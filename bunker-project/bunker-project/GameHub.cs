@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Bunker.Services;
 using Bunker.Models;
+using Bunker.Models.Сharacteristics;
 
 namespace Bunker
 {
@@ -830,34 +831,34 @@ namespace Bunker
                 switch (characteristicName)
                 {
                     case "Profession":
-                        player.Profession = new Models.Сharacteristics.Profession();
+                        player.Profession = new Profession();
                         break;
                     case "PhysicalHealth":
-                        player.PhysicalHealth = new Models.Сharacteristics.PhysicalCondition();
+                        player.PhysicalHealth = new PhysicalHealth();
                         break;
                     case "MentalHealth":
-                        player.MentalHealth = new Models.Сharacteristics.MentalCondition();
+                        player.MentalHealth = new MentalHealth();
                         break;
                     case "Hobby":
-                        player.Hobby = new Models.Сharacteristics.Hobby();
+                        player.Hobby = new Hobby();
                         break;
                     case "CharacterTrait":
-                        player.CharacterTrait = new Models.Сharacteristics.CharacterTrait();
+                        player.CharacterTrait = new CharacterTrait();
                         break;
                     case "Phobia":
-                        player.Phobia = new Models.Сharacteristics.Phobia();
+                        player.Phobia = new Phobia();
                         break;
                     case "Traits":
-                        player.Traits = new Models.Сharacteristics.Traits();
+                        player.Traits = new Traits();
                         break;
                     case "Secret":
-                        player.Secret = new Models.Сharacteristics.Secret();
+                        player.Secret = new Secret();
                         break;
                     case "SecretGoal":
-                        player.SecretGoal = new Models.Сharacteristics.SecretGoal();
+                        player.SecretGoal = new SecretGoal();
                         break;
                     case "Inventory":
-                        player.Inventory = new Models.Сharacteristics.Inventory();
+                        player.Inventory = new Inventory();
                         break;
                     default:
                         return false;
