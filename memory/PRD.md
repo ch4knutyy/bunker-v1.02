@@ -42,7 +42,50 @@
 10. **tooltip.css** - стилі для secret-goal
 
 ## Backlog / Future Tasks:
-- **TASK 2**: Rooms system using SignalR Groups
+- **TASK 2**: Rooms system using SignalR Groups ✅ COMPLETED
 - **TASK 3**: Game Master Panel
 - **TASK 4**: Special Cards system
 - **TASK 5**: Apocalypse and Bunker systems
+
+---
+
+## TASK 2 - Rooms System (Completed)
+
+### New Files Created:
+1. `/Models/Room.cs` - Room model with:
+   - Id, Name, Password, MaxPlayers, HostConnectionId
+   - RoomState enum (Lobby, Playing, Voting, Finished)
+   - Players dictionary
+   - CanJoin, CanStart, IsHost methods
+   - ToPublicInfo() for safe serialization
+
+2. `/Service/RoomService.cs` - Room management service:
+   - CreateRoom, JoinRoom, LeaveRoom
+   - StartGame, GetRoom, GetAllRooms
+   - Player-to-room mapping
+   - Auto host transfer on leave
+   - Thread-safe ConcurrentDictionary
+
+### Modified Files:
+1. `/Program.cs` - Added RoomService registration
+2. `/GameHub.cs` - Complete rewrite with:
+   - Room management methods (CreateRoom, JoinRoom, LeaveRoom, StartGame, GetRooms)
+   - SignalR Groups for room isolation
+   - Game actions in room context
+   - Disconnect handling with room cleanup
+
+3. `/Views/Home/Index.cshtml` - New UI:
+   - Lobby section with room creation form
+   - Room list with join functionality  
+   - Room section with player list
+   - Game section for active play
+   - Join modal for password-protected rooms
+   - All SignalR handlers for room events
+
+### Features:
+- Create room with name, max players, optional password
+- Join room (with password check)
+- Leave room (auto host transfer)
+- Start game (host only, min 4 players)
+- Real-time room list updates
+- SignalR Groups for isolated communication
