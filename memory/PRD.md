@@ -92,6 +92,47 @@
 3. Game Master Panel ✅
 4. Special Cards ✅
 5. Apocalypse & Bunker ✅
+6. Voting System ✅
+
+---
+
+## TASK 6 - Voting System (Completed)
+
+### New Files Created:
+1. `/Models/VotingSession.cs`:
+   - `VotingState` enum (Active, Completed, Resolved)
+   - `VotingSession` model with votes tracking
+   - Methods: AddVote, HasVoted, VoteCounts, TopVotedPlayerId, IsTie
+
+### Backend Changes (GameHub.cs):
+- `StartVoting()` - хост починає голосування
+- `Vote(targetConnectionId)` - гравець голосує
+- `EndVoting()` - хост завершує достроково
+- `ResolveVoting(eliminateConnectionId)` - хост приймає рішення (елімінувати чи ні)
+- `CancelVoting()` - хост скасовує голосування
+
+### Frontend Changes (Index.cshtml):
+1. **Voting Panel**:
+   - Список кандидатів з кнопками голосування
+   - Прогрес голосування (X/Y проголосували)
+   - Статус "Ви проголосували за..."
+   - Кнопки хоста: завершити/скасувати
+
+2. **Voting Results Panel** (для хоста):
+   - Результати з кількістю голосів
+   - Деталі хто за кого голосував
+   - Попередження про нічию
+   - Кнопки: "Елімінувати лідера" / "Нікого не елімінувати"
+
+3. **SignalR Handlers**:
+   - VotingStarted, VoteCast, VotingProgress
+   - VotingEnded, VotingResolved, VotingCancelled
+
+4. **CSS Styles** - повне оформлення з синьою/оранжевою темою
+
+### Key Feature:
+- Автоматичної елімінації немає
+- Хост бачить результати і сам вирішує кого елімінувати (або нікого)
 
 ---
 
