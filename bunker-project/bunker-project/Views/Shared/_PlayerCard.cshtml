@@ -1,0 +1,155 @@
+@* 
+    Partial View для відображення картки гравця з усіма характеристиками та tooltip
+    Використання: @await Html.PartialAsync("_PlayerCard", player)
+*@
+@using Bunker.Models
+@using Bunker.Models.Сharacteristics
+@using Bunker.Models.ViewModels
+@model Bunker.Models.Player
+
+<div class="player-card" data-player-id="@Model.Name">
+    <div class="player-card-header">
+        <h3 class="player-name">@Model.Name</h3>
+        @if (Model.IsEliminated)
+        {
+            <span class="eliminated-badge">Вибув</span>
+        }
+    </div>
+    
+    <div class="player-card-body">
+        @* Базові характеристики без tooltip *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Вік:</span>
+            <span class="characteristic-value">@Model.Personality.Age років</span>
+        </div>
+        
+        <div class="player-characteristic">
+            <span class="characteristic-label">Стать:</span>
+            <span class="characteristic-value">@Model.Personality.Sex</span>
+        </div>
+        
+        <div class="player-characteristic">
+            <span class="characteristic-label">Орієнтація:</span>
+            <span class="characteristic-value">@Model.Personality.SexOrientation</span>
+        </div>
+        
+        <div class="player-characteristic">
+            <span class="characteristic-label">Тіло:</span>
+            <span class="characteristic-value">@Model.Body.Height см, @Model.Body.Weight кг (@Model.Body.BodyType)</span>
+        </div>
+        
+        @* Характеристики з tooltip *@
+        
+        @* Професія *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Професія:</span>
+            <span class="characteristic-value">
+                <div class="characteristic-with-tooltip">
+                    <span class="characteristic-name">@Model.Profession.Name</span>
+                    @if (!string.IsNullOrEmpty(Model.Profession.SelectedItem))
+                    {
+                        <span class="selected-item">(+@Model.Profession.SelectedItem)</span>
+                    }
+                    @if (Model.Profession.HasTooltip)
+                    {
+                        <span class="tooltip-trigger profession" title="">!</span>
+                        <div class="tooltip-content">
+                            @Model.Profession.Tooltip
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+        
+        @* Хобі *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Хобі:</span>
+            <span class="characteristic-value">
+                <div class="characteristic-with-tooltip">
+                    <span class="characteristic-name">@Model.Hobby.Name</span>
+                    @if (Model.Hobby.HasTooltip)
+                    {
+                        <span class="tooltip-trigger hobby" title="">!</span>
+                        <div class="tooltip-content">
+                            @Model.Hobby.Tooltip
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+        
+        @* Фізичне здоров'я *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Фіз. здоров'я:</span>
+            <span class="characteristic-value">
+                <div class="characteristic-with-tooltip">
+                    <span class="characteristic-name">@Model.PhysicalHealth.Name</span>
+                    @if (Model.PhysicalHealth.HasTooltip)
+                    {
+                        <span class="tooltip-trigger physical" title="">!</span>
+                        <div class="tooltip-content">
+                            @Model.PhysicalHealth.Tooltip
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+        
+        @* Ментальне здоров'я *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Псих. стан:</span>
+            <span class="characteristic-value">
+                <div class="characteristic-with-tooltip">
+                    <span class="characteristic-name">@Model.MentalHealth.Name</span>
+                    @if (Model.MentalHealth.HasTooltip)
+                    {
+                        <span class="tooltip-trigger mental" title="">!</span>
+                        <div class="tooltip-content">
+                            @Model.MentalHealth.Tooltip
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+        
+        @* Риса характеру *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Риса характеру:</span>
+            <span class="characteristic-value">@Model.CharacterTrait.Name</span>
+        </div>
+        
+        @* Особливість (Trait) *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Особливість:</span>
+            <span class="characteristic-value">
+                <div class="characteristic-with-tooltip">
+                    <span class="characteristic-name">@Model.Traits.Name</span>
+                    @if (Model.Traits.HasTooltip)
+                    {
+                        <span class="tooltip-trigger trait" title="">!</span>
+                        <div class="tooltip-content">
+                            @Model.Traits.Tooltip
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+        
+        @* Таємна ціль *@
+        <div class="player-characteristic">
+            <span class="characteristic-label">Таємна ціль:</span>
+            <span class="characteristic-value">
+                <div class="characteristic-with-tooltip">
+                    <span class="characteristic-name">@Model.SecretGoal.Goal</span>
+                    @if (Model.SecretGoal.HasTooltip)
+                    {
+                        <span class="tooltip-trigger secret-goal" title="">!</span>
+                        <div class="tooltip-content">
+                            @Model.SecretGoal.Tooltip
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+    </div>
+</div>

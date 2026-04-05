@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BUNKER ONLINE</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tooltip.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header with Navigation -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo-icon">🏚️</div>
+                <div class="logo-text">
+                    <span class="logo-bunker">BUNKER</span>
+                    <span class="logo-online">ONLINE</span>
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <a href="#" class="nav-link">Правила гри</a>
+                <a href="#" class="nav-link">Вікі</a>
+                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Головна</a>
+                <a href="#" class="nav-link">Оновлення</a>
+                <a href="#" class="nav-link">Магазин</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="uk">🇺🇦</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧</button>
+                    <button class="lang-btn" data-lang="ru">🇷🇺</button>
+                </div>
+                <button class="profile-btn" title="Профіль">👤</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- Support Card -->
+    <div class="support-card">
+        <div class="support-icon">💳</div>
+        <div class="support-content">
+            <h3 class="support-title">Підтримати розробника</h3>
+            <p class="support-text">Допоможіть проекту розвиватися!</p>
+            <div class="card-number" id="cardNumber">4441 1110 4940 7970</div>
+            <button class="copy-btn" onclick="copyCardNumber()">📋 Копіювати</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 - BUNKER ONLINE - Всі права захищено</p>
+            <div class="footer-links">
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Конфіденційність</a>
+                <a href="#">Умови використання</a>
+                <a href="#">Контакти</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/tooltip.js" asp-append-version="true"></script>
+    
+    <script>
+        // Copy card number function
+        function copyCardNumber() {
+            const cardNumber = document.getElementById('cardNumber').textContent;
+            navigator.clipboard.writeText(cardNumber).then(function() {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✅ Скопійовано!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Копіювати';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }, function(err) {
+                console.error('Помилка копіювання: ', err);
+            });
+        }
+
+        // Language selector
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const lang = this.getAttribute('data-lang');
+                console.log('Вибрано мову:', lang);
+                // Тут можна додати логіку перемикання мови
+            });
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,2870 @@
+@{
+    ViewData["Title"] = "Бункер Онлайн";
+}
+
+<link rel="stylesheet" href="/css/site.css" />
+<link rel="stylesheet" href="/css/tooltip.css" />
+
+<div class="game-container">
+    <h1 class="page-title">BUNKER ONLINE</h1>
+
+    <!-- Lobby Section (вибір кімнати) -->
+    <div id="lobbySection">
+        <div class="lobby-container">
+            <!-- Створення кімнати -->
+            <div class="create-room-panel">
+                <h2 class="section-title">Створити кімнату</h2>
+                <form class="create-room-form" onsubmit="createRoom(); return false;">
+                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." required />
+                    <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." required />
+                    <div class="form-row">
+                        <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
+                        <input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" />
+                    </div>
+                    <button type="submit" class="btn-primary">Створити кімнату</button>
+                </form>
+            </div>
+
+            <!-- Список кімнат -->
+            <div class="rooms-list-panel">
+                <h2 class="section-title">Доступні кімнати</h2>
+                <div id="roomsList" class="rooms-list">
+                    <p class="no-rooms">Завантаження кімнат...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Section (в кімнаті / лобі) -->
+    <div id="roomSection" style="display: none;">
+        <div class="room-header">
+            <div class="room-info">
+                <h2 class="room-name" id="currentRoomName">Кімната</h2>
+                <span class="room-id" id="currentRoomId">ID: ---</span>
+                <span class="room-state" id="currentRoomState">Лобі</span>
+            </div>
+            <div class="room-actions">
+                <button id="gmPanelBtn" class="btn-gm" onclick="toggleGMPanel()" style="display: none;">🎮 GM Панель</button>
+                <button id="startVotingBtn" class="btn-vote" onclick="startVoting()" style="display: none;">🗳️ Голосування</button>
+                <button id="startGameBtn" class="btn-success" onclick="startGame()" style="display: none;">Почати гру</button>
+                <button class="btn-danger" onclick="leaveRoom()">Покинути кімнату</button>
+            </div>
+        </div>
+
+        <!-- Voting Panel -->
+        <div id="votingPanel" class="voting-panel" style="display: none;">
+            <div class="voting-header">
+                <h3>🗳️ Голосування (Раунд <span id="votingRound">1</span>)</h3>
+                <div class="voting-progress">
+                    <span id="votingProgressText">0/0 проголосували</span>
+                </div>
+            </div>
+            
+            <div class="voting-content">
+                <!-- Для гравців - вибір кандидата -->
+                <div id="votingCandidates" class="voting-candidates"></div>
+                
+                <!-- Моє голосування -->
+                <div id="myVoteStatus" class="my-vote-status" style="display: none;">
+                    Ви проголосували за: <span id="myVoteTarget" class="vote-target"></span>
+                </div>
+            </div>
+            
+            <!-- Кнопки хоста -->
+            <div id="votingHostControls" class="voting-host-controls" style="display: none;">
+                <button class="btn-warning" onclick="endVotingEarly()">Завершити голосування</button>
+                <button class="btn-secondary" onclick="cancelVoting()">Скасувати</button>
+            </div>
+        </div>
+
+        <!-- Voting Results Panel (для хоста) -->
+        <div id="votingResultsPanel" class="voting-results-panel" style="display: none;">
+            <div class="voting-results-header">
+                <h3>📊 Результати голосування</h3>
+            </div>
+            <div id="votingResultsContent" class="voting-results-content"></div>
+            <div id="votingDecisionControls" class="voting-decision-controls">
+                <p class="decision-prompt">Оберіть дію:</p>
+                <button id="eliminateTopBtn" class="btn-danger" onclick="eliminateTopVoted()">❌ Елімінувати лідера</button>
+                <button class="btn-success" onclick="resolveNoElimination()">✓ Нікого не елімінувати</button>
+            </div>
+        </div>
+
+        <!-- Game Master Panel (тільки для хоста) -->
+        <div id="gmPanel" class="gm-panel" style="display: none;">
+            <div class="gm-panel-header">
+                <h3>🎮 Game Master Panel</h3>
+                <button class="btn-close" onclick="toggleGMPanel()">×</button>
+            </div>
+            <div class="gm-panel-content">
+                <!-- Вибір гравця -->
+                <div class="gm-section">
+                    <label class="gm-label">Вибрати гравця:</label>
+                    <select id="gmPlayerSelect" class="gm-select" onchange="loadPlayerDataForGM()">
+                        <option value="">-- Виберіть гравця --</option>
+                    </select>
+                </div>
+
+                <!-- Інформація про вибраного гравця -->
+                <div id="gmPlayerInfo" class="gm-player-info" style="display: none;">
+                    <h4 id="gmPlayerName">Гравець</h4>
+                    
+                    <!-- Швидкі дії -->
+                    <div class="gm-quick-actions">
+                        <button class="btn-gm-action btn-eliminate" onclick="eliminateSelectedPlayer()">❌ Елімінувати</button>
+                        <button class="btn-gm-action btn-restore" onclick="restoreSelectedPlayer()">✅ Повернути</button>
+                    </div>
+
+                    <!-- Характеристики -->
+                    <div class="gm-characteristics">
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Професія:</span>
+                            <span class="gm-char-value" id="gmProfession">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Profession')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Profession')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Фіз. здоров'я:</span>
+                            <span class="gm-char-value" id="gmPhysicalHealth">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('PhysicalHealth')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('PhysicalHealth')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Псих. здоров'я:</span>
+                            <span class="gm-char-value" id="gmMentalHealth">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('MentalHealth')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('MentalHealth')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Хобі:</span>
+                            <span class="gm-char-value" id="gmHobby">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Hobby')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Hobby')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Риса характеру:</span>
+                            <span class="gm-char-value" id="gmCharacterTrait">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('CharacterTrait')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('CharacterTrait')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Фобія:</span>
+                            <span class="gm-char-value" id="gmPhobia">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Phobia')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Phobia')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Особливості:</span>
+                            <span class="gm-char-value" id="gmTraits">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('Traits')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Traits')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Traits')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Секрет:</span>
+                            <span class="gm-char-value" id="gmSecret">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('Secret')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Secret')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Secret')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Таємна ціль:</span>
+                            <span class="gm-char-value" id="gmSecretGoal">-</span>
+                            <div class="gm-char-actions">
+                                <button onclick="editCharacteristic('SecretGoal')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('SecretGoal')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('SecretGoal')" title="Розкрити">👁️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Гравці в кімнаті (Лобі) -->
+        <div id="roomLobby">
+            <h3 class="section-title">Гравці в кімнаті: <span id="roomPlayerCount">0/12</span></h3>
+            <div id="roomPlayersList" class="room-players-grid"></div>
+            <p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
+        </div>
+
+        <!-- My Player Detailed Cards Section (тільки для власника) -->
+        <div id="myPlayerSection" style="display:none;">
+            <h2 class="section-title">Мої характеристики (бачу тільки я)</h2>
+            <div id="myPlayerCards" class="player-cards-grid"></div>
+            
+            <!-- Мої спеціальні карти -->
+            <h2 class="section-title" style="margin-top: 2rem;">🃏 Мої спеціальні карти</h2>
+            <div id="myCardsSection" class="cards-grid"></div>
+        </div>
+
+        <!-- Players Table Section (під час гри) -->
+        <div id="gameSection" style="display: none;">
+            <!-- Apocalypse & Bunker Info -->
+            <div class="game-info-panels">
+                <div class="apocalypse-panel" id="apocalypsePanel">
+                    <h3 class="panel-title">☢️ Апокаліпсис</h3>
+                    <div class="panel-content" id="apocalypseContent">
+                        <p>Завантаження...</p>
+                    </div>
+                </div>
+                <div class="bunker-panel" id="bunkerPanel">
+                    <h3 class="panel-title">🏠 Бункер</h3>
+                    <div class="panel-content" id="bunkerContent">
+                        <p>Завантаження...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="section-title">
+                Гравці в бункері: <span class="bunker-count" id="playerCount">0/6</span>
+            </h2>
+
+            <div style="overflow-x: auto;">
+                <table class="players-table" id="playersTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">№</th>
+                            <th style="min-width: 150px;">Ім'я гравця</th>
+                            <th style="min-width: 200px;">Особистість</th>
+                            <th style="min-width: 200px;">Статура</th>
+                            <th style="min-width: 180px;">Професія</th>
+                            <th style="min-width: 180px;">Фізичне здоров'я</th>
+                            <th style="min-width: 180px;">Психічне здоров'я</th>
+                            <th style="min-width: 180px;">Хобі</th>
+                            <th style="min-width: 180px;">Риса характеру</th>
+                            <th style="min-width: 180px;">Фобія</th>
+                            <th style="min-width: 180px;">Особливості</th>
+                            <th style="min-width: 180px;">Інвентар</th>
+                            <th style="min-width: 180px;">Секрет</th>
+                            <th style="min-width: 200px;">Таємна ціль</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playersTableBody">
+                        <tr>
+                            <td colspan="14" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
+                                Очікування гравців...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="events-section">
+        <h2 class="section-title">Події</h2>
+        <div id="events">
+            <p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Join Room Modal -->
+<div id="joinModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Приєднатися до кімнати</h3>
+        <form onsubmit="submitJoinRoom(); return false;">
+            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." required />
+            <input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
+            <input type="hidden" id="joinRoomId" />
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeJoinModal()">Скасувати</button>
+                <button type="submit" class="btn-primary">Приєднатися</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Characteristic Modal -->
+<div id="editCharModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Редагувати характеристику</h3>
+        <p id="editCharInfo" class="edit-char-info"></p>
+        <form onsubmit="submitEditCharacteristic(); return false;">
+            <input id="editCharValue" type="text" class="input-field" placeholder="Нове значення..." required />
+            <input type="hidden" id="editCharName" />
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeEditCharModal()">Скасувати</button>
+                <button type="button" class="btn-warning" onclick="clearCharacteristic()">Очистити</button>
+                <button type="submit" class="btn-primary">Зберегти</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Use Card Modal -->
+<div id="useCardModal" class="modal" style="display: none;">
+    <div class="modal-content modal-card">
+        <h3 id="useCardTitle">Використати карту</h3>
+        <p id="useCardDescription" class="card-modal-desc"></p>
+        <form onsubmit="submitUseCard(); return false;">
+            <div id="cardTargetSection" style="display: none;">
+                <label class="gm-label">Виберіть гравця-ціль:</label>
+                <select id="cardTargetPlayer" class="gm-select">
+                    <option value="">-- Виберіть гравця --</option>
+                </select>
+            </div>
+            <div id="cardCharacteristicSection" style="display: none; margin-top: 1rem;">
+                <label class="gm-label">Виберіть характеристику:</label>
+                <select id="cardTargetCharacteristic" class="gm-select">
+                    <option value="">-- Виберіть характеристику --</option>
+                    <option value="Profession">Професія</option>
+                    <option value="PhysicalHealth">Фізичне здоров'я</option>
+                    <option value="MentalHealth">Психічне здоров'я</option>
+                    <option value="Hobby">Хобі</option>
+                    <option value="CharacterTrait">Риса характеру</option>
+                    <option value="Phobia">Фобія</option>
+                    <option value="Traits">Особливості</option>
+                    <option value="Secret">Секрет</option>
+                    <option value="SecretGoal">Таємна ціль</option>
+                </select>
+            </div>
+            <input type="hidden" id="useCardId" />
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeUseCardModal()">Скасувати</button>
+                <button type="submit" class="btn-primary">Використати</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Card Approval Modal (для хоста) -->
+<div id="cardApprovalModal" class="modal" style="display: none;">
+    <div class="modal-content modal-card">
+        <h3>🃏 Запит на використання карти</h3>
+        <div id="cardApprovalContent"></div>
+        <input type="hidden" id="approvalCardId" />
+        <input type="hidden" id="approvalPlayerId" />
+        <div class="modal-actions">
+            <button type="button" class="btn-danger" onclick="rejectCardApproval()">Відхилити</button>
+            <button type="button" class="btn-success" onclick="approveCardApproval()">Підтвердити</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/gameHub")
+        .withAutomaticReconnect()
+        .build();
+
+    // Дані
+    let currentRoom = null;
+    let myPlayerData = null;
+    let myConnectionId = null;
+    let isHost = false;
+    let roomPlayers = {}; // connectionId -> player info
+    let gmPlayersData = {}; // Повні дані гравців для GM
+    let selectedPlayerForGM = null;
+    let pendingCardApprovals = []; // Запити на підтвердження карт
+    let currentCardToUse = null;
+    let currentApocalypse = null;
+    let currentBunker = null;
+    let currentVoting = null;
+    let myVote = null;
+
+    // ==================== SIGNALR HANDLERS ====================
+
+    // Список кімнат оновлено
+    connection.on("RoomsListUpdated", function (rooms) {
+        console.log("Rooms updated:", rooms);
+        renderRoomsList(rooms);
+    });
+
+    // Кімнату створено
+    connection.on("RoomCreated", function (data) {
+        console.log("Room created:", data);
+        currentRoom = data.room;
+        myPlayerData = data.player;
+        isHost = data.isHost;
+        myConnectionId = data.player.connectionId;
+        
+        roomPlayers = {};
+        roomPlayers[myConnectionId] = {
+            name: myPlayerData.name,
+            connectionId: myConnectionId,
+            isHost: isHost,
+            revealed: myPlayerData.revealed || {}
+        };
+        
+        showRoomSection();
+        updateRoomUI();
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`Ви створили кімнату <span class="event-room">${currentRoom.name}</span>`);
+    });
+
+    // Приєднались до кімнати
+    connection.on("RoomJoined", function (data) {
+        console.log("Joined room:", data);
+        currentRoom = data.room;
+        myPlayerData = data.player;
+        isHost = data.isHost;
+        myConnectionId = data.player.connectionId;
+        
+        roomPlayers = {};
+        data.players.forEach(p => {
+            roomPlayers[p.connectionId] = {
+                name: p.name,
+                connectionId: p.connectionId,
+                isHost: p.isHost,
+                revealed: p.revealed || {},
+                revealedData: {}
+            };
+        });
+        
+        showRoomSection();
+        updateRoomUI();
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`Ви приєднались до кімнати <span class="event-room">${currentRoom.name}</span>`);
+    });
+
+    // Гравець приєднався до кімнати
+    connection.on("PlayerJoinedRoom", function (info) {
+        console.log("Player joined room:", info);
+        roomPlayers[info.connectionId] = {
+            name: info.name,
+            connectionId: info.connectionId,
+            isHost: info.isHost,
+            revealed: info.revealed || {},
+            revealedData: {}
+        };
+        updateRoomUI();
+        addEventMessage(`Гравець <span class="event-player">${info.name}</span> приєднався`);
+    });
+
+    // Гравець покинув кімнату
+    connection.on("PlayerLeftRoom", function (info) {
+        console.log("Player left room:", info);
+        const leftPlayer = roomPlayers[info.connectionId];
+        const leftName = leftPlayer?.name || 'Гравець';
+        delete roomPlayers[info.connectionId];
+        
+        // Якщо змінився хост
+        if (info.newHostConnectionId) {
+            if (roomPlayers[info.newHostConnectionId]) {
+                roomPlayers[info.newHostConnectionId].isHost = true;
+            }
+            if (info.newHostConnectionId === myConnectionId) {
+                isHost = true;
+                addEventMessage(`Ви тепер хост кімнати!`);
+            } else {
+                addEventMessage(`<span class="event-player">${info.newHostName}</span> тепер хост`);
+            }
+        }
+        
+        updateRoomUI();
+        addEventMessage(`Гравець <span class="event-player">${leftName}</span> покинув кімнату`);
+    });
+
+    // Покинув кімнату
+    connection.on("RoomLeft", function () {
+        console.log("Left room");
+        currentRoom = null;
+        myPlayerData = null;
+        isHost = false;
+        roomPlayers = {};
+        showLobbySection();
+        addEventMessage(`Ви покинули кімнату`);
+    });
+
+    // Гра почалась
+    connection.on("GameStarted", function (data) {
+        console.log("Game started:", data);
+        currentRoom.state = data.roomState;
+        currentApocalypse = data.apocalypse;
+        currentBunker = data.bunker;
+        
+        document.getElementById('roomLobby').style.display = 'none';
+        document.getElementById('gameSection').style.display = 'block';
+        document.getElementById('myPlayerSection').style.display = 'block';
+        document.getElementById('currentRoomState').textContent = 'Гра';
+        document.getElementById('currentRoomState').classList.add('state-playing');
+        document.getElementById('startGameBtn').style.display = 'none';
+        
+        // Рендеримо апокаліпсис та бункер
+        renderApocalypse(data.apocalypse);
+        renderBunker(data.bunker);
+        
+        updatePlayersTable();
+        addEventMessage(`Гра почалась! Раунд ${data.currentRound}`);
+        
+        if (data.apocalypse) {
+            addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${data.apocalypse.name}`);
+        }
+        if (data.bunker) {
+            addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${data.bunker.name}`);
+        }
+    });
+
+    // Характеристику розкрито
+    connection.on("CharacteristicRevealed", function (info) {
+        console.log("Characteristic revealed:", info);
+        const charKey = toCamelCase(info.characteristicKey);
+        
+        if (roomPlayers[info.connectionId]) {
+            if (!roomPlayers[info.connectionId].revealed) {
+                roomPlayers[info.connectionId].revealed = {};
+            }
+            if (!roomPlayers[info.connectionId].revealedData) {
+                roomPlayers[info.connectionId].revealedData = {};
+            }
+            roomPlayers[info.connectionId].revealed[charKey] = true;
+            roomPlayers[info.connectionId].revealedData[charKey] = info.data.value;
+        }
+        
+        // Оновлюємо свої картки якщо це я
+        if (info.connectionId === myConnectionId && myPlayerData) {
+            if (!myPlayerData.revealed) myPlayerData.revealed = {};
+            myPlayerData.revealed[charKey] = true;
+            renderMyPlayerCards(myPlayerData);
+        }
+        
+        updatePlayersTable();
+        addEventMessage(`<span class="event-player">${info.playerName}</span> розкрив: <span class="revealed-label">${info.data.label}</span>`);
+    });
+
+    // Характеристику оновлено (GM змінив)
+    connection.on("CharacteristicUpdated", function (info) {
+        console.log("Characteristic updated by GM:", info);
+        const charKey = toCamelCase(info.characteristicKey);
+        
+        if (roomPlayers[info.connectionId]) {
+            if (!roomPlayers[info.connectionId].revealedData) {
+                roomPlayers[info.connectionId].revealedData = {};
+            }
+            roomPlayers[info.connectionId].revealedData[charKey] = info.data.value;
+        }
+        
+        updatePlayersTable();
+        addEventMessage(`<span class="event-gm">GM</span> змінив характеристику <span class="event-player">${info.playerName}</span>`);
+    });
+
+    // Мої характеристики відредаговані GM
+    connection.on("CharacteristicEdited", function (info) {
+        console.log("My characteristic edited:", info);
+        myPlayerData = info.player;
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`<span class="event-gm">GM</span> змінив вашу характеристику: ${info.characteristicName}`);
+    });
+
+    // Характеристику очищено
+    connection.on("CharacteristicCleared", function (info) {
+        console.log("My characteristic cleared:", info);
+        myPlayerData = info.player;
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`<span class="event-gm">GM</span> очистив вашу характеристику: ${info.characteristicName}`);
+    });
+
+    // Характеристику регенеровано
+    connection.on("CharacteristicRegenerated", function (info) {
+        console.log("My characteristic regenerated:", info);
+        myPlayerData = info.player;
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`<span class="event-gm">GM</span> регенерував вашу характеристику: ${info.characteristicName}`);
+    });
+
+    // Гравця елімінівано
+    connection.on("PlayerEliminated", function (info) {
+        console.log("Player eliminated:", info);
+        if (roomPlayers[info.connectionId]) {
+            roomPlayers[info.connectionId].isEliminated = true;
+        }
+        updatePlayersTable();
+        updateGMPlayerSelect();
+        addEventMessage(`<span class="event-eliminate">❌ ${info.playerName}</span> елімінований!`);
+    });
+
+    // Гравця повернено
+    connection.on("PlayerRestored", function (info) {
+        console.log("Player restored:", info);
+        if (roomPlayers[info.connectionId]) {
+            roomPlayers[info.connectionId].isEliminated = false;
+        }
+        updatePlayersTable();
+        updateGMPlayerSelect();
+        addEventMessage(`<span class="event-restore">✅ ${info.playerName}</span> повернено в гру!`);
+    });
+
+    // GM отримав дані всіх гравців
+    connection.on("AllPlayersData", function (data) {
+        console.log("All players data received:", data);
+        gmPlayersData = {};
+        data.forEach(p => {
+            gmPlayersData[p.connectionId] = p;
+        });
+        updateGMPlayerSelect();
+    });
+
+    // GM дія успішна
+    connection.on("GMActionSuccess", function (info) {
+        console.log("GM action success:", info);
+        addEventMessage(`<span class="event-gm">GM</span> ${info.action}: ${info.playerName} - ${info.characteristicName || ''}`);
+        // Оновлюємо дані гравців
+        if (isHost) {
+            connection.invoke("GetAllPlayersData").catch(err => console.error(err));
+        }
+    });
+
+    // Помилка
+    connection.on("ReceiveError", function (message) {
+        console.error("Error:", message);
+        addEventMessage(`<span class="event-error">Помилка: ${message}</span>`);
+        alert(message);
+    });
+
+    // ==================== CARD SIGNALR HANDLERS ====================
+
+    // Карта очікує підтвердження
+    connection.on("CardPending", function (card) {
+        console.log("Card pending:", card);
+        renderMyCards();
+        addEventMessage(`Карта <span class="card-name">${card.name}</span> очікує підтвердження хоста`);
+    });
+
+    // Запит на підтвердження карти (для хоста)
+    connection.on("CardApprovalRequest", function (data) {
+        console.log("Card approval request:", data);
+        pendingCardApprovals.push(data);
+        showCardApprovalModal(data);
+        addEventMessage(`<span class="event-gm">🃏</span> ${data.playerName} хоче використати карту <span class="card-name">${data.card.name}</span>`);
+    });
+
+    // Карта використана
+    connection.on("CardUsed", function (data) {
+        console.log("Card used:", data);
+        if (myPlayerData) {
+            const cardIndex = myPlayerData.cards.findIndex(c => c.id === data.card.id);
+            if (cardIndex >= 0) {
+                myPlayerData.cards[cardIndex] = data.card;
+            }
+        }
+        renderMyCards();
+        addEventMessage(`Карта <span class="card-name">${data.card.name}</span> використана: ${data.result}`);
+    });
+
+    // Карта відхилена
+    connection.on("CardRejected", function (data) {
+        console.log("Card rejected:", data);
+        if (myPlayerData) {
+            const cardIndex = myPlayerData.cards.findIndex(c => c.id === data.card.id);
+            if (cardIndex >= 0) {
+                myPlayerData.cards[cardIndex] = data.card;
+            }
+        }
+        renderMyCards();
+        addEventMessage(`<span class="event-error">Карта ${data.card.name} відхилена: ${data.reason}</span>`);
+    });
+
+    // Нова карта отримана
+    connection.on("CardReceived", function (card) {
+        console.log("Card received:", card);
+        if (myPlayerData) {
+            if (!myPlayerData.cards) myPlayerData.cards = [];
+            myPlayerData.cards.push(card);
+        }
+        renderMyCards();
+        addEventMessage(`<span class="event-card">🃏</span> Ви отримали нову карту: <span class="card-name">${card.name}</span>`);
+    });
+
+    // Карта активована (для всіх)
+    connection.on("CardActivated", function (data) {
+        console.log("Card activated:", data);
+        addEventMessage(`<span class="event-card">🃏</span> ${data.playerName} активував карту <span class="card-name">${data.cardName}</span>`);
+    });
+
+    // Секрет переглянуто (тільки власнику карти)
+    connection.on("SecretViewed", function (data) {
+        console.log("Secret viewed:", data);
+        alert(`${data.secretType} гравця ${data.targetPlayerName}:\n\n${data.secretValue}`);
+        addEventMessage(`Ви дізналися ${data.secretType} гравця ${data.targetPlayerName}`);
+    });
+
+    // Характеристику обміняно
+    connection.on("CharacteristicSwapped", function (data) {
+        console.log("Characteristic swapped:", data);
+        myPlayerData = data.player;
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`Вашу характеристику ${data.characteristicName} обміняно з ${data.withPlayerName}`);
+    });
+
+    // ==================== VOTING SIGNALR HANDLERS ====================
+
+    // Голосування почалось
+    connection.on("VotingStarted", function (data) {
+        console.log("Voting started:", data);
+        currentVoting = data;
+        myVote = null;
+        showVotingPanel(data);
+        addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round}`);
+    });
+
+    // Голос зараховано
+    connection.on("VoteCast", function (data) {
+        console.log("Vote cast:", data);
+        myVote = data;
+        document.getElementById('myVoteStatus').style.display = 'block';
+        document.getElementById('myVoteTarget').textContent = data.targetName;
+        updateVotingCandidates();
+        addEventMessage(`Ви проголосували за ${data.targetName}${data.changed ? ' (змінено)' : ''}`);
+    });
+
+    // Прогрес голосування
+    connection.on("VotingProgress", function (data) {
+        console.log("Voting progress:", data);
+        document.getElementById('votingProgressText').textContent = `${data.votedCount}/${data.totalVoters} проголосували`;
+    });
+
+    // Голосування завершено
+    connection.on("VotingEnded", function (data) {
+        console.log("Voting ended:", data);
+        currentVoting = data;
+        
+        // Ховаємо панель голосування
+        document.getElementById('votingPanel').style.display = 'none';
+        
+        // Показуємо результати (тільки хосту показуємо кнопки)
+        showVotingResults(data);
+        
+        addEventMessage(`<span class="event-voting">🗳️ Голосування завершено!</span> Лідер: ${data.topVotedPlayerName || 'Нічия'}`);
+    });
+
+    // Рішення по голосуванню прийнято
+    connection.on("VotingResolved", function (data) {
+        console.log("Voting resolved:", data);
+        currentVoting = null;
+        
+        // Ховаємо панель результатів
+        document.getElementById('votingResultsPanel').style.display = 'none';
+        
+        // Оновлюємо UI
+        updateRoomUI();
+        
+        addEventMessage(`<span class="event-voting">⚖️</span> ${data.message}. Раунд ${data.nextRound}`);
+    });
+
+    // Голосування скасовано
+    connection.on("VotingCancelled", function (data) {
+        console.log("Voting cancelled:", data);
+        currentVoting = null;
+        
+        document.getElementById('votingPanel').style.display = 'none';
+        document.getElementById('votingResultsPanel').style.display = 'none';
+        
+        addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
+    });
+
+    // Підключення
+    connection.start()
+        .then(() => {
+            console.log("SignalR connected");
+            myConnectionId = connection.connectionId;
+            connection.invoke("GetRooms");
+            addEventMessage("Підключено до сервера");
+        })
+        .catch(err => {
+            console.error("Connection error:", err);
+            addEventMessage("Помилка підключення до сервера");
+        });
+
+    // ==================== ROOM FUNCTIONS ====================
+
+    function createRoom() {
+        const playerName = document.getElementById('playerNameCreate').value.trim();
+        const roomName = document.getElementById('roomName').value.trim();
+        const maxPlayers = parseInt(document.getElementById('maxPlayers').value) || 12;
+        const password = document.getElementById('roomPassword').value || null;
+        
+        if (!playerName || !roomName) {
+            alert("Введіть ім'я та назву кімнати");
+            return;
+        }
+        
+        connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password)
+            .catch(err => console.error("CreateRoom error:", err));
+    }
+
+    function joinRoom(roomId, hasPassword) {
+        if (hasPassword) {
+            document.getElementById('joinRoomId').value = roomId;
+            document.getElementById('joinModal').style.display = 'flex';
+        } else {
+            const playerName = prompt("Введіть ваше ім'я:");
+            if (playerName && playerName.trim()) {
+                connection.invoke("JoinRoom", roomId, playerName.trim(), null)
+                    .catch(err => console.error("JoinRoom error:", err));
+            }
+        }
+    }
+
+    function submitJoinRoom() {
+        const playerName = document.getElementById('playerNameJoin').value.trim();
+        const password = document.getElementById('joinRoomPassword').value || null;
+        const roomId = document.getElementById('joinRoomId').value;
+        
+        if (!playerName) {
+            alert("Введіть ваше ім'я");
+            return;
+        }
+        
+        connection.invoke("JoinRoom", roomId, playerName, password)
+            .catch(err => console.error("JoinRoom error:", err));
+        
+        closeJoinModal();
+    }
+
+    function closeJoinModal() {
+        document.getElementById('joinModal').style.display = 'none';
+        document.getElementById('playerNameJoin').value = '';
+        document.getElementById('joinRoomPassword').value = '';
+    }
+
+    function leaveRoom() {
+        if (confirm("Ви впевнені, що хочете покинути кімнату?")) {
+            connection.invoke("LeaveRoom")
+                .catch(err => console.error("LeaveRoom error:", err));
+        }
+    }
+
+    function startGame() {
+        if (confirm("Почати гру?")) {
+            connection.invoke("StartGame")
+                .catch(err => console.error("StartGame error:", err));
+        }
+    }
+
+    function reveal(characteristicName) {
+        connection.invoke("RevealCharacteristic", characteristicName)
+            .catch(err => console.error("RevealCharacteristic error:", err));
+    }
+
+    // ==================== APOCALYPSE & BUNKER FUNCTIONS ====================
+
+    function renderApocalypse(apocalypse) {
+        const container = document.getElementById('apocalypseContent');
+        if (!container) return;
+        
+        if (!apocalypse) {
+            container.innerHTML = '<p>Невідомо</p>';
+            return;
+        }
+        
+        const severityColors = {
+            'low': '#27ae60',
+            'medium': '#f39c12',
+            'high': '#e74c3c',
+            'extreme': '#8e44ad'
+        };
+        
+        const severityLabels = {
+            'low': 'Низька',
+            'medium': 'Середня',
+            'high': 'Висока',
+            'extreme': 'Екстремальна'
+        };
+        
+        container.innerHTML = `
+            <h4 class="apocalypse-name">${apocalypse.name}</h4>
+            <p class="apocalypse-desc">${apocalypse.description}</p>
+            <div class="apocalypse-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Загроза:</span>
+                    <span class="stat-value" style="color: ${severityColors[apocalypse.severity]}">${severityLabels[apocalypse.severity]}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Шанс виживання:</span>
+                    <span class="stat-value">${apocalypse.survivalChance}%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Тривалість:</span>
+                    <span class="stat-value">${apocalypse.duration}</span>
+                </div>
+            </div>
+            <div class="apocalypse-lists">
+                <div class="list-section">
+                    <span class="list-title">⚠️ Загрози:</span>
+                    <ul>${apocalypse.threats.map(t => `<li>${t}</li>`).join('')}</ul>
+                </div>
+                <div class="list-section">
+                    <span class="list-title">✓ Потрібно:</span>
+                    <ul>${apocalypse.requirements.map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+            </div>
+        `;
+    }
+
+    // ==================== VOTING FUNCTIONS ====================
+
+    function startVoting() {
+        if (confirm('Почати голосування?')) {
+            connection.invoke("StartVoting")
+                .catch(err => console.error("StartVoting error:", err));
+        }
+    }
+
+    function showVotingPanel(data) {
+        document.getElementById('votingRound').textContent = data.round;
+        document.getElementById('votingProgressText').textContent = `0/${data.eligibleVoters} проголосували`;
+        document.getElementById('myVoteStatus').style.display = 'none';
+        
+        // Показуємо кнопки хоста
+        document.getElementById('votingHostControls').style.display = isHost ? 'flex' : 'none';
+        
+        // Рендеримо кандидатів
+        const candidatesContainer = document.getElementById('votingCandidates');
+        candidatesContainer.innerHTML = data.candidates.map(c => `
+            <div class="voting-candidate ${c.connectionId === myConnectionId ? 'self-candidate' : ''}" 
+                 data-connection-id="${c.connectionId}">
+                <span class="candidate-name">${c.name}</span>
+                ${c.connectionId !== myConnectionId 
+                    ? `<button class="btn-vote-for" onclick="voteFor('${c.connectionId}')">Голосувати</button>`
+                    : '<span class="self-label">(Ви)</span>'}
+            </div>
+        `).join('');
+        
+        document.getElementById('votingPanel').style.display = 'block';
+        
+        // Ховаємо кнопку голосування
+        document.getElementById('startVotingBtn').style.display = 'none';
+    }
+
+    function updateVotingCandidates() {
+        if (!myVote) return;
+        
+        // Позначаємо вибраного кандидата
+        document.querySelectorAll('.voting-candidate').forEach(el => {
+            const connId = el.dataset.connectionId;
+            if (connId === myVote.targetConnectionId) {
+                el.classList.add('voted-for');
+                const btn = el.querySelector('.btn-vote-for');
+                if (btn) btn.textContent = '✓ Ваш голос';
+            } else {
+                el.classList.remove('voted-for');
+                const btn = el.querySelector('.btn-vote-for');
+                if (btn) btn.textContent = 'Голосувати';
+            }
+        });
+    }
+
+    function voteFor(targetConnectionId) {
+        connection.invoke("Vote", targetConnectionId)
+            .catch(err => console.error("Vote error:", err));
+    }
+
+    function endVotingEarly() {
+        if (confirm('Завершити голосування достроково?')) {
+            connection.invoke("EndVoting")
+                .catch(err => console.error("EndVoting error:", err));
+        }
+    }
+
+    function cancelVoting() {
+        if (confirm('Скасувати голосування?')) {
+            connection.invoke("CancelVoting")
+                .catch(err => console.error("CancelVoting error:", err));
+        }
+    }
+
+    function showVotingResults(data) {
+        const resultsContainer = document.getElementById('votingResultsContent');
+        
+        let resultsHtml = '<div class="voting-results-list">';
+        data.results.forEach((r, i) => {
+            const isTop = i === 0;
+            resultsHtml += `
+                <div class="vote-result ${isTop ? 'top-voted' : ''}" data-connection-id="${r.connectionId}">
+                    <span class="result-rank">#${i + 1}</span>
+                    <span class="result-name">${r.playerName}</span>
+                    <span class="result-votes">${r.voteCount} голосів</span>
+                </div>
+            `;
+        });
+        resultsHtml += '</div>';
+        
+        if (data.isTie) {
+            resultsHtml += '<p class="tie-warning">⚠️ Нічия! Ведучий вирішує.</p>';
+        }
+        
+        // Показуємо хто за кого голосував
+        if (data.votes && data.votes.length > 0) {
+            resultsHtml += '<div class="votes-breakdown"><h4>Деталі голосування:</h4><ul>';
+            data.votes.forEach(v => {
+                resultsHtml += `<li><span class="voter">${v.voterName}</span> → <span class="target">${v.targetName}</span></li>`;
+            });
+            resultsHtml += '</ul></div>';
+        }
+        
+        resultsContainer.innerHTML = resultsHtml;
+        
+        // Показуємо/ховаємо кнопки рішення (тільки для хоста)
+        document.getElementById('votingDecisionControls').style.display = isHost ? 'block' : 'none';
+        
+        // Оновлюємо кнопку елімінації
+        const eliminateBtn = document.getElementById('eliminateTopBtn');
+        if (data.topVotedPlayerName) {
+            eliminateBtn.textContent = `❌ Елімінувати ${data.topVotedPlayerName}`;
+            eliminateBtn.dataset.targetId = data.topVotedPlayerId;
+        }
+        
+        document.getElementById('votingResultsPanel').style.display = 'block';
+    }
+
+    function eliminateTopVoted() {
+        const btn = document.getElementById('eliminateTopBtn');
+        const targetId = btn.dataset.targetId;
+        
+        if (!targetId) {
+            alert('Немає кандидата для елімінації');
+            return;
+        }
+        
+        if (confirm('Елімінувати цього гравця?')) {
+            connection.invoke("ResolveVoting", targetId)
+                .catch(err => console.error("ResolveVoting error:", err));
+        }
+    }
+
+    function resolveNoElimination() {
+        if (confirm('Нікого не елімінувати?')) {
+            connection.invoke("ResolveVoting", null)
+                .catch(err => console.error("ResolveVoting error:", err));
+        }
+    }
+
+    function renderBunker(bunker) {
+        const container = document.getElementById('bunkerContent');
+        if (!container) return;
+        
+        if (!bunker) {
+            container.innerHTML = '<p>Невідомо</p>';
+            return;
+        }
+        
+        const conditionColors = {
+            'poor': '#e74c3c',
+            'fair': '#f39c12',
+            'good': '#27ae60',
+            'excellent': '#3498db'
+        };
+        
+        const conditionLabels = {
+            'poor': 'Поганий',
+            'fair': 'Задовільний',
+            'good': 'Хороший',
+            'excellent': 'Відмінний'
+        };
+        
+        container.innerHTML = `
+            <h4 class="bunker-name">${bunker.name}</h4>
+            <p class="bunker-desc">${bunker.description}</p>
+            <div class="bunker-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Місткість:</span>
+                    <span class="stat-value">${bunker.capacity} осіб</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Стан:</span>
+                    <span class="stat-value" style="color: ${conditionColors[bunker.condition]}">${conditionLabels[bunker.condition]}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Запаси:</span>
+                    <span class="stat-value">${bunker.suppliesMonths} місяців</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Локація:</span>
+                    <span class="stat-value">${bunker.location}</span>
+                </div>
+            </div>
+            <div class="bunker-lists">
+                <div class="list-section">
+                    <span class="list-title">🏗️ Приміщення:</span>
+                    <ul>${bunker.facilities.map(f => `<li>${f}</li>`).join('')}</ul>
+                </div>
+                <div class="list-section">
+                    <span class="list-title">📦 Ресурси:</span>
+                    <ul>${bunker.resources.map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+                ${bunker.problems.length > 0 ? `
+                <div class="list-section problems">
+                    <span class="list-title">⚠️ Проблеми:</span>
+                    <ul>${bunker.problems.map(p => `<li>${p}</li>`).join('')}</ul>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    // ==================== SPECIAL CARDS FUNCTIONS ====================
+
+    function renderMyCards() {
+        const container = document.getElementById('myCardsSection');
+        if (!container || !myPlayerData || !myPlayerData.cards) {
+            if (container) container.innerHTML = '<p style="color: var(--color-text-muted);">Немає карт</p>';
+            return;
+        }
+
+        const cards = myPlayerData.cards;
+        if (cards.length === 0) {
+            container.innerHTML = '<p style="color: var(--color-text-muted);">Немає карт</p>';
+            return;
+        }
+
+        container.innerHTML = cards.map(card => {
+            const rarityClass = `rarity-${card.rarity}`;
+            const stateClass = `state-${card.state.toLowerCase()}`;
+            const isUsable = card.state === 'Available';
+            
+            return `
+                <div class="special-card ${rarityClass} ${stateClass}">
+                    <div class="card-header">
+                        <span class="card-name">${card.name}</span>
+                        <span class="card-rarity">${getRarityLabel(card.rarity)}</span>
+                    </div>
+                    <p class="card-description">${card.description}</p>
+                    <div class="card-footer">
+                        <span class="card-state">${getCardStateLabel(card.state)}</span>
+                        ${isUsable ? `<button class="btn-use-card" onclick="openUseCardModal('${card.id}')">Використати</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function getRarityLabel(rarity) {
+        const labels = {
+            'common': 'Звичайна',
+            'rare': 'Рідкісна',
+            'epic': 'Епічна',
+            'legendary': 'Легендарна'
+        };
+        return labels[rarity] || rarity;
+    }
+
+    function getCardStateLabel(state) {
+        const labels = {
+            'Available': '✓ Доступна',
+            'Pending': '⏳ Очікує',
+            'Approved': '✓ Підтверджена',
+            'Used': '✗ Використана',
+            'Rejected': '✗ Відхилена'
+        };
+        return labels[state] || state;
+    }
+
+    function openUseCardModal(cardId) {
+        if (!myPlayerData || !myPlayerData.cards) return;
+        
+        const card = myPlayerData.cards.find(c => c.id === cardId);
+        if (!card) return;
+        
+        currentCardToUse = card;
+        
+        document.getElementById('useCardTitle').textContent = `Використати: ${card.name}`;
+        document.getElementById('useCardDescription').textContent = card.description;
+        document.getElementById('useCardId').value = cardId;
+        
+        // Визначаємо чи потрібно вибирати ціль
+        const needsTarget = ['RevealOther', 'SwapCharacteristic', 'SkipTurn', 'StealItem', 'ViewSecret', 'Custom'].includes(card.effectType);
+        const needsCharacteristic = card.effectType === 'RevealOther' && !card.effectValue;
+        
+        // Заповнюємо список гравців
+        const targetSelect = document.getElementById('cardTargetPlayer');
+        const players = Object.values(roomPlayers).filter(p => p.connectionId !== myConnectionId);
+        targetSelect.innerHTML = '<option value="">-- Виберіть гравця --</option>' + 
+            players.map(p => `<option value="${p.connectionId}">${p.name}</option>`).join('');
+        
+        document.getElementById('cardTargetSection').style.display = needsTarget ? 'block' : 'none';
+        document.getElementById('cardCharacteristicSection').style.display = needsCharacteristic ? 'block' : 'none';
+        
+        document.getElementById('useCardModal').style.display = 'flex';
+    }
+
+    function closeUseCardModal() {
+        document.getElementById('useCardModal').style.display = 'none';
+        currentCardToUse = null;
+    }
+
+    function submitUseCard() {
+        const cardId = document.getElementById('useCardId').value;
+        const targetPlayerId = document.getElementById('cardTargetPlayer').value || null;
+        const targetCharacteristic = document.getElementById('cardTargetCharacteristic').value || null;
+        
+        connection.invoke("UseCard", cardId, targetPlayerId, targetCharacteristic)
+            .catch(err => console.error("UseCard error:", err));
+        
+        closeUseCardModal();
+    }
+
+    function showCardApprovalModal(data) {
+        document.getElementById('cardApprovalContent').innerHTML = `
+            <div class="approval-info">
+                <p><strong>Гравець:</strong> ${data.playerName}</p>
+                <p><strong>Карта:</strong> ${data.card.name}</p>
+                <p><strong>Опис:</strong> ${data.card.description}</p>
+                ${data.targetPlayerName ? `<p><strong>Ціль:</strong> ${data.targetPlayerName}</p>` : ''}
+            </div>
+        `;
+        document.getElementById('approvalCardId').value = data.card.id;
+        document.getElementById('approvalPlayerId').value = data.playerConnectionId;
+        document.getElementById('cardApprovalModal').style.display = 'flex';
+    }
+
+    function approveCardApproval() {
+        const cardId = document.getElementById('approvalCardId').value;
+        const playerId = document.getElementById('approvalPlayerId').value;
+        
+        connection.invoke("ApproveCard", playerId, cardId)
+            .catch(err => console.error("ApproveCard error:", err));
+        
+        document.getElementById('cardApprovalModal').style.display = 'none';
+    }
+
+    function rejectCardApproval() {
+        const cardId = document.getElementById('approvalCardId').value;
+        const playerId = document.getElementById('approvalPlayerId').value;
+        const reason = prompt("Причина відхилення (необов'язково):");
+        
+        connection.invoke("RejectCard", playerId, cardId, reason)
+            .catch(err => console.error("RejectCard error:", err));
+        
+        document.getElementById('cardApprovalModal').style.display = 'none';
+    }
+
+    // ==================== GAME MASTER FUNCTIONS ====================
+
+    function toggleGMPanel() {
+        const panel = document.getElementById('gmPanel');
+        const isVisible = panel.style.display !== 'none';
+        panel.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible && isHost) {
+            // Завантажуємо дані гравців при відкритті панелі
+            connection.invoke("GetAllPlayersData").catch(err => console.error(err));
+        }
+    }
+
+    function updateGMPlayerSelect() {
+        const select = document.getElementById('gmPlayerSelect');
+        if (!select) return;
+        
+        const players = Object.values(roomPlayers);
+        select.innerHTML = '<option value="">-- Виберіть гравця --</option>' + 
+            players.map(p => `<option value="${p.connectionId}" ${p.isEliminated ? 'class="eliminated-option"' : ''}>
+                ${p.name}${p.isEliminated ? ' (елімінований)' : ''}${p.connectionId === myConnectionId ? ' (Ви)' : ''}
+            </option>`).join('');
+    }
+
+    function loadPlayerDataForGM() {
+        const select = document.getElementById('gmPlayerSelect');
+        const connectionId = select.value;
+        
+        if (!connectionId) {
+            document.getElementById('gmPlayerInfo').style.display = 'none';
+            selectedPlayerForGM = null;
+            return;
+        }
+        
+        selectedPlayerForGM = connectionId;
+        const playerData = gmPlayersData[connectionId];
+        
+        if (!playerData) {
+            document.getElementById('gmPlayerInfo').style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('gmPlayerInfo').style.display = 'block';
+        document.getElementById('gmPlayerName').textContent = playerData.name + (playerData.isEliminated ? ' (Елімінований)' : '');
+        
+        // Заповнюємо характеристики
+        document.getElementById('gmProfession').textContent = playerData.profession?.name || '-';
+        document.getElementById('gmPhysicalHealth').textContent = playerData.physicalHealth?.name || '-';
+        document.getElementById('gmMentalHealth').textContent = playerData.mentalHealth?.name || '-';
+        document.getElementById('gmHobby').textContent = playerData.hobby?.name || '-';
+        document.getElementById('gmCharacterTrait').textContent = playerData.characterTrait?.name || '-';
+        document.getElementById('gmPhobia').textContent = playerData.phobia?.name || '-';
+        document.getElementById('gmTraits').textContent = playerData.traits?.name || '-';
+        document.getElementById('gmSecret').textContent = playerData.secret?.name || '-';
+        document.getElementById('gmSecretGoal').textContent = playerData.secretGoal?.goal || '-';
+        
+        // Оновлюємо кнопки елімінації
+        const eliminateBtn = document.querySelector('.btn-eliminate');
+        const restoreBtn = document.querySelector('.btn-restore');
+        if (playerData.isEliminated) {
+            eliminateBtn.style.display = 'none';
+            restoreBtn.style.display = 'inline-block';
+        } else {
+            eliminateBtn.style.display = 'inline-block';
+            restoreBtn.style.display = 'none';
+        }
+    }
+
+    function editCharacteristic(charName) {
+        if (!selectedPlayerForGM) {
+            alert('Виберіть гравця');
+            return;
+        }
+        
+        const playerData = gmPlayersData[selectedPlayerForGM];
+        if (!playerData) return;
+        
+        let currentValue = '';
+        switch(charName) {
+            case 'Profession': currentValue = playerData.profession?.name || ''; break;
+            case 'PhysicalHealth': currentValue = playerData.physicalHealth?.name || ''; break;
+            case 'MentalHealth': currentValue = playerData.mentalHealth?.name || ''; break;
+            case 'Hobby': currentValue = playerData.hobby?.name || ''; break;
+            case 'CharacterTrait': currentValue = playerData.characterTrait?.name || ''; break;
+            case 'Phobia': currentValue = playerData.phobia?.name || ''; break;
+            case 'Traits': currentValue = playerData.traits?.name || ''; break;
+            case 'Secret': currentValue = playerData.secret?.name || ''; break;
+            case 'SecretGoal': currentValue = playerData.secretGoal?.goal || ''; break;
+        }
+        
+        document.getElementById('editCharInfo').textContent = `Гравець: ${playerData.name} | Характеристика: ${charName}`;
+        document.getElementById('editCharValue').value = currentValue;
+        document.getElementById('editCharName').value = charName;
+        document.getElementById('editCharModal').style.display = 'flex';
+    }
+
+    function submitEditCharacteristic() {
+        if (!selectedPlayerForGM) return;
+        
+        const charName = document.getElementById('editCharName').value;
+        const newValue = document.getElementById('editCharValue').value.trim();
+        
+        if (!newValue) {
+            alert('Введіть значення');
+            return;
+        }
+        
+        connection.invoke("EditPlayerCharacteristic", selectedPlayerForGM, charName, newValue)
+            .catch(err => console.error(err));
+        
+        closeEditCharModal();
+    }
+
+    function clearCharacteristic() {
+        if (!selectedPlayerForGM) return;
+        
+        const charName = document.getElementById('editCharName').value;
+        
+        if (confirm(`Очистити характеристику ${charName}?`)) {
+            connection.invoke("ClearPlayerCharacteristic", selectedPlayerForGM, charName)
+                .catch(err => console.error(err));
+            closeEditCharModal();
+        }
+    }
+
+    function closeEditCharModal() {
+        document.getElementById('editCharModal').style.display = 'none';
+        document.getElementById('editCharValue').value = '';
+    }
+
+    function regenerateCharacteristic(charName) {
+        if (!selectedPlayerForGM) {
+            alert('Виберіть гравця');
+            return;
+        }
+        
+        if (confirm(`Регенерувати характеристику ${charName}?`)) {
+            connection.invoke("RegeneratePlayerCharacteristic", selectedPlayerForGM, charName)
+                .catch(err => console.error(err));
+        }
+    }
+
+    function forceReveal(charName) {
+        if (!selectedPlayerForGM) {
+            alert('Виберіть гравця');
+            return;
+        }
+        
+        if (confirm(`Примусово розкрити характеристику ${charName}?`)) {
+            connection.invoke("ForceRevealCharacteristic", selectedPlayerForGM, charName)
+                .catch(err => console.error(err));
+        }
+    }
+
+    function eliminateSelectedPlayer() {
+        if (!selectedPlayerForGM) {
+            alert('Виберіть гравця');
+            return;
+        }
+        
+        const playerData = gmPlayersData[selectedPlayerForGM];
+        if (confirm(`Елімінувати гравця ${playerData?.name}?`)) {
+            connection.invoke("EliminatePlayer", selectedPlayerForGM)
+                .catch(err => console.error(err));
+        }
+    }
+
+    function restoreSelectedPlayer() {
+        if (!selectedPlayerForGM) {
+            alert('Виберіть гравця');
+            return;
+        }
+        
+        const playerData = gmPlayersData[selectedPlayerForGM];
+        if (confirm(`Повернути гравця ${playerData?.name} в гру?`)) {
+            connection.invoke("RestorePlayer", selectedPlayerForGM)
+                .catch(err => console.error(err));
+        }
+    }
+
+    // ==================== UI FUNCTIONS ====================
+
+    function showLobbySection() {
+        document.getElementById('lobbySection').style.display = 'block';
+        document.getElementById('roomSection').style.display = 'none';
+    }
+
+    function showRoomSection() {
+        document.getElementById('lobbySection').style.display = 'none';
+        document.getElementById('roomSection').style.display = 'block';
+        document.getElementById('roomLobby').style.display = 'block';
+        document.getElementById('gameSection').style.display = 'none';
+        document.getElementById('myPlayerSection').style.display = 'block';
+    }
+
+    function updateRoomUI() {
+        if (!currentRoom) return;
+        
+        document.getElementById('currentRoomName').textContent = currentRoom.name;
+        document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id}`;
+        document.getElementById('currentRoomState').textContent = currentRoom.state === 'Lobby' ? 'Лобі' : 'Гра';
+        
+        const playerCount = Object.keys(roomPlayers).length;
+        document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers}`;
+        
+        // Показуємо кнопку GM панелі тільки хосту
+        const gmPanelBtn = document.getElementById('gmPanelBtn');
+        if (isHost) {
+            gmPanelBtn.style.display = 'inline-block';
+        } else {
+            gmPanelBtn.style.display = 'none';
+        }
+        
+        // Показуємо кнопку старту тільки хосту
+        const startBtn = document.getElementById('startGameBtn');
+        if (isHost && currentRoom.state === 'Lobby') {
+            startBtn.style.display = 'inline-block';
+            startBtn.disabled = playerCount < 4;
+            startBtn.title = playerCount < 4 ? 'Потрібно мінімум 4 гравці' : '';
+        } else {
+            startBtn.style.display = 'none';
+        }
+        
+        // Показуємо кнопку голосування тільки хосту під час гри
+        const votingBtn = document.getElementById('startVotingBtn');
+        if (isHost && currentRoom.state === 'Playing' && !currentVoting) {
+            votingBtn.style.display = 'inline-block';
+        } else {
+            votingBtn.style.display = 'none';
+        }
+        
+        // Текст очікування
+        const waitingText = document.getElementById('waitingText');
+        if (playerCount < 4) {
+            waitingText.textContent = `Очікування гравців... (потрібно ще ${4 - playerCount})`;
+            waitingText.style.display = 'block';
+        } else if (!isHost) {
+            waitingText.textContent = 'Очікування старту гри від хоста...';
+            waitingText.style.display = 'block';
+        } else {
+            waitingText.style.display = 'none';
+        }
+        
+        renderRoomPlayers();
+        
+        if (currentRoom.state !== 'Lobby') {
+            updatePlayersTable();
+        }
+    }
+
+    function renderRoomsList(rooms) {
+        const container = document.getElementById('roomsList');
+        
+        if (!rooms || rooms.length === 0) {
+            container.innerHTML = '<p class="no-rooms">Немає доступних кімнат. Створіть свою!</p>';
+            return;
+        }
+        
+        container.innerHTML = rooms.map(room => `
+            <div class="room-card ${!room.canJoin ? 'room-full' : ''}">
+                <div class="room-card-header">
+                    <span class="room-card-name">${room.name}</span>
+                    ${room.hasPassword ? '<span class="room-lock">🔒</span>' : ''}
+                </div>
+                <div class="room-card-info">
+                    <span class="room-host">Хост: ${room.hostName}</span>
+                    <span class="room-players">${room.playerCount}/${room.maxPlayers} гравців</span>
+                </div>
+                <button class="btn-join" onclick="joinRoom('${room.id}', ${room.hasPassword})" ${!room.canJoin ? 'disabled' : ''}>
+                    ${room.canJoin ? 'Приєднатися' : 'Заповнено'}
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function renderRoomPlayers() {
+        const container = document.getElementById('roomPlayersList');
+        const players = Object.values(roomPlayers);
+        
+        container.innerHTML = players.map((p, i) => `
+            <div class="room-player-card ${p.connectionId === myConnectionId ? 'my-player' : ''} ${p.isHost ? 'host-player' : ''}">
+                <span class="player-number">#${i + 1}</span>
+                <span class="player-name">${p.name}</span>
+                ${p.isHost ? '<span class="host-badge">Хост</span>' : ''}
+                ${p.connectionId === myConnectionId ? '<span class="you-badge">Ви</span>' : ''}
+            </div>
+        `).join('');
+    }
+
+    function toCamelCase(str) {
+        return str.charAt(0).toLowerCase() + str.slice(1);
+    }
+
+    function updatePlayersTable() {
+        const tbody = document.getElementById('playersTableBody');
+        const players = Object.values(roomPlayers);
+        
+        if (players.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="14" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">Немає гравців</td></tr>`;
+            return;
+        }
+        
+        tbody.innerHTML = players.map((player, index) => `
+            <tr class="${player.connectionId === myConnectionId ? 'my-player-row' : ''}" data-player="${player.connectionId}">
+                <td class="player-number">#${index + 1}</td>
+                <td class="player-name">${player.name}${player.connectionId === myConnectionId ? ' <span class="my-badge">(Я)</span>' : ''}${player.isHost ? ' <span class="host-badge-small">Хост</span>' : ''}</td>
+                <td>${renderTableCell(player, 'personality')}</td>
+                <td>${renderTableCell(player, 'body')}</td>
+                <td>${renderTableCell(player, 'profession')}</td>
+                <td>${renderTableCell(player, 'physicalHealth')}</td>
+                <td>${renderTableCell(player, 'mentalHealth')}</td>
+                <td>${renderTableCell(player, 'hobby')}</td>
+                <td>${renderTableCell(player, 'characterTrait')}</td>
+                <td>${renderTableCell(player, 'phobia')}</td>
+                <td>${renderTableCell(player, 'traits')}</td>
+                <td>${renderTableCell(player, 'inventory')}</td>
+                <td>${renderTableCell(player, 'secret')}</td>
+                <td>${renderTableCell(player, 'secretGoal')}</td>
+            </tr>
+        `).join('');
+        
+        document.getElementById('playerCount').textContent = `${players.length}/${currentRoom?.maxPlayers || 12}`;
+    }
+
+    function renderTableCell(player, charKey) {
+        const revealed = player.revealed && player.revealed[charKey];
+        if (revealed) {
+            const value = player.revealedData && player.revealedData[charKey] ? player.revealedData[charKey] : 'Розкрито';
+            return `<div class="char-revealed">${value}</div>`;
+        }
+        return `<span class="char-hidden">Приховано</span>`;
+    }
+
+    // Helper для типу таємної цілі
+    function getSecretGoalTypeLabel(type) {
+        const types = {
+            'dark': 'Темна',
+            'meme': 'Мемна',
+            'normal': 'Нормальна',
+            'adult': 'Дорослий контент',
+            'mixed': 'Змішана'
+        };
+        return types[type] || 'Невідомо';
+    }
+
+    // Рендер карток моїх характеристик
+    function renderMyPlayerCards(player) {
+        const container = document.getElementById("myPlayerCards");
+        if (!container || !player) return;
+        
+        const revealed = player.revealed || {};
+        
+        function createTooltipHtml(text, typeClass) {
+            if (!text) return '';
+            return `<span class="tooltip-trigger ${typeClass}" title="">!</span><div class="tooltip-content">${text}</div>`;
+        }
+        
+        function charWithTooltip(name, tooltip, typeClass) {
+            if (!tooltip) return name;
+            return `<span class="characteristic-with-tooltip"><span>${name}</span>${createTooltipHtml(tooltip, typeClass)}</span>`;
+        }
+        
+        container.innerHTML = `
+            <!-- Особистість -->
+            <div class="char-card ${revealed.personality ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Особистість</h3>
+                <div class="char-row"><span class="char-label">Вік:</span><span class="char-value">${player.personality.age} років</span></div>
+                <div class="char-row"><span class="char-label">Стать:</span><span class="char-value">${player.personality.sex}${player.personality.isChildfree ? " (чайлдфрі)" : ""}</span></div>
+                <div class="char-row"><span class="char-label">Орієнтація:</span><span class="char-value">${player.personality.sexOrientation}</span></div>
+                <div class="char-row">${revealed.personality ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Personality\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Статура -->
+            <div class="char-card ${revealed.body ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Статура</h3>
+                <div class="char-row"><span class="char-label">Зріст:</span><span class="char-value">${player.body.height} см</span></div>
+                <div class="char-row"><span class="char-label">Вага:</span><span class="char-value">${player.body.weight} кг</span></div>
+                <div class="char-row"><span class="char-label">Тип тіла:</span><span class="char-value">${player.body.bodyType}</span></div>
+                <div class="char-row">${revealed.body ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Body\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Професія -->
+            <div class="char-card ${revealed.profession ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Професія</h3>
+                <div class="char-row"><span class="char-label">Назва:</span><span class="char-value">${charWithTooltip((player.profession.name || 'Безробітний') + (player.profession.selectedItem ? ' <span class="selected-item-badge">(+' + player.profession.selectedItem + ')</span>' : ''), player.profession.tooltip, 'profession')}</span></div>
+                <div class="char-row"><span class="char-label">Досвід:</span><span class="char-value">${player.profession.experienceYears || 0} років</span></div>
+                <div class="char-row">${revealed.profession ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Profession\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Фізичне здоров'я -->
+            <div class="char-card ${revealed.physicalHealth ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Фізичне здоров'я</h3>
+                <div class="char-row"><span class="char-label">Стан:</span><span class="char-value">${charWithTooltip(player.physicalHealth.name || 'Здоровий', player.physicalHealth.tooltip, 'physical')}</span></div>
+                <div class="char-row">${revealed.physicalHealth ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'PhysicalHealth\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Психічне здоров'я -->
+            <div class="char-card ${revealed.mentalHealth ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Психічне здоров'я</h3>
+                <div class="char-row"><span class="char-label">Стан:</span><span class="char-value">${charWithTooltip(player.mentalHealth.name || 'Стабільний', player.mentalHealth.tooltip, 'mental')}</span></div>
+                <div class="char-row">${revealed.mentalHealth ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'MentalHealth\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Хобі -->
+            <div class="char-card ${revealed.hobby ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Хобі</h3>
+                <div class="char-row"><span class="char-label">Заняття:</span><span class="char-value">${charWithTooltip(player.hobby.name || 'Немає хобі', player.hobby.tooltip, 'hobby')}</span></div>
+                <div class="char-row">${revealed.hobby ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Hobby\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Риса характеру -->
+            <div class="char-card ${revealed.characterTrait ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Риса характеру</h3>
+                <div class="char-row"><span class="char-label">Тип:</span><span class="char-value">${player.characterTrait?.name || 'Невизначений'}</span></div>
+                <div class="char-row">${revealed.characterTrait ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'CharacterTrait\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Фобія -->
+            <div class="char-card ${revealed.phobia ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Фобія</h3>
+                <div class="char-row"><span class="char-label">Страх:</span><span class="char-value">${charWithTooltip(player.phobia?.name || 'Немає фобій', player.phobia?.tooltip, 'phobia')}</span></div>
+                <div class="char-row">${revealed.phobia ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Phobia\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Особливості -->
+            <div class="char-card ${revealed.traits ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Особливості</h3>
+                <div class="char-row"><span class="char-label">Риси:</span><span class="char-value">${charWithTooltip(player.traits?.name || 'Немає особливостей', player.traits?.tooltip, 'trait')}</span></div>
+                <div class="char-row">${revealed.traits ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Traits\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Інвентар -->
+            <div class="char-card ${revealed.inventory ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Інвентар</h3>
+                <div class="char-row"><span class="char-label">Предмети:</span><span class="char-value">${player.inventory?.items && player.inventory.items.length > 0 ? player.inventory.items.map(i => i.name).join(', ') : 'Порожній'}</span></div>
+                <div class="char-row">${revealed.inventory ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Inventory\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Секрет -->
+            <div class="char-card ${revealed.secret ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Секрет</h3>
+                <div class="char-row"><span class="char-label">Таємниця:</span><span class="char-value">${player.secret?.name || 'Без секретів'}</span></div>
+                <div class="char-row">${revealed.secret ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Secret\')">Розкрити всім</button>'}</div>
+            </div>
+
+            <!-- Таємна ціль -->
+            <div class="char-card ${revealed.secretGoal ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Таємна ціль</h3>
+                <div class="char-row"><span class="char-label">Ціль:</span><span class="char-value">${charWithTooltip(player.secretGoal?.goal || 'Вижити', player.secretGoal?.tooltip, 'secret-goal')}</span></div>
+                <div class="char-row"><span class="char-label">Тип:</span><span class="char-value">${getSecretGoalTypeLabel(player.secretGoal?.type)}</span></div>
+                <div class="char-row">${revealed.secretGoal ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'SecretGoal\')">Розкрити всім</button>'}</div>
+            </div>
+        `;
+        
+        // Рендеримо карти
+        renderMyCards();
+    }
+
+    function addEventMessage(message) {
+        const eventDiv = document.getElementById("events");
+        const eventItem = document.createElement("div");
+        eventItem.className = "event-item";
+        eventItem.innerHTML = message;
+        
+        const placeholder = eventDiv.querySelector('p');
+        if (placeholder) placeholder.remove();
+        
+        eventDiv.insertBefore(eventItem, eventDiv.firstChild);
+        while (eventDiv.children.length > 50) {
+            eventDiv.removeChild(eventDiv.lastChild);
+        }
+    }
+</script>
+
+<style>
+/* ==================== LOBBY STYLES ==================== */
+.lobby-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.create-room-panel, .rooms-list-panel {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.create-room-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.input-field.small {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.rooms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.room-card {
+    background: var(--color-bg-primary);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s;
+}
+
+.room-card:hover:not(.room-full) {
+    border-color: var(--color-gold);
+    transform: translateY(-2px);
+}
+
+.room-card.room-full {
+    opacity: 0.6;
+}
+
+.room-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.room-card-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+}
+
+.room-lock {
+    font-size: 0.9rem;
+}
+
+.room-card-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.btn-join {
+    width: 100%;
+    padding: 0.6rem;
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-join:hover:not(:disabled) {
+    background: var(--color-gold-hover);
+}
+
+.btn-join:disabled {
+    background: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+.no-rooms {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: 2rem;
+}
+
+/* ==================== ROOM SECTION ==================== */
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.room-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.room-name {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.room-id {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.room-state {
+    padding: 0.3rem 0.8rem;
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.room-state.state-playing {
+    background: var(--color-green);
+}
+
+.room-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.room-players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.room-player-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.room-player-card.my-player {
+    border-color: var(--color-gold);
+    background: rgba(216, 155, 43, 0.1);
+}
+
+.room-player-card.host-player {
+    border-color: var(--color-green);
+}
+
+.player-number {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.host-badge {
+    background: var(--color-green);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.host-badge-small {
+    background: var(--color-green);
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.you-badge {
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.waiting-text {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: 1rem;
+}
+
+/* ==================== MODAL ==================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: var(--color-bg-secondary);
+    padding: 2rem;
+    border-radius: 12px;
+    min-width: 350px;
+    border: 1px solid var(--color-border);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.modal-content .input-field {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+/* ==================== BUTTONS ==================== */
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--color-gold-hover);
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-primary);
+}
+
+.btn-success {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-green);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-success:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-danger {
+    padding: 0.75rem 1.5rem;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* ==================== GAME STYLES (kept from original) ==================== */
+.my-player-row { background: rgba(216, 155, 43, 0.1) !important; }
+.my-badge { background: var(--color-gold); color: var(--color-bg-primary); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; }
+.char-hidden { color: var(--color-text-muted); font-style: italic; }
+.char-revealed { color: var(--color-green); font-weight: 600; font-size: 0.85rem; line-height: 1.4; }
+.card-revealed { border-color: var(--color-green) !important; background: rgba(55, 201, 107, 0.05) !important; }
+.status-revealed { color: var(--color-green); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+.status-revealed::before { content: '✓'; }
+.player-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+.event-room { color: var(--color-gold); font-weight: 600; }
+.event-error { color: #e74c3c; }
+
+/* Tooltip styles */
+.characteristic-with-tooltip { display: inline-flex; align-items: center; gap: 6px; position: relative; }
+.tooltip-trigger { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; font-size: 11px; font-weight: bold; color: #fff; background: linear-gradient(135deg, #ff6b35, #f7931e); border-radius: 50%; cursor: help; transition: all 0.2s ease; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
+.tooltip-trigger:hover { transform: scale(1.2); box-shadow: 0 2px 8px rgba(255, 107, 53, 0.5); }
+.tooltip-trigger.profession { background: linear-gradient(135deg, #4a90d9, #357abd); }
+.tooltip-trigger.hobby { background: linear-gradient(135deg, #27ae60, #219a52); }
+.tooltip-trigger.mental { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.tooltip-trigger.physical { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.tooltip-trigger.trait { background: linear-gradient(135deg, #f39c12, #d68910); }
+.tooltip-trigger.phobia { background: linear-gradient(135deg, #8e44ad, #6c3483); }
+.tooltip-trigger.secret-goal { background: linear-gradient(135deg, #e91e63, #c2185b); }
+.tooltip-content { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); min-width: 220px; max-width: 320px; padding: 12px 16px; background: rgba(20, 20, 20, 0.98); color: #f0f0f0; font-size: 13px; line-height: 1.5; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: all 0.25s ease; z-index: 1000; pointer-events: none; text-align: left; }
+.tooltip-content::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: rgba(20, 20, 20, 0.98); }
+.tooltip-trigger:hover + .tooltip-content, .characteristic-with-tooltip:hover .tooltip-content { opacity: 1; visibility: visible; }
+.selected-item-badge { color: #4a90d9; font-weight: 600; font-size: 0.9em; }
+
+@@media (max-width: 900px) {
+    .lobby-container { grid-template-columns: 1fr; }
+}
+
+/* ==================== GAME MASTER PANEL ==================== */
+.btn-gm {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-gm:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    padding: 0.75rem 1.5rem;
+    background: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-warning:hover {
+    background: #d68910;
+}
+
+.gm-panel {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 400px;
+    max-height: 85vh;
+    background: var(--color-bg-secondary);
+    border: 2px solid #9b59b6;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(155, 89, 182, 0.3);
+    z-index: 1500;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.gm-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+}
+
+.gm-panel-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.btn-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.btn-close:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.gm-panel-content {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.gm-section {
+    margin-bottom: 1rem;
+}
+
+.gm-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.gm-select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+}
+
+.gm-player-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.gm-player-info h4 {
+    margin: 0 0 1rem 0;
+    color: var(--color-gold);
+    font-size: 1.1rem;
+}
+
+.gm-quick-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.btn-gm-action {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-eliminate {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-eliminate:hover {
+    background: #c0392b;
+}
+
+.btn-restore {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-restore:hover {
+    background: #219a52;
+}
+
+.gm-characteristics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gm-char-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--color-bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+}
+
+.gm-char-name {
+    width: 110px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.gm-char-value {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gm-char-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.gm-char-actions button {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.gm-char-actions button:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-gold);
+}
+
+.edit-char-info {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.eliminated-option {
+    color: #e74c3c;
+}
+
+.event-gm {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.event-eliminate {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.event-restore {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+@@media (max-width: 768px) {
+    .gm-panel {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        max-height: 70vh;
+        border-radius: 12px 12px 0 0;
+    }
+}
+
+/* ==================== SPECIAL CARDS STYLES ==================== */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.special-card {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.special-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.special-card.rarity-common::before { background: #95a5a6; }
+.special-card.rarity-rare::before { background: #3498db; }
+.special-card.rarity-epic::before { background: #9b59b6; }
+.special-card.rarity-legendary::before { background: linear-gradient(90deg, #f39c12, #e74c3c, #9b59b6); }
+
+.special-card.rarity-common { border-color: #95a5a6; }
+.special-card.rarity-rare { border-color: #3498db; }
+.special-card.rarity-epic { border-color: #9b59b6; }
+.special-card.rarity-legendary { border-color: #f39c12; box-shadow: 0 0 15px rgba(243, 156, 18, 0.3); }
+
+.special-card.state-pending { opacity: 0.7; }
+.special-card.state-used, .special-card.state-rejected { opacity: 0.5; filter: grayscale(50%); }
+
+.special-card:hover:not(.state-used):not(.state-rejected) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.card-header .card-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+}
+
+.card-rarity {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.rarity-common .card-rarity { background: #95a5a6; color: white; }
+.rarity-rare .card-rarity { background: #3498db; color: white; }
+.rarity-epic .card-rarity { background: #9b59b6; color: white; }
+.rarity-legendary .card-rarity { background: linear-gradient(90deg, #f39c12, #e74c3c); color: white; }
+
+.card-description {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-state {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.state-available .card-state { color: #27ae60; }
+.state-pending .card-state { color: #f39c12; }
+.state-used .card-state { color: #95a5a6; }
+.state-rejected .card-state { color: #e74c3c; }
+
+.btn-use-card {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-use-card:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+}
+
+.modal-card {
+    max-width: 450px;
+}
+
+.card-modal-desc {
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.approval-info {
+    background: var(--color-bg-primary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.approval-info p {
+    margin: 0.5rem 0;
+}
+
+.event-card {
+    font-size: 1.1rem;
+}
+
+.card-name {
+    color: var(--color-gold);
+    font-weight: 600;
+}
+
+/* ==================== APOCALYPSE & BUNKER STYLES ==================== */
+.game-info-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.apocalypse-panel, .bunker-panel {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.apocalypse-panel {
+    border-top: 4px solid #e74c3c;
+}
+
+.bunker-panel {
+    border-top: 4px solid #3498db;
+}
+
+.panel-title {
+    background: linear-gradient(135deg, rgba(0,0,0,0.2), transparent);
+    padding: 1rem 1.5rem;
+    margin: 0;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.apocalypse-panel .panel-title {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), transparent);
+}
+
+.bunker-panel .panel-title {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), transparent);
+}
+
+.panel-content {
+    padding: 1rem 1.5rem;
+}
+
+.apocalypse-name, .bunker-name {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    color: var(--color-text-primary);
+}
+
+.apocalypse-desc, .bunker-desc {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.apocalypse-stats, .bunker-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--color-bg-primary);
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.stat-value {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.apocalypse-lists, .bunker-lists {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.list-section {
+    background: var(--color-bg-primary);
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.list-section.problems {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.list-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.list-section ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+}
+
+.list-section li {
+    margin-bottom: 0.25rem;
+    color: var(--color-text-primary);
+}
+
+.event-apocalypse {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.event-bunker {
+    color: #3498db;
+    font-weight: 600;
+}
+
+@@media (max-width: 900px) {
+    .game-info-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== VOTING STYLES ==================== */
+.btn-vote {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-vote:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.voting-panel {
+    background: var(--color-bg-secondary);
+    border: 2px solid #3498db;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.voting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.voting-header h3 {
+    margin: 0;
+}
+
+.voting-progress {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.voting-content {
+    padding: 1.5rem;
+}
+
+.voting-candidates {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.voting-candidate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.voting-candidate.self-candidate {
+    border-color: var(--color-gold);
+    opacity: 0.7;
+}
+
+.voting-candidate.voted-for {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.1);
+}
+
+.candidate-name {
+    font-weight: 600;
+}
+
+.self-label {
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+.btn-vote-for {
+    padding: 0.5rem 1rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-vote-for:hover {
+    background: #2980b9;
+}
+
+.voted-for .btn-vote-for {
+    background: #27ae60;
+}
+
+.my-vote-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(39, 174, 96, 0.1);
+    border: 1px solid #27ae60;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.vote-target {
+    color: #27ae60;
+    font-weight: 700;
+}
+
+.voting-host-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.voting-results-panel {
+    background: var(--color-bg-secondary);
+    border: 2px solid #f39c12;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.voting-results-header {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #f39c12, #d68910);
+    color: white;
+}
+
+.voting-results-header h3 {
+    margin: 0;
+}
+
+.voting-results-content {
+    padding: 1.5rem;
+}
+
+.voting-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.vote-result {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.vote-result.top-voted {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.result-rank {
+    font-weight: 700;
+    color: var(--color-text-muted);
+    width: 30px;
+}
+
+.top-voted .result-rank {
+    color: #e74c3c;
+}
+
+.result-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.result-votes {
+    color: var(--color-gold);
+    font-weight: 700;
+}
+
+.tie-warning {
+    color: #f39c12;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.75rem;
+    background: rgba(243, 156, 18, 0.1);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.votes-breakdown {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-bg-primary);
+    border-radius: 8px;
+}
+
+.votes-breakdown h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.votes-breakdown ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.votes-breakdown li {
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.votes-breakdown .voter {
+    color: var(--color-text-primary);
+}
+
+.votes-breakdown .target {
+    color: var(--color-gold);
+    font-weight: 600;
+}
+
+.voting-decision-controls {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+}
+
+.decision-prompt {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-muted);
+}
+
+.voting-decision-controls button {
+    margin: 0 0.5rem;
+}
+
+.event-voting {
+    color: #3498db;
+    font-weight: 600;
+}
+
+.event-warning {
+    color: #f39c12;
+}
+</style>

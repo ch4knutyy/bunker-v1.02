@@ -1,0 +1,20 @@
+@* 
+    Partial View для відображення характеристики з tooltip
+    Використання: @await Html.PartialAsync("_CharacteristicTooltip", new CharacteristicTooltipModel { ... })
+*@
+@model Bunker.Models.ViewModels.CharacteristicTooltipModel
+
+@if (Model != null && !string.IsNullOrEmpty(Model.Name))
+{
+    <div class="characteristic-with-tooltip">
+        <span class="characteristic-name">@Model.Name</span>
+        
+        @if (Model.HasTooltip && !string.IsNullOrEmpty(Model.Tooltip))
+        {
+            <span class="tooltip-trigger @Model.TypeClass" title="">!</span>
+            <div class="tooltip-content">
+                @Model.Tooltip
+            </div>
+        }
+    </div>
+}

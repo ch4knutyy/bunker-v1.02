@@ -1,0 +1,253 @@
+using Bunker.Models;
+using System.Collections.Concurrent;
+
+namespace Bunker.Services
+{
+    /// <summary>
+    /// Сервіс для управління ігровими кімнатами
+    /// </summary>
+    public class RoomService
+    {
+        private readonly ConcurrentDictionary<string, Room> _rooms = new();
+        private readonly ConcurrentDictionary<string, string> _playerToRoom = new(); // ConnectionId -> RoomId
+        private readonly ILogger<RoomService> _logger;
+
+        public RoomService(ILogger<RoomService> logger)
+        {
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Створити нову кімнату
+        /// </summary>
+        public Room CreateRoom(string name, string hostConnectionId, string hostName, int maxPlayers = 12, string? password = null)
+        {
+            var room = new Room
+            {
+                Name = name,
+                HostConnectionId = hostConnectionId,
+                HostName = hostName,
+                MaxPlayers = Math.Clamp(maxPlayers, 4, 16),
+                Password = string.IsNullOrWhiteSpace(password) ? null : password
+            };
+
+            if (_rooms.TryAdd(room.Id, room))
+            {
+                _logger.LogInformation($"Кімната '{room.Name}' (ID: {room.Id}) створена хостом {hostName}");
+                return room;
+            }
+
+            throw new InvalidOperationException("Не вдалося створити кімнату");
+        }
+
+        /// <summary>
+        /// Приєднатися до кімнати
+        /// </summary>
+        public (bool success, string? error, Room? room) JoinRoom(string roomId, string connectionId, Player player, string? password = null)
+        {
+            if (!_rooms.TryGetValue(roomId, out var room))
+            {
+                return (false, "Кімнату не знайдено", null);
+            }
+
+            if (!room.CanJoin)
+            {
+                return (false, room.State != RoomState.Lobby ? "Гра вже почалась" : "Кімната заповнена", null);
+            }
+
+            if (room.HasPassword && room.Password != password)
+            {
+                return (false, "Невірний пароль", null);
+            }
+
+            if (room.Players.ContainsKey(connectionId))
+            {
+                return (false, "Ви вже в цій кімнаті", null);
+            }
+
+            // Видаляємо з попередньої кімнати якщо був
+            LeaveCurrentRoom(connectionId);
+
+            room.Players[connectionId] = player;
+            _playerToRoom[connectionId] = roomId;
+
+            _logger.LogInformation($"Гравець {player.Name} приєднався до кімнати {room.Name} (ID: {room.Id})");
+            
+            return (true, null, room);
+        }
+
+        /// <summary>
+        /// Покинути кімнату
+        /// </summary>
+        public (bool success, Room? room, bool roomDeleted, string? newHostConnectionId) LeaveRoom(string connectionId)
+        {
+            if (!_playerToRoom.TryRemove(connectionId, out var roomId))
+            {
+                return (false, null, false, null);
+            }
+
+            if (!_rooms.TryGetValue(roomId, out var room))
+            {
+                return (false, null, false, null);
+            }
+
+            room.Players.Remove(connectionId, out var player);
+            var playerName = player?.Name ?? "Unknown";
+
+            _logger.LogInformation($"Гравець {playerName} покинув кімнату {room.Name} (ID: {room.Id})");
+
+            // Якщо кімната порожня - видаляємо
+            if (room.Players.Count == 0)
+            {
+                _rooms.TryRemove(roomId, out _);
+                _logger.LogInformation($"Кімната {room.Name} (ID: {room.Id}) видалена (порожня)");
+                return (true, room, true, null);
+            }
+
+            // Якщо вийшов хост - передаємо права
+            string? newHostConnectionId = null;
+            if (room.HostConnectionId == connectionId)
+            {
+                var newHost = room.Players.First();
+                room.HostConnectionId = newHost.Key;
+                room.HostName = newHost.Value.Name;
+                newHostConnectionId = newHost.Key;
+                _logger.LogInformation($"Новий хост кімнати {room.Name}: {room.HostName}");
+            }
+
+            return (true, room, false, newHostConnectionId);
+        }
+
+        /// <summary>
+        /// Покинути поточну кімнату (helper)
+        /// </summary>
+        private void LeaveCurrentRoom(string connectionId)
+        {
+            if (_playerToRoom.TryGetValue(connectionId, out var oldRoomId))
+            {
+                if (_rooms.TryGetValue(oldRoomId, out var oldRoom))
+                {
+                    oldRoom.Players.Remove(connectionId);
+                    
+                    if (oldRoom.Players.Count == 0)
+                    {
+                        _rooms.TryRemove(oldRoomId, out _);
+                    }
+                    else if (oldRoom.HostConnectionId == connectionId)
+                    {
+                        var newHost = oldRoom.Players.First();
+                        oldRoom.HostConnectionId = newHost.Key;
+                        oldRoom.HostName = newHost.Value.Name;
+                    }
+                }
+                _playerToRoom.TryRemove(connectionId, out _);
+            }
+        }
+
+        /// <summary>
+        /// Почати гру в кімнаті
+        /// </summary>
+        public (bool success, string? error, Room? room) StartGame(string roomId, string connectionId)
+        {
+            if (!_rooms.TryGetValue(roomId, out var room))
+            {
+                return (false, "Кімнату не знайдено", null);
+            }
+
+            if (!room.IsHost(connectionId))
+            {
+                return (false, "Тільки хост може почати гру", null);
+            }
+
+            if (!room.CanStart)
+            {
+                return (false, $"Потрібно мінімум {room.MinPlayers} гравців", null);
+            }
+
+            room.State = RoomState.Playing;
+            room.CurrentRound = 1;
+            
+            // Встановлюємо першого гравця для ходу
+            room.CurrentTurnPlayerId = room.Players.Keys.First();
+
+            _logger.LogInformation($"Гра почалась в кімнаті {room.Name} (ID: {room.Id}) з {room.PlayerCount} гравцями");
+            
+            return (true, null, room);
+        }
+
+        /// <summary>
+        /// Отримати кімнату за ID
+        /// </summary>
+        public Room? GetRoom(string roomId)
+        {
+            _rooms.TryGetValue(roomId, out var room);
+            return room;
+        }
+
+        /// <summary>
+        /// Отримати кімнату гравця
+        /// </summary>
+        public Room? GetPlayerRoom(string connectionId)
+        {
+            if (_playerToRoom.TryGetValue(connectionId, out var roomId))
+            {
+                return GetRoom(roomId);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Отримати ID кімнати гравця
+        /// </summary>
+        public string? GetPlayerRoomId(string connectionId)
+        {
+            _playerToRoom.TryGetValue(connectionId, out var roomId);
+            return roomId;
+        }
+
+        /// <summary>
+        /// Отримати всі публічні кімнати
+        /// </summary>
+        public IEnumerable<object> GetAllRooms()
+        {
+            return _rooms.Values
+                .Where(r => r.State == RoomState.Lobby)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => r.ToPublicInfo());
+        }
+
+        /// <summary>
+        /// Отримати гравця в кімнаті
+        /// </summary>
+        public Player? GetPlayer(string connectionId)
+        {
+            var room = GetPlayerRoom(connectionId);
+            if (room != null && room.Players.TryGetValue(connectionId, out var player))
+            {
+                return player;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Оновити гравця в кімнаті
+        /// </summary>
+        public void UpdatePlayer(string connectionId, Player player)
+        {
+            var room = GetPlayerRoom(connectionId);
+            if (room != null)
+            {
+                room.Players[connectionId] = player;
+            }
+        }
+
+        /// <summary>
+        /// Видалити гравця при відключенні
+        /// </summary>
+        public (Room? room, bool roomDeleted, string? newHostConnectionId) RemoveDisconnectedPlayer(string connectionId)
+        {
+            var result = LeaveRoom(connectionId);
+            return (result.room, result.roomDeleted, result.newHostConnectionId);
+        }
+    }
+}
