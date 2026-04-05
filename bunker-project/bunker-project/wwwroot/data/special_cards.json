@@ -1,0 +1,224 @@
+{
+  "cards": [
+    {
+      "id": "card_reveal_profession",
+      "name": "Шпигун",
+      "description": "Примусово розкрити професію іншого гравця",
+      "effectType": "RevealOther",
+      "effectValue": "Profession",
+      "requiresApproval": true,
+      "rarity": "common",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_reveal_secret",
+      "name": "Детектив",
+      "description": "Розкрити секрет іншого гравця",
+      "effectType": "ViewSecret",
+      "effectValue": "Secret",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_reveal_goal",
+      "name": "Провидець",
+      "description": "Дізнатися таємну ціль іншого гравця",
+      "effectType": "ViewSecret",
+      "effectValue": "SecretGoal",
+      "requiresApproval": true,
+      "rarity": "epic",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_hide_profession",
+      "name": "Маскування",
+      "description": "Приховати свою професію від інших на 1 раунд",
+      "effectType": "HideOwn",
+      "effectValue": "Profession",
+      "requiresApproval": false,
+      "rarity": "common",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_swap_profession",
+      "name": "Обмін долями",
+      "description": "Обміняти свою професію з іншим гравцем",
+      "effectType": "SwapCharacteristic",
+      "effectValue": "Profession",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_swap_health",
+      "name": "Трансплантація",
+      "description": "Обміняти своє фізичне здоров'я з іншим гравцем",
+      "effectType": "SwapCharacteristic",
+      "effectValue": "PhysicalHealth",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_regenerate_profession",
+      "name": "Перекваліфікація",
+      "description": "Отримати нову випадкову професію",
+      "effectType": "RegenerateOwn",
+      "effectValue": "Profession",
+      "requiresApproval": true,
+      "rarity": "common",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_regenerate_health",
+      "name": "Зцілення",
+      "description": "Отримати нове фізичне здоров'я",
+      "effectType": "RegenerateOwn",
+      "effectValue": "PhysicalHealth",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_regenerate_mental",
+      "name": "Психотерапія",
+      "description": "Отримати новий психічний стан",
+      "effectType": "RegenerateOwn",
+      "effectValue": "MentalHealth",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_protect_vote",
+      "name": "Недоторканність",
+      "description": "Захист від голосування на 1 раунд",
+      "effectType": "ProtectFromVote",
+      "effectValue": "",
+      "requiresApproval": true,
+      "rarity": "epic",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_extra_vote",
+      "name": "Авторитет",
+      "description": "Отримати додатковий голос",
+      "effectType": "ExtraVote",
+      "effectValue": "",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_skip_turn",
+      "name": "Саботаж",
+      "description": "Пропустити хід іншого гравця",
+      "effectType": "SkipTurn",
+      "effectValue": "",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_steal_item",
+      "name": "Крадій",
+      "description": "Вкрасти предмет з інвентарю іншого гравця",
+      "effectType": "StealItem",
+      "effectValue": "",
+      "requiresApproval": true,
+      "rarity": "rare",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_reveal_any",
+      "name": "Допит",
+      "description": "Примусово розкрити будь-яку характеристику іншого гравця",
+      "effectType": "RevealOther",
+      "effectValue": "",
+      "requiresApproval": true,
+      "rarity": "epic",
+      "requiresTarget": true,
+      "requiresCharacteristic": true
+    },
+    {
+      "id": "card_regenerate_all",
+      "name": "Нове життя",
+      "description": "Регенерувати всі свої характеристики",
+      "effectType": "RegenerateOwn",
+      "effectValue": "all",
+      "requiresApproval": true,
+      "rarity": "legendary",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_double_protection",
+      "name": "Бункер VIP",
+      "description": "Подвійний захист від елімінації",
+      "effectType": "ProtectFromVote",
+      "effectValue": "double",
+      "requiresApproval": true,
+      "rarity": "legendary",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_reveal_phobia",
+      "name": "Психоаналітик",
+      "description": "Дізнатися фобію іншого гравця",
+      "effectType": "RevealOther",
+      "effectValue": "Phobia",
+      "requiresApproval": true,
+      "rarity": "common",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_swap_hobby",
+      "name": "Культурний обмін",
+      "description": "Обміняти своє хобі з іншим гравцем",
+      "effectType": "SwapCharacteristic",
+      "effectValue": "Hobby",
+      "requiresApproval": true,
+      "rarity": "common",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_regenerate_trait",
+      "name": "Самовдосконалення",
+      "description": "Отримати нову рису характеру",
+      "effectType": "RegenerateOwn",
+      "effectValue": "CharacterTrait",
+      "requiresApproval": false,
+      "rarity": "common",
+      "requiresTarget": false,
+      "requiresCharacteristic": false
+    },
+    {
+      "id": "card_copy_profession",
+      "name": "Імітатор",
+      "description": "Скопіювати професію іншого гравця",
+      "effectType": "Custom",
+      "effectValue": "copy_profession",
+      "requiresApproval": true,
+      "rarity": "epic",
+      "requiresTarget": true,
+      "requiresCharacteristic": false
+    }
+  ]
+}

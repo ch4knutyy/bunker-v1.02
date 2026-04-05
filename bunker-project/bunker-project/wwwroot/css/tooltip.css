@@ -1,0 +1,267 @@
+/* ================================================== */
+/* TOOLTIP & ЗНАК ОКЛИКУ ДЛЯ ХАРАКТЕРИСТИК           */
+/* ================================================== */
+
+/* Контейнер для характеристики з tooltip */
+.characteristic-with-tooltip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+/* Знак оклику */
+.tooltip-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    border-radius: 50%;
+    cursor: help;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip-trigger:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 6px rgba(255, 107, 53, 0.4);
+}
+
+/* Варіанти кольорів для різних типів характеристик */
+.tooltip-trigger.profession {
+    background: linear-gradient(135deg, #4a90d9, #357abd);
+}
+
+.tooltip-trigger.profession:hover {
+    box-shadow: 0 2px 6px rgba(74, 144, 217, 0.4);
+}
+
+.tooltip-trigger.hobby {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+}
+
+.tooltip-trigger.hobby:hover {
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.4);
+}
+
+.tooltip-trigger.mental {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.tooltip-trigger.mental:hover {
+    box-shadow: 0 2px 6px rgba(155, 89, 182, 0.4);
+}
+
+.tooltip-trigger.physical {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.tooltip-trigger.physical:hover {
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
+}
+
+.tooltip-trigger.trait {
+    background: linear-gradient(135deg, #f39c12, #d68910);
+}
+
+.tooltip-trigger.trait:hover {
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.4);
+}
+
+.tooltip-trigger.secret-goal {
+    background: linear-gradient(135deg, #e91e63, #c2185b);
+}
+
+.tooltip-trigger.secret-goal:hover {
+    box-shadow: 0 2px 6px rgba(233, 30, 99, 0.4);
+}
+
+.tooltip-trigger.phobia {
+    background: linear-gradient(135deg, #607d8b, #455a64);
+}
+
+.tooltip-trigger.phobia:hover {
+    box-shadow: 0 2px 6px rgba(96, 125, 139, 0.4);
+}
+
+/* Tooltip контейнер */
+.tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 200px;
+    max-width: 300px;
+    padding: 10px 14px;
+    background: rgba(30, 30, 30, 0.95);
+    color: #f0f0f0;
+    font-size: 13px;
+    line-height: 1.5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    z-index: 1000;
+    pointer-events: none;
+    text-align: left;
+}
+
+/* Стрілка tooltip */
+.tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(30, 30, 30, 0.95);
+}
+
+/* Показ tooltip при наведенні */
+.tooltip-trigger:hover + .tooltip-content,
+.tooltip-content:hover {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Альтернативне позиціонування (знизу) */
+.tooltip-content.bottom {
+    bottom: auto;
+    top: calc(100% + 8px);
+}
+
+.tooltip-content.bottom::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: rgba(30, 30, 30, 0.95);
+}
+
+/* Альтернативне позиціонування (праворуч) */
+.tooltip-content.right {
+    bottom: auto;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.tooltip-content.right::after {
+    left: auto;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top-color: transparent;
+    border-right-color: rgba(30, 30, 30, 0.95);
+}
+
+/* ================================================== */
+/* КАРТКА ГРАВЦЯ - ХАРАКТЕРИСТИКИ                    */
+/* ================================================== */
+
+.player-characteristic {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-characteristic:last-child {
+    border-bottom: none;
+}
+
+.characteristic-label {
+    font-weight: 600;
+    color: #888;
+    min-width: 120px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.characteristic-value {
+    flex: 1;
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+/* Ступінь тяжкості */
+.severity-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 6px;
+}
+
+.severity-badge.mild {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.severity-badge.moderate {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+}
+
+.severity-badge.severe {
+    background: rgba(230, 126, 34, 0.2);
+    color: #e67e22;
+}
+
+.severity-badge.very-severe {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.severity-badge.critical {
+    background: rgba(142, 68, 173, 0.2);
+    color: #8e44ad;
+}
+
+/* ================================================== */
+/* АДАПТИВНІСТЬ                                      */
+/* ================================================== */
+
+@media (max-width: 768px) {
+    .tooltip-content {
+        min-width: 180px;
+        max-width: 250px;
+        font-size: 12px;
+    }
+    
+    .characteristic-label {
+        min-width: 100px;
+        font-size: 12px;
+    }
+    
+    .characteristic-value {
+        font-size: 13px;
+    }
+}
+
+/* ================================================== */
+/* ТЕМНА ТЕМА (якщо потрібно)                        */
+/* ================================================== */
+
+.dark-theme .tooltip-content {
+    background: rgba(245, 245, 245, 0.98);
+    color: #222;
+}
+
+.dark-theme .tooltip-content::after {
+    border-top-color: rgba(245, 245, 245, 0.98);
+}
+
+.dark-theme .tooltip-content.bottom::after {
+    border-top-color: transparent;
+    border-bottom-color: rgba(245, 245, 245, 0.98);
+}
