@@ -45,7 +45,53 @@
 - **TASK 2**: Rooms system using SignalR Groups ✅ COMPLETED
 - **TASK 3**: Game Master Panel ✅ COMPLETED
 - **TASK 4**: Special Cards system ✅ COMPLETED
-- **TASK 5**: Apocalypse and Bunker systems
+- **TASK 5**: Apocalypse and Bunker systems ✅ COMPLETED
+
+---
+
+## TASK 5 - Apocalypse and Bunker Systems (Completed)
+
+### New Files Created:
+1. `/Models/ApocalypseAndBunker.cs`:
+   - `Apocalypse` model (name, description, severity, survivalChance, duration, threats, requirements)
+   - `BunkerInfo` model (name, description, capacity, location, suppliesMonths, facilities, resources, problems, condition)
+   - Root classes for JSON deserialization
+
+2. `/wwwroot/data/apocalypses.json`:
+   - 12 unique apocalypse scenarios
+   - Various severity levels (low/medium/high/extreme)
+   - Including: nuclear war, zombie outbreak, asteroid, pandemic, AI uprising, climate collapse, alien invasion, supervolcano, economic collapse, solar flare, biological weapon, magnetic reversal
+
+3. `/wwwroot/data/bunkers.json`:
+   - 10 unique bunker types
+   - Various conditions (poor/fair/good/excellent)
+   - Including: military bunker, luxury bunker, metro station, farm shelter, hospital, school shelter, research complex, church catacombs, submarine base, mining shaft
+
+### Backend Changes:
+- `GameDataService.cs` - added loading of apocalypses.json and bunkers.json
+- `Room.cs` - added Apocalypse and BunkerInfo properties
+- `GameHub.cs` - added random apocalypse/bunker selection on StartGame
+
+### Frontend Changes (Index.cshtml):
+1. **Game Info Panels** - two-column layout for apocalypse and bunker
+2. **Apocalypse Panel**:
+   - Name, description
+   - Stats: severity, survival chance, duration
+   - Lists: threats, requirements
+   - Color-coded severity
+3. **Bunker Panel**:
+   - Name, description
+   - Stats: capacity, condition, supplies, location
+   - Lists: facilities, resources, problems
+   - Color-coded condition
+4. **CSS Styles** - full styling with gradients and responsive design
+
+### All Tasks Completed:
+1. SecretGoal fix ✅
+2. Rooms system ✅
+3. Game Master Panel ✅
+4. Special Cards ✅
+5. Apocalypse & Bunker ✅
 
 ---
 
