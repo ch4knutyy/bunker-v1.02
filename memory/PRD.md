@@ -44,8 +44,58 @@
 ## Backlog / Future Tasks:
 - **TASK 2**: Rooms system using SignalR Groups ✅ COMPLETED
 - **TASK 3**: Game Master Panel ✅ COMPLETED
-- **TASK 4**: Special Cards system
+- **TASK 4**: Special Cards system ✅ COMPLETED
 - **TASK 5**: Apocalypse and Bunker systems
+
+---
+
+## TASK 4 - Special Cards System (Completed)
+
+### New Files Created:
+1. `/Models/SpecialCard.cs`:
+   - `CardState` enum (Available, Pending, Approved, Used, Rejected)
+   - `CardEffectType` enum (RevealOther, HideOwn, SwapCharacteristic, etc.)
+   - `SpecialCard` model with all properties
+   - `CardTemplate` model for JSON templates
+   - `CardsRoot` for deserialization
+
+2. `/Service/CardService.cs`:
+   - Load card templates from JSON
+   - `GenerateCardsForPlayer()` - weighted random selection by rarity
+   - `CreateCardFromTemplateId()` for GM
+   - `GetAllTemplates()` for GM panel
+
+3. `/wwwroot/data/special_cards.json`:
+   - 20 unique special cards
+   - Rarities: common, rare, epic, legendary
+   - Various effect types
+
+### Backend Changes (GameHub.cs):
+- Added `CardService` dependency
+- Cards generated when player joins/creates room
+- New methods:
+  - `UseCard()` - request card usage
+  - `ApproveCard()` - host approves
+  - `RejectCard()` - host rejects
+  - `GiveCard()` - host gives card to player
+  - `GetCardTemplates()` - get all templates
+  - `ExecuteCard()` - execute card effects
+
+### Frontend Changes (Index.cshtml):
+1. **Cards Section** - "🃏 Мої спеціальні карти" under characteristics
+2. **Use Card Modal** - select target player/characteristic
+3. **Card Approval Modal** - for host to approve/reject
+4. **SignalR Handlers**:
+   - CardPending, CardApprovalRequest
+   - CardUsed, CardRejected, CardReceived
+   - CardActivated, SecretViewed, CharacteristicSwapped
+5. **CSS Styles** - full card styling with rarity colors
+
+### Card Features:
+- Rarity system (common/rare/epic/legendary) with weighted selection
+- Approval system for powerful cards
+- Various effects: reveal, swap, regenerate, protect, etc.
+- Visual feedback for card states
 
 ---
 
