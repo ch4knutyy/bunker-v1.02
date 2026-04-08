@@ -18,7 +18,7 @@
                     <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." />
                     <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." />
                     <div class="form-row">
-                        <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
+                        <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="3" max="16" />
                         <input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" />
                     </div>
                     <button type="button" id="createRoomBtn" class="btn-primary" data-testid="create-room-btn">Створити кімнату</button>
@@ -817,19 +817,37 @@
         
         roomPlayers = {};
         data.players.forEach(function(p) {
+            // Конвертуємо revealedValues в revealedData для renderTableCell
+            var revealedData = {};
+            var revealedTooltips = {};
+            if (p.revealedValues) {
+                Object.keys(p.revealedValues).forEach(function(key) {
+                    var rd = p.revealedValues[key];
+                    // Конвертуємо PascalCase в camelCase для ключа
+                    var camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+                    revealedData[camelKey] = rd.value || rd.Value || 'Розкрито';
+                    if (rd.tooltip || rd.Tooltip) {
+                        revealedTooltips[camelKey] = rd.tooltip || rd.Tooltip;
+                    }
+                });
+            }
+            
             roomPlayers[p.connectionId] = {
                 name: p.name,
                 connectionId: p.connectionId,
                 isHost: p.isHost,
                 revealed: p.revealed || {},
-                revealedData: {},
-                isEliminated: p.isEliminated
+                revealedData: revealedData,
+                revealedTooltips: revealedTooltips,
+                isEliminated: p.isEliminated,
+                seatNumber: p.seatNumber || 0
             };
         });
         
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
+        renderMyCards(); // Показуємо спеціальні карти
         
         // Якщо гра вже йде — показати ігрову секцію
         if (data.roomState === 'Playing' || data.roomState === 'Voting') {
@@ -843,6 +861,7 @@
             if (data.apocalypse) renderApocalypse(data.apocalypse);
             if (data.bunker) renderBunker(data.bunker);
             updatePlayersTable();
+            updateActivatedCardsTable(); // Оновлюємо таблицю спецкарт
         }
         
         addEventMessage(`Сесію відновлено! Ви знову в кімнаті <span class="event-room">${currentRoom.name}</span>`);
@@ -1174,6 +1193,18 @@
             localStorage.setItem('bunker_lastPlayerName', playerName);
         } catch (e) { console.warn('Session save failed:', e); }
     }
+    
+    // Генеруємо або отримуємо стабільний playerId
+    function getOrCreatePlayerId() {
+        let playerId = localStorage.getItem('bunker_playerId');
+        if (!playerId) {
+            playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('bunker_playerId', playerId);
+        }
+        return playerId;
+    }
+    
+    const stablePlayerId = getOrCreatePlayerId();
 
     function clearSession() {
         try {
@@ -1194,8 +1225,8 @@
     function tryRejoin() {
         var session = loadSession();
         if (session.roomId && session.playerName) {
-            console.log('Attempting rejoin:', session);
-            connection.invoke("RejoinRoom", session.roomId, session.playerName)
+            console.log('Attempting rejoin with playerId:', stablePlayerId);
+            connection.invoke("RejoinRoom", session.roomId, session.playerName, stablePlayerId)
                 .catch(function(err) {
                     console.error("RejoinRoom error:", err);
                     clearSession();
@@ -1425,9 +1456,9 @@
             btn.textContent = 'Створення...';
         }
         
-        console.log('[CreateRoom] Invoking CreateRoom with:', { roomName, playerName, maxPlayers, hasPassword: !!password });
+        console.log('[CreateRoom] Invoking CreateRoom with:', { roomName, playerName, maxPlayers, hasPassword: !!password, playerId: stablePlayerId });
         
-        connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password)
+        connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password, stablePlayerId)
             .then(() => {
                 console.log('[CreateRoom] Invoke successful');
             })
@@ -1449,7 +1480,7 @@
         } else {
             const playerName = prompt("Введіть ваше ім'я:");
             if (playerName && playerName.trim()) {
-                connection.invoke("JoinRoom", roomId, playerName.trim(), null)
+                connection.invoke("JoinRoom", roomId, playerName.trim(), null, stablePlayerId)
                     .catch(err => console.error("JoinRoom error:", err));
             }
         }
@@ -1468,7 +1499,7 @@
         // Зберігаємо roomId для перевірки в RoomJoined handler
         pendingJoinRoomId = roomId;
         
-        connection.invoke("JoinRoom", roomId, playerName, password)
+        connection.invoke("JoinRoom", roomId, playerName, password, stablePlayerId)
             .catch(err => {
                 console.error("JoinRoom error:", err);
                 pendingJoinRoomId = null;
@@ -2317,71 +2348,38 @@
             gmPanelBtn.style.display = 'none';
         }
         
-        // Показуємо кнопку старту тільки хосту
-        const startBtn = document.getElementById('startGameBtn');
-        if (isHost && currentRoom.state === 'Lobby') {
-            startBtn.style.display = 'inline-block';
-            startBtn.disabled = playerCount < 4;
-            startBtn.title = playerCount < 4 ? 'Потрібно мінімум 4 гравці' : '';
-        } else {
-            startBtn.style.display = 'none';
-        }
-        
-        // Показуємо кнопку голосування тільки хосту під час гри
-        const votingBtn = document.getElementById('startVotingBtn');
-        if (isHost && currentRoom.state === 'Playing' && !currentVoting) {
-            votingBtn.style.display = 'inline-block';
-        } else {
-            votingBtn.style.display = 'none';
-        }
-        
-        // Текст очікування
-        const waitingText = document.getElementById('waitingText');
-        if (playerCount < 4) {
-            waitingText.textContent = `Очікування гравців... (потрібно ще ${4 - playerCount})`;
-            waitingText.style.display = 'block';
-        } else if (!isHost) {
-            waitingText.textContent = 'Очікування старту гри від хоста...';
-            waitingText.style.display = 'block';
-        } else {
-            waitingText.style.display = 'none';
-        }
-        
-        renderRoomPlayers();
-        
-        if (currentRoom.state !== 'Lobby') {
-            updatePlayersTable();
-        }
-    }
+// Показуємо кнопку старту тільки хосту
+const startBtn = document.getElementById('startGameBtn');
+if (isHost && currentRoom.state === 'Lobby') {
+    startBtn.style.display = 'inline-block';
+    startBtn.disabled = false;
+    startBtn.title = '';
+} else {
+    startBtn.style.display = 'none';
+}
 
-    function renderRoomsList(rooms) {
-        const container = document.getElementById('roomsList');
-        
-        if (!rooms || rooms.length === 0) {
-            container.innerHTML = '<p class="no-rooms">Немає доступних кімнат. Створіть свою!</p>';
-            return;
-        }
-        
-        container.innerHTML = rooms.map(room => `
-            <div class="room-card ${!room.canJoin ? 'room-full' : ''}">
-                <div class="room-card-header">
-                    <span class="room-card-name">${room.name}</span>
-                    ${room.hasPassword ? '<span class="room-lock">🔒</span>' : ''}
-                </div>
-                <div class="room-card-info">
-                    <span class="room-host">Хост: ${room.hostName}</span>
-                    <span class="room-players">${room.playerCount}/${room.maxPlayers} гравців</span>
-                </div>
-                <button class="btn-join" onclick="joinRoom('${room.id}', ${room.hasPassword})" ${!room.canJoin ? 'disabled' : ''}>
-                    ${room.canJoin ? 'Приєднатися' : 'Заповнено'}
-                </button>
-            </div>
-        `).join('');
-    }
+// Показуємо кнопку голосування тільки хосту під час гри
+const votingBtn = document.getElementById('startVotingBtn');
+if (isHost && currentRoom.state === 'Playing' && !currentVoting) {
+    votingBtn.style.display = 'inline-block';
+} else {
+    votingBtn.style.display = 'none';
+}
 
-    function renderRoomPlayers() {
-        const container = document.getElementById('roomPlayersList');
-        const players = Object.values(roomPlayers);
+// Текст очікування
+const waitingText = document.getElementById('waitingText');
+if (!isHost && currentRoom.state === 'Lobby') {
+    waitingText.textContent = 'Очікування старту гри від хоста...';
+    waitingText.style.display = 'block';
+} else {
+    waitingText.style.display = 'none';
+}
+
+renderRoomPlayers();
+
+if (currentRoom.state !== 'Lobby') {
+    updatePlayersTable();
+}
         
         // Сортуємо за seatNumber якщо є (після старту гри)
         players.sort(function(a, b) { return (a.seatNumber || 999) - (b.seatNumber || 999); });
@@ -2433,8 +2431,8 @@
                 <td>${renderTableCell(player, 'secret')}</td>
                 <td>${renderTableCell(player, 'secretGoal')}</td>
             </tr>
-         `;
-        }).join('');
+        `;
+    }).join('');
         
         document.getElementById('playerCount').textContent = `${players.length}/${currentRoom?.maxPlayers || 12}`;
     }

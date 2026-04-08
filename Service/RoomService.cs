@@ -254,15 +254,27 @@ namespace Bunker.Services
         /// Спроба повторного приєднання до кімнати (після перезавантаження сторінки)
         /// Шукає гравця за ім'ям в кімнаті та переносить його на новий connectionId
         /// </summary>
-        public (bool success, string? error, Room? room, Player? player, bool wasHost) RejoinRoom(string roomId, string newConnectionId, string playerName)
+        public (bool success, string? error, Room? room, Player? player, bool wasHost) RejoinRoom(string roomId, string newConnectionId, string playerName, string? stablePlayerId = null)
         {
             if (!_rooms.TryGetValue(roomId, out var room))
             {
                 return (false, "Кімнату не знайдено", null, null, false);
             }
 
-            // Шукаємо гравця за ім'ям
-            var existingEntry = room.Players.FirstOrDefault(p => p.Value.Name == playerName);
+            // Спочатку шукаємо за stablePlayerId (більш надійно)
+            KeyValuePair<string, Player> existingEntry = default;
+            
+            if (!string.IsNullOrEmpty(stablePlayerId))
+            {
+                existingEntry = room.Players.FirstOrDefault(p => p.Value.StablePlayerId == stablePlayerId);
+            }
+            
+            // Якщо не знайшли за stablePlayerId, шукаємо за ім'ям
+            if (existingEntry.Value == null)
+            {
+                existingEntry = room.Players.FirstOrDefault(p => p.Value.Name == playerName);
+            }
+            
             if (existingEntry.Value == null)
             {
                 return (false, "Гравця не знайдено в кімнаті", null, null, false);
@@ -270,6 +282,9 @@ namespace Bunker.Services
 
             var oldConnectionId = existingEntry.Key;
             var player = existingEntry.Value;
+            
+            // Зберігаємо SeatNumber (не змінюємо!)
+            var seatNumber = player.SeatNumber;
 
             // Видаляємо старий маппінг
             room.Players.Remove(oldConnectionId);
@@ -277,6 +292,7 @@ namespace Bunker.Services
 
             // Оновлюємо connectionId гравця
             player.ConnectionId = newConnectionId;
+            player.SeatNumber = seatNumber; // Явно зберігаємо seat number
             room.Players[newConnectionId] = player;
             _playerToRoom[newConnectionId] = roomId;
 
@@ -287,7 +303,7 @@ namespace Bunker.Services
                 room.HostConnectionId = newConnectionId;
             }
 
-            _logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name} (старий: {oldConnectionId}, новий: {newConnectionId})");
+            _logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name} (seat: {seatNumber}, старий: {oldConnectionId}, новий: {newConnectionId})");
 
             return (true, null, room, player, wasHost);
         }

@@ -7,6 +7,9 @@ namespace Bunker.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "";
         public string ConnectionId { get; set; } = "";
+        
+        // Стабільний ID гравця (зберігається в localStorage клієнта)
+        public string StablePlayerId { get; set; } = "";
 
         public Profession Profession { get; set; } = new();
         public Inventory Inventory { get; set; } = new();
