@@ -28,6 +28,9 @@ namespace Bunker.Models
         // Статус гравця в грі
         public bool IsEliminated { get; set; } = false;
         
+        // Номер місця (рандомізується при старті гри)
+        public int SeatNumber { get; set; } = 0;
+        
         // Захист від голосування (від спеціальної карти)
         public bool IsProtectedFromVote { get; set; } = false;
         
