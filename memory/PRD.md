@@ -49,6 +49,44 @@
 
 ---
 
+## BUG FIX — Room Password Bug (2026-02-XX) ✅
+
+**Проблема:** При створенні кімнати з паролем, хост не міг приєднатися до власної кімнати через те, що `JoinRoom` викликався без передачі пароля. На фронті модалка join закривалась до відповіді сервера.
+
+**Фікс (GameHub.cs):**
+- Передаємо `password` параметр у `_roomService.JoinRoom()` при створенні кімнати хостом
+
+**Фікс (Index.cshtml):**
+- `submitJoinRoom()` більше не закриває модалку одразу
+- Модалка закривається тільки в `RoomJoined` SignalR handler після успішного приєднання
+- При помилці (невірний пароль) модалка залишається відкритою, гравець бачить alert
+
+---
+
+## BUG FIX — Mobile Tooltips (2026-02-XX) ✅
+
+**Проблема:** Тултіпи характеристик працювали тільки через CSS `:hover`, що не підтримується на touch-пристроях.
+
+**Фікс (Index.cshtml):**
+- Додано JS click-listener на `document` для toggle класу `.active` на `.tooltip-trigger`
+- Клік на тултіп-тригер відкриває/закриває тултіп; клік поза ним — закриває всі
+- Додано CSS селектори: `.tooltip-trigger.active + .tooltip-content` та `.characteristic-with-tooltip .tooltip-trigger.active ~ .tooltip-content`
+
+---
+
+## Upcoming Tasks (Prioritized):
+- **P0**: Passwordless Profile (localStorage) + Session Restore on page refresh
+- **P1**: "Eye" icon — Host reveals single hidden characteristic (server-validated)
+- **P1**: Host-controlled Special Cards approval flow
+- **P1**: Dynamic Bunker Slots modification by Host
+- **P1**: Host-controlled Events system
+- **P1**: Advanced Voting System (host controls, ties, card influence)
+- **P2**: Randomize player seat numbers after game start
+- **P2**: Per-Player Characteristic Generation History
+- **P2**: Profile Filters (dark, meme, etc.)
+
+---
+
 ## TASK 5 - Apocalypse and Bunker Systems (Completed)
 
 ### New Files Created:
