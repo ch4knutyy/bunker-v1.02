@@ -798,6 +798,142 @@ namespace Bunker
         }
 
         /// <summary>
+        /// Змінити кількість слотів бункера (тільки хост)
+        /// </summary>
+        public async Task UpdateBunkerCapacity(int newCapacity)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати слоти бункера");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || room.Bunker == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Бункер не знайдено");
+                return;
+            }
+
+            newCapacity = Math.Clamp(newCapacity, 1, room.PlayerCount);
+            room.Bunker.Capacity = newCapacity;
+
+            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
+            await Clients.Group(roomId).SendAsync("BunkerCapacityUpdated", new
+            {
+                capacity = newCapacity,
+                bunker = room.Bunker.ToClientInfo()
+            });
+
+            _logger.LogInformation($"GM змінив кількість слотів бункера на {newCapacity} в кімнаті {room.Name}");
+        }
+
+        /// <summary>
+        /// Змінити бункер на інший (тільки хост)
+        /// </summary>
+        public async Task RegenerateBunker()
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати бункер");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                return;
+            }
+
+            if (_gameData.Bunkers.Count == 0)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Немає доступних бункерів");
+                return;
+            }
+
+            room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
+
+            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
+            await Clients.Group(roomId).SendAsync("BunkerChanged", new
+            {
+                bunker = room.Bunker.ToClientInfo()
+            });
+
+            _logger.LogInformation($"GM змінив бункер на {room.Bunker.Name} в кімнаті {room.Name}");
+        }
+
+        /// <summary>
+        /// Змінити апокаліпсис (тільки хост)
+        /// </summary>
+        public async Task RegenerateApocalypse()
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати апокаліпсис");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                return;
+            }
+
+            if (_gameData.Apocalypses.Count == 0)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Немає доступних апокаліпсисів");
+                return;
+            }
+
+            room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
+
+            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
+            await Clients.Group(roomId).SendAsync("ApocalypseChanged", new
+            {
+                apocalypse = room.Apocalypse.ToClientInfo()
+            });
+
+            _logger.LogInformation($"GM змінив апокаліпсис на {room.Apocalypse.Name} в кімнаті {room.Name}");
+        }
+
+        /// <summary>
+        /// Відправити подію гри (тільки хост)
+        /// </summary>
+        public async Task SendGameEvent(string eventText, string eventType)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може створювати події");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(eventText))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Текст події не може бути порожнім");
+                return;
+            }
+
+            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
+            if (roomId == null) return;
+
+            // Валідуємо тип
+            var validTypes = new[] { "info", "warning", "danger", "success", "catastrophe" };
+            if (!validTypes.Contains(eventType))
+                eventType = "info";
+
+            await Clients.Group(roomId).SendAsync("GameEvent", new
+            {
+                text = eventText,
+                type = eventType,
+                timestamp = DateTime.UtcNow.ToString("HH:mm:ss")
+            });
+
+            _logger.LogInformation($"GM створив подію типу {eventType} в кімнаті {roomId}");
+        }
+
+        /// <summary>
         /// Елімінувати гравця (тільки хост)
         /// </summary>
         public async Task EliminatePlayer(string targetConnectionId)
@@ -1348,11 +1484,12 @@ namespace Bunker
                     break;
                     
                 case CardEffectType.ProtectFromVote:
-                    // Позначаємо гравця як захищеного (можна додати поле в Player)
+                    player.IsProtectedFromVote = true;
                     resultMessage = "Захист від голосування активовано";
                     break;
                     
                 case CardEffectType.ExtraVote:
+                    player.ExtraVotes += 1;
                     resultMessage = "Додатковий голос отримано";
                     break;
                     
@@ -1438,7 +1575,12 @@ namespace Bunker
                 eligibleVoters = voting.EligibleVoters.Count,
                 candidates = room.Players.Values
                     .Where(p => !p.IsEliminated)
-                    .Select(p => new { connectionId = p.ConnectionId, name = p.Name })
+                    .Select(p => new { 
+                        connectionId = p.ConnectionId, 
+                        name = p.Name,
+                        isProtected = p.IsProtectedFromVote,
+                        extraVotes = p.ExtraVotes
+                    })
             });
 
             _logger.LogInformation($"Голосування почалось в кімнаті {room.Name}, раунд {voting.Round}");
@@ -1475,6 +1617,13 @@ namespace Bunker
             if (!room.Players.ContainsKey(targetConnectionId) || room.Players[targetConnectionId].IsEliminated)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Недійсний кандидат");
+                return;
+            }
+
+            // Перевірка захисту від голосування
+            if (room.Players[targetConnectionId].IsProtectedFromVote)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Цей гравець захищений від голосування");
                 return;
             }
 
@@ -1541,6 +1690,21 @@ namespace Bunker
             voting.State = VotingState.Completed;
             voting.EndedAt = DateTime.UtcNow;
 
+            // Застосовуємо додаткові голоси від спеціальних карт
+            // ExtraVotes додає "фантомні" голоси за того ж кандидата
+            foreach (var voter in voting.Votes.ToList())
+            {
+                if (room.Players.TryGetValue(voter.Key, out var voterPlayer) && voterPlayer.ExtraVotes > 0)
+                {
+                    // Додаємо фантомні голоси (через окремий лічильник)
+                    for (int i = 0; i < voterPlayer.ExtraVotes; i++)
+                    {
+                        var phantomVoterId = $"_extra_{voter.Key}_{i}";
+                        voting.Votes[phantomVoterId] = voter.Value;
+                    }
+                }
+            }
+
             // Повідомляємо всіх про результати
             await Clients.Group(roomId).SendAsync("VotingEnded", voting.ToClientInfo(room.Players, showVotes: true));
 
@@ -1591,6 +1755,13 @@ namespace Bunker
             room.State = RoomState.Playing;
             room.CurrentRound++;
             room.CurrentVoting = null;
+
+            // Скидаємо одноразові ефекти карт (захист, додаткові голоси)
+            foreach (var p in room.Players.Values)
+            {
+                p.IsProtectedFromVote = false;
+                p.ExtraVotes = 0;
+            }
 
             // Повідомляємо всіх
             await Clients.Group(roomId).SendAsync("VotingResolved", new

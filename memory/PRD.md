@@ -75,13 +75,54 @@
 ---
 
 ## Upcoming Tasks (Prioritized):
-- **P1**: Host-controlled Special Cards approval flow
-- **P1**: Dynamic Bunker Slots modification by Host
-- **P1**: Host-controlled Events system
-- **P1**: Advanced Voting System (host controls, ties, card influence)
 - **P2**: Randomize player seat numbers after game start
 - **P2**: Per-Player Characteristic Generation History
 - **P2**: Profile Filters (dark, meme, etc.)
+
+---
+
+## DYNAMIC BUNKER SLOTS + REGENERATION (2026-02-XX) ✅
+
+### Backend (GameHub.cs):
+- `UpdateBunkerCapacity(newCapacity)` — хост змінює кількість слотів (Clamp 1..PlayerCount)
+- `RegenerateBunker()` — хост генерує новий бункер з JSON
+- `RegenerateApocalypse()` — хост генерує новий апокаліпсис з JSON
+- SignalR events: `BunkerCapacityUpdated`, `BunkerChanged`, `ApocalypseChanged`
+
+### Frontend (Index.cshtml):
+- GM Panel секція "Сценарій гри" з кнопками +/- для слотів та "Новий бункер"/"Новий апокаліпсис"
+- Секція показується тільки при `isHost && gameStarted`
+
+---
+
+## HOST EVENTS SYSTEM (2026-02-XX) ✅
+
+### Backend (GameHub.cs):
+- `SendGameEvent(text, type)` — хост відправляє подію з типом (info/warning/danger/success/catastrophe)
+- SignalR event: `GameEvent` з timestamp
+
+### Frontend (Index.cshtml):
+- GM Panel секція "Ігрові події" з textarea + select типу + кнопка "Відправити"
+- Швидкі кнопки подій: Землетрус, Запаси, Зараження, Виживальці, Генератор
+- Кольорові CSS стилі для кожного типу події в логу
+
+---
+
+## ADVANCED VOTING (2026-02-XX) ✅
+
+### Backend Changes:
+- `Player.IsProtectedFromVote` — поле для захисту від голосування
+- `Player.ExtraVotes` — додаткові голоси від спеціальних карт
+- `ExecuteCard` оновлено: ProtectFromVote/ExtraVote реально встановлюють поля
+- `Vote()` перевіряє захист кандидата перед голосуванням
+- `EndVotingInternal()` додає фантомні голоси від ExtraVotes
+- `ResolveVoting()` скидає одноразові ефекти (Protection, ExtraVotes) після голосування
+- `VotingStarted` передає isProtected/extraVotes для кожного кандидата
+
+### Frontend Changes:
+- Захищені кандидати показуються з 🛡️ бейджем та кнопка "Захищений" замість "Голосувати"
+- ExtraVotes показуються з +N🗳️ бейджем
+- CSS для .protected-candidate, .badge-protected, .badge-extra-votes
 
 ---
 

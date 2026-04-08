@@ -209,10 +209,50 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Бункер/Апокаліпсис контролі -->
+                <div class="gm-section" id="gmScenarioSection" style="display: none;">
+                    <h4 class="gm-section-title">Сценарій гри</h4>
+                    <div class="gm-scenario-controls">
+                        <div class="gm-control-row">
+                            <label class="gm-label">Слоти бункера:</label>
+                            <div class="gm-capacity-control">
+                                <button class="btn-gm-small" onclick="changeBunkerCapacity(-1)">-</button>
+                                <span id="gmBunkerCapacity" class="gm-capacity-value">6</span>
+                                <button class="btn-gm-small" onclick="changeBunkerCapacity(1)">+</button>
+                            </div>
+                        </div>
+                        <div class="gm-control-row">
+                            <button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
+                            <button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Система подій -->
+                <div class="gm-section" id="gmEventsSection" style="display: none;">
+                    <h4 class="gm-section-title">Ігрові події</h4>
+                    <div class="gm-event-form">
+                        <select id="gmEventType" class="gm-select">
+                            <option value="info">Інформація</option>
+                            <option value="warning">Попередження</option>
+                            <option value="danger">Небезпека</option>
+                            <option value="success">Позитив</option>
+                            <option value="catastrophe">Катастрофа</option>
+                        </select>
+                        <textarea id="gmEventText" class="input-field gm-event-textarea" placeholder="Текст події..." rows="2"></textarea>
+                        <button class="btn-gm-action btn-send-event" onclick="sendGameEvent()">Відправити подію</button>
+                    </div>
+                    <div class="gm-quick-events">
+                        <button class="btn-gm-quick" onclick="sendQuickEvent('Землетрус! Частина бункера пошкоджена.', 'catastrophe')">Землетрус</button>
+                        <button class="btn-gm-quick" onclick="sendQuickEvent('Знайдено додаткові запаси!', 'success')">Запаси</button>
+                        <button class="btn-gm-quick" onclick="sendQuickEvent('Загроза зараження! Потрібна дезінфекція.', 'warning')">Зараження</button>
+                        <button class="btn-gm-quick" onclick="sendQuickEvent('Зовнішні виживальці просять допомоги.', 'info')">Виживальці</button>
+                        <button class="btn-gm-quick" onclick="sendQuickEvent('Генератор зламався! Світла немає.', 'danger')">Генератор</button>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Гравці в кімнаті (Лобі) -->
         <div id="roomLobby">
             <h3 class="section-title">Гравці в кімнаті: <span id="roomPlayerCount">0/12</span></h3>
             <div id="roomPlayersList" class="room-players-grid"></div>
@@ -538,6 +578,16 @@
         document.getElementById('currentRoomState').classList.add('state-playing');
         document.getElementById('startGameBtn').style.display = 'none';
         
+        // Показуємо GM секції для хоста
+        if (isHost) {
+            document.getElementById('gmScenarioSection').style.display = 'block';
+            document.getElementById('gmEventsSection').style.display = 'block';
+            if (data.bunker) {
+                currentBunkerCapacity = data.bunker.capacity;
+                document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+            }
+        }
+        
         // Рендеримо апокаліпсис та бункер
         renderApocalypse(data.apocalypse);
         renderBunker(data.bunker);
@@ -827,6 +877,41 @@
         addEventMessage(`Вашу характеристику ${data.characteristicName} обміняно з ${data.withPlayerName}`);
     });
 
+    // ==================== SCENARIO & EVENT SIGNALR HANDLERS ====================
+
+    // Кількість слотів бункера змінено
+    connection.on("BunkerCapacityUpdated", function (data) {
+        console.log("Bunker capacity updated:", data);
+        if (currentBunker) currentBunker.capacity = data.capacity;
+        document.getElementById('gmBunkerCapacity').textContent = data.capacity;
+        renderBunker(data.bunker);
+        addEventMessage(`<span class="event-gm">GM</span> змінив кількість слотів бункера на <strong>${data.capacity}</strong>`);
+    });
+
+    // Бункер змінено
+    connection.on("BunkerChanged", function (data) {
+        console.log("Bunker changed:", data);
+        currentBunker = data.bunker;
+        document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+        renderBunker(data.bunker);
+        addEventMessage(`<span class="event-bunker">🏠 Новий бункер:</span> ${data.bunker.name}`);
+    });
+
+    // Апокаліпсис змінено
+    connection.on("ApocalypseChanged", function (data) {
+        console.log("Apocalypse changed:", data);
+        currentApocalypse = data.apocalypse;
+        renderApocalypse(data.apocalypse);
+        addEventMessage(`<span class="event-apocalypse">☢️ Новий апокаліпсис:</span> ${data.apocalypse.name}`);
+    });
+
+    // Ігрова подія від GM
+    connection.on("GameEvent", function (data) {
+        console.log("Game event:", data);
+        var typeClass = 'event-' + data.type;
+        addEventMessage(`<span class="${typeClass}"><strong>[Подія ${data.timestamp}]</strong> ${data.text}</span>`);
+    });
+
     // ==================== VOTING SIGNALR HANDLERS ====================
 
     // Голосування почалось
@@ -995,6 +1080,49 @@
 
     function closePeekModal() {
         document.getElementById('peekModal').style.display = 'none';
+    }
+
+    // ==================== SCENARIO & EVENT FUNCTIONS ====================
+
+    var currentBunkerCapacity = 6;
+
+    function changeBunkerCapacity(delta) {
+        currentBunkerCapacity += delta;
+        if (currentBunkerCapacity < 1) currentBunkerCapacity = 1;
+        document.getElementById('gmBunkerCapacity').textContent = currentBunkerCapacity;
+        connection.invoke("UpdateBunkerCapacity", currentBunkerCapacity)
+            .catch(function(err) { console.error("UpdateBunkerCapacity error:", err); });
+    }
+
+    function regenerateBunker() {
+        if (confirm('Згенерувати новий бункер?')) {
+            connection.invoke("RegenerateBunker")
+                .catch(function(err) { console.error("RegenerateBunker error:", err); });
+        }
+    }
+
+    function regenerateApocalypse() {
+        if (confirm('Згенерувати новий апокаліпсис?')) {
+            connection.invoke("RegenerateApocalypse")
+                .catch(function(err) { console.error("RegenerateApocalypse error:", err); });
+        }
+    }
+
+    function sendGameEvent() {
+        var text = document.getElementById('gmEventText').value.trim();
+        var type = document.getElementById('gmEventType').value;
+        if (!text) {
+            alert('Введіть текст події');
+            return;
+        }
+        connection.invoke("SendGameEvent", text, type)
+            .catch(function(err) { console.error("SendGameEvent error:", err); });
+        document.getElementById('gmEventText').value = '';
+    }
+
+    function sendQuickEvent(text, type) {
+        connection.invoke("SendGameEvent", text, type)
+            .catch(function(err) { console.error("SendGameEvent error:", err); });
     }
 
     // ==================== MOBILE TOOLTIPS ====================
@@ -1166,15 +1294,26 @@
         
         // Рендеримо кандидатів
         const candidatesContainer = document.getElementById('votingCandidates');
-        candidatesContainer.innerHTML = data.candidates.map(c => `
-            <div class="voting-candidate ${c.connectionId === myConnectionId ? 'self-candidate' : ''}" 
+        candidatesContainer.innerHTML = data.candidates.map(c => {
+            var badges = '';
+            if (c.isProtected) badges += '<span class="badge-protected" title="Захищений від голосування">🛡️</span>';
+            if (c.extraVotes > 0) badges += `<span class="badge-extra-votes" title="Має ${c.extraVotes} додаткових голосів">+${c.extraVotes}🗳️</span>`;
+            
+            var voteBtn = '';
+            if (c.connectionId === myConnectionId) {
+                voteBtn = '<span class="self-label">(Ви)</span>';
+            } else if (c.isProtected) {
+                voteBtn = '<span class="protected-label">Захищений</span>';
+            } else {
+                voteBtn = `<button class="btn-vote-for" onclick="voteFor('${c.connectionId}')">Голосувати</button>`;
+            }
+            
+            return `<div class="voting-candidate ${c.connectionId === myConnectionId ? 'self-candidate' : ''} ${c.isProtected ? 'protected-candidate' : ''}" 
                  data-connection-id="${c.connectionId}">
-                <span class="candidate-name">${c.name}</span>
-                ${c.connectionId !== myConnectionId 
-                    ? `<button class="btn-vote-for" onclick="voteFor('${c.connectionId}')">Голосувати</button>`
-                    : '<span class="self-label">(Ви)</span>'}
-            </div>
-        `).join('');
+                <span class="candidate-name">${c.name} ${badges}</span>
+                ${voteBtn}
+            </div>`;
+        }).join('');
         
         document.getElementById('votingPanel').style.display = 'block';
         
@@ -2595,6 +2734,159 @@
 .event-restore {
     color: #27ae60;
     font-weight: 600;
+}
+
+/* Scenario Controls (GM Panel) */
+.gm-scenario-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.gm-control-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.gm-label {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    min-width: 110px;
+}
+
+.gm-capacity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-gm-small {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-gold);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.btn-gm-small:hover {
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+}
+
+.gm-capacity-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    min-width: 30px;
+    text-align: center;
+}
+
+.btn-gm-action {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-gm-action:hover {
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    border-color: var(--color-gold);
+}
+
+.btn-send-event {
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    font-weight: 600;
+}
+
+/* Events System */
+.gm-event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.gm-select {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.gm-event-textarea {
+    resize: vertical;
+    min-height: 50px;
+    font-size: 0.85rem;
+}
+
+.gm-quick-events {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.btn-gm-quick {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+
+.btn-gm-quick:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+}
+
+/* Event type colors in log */
+.event-info { color: #3498db; font-weight: 500; }
+.event-warning { color: #f39c12; font-weight: 600; }
+.event-danger { color: #e74c3c; font-weight: 600; }
+.event-success { color: #27ae60; font-weight: 500; }
+.event-catastrophe { color: #e74c3c; font-weight: 700; text-transform: uppercase; }
+
+/* Voting badges */
+.badge-protected {
+    font-size: 0.85rem;
+    margin-left: 0.25rem;
+}
+
+.badge-extra-votes {
+    font-size: 0.75rem;
+    background: rgba(241, 196, 15, 0.2);
+    color: var(--color-gold);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    margin-left: 0.25rem;
+}
+
+.protected-candidate {
+    opacity: 0.6;
+    border-color: #17a2b8 !important;
+}
+
+.protected-label {
+    font-size: 0.8rem;
+    color: #17a2b8;
+    font-style: italic;
 }
 
 @@media (max-width: 768px) {
