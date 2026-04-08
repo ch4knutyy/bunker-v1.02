@@ -75,8 +75,6 @@
 ---
 
 ## Upcoming Tasks (Prioritized):
-- **P0**: Passwordless Profile (localStorage) + Session Restore on page refresh
-- **P1**: "Eye" icon — Host reveals single hidden characteristic (server-validated)
 - **P1**: Host-controlled Special Cards approval flow
 - **P1**: Dynamic Bunker Slots modification by Host
 - **P1**: Host-controlled Events system
@@ -84,6 +82,58 @@
 - **P2**: Randomize player seat numbers after game start
 - **P2**: Per-Player Characteristic Generation History
 - **P2**: Profile Filters (dark, meme, etc.)
+
+---
+
+## SESSION RESTORE — Passwordless Profile + Reconnect (2026-02-XX) ✅
+
+### Backend Changes:
+
+**RoomService.cs** — новий метод `RejoinRoom`:
+- Шукає гравця за ім'ям у кімнаті
+- Переносить Player з oldConnectionId на newConnectionId
+- Оновлює host якщо потрібно
+- Повертає повний стан гравця та кімнати
+
+**GameHub.cs** — новий метод `RejoinRoom(roomId, playerName)`:
+- Викликає `_roomService.RejoinRoom()`
+- Додає до SignalR Group
+- Надсилає `RejoinSuccess` з повним станом гри (room, player, apocalypse, bunker, players)
+- Надсилає `PlayerReconnected` іншим гравцям
+- При помилці — `RejoinFailed`
+
+**GameHub.cs** — оновлено `OnDisconnectedAsync`:
+- 5-секундна затримка перед видаленням гравця (grace period)
+- Дозволяє page refresh без втрати сесії
+
+### Frontend Changes (Index.cshtml):
+
+1. **localStorage** — збереження `bunker_lastPlayerName` для автозаповнення
+2. **sessionStorage** — збереження `bunker_roomId` + `bunker_playerName` для reconnect
+3. **saveSession/clearSession/loadSession** — утиліти для роботи з сесією
+4. **tryRejoin()** — при підключенні до SignalR спроба перепідключитися
+5. **prefillPlayerName()** — автозаповнення імені з localStorage
+6. **RejoinSuccess handler** — повне відновлення стану UI включно з ігровою секцією
+7. **RejoinFailed handler** — тиха очистка сесії, показ лобі
+8. **PlayerReconnected handler** — оновлення connectionId гравця в roomPlayers
+
+---
+
+## EYE ICON — Peek Characteristic for Host (2026-02-XX) ✅
+
+### Backend Changes (GameHub.cs):
+- Новий метод `PeekCharacteristic(targetConnectionId, characteristicName)`
+- Надсилає дані ТІЛЬКИ хосту через `Clients.Caller`
+- НЕ змінює `Revealed` стан характеристики
+- Серверна валідація `IsCallerHost()`
+
+### Frontend Changes (Index.cshtml):
+1. **GM Panel** — додано кнопку &#128065; (Підглянути) до кожної характеристики
+   - Замінено старе 👁️ (Розкрити) на 📢 (Розкрити для всіх) для кращого розрізнення
+2. **peekCharacteristic(charName)** — виклик Hub методу
+3. **CharacteristicPeeked handler** — відкриває модалку з даними
+4. **Peek Modal** — показує значення, тултіп, статус (прихована/розкрита)
+5. **CSS** — стилі для .btn-peek, .modal-peek, .peek-info, .peek-status
 
 ---
 

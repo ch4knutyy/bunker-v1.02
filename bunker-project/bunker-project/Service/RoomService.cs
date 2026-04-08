@@ -249,5 +249,47 @@ namespace Bunker.Services
             var result = LeaveRoom(connectionId);
             return (result.room, result.roomDeleted, result.newHostConnectionId);
         }
+
+        /// <summary>
+        /// Спроба повторного приєднання до кімнати (після перезавантаження сторінки)
+        /// Шукає гравця за ім'ям в кімнаті та переносить його на новий connectionId
+        /// </summary>
+        public (bool success, string? error, Room? room, Player? player, bool wasHost) RejoinRoom(string roomId, string newConnectionId, string playerName)
+        {
+            if (!_rooms.TryGetValue(roomId, out var room))
+            {
+                return (false, "Кімнату не знайдено", null, null, false);
+            }
+
+            // Шукаємо гравця за ім'ям
+            var existingEntry = room.Players.FirstOrDefault(p => p.Value.Name == playerName);
+            if (existingEntry.Value == null)
+            {
+                return (false, "Гравця не знайдено в кімнаті", null, null, false);
+            }
+
+            var oldConnectionId = existingEntry.Key;
+            var player = existingEntry.Value;
+
+            // Видаляємо старий маппінг
+            room.Players.Remove(oldConnectionId);
+            _playerToRoom.TryRemove(oldConnectionId, out _);
+
+            // Оновлюємо connectionId гравця
+            player.ConnectionId = newConnectionId;
+            room.Players[newConnectionId] = player;
+            _playerToRoom[newConnectionId] = roomId;
+
+            // Якщо був хостом — оновлюємо
+            bool wasHost = room.HostConnectionId == oldConnectionId;
+            if (wasHost)
+            {
+                room.HostConnectionId = newConnectionId;
+            }
+
+            _logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name} (старий: {oldConnectionId}, новий: {newConnectionId})");
+
+            return (true, null, room, player, wasHost);
+        }
     }
 }

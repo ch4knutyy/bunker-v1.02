@@ -179,6 +179,66 @@ namespace Bunker
         }
 
         /// <summary>
+        /// Спроба повторного приєднання після перезавантаження сторінки
+        /// </summary>
+        public async Task RejoinRoom(string roomId, string playerName)
+        {
+            if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
+            {
+                await Clients.Caller.SendAsync("RejoinFailed", "Невірні дані для перепідключення");
+                return;
+            }
+
+            try
+            {
+                var (success, error, room, player, wasHost) = _roomService.RejoinRoom(roomId, Context.ConnectionId, playerName);
+
+                if (!success || room == null || player == null)
+                {
+                    await Clients.Caller.SendAsync("RejoinFailed", error ?? "Не вдалося перепідключитися");
+                    return;
+                }
+
+                // Додаємо до SignalR групи
+                await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+
+                // Відправляємо повні дані гравцю
+                await Clients.Caller.SendAsync("RejoinSuccess", new
+                {
+                    room = room.ToPublicInfo(),
+                    player = player,
+                    isHost = wasHost,
+                    roomState = room.State.ToString(),
+                    apocalypse = room.Apocalypse?.ToClientInfo(),
+                    bunker = room.Bunker?.ToClientInfo(),
+                    players = room.Players.Values.Select(p => new
+                    {
+                        name = p.Name,
+                        connectionId = p.ConnectionId,
+                        isHost = room.IsHost(p.ConnectionId),
+                        revealed = p.Revealed,
+                        isEliminated = p.IsEliminated
+                    })
+                });
+
+                // Повідомляємо інших про перепідключення
+                await Clients.OthersInGroup(roomId).SendAsync("PlayerReconnected", new
+                {
+                    name = player.Name,
+                    connectionId = Context.ConnectionId,
+                    isHost = wasHost
+                });
+
+                _logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка перепідключення");
+                await Clients.Caller.SendAsync("RejoinFailed", "Помилка перепідключення");
+            }
+        }
+
+        /// <summary>
         /// Почати гру (тільки хост)
         /// </summary>
         public async Task StartGame()
@@ -696,6 +756,45 @@ namespace Bunker
             });
 
             _logger.LogInformation($"GM примусово розкрив {characteristicName} гравця {player.Name}");
+        }
+
+        /// <summary>
+        /// Підглянути приховану характеристику (тільки хост, тільки для себе)
+        /// НЕ розкриває характеристику для інших гравців
+        /// </summary>
+        public async Task PeekCharacteristic(string targetConnectionId, string characteristicName)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може підглядати характеристики");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !room.Players.TryGetValue(targetConnectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
+                return;
+            }
+
+            var revealedData = GetRevealedDataForCharacteristic(player, characteristicName);
+            if (revealedData == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", $"Невідома характеристика: {characteristicName}");
+                return;
+            }
+
+            // Відправляємо ТІЛЬКИ хосту — НЕ розкриваємо для інших
+            await Clients.Caller.SendAsync("CharacteristicPeeked", new
+            {
+                playerName = player.Name,
+                connectionId = targetConnectionId,
+                characteristicKey = characteristicName,
+                data = revealedData,
+                isRevealed = IsCharacteristicRevealed(player, characteristicName)
+            });
+
+            _logger.LogInformation($"GM підглянув {characteristicName} гравця {player.Name}");
         }
 
         /// <summary>
@@ -1551,20 +1650,41 @@ namespace Bunker
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var (room, roomDeleted, newHostConnectionId) = _roomService.RemoveDisconnectedPlayer(Context.ConnectionId);
-
-            if (room != null && !roomDeleted)
+            var disconnectedId = Context.ConnectionId;
+            var roomId = _roomService.GetPlayerRoomId(disconnectedId);
+            
+            if (roomId != null)
             {
-                await Clients.Group(room.Id).SendAsync("PlayerLeftRoom", new
+                // Даємо 5 секунд на перепідключення (page refresh)
+                _ = Task.Run(async () =>
                 {
-                    connectionId = Context.ConnectionId,
-                    newHostConnectionId = newHostConnectionId,
-                    newHostName = newHostConnectionId != null && room.Players.ContainsKey(newHostConnectionId) 
-                        ? room.Players[newHostConnectionId].Name 
-                        : null
+                    await Task.Delay(5000);
+                    
+                    // Перевіряємо чи гравець вже перепідключився (connectionId змінився)
+                    var currentRoomId = _roomService.GetPlayerRoomId(disconnectedId);
+                    if (currentRoomId == null)
+                    {
+                        // Вже видалений або перепідключився з новим connectionId
+                        return;
+                    }
+                    
+                    // Гравець не перепідключився — видаляємо
+                    var (room, roomDeleted, newHostConnectionId) = _roomService.RemoveDisconnectedPlayer(disconnectedId);
+                    
+                    if (room != null && !roomDeleted)
+                    {
+                        await Clients.Group(room.Id).SendAsync("PlayerLeftRoom", new
+                        {
+                            connectionId = disconnectedId,
+                            newHostConnectionId = newHostConnectionId,
+                            newHostName = newHostConnectionId != null && room.Players.ContainsKey(newHostConnectionId)
+                                ? room.Players[newHostConnectionId].Name
+                                : (string?)null
+                        });
+                        
+                        await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
+                    }
                 });
-
-                await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
             }
 
             await base.OnDisconnectedAsync(exception);
