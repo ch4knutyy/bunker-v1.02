@@ -63,6 +63,21 @@
 
 ---
 
+## CRITICAL BUG FIX — Create Room Page Reload (2026-02-XX) ✅
+
+**Проблема:** Кнопка "Створити кімнату" перезавантажувала сторінку замість виклику JS.
+- `<form onsubmit="createRoom(); return false;">` + `<button type="submit">` — якщо `createRoom()` кидав виключення (SignalR ще не підключений), `return false` не виконувався
+- Те саме для всіх модальних вікон (Join, Edit Characteristic, Use Card)
+
+**Фікс (Index.cshtml):**
+- Замінено всі `<form onsubmit>` на `<div>` + `<button type="button" onclick="...">`
+- Видалено всі `type="submit"` кнопки та `required` атрибути (валідація тепер в JS)
+- `createRoom()` тепер перевіряє `connection.state === signalR.HubConnectionState.Connected`
+- Обгорнуто `connection.invoke()` у `try/catch` + `.catch()` з `alert()` для помилок
+- Аналогічно виправлено: Join Modal, Edit Characteristic Modal, Use Card Modal
+
+---
+
 ## BUG FIX — Mobile Tooltips (2026-02-XX) ✅
 
 **Проблема:** Тултіпи характеристик працювали тільки через CSS `:hover`, що не підтримується на touch-пристроях.

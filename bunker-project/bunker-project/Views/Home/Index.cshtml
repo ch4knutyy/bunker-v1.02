@@ -14,15 +14,15 @@
             <!-- Створення кімнати -->
             <div class="create-room-panel">
                 <h2 class="section-title">Створити кімнату</h2>
-                <form class="create-room-form" onsubmit="createRoom(); return false;">
-                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." required />
-                    <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." required />
+                <div class="create-room-form">
+                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." />
+                    <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." />
                     <div class="form-row">
                         <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
                         <input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" />
                     </div>
-                    <button type="submit" class="btn-primary">Створити кімнату</button>
-                </form>
+                    <button type="button" class="btn-primary" onclick="createRoom()">Створити кімнату</button>
+                </div>
             </div>
 
             <!-- Список кімнат -->
@@ -336,15 +336,15 @@
 <div id="joinModal" class="modal" style="display: none;">
     <div class="modal-content">
         <h3>Приєднатися до кімнати</h3>
-        <form onsubmit="submitJoinRoom(); return false;">
-            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." required />
+        <div>
+            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." />
             <input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
             <input type="hidden" id="joinRoomId" />
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeJoinModal()">Скасувати</button>
-                <button type="submit" class="btn-primary">Приєднатися</button>
+                <button type="button" class="btn-primary" onclick="submitJoinRoom()">Приєднатися</button>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -353,15 +353,15 @@
     <div class="modal-content">
         <h3>Редагувати характеристику</h3>
         <p id="editCharInfo" class="edit-char-info"></p>
-        <form onsubmit="submitEditCharacteristic(); return false;">
-            <input id="editCharValue" type="text" class="input-field" placeholder="Нове значення..." required />
+        <div>
+            <input id="editCharValue" type="text" class="input-field" placeholder="Нове значення..." />
             <input type="hidden" id="editCharName" />
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeEditCharModal()">Скасувати</button>
                 <button type="button" class="btn-warning" onclick="clearCharacteristic()">Очистити</button>
-                <button type="submit" class="btn-primary">Зберегти</button>
+                <button type="button" class="btn-primary" onclick="submitEditCharacteristic()">Зберегти</button>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -370,7 +370,7 @@
     <div class="modal-content modal-card">
         <h3 id="useCardTitle">Використати карту</h3>
         <p id="useCardDescription" class="card-modal-desc"></p>
-        <form onsubmit="submitUseCard(); return false;">
+        <div>
             <div id="cardTargetSection" style="display: none;">
                 <label class="gm-label">Виберіть гравця-ціль:</label>
                 <select id="cardTargetPlayer" class="gm-select">
@@ -395,9 +395,9 @@
             <input type="hidden" id="useCardId" />
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeUseCardModal()">Скасувати</button>
-                <button type="submit" class="btn-primary">Використати</button>
+                <button type="button" class="btn-primary" onclick="submitUseCard()">Використати</button>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -1161,13 +1161,32 @@
         const maxPlayers = parseInt(document.getElementById('maxPlayers').value) || 12;
         const password = document.getElementById('roomPassword').value || null;
         
-        if (!playerName || !roomName) {
-            alert("Введіть ім'я та назву кімнати");
+        if (!playerName) {
+            alert("Введіть ваше ім'я");
             return;
         }
         
-        connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password)
-            .catch(err => console.error("CreateRoom error:", err));
+        if (!roomName) {
+            alert("Введіть назву кімнати");
+            return;
+        }
+        
+        // Перевіряємо стан з'єднання
+        if (connection.state !== signalR.HubConnectionState.Connected) {
+            alert("З'єднання з сервером ще не встановлено. Зачекайте кілька секунд і спробуйте знову.");
+            return;
+        }
+        
+        try {
+            connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password)
+                .catch(function(err) {
+                    console.error("CreateRoom error:", err);
+                    alert("Помилка створення кімнати: " + (err.message || err));
+                });
+        } catch (e) {
+            console.error("CreateRoom invoke failed:", e);
+            alert("Не вдалося створити кімнату. Перевірте з'єднання з сервером.");
+        }
     }
 
     function joinRoom(roomId, hasPassword) {
