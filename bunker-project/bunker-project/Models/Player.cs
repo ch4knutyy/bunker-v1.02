@@ -28,6 +28,12 @@ namespace Bunker.Models
         // Статус гравця в грі
         public bool IsEliminated { get; set; } = false;
         
+        // Захист від голосування (від спеціальної карти)
+        public bool IsProtectedFromVote { get; set; } = false;
+        
+        // Додаткові голоси (від спеціальної карти)
+        public int ExtraVotes { get; set; } = 0;
+        
         // Спеціальні карти гравця
         public List<SpecialCard> Cards { get; set; } = new();
     }
