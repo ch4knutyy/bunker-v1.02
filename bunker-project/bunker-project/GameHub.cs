@@ -48,8 +48,8 @@ namespace Bunker
                 // Генеруємо спеціальні карти
                 player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
 
-                // Приєднуємо хоста до кімнати
-                var (success, error, _) = _roomService.JoinRoom(room.Id, Context.ConnectionId, player);
+                // Приєднуємо хоста до кімнати (передаємо пароль щоб пройти перевірку)
+                var (success, error, _) = _roomService.JoinRoom(room.Id, Context.ConnectionId, player, password);
                 
                 if (!success)
                 {
