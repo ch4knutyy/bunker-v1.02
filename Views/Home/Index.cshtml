@@ -21,7 +21,8 @@
                         <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
                         <input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" />
                     </div>
-                    <button type="button" class="btn-primary" onclick="createRoom()">Створити кімнату</button>
+                    <button type="button" id="createRoomBtn" class="btn-primary" data-testid="create-room-btn">Створити кімнату</button>
+                    <p id="connectionStatus" class="connection-status" style="display: none; margin-top: 0.5rem; font-size: 0.85rem;"></p>
                 </div>
             </div>
 
@@ -323,11 +324,60 @@
         </div>
     </div>
 
-    <!-- Events Section -->
-    <div class="events-section">
-        <h2 class="section-title">Події</h2>
-        <div id="events">
-            <p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
+    <!-- Activated Special Cards Table -->
+    <div id="specialCardsTableSection" class="special-cards-table-section" style="display: none;">
+        <h2 class="section-title">Таблиця спец. можливостей</h2>
+        <div class="special-cards-table-wrapper">
+            <table class="special-cards-table" id="specialCardsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">№</th>
+                        <th style="min-width: 150px;">Ім'я</th>
+                        <th style="min-width: 200px;">Спец. можливість 1</th>
+                        <th style="min-width: 200px;">Спец. можливість 2</th>
+                    </tr>
+                </thead>
+                <tbody id="specialCardsTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
+                            Ще ніхто не активував спецкарти
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Events Section (покращена) -->
+    <div class="events-section-wrapper">
+        <div class="events-section-main">
+            <h2 class="section-title">Ігрові події</h2>
+            
+            <!-- Поточна подія -->
+            <div id="currentEventPanel" class="current-event-panel" style="display: none;">
+                <div class="current-event-header">
+                    <span class="current-event-badge">ПОТОЧНА ПОДІЯ</span>
+                    <span id="currentEventTime" class="current-event-time"></span>
+                </div>
+                <div id="currentEventContent" class="current-event-content"></div>
+                <div id="currentEventEffect" class="current-event-effect" style="display: none;">
+                    <span class="effect-label">Можливий ефект:</span>
+                    <span id="currentEventEffectText" class="effect-text"></span>
+                </div>
+                <!-- Кнопка для ведучого -->
+                <div id="eventHostControls" class="event-host-controls" style="display: none;">
+                    <button class="btn-apply-effect" onclick="applyCurrentEventEffect()">Застосувати ефект</button>
+                    <button class="btn-dismiss-event" onclick="dismissCurrentEvent()">Закрити подію</button>
+                </div>
+            </div>
+            
+            <!-- Історія подій -->
+            <div class="events-history">
+                <h3 class="events-history-title">Історія подій</h3>
+                <div id="events" class="events-list">
+                    <p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -459,11 +509,18 @@
 
     // Кімнату створено
     connection.on("RoomCreated", function (data) {
-        console.log("Room created:", data);
+        console.log("[RoomCreated] Received:", data);
         currentRoom = data.room;
         myPlayerData = data.player;
         isHost = data.isHost;
         myConnectionId = data.player.connectionId;
+        
+        // Повертаємо кнопку до нормального стану
+        const btn = document.getElementById('createRoomBtn');
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Створити кімнату';
+        }
         
         // Зберігаємо сесію в localStorage
         saveSession(currentRoom.id, myPlayerData.name);
@@ -479,6 +536,7 @@
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
+        renderMyCards(); // Показуємо спеціальні карти
         addEventMessage(`Ви створили кімнату <span class="event-room">${currentRoom.name}</span>`);
     });
 
@@ -511,6 +569,7 @@
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
+        renderMyCards(); // Показуємо спеціальні карти
         addEventMessage(`Ви приєднались до кімнати <span class="event-room">${currentRoom.name}</span>`);
     });
 
@@ -587,6 +646,10 @@
         document.getElementById('currentRoomState').classList.add('state-playing');
         document.getElementById('startGameBtn').style.display = 'none';
         
+        // Ініціалізуємо таблицю спецкарт
+        activatedCardsTable = {};
+        updateActivatedCardsTable();
+        
         // Показуємо GM секції для хоста
         if (isHost) {
             document.getElementById('gmScenarioSection').style.display = 'block';
@@ -624,8 +687,15 @@
             if (!roomPlayers[info.connectionId].revealedData) {
                 roomPlayers[info.connectionId].revealedData = {};
             }
+            if (!roomPlayers[info.connectionId].revealedTooltips) {
+                roomPlayers[info.connectionId].revealedTooltips = {};
+            }
             roomPlayers[info.connectionId].revealed[charKey] = true;
             roomPlayers[info.connectionId].revealedData[charKey] = info.data.value;
+            // Зберігаємо tooltip якщо є
+            if (info.data.tooltip && info.data.hasTooltip) {
+                roomPlayers[info.connectionId].revealedTooltips[charKey] = info.data.tooltip;
+            }
         }
         
         // Оновлюємо свої картки якщо це я
@@ -636,6 +706,10 @@
         }
         
         updatePlayersTable();
+        // Реініціалізуємо tooltip після оновлення DOM
+        if (typeof initMobileTooltips === 'function') {
+            setTimeout(initMobileTooltips, 100);
+        }
         addEventMessage(`<span class="event-player">${info.playerName}</span> розкрив: <span class="revealed-label">${info.data.label}</span>`);
     });
 
@@ -868,6 +942,11 @@
     // Карта активована (для всіх)
     connection.on("CardActivated", function (data) {
         console.log("Card activated:", data);
+        // Додаємо в таблицю активованих спецкарт
+        addActivatedCard(data.connectionId || data.playerConnectionId, {
+            name: data.cardName || data.card?.name,
+            rarity: data.cardRarity || data.card?.rarity || 'common'
+        });
         addEventMessage(`<span class="event-card">🃏</span> ${data.playerName} активував карту <span class="card-name">${data.cardName}</span>`);
     });
 
@@ -919,6 +998,24 @@
         console.log("Game event:", data);
         var typeClass = 'event-' + data.type;
         addEventMessage(`<span class="${typeClass}"><strong>[Подія ${data.timestamp}]</strong> ${data.text}</span>`);
+    });
+
+    // Нова подія з ефектом (показується всім)
+    connection.on("NewGameEvent", function (eventData) {
+        console.log("New game event:", eventData);
+        showCurrentEvent(eventData);
+        addEventToHistory(`<strong>${eventData.name || eventData.Name}</strong>: ${eventData.description || eventData.Description}`, 'game');
+    });
+
+    // Ефект події застосовано
+    connection.on("EventEffectApplied", function (data) {
+        console.log("Event effect applied:", data);
+        // Оновлюємо бункер якщо потрібно
+        if (data.bunker) {
+            currentBunker = data.bunker;
+            renderBunker(data.bunker);
+        }
+        addEventToHistory(`<span class="event-special">Застосовано ефект: ${data.effectDescription}</span>`, 'special');
     });
 
     // ==================== VOTING SIGNALR HANDLERS ====================
@@ -987,11 +1084,51 @@
         addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
     });
 
+    // ==================== CONNECTION STATUS UI ====================
+    
+    function updateConnectionStatus(status, isError = false) {
+        const statusEl = document.getElementById('connectionStatus');
+        const createBtn = document.getElementById('createRoomBtn');
+        if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.style.color = isError ? 'var(--color-red)' : 'var(--color-green)';
+            statusEl.textContent = status;
+            // Ховаємо статус через 3 секунди якщо успішно
+            if (!isError) {
+                setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+            }
+        }
+        if (createBtn) {
+            createBtn.disabled = isError;
+            createBtn.style.opacity = isError ? '0.5' : '1';
+        }
+    }
+
+    // ==================== BUTTON EVENT BINDING ====================
+    
+    // Прив'язуємо подію до кнопки створення кімнати після завантаження DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        if (createRoomBtn) {
+            createRoomBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('[CreateRoom] Button clicked');
+                createRoom();
+            });
+        }
+        
+        // Ініціалізація tooltip для мобільних
+        initMobileTooltips();
+    });
+
     // Підключення
     connection.start()
         .then(() => {
-            console.log("SignalR connected");
+            console.log("SignalR connected, connectionId:", connection.connectionId);
             myConnectionId = connection.connectionId;
+            
+            updateConnectionStatus("✓ Підключено до сервера");
             
             // Спроба перепідключення до існуючої сесії
             if (!tryRejoin()) {
@@ -1005,8 +1142,27 @@
         })
         .catch(err => {
             console.error("Connection error:", err);
+            updateConnectionStatus("✗ Помилка підключення. Оновіть сторінку.", true);
             addEventMessage("Помилка підключення до сервера");
         });
+    
+    // Обробка перепідключення
+    connection.onreconnecting(err => {
+        console.log("SignalR reconnecting...", err);
+        updateConnectionStatus("⟳ Перепідключення...", false);
+    });
+    
+    connection.onreconnected(connectionId => {
+        console.log("SignalR reconnected, connectionId:", connectionId);
+        myConnectionId = connectionId;
+        updateConnectionStatus("✓ Перепідключено");
+        connection.invoke("GetRooms");
+    });
+    
+    connection.onclose(err => {
+        console.log("SignalR connection closed", err);
+        updateConnectionStatus("✗ З'єднання втрачено. Оновіть сторінку.", true);
+    });
 
     // ==================== SESSION & PROFILE FUNCTIONS ====================
 
@@ -1136,57 +1292,154 @@
 
     // ==================== MOBILE TOOLTIPS ====================
     
-    // Відкрити/закрити тултіп по кліку (для мобільних)
+    // Ініціалізація tooltip для мобільних
+    function initMobileTooltips() {
+        console.log('[Tooltip] Initializing mobile tooltips');
+    }
+    
+    // Глобальний обробник для всіх кліків - працює і для динамічно створених елементів
     document.addEventListener('click', function(e) {
         const trigger = e.target.closest('.tooltip-trigger');
+        
         if (trigger) {
             e.preventDefault();
             e.stopPropagation();
-            // Закриваємо всі інші відкриті тултіпи
+            
+            const wasActive = trigger.classList.contains('active');
+            
+            // Закриваємо всі інші тултіпи
             document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
-                if (t !== trigger) t.classList.remove('active');
+                t.classList.remove('active');
             });
-            trigger.classList.toggle('active');
+            
+            // Закриваємо мобільний оверлей
+            closeMobileTooltipOverlay();
+            
+            if (!wasActive) {
+                // На мобільних показуємо модальний оверлей
+                if (isMobileDevice()) {
+                    showMobileTooltipOverlay(trigger);
+                } else {
+                    trigger.classList.add('active');
+                }
+            }
             return;
         }
-        // Клік поза тултіпом — закрити всі
-        document.querySelectorAll('.tooltip-trigger.active').forEach(t => t.classList.remove('active'));
-    });
+        
+        // Клік поза тултіпом - закрити всі
+        if (!e.target.closest('.tooltip-content') && !e.target.closest('.mobile-tooltip-overlay')) {
+            document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
+                t.classList.remove('active');
+            });
+            closeMobileTooltipOverlay();
+        }
+    }, true);
+    
+    // Touch events для мобільних
+    document.addEventListener('touchend', function(e) {
+        const trigger = e.target.closest('.tooltip-trigger');
+        if (trigger) {
+            e.preventDefault();
+            // Імітуємо клік
+            trigger.click();
+        }
+    }, { passive: false });
+    
+    function isMobileDevice() {
+        return window.innerWidth <= 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    }
+    
+    function showMobileTooltipOverlay(trigger) {
+        // Видаляємо старий оверлей якщо є
+        closeMobileTooltipOverlay();
+        
+        const tooltipContent = trigger.nextElementSibling;
+        if (!tooltipContent || !tooltipContent.classList.contains('tooltip-content')) return;
+        
+        const tooltipText = tooltipContent.textContent || tooltipContent.innerText;
+        
+        // Створюємо мобільний оверлей
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-tooltip-overlay';
+        overlay.innerHTML = `
+            <div class="mobile-tooltip-backdrop"></div>
+            <div class="mobile-tooltip-card">
+                <div class="mobile-tooltip-content">${tooltipText}</div>
+                <button class="mobile-tooltip-close" onclick="closeMobileTooltipOverlay()">Закрити</button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Закриття по кліку на backdrop
+        overlay.querySelector('.mobile-tooltip-backdrop').addEventListener('click', closeMobileTooltipOverlay);
+    }
+    
+    function closeMobileTooltipOverlay() {
+        const overlay = document.querySelector('.mobile-tooltip-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
 
     // ==================== ROOM FUNCTIONS ====================
 
     function createRoom() {
+        console.log('[CreateRoom] Function called');
+        
         const playerName = document.getElementById('playerNameCreate').value.trim();
         const roomName = document.getElementById('roomName').value.trim();
         const maxPlayers = parseInt(document.getElementById('maxPlayers').value) || 12;
         const password = document.getElementById('roomPassword').value || null;
+        const btn = document.getElementById('createRoomBtn');
         
+        // Валідація
         if (!playerName) {
             alert("Введіть ваше ім'я");
+            document.getElementById('playerNameCreate').focus();
             return;
         }
         
         if (!roomName) {
             alert("Введіть назву кімнати");
+            document.getElementById('roomName').focus();
             return;
         }
         
         // Перевіряємо стан з'єднання
+        console.log('[CreateRoom] Connection state:', connection.state);
         if (connection.state !== signalR.HubConnectionState.Connected) {
-            alert("З'єднання з сервером ще не встановлено. Зачекайте кілька секунд і спробуйте знову.");
+            updateConnectionStatus("✗ Немає з'єднання. Зачекайте...", true);
+            // Спробуємо перепідключитися
+            connection.start().then(() => {
+                updateConnectionStatus("✓ Перепідключено. Спробуйте знову.");
+            }).catch(err => {
+                updateConnectionStatus("✗ Не вдалося підключитися. Оновіть сторінку.", true);
+            });
             return;
         }
         
-        try {
-            connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password)
-                .catch(function(err) {
-                    console.error("CreateRoom error:", err);
-                    alert("Помилка створення кімнати: " + (err.message || err));
-                });
-        } catch (e) {
-            console.error("CreateRoom invoke failed:", e);
-            alert("Не вдалося створити кімнату. Перевірте з'єднання з сервером.");
+        // Блокуємо кнопку на час запиту
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Створення...';
         }
+        
+        console.log('[CreateRoom] Invoking CreateRoom with:', { roomName, playerName, maxPlayers, hasPassword: !!password });
+        
+        connection.invoke("CreateRoom", roomName, playerName, maxPlayers, password)
+            .then(() => {
+                console.log('[CreateRoom] Invoke successful');
+            })
+            .catch(function(err) {
+                console.error("[CreateRoom] Error:", err);
+                alert("Помилка створення кімнати: " + (err.message || err));
+                // Повертаємо кнопку
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Створити кімнату';
+                }
+            });
     }
 
     function joinRoom(roomId, hasPassword) {
@@ -1519,32 +1772,48 @@
 
     function renderMyCards() {
         const container = document.getElementById('myCardsSection');
-        if (!container || !myPlayerData || !myPlayerData.cards) {
-            if (container) container.innerHTML = '<p style="color: var(--color-text-muted);">Немає карт</p>';
+        console.log('[renderMyCards] myPlayerData:', myPlayerData);
+        
+        if (!container) {
+            console.log('[renderMyCards] Container not found');
             return;
         }
-
-        const cards = myPlayerData.cards;
+        
+        if (!myPlayerData) {
+            console.log('[renderMyCards] No player data');
+            container.innerHTML = '<p style="color: var(--color-text-muted);">Немає даних гравця</p>';
+            return;
+        }
+        
+        // Підтримка обох варіантів: cards та Cards (через різну серіалізацію)
+        const cards = myPlayerData.cards || myPlayerData.Cards || [];
+        console.log('[renderMyCards] Cards:', cards);
+        
         if (cards.length === 0) {
             container.innerHTML = '<p style="color: var(--color-text-muted);">Немає карт</p>';
             return;
         }
 
         container.innerHTML = cards.map(card => {
-            const rarityClass = `rarity-${card.rarity}`;
-            const stateClass = `state-${card.state.toLowerCase()}`;
-            const isUsable = card.state === 'Available';
+            const rarityClass = `rarity-${card.rarity || card.Rarity || 'common'}`;
+            const state = card.state || card.State || 'Available';
+            const stateClass = `state-${state.toLowerCase()}`;
+            const isUsable = state === 'Available';
+            const cardId = card.id || card.Id;
+            const cardName = card.name || card.Name || 'Карта';
+            const cardDesc = card.description || card.Description || '';
+            const cardRarity = card.rarity || card.Rarity || 'common';
             
             return `
                 <div class="special-card ${rarityClass} ${stateClass}">
                     <div class="card-header">
-                        <span class="card-name">${card.name}</span>
-                        <span class="card-rarity">${getRarityLabel(card.rarity)}</span>
+                        <span class="card-name">${cardName}</span>
+                        <span class="card-rarity">${getRarityLabel(cardRarity)}</span>
                     </div>
-                    <p class="card-description">${card.description}</p>
+                    <p class="card-description">${cardDesc}</p>
                     <div class="card-footer">
-                        <span class="card-state">${getCardStateLabel(card.state)}</span>
-                        ${isUsable ? `<button class="btn-use-card" onclick="openUseCardModal('${card.id}')">Використати</button>` : ''}
+                        <span class="card-state">${getCardStateLabel(state)}</span>
+                        ${isUsable ? `<button class="btn-use-card" onclick="openUseCardModal('${cardId}')">Використати</button>` : ''}
                     </div>
                 </div>
             `;
@@ -1649,6 +1918,190 @@
             .catch(err => console.error("RejectCard error:", err));
         
         document.getElementById('cardApprovalModal').style.display = 'none';
+    }
+
+    // ==================== ACTIVATED SPECIAL CARDS TABLE ====================
+    
+    // Зберігання активованих карт по гравцях
+    let activatedCardsTable = {};
+    
+    function updateActivatedCardsTable() {
+        const tbody = document.getElementById('specialCardsTableBody');
+        const section = document.getElementById('specialCardsTableSection');
+        
+        if (!tbody) return;
+        
+        const players = Object.values(roomPlayers);
+        if (players.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
+                Ще ніхто не активував спецкарти
+            </td></tr>`;
+            return;
+        }
+        
+        let hasActivatedCards = false;
+        let html = '';
+        
+        players.forEach((player, index) => {
+            const playerCards = activatedCardsTable[player.connectionId] || [];
+            const card1 = playerCards[0];
+            const card2 = playerCards[1];
+            
+            if (card1 || card2) hasActivatedCards = true;
+            
+            const isMe = player.connectionId === myConnectionId;
+            
+            html += `
+                <tr class="${isMe ? 'my-player-row' : ''}">
+                    <td>${index + 1}</td>
+                    <td>
+                        ${player.name}
+                        ${isMe ? '<span class="my-badge">Ви</span>' : ''}
+                        ${player.isHost ? '<span class="host-badge-small">GM</span>' : ''}
+                    </td>
+                    <td>${card1 ? renderActivatedCardBadge(card1) : '<span class="char-hidden">—</span>'}</td>
+                    <td>${card2 ? renderActivatedCardBadge(card2) : '<span class="char-hidden">—</span>'}</td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html || `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
+            Ще ніхто не активував спецкарти
+        </td></tr>`;
+        
+        // Показуємо секцію якщо є активовані карти
+        if (section) {
+            section.style.display = hasActivatedCards ? 'block' : 'none';
+        }
+    }
+    
+    function renderActivatedCardBadge(card) {
+        const rarity = card.rarity || card.Rarity || 'common';
+        const name = card.name || card.Name || 'Карта';
+        return `<span class="activated-card-badge rarity-${rarity}">${name}</span>`;
+    }
+    
+    function addActivatedCard(connectionId, card) {
+        if (!activatedCardsTable[connectionId]) {
+            activatedCardsTable[connectionId] = [];
+        }
+        // Максимум 2 карти на гравця в таблиці
+        if (activatedCardsTable[connectionId].length < 2) {
+            activatedCardsTable[connectionId].push(card);
+        }
+        updateActivatedCardsTable();
+    }
+
+    // ==================== EVENTS SYSTEM ====================
+    
+    let currentEvent = null;
+    let eventsHistory = [];
+    
+    function showCurrentEvent(event) {
+        currentEvent = event;
+        
+        const panel = document.getElementById('currentEventPanel');
+        const content = document.getElementById('currentEventContent');
+        const effectSection = document.getElementById('currentEventEffect');
+        const effectText = document.getElementById('currentEventEffectText');
+        const timeEl = document.getElementById('currentEventTime');
+        const hostControls = document.getElementById('eventHostControls');
+        
+        if (!panel || !content) return;
+        
+        content.innerHTML = `
+            <h3 style="margin-bottom: 0.5rem; color: var(--color-gold);">${event.name || event.Name || 'Подія'}</h3>
+            <p>${event.description || event.Description || ''}</p>
+        `;
+        
+        if (event.effect || event.Effect) {
+            const effect = event.effect || event.Effect;
+            effectSection.style.display = 'block';
+            effectText.textContent = formatEventEffect(effect);
+        } else {
+            effectSection.style.display = 'none';
+        }
+        
+        timeEl.textContent = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+        
+        // Показуємо кнопки керування тільки для ведучого
+        hostControls.style.display = isHost ? 'flex' : 'none';
+        
+        panel.style.display = 'block';
+    }
+    
+    function formatEventEffect(effect) {
+        if (typeof effect === 'string') return effect;
+        
+        // Якщо це об'єкт з полями
+        if (effect.type && effect.value) {
+            const effectTypes = {
+                'addFood': `Додати ${effect.value} місяців їжі`,
+                'removeFood': `Забрати ${effect.value} місяців їжі`,
+                'addSpace': `Додати ${effect.value} місць`,
+                'removeSpace': `Забрати ${effect.value} місць`,
+                'addTime': `Додати ${effect.value} місяців часу`,
+                'removeTime': `Забрати ${effect.value} місяців часу`,
+                'custom': effect.description || effect.value
+            };
+            return effectTypes[effect.type] || JSON.stringify(effect);
+        }
+        
+        return JSON.stringify(effect);
+    }
+    
+    function applyCurrentEventEffect() {
+        if (!currentEvent || !isHost) return;
+        
+        if (confirm('Застосувати ефект події?')) {
+            connection.invoke("ApplyEventEffect", currentEvent.id || currentEvent.Id)
+                .then(() => {
+                    addEventMessage(`<span class="event-special">Ведучий застосував ефект події: ${currentEvent.name || currentEvent.Name}</span>`);
+                    dismissCurrentEvent();
+                })
+                .catch(err => {
+                    console.error("ApplyEventEffect error:", err);
+                    alert("Помилка застосування ефекту: " + err.message);
+                });
+        }
+    }
+    
+    function dismissCurrentEvent() {
+        if (!currentEvent) return;
+        
+        // Додаємо в історію
+        eventsHistory.unshift({
+            ...currentEvent,
+            dismissedAt: new Date()
+        });
+        
+        currentEvent = null;
+        document.getElementById('currentEventPanel').style.display = 'none';
+    }
+    
+    function addEventToHistory(event, type = 'game') {
+        const eventsContainer = document.getElementById('events');
+        if (!eventsContainer) return;
+        
+        // Прибираємо placeholder якщо є
+        const placeholder = eventsContainer.querySelector('p');
+        if (placeholder) placeholder.remove();
+        
+        const time = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+        
+        const eventItem = document.createElement('div');
+        eventItem.className = `event-item event-type-${type}`;
+        eventItem.innerHTML = `
+            <span class="event-time">${time}</span>
+            <span class="event-text">${event}</span>
+        `;
+        
+        eventsContainer.insertBefore(eventItem, eventsContainer.firstChild);
+        
+        // Обмежуємо кількість подій у списку
+        while (eventsContainer.children.length > 50) {
+            eventsContainer.removeChild(eventsContainer.lastChild);
+        }
     }
 
     // ==================== GAME MASTER FUNCTIONS ====================
@@ -1980,7 +2433,8 @@
                 <td>${renderTableCell(player, 'secret')}</td>
                 <td>${renderTableCell(player, 'secretGoal')}</td>
             </tr>
-        `).join('');
+         `;
+        }).join('');
         
         document.getElementById('playerCount').textContent = `${players.length}/${currentRoom?.maxPlayers || 12}`;
     }
@@ -1989,9 +2443,34 @@
         const revealed = player.revealed && player.revealed[charKey];
         if (revealed) {
             const value = player.revealedData && player.revealedData[charKey] ? player.revealedData[charKey] : 'Розкрито';
+            // Додаємо tooltip якщо є
+            const tooltipData = player.revealedTooltips && player.revealedTooltips[charKey];
+            if (tooltipData) {
+                const typeClass = getTooltipTypeClass(charKey);
+                return `<div class="char-revealed">
+                    <span class="characteristic-with-tooltip">
+                        <span>${value}</span>
+                        <span class="tooltip-trigger ${typeClass}">!</span>
+                        <div class="tooltip-content">${tooltipData}</div>
+                    </span>
+                </div>`;
+            }
             return `<div class="char-revealed">${value}</div>`;
         }
         return `<span class="char-hidden">Приховано</span>`;
+    }
+    
+    function getTooltipTypeClass(charKey) {
+        const typeClasses = {
+            'profession': 'profession',
+            'physicalHealth': 'physical',
+            'mentalHealth': 'mental',
+            'hobby': 'hobby',
+            'phobia': 'phobia',
+            'traits': 'trait',
+            'secretGoal': 'secret-goal'
+        };
+        return typeClasses[charKey] || '';
     }
 
     // Helper для типу таємної цілі

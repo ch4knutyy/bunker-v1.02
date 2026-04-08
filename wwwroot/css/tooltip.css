@@ -26,6 +26,8 @@
     transition: all 0.2s ease;
     flex-shrink: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .tooltip-trigger:hover {
@@ -33,12 +35,19 @@
     box-shadow: 0 2px 6px rgba(255, 107, 53, 0.4);
 }
 
+/* Активний стан для мобільних */
+.tooltip-trigger.active {
+    transform: scale(1.2);
+    box-shadow: 0 3px 10px rgba(255, 107, 53, 0.5);
+}
+
 /* Варіанти кольорів для різних типів характеристик */
 .tooltip-trigger.profession {
     background: linear-gradient(135deg, #4a90d9, #357abd);
 }
 
-.tooltip-trigger.profession:hover {
+.tooltip-trigger.profession:hover,
+.tooltip-trigger.profession.active {
     box-shadow: 0 2px 6px rgba(74, 144, 217, 0.4);
 }
 
@@ -46,7 +55,8 @@
     background: linear-gradient(135deg, #27ae60, #219a52);
 }
 
-.tooltip-trigger.hobby:hover {
+.tooltip-trigger.hobby:hover,
+.tooltip-trigger.hobby.active {
     box-shadow: 0 2px 6px rgba(39, 174, 96, 0.4);
 }
 
@@ -54,7 +64,8 @@
     background: linear-gradient(135deg, #9b59b6, #8e44ad);
 }
 
-.tooltip-trigger.mental:hover {
+.tooltip-trigger.mental:hover,
+.tooltip-trigger.mental.active {
     box-shadow: 0 2px 6px rgba(155, 89, 182, 0.4);
 }
 
@@ -62,7 +73,8 @@
     background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
 
-.tooltip-trigger.physical:hover {
+.tooltip-trigger.physical:hover,
+.tooltip-trigger.physical.active {
     box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
 }
 
@@ -70,7 +82,8 @@
     background: linear-gradient(135deg, #f39c12, #d68910);
 }
 
-.tooltip-trigger.trait:hover {
+.tooltip-trigger.trait:hover,
+.tooltip-trigger.trait.active {
     box-shadow: 0 2px 6px rgba(243, 156, 18, 0.4);
 }
 
@@ -78,7 +91,8 @@
     background: linear-gradient(135deg, #e91e63, #c2185b);
 }
 
-.tooltip-trigger.secret-goal:hover {
+.tooltip-trigger.secret-goal:hover,
+.tooltip-trigger.secret-goal.active {
     box-shadow: 0 2px 6px rgba(233, 30, 99, 0.4);
 }
 
@@ -86,7 +100,8 @@
     background: linear-gradient(135deg, #607d8b, #455a64);
 }
 
-.tooltip-trigger.phobia:hover {
+.tooltip-trigger.phobia:hover,
+.tooltip-trigger.phobia.active {
     box-shadow: 0 2px 6px rgba(96, 125, 139, 0.4);
 }
 
@@ -99,7 +114,7 @@
     min-width: 200px;
     max-width: 300px;
     padding: 10px 14px;
-    background: rgba(30, 30, 30, 0.95);
+    background: rgba(30, 30, 30, 0.98);
     color: #f0f0f0;
     font-size: 13px;
     line-height: 1.5;
@@ -121,12 +136,19 @@
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: rgba(30, 30, 30, 0.95);
+    border-top-color: rgba(30, 30, 30, 0.98);
 }
 
-/* Показ tooltip при наведенні */
+/* Показ tooltip при наведенні (ПК) */
 .tooltip-trigger:hover + .tooltip-content,
 .tooltip-content:hover {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Показ tooltip при активному стані (мобільні) */
+.tooltip-trigger.active + .tooltip-content {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -142,13 +164,14 @@
     top: auto;
     bottom: 100%;
     border-top-color: transparent;
-    border-bottom-color: rgba(30, 30, 30, 0.95);
+    border-bottom-color: rgba(30, 30, 30, 0.98);
 }
 
 /* Альтернативне позиціонування (праворуч) */
 .tooltip-content.right {
     bottom: auto;
-    left: calc(100% + 8px);
+    left: auto;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
 }
@@ -159,7 +182,25 @@
     top: 50%;
     transform: translateY(-50%);
     border-top-color: transparent;
-    border-right-color: rgba(30, 30, 30, 0.95);
+    border-right-color: rgba(30, 30, 30, 0.98);
+}
+
+/* Альтернативне позиціонування (ліворуч) */
+.tooltip-content.left {
+    bottom: auto;
+    left: 0;
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.tooltip-content.left::after {
+    left: 100%;
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top-color: transparent;
+    border-left-color: rgba(30, 30, 30, 0.98);
 }
 
 /* ================================================== */
@@ -228,14 +269,15 @@
 }
 
 /* ================================================== */
-/* АДАПТИВНІСТЬ                                      */
+/* МОБІЛЬНА АДАПТИВНІСТЬ TOOLTIP                     */
 /* ================================================== */
 
 @media (max-width: 768px) {
     .tooltip-content {
         min-width: 180px;
-        max-width: 250px;
+        max-width: 280px;
         font-size: 12px;
+        padding: 12px 16px;
     }
     
     .characteristic-label {
@@ -246,6 +288,96 @@
     .characteristic-value {
         font-size: 13px;
     }
+    
+    /* Збільшуємо зону натискання для мобільних */
+    .tooltip-trigger {
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tooltip-content {
+        min-width: 260px;
+        max-width: calc(100vw - 40px);
+        font-size: 13px;
+    }
+}
+
+/* ================================================== */
+/* МОБІЛЬНИЙ TOOLTIP OVERLAY                         */
+/* ================================================== */
+
+.mobile-tooltip-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.mobile-tooltip-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.mobile-tooltip-card {
+    position: relative;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 320px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.mobile-tooltip-content {
+    color: #f0f0f0;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.mobile-tooltip-close {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, #d89b2b, #ff9500);
+    border: none;
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-tooltip-close:hover {
+    background: linear-gradient(135deg, #ff9500, #d89b2b);
+    transform: translateY(-1px);
 }
 
 /* ================================================== */
