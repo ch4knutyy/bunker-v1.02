@@ -28,7 +28,7 @@ namespace Bunker
         /// <summary>
         /// Створити нову кімнату
         /// </summary>
-        public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null)
+        public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null, string? stablePlayerId = null)
         {
             if (string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(playerName))
             {
@@ -44,6 +44,7 @@ namespace Bunker
                 // Генеруємо персонажа для хоста
                 var player = _generator.Generate(playerName);
                 player.ConnectionId = Context.ConnectionId;
+                player.StablePlayerId = stablePlayerId ?? "";
                 
                 // Генеруємо спеціальні карти
                 player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
@@ -83,22 +84,36 @@ namespace Bunker
         /// <summary>
         /// Приєднатися до кімнати
         /// </summary>
-        public async Task JoinRoom(string roomId, string playerName, string? password = null)
+        public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null)
         {
             if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "ID кімнати та ім'я гравця обов'язкові");
                 return;
             }
+            
+            // Спочатку перевіряємо чи гравець з таким stablePlayerId вже в кімнаті
+            var room = _roomService.GetRoom(roomId);
+            if (room != null && !string.IsNullOrEmpty(stablePlayerId))
+            {
+                var existingPlayer = room.Players.Values.FirstOrDefault(p => p.StablePlayerId == stablePlayerId);
+                if (existingPlayer != null)
+                {
+                    // Це reconnect - викликаємо RejoinRoom
+                    await RejoinRoom(roomId, playerName, stablePlayerId);
+                    return;
+                }
+            }
 
             // Генеруємо персонажа
             var player = _generator.Generate(playerName);
             player.ConnectionId = Context.ConnectionId;
+            player.StablePlayerId = stablePlayerId ?? "";
             
             // Генеруємо спеціальні карти
             player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
 
-            var (success, error, room) = _roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
+            var (success, error, joinedroom) = _roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
 
             if (!success || room == null)
             {
@@ -181,7 +196,7 @@ namespace Bunker
         /// <summary>
         /// Спроба повторного приєднання після перезавантаження сторінки
         /// </summary>
-        public async Task RejoinRoom(string roomId, string playerName)
+        public async Task RejoinRoom(string roomId, string playerName, string? stablePlayerId = null)
         {
             if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
             {
@@ -191,7 +206,7 @@ namespace Bunker
 
             try
             {
-                var (success, error, room, player, wasHost) = _roomService.RejoinRoom(roomId, Context.ConnectionId, playerName);
+                var (success, error, room, player, wasHost) = _roomService.RejoinRoom(roomId, Context.ConnectionId, playerName, stablePlayerId);
 
                 if (!success || room == null || player == null)
                 {
@@ -217,7 +232,9 @@ namespace Bunker
                         connectionId = p.ConnectionId,
                         isHost = room.IsHost(p.ConnectionId),
                         revealed = p.Revealed,
-                        isEliminated = p.IsEliminated
+                        revealedValues = p.Revealed.RevealedValues,
+                        isEliminated = p.IsEliminated,
+                        seatNumber = p.SeatNumber
                     })
                 });
 
@@ -485,6 +502,27 @@ namespace Bunker
 
         private void SetCharacteristicRevealed(Player player, string characteristicName)
         {
+            // Зберігаємо реальне значення для reconnect
+            var data = GetRevealedDataForCharacteristic(player, characteristicName);
+            if (data != null)
+            {
+                // Конвертуємо в RevealedData
+                var revealedData = new RevealedData();
+                var dataType = data.GetType();
+                
+                var valueProp = dataType.GetProperty("value");
+                var labelProp = dataType.GetProperty("label");
+                var tooltipProp = dataType.GetProperty("tooltip");
+                var hasTooltipProp = dataType.GetProperty("hasTooltip");
+                
+                if (valueProp != null) revealedData.Value = valueProp.GetValue(data)?.ToString() ?? "";
+                if (labelProp != null) revealedData.Label = labelProp.GetValue(data)?.ToString() ?? "";
+                if (tooltipProp != null) revealedData.Tooltip = tooltipProp.GetValue(data)?.ToString();
+                if (hasTooltipProp != null) revealedData.HasTooltip = (bool)(hasTooltipProp.GetValue(data) ?? false);
+                
+                player.Revealed.RevealedValues[characteristicName] = revealedData;
+            }
+            
             switch (characteristicName)
             {
                 case "Personality": player.Revealed.Personality = true; break;

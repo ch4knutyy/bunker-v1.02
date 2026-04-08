@@ -1,72 +1,57 @@
 # Bunker Online - Product Requirements Document
 
 ## Original Problem Statement
-Гравець повідомив про проблеми:
-1. Кнопка "Створити кімнату" перезавантажує сторінку
-2. Tooltip не працює на мобільних телефонах
-3. Розкриті характеристики показують "Розкрито" замість реальних значень
-4. Спеціальні карти не показуються
-
-## Architecture
-- **Backend**: ASP.NET Core with SignalR
-- **Frontend**: Razor Views with vanilla JavaScript
-- **Real-time**: SignalR Hub (`/gameHub`)
-- **Data**: JSON files in `/wwwroot/data/`
+Основні баги:
+1. Після F5 гравець отримує новий connectionId, втрачає місце
+2. Розкриті характеристики показують "Розкрито" замість реальних значень
+3. Спеціальні карти не відображаються
 
 ## What's Been Implemented
 
-### Session 1: Bug Fixes & Features
+### Session 2: Reconnect & Revealed Data Fixes
 
-#### 1. Fixed Room Creation Button
-- Event listener via `DOMContentLoaded`
-- Connection status UI
-- Better error handling
+#### 1. Stable Player ID (Client)
+- Added `getOrCreatePlayerId()` - generates UUID stored in localStorage
+- `stablePlayerId` passed to CreateRoom, JoinRoom, RejoinRoom
+- Survives browser refresh
 
-#### 2. Fixed Mobile Tooltip (Complete Rewrite)
-- Mobile overlay system (`showMobileTooltipOverlay()`)
-- Touch event handling
-- Modal-like display with backdrop
-- "Закрити" button
+#### 2. Player Model Update (Server)
+- Added `StablePlayerId` property to Player.cs
+- RoomService.RejoinRoom searches by StablePlayerId first, then by name
+- SeatNumber explicitly preserved during reconnect
 
-#### 3. Fixed Special Cards Display
-- Added `renderMyCards()` calls to handlers
-- Support for both PascalCase/camelCase
-- Added full CSS for cards
+#### 3. RevealedCharacteristics Model Update
+- Added `RevealedValues` dictionary to store actual values
+- Added `RevealedData` class with Value, Tooltip, HasTooltip, Label
+- SetCharacteristicRevealed() now saves values to dictionary
 
-#### 4. Added Activated Special Cards Table
-- New HTML section with table
-- JavaScript functions: `updateActivatedCardsTable()`, `addActivatedCard()`
-- SignalR integration via `CardActivated` handler
-- Updated GameHub to send `connectionId` and `cardRarity`
+#### 4. GameHub Updates
+- CreateRoom, JoinRoom accept stablePlayerId parameter
+- JoinRoom checks for existing player with same stablePlayerId (auto-reconnect)
+- RejoinRoom accepts stablePlayerId
+- RejoinSuccess sends revealedValues with actual data
 
-#### 5. Enhanced Events System
-- New current event panel with effect preview
-- Host controls: "Застосувати ефект" / "Закрити подію"
-- Events history with timestamps
-- New SignalR handlers: `NewGameEvent`, `EventEffectApplied`
-- New GameHub methods: `ApplyEventEffect()`, `TriggerNewEvent()`
-
-#### 6. Added Voting CSS
-- Full voting section styles
-- Candidate cards
-- Results visualization
+#### 5. Client RejoinSuccess Handler
+- Processes revealedValues from server
+- Converts to revealedData/revealedTooltips for renderTableCell
+- Maintains seatNumber after reconnect
 
 ## Files Changed
-- `/Views/Home/Index.cshtml` - HTML + JavaScript
-- `/wwwroot/css/site.css` - CSS for cards, events, voting
-- `/wwwroot/css/tooltip.css` - Mobile tooltip overlay
-- `/GameHub.cs` - New methods for events
+- `/Models/Player.cs` - Added StablePlayerId
+- `/Models/RevealedCharacteristics.cs` - Added RevealedValues dictionary
+- `/Service/RoomService.cs` - Updated RejoinRoom for stablePlayerId
+- `/GameHub.cs` - Updated CreateRoom, JoinRoom, RejoinRoom, SetCharacteristicRevealed
+- `/Views/Home/Index.cshtml` - getOrCreatePlayerId, RejoinSuccess handler
+
+## Testing Instructions
+1. Create room, note your seat number
+2. Start game, reveal some characteristics
+3. Press F5 (refresh page)
+4. Should:
+   - Keep same seat number
+   - Show actual revealed values (not "Розкрито")
+   - Show special cards
 
 ## Remaining Tasks
-
-### P1 (High)
-- [ ] GM role restrictions (can't see hidden characteristics)
-- [ ] Test all features
-
-### P2 (Medium)
-- [ ] Better error messages
-- [ ] Loading states
-
-### P3 (Low)
-- [ ] UI polish
-- [ ] Animation improvements
+- Test all reconnect scenarios
+- Test special cards activation flow
