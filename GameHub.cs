@@ -949,6 +949,65 @@ namespace Bunker
         }
 
         /// <summary>
+        /// Застосувати ефект події (тільки хост)
+        /// </summary>
+        public async Task ApplyEventEffect(string eventId)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може застосовувати ефекти подій");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null) return;
+
+            // Тут можна додати логіку для конкретних ефектів
+            // Наприклад, зміна ресурсів бункера
+            string effectDescription = "Ефект застосовано";
+            
+            // Приклад: якщо eventId містить інформацію про ефект
+            // Можна розширити цю логіку для різних типів ефектів
+            
+            await Clients.Group(room.Id).SendAsync("EventEffectApplied", new
+            {
+                eventId = eventId,
+                effectDescription = effectDescription,
+                bunker = room.Bunker?.ToClientInfo()
+            });
+
+            _logger.LogInformation($"Ефект події {eventId} застосовано в кімнаті {room.Name}");
+        }
+
+        /// <summary>
+        /// Відправити нову подію з ефектом всім гравцям
+        /// </summary>
+        public async Task TriggerNewEvent(string eventName, string eventDescription, string effectType = null, int? effectValue = null)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може створювати події");
+                return;
+            }
+
+            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
+            if (roomId == null) return;
+
+            var eventData = new
+            {
+                id = Guid.NewGuid().ToString(),
+                name = eventName,
+                description = eventDescription,
+                effect = effectType != null ? new { type = effectType, value = effectValue } : null,
+                createdAt = DateTime.UtcNow
+            };
+
+            await Clients.Group(roomId).SendAsync("NewGameEvent", eventData);
+
+            _logger.LogInformation($"Нова подія '{eventName}' створена в кімнаті {roomId}");
+        }
+
+        /// <summary>
         /// Елімінувати гравця (тільки хост)
         /// </summary>
         public async Task EliminatePlayer(string targetConnectionId)
@@ -1522,11 +1581,13 @@ namespace Bunker
                 result = resultMessage
             });
             
-            // Повідомляємо всіх про використання карти
+            // Повідомляємо всіх про використання карти (включаючи дані для таблиці)
             await Clients.Group(roomId).SendAsync("CardActivated", new
             {
                 playerName = player.Name,
+                connectionId = player.ConnectionId,
                 cardName = card.Name,
+                cardRarity = card.Rarity,
                 result = resultMessage
             });
         }
