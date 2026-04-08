@@ -75,9 +75,22 @@
 ---
 
 ## Upcoming Tasks (Prioritized):
-- **P2**: Randomize player seat numbers after game start
 - **P2**: Per-Player Characteristic Generation History
 - **P2**: Profile Filters (dark, meme, etc.)
+
+---
+
+## RANDOMIZE SEAT NUMBERS (2026-02-XX) ✅
+
+### Backend:
+- `Player.SeatNumber` — нове поле (int, default 0)
+- `StartGame()` — Fisher-Yates shuffle для рандомізації місць 1..N серед усіх гравців
+- `GameStarted` SignalR event тепер включає `seatNumber` для кожного гравця
+
+### Frontend:
+- `GameStarted` handler зберігає `seatNumber` в `roomPlayers`
+- `updatePlayersTable()` сортує гравців за `seatNumber` та показує `#N` замість порядку вступу
+- `renderRoomPlayers()` також сортує за `seatNumber` (якщо призначено)
 
 ---
 

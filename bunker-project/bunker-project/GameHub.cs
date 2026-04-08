@@ -269,6 +269,20 @@ namespace Bunker
                 room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
             }
 
+            // Рандомізація номерів місць гравців
+            var seatNumbers = Enumerable.Range(1, room.PlayerCount).ToList();
+            // Fisher-Yates shuffle
+            for (int i = seatNumbers.Count - 1; i > 0; i--)
+            {
+                int j = _random.Next(i + 1);
+                (seatNumbers[i], seatNumbers[j]) = (seatNumbers[j], seatNumbers[i]);
+            }
+            int seatIdx = 0;
+            foreach (var p in room.Players.Values)
+            {
+                p.SeatNumber = seatNumbers[seatIdx++];
+            }
+
             // Відправляємо всім в кімнаті сигнал про початок гри
             await Clients.Group(roomId).SendAsync("GameStarted", new
             {
@@ -281,7 +295,8 @@ namespace Bunker
                 {
                     name = p.Name,
                     connectionId = p.ConnectionId,
-                    isEliminated = p.IsEliminated
+                    isEliminated = p.IsEliminated,
+                    seatNumber = p.SeatNumber
                 })
             });
 

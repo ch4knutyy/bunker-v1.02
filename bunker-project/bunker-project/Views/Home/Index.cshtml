@@ -571,6 +571,15 @@
         currentApocalypse = data.apocalypse;
         currentBunker = data.bunker;
         
+        // Оновлюємо seatNumber для кожного гравця
+        if (data.players) {
+            data.players.forEach(function(p) {
+                if (roomPlayers[p.connectionId]) {
+                    roomPlayers[p.connectionId].seatNumber = p.seatNumber;
+                }
+            });
+        }
+        
         document.getElementById('roomLobby').style.display = 'none';
         document.getElementById('gameSection').style.display = 'block';
         document.getElementById('myPlayerSection').style.display = 'block';
@@ -1902,14 +1911,19 @@
         const container = document.getElementById('roomPlayersList');
         const players = Object.values(roomPlayers);
         
-        container.innerHTML = players.map((p, i) => `
+        // Сортуємо за seatNumber якщо є (після старту гри)
+        players.sort(function(a, b) { return (a.seatNumber || 999) - (b.seatNumber || 999); });
+        
+        container.innerHTML = players.map((p, i) => {
+            var seatLabel = p.seatNumber ? '#' + p.seatNumber : '#' + (i + 1);
+            return `
             <div class="room-player-card ${p.connectionId === myConnectionId ? 'my-player' : ''} ${p.isHost ? 'host-player' : ''}">
-                <span class="player-number">#${i + 1}</span>
+                <span class="player-number">${seatLabel}</span>
                 <span class="player-name">${p.name}</span>
                 ${p.isHost ? '<span class="host-badge">Хост</span>' : ''}
                 ${p.connectionId === myConnectionId ? '<span class="you-badge">Ви</span>' : ''}
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     }
 
     function toCamelCase(str) {
@@ -1925,9 +1939,14 @@
             return;
         }
         
-        tbody.innerHTML = players.map((player, index) => `
+        // Сортуємо за номером місця (якщо призначено)
+        players.sort(function(a, b) { return (a.seatNumber || 999) - (b.seatNumber || 999); });
+        
+        tbody.innerHTML = players.map((player, index) => {
+            var seatLabel = player.seatNumber ? '#' + player.seatNumber : '#' + (index + 1);
+            return `
             <tr class="${player.connectionId === myConnectionId ? 'my-player-row' : ''}" data-player="${player.connectionId}">
-                <td class="player-number">#${index + 1}</td>
+                <td class="player-number">${seatLabel}</td>
                 <td class="player-name">${player.name}${player.connectionId === myConnectionId ? ' <span class="my-badge">(Я)</span>' : ''}${player.isHost ? ' <span class="host-badge-small">Хост</span>' : ''}</td>
                 <td>${renderTableCell(player, 'personality')}</td>
                 <td>${renderTableCell(player, 'body')}</td>
