@@ -25,18 +25,31 @@ namespace Bunker.Services
             try
             {
                 var filePath = Path.Combine(_env.WebRootPath, "data", "special_cards.json");
+                _logger.LogInformation($"[CardService] Loading cards from: {filePath}");
+                _logger.LogInformation($"[CardService] WebRootPath: {_env.WebRootPath}");
+                
                 if (File.Exists(filePath))
                 {
                     var json = File.ReadAllText(filePath);
+                    _logger.LogInformation($"[CardService] JSON length: {json.Length}");
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var root = JsonSerializer.Deserialize<CardsRoot>(json, options);
                     _cardTemplates = root?.Cards ?? new();
-                    _logger.LogInformation($"Завантажено {_cardTemplates.Count} шаблонів карт");
+                    _logger.LogInformation($"[CardService] Loaded {_cardTemplates.Count} card templates");
+                    
+                    foreach (var t in _cardTemplates.Take(3))
+                    {
+                        _logger.LogInformation($"[CardService] Sample template: {t.Name} ({t.Rarity})");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"[CardService] File not found: {filePath}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Помилка завантаження шаблонів карт");
+                _logger.LogError(ex, "[CardService] Error loading card templates");
             }
         }
 
@@ -46,6 +59,15 @@ namespace Bunker.Services
         public List<SpecialCard> GenerateCardsForPlayer(string connectionId, int count = 2)
         {
             var cards = new List<SpecialCard>();
+            
+            _logger.LogInformation($"[CardService] GenerateCardsForPlayer: templates={_cardTemplates.Count}, requested={count}");
+            
+            if (_cardTemplates.Count == 0)
+            {
+                _logger.LogWarning("[CardService] No card templates loaded! Reloading...");
+                LoadCardTemplates();
+            }
+            
             var availableTemplates = _cardTemplates.ToList();
             
             // Зважений вибір по рідкості
@@ -56,11 +78,11 @@ namespace Bunker.Services
                 {
                     var card = CreateCardFromTemplate(template, connectionId);
                     cards.Add(card);
-                    // Можна видалити шаблон щоб не було дублікатів
-                    // availableTemplates.Remove(template);
+                    _logger.LogInformation($"[CardService] Generated card: {card.Name} ({card.Rarity})");
                 }
             }
             
+            _logger.LogInformation($"[CardService] Total cards generated: {cards.Count}");
             return cards;
         }
 
@@ -123,13 +145,15 @@ namespace Bunker.Services
         /// </summary>
         public CardTemplate? GetTemplate(string templateId)
         {
-            return _cardTemplates.FirstOrDefault(t => t.Id == templateId);
-        }
+            if (!int.TryParse(templateId, out var id))
+                return null;
 
-        /// <summary>
-        /// Отримати всі шаблони карт
-        /// </summary>
-        public IReadOnlyList<CardTemplate> GetAllTemplates() => _cardTemplates.AsReadOnly();
+            return _cardTemplates.FirstOrDefault(t => t.Id == id);
+        }
+		/// <summary>
+		/// Отримати всі шаблони карт
+		/// </summary>
+		public IReadOnlyList<CardTemplate> GetAllTemplates() => _cardTemplates.AsReadOnly();
 
         /// <summary>
         /// Створити карту з шаблону
