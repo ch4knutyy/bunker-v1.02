@@ -8,6 +8,7 @@
 		public string Rarity { get; set; } = "common";
 		public string PlayerName { get; set; } = "";
 		public string? TargetPlayerId { get; set; }
+		public string Description { get; set; } = "";
 		public string? TargetPlayerName { get; set; }
 		public string? TargetCharacteristic { get; set; }
 		public string ConnectionId { get; set; } = "";

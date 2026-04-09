@@ -656,11 +656,29 @@
         document.getElementById('startGameBtn').style.display = 'none';
         
         // Ініціалізуємо таблицю спецкарт
-        function renderActivatedCardBadge(card) {
-            const rarity = card?.rarity || card?.Rarity || 'common';
-            const name = card?.name || card?.Name || 'Карта';
-            return `<span class="activated-card-badge rarity-${rarity}">${name}</span>`;
-        }
+function renderActivatedCardBadge(card) {
+    const rarity = card?.rarity || 'common';
+    const name = card?.name || 'Карта';
+    const description = card?.description || 'Без опису';
+
+    return `
+        <span class="activated-card-badge rarity-${rarity} card-badge-tooltip">
+            <span class="card-badge-text">${escapeHtml(name)}</span>
+            <span class="card-badge-icon">!</span>
+            <span class="card-badge-tooltip-box">${escapeHtml(description)}</span>
+        </span>
+    `;
+}
+
+function escapeHtml(text) {
+    if (text == null) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
         updateActivatedCardsTable();
         console.log("[updateActivatedCardsTable] roomPlayers keys:", Object.keys(roomPlayers || {}));
         console.log("[updateActivatedCardsTable] activatedCardsTable keys:", Object.keys(activatedCardsTable || {}));
@@ -884,6 +902,7 @@ connection.on("RejoinSuccess", function (data) {
             cardId: card.cardId || card.CardId || '',
             name: card.name || card.Name || card.cardName || card.CardName || '',
             rarity: card.rarity || card.Rarity || 'common',
+            description: card.description || card.Description || card.cardDescription || card.CardDescription || '',
             playerId: card.playerId || card.PlayerId || card.connectionId || card.ConnectionId || '',
             playerName: card.playerName || card.PlayerName || '',
             targetPlayerId: card.targetPlayerId || card.TargetPlayerId || null,
@@ -917,7 +936,8 @@ connection.on("RejoinSuccess", function (data) {
         if (activatedCardsTable[connectionId].length < 2) {
             activatedCardsTable[connectionId].push({
                 name: card.name || 'Карта',
-                rarity: card.rarity || 'common'
+                rarity: card.rarity || 'common',
+                description: card.description || ''
             });
         }
     });
@@ -1052,14 +1072,13 @@ connection.on("RejoinSuccess", function (data) {
     // Карта активована (для всіх)
 connection.on("CardActivated", function (data) {
     console.log("=== CardActivated START ===");
-    console.log("[CardActivated] raw data:", data);
-    console.log("[CardActivated] roomPlayers BEFORE:", roomPlayers);
-    console.log("[CardActivated] activatedCardsTable BEFORE:", activatedCardsTable);
 
     const connectionId = data.connectionId || data.playerConnectionId;
+
     const normalizedCard = {
         name: data.cardName || data.card?.name || data.name || "Карта",
-        rarity: data.cardRarity || data.card?.rarity || data.rarity || "common"
+        rarity: data.cardRarity || data.card?.rarity || data.rarity || "common",
+        description: data.cardDescription || data.card?.description || data.description || ""
     };
 
     console.log("[CardActivated] resolved connectionId:", connectionId);
@@ -1110,7 +1129,8 @@ connection.on("CardActivated", function (data) {
 
     const normalizedCard = {
         name: card.name || card.cardName || "Карта",
-        rarity: card.rarity || card.cardRarity || "common"
+        rarity: card.rarity || card.cardRarity || "common",
+        description: card.description || card.cardDescription || ""
     };
 
     if (activatedCardsTable[connectionId].length < 2) {

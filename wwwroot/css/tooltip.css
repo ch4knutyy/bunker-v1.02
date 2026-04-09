@@ -233,6 +233,75 @@
     font-size: 14px;
 }
 
+
+.activated-card-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Приклади рідкості */
+.rarity-common {
+    background: linear-gradient(135deg, #5f6b7a, #3f4955);
+}
+
+.rarity-rare {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.rarity-epic {
+    background: linear-gradient(135deg, #a855f7, #6d28d9);
+}
+
+.rarity-legendary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.custom-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    min-width: 220px;
+    max-width: 320px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(18, 24, 38, 0.97);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: normal;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+    .custom-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: rgba(18, 24, 38, 0.97);
+    }
+.tooltip-trigger:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
 /* Ступінь тяжкості */
 .severity-badge {
     display: inline-block;
