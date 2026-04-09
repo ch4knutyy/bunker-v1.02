@@ -833,63 +833,152 @@ function registerSignalREvents() {
     // Гра почалась
     connection.off("GameStarted");
     connection.on("GameStarted", function (data) {
-        console.log("Game started:", data);
+        console.log("=== GAME STARTED ===");
+        console.log("[GameStarted] Raw data:", data);
+        console.log("[GameStarted] data.roomState:", data.roomState);
+        console.log("[GameStarted] data.apocalypse:", data.apocalypse);
+        console.log("[GameStarted] data.bunker:", data.bunker);
+        console.log("[GameStarted] data.players:", data.players);
 
         isStartingGame = false;
+        console.log("[GameStarted] Reset isStartingGame = false");
 
+        // Normalize room state (handle both camelCase and PascalCase)
+        const roomState = data.roomState || data.RoomState || "Playing";
+        
         if (currentRoom) {
-            currentRoom.state = data.roomState;
+            currentRoom.state = roomState;
+            console.log("[GameStarted] Updated currentRoom.state:", currentRoom.state);
         }
 
-        currentApocalypse = data.apocalypse;
-        currentBunker = data.bunker;
+        // Normalize apocalypse (handle both camelCase and PascalCase)
+        const apocalypse = data.apocalypse || data.Apocalypse;
+        currentApocalypse = apocalypse ? {
+            id: apocalypse.id || apocalypse.Id,
+            name: apocalypse.name || apocalypse.Name || 'Невідомо',
+            description: apocalypse.description || apocalypse.Description || '',
+            severity: apocalypse.severity || apocalypse.Severity || 'medium',
+            survivalChance: apocalypse.survivalChance ?? apocalypse.SurvivalChance ?? 50,
+            duration: apocalypse.duration || apocalypse.Duration || '',
+            threats: apocalypse.threats || apocalypse.Threats || [],
+            requirements: apocalypse.requirements || apocalypse.Requirements || []
+        } : null;
+        console.log("[GameStarted] Normalized apocalypse:", currentApocalypse);
 
-        if (data.players) {
-            data.players.forEach(function (p) {
-                if (roomPlayers[p.connectionId]) {
-                    roomPlayers[p.connectionId].seatNumber = p.seatNumber;
-                }
-            });
+        // Normalize bunker (handle both camelCase and PascalCase)
+        const bunker = data.bunker || data.Bunker;
+        currentBunker = bunker ? {
+            id: bunker.id || bunker.Id,
+            name: bunker.name || bunker.Name || 'Невідомо',
+            description: bunker.description || bunker.Description || '',
+            capacity: bunker.capacity ?? bunker.Capacity ?? 6,
+            location: bunker.location || bunker.Location || '',
+            suppliesMonths: bunker.suppliesMonths ?? bunker.SuppliesMonths ?? 12,
+            facilities: bunker.facilities || bunker.Facilities || [],
+            resources: bunker.resources || bunker.Resources || [],
+            problems: bunker.problems || bunker.Problems || [],
+            condition: bunker.condition || bunker.Condition || 'good'
+        } : null;
+        console.log("[GameStarted] Normalized bunker:", currentBunker);
+
+        // Update players with seat numbers
+        const players = data.players || data.Players || [];
+        console.log("[GameStarted] Players to update:", players);
+        
+        players.forEach(function (p) {
+            const connId = p.connectionId || p.ConnectionId;
+            const seatNum = p.seatNumber ?? p.SeatNumber ?? 0;
+            
+            if (roomPlayers[connId]) {
+                roomPlayers[connId].seatNumber = seatNum;
+                roomPlayers[connId].isEliminated = p.isEliminated ?? p.IsEliminated ?? false;
+                console.log(`[GameStarted] Updated player ${connId} seat: ${seatNum}`);
+            }
+        });
+
+        // Update UI visibility
+        console.log("[GameStarted] Updating UI visibility...");
+        
+        const roomLobby = document.getElementById('roomLobby');
+        const gameSection = document.getElementById('gameSection');
+        const myPlayerSection = document.getElementById('myPlayerSection');
+        const currentRoomState = document.getElementById('currentRoomState');
+        
+        if (roomLobby) {
+            roomLobby.style.display = 'none';
+            console.log("[GameStarted] roomLobby hidden");
         }
-
-        document.getElementById('roomLobby').style.display = 'none';
-        document.getElementById('gameSection').style.display = 'block';
-        document.getElementById('myPlayerSection').style.display = 'block';
-        document.getElementById('currentRoomState').textContent = 'Гра';
-        document.getElementById('currentRoomState').classList.add('state-playing');
+        if (gameSection) {
+            gameSection.style.display = 'block';
+            console.log("[GameStarted] gameSection shown");
+        }
+        if (myPlayerSection) {
+            myPlayerSection.style.display = 'block';
+            console.log("[GameStarted] myPlayerSection shown");
+        }
+        if (currentRoomState) {
+            currentRoomState.textContent = 'Гра';
+            currentRoomState.classList.add('state-playing');
+            console.log("[GameStarted] currentRoomState updated");
+        }
 
         const startBtn = document.getElementById('startGameBtn');
         if (startBtn) {
             startBtn.style.display = 'none';
             startBtn.disabled = true;
             startBtn.style.pointerEvents = 'none';
+            console.log("[GameStarted] startBtn hidden");
         }
 
+        // Update activated cards table
+        console.log("[GameStarted] Calling updateActivatedCardsTable...");
         updateActivatedCardsTable();
 
+        // Show GM sections for host
         if (isHost) {
-            document.getElementById('gmScenarioSection').style.display = 'block';
-            document.getElementById('gmEventsSection').style.display = 'block';
+            console.log("[GameStarted] Host mode - showing GM sections");
+            const gmScenarioSection = document.getElementById('gmScenarioSection');
+            const gmEventsSection = document.getElementById('gmEventsSection');
+            
+            if (gmScenarioSection) {
+                gmScenarioSection.style.display = 'block';
+            }
+            if (gmEventsSection) {
+                gmEventsSection.style.display = 'block';
+            }
 
-            if (data.bunker) {
-                currentBunkerCapacity = data.bunker.capacity;
-                document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+            if (currentBunker) {
+                currentBunkerCapacity = currentBunker.capacity;
+                const gmBunkerCapacity = document.getElementById('gmBunkerCapacity');
+                if (gmBunkerCapacity) {
+                    gmBunkerCapacity.textContent = currentBunker.capacity;
+                }
             }
         }
 
-        renderApocalypse(data.apocalypse);
-        renderBunker(data.bunker);
+        // Render apocalypse and bunker
+        console.log("[GameStarted] Rendering apocalypse...");
+        renderApocalypse(currentApocalypse);
+        
+        console.log("[GameStarted] Rendering bunker...");
+        renderBunker(currentBunker);
+        
+        console.log("[GameStarted] Updating players table...");
         updatePlayersTable();
 
-        addEventMessage(`Гра почалась! Раунд ${data.currentRound}`);
+        // Add event messages
+        const currentRound = data.currentRound || data.CurrentRound || 1;
+        addEventMessage(`Гра почалась! Раунд ${currentRound}`);
 
-        if (data.apocalypse) {
-            addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${data.apocalypse.name}`);
+        if (currentApocalypse && currentApocalypse.name) {
+            addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${currentApocalypse.name}`);
         }
 
-        if (data.bunker) {
-            addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${data.bunker.name}`);
+        if (currentBunker && currentBunker.name) {
+            addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${currentBunker.name}`);
         }
+
+        console.log("=== GAME STARTED END ===");
     });
 
     // Характеристику розкрито
@@ -1506,20 +1595,34 @@ function registerSignalREvents() {
 let isStartingGame = false;
 
 function startGame() {
-    if (isStartingGame) return;
-    if (!confirm("Почати гру?")) return;
+    console.log("[startGame] Called, isStartingGame:", isStartingGame);
+    
+    if (isStartingGame) {
+        console.log("[startGame] Already starting, returning");
+        return;
+    }
+    if (!confirm("Почати гру?")) {
+        console.log("[startGame] User cancelled");
+        return;
+    }
 
     isStartingGame = true;
+    console.log("[startGame] Set isStartingGame = true");
 
     const btn = document.getElementById("startGameBtn");
     if (btn) {
         btn.disabled = true;
         btn.style.pointerEvents = "none";
+        console.log("[startGame] Button disabled");
     }
 
+    console.log("[startGame] Invoking StartGame on server...");
     connection.invoke("StartGame")
+        .then(() => {
+            console.log("[startGame] Invoke successful, waiting for GameStarted event...");
+        })
         .catch(err => {
-            console.error("StartGame error:", err);
+            console.error("[startGame] Invoke error:", err);
             isStartingGame = false;
 
             if (btn) {
