@@ -13,15 +13,17 @@ namespace Bunker
         private readonly RoomService _roomService;
         private readonly CardService _cardService;
         private readonly GameDataService _gameData;
+        private readonly ScenarioImageService _imageService;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, CardService cardService, GameDataService gameData, ILogger<GameHub> logger)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, CardService cardService, GameDataService gameData, ScenarioImageService imageService, ILogger<GameHub> logger)
         {
             _generator = generator;
             _roomService = roomService;
             _cardService = cardService;
             _gameData = gameData;
+            _imageService = imageService;
             _logger = logger;
         }
 
@@ -32,9 +34,19 @@ namespace Bunker
 		/// </summary>
 		public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null, string? stablePlayerId = null)
 		{
+			// Validate and sanitize inputs
+			roomName = roomName?.Trim() ?? "";
+			playerName = SanitizePlayerName(playerName);
+			
 			if (string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(playerName))
 			{
 				await Clients.Caller.SendAsync("ReceiveError", "Назва кімнати та ім'я гравця обов'язкові");
+				return;
+			}
+			
+			if (playerName.Length > 10)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "Ім'я гравця не може перевищувати 10 символів");
 				return;
 			}
 
@@ -86,9 +98,19 @@ namespace Bunker
 
 		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null)
 		{
+			// Validate and sanitize inputs
+			roomId = roomId?.Trim() ?? "";
+			playerName = SanitizePlayerName(playerName);
+			
 			if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
 			{
 				await Clients.Caller.SendAsync("ReceiveError", "ID кімнати та ім'я гравця обов'язкові");
+				return;
+			}
+			
+			if (playerName.Length > 10)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "Ім'я гравця не може перевищувати 10 символів");
 				return;
 			}
 
@@ -249,6 +271,9 @@ namespace Bunker
 					);
 				}
 
+				// Оновлюємо URL зображень з кешу
+				_imageService.UpdateApocalypseImageUrl(room.Apocalypse);
+				_imageService.UpdateBunkerImageUrl(room.Bunker);
 
 				await Clients.Caller.SendAsync("RejoinSuccess", new
 				{
@@ -322,11 +347,15 @@ namespace Bunker
             if (_gameData.Apocalypses.Count > 0)
             {
                 room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
+                // Оновлюємо URL зображення з кешу
+                _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
             }
             
             if (_gameData.Bunkers.Count > 0)
             {
                 room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
+                // Оновлюємо URL зображення з кешу
+                _imageService.UpdateBunkerImageUrl(room.Bunker);
             }
 
             // Рандомізація номерів місць гравців
@@ -1058,6 +1087,78 @@ namespace Bunker
             });
 
             _logger.LogInformation($"Ефект події {eventId} застосовано в кімнаті {room.Name}");
+        }
+
+        /// <summary>
+        /// Додати випадкову кількість запасів до бункера (тільки хост)
+        /// </summary>
+        public async Task AddBunkerSupplies()
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може додавати запаси");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null) return;
+
+            if (room.Bunker == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
+                return;
+            }
+
+            // Генеруємо випадкову кількість місяців 1-12
+            int addedMonths = _random.Next(1, 13);
+            
+            // Додаємо до поточних запасів
+            room.Bunker.SuppliesMonths += addedMonths;
+
+            _logger.LogInformation($"GM додав {addedMonths} місяців запасів до бункера в кімнаті {room.Name}. Всього: {room.Bunker.SuppliesMonths}");
+
+            // Надсилаємо оновлення всім гравцям
+            await Clients.Group(room.Id).SendAsync("BunkerSuppliesAdded", new
+            {
+                addedMonths = addedMonths,
+                totalSuppliesMonths = room.Bunker.SuppliesMonths,
+                bunker = room.Bunker.ToClientInfo()
+            });
+        }
+
+        /// <summary>
+        /// Зменшити запаси бункера (тільки хост)
+        /// </summary>
+        public async Task RemoveBunkerSupplies(int months)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати запаси");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null) return;
+
+            if (room.Bunker == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
+                return;
+            }
+
+            // Забираємо місяці (мінімум 0)
+            int removedMonths = Math.Min(months, room.Bunker.SuppliesMonths);
+            room.Bunker.SuppliesMonths = Math.Max(0, room.Bunker.SuppliesMonths - months);
+
+            _logger.LogInformation($"GM зняв {removedMonths} місяців запасів з бункера в кімнаті {room.Name}. Залишилось: {room.Bunker.SuppliesMonths}");
+
+            // Надсилаємо оновлення всім гравцям
+            await Clients.Group(room.Id).SendAsync("BunkerSuppliesRemoved", new
+            {
+                removedMonths = removedMonths,
+                totalSuppliesMonths = room.Bunker.SuppliesMonths,
+                bunker = room.Bunker.ToClientInfo()
+            });
         }
 
         /// <summary>
@@ -2057,6 +2158,28 @@ namespace Bunker
             }
 
             await base.OnDisconnectedAsync(exception);
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Sanitize and validate player name
+        /// </summary>
+        private string SanitizePlayerName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "";
+            
+            // Trim whitespace
+            name = name.Trim();
+            
+            // Limit to 10 characters
+            if (name.Length > 10)
+                name = name.Substring(0, 10);
+            
+            return name;
         }
 
         #endregion

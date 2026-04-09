@@ -15,7 +15,7 @@
             <div class="create-room-panel">
                 <h2 class="section-title">Створити кімнату</h2>
                 <div class="create-room-form">
-                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." />
+                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
                     <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." />
                     <div class="form-row">
                         <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
@@ -119,8 +119,28 @@
                     <!-- Характеристики -->
                     <div class="gm-characteristics">
                         <div class="gm-char-item">
+                            <span class="gm-char-name">Особистість:</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
+                            <div class="gm-char-actions">
+                                <button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
+                                <button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Статура:</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
+                            <div class="gm-char-actions">
+                                <button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
+                                <button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
                             <span class="gm-char-name">Професія:</span>
-                            <span class="gm-char-value" id="gmProfession">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
@@ -130,7 +150,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Фіз. здоров'я:</span>
-                            <span class="gm-char-value" id="gmPhysicalHealth">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
@@ -140,7 +160,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Псих. здоров'я:</span>
-                            <span class="gm-char-value" id="gmMentalHealth">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
@@ -150,7 +170,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Хобі:</span>
-                            <span class="gm-char-value" id="gmHobby">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
@@ -160,7 +180,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Риса характеру:</span>
-                            <span class="gm-char-value" id="gmCharacterTrait">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
@@ -170,7 +190,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Фобія:</span>
-                            <span class="gm-char-value" id="gmPhobia">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
@@ -180,7 +200,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Особливості:</span>
-                            <span class="gm-char-value" id="gmTraits">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmTraits">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Traits')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Traits')" title="Редагувати">✏️</button>
@@ -190,7 +210,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Секрет:</span>
-                            <span class="gm-char-value" id="gmSecret">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmSecret">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Secret')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Secret')" title="Редагувати">✏️</button>
@@ -200,7 +220,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Таємна ціль:</span>
-                            <span class="gm-char-value" id="gmSecretGoal">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmSecretGoal">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('SecretGoal')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('SecretGoal')" title="Редагувати">✏️</button>
@@ -246,7 +266,7 @@
                     </div>
                     <div class="gm-quick-events">
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Землетрус! Частина бункера пошкоджена.', 'catastrophe')">Землетрус</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Знайдено додаткові запаси!', 'success')">Запаси</button>
+                        <button class="btn-gm-quick" onclick="addBunkerSupplies()">Запаси</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Загроза зараження! Потрібна дезінфекція.', 'warning')">Зараження</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Зовнішні виживальці просять допомоги.', 'info')">Виживальці</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Генератор зламався! Світла немає.', 'danger')">Генератор</button>
@@ -272,6 +292,13 @@
 
         <!-- Players Table Section (під час гри) -->
         <div id="gameSection" style="display: none;">
+            <!-- Section Header for Apocalypse & Bunker -->
+            <div class="scenario-section-header">
+                <div class="section-header-line"></div>
+                <h2 class="section-header-title">🎭 Бункер та Апокаліпсис</h2>
+                <div class="section-header-line"></div>
+            </div>
+            
             <!-- Apocalypse & Bunker Info -->
             <div class="game-info-panels">
                 <div class="apocalypse-panel" id="apocalypsePanel">
@@ -387,7 +414,7 @@
     <div class="modal-content">
         <h3>Приєднатися до кімнати</h3>
         <div>
-            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." />
+            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
             <input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
             <input type="hidden" id="joinRoomId" />
             <div class="modal-actions">
@@ -538,6 +565,110 @@ connection.start()
             .replace(/'/g, '&#039;');
     }
 
+    // Normalize player data from server (PascalCase) to client (camelCase)
+    function normalizePlayer(player) {
+        if (!player) return null;
+        
+        console.log('[normalizePlayer] Input:', player);
+        
+        // Helper to get value from either camelCase or PascalCase
+        function get(obj, camel, pascal) {
+            return obj?.[camel] ?? obj?.[pascal] ?? null;
+        }
+        
+        // Helper to normalize a simple object with name/tooltip
+        function normalizeSimple(obj, camelKey, pascalKey) {
+            const source = obj?.[camelKey] || obj?.[pascalKey];
+            if (!source) return { name: null, tooltip: null };
+            return {
+                name: source.name ?? source.Name ?? null,
+                tooltip: source.tooltip ?? source.Tooltip ?? null
+            };
+        }
+        
+        const normalized = {
+            name: player.name ?? player.Name ?? 'Гравець',
+            connectionId: player.connectionId ?? player.ConnectionId ?? null,
+            isHost: player.isHost ?? player.IsHost ?? false,
+            isEliminated: player.isEliminated ?? player.IsEliminated ?? false,
+            seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
+            revealed: player.revealed ?? player.Revealed ?? {},
+            
+            // Personality
+            personality: {
+                age: get(player.personality || player.Personality, 'age', 'Age') ?? 25,
+                sex: get(player.personality || player.Personality, 'sex', 'Sex') ?? 'Невизначено',
+                sexOrientation: get(player.personality || player.Personality, 'sexOrientation', 'SexOrientation') ?? 'Невизначено',
+                isChildfree: get(player.personality || player.Personality, 'isChildfree', 'IsChildfree') ?? false
+            },
+            
+            // Body
+            body: {
+                height: get(player.body || player.Body, 'height', 'Height') ?? 170,
+                weight: get(player.body || player.Body, 'weight', 'Weight') ?? 70,
+                bodyType: get(player.body || player.Body, 'bodyType', 'BodyType') ?? 'Звичайний'
+            },
+            
+            // Profession
+            profession: (() => {
+                const src = player.profession || player.Profession || {};
+                return {
+                    name: src.name ?? src.Name ?? 'Безробітний',
+                    tooltip: src.tooltip ?? src.Tooltip ?? null,
+                    experienceYears: src.experienceYears ?? src.ExperienceYears ?? 0,
+                    selectedItem: src.selectedItem ?? src.SelectedItem ?? null
+                };
+            })(),
+            
+            // Health
+            physicalHealth: normalizeSimple(player, 'physicalHealth', 'PhysicalHealth'),
+            mentalHealth: normalizeSimple(player, 'mentalHealth', 'MentalHealth'),
+            
+            // Other characteristics
+            hobby: normalizeSimple(player, 'hobby', 'Hobby'),
+            characterTrait: normalizeSimple(player, 'characterTrait', 'CharacterTrait'),
+            phobia: normalizeSimple(player, 'phobia', 'Phobia'),
+            traits: normalizeSimple(player, 'traits', 'Traits'),
+            secret: normalizeSimple(player, 'secret', 'Secret'),
+            
+            // Secret goal
+            secretGoal: (() => {
+                const src = player.secretGoal || player.SecretGoal || {};
+                return {
+                    goal: src.goal ?? src.Goal ?? 'Вижити',
+                    type: src.type ?? src.Type ?? null,
+                    tooltip: src.tooltip ?? src.Tooltip ?? null
+                };
+            })(),
+            
+            // Inventory
+            inventory: (() => {
+                const src = player.inventory || player.Inventory || {};
+                const items = src.items ?? src.Items ?? [];
+                return {
+                    items: items.map(item => ({
+                        name: item.name ?? item.Name ?? 'Предмет',
+                        description: item.description ?? item.Description ?? ''
+                    }))
+                };
+            })(),
+            
+            // Cards
+            cards: (player.cards || player.Cards || []).map(card => ({
+                id: card.id ?? card.Id ?? null,
+                name: card.name ?? card.Name ?? 'Карта',
+                description: card.description ?? card.Description ?? '',
+                rarity: card.rarity ?? card.Rarity ?? 'common',
+                effectType: card.effectType ?? card.EffectType ?? null,
+                effectValue: card.effectValue ?? card.EffectValue ?? null,
+                state: card.state ?? card.State ?? 'Available'
+            }))
+        };
+        
+        console.log('[normalizePlayer] Output:', normalized);
+        return normalized;
+    }
+
     // Render activated card badge with tooltip
     function renderActivatedCardBadge(card) {
         const rarity = card?.rarity || "common";
@@ -568,18 +699,21 @@ function registerSignalREvents() {
         console.log("[RoomCreated] Received:", data);
         console.log("[RoomCreated] Player cards:", data.player.cards || data.player.Cards);
 
-        currentRoom = data.room;
-        myPlayerData = data.player;
-        isHost = data.isHost;
-        myConnectionId = data.player.connectionId;
+        currentRoom = data.room || data.Room;
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        isHost = data.isHost ?? data.IsHost ?? true;
+        myConnectionId = myPlayerData.connectionId;
 
         if (currentRoom) {
-            currentRoom.state = currentRoom.state || "Lobby";
+            currentRoom.state = currentRoom.state || currentRoom.State || "Lobby";
+            currentRoom.name = currentRoom.name || currentRoom.Name || "Кімната";
+            currentRoom.id = currentRoom.id || currentRoom.Id;
+            currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
 
-        if (myPlayerData) {
-            myPlayerData.cards = myPlayerData.cards || myPlayerData.Cards || [];
-        }
+        console.log("[RoomCreated] Normalized myPlayerData:", myPlayerData);
+        console.log("[RoomCreated] myConnectionId:", myConnectionId);
+        console.log("[RoomCreated] isHost:", isHost);
 
         const btn = document.getElementById('createRoomBtn');
         if (btn) {
@@ -601,6 +735,8 @@ function registerSignalREvents() {
             seatNumber: 1
         };
 
+        console.log("[RoomCreated] roomPlayers:", roomPlayers);
+
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
@@ -613,12 +749,23 @@ function registerSignalREvents() {
     // Приєднались до кімнати
     connection.off("RoomJoined");
     connection.on("RoomJoined", function (data) {
-        console.log("Joined room:", data);
-        console.log("[RoomJoined] Player cards:", data.player.cards || data.player.Cards);
-        currentRoom = data.room;
-        myPlayerData = data.player;
-        isHost = data.isHost;
-        myConnectionId = data.player.connectionId;
+        console.log("[RoomJoined] Received:", data);
+        console.log("[RoomJoined] Player cards:", data.player?.cards || data.player?.Cards);
+        
+        currentRoom = data.room || data.Room;
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        isHost = data.isHost ?? data.IsHost ?? false;
+        myConnectionId = myPlayerData.connectionId;
+        
+        if (currentRoom) {
+            currentRoom.state = currentRoom.state || currentRoom.State || "Lobby";
+            currentRoom.name = currentRoom.name || currentRoom.Name || "Кімната";
+            currentRoom.id = currentRoom.id || currentRoom.Id;
+            currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
+        }
+        
+        console.log("[RoomJoined] Normalized myPlayerData:", myPlayerData);
+        console.log("[RoomJoined] myConnectionId:", myConnectionId);
         
         // Закриваємо модалку join якщо була відкрита
         pendingJoinRoomId = null;
@@ -628,20 +775,24 @@ function registerSignalREvents() {
         saveSession(currentRoom.id, myPlayerData.name);
         
         roomPlayers = {};
-        data.players.forEach(p => {
-            roomPlayers[p.connectionId] = {
-                name: p.name,
-                connectionId: p.connectionId,
-                isHost: p.isHost,
-                revealed: p.revealed || {},
+        const players = data.players || data.Players || [];
+        players.forEach(p => {
+            const connId = p.connectionId || p.ConnectionId;
+            roomPlayers[connId] = {
+                name: p.name || p.Name,
+                connectionId: connId,
+                isHost: p.isHost ?? p.IsHost ?? false,
+                revealed: p.revealed || p.Revealed || {},
                 revealedData: {}
             };
         });
         
+        console.log("[RoomJoined] roomPlayers:", roomPlayers);
+        
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
-        renderMyCards(); // Показуємо спеціальні карти
+        renderMyCards();
         addEventMessage(`Ви приєднались до кімнати <span class="event-room">${currentRoom.name}</span>`);
     });
 
@@ -709,63 +860,154 @@ function registerSignalREvents() {
     // Гра почалась
     connection.off("GameStarted");
     connection.on("GameStarted", function (data) {
-        console.log("Game started:", data);
+        console.log("=== GAME STARTED ===");
+        console.log("[GameStarted] Raw data:", data);
+        console.log("[GameStarted] data.roomState:", data.roomState);
+        console.log("[GameStarted] data.apocalypse:", data.apocalypse);
+        console.log("[GameStarted] data.bunker:", data.bunker);
+        console.log("[GameStarted] data.players:", data.players);
 
         isStartingGame = false;
+        console.log("[GameStarted] Reset isStartingGame = false");
 
+        // Normalize room state (handle both camelCase and PascalCase)
+        const roomState = data.roomState || data.RoomState || "Playing";
+        
         if (currentRoom) {
-            currentRoom.state = data.roomState;
+            currentRoom.state = roomState;
+            console.log("[GameStarted] Updated currentRoom.state:", currentRoom.state);
         }
 
-        currentApocalypse = data.apocalypse;
-        currentBunker = data.bunker;
+        // Normalize apocalypse (handle both camelCase and PascalCase)
+        const apocalypse = data.apocalypse || data.Apocalypse;
+        currentApocalypse = apocalypse ? {
+            id: apocalypse.id || apocalypse.Id,
+            name: apocalypse.name || apocalypse.Name || 'Невідомо',
+            description: apocalypse.description || apocalypse.Description || '',
+            severity: apocalypse.severity || apocalypse.Severity || 'medium',
+            survivalChance: apocalypse.survivalChance ?? apocalypse.SurvivalChance ?? 50,
+            duration: apocalypse.duration || apocalypse.Duration || '',
+            threats: apocalypse.threats || apocalypse.Threats || [],
+            requirements: apocalypse.requirements || apocalypse.Requirements || []
+        } : null;
+        console.log("[GameStarted] Normalized apocalypse:", currentApocalypse);
 
-        if (data.players) {
-            data.players.forEach(function (p) {
-                if (roomPlayers[p.connectionId]) {
-                    roomPlayers[p.connectionId].seatNumber = p.seatNumber;
-                }
-            });
+        // Normalize bunker (handle both camelCase and PascalCase)
+        const bunker = data.bunker || data.Bunker;
+        currentBunker = bunker ? {
+            id: bunker.id || bunker.Id,
+            name: bunker.name || bunker.Name || 'Невідомо',
+            description: bunker.description || bunker.Description || '',
+            capacity: bunker.capacity ?? bunker.Capacity ?? 6,
+            location: bunker.location || bunker.Location || '',
+            suppliesMonths: bunker.suppliesMonths ?? bunker.SuppliesMonths ?? 12,
+            facilities: bunker.facilities || bunker.Facilities || [],
+            resources: bunker.resources || bunker.Resources || [],
+            problems: bunker.problems || bunker.Problems || [],
+            condition: bunker.condition || bunker.Condition || 'good'
+        } : null;
+        console.log("[GameStarted] Normalized bunker:", currentBunker);
+
+        // Update players with seat numbers
+        const players = data.players || data.Players || [];
+        console.log("[GameStarted] Players to update:", players);
+        
+        players.forEach(function (p) {
+            const connId = p.connectionId || p.ConnectionId;
+            const seatNum = p.seatNumber ?? p.SeatNumber ?? 0;
+            
+            if (roomPlayers[connId]) {
+                roomPlayers[connId].seatNumber = seatNum;
+                roomPlayers[connId].isEliminated = p.isEliminated ?? p.IsEliminated ?? false;
+                console.log(`[GameStarted] Updated player ${connId} seat: ${seatNum}`);
+            }
+        });
+
+        // Update UI visibility
+        console.log("[GameStarted] Updating UI visibility...");
+        
+        const roomLobby = document.getElementById('roomLobby');
+        const gameSection = document.getElementById('gameSection');
+        const myPlayerSection = document.getElementById('myPlayerSection');
+        const currentRoomState = document.getElementById('currentRoomState');
+        
+        if (roomLobby) {
+            roomLobby.style.display = 'none';
+            console.log("[GameStarted] roomLobby hidden");
         }
-
-        document.getElementById('roomLobby').style.display = 'none';
-        document.getElementById('gameSection').style.display = 'block';
-        document.getElementById('myPlayerSection').style.display = 'block';
-        document.getElementById('currentRoomState').textContent = 'Гра';
-        document.getElementById('currentRoomState').classList.add('state-playing');
+        if (gameSection) {
+            gameSection.style.display = 'block';
+            console.log("[GameStarted] gameSection shown");
+        }
+        if (myPlayerSection) {
+            myPlayerSection.style.display = 'block';
+            console.log("[GameStarted] myPlayerSection shown");
+        }
+        if (currentRoomState) {
+            currentRoomState.textContent = 'Гра';
+            currentRoomState.classList.add('state-playing');
+            console.log("[GameStarted] currentRoomState updated");
+        }
 
         const startBtn = document.getElementById('startGameBtn');
         if (startBtn) {
             startBtn.style.display = 'none';
             startBtn.disabled = true;
             startBtn.style.pointerEvents = 'none';
+            console.log("[GameStarted] startBtn hidden");
         }
 
-        updateActivatedCardsTable();
-
-        if (isHost) {
-            document.getElementById('gmScenarioSection').style.display = 'block';
-            document.getElementById('gmEventsSection').style.display = 'block';
-
-            if (data.bunker) {
-                currentBunkerCapacity = data.bunker.capacity;
-                document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+        // Show voting button for host now that game is active
+        const votingBtn = document.getElementById('startVotingBtn');
+        if (votingBtn) {
+            if (isHost && !currentVoting) {
+                votingBtn.style.display = 'inline-block';
+                console.log("[GameStarted] Voting button shown for host");
+            } else {
+                votingBtn.style.display = 'none';
             }
         }
 
-        renderApocalypse(data.apocalypse);
-        renderBunker(data.bunker);
+        // Update activated cards table
+        console.log("[GameStarted] Calling updateActivatedCardsTable...");
+        updateActivatedCardsTable();
+
+        // Show GM sections for host using the dedicated function
+        console.log("[GameStarted] Calling updateGMSections...");
+        updateGMSections();
+        
+        // Update bunker capacity display
+        if (isHost && currentBunker) {
+            currentBunkerCapacity = currentBunker.capacity;
+            const gmBunkerCapacity = document.getElementById('gmBunkerCapacity');
+            if (gmBunkerCapacity) {
+                gmBunkerCapacity.textContent = currentBunker.capacity;
+            }
+        }
+
+        // Render apocalypse and bunker
+        console.log("[GameStarted] Rendering apocalypse...");
+        renderApocalypse(currentApocalypse);
+        
+        console.log("[GameStarted] Rendering bunker...");
+        renderBunker(currentBunker);
+        
+        console.log("[GameStarted] Updating players table...");
         updatePlayersTable();
 
-        addEventMessage(`Гра почалась! Раунд ${data.currentRound}`);
+        // Add event messages
+        const currentRound = data.currentRound || data.CurrentRound || 1;
+        addEventMessage(`Гра почалась! Раунд ${currentRound}`);
 
-        if (data.apocalypse) {
-            addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${data.apocalypse.name}`);
+        if (currentApocalypse && currentApocalypse.name) {
+            addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${currentApocalypse.name}`);
         }
 
-        if (data.bunker) {
-            addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${data.bunker.name}`);
+        if (currentBunker && currentBunker.name) {
+            addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${currentBunker.name}`);
         }
+
+        console.log("=== GAME STARTED END ===");
     });
 
     // Характеристику розкрито
@@ -919,36 +1161,36 @@ function registerSignalREvents() {
         console.log("[RejoinSuccess] data.activatedCards:", data.activatedCards);
         console.log("[RejoinSuccess] data.players:", data.players);
 
-        currentRoom = data.room;
-        myPlayerData = data.player;
-        isHost = data.isHost;
-        myConnectionId = data.player.connectionId;
+        currentRoom = data.room || data.Room;
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        isHost = data.isHost ?? data.IsHost ?? false;
+        myConnectionId = myPlayerData.connectionId;
 
-        // ВАЖЛИВО
+        // Normalize room
         if (currentRoom) {
-            currentRoom.state = data.roomState || currentRoom.state || "Lobby";
+            currentRoom.state = data.roomState || currentRoom.state || currentRoom.State || "Lobby";
+            currentRoom.name = currentRoom.name || currentRoom.Name || "Кімната";
+            currentRoom.id = currentRoom.id || currentRoom.Id;
+            currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
 
         console.log("[RejoinSuccess] currentRoom:", currentRoom);
         console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
         console.log("[RejoinSuccess] myConnectionId:", myConnectionId);
 
-        if (myPlayerData) {
-            myPlayerData.cards = myPlayerData.cards || myPlayerData.Cards || [];
-        }
-
-        console.log("[RejoinSuccess] normalized myPlayerData.cards:", myPlayerData?.cards);
-
         saveSession(currentRoom.id, myPlayerData.name);
 
         roomPlayers = {};
-        (data.players || []).forEach(function (p, index) {
+        (data.players || data.Players || []).forEach(function (p, index) {
             var revealedData = {};
             var revealedTooltips = {};
+            
+            const connId = p.connectionId || p.ConnectionId;
 
-            if (p.revealedValues) {
-                Object.keys(p.revealedValues).forEach(function (key) {
-                    var rd = p.revealedValues[key];
+            if (p.revealedValues || p.RevealedValues) {
+                const rv = p.revealedValues || p.RevealedValues;
+                Object.keys(rv).forEach(function (key) {
+                    var rd = rv[key];
                     var camelKey = key.charAt(0).toLowerCase() + key.slice(1);
 
                     revealedData[camelKey] = rd.value || rd.Value || 'Розкрито';
@@ -959,18 +1201,18 @@ function registerSignalREvents() {
                 });
             }
 
-            roomPlayers[p.connectionId] = {
-                name: p.name,
-                connectionId: p.connectionId,
-                isHost: p.isHost,
-                revealed: p.revealed || {},
+            roomPlayers[connId] = {
+                name: p.name || p.Name,
+                connectionId: connId,
+                isHost: p.isHost ?? p.IsHost ?? false,
+                revealed: p.revealed || p.Revealed || {},
                 revealedData: revealedData,
                 revealedTooltips: revealedTooltips,
-                isEliminated: p.isEliminated,
-                seatNumber: p.seatNumber || 0
+                isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
+                seatNumber: p.seatNumber ?? p.SeatNumber ?? 0
             };
 
-            console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[p.connectionId]);
+            console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[connId]);
         });
 
         console.log("[RejoinSuccess] roomPlayers final:", roomPlayers);
@@ -1025,9 +1267,9 @@ function registerSignalREvents() {
         console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
 
         const isGameState =
-            data.roomState === 'Playing' ||
-            data.roomState === 'Voting' ||
-            data.roomState === 'Started';
+            currentRoom.state === 'Playing' ||
+            currentRoom.state === 'Voting' ||
+            currentRoom.state === 'Started';
 
         showRoomSection();
         updateRoomUI();
@@ -1038,15 +1280,15 @@ function registerSignalREvents() {
         }
 
         if (isGameState) {
-            currentApocalypse = data.apocalypse;
-            currentBunker = data.bunker;
+            currentApocalypse = data.apocalypse || data.Apocalypse;
+            currentBunker = data.bunker || data.Bunker;
 
             document.getElementById('roomLobby').style.display = 'none';
             document.getElementById('gameSection').style.display = 'block';
             document.getElementById('myPlayerSection').style.display = 'block';
 
             document.getElementById('currentRoomState').textContent =
-                data.roomState === 'Voting' ? 'Голосування' : 'Гра';
+                currentRoom.state === 'Voting' ? 'Голосування' : 'Гра';
 
             const startBtn = document.getElementById('startGameBtn');
             if (startBtn) {
@@ -1054,8 +1296,19 @@ function registerSignalREvents() {
                 startBtn.disabled = true;
             }
 
-            if (data.apocalypse) renderApocalypse(data.apocalypse);
-            if (data.bunker) renderBunker(data.bunker);
+            // Show voting button for host in game state
+            const votingBtn = document.getElementById('startVotingBtn');
+            if (votingBtn) {
+                if (isHost && !currentVoting && currentRoom.state !== 'Voting') {
+                    votingBtn.style.display = 'inline-block';
+                    console.log("[RejoinSuccess] Voting button shown for host");
+                } else {
+                    votingBtn.style.display = 'none';
+                }
+            }
+
+            if (currentApocalypse) renderApocalypse(currentApocalypse);
+            if (currentBunker) renderBunker(currentBunker);
         } else {
             document.getElementById('roomLobby').style.display = 'block';
             document.getElementById('gameSection').style.display = 'none';
@@ -1375,6 +1628,81 @@ function registerSignalREvents() {
         
         addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
     });
+
+    // ==================== SCENARIO IMAGE HANDLERS ====================
+    
+    // Зображення апокаліпсису оновлено
+    connection.off("ApocalypseImageUpdated");
+    connection.on("ApocalypseImageUpdated", function (data) {
+        console.log("[ApocalypseImageUpdated]", data);
+        if (currentApocalypse && currentApocalypse.id === data.apocalypseId) {
+            currentApocalypse.imageUrl = data.imageUrl;
+            renderApocalypse(currentApocalypse);
+            addEventMessage(`<span class="event-image">🖼️</span> Зображення апокаліпсису оновлено`);
+        }
+    });
+    
+    // Зображення бункера оновлено
+    connection.off("BunkerImageUpdated");
+    connection.on("BunkerImageUpdated", function (data) {
+        console.log("[BunkerImageUpdated]", data);
+        if (currentBunker && currentBunker.id === data.bunkerId) {
+            currentBunker.imageUrl = data.imageUrl;
+            renderBunker(currentBunker);
+            addEventMessage(`<span class="event-image">🖼️</span> Зображення бункера оновлено`);
+        }
+    });
+    
+    // Зображення апокаліпсису видалено
+    connection.off("ApocalypseImageRemoved");
+    connection.on("ApocalypseImageRemoved", function (data) {
+        console.log("[ApocalypseImageRemoved]", data);
+        if (currentApocalypse && currentApocalypse.id === data.apocalypseId) {
+            currentApocalypse.imageUrl = null;
+            renderApocalypse(currentApocalypse);
+            addEventMessage(`<span class="event-image">🗑️</span> Зображення апокаліпсису видалено`);
+        }
+    });
+    
+    // Зображення бункера видалено
+    connection.off("BunkerImageRemoved");
+    connection.on("BunkerImageRemoved", function (data) {
+        console.log("[BunkerImageRemoved]", data);
+        if (currentBunker && currentBunker.id === data.bunkerId) {
+            currentBunker.imageUrl = null;
+            renderBunker(currentBunker);
+            addEventMessage(`<span class="event-image">🗑️</span> Зображення бункера видалено`);
+        }
+    });
+
+    // ==================== BUNKER SUPPLIES HANDLERS ====================
+    
+    // Запаси бункера додано
+    connection.off("BunkerSuppliesAdded");
+    connection.on("BunkerSuppliesAdded", function (data) {
+        console.log("[BunkerSuppliesAdded]", data);
+        
+        if (currentBunker) {
+            currentBunker.suppliesMonths = data.totalSuppliesMonths;
+            renderBunker(currentBunker);
+        }
+        
+        addEventMessage(`<span class="event-success">📦 GM додав запаси їжі: +${data.addedMonths} місяців</span>`);
+    });
+    
+    // Запаси бункера зменшено
+    connection.off("BunkerSuppliesRemoved");
+    connection.on("BunkerSuppliesRemoved", function (data) {
+        console.log("[BunkerSuppliesRemoved]", data);
+        
+        if (currentBunker) {
+            currentBunker.suppliesMonths = data.totalSuppliesMonths;
+            renderBunker(currentBunker);
+        }
+        
+        addEventMessage(`<span class="event-warning">📦 Запаси бункера зменшено на ${data.removedMonths} місяців</span>`);
+    });
+
 } // End of registerSignalREvents()
 
 // ==================== GLOBAL FUNCTIONS ====================
@@ -1382,20 +1710,34 @@ function registerSignalREvents() {
 let isStartingGame = false;
 
 function startGame() {
-    if (isStartingGame) return;
-    if (!confirm("Почати гру?")) return;
+    console.log("[startGame] Called, isStartingGame:", isStartingGame);
+    
+    if (isStartingGame) {
+        console.log("[startGame] Already starting, returning");
+        return;
+    }
+    if (!confirm("Почати гру?")) {
+        console.log("[startGame] User cancelled");
+        return;
+    }
 
     isStartingGame = true;
+    console.log("[startGame] Set isStartingGame = true");
 
     const btn = document.getElementById("startGameBtn");
     if (btn) {
         btn.disabled = true;
         btn.style.pointerEvents = "none";
+        console.log("[startGame] Button disabled");
     }
 
+    console.log("[startGame] Invoking StartGame on server...");
     connection.invoke("StartGame")
+        .then(() => {
+            console.log("[startGame] Invoke successful, waiting for GameStarted event...");
+        })
         .catch(err => {
-            console.error("StartGame error:", err);
+            console.error("[startGame] Invoke error:", err);
             isStartingGame = false;
 
             if (btn) {
@@ -1453,6 +1795,336 @@ function addActivatedCard(connectionId, card) {
         }
     }
 
+// ==================== SCENARIO IMAGE FUNCTIONS ====================
+
+// Завантаження зображення апокаліпсису
+async function uploadApocalypseImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    // Валідація розміру (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Файл занадто великий. Максимум 5 MB');
+        return;
+    }
+    
+    // Валідація типу
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('roomId', currentRoom?.id || '');
+    formData.append('connectionId', myConnectionId || '');
+    formData.append('apocalypseId', currentApocalypse?.id || '');
+    
+    try {
+        const response = await fetch('/api/ScenarioImage/apocalypse', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка завантаження');
+            return;
+        }
+        
+        console.log('[uploadApocalypseImage] Success');
+    } catch (error) {
+        console.error('[uploadApocalypseImage] Error:', error);
+        alert('Помилка завантаження зображення');
+    }
+    
+    // Очищаємо input
+    input.value = '';
+}
+
+// Завантаження зображення бункера
+async function uploadBunkerImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    // Валідація розміру (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Файл занадто великий. Максимум 5 MB');
+        return;
+    }
+    
+    // Валідація типу
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('roomId', currentRoom?.id || '');
+    formData.append('connectionId', myConnectionId || '');
+    formData.append('bunkerId', currentBunker?.id || '');
+    
+    try {
+        const response = await fetch('/api/ScenarioImage/bunker', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка завантаження');
+            return;
+        }
+        
+        console.log('[uploadBunkerImage] Success');
+    } catch (error) {
+        console.error('[uploadBunkerImage] Error:', error);
+        alert('Помилка завантаження зображення');
+    }
+    
+    // Очищаємо input
+    input.value = '';
+}
+
+// Видалення зображення апокаліпсису
+async function removeApocalypseImage() {
+    if (!confirm('Видалити зображення апокаліпсису?')) return;
+    
+    try {
+        const params = new URLSearchParams({
+            roomId: currentRoom?.id || '',
+            connectionId: myConnectionId || '',
+            apocalypseId: currentApocalypse?.id || ''
+        });
+        
+        const response = await fetch(`/api/ScenarioImage/apocalypse?${params}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка видалення');
+            return;
+        }
+        
+        console.log('[removeApocalypseImage] Success');
+    } catch (error) {
+        console.error('[removeApocalypseImage] Error:', error);
+        alert('Помилка видалення зображення');
+    }
+}
+
+// Видалення зображення бункера
+async function removeBunkerImage() {
+    if (!confirm('Видалити зображення бункера?')) return;
+    
+    try {
+        const params = new URLSearchParams({
+            roomId: currentRoom?.id || '',
+            connectionId: myConnectionId || '',
+            bunkerId: currentBunker?.id || ''
+        });
+        
+        const response = await fetch(`/api/ScenarioImage/bunker?${params}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка видалення');
+            return;
+        }
+        
+        console.log('[removeBunkerImage] Success');
+    } catch (error) {
+        console.error('[removeBunkerImage] Error:', error);
+        alert('Помилка видалення зображення');
+    }
+}
+
+// Генерація промпту для апокаліпсису
+async function generateApocalypsePrompt() {
+    try {
+        const response = await fetch(`/api/ScenarioImage/apocalypse/prompt?roomId=${currentRoom?.id || ''}`);
+        
+        if (!response.ok) {
+            alert('Помилка отримання промпту');
+            return;
+        }
+        
+        const data = await response.json();
+        showPromptModal('Промпт для апокаліпсису', data.prompt);
+    } catch (error) {
+        console.error('[generateApocalypsePrompt] Error:', error);
+        alert('Помилка отримання промпту');
+    }
+}
+
+// Генерація промпту для бункера
+async function generateBunkerPrompt() {
+    try {
+        const response = await fetch(`/api/ScenarioImage/bunker/prompt?roomId=${currentRoom?.id || ''}`);
+        
+        if (!response.ok) {
+            alert('Помилка отримання промпту');
+            return;
+        }
+        
+        const data = await response.json();
+        showPromptModal('Промпт для бункера', data.prompt);
+    } catch (error) {
+        console.error('[generateBunkerPrompt] Error:', error);
+        alert('Помилка отримання промпту');
+    }
+}
+
+// Показати модальне вікно з промптом
+function showPromptModal(title, prompt) {
+    // Створюємо модальне вікно якщо його немає
+    let modal = document.getElementById('promptModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'promptModal';
+        modal.className = 'prompt-modal-overlay';
+        modal.innerHTML = `
+            <div class="prompt-modal">
+                <div class="prompt-modal-header">
+                    <h3 id="promptModalTitle"></h3>
+                    <button class="prompt-modal-close" onclick="closePromptModal()">×</button>
+                </div>
+                <div class="prompt-modal-body">
+                    <textarea id="promptModalText" readonly></textarea>
+                    <button class="btn-copy-prompt" onclick="copyPromptToClipboard()">📋 Копіювати промпт</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('promptModalTitle').textContent = title;
+    document.getElementById('promptModalText').value = prompt;
+    modal.style.display = 'flex';
+}
+
+// Закрити модальне вікно з промптом
+function closePromptModal() {
+    const modal = document.getElementById('promptModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Копіювати промпт в буфер обміну
+function copyPromptToClipboard() {
+    const textarea = document.getElementById('promptModalText');
+    if (textarea) {
+        textarea.select();
+        document.execCommand('copy');
+        
+        // Показуємо підтвердження
+        const btn = document.querySelector('.btn-copy-prompt');
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Скопійовано!';
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
+    }
+}
+
+// Відкрити зображення в модальному вікні
+function openImageModal(imageUrl, title) {
+    let modal = document.getElementById('imageModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'imageModal';
+        modal.className = 'image-modal-overlay';
+        modal.onclick = function(e) {
+            if (e.target === modal) closeImageModal();
+        };
+        modal.innerHTML = `
+            <div class="image-modal">
+                <div class="image-modal-header">
+                    <h3 id="imageModalTitle"></h3>
+                    <button class="image-modal-close" onclick="closeImageModal()">×</button>
+                </div>
+                <div class="image-modal-body">
+                    <img id="imageModalImg" src="" alt="" />
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('imageModalTitle').textContent = title;
+    document.getElementById('imageModalImg').src = imageUrl;
+    document.getElementById('imageModalImg').alt = title;
+    modal.style.display = 'flex';
+}
+
+// Закрити модальне вікно із зображенням
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// ==================== BUNKER SUPPLIES FUNCTIONS ====================
+
+// Додати випадкову кількість запасів до бункера (1-12 місяців)
+function addBunkerSupplies() {
+    if (!isHost) {
+        alert('Тільки хост може додавати запаси');
+        return;
+    }
+    
+    if (!currentBunker) {
+        alert('Бункер не визначено. Спочатку почніть гру.');
+        return;
+    }
+    
+    console.log("[addBunkerSupplies] Invoking...");
+    
+    connection.invoke("AddBunkerSupplies")
+        .then(() => {
+            console.log("[addBunkerSupplies] Success");
+        })
+        .catch(err => {
+            console.error("[addBunkerSupplies] Error:", err);
+            alert('Помилка додавання запасів');
+        });
+}
+
+// Зменшити запаси бункера
+function removeBunkerSupplies(months) {
+    if (!isHost) {
+        alert('Тільки хост може змінювати запаси');
+        return;
+    }
+    
+    if (!currentBunker) {
+        alert('Бункер не визначено');
+        return;
+    }
+    
+    const amount = months || parseInt(prompt('Скільки місяців забрати?', '3'));
+    if (isNaN(amount) || amount <= 0) return;
+    
+    console.log("[removeBunkerSupplies] Invoking with:", amount);
+    
+    connection.invoke("RemoveBunkerSupplies", amount)
+        .then(() => {
+            console.log("[removeBunkerSupplies] Success");
+        })
+        .catch(err => {
+            console.error("[removeBunkerSupplies] Error:", err);
+            alert('Помилка зменшення запасів');
+        });
+}
+
     // ==================== BUTTON EVENT BINDING ====================
     
     // Прив'язуємо подію до кнопки створення кімнати після завантаження DOM
@@ -1488,6 +2160,29 @@ function addActivatedCard(connectionId, card) {
         console.log("SignalR connection closed", err);
         updateConnectionStatus("✗ З'єднання втрачено. Оновіть сторінку.", true);
     });
+
+    // ==================== NAME VALIDATION ====================
+    
+    // Sanitize player name input - max 10 chars
+    function sanitizeNameInput(input) {
+        // Trim and limit to 10 characters
+        let value = input.value;
+        if (value.length > 10) {
+            input.value = value.substring(0, 10);
+        }
+    }
+    
+    // Validate player name before submission
+    function validatePlayerName(name) {
+        if (!name || name.trim().length === 0) {
+            return { valid: false, error: "Ім'я гравця обов'язкове" };
+        }
+        name = name.trim();
+        if (name.length > 10) {
+            return { valid: false, error: "Ім'я гравця не може перевищувати 10 символів" };
+        }
+        return { valid: true, name: name };
+    }
 
     // ==================== SESSION & PROFILE FUNCTIONS ====================
 
@@ -1563,8 +2258,80 @@ function addActivatedCard(connectionId, card) {
             alert('Спочатку виберіть гравця');
             return;
         }
+        
+        // Locally reveal the value in GM panel immediately
+        revealCharInGMPanel(charName);
+        
+        // Also call server to get full data
         connection.invoke("PeekCharacteristic", selectedId, charName)
             .catch(function(err) { console.error("PeekCharacteristic error:", err); });
+    }
+    
+    // Reveal a specific characteristic value in the GM panel
+    function revealCharInGMPanel(charName) {
+        const playerData = gmPlayersData[selectedPlayerForGM];
+        if (!playerData) return;
+        
+        let value = 'Невідомо';
+        let elementId = '';
+        
+        switch(charName) {
+            case 'Personality':
+                value = formatPersonality(playerData.personality || playerData.Personality);
+                elementId = 'gmPersonality';
+                break;
+            case 'Body':
+                value = formatBody(playerData.body || playerData.Body);
+                elementId = 'gmBody';
+                break;
+            case 'Profession':
+                value = getCharValue(playerData, 'profession', 'Profession') || 'Невідомо';
+                elementId = 'gmProfession';
+                break;
+            case 'PhysicalHealth':
+                value = getCharValue(playerData, 'physicalHealth', 'PhysicalHealth') || 'Невідомо';
+                elementId = 'gmPhysicalHealth';
+                break;
+            case 'MentalHealth':
+                value = getCharValue(playerData, 'mentalHealth', 'MentalHealth') || 'Невідомо';
+                elementId = 'gmMentalHealth';
+                break;
+            case 'Hobby':
+                value = getCharValue(playerData, 'hobby', 'Hobby') || 'Невідомо';
+                elementId = 'gmHobby';
+                break;
+            case 'CharacterTrait':
+                value = getCharValue(playerData, 'characterTrait', 'CharacterTrait') || 'Невідомо';
+                elementId = 'gmCharacterTrait';
+                break;
+            case 'Phobia':
+                value = getCharValue(playerData, 'phobia', 'Phobia') || 'Невідомо';
+                elementId = 'gmPhobia';
+                break;
+            case 'Traits':
+                value = getCharValue(playerData, 'traits', 'Traits') || 'Невідомо';
+                elementId = 'gmTraits';
+                break;
+            case 'Secret':
+                value = getCharValue(playerData, 'secret', 'Secret') || 'Невідомо';
+                elementId = 'gmSecret';
+                break;
+            case 'SecretGoal':
+                const sg = playerData.secretGoal || playerData.SecretGoal;
+                value = sg?.goal ?? sg?.Goal ?? 'Невідомо';
+                elementId = 'gmSecretGoal';
+                break;
+        }
+        
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.textContent = value;
+            el.classList.remove('gm-char-hidden');
+            el.classList.add('gm-char-revealed');
+        }
+        
+        // Track what's been revealed
+        gmRevealedChars[charName] = true;
     }
 
     function showPeekModal(playerName, charKey, data, isAlreadyRevealed) {
@@ -1859,23 +2626,34 @@ function addActivatedCard(connectionId, card) {
             document.getElementById('joinRoomId').value = roomId;
             document.getElementById('joinModal').style.display = 'flex';
         } else {
-            const playerName = prompt("Введіть ваше ім'я:");
+            let playerName = prompt("Введіть ваше ім'я (макс. 10 символів):");
             if (playerName && playerName.trim()) {
-                connection.invoke("JoinRoom", roomId, playerName.trim(), null, stablePlayerId)
+                // Validate and sanitize name
+                const validation = validatePlayerName(playerName);
+                if (!validation.valid) {
+                    alert(validation.error);
+                    return;
+                }
+                connection.invoke("JoinRoom", roomId, validation.name, null, stablePlayerId)
                     .catch(err => console.error("JoinRoom error:", err));
             }
         }
     }
 
     function submitJoinRoom() {
-        const playerName = document.getElementById('playerNameJoin').value.trim();
+        const playerNameRaw = document.getElementById('playerNameJoin').value;
         const password = document.getElementById('joinRoomPassword').value || null;
         const roomId = document.getElementById('joinRoomId').value;
         
-        if (!playerName) {
-            alert("Введіть ваше ім'я");
+        // Validate name
+        const validation = validatePlayerName(playerNameRaw);
+        if (!validation.valid) {
+            alert(validation.error);
+            document.getElementById('playerNameJoin').focus();
             return;
         }
+        
+        const playerName = validation.name;
         
         // Зберігаємо roomId для перевірки в RoomJoined handler
         pendingJoinRoomId = roomId;
@@ -1932,9 +2710,33 @@ function addActivatedCard(connectionId, card) {
             'extreme': 'Екстремальна'
         };
         
+        // Перевіряємо наявність зображення
+        const imageUrl = apocalypse.imageUrl || apocalypse.ImageUrl;
+        const imageSection = imageUrl ? `
+            <div class="scenario-image-container">
+                <img src="${imageUrl}" alt="${apocalypse.name}" class="scenario-image" onclick="openImageModal('${imageUrl}', '${escapeHtml(apocalypse.name)}')" />
+            </div>
+        ` : '';
+        
+        // Контроли хоста для зображення
+        const hostControls = isHost ? `
+            <div class="scenario-image-controls">
+                <input type="file" id="apocalypseImageInput" accept="image/*" style="display: none;" onchange="uploadApocalypseImage(this)" />
+                <button class="btn-scenario-image" onclick="document.getElementById('apocalypseImageInput').click()">
+                    📤 Завантажити зображення
+                </button>
+                <button class="btn-scenario-image btn-generate" onclick="generateApocalypsePrompt()">
+                    ✨ Згенерувати промпт
+                </button>
+                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeApocalypseImage()">🗑️ Видалити</button>` : ''}
+            </div>
+        ` : '';
+        
         container.innerHTML = `
             <h4 class="apocalypse-name">${apocalypse.name}</h4>
             <p class="apocalypse-desc">${apocalypse.description}</p>
+            ${imageSection}
+            ${hostControls}
             <div class="apocalypse-stats">
                 <div class="stat-item">
                     <span class="stat-label">Загроза:</span>
@@ -1952,11 +2754,11 @@ function addActivatedCard(connectionId, card) {
             <div class="apocalypse-lists">
                 <div class="list-section">
                     <span class="list-title">⚠️ Загрози:</span>
-                    <ul>${apocalypse.threats.map(t => `<li>${t}</li>`).join('')}</ul>
+                    <ul>${(apocalypse.threats || []).map(t => `<li>${t}</li>`).join('')}</ul>
                 </div>
                 <div class="list-section">
                     <span class="list-title">✓ Потрібно:</span>
-                    <ul>${apocalypse.requirements.map(r => `<li>${r}</li>`).join('')}</ul>
+                    <ul>${(apocalypse.requirements || []).map(r => `<li>${r}</li>`).join('')}</ul>
                 </div>
             </div>
         `;
@@ -2134,9 +2936,33 @@ function addActivatedCard(connectionId, card) {
             'excellent': 'Відмінний'
         };
         
+        // Перевіряємо наявність зображення
+        const imageUrl = bunker.imageUrl || bunker.ImageUrl;
+        const imageSection = imageUrl ? `
+            <div class="scenario-image-container">
+                <img src="${imageUrl}" alt="${bunker.name}" class="scenario-image" onclick="openImageModal('${imageUrl}', '${escapeHtml(bunker.name)}')" />
+            </div>
+        ` : '';
+        
+        // Контроли хоста для зображення
+        const hostControls = isHost ? `
+            <div class="scenario-image-controls">
+                <input type="file" id="bunkerImageInput" accept="image/*" style="display: none;" onchange="uploadBunkerImage(this)" />
+                <button class="btn-scenario-image" onclick="document.getElementById('bunkerImageInput').click()">
+                    📤 Завантажити зображення
+                </button>
+                <button class="btn-scenario-image btn-generate" onclick="generateBunkerPrompt()">
+                    ✨ Згенерувати промпт
+                </button>
+                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeBunkerImage()">🗑️ Видалити</button>` : ''}
+            </div>
+        ` : '';
+        
         container.innerHTML = `
             <h4 class="bunker-name">${bunker.name}</h4>
             <p class="bunker-desc">${bunker.description}</p>
+            ${imageSection}
+            ${hostControls}
             <div class="bunker-stats">
                 <div class="stat-item">
                     <span class="stat-label">Місткість:</span>
@@ -2158,13 +2984,13 @@ function addActivatedCard(connectionId, card) {
             <div class="bunker-lists">
                 <div class="list-section">
                     <span class="list-title">🏗️ Приміщення:</span>
-                    <ul>${bunker.facilities.map(f => `<li>${f}</li>`).join('')}</ul>
+                    <ul>${(bunker.facilities || []).map(f => `<li>${f}</li>`).join('')}</ul>
                 </div>
                 <div class="list-section">
                     <span class="list-title">📦 Ресурси:</span>
-                    <ul>${bunker.resources.map(r => `<li>${r}</li>`).join('')}</ul>
+                    <ul>${(bunker.resources || []).map(r => `<li>${r}</li>`).join('')}</ul>
                 </div>
-                ${bunker.problems.length > 0 ? `
+                ${(bunker.problems || []).length > 0 ? `
                 <div class="list-section problems">
                     <span class="list-title">⚠️ Проблеми:</span>
                     <ul>${bunker.problems.map(p => `<li>${p}</li>`).join('')}</ul>
@@ -2584,6 +3410,8 @@ function updateActivatedCardsTable() {
         if (!connectionId) {
             document.getElementById('gmPlayerInfo').style.display = 'none';
             selectedPlayerForGM = null;
+            // Reset all revealed states
+            gmRevealedChars = {};
             return;
         }
         
@@ -2595,30 +3423,80 @@ function updateActivatedCardsTable() {
             return;
         }
         
-        document.getElementById('gmPlayerInfo').style.display = 'block';
-        document.getElementById('gmPlayerName').textContent = playerData.name + (playerData.isEliminated ? ' (Елімінований)' : '');
+        // Reset revealed characteristics for new player
+        gmRevealedChars = {};
         
-        // Заповнюємо характеристики
-        document.getElementById('gmProfession').textContent = playerData.profession?.name || '-';
-        document.getElementById('gmPhysicalHealth').textContent = playerData.physicalHealth?.name || '-';
-        document.getElementById('gmMentalHealth').textContent = playerData.mentalHealth?.name || '-';
-        document.getElementById('gmHobby').textContent = playerData.hobby?.name || '-';
-        document.getElementById('gmCharacterTrait').textContent = playerData.characterTrait?.name || '-';
-        document.getElementById('gmPhobia').textContent = playerData.phobia?.name || '-';
-        document.getElementById('gmTraits').textContent = playerData.traits?.name || '-';
-        document.getElementById('gmSecret').textContent = playerData.secret?.name || '-';
-        document.getElementById('gmSecretGoal').textContent = playerData.secretGoal?.goal || '-';
+        document.getElementById('gmPlayerInfo').style.display = 'block';
+        
+        // Get player name with elimination status
+        const playerName = playerData.name || playerData.Name || 'Гравець';
+        const isEliminated = playerData.isEliminated ?? playerData.IsEliminated ?? false;
+        document.getElementById('gmPlayerName').textContent = playerName + (isEliminated ? ' (Елімінований)' : '');
+        
+        // Заповнюємо характеристики - приховано по дефолту
+        const hiddenText = 'Приховано';
+        const hiddenClass = 'gm-char-hidden';
+        
+        // Всі характеристики
+        const charElements = ['gmPersonality', 'gmBody', 'gmProfession', 'gmPhysicalHealth', 'gmMentalHealth', 
+                             'gmHobby', 'gmCharacterTrait', 'gmPhobia', 'gmTraits', 'gmSecret', 'gmSecretGoal'];
+        charElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = hiddenText;
+                el.classList.add(hiddenClass);
+                el.classList.remove('gm-char-revealed');
+            }
+        });
         
         // Оновлюємо кнопки елімінації
         const eliminateBtn = document.querySelector('.btn-eliminate');
         const restoreBtn = document.querySelector('.btn-restore');
-        if (playerData.isEliminated) {
-            eliminateBtn.style.display = 'none';
-            restoreBtn.style.display = 'inline-block';
+        if (isEliminated) {
+            if (eliminateBtn) eliminateBtn.style.display = 'none';
+            if (restoreBtn) restoreBtn.style.display = 'inline-block';
         } else {
-            eliminateBtn.style.display = 'inline-block';
-            restoreBtn.style.display = 'none';
+            if (eliminateBtn) eliminateBtn.style.display = 'inline-block';
+            if (restoreBtn) restoreBtn.style.display = 'none';
         }
+    }
+    
+    // Об'єкт для зберігання розкритих характеристик у GM панелі
+    var gmRevealedChars = {};
+    
+    // Форматування особистості
+    function formatPersonality(personality) {
+        if (!personality) return 'Невідомо';
+        const p = personality;
+        const age = p.age ?? p.Age ?? '?';
+        const sex = p.sex ?? p.Sex ?? '?';
+        const sexOrientation = p.sexOrientation ?? p.SexOrientation ?? '';
+        const isChildfree = p.isChildfree ?? p.IsChildfree ?? false;
+        
+        let result = `${age} років, ${sex}`;
+        if (sexOrientation && sexOrientation !== 'Гетеросексуал') {
+            result += `, ${sexOrientation}`;
+        }
+        if (isChildfree) {
+            result += ', Чайлдфрі';
+        }
+        return result;
+    }
+    
+    // Форматування статури
+    function formatBody(body) {
+        if (!body) return 'Невідомо';
+        const height = body.height ?? body.Height ?? '?';
+        const weight = body.weight ?? body.Weight ?? '?';
+        const bodyType = body.bodyType ?? body.BodyType ?? '';
+        return `${height} см, ${weight} кг${bodyType ? ', ' + bodyType : ''}`;
+    }
+    
+    // Безпечне отримання значення характеристики з обох регістрів
+    function getCharValue(obj, camelKey, pascalKey) {
+        const src = obj?.[camelKey] || obj?.[pascalKey];
+        if (!src) return null;
+        return src.name ?? src.Name ?? src.goal ?? src.Goal ?? src;
     }
 
     function editCharacteristic(charName) {
@@ -2632,18 +3510,24 @@ function updateActivatedCardsTable() {
         
         let currentValue = '';
         switch(charName) {
-            case 'Profession': currentValue = playerData.profession?.name || ''; break;
-            case 'PhysicalHealth': currentValue = playerData.physicalHealth?.name || ''; break;
-            case 'MentalHealth': currentValue = playerData.mentalHealth?.name || ''; break;
-            case 'Hobby': currentValue = playerData.hobby?.name || ''; break;
-            case 'CharacterTrait': currentValue = playerData.characterTrait?.name || ''; break;
-            case 'Phobia': currentValue = playerData.phobia?.name || ''; break;
-            case 'Traits': currentValue = playerData.traits?.name || ''; break;
-            case 'Secret': currentValue = playerData.secret?.name || ''; break;
-            case 'SecretGoal': currentValue = playerData.secretGoal?.goal || ''; break;
+            case 'Personality': currentValue = formatPersonality(playerData.personality || playerData.Personality); break;
+            case 'Body': currentValue = formatBody(playerData.body || playerData.Body); break;
+            case 'Profession': currentValue = getCharValue(playerData, 'profession', 'Profession') || ''; break;
+            case 'PhysicalHealth': currentValue = getCharValue(playerData, 'physicalHealth', 'PhysicalHealth') || ''; break;
+            case 'MentalHealth': currentValue = getCharValue(playerData, 'mentalHealth', 'MentalHealth') || ''; break;
+            case 'Hobby': currentValue = getCharValue(playerData, 'hobby', 'Hobby') || ''; break;
+            case 'CharacterTrait': currentValue = getCharValue(playerData, 'characterTrait', 'CharacterTrait') || ''; break;
+            case 'Phobia': currentValue = getCharValue(playerData, 'phobia', 'Phobia') || ''; break;
+            case 'Traits': currentValue = getCharValue(playerData, 'traits', 'Traits') || ''; break;
+            case 'Secret': currentValue = getCharValue(playerData, 'secret', 'Secret') || ''; break;
+            case 'SecretGoal':
+                const sg = playerData.secretGoal || playerData.SecretGoal;
+                currentValue = sg?.goal ?? sg?.Goal ?? '';
+                break;
         }
         
-        document.getElementById('editCharInfo').textContent = `Гравець: ${playerData.name} | Характеристика: ${charName}`;
+        const playerName = playerData.name || playerData.Name || 'Гравець';
+        document.getElementById('editCharInfo').textContent = `Гравець: ${playerName} | Характеристика: ${charName}`;
         document.getElementById('editCharValue').value = currentValue;
         document.getElementById('editCharName').value = charName;
         document.getElementById('editCharModal').style.display = 'flex';
@@ -2751,55 +3635,89 @@ function updateActivatedCardsTable() {
     function updateRoomUI() {
         if (!currentRoom) return;
         
-        document.getElementById('currentRoomName').textContent = currentRoom.name;
-        document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id}`;
+        console.log("[updateRoomUI] Called with currentRoom:", currentRoom);
+        console.log("[updateRoomUI] isHost:", isHost);
+        console.log("[updateRoomUI] currentRoom.state:", currentRoom.state);
+        
+        document.getElementById('currentRoomName').textContent = currentRoom.name || 'Кімната';
+        document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id || ''}`;
         document.getElementById('currentRoomState').textContent = currentRoom.state === 'Lobby' ? 'Лобі' : 'Гра';
         
         const playerCount = Object.keys(roomPlayers).length;
-        document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers}`;
+        document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers || 12}`;
         
-        // Показуємо кнопку GM панелі тільки хосту
-        const gmPanelBtn = document.getElementById('gmPanelBtn');
-            if (isHost && currentRoom.state === 'Started' && !currentVoting) {
-            votingBtn.style.display = 'inline-block';
-            } else {
-            votingBtn.style.display = 'none';
-            }
-        // Показуємо кнопку старту тільки хосту
+        // Показуємо кнопку старту тільки хосту в лобі
         const startBtn = document.getElementById('startGameBtn');
-        if (isHost && currentRoom.state === 'Lobby') {
-            startBtn.style.display = 'inline-block';
-            startBtn.disabled = playerCount < 4;
-            startBtn.title = playerCount < 4 ? 'Потрібно мінімум 4 гравці' : '';
-        } else {
-            startBtn.style.display = 'none';
+        if (startBtn) {
+            if (isHost && currentRoom.state === 'Lobby') {
+                startBtn.style.display = 'inline-block';
+                startBtn.disabled = playerCount < 2; // Changed from 4 to 2 for testing
+                startBtn.title = playerCount < 2 ? 'Потрібно мінімум 2 гравці' : '';
+            } else {
+                startBtn.style.display = 'none';
+            }
         }
         
         // Показуємо кнопку голосування тільки хосту під час гри
         const votingBtn = document.getElementById('startVotingBtn');
-        if (isHost && currentRoom.state === 'Playing' && !currentVoting) {
-            votingBtn.style.display = 'inline-block';
-        } else {
-            votingBtn.style.display = 'none';
+        if (votingBtn) {
+            if (isHost && (currentRoom.state === 'Playing' || currentRoom.state === 'Started') && !currentVoting) {
+                votingBtn.style.display = 'inline-block';
+            } else {
+                votingBtn.style.display = 'none';
+            }
+        }
+        
+        // Показуємо кнопку GM панелі хосту ЗАВЖДИ (і в лобі, і під час гри)
+        const gmPanelBtn = document.getElementById('gmPanelBtn');
+        if (gmPanelBtn) {
+            if (isHost) {
+                gmPanelBtn.style.display = 'inline-block';
+                console.log("[updateRoomUI] GM Panel button shown for host");
+            } else {
+                gmPanelBtn.style.display = 'none';
+            }
         }
         
         // Текст очікування
         const waitingText = document.getElementById('waitingText');
-        if (playerCount < 4) {
-            waitingText.textContent = `Очікування гравців... (потрібно ще ${4 - playerCount})`;
-            waitingText.style.display = 'block';
-        } else if (!isHost) {
-            waitingText.textContent = 'Очікування старту гри від хоста...';
-            waitingText.style.display = 'block';
-        } else {
-            waitingText.style.display = 'none';
+        if (waitingText) {
+            if (playerCount < 2) {
+                waitingText.textContent = `Очікування гравців... (потрібно ще ${2 - playerCount})`;
+                waitingText.style.display = 'block';
+            } else if (!isHost) {
+                waitingText.textContent = 'Очікування старту гри від хоста...';
+                waitingText.style.display = 'block';
+            } else {
+                waitingText.style.display = 'none';
+            }
         }
+        
+        // Оновлюємо GM секції якщо гра почалась
+        updateGMSections();
         
         renderRoomPlayers();
         
         if (currentRoom.state !== 'Lobby') {
             updatePlayersTable();
         }
+    }
+    
+    // Нова функція для оновлення GM секцій
+    function updateGMSections() {
+        const gmScenarioSection = document.getElementById('gmScenarioSection');
+        const gmEventsSection = document.getElementById('gmEventsSection');
+        
+        const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started');
+        
+        if (gmScenarioSection) {
+            gmScenarioSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
+        }
+        if (gmEventsSection) {
+            gmEventsSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
+        }
+        
+        console.log("[updateGMSections] isHost:", isHost, "isGameActive:", isGameActive);
     }
 
     function renderRoomsList(rooms) {
@@ -2836,12 +3754,20 @@ function updateActivatedCardsTable() {
         
         container.innerHTML = players.map((p, i) => {
             var seatLabel = p.seatNumber ? '#' + p.seatNumber : '#' + (i + 1);
+            const isEliminated = p.isEliminated || p.IsEliminated || false;
+            
+            let cardClasses = ['room-player-card'];
+            if (p.connectionId === myConnectionId) cardClasses.push('my-player');
+            if (p.isHost) cardClasses.push('host-player');
+            if (isEliminated) cardClasses.push('room-player-eliminated');
+            
             return `
-            <div class="room-player-card ${p.connectionId === myConnectionId ? 'my-player' : ''} ${p.isHost ? 'host-player' : ''}">
+            <div class="${cardClasses.join(' ')}">
                 <span class="player-number">${seatLabel}</span>
                 <span class="player-name">${p.name}</span>
                 ${p.isHost ? '<span class="host-badge">Хост</span>' : ''}
                 ${p.connectionId === myConnectionId ? '<span class="you-badge">Ви</span>' : ''}
+                ${isEliminated ? '<span class="eliminated-badge-small">ВИБУВ</span>' : ''}
             </div>`;
         }).join('');
     }
@@ -2864,10 +3790,26 @@ function updateActivatedCardsTable() {
         
         tbody.innerHTML = players.map((player, index) => {
             var seatLabel = player.seatNumber ? '#' + player.seatNumber : '#' + (index + 1);
+            const isMe = player.connectionId === myConnectionId;
+            const isEliminated = player.isEliminated || player.IsEliminated || false;
+            
+            // Build CSS classes
+            let rowClasses = [];
+            if (isMe) rowClasses.push('my-player-row');
+            if (isEliminated) rowClasses.push('player-eliminated');
+            
+            // Eliminated badge
+            const eliminatedBadge = isEliminated ? '<span class="eliminated-badge">ВИБУВ</span>' : '';
+            
             return `
-            <tr class="${player.connectionId === myConnectionId ? 'my-player-row' : ''}" data-player="${player.connectionId}">
+            <tr class="${rowClasses.join(' ')}" data-player="${player.connectionId}">
                 <td class="player-number">${seatLabel}</td>
-                <td class="player-name">${player.name}${player.connectionId === myConnectionId ? ' <span class="my-badge">(Я)</span>' : ''}${player.isHost ? ' <span class="host-badge-small">Хост</span>' : ''}</td>
+                <td class="player-name-cell">
+                    <span class="player-name-text">${player.name}</span>
+                    ${isMe ? '<span class="my-badge">(Я)</span>' : ''}
+                    ${player.isHost ? '<span class="host-badge-small">Хост</span>' : ''}
+                    ${eliminatedBadge}
+                </td>
                 <td>${renderTableCell(player, 'personality')}</td>
                 <td>${renderTableCell(player, 'body')}</td>
                 <td>${renderTableCell(player, 'profession')}</td>
@@ -2884,7 +3826,9 @@ function updateActivatedCardsTable() {
             `;
             }).join('');
         
-        document.getElementById('playerCount').textContent = `${players.length}/${currentRoom?.maxPlayers || 12}`;
+        // Count non-eliminated players for bunker capacity display
+        const activePlayers = players.filter(p => !(p.isEliminated || p.IsEliminated));
+        document.getElementById('playerCount').textContent = `${activePlayers.length}/${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
     }
 
     function renderTableCell(player, charKey) {
@@ -3400,6 +4344,101 @@ function updateActivatedCardsTable() {
 .event-room { color: var(--color-gold); font-weight: 600; }
 .event-error { color: #e74c3c; }
 
+/* ==================== ELIMINATED PLAYER STYLES ==================== */
+.player-eliminated {
+    opacity: 0.4;
+    filter: grayscale(70%);
+    background: rgba(100, 100, 100, 0.15) !important;
+    position: relative;
+}
+
+.player-eliminated td {
+    color: var(--color-text-muted) !important;
+}
+
+.player-eliminated .char-revealed {
+    color: var(--color-text-muted) !important;
+}
+
+.player-eliminated .player-number {
+    text-decoration: line-through;
+}
+
+.player-name-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-width: 150px;
+    overflow: hidden;
+}
+
+.player-name-text {
+    font-weight: 600;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-eliminated .player-name-text {
+    text-decoration: line-through;
+    font-weight: normal;
+}
+
+.eliminated-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+    animation: eliminatedPulse 2s ease-in-out infinite;
+}
+
+@@keyframes eliminatedPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Keep my-player-row highlight even when eliminated */
+.player-eliminated.my-player-row {
+    background: rgba(216, 155, 43, 0.08) !important;
+}
+
+/* Room player card eliminated state (lobby view) */
+.room-player-eliminated {
+    opacity: 0.4;
+    filter: grayscale(60%);
+    position: relative;
+}
+
+.room-player-eliminated .player-name {
+    text-decoration: line-through;
+}
+
+.eliminated-badge-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.1rem 0.35rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 3px;
+    margin-left: 0.3rem;
+}
+
 /* Tooltip styles */
 .characteristic-with-tooltip { display: inline-flex; align-items: center; gap: 6px; position: relative; }
 .tooltip-trigger { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; font-size: 11px; font-weight: bold; color: #fff; background: linear-gradient(135deg, #ff6b35, #f7931e); border-radius: 50%; cursor: help; transition: all 0.2s ease; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
@@ -3609,6 +4648,20 @@ function updateActivatedCardsTable() {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Hidden/revealed states for GM characteristic values */
+.gm-char-value.gm-char-hidden {
+    color: var(--color-text-muted);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.gm-char-value.gm-char-revealed {
+    color: var(--color-green);
+    font-weight: 600;
+    font-style: normal;
+    opacity: 1;
 }
 
 .gm-char-actions {
@@ -3827,6 +4880,249 @@ function updateActivatedCardsTable() {
 .event-danger { color: #e74c3c; font-weight: 600; }
 .event-success { color: #27ae60; font-weight: 500; }
 .event-catastrophe { color: #e74c3c; font-weight: 700; text-transform: uppercase; }
+.event-image { color: #9b59b6; font-weight: 500; }
+
+/* ==================== SCENARIO IMAGE STYLES ==================== */
+.scenario-image-container {
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.scenario-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.scenario-image:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.scenario-image-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+.btn-scenario-image {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-scenario-image:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    background: rgba(216, 155, 43, 0.1);
+}
+
+.btn-scenario-image.btn-generate {
+    border-color: #9b59b6;
+    color: #9b59b6;
+}
+
+.btn-scenario-image.btn-generate:hover {
+    background: rgba(155, 89, 182, 0.15);
+}
+
+.btn-scenario-image.btn-remove {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.btn-scenario-image.btn-remove:hover {
+    background: rgba(231, 76, 60, 0.15);
+}
+
+/* Prompt Modal */
+.prompt-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 1rem;
+}
+
+.prompt-modal {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.prompt-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.prompt-modal-header h3 {
+    margin: 0;
+    color: var(--color-gold);
+    font-size: 1.1rem;
+}
+
+.prompt-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.prompt-modal-close:hover {
+    color: var(--color-red);
+}
+
+.prompt-modal-body {
+    padding: 1.5rem;
+}
+
+.prompt-modal-body textarea {
+    width: 100%;
+    min-height: 200px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 1rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.btn-copy-prompt {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-copy-prompt:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Image Modal */
+.image-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    padding: 1rem;
+}
+
+.image-modal {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.image-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.image-modal-header h3 {
+    margin: 0;
+    color: var(--color-gold);
+    font-size: 1rem;
+}
+
+.image-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.image-modal-close:hover {
+    color: var(--color-red);
+}
+
+.image-modal-body {
+    max-height: calc(90vh - 60px);
+    overflow: auto;
+}
+
+.image-modal-body img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(90vh - 80px);
+    margin: 0 auto;
+}
+
+@@media (max-width: 768px) {
+    .scenario-image-controls {
+        flex-direction: column;
+    }
+    
+    .btn-scenario-image {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .scenario-image {
+        max-height: 200px;
+    }
+}
 
 /* Voting badges */
 .badge-protected {
@@ -4007,6 +5303,38 @@ function updateActivatedCardsTable() {
     font-weight: 600;
 }
 
+/* ==================== SCENARIO SECTION HEADER ==================== */
+.scenario-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+}
+
+.section-header-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    max-width: 200px;
+}
+
+.section-header-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+    padding: 0.5rem 1.5rem;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-gold);
+    border-radius: 8px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    white-space: nowrap;
+}
+
 /* ==================== APOCALYPSE & BUNKER STYLES ==================== */
 .game-info-panels {
     display: grid;
@@ -4137,6 +5465,20 @@ function updateActivatedCardsTable() {
 @@media (max-width: 900px) {
     .game-info-panels {
         grid-template-columns: 1fr;
+    }
+    
+    .scenario-section-header {
+        gap: 1rem;
+    }
+    
+    .section-header-title {
+        font-size: 1.1rem;
+        padding: 0.4rem 1rem;
+        letter-spacing: 1px;
+    }
+    
+    .section-header-line {
+        max-width: 100px;
     }
 }
 

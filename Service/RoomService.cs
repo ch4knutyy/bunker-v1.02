@@ -166,8 +166,8 @@ namespace Bunker.Services
 				return (false, "Недостатньо гравців для початку", null);
 			}
 
-			// Якщо вже запущена
-			if (room.State != RoomState.Waiting)
+			// Якщо вже запущена (room starts in Lobby state)
+			if (room.State != RoomState.Lobby)
 			{
 				return (false, "Гра вже запущена", null);
 			}

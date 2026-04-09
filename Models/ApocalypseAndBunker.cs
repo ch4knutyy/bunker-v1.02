@@ -13,6 +13,7 @@ namespace Bunker.Models
         public string Duration { get; set; } = ""; // Тривалість перебування в бункері
         public List<string> Threats { get; set; } = new(); // Загрози зовні
         public List<string> Requirements { get; set; } = new(); // Що потрібно для виживання
+        public string? ImageUrl { get; set; } // URL зображення апокаліпсису
 
         public object ToClientInfo()
         {
@@ -25,8 +26,21 @@ namespace Bunker.Models
                 survivalChance = SurvivalChance,
                 duration = Duration,
                 threats = Threats,
-                requirements = Requirements
+                requirements = Requirements,
+                imageUrl = ImageUrl
             };
+        }
+        
+        /// <summary>
+        /// Генерує промпт для AI-генерації зображення
+        /// </summary>
+        public string GenerateImagePrompt()
+        {
+            var threatsList = Threats.Count > 0 ? string.Join(", ", Threats.Take(3)) : "unknown dangers";
+            return $"Create a dark cinematic post-apocalyptic illustration of '{Name}'. " +
+                   $"{Description} " +
+                   $"Show {threatsList}, desperate survival mood, dramatic lighting, realistic detailed style. " +
+                   $"Severity: {Severity}. Dark atmospheric scene, high detail, 4k quality.";
         }
     }
 
@@ -45,6 +59,7 @@ namespace Bunker.Models
         public List<string> Resources { get; set; } = new(); // Наявні ресурси
         public List<string> Problems { get; set; } = new(); // Проблеми бункера
         public string Condition { get; set; } = "good"; // poor, fair, good, excellent
+        public string? ImageUrl { get; set; } // URL зображення бункера
 
         public object ToClientInfo()
         {
@@ -59,8 +74,25 @@ namespace Bunker.Models
                 facilities = Facilities,
                 resources = Resources,
                 problems = Problems,
-                condition = Condition
+                condition = Condition,
+                imageUrl = ImageUrl
             };
+        }
+        
+        /// <summary>
+        /// Генерує промпт для AI-генерації зображення
+        /// </summary>
+        public string GenerateImagePrompt()
+        {
+            var facilitiesList = Facilities.Count > 0 ? string.Join(", ", Facilities.Take(3)) : "basic rooms";
+            var problemsList = Problems.Count > 0 ? string.Join(", ", Problems.Take(2)) : "";
+            var problemsText = !string.IsNullOrEmpty(problemsList) ? $"Problems visible: {problemsList}. " : "";
+            
+            return $"Create a dark realistic underground survival bunker illustration of '{Name}'. " +
+                   $"{Description} " +
+                   $"Location: {Location}. Facilities: {facilitiesList}. " +
+                   $"{problemsText}" +
+                   $"Condition: {Condition}. Survival atmosphere, cinematic lighting, realistic detailed style, 4k quality.";
         }
     }
 
