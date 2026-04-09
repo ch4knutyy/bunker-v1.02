@@ -792,13 +792,14 @@ body {
     .main-content {
         padding: 1rem;
     }
-    
+
     .game-container,
     .join-section,
     .players-section,
     .events-section,
     .revealed-section {
         padding: 1rem;
+        overflow: visible;
     }
 }
 
@@ -1045,16 +1046,12 @@ body {
     border: 1px solid var(--color-border);
 }
 
-.special-cards-table-wrapper {
-    overflow-x: auto;
-    margin-top: 1rem;
-}
 
-.special-cards-table-wrapper,
 .special-cards-table,
-.special-cards-table td,
-.special-cards-table th {
-    overflow: visible;
+.special-cards-table tbody,
+.special-cards-table tr,
+.special-cards-table td {
+    overflow: visible !important;
 }
 
 .special-cards-table {
@@ -1092,11 +1089,17 @@ body {
 }
 
 .activated-card-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 500;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.28);
 }
 
 .activated-card-badge.rarity-common {
@@ -1472,90 +1475,57 @@ body {
 .special-cards-table-wrapper {
     overflow-x: auto;
     overflow-y: visible;
-    margin-top: 1rem;
 }
 
 .special-cards-table,
-.special-cards-table td,
-.special-cards-table th {
-    overflow: visible;
+.special-cards-table tbody,
+.special-cards-table tr,
+.special-cards-table td {
+    overflow: visible !important;
 }
 
-    .special-cards-table td {
-        position: relative;
-    }
+.special-cards-table td {
+    position: relative;
+}
 
-.card-tooltip-trigger {
+/* Activated card badge with tooltip wrapper */
+.activated-card-badge {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    cursor: help;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .activated-card-badge {
     position: relative;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
     padding: 6px 12px;
     border-radius: 10px;
     font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-/* tooltip */
-.card-tooltip-trigger .custom-tooltip {
-    visibility: hidden;
-    opacity: 0;
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 10px);
-    transform: translateX(-50%) translateY(6px);
-    z-index: 99999;
-    min-width: 220px;
-    max-width: 320px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: rgba(18, 24, 38, 0.98);
+    font-weight: 700;
     color: #fff;
-    font-size: 13px;
-    line-height: 1.4;
-    font-weight: 500;
-    white-space: normal;
-    text-align: left;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255,255,255,0.08);
-    pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-    .card-tooltip-trigger .custom-tooltip::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 6px solid transparent;
-        border-top-color: rgba(18, 24, 38, 0.98);
-    }
-
-.card-tooltip-trigger:hover .custom-tooltip {
-    visibility: visible;
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+/* Card badge text */
+.card-badge-text {
+    display: inline;
 }
 
-.card-badge-tooltip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: help;
-}
-
+/* Card badge info icon */
 .card-badge-icon {
     display: inline-flex;
     align-items: center;
@@ -1571,7 +1541,107 @@ body {
     flex-shrink: 0;
 }
 
+/* Tooltip content - positioned above the badge */
+.card-tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    min-width: 240px;
+    max-width: 340px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(14, 20, 32, 0.98);
+    color: #f8fafc;
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.42);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+}
+
+/* Tooltip arrow */
+    .card-tooltip-content::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 7px solid transparent;
+        border-top-color: rgba(14, 20, 32, 0.98);
+    }
+
+.card-tooltip-wrapper:hover .card-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+/* Show tooltip on hover */
+.activated-card-badge:hover .card-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip positioning for edge cases - show below if near top */
+.activated-card-badge.tooltip-bottom .card-tooltip-content {
+    bottom: auto;
+    top: calc(100% + 12px);
+}
+
+.activated-card-badge.tooltip-bottom .card-tooltip-content::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: rgba(18, 24, 38, 0.98);
+}
+
+/* Mobile: click/touch support */
+.activated-card-badge.tooltip-active .card-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Rarity backgrounds */
+.activated-card-badge.rarity-common {
+    background: linear-gradient(135deg, #5f6b7a, #3f4955);
+}
+
+.activated-card-badge.rarity-rare {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.activated-card-badge.rarity-epic {
+    background: linear-gradient(135deg, #a855f7, #6d28d9);
+}
+
+.activated-card-badge.rarity-legendary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* Legacy support for old class names */
+.card-tooltip-wrapper {
+    position: relative;
+    z-index: 20;
+}
+
+.card-badge-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: help;
+}
+
 .card-badge-tooltip-box {
+    visibility: hidden;
+    opacity: 0;
     position: absolute;
     left: 50%;
     bottom: calc(100% + 10px);
@@ -1589,23 +1659,122 @@ body {
     text-align: left;
     border: 1px solid rgba(255,255,255,0.08);
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-    opacity: 0;
-    visibility: hidden;
     pointer-events: none;
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-    .card-badge-tooltip-box::after {
+.card-tooltip-content::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 7px solid transparent;
+    border-bottom-color: rgba(14, 20, 32, 0.98);
+}
+
+.card-tooltip-wrapper:hover .card-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.main-content,
+.game-container,
+.players-section,
+.special-cards-table-section,
+.special-cards-table-wrapper,
+.special-cards-table,
+.special-cards-table tbody,
+.special-cards-table tr,
+.special-cards-table td,
+.special-cards-table th {
+    overflow: visible !important;
+}
+
+.special-cards-table-wrapper {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+.card-tooltip-wrapper {
+    position: relative;
+    z-index: 1000;
+}
+
+.card-tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    min-width: 240px;
+    max-width: 340px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(14, 20, 32, 0.98);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.42);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+}
+
+    .card-tooltip-content::after {
         content: "";
         position: absolute;
         top: 100%;
         left: 50%;
         transform: translateX(-50%);
-        border: 6px solid transparent;
-        border-top-color: rgba(18, 24, 38, 0.98);
+        border: 7px solid transparent;
+        border-top-color: rgba(14, 20, 32, 0.98);
     }
 
-.card-badge-tooltip:hover .card-badge-tooltip-box {
+.card-tooltip-wrapper:hover .card-tooltip-content {
     opacity: 1;
     visibility: visible;
 }
+.global-card-tooltip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -100%);
+    z-index: 99999999;
+    min-width: 240px;
+    max-width: 340px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(14, 20, 32, 0.98);
+    color: #f8fafc;
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.42);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease;
+}
+
+    .global-card-tooltip.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .global-card-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 7px solid transparent;
+        border-top-color: rgba(14, 20, 32, 0.98);
+    }
