@@ -1070,6 +1070,78 @@ namespace Bunker
         }
 
         /// <summary>
+        /// Додати випадкову кількість запасів до бункера (тільки хост)
+        /// </summary>
+        public async Task AddBunkerSupplies()
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може додавати запаси");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null) return;
+
+            if (room.Bunker == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
+                return;
+            }
+
+            // Генеруємо випадкову кількість місяців 1-12
+            int addedMonths = _random.Next(1, 13);
+            
+            // Додаємо до поточних запасів
+            room.Bunker.SuppliesMonths += addedMonths;
+
+            _logger.LogInformation($"GM додав {addedMonths} місяців запасів до бункера в кімнаті {room.Name}. Всього: {room.Bunker.SuppliesMonths}");
+
+            // Надсилаємо оновлення всім гравцям
+            await Clients.Group(room.Id).SendAsync("BunkerSuppliesAdded", new
+            {
+                addedMonths = addedMonths,
+                totalSuppliesMonths = room.Bunker.SuppliesMonths,
+                bunker = room.Bunker.ToClientInfo()
+            });
+        }
+
+        /// <summary>
+        /// Зменшити запаси бункера (тільки хост)
+        /// </summary>
+        public async Task RemoveBunkerSupplies(int months)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати запаси");
+                return;
+            }
+
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null) return;
+
+            if (room.Bunker == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
+                return;
+            }
+
+            // Забираємо місяці (мінімум 0)
+            int removedMonths = Math.Min(months, room.Bunker.SuppliesMonths);
+            room.Bunker.SuppliesMonths = Math.Max(0, room.Bunker.SuppliesMonths - months);
+
+            _logger.LogInformation($"GM зняв {removedMonths} місяців запасів з бункера в кімнаті {room.Name}. Залишилось: {room.Bunker.SuppliesMonths}");
+
+            // Надсилаємо оновлення всім гравцям
+            await Clients.Group(room.Id).SendAsync("BunkerSuppliesRemoved", new
+            {
+                removedMonths = removedMonths,
+                totalSuppliesMonths = room.Bunker.SuppliesMonths,
+                bunker = room.Bunker.ToClientInfo()
+            });
+        }
+
+        /// <summary>
         /// Відправити нову подію з ефектом всім гравцям
         /// </summary>
         public async Task TriggerNewEvent(string eventName, string eventDescription, string effectType = null, int? effectValue = null)

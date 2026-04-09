@@ -246,7 +246,7 @@
                     </div>
                     <div class="gm-quick-events">
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Землетрус! Частина бункера пошкоджена.', 'catastrophe')">Землетрус</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Знайдено додаткові запаси!', 'success')">Запаси</button>
+                        <button class="btn-gm-quick" onclick="addBunkerSupplies()">Запаси</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Загроза зараження! Потрібна дезінфекція.', 'warning')">Зараження</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Зовнішні виживальці просять допомоги.', 'info')">Виживальці</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Генератор зламався! Світла немає.', 'danger')">Генератор</button>
@@ -937,6 +937,17 @@ function registerSignalREvents() {
             console.log("[GameStarted] startBtn hidden");
         }
 
+        // Show voting button for host now that game is active
+        const votingBtn = document.getElementById('startVotingBtn');
+        if (votingBtn) {
+            if (isHost && !currentVoting) {
+                votingBtn.style.display = 'inline-block';
+                console.log("[GameStarted] Voting button shown for host");
+            } else {
+                votingBtn.style.display = 'none';
+            }
+        }
+
         // Update activated cards table
         console.log("[GameStarted] Calling updateActivatedCardsTable...");
         updateActivatedCardsTable();
@@ -1263,6 +1274,17 @@ function registerSignalREvents() {
             if (startBtn) {
                 startBtn.style.display = 'none';
                 startBtn.disabled = true;
+            }
+
+            // Show voting button for host in game state
+            const votingBtn = document.getElementById('startVotingBtn');
+            if (votingBtn) {
+                if (isHost && !currentVoting && currentRoom.state !== 'Voting') {
+                    votingBtn.style.display = 'inline-block';
+                    console.log("[RejoinSuccess] Voting button shown for host");
+                } else {
+                    votingBtn.style.display = 'none';
+                }
             }
 
             if (currentApocalypse) renderApocalypse(currentApocalypse);
@@ -1633,6 +1655,34 @@ function registerSignalREvents() {
         }
     });
 
+    // ==================== BUNKER SUPPLIES HANDLERS ====================
+    
+    // Запаси бункера додано
+    connection.off("BunkerSuppliesAdded");
+    connection.on("BunkerSuppliesAdded", function (data) {
+        console.log("[BunkerSuppliesAdded]", data);
+        
+        if (currentBunker) {
+            currentBunker.suppliesMonths = data.totalSuppliesMonths;
+            renderBunker(currentBunker);
+        }
+        
+        addEventMessage(`<span class="event-success">📦 GM додав запаси їжі: +${data.addedMonths} місяців</span>`);
+    });
+    
+    // Запаси бункера зменшено
+    connection.off("BunkerSuppliesRemoved");
+    connection.on("BunkerSuppliesRemoved", function (data) {
+        console.log("[BunkerSuppliesRemoved]", data);
+        
+        if (currentBunker) {
+            currentBunker.suppliesMonths = data.totalSuppliesMonths;
+            renderBunker(currentBunker);
+        }
+        
+        addEventMessage(`<span class="event-warning">📦 Запаси бункера зменшено на ${data.removedMonths} місяців</span>`);
+    });
+
 } // End of registerSignalREvents()
 
 // ==================== GLOBAL FUNCTIONS ====================
@@ -2000,6 +2050,59 @@ function closeImageModal() {
     if (modal) {
         modal.style.display = 'none';
     }
+}
+
+// ==================== BUNKER SUPPLIES FUNCTIONS ====================
+
+// Додати випадкову кількість запасів до бункера (1-12 місяців)
+function addBunkerSupplies() {
+    if (!isHost) {
+        alert('Тільки хост може додавати запаси');
+        return;
+    }
+    
+    if (!currentBunker) {
+        alert('Бункер не визначено. Спочатку почніть гру.');
+        return;
+    }
+    
+    console.log("[addBunkerSupplies] Invoking...");
+    
+    connection.invoke("AddBunkerSupplies")
+        .then(() => {
+            console.log("[addBunkerSupplies] Success");
+        })
+        .catch(err => {
+            console.error("[addBunkerSupplies] Error:", err);
+            alert('Помилка додавання запасів');
+        });
+}
+
+// Зменшити запаси бункера
+function removeBunkerSupplies(months) {
+    if (!isHost) {
+        alert('Тільки хост може змінювати запаси');
+        return;
+    }
+    
+    if (!currentBunker) {
+        alert('Бункер не визначено');
+        return;
+    }
+    
+    const amount = months || parseInt(prompt('Скільки місяців забрати?', '3'));
+    if (isNaN(amount) || amount <= 0) return;
+    
+    console.log("[removeBunkerSupplies] Invoking with:", amount);
+    
+    connection.invoke("RemoveBunkerSupplies", amount)
+        .then(() => {
+            console.log("[removeBunkerSupplies] Success");
+        })
+        .catch(err => {
+            console.error("[removeBunkerSupplies] Error:", err);
+            alert('Помилка зменшення запасів');
+        });
 }
 
     // ==================== BUTTON EVENT BINDING ====================
