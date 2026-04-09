@@ -272,6 +272,13 @@
 
         <!-- Players Table Section (під час гри) -->
         <div id="gameSection" style="display: none;">
+            <!-- Section Header for Apocalypse & Bunker -->
+            <div class="scenario-section-header">
+                <div class="section-header-line"></div>
+                <h2 class="section-header-title">🎭 Бункер та Апокаліпсис</h2>
+                <div class="section-header-line"></div>
+            </div>
+            
             <!-- Apocalypse & Bunker Info -->
             <div class="game-info-panels">
                 <div class="apocalypse-panel" id="apocalypsePanel">
@@ -934,25 +941,16 @@ function registerSignalREvents() {
         console.log("[GameStarted] Calling updateActivatedCardsTable...");
         updateActivatedCardsTable();
 
-        // Show GM sections for host
-        if (isHost) {
-            console.log("[GameStarted] Host mode - showing GM sections");
-            const gmScenarioSection = document.getElementById('gmScenarioSection');
-            const gmEventsSection = document.getElementById('gmEventsSection');
-            
-            if (gmScenarioSection) {
-                gmScenarioSection.style.display = 'block';
-            }
-            if (gmEventsSection) {
-                gmEventsSection.style.display = 'block';
-            }
-
-            if (currentBunker) {
-                currentBunkerCapacity = currentBunker.capacity;
-                const gmBunkerCapacity = document.getElementById('gmBunkerCapacity');
-                if (gmBunkerCapacity) {
-                    gmBunkerCapacity.textContent = currentBunker.capacity;
-                }
+        // Show GM sections for host using the dedicated function
+        console.log("[GameStarted] Calling updateGMSections...");
+        updateGMSections();
+        
+        // Update bunker capacity display
+        if (isHost && currentBunker) {
+            currentBunkerCapacity = currentBunker.capacity;
+            const gmBunkerCapacity = document.getElementById('gmBunkerCapacity');
+            if (gmBunkerCapacity) {
+                gmBunkerCapacity.textContent = currentBunker.capacity;
             }
         }
 
@@ -2978,6 +2976,10 @@ function updateActivatedCardsTable() {
     function updateRoomUI() {
         if (!currentRoom) return;
         
+        console.log("[updateRoomUI] Called with currentRoom:", currentRoom);
+        console.log("[updateRoomUI] isHost:", isHost);
+        console.log("[updateRoomUI] currentRoom.state:", currentRoom.state);
+        
         document.getElementById('currentRoomName').textContent = currentRoom.name || 'Кімната';
         document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id || ''}`;
         document.getElementById('currentRoomState').textContent = currentRoom.state === 'Lobby' ? 'Лобі' : 'Гра';
@@ -2985,13 +2987,13 @@ function updateActivatedCardsTable() {
         const playerCount = Object.keys(roomPlayers).length;
         document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers || 12}`;
         
-        // Показуємо кнопку старту тільки хосту
+        // Показуємо кнопку старту тільки хосту в лобі
         const startBtn = document.getElementById('startGameBtn');
         if (startBtn) {
             if (isHost && currentRoom.state === 'Lobby') {
                 startBtn.style.display = 'inline-block';
-                startBtn.disabled = playerCount < 4;
-                startBtn.title = playerCount < 4 ? 'Потрібно мінімум 4 гравці' : '';
+                startBtn.disabled = playerCount < 2; // Changed from 4 to 2 for testing
+                startBtn.title = playerCount < 2 ? 'Потрібно мінімум 2 гравці' : '';
             } else {
                 startBtn.style.display = 'none';
             }
@@ -3007,11 +3009,12 @@ function updateActivatedCardsTable() {
             }
         }
         
-        // Показуємо кнопку GM панелі тільки хосту
+        // Показуємо кнопку GM панелі хосту ЗАВЖДИ (і в лобі, і під час гри)
         const gmPanelBtn = document.getElementById('gmPanelBtn');
         if (gmPanelBtn) {
-            if (isHost && (currentRoom.state === 'Playing' || currentRoom.state === 'Started')) {
+            if (isHost) {
                 gmPanelBtn.style.display = 'inline-block';
+                console.log("[updateRoomUI] GM Panel button shown for host");
             } else {
                 gmPanelBtn.style.display = 'none';
             }
@@ -3020,8 +3023,8 @@ function updateActivatedCardsTable() {
         // Текст очікування
         const waitingText = document.getElementById('waitingText');
         if (waitingText) {
-            if (playerCount < 4) {
-                waitingText.textContent = `Очікування гравців... (потрібно ще ${4 - playerCount})`;
+            if (playerCount < 2) {
+                waitingText.textContent = `Очікування гравців... (потрібно ще ${2 - playerCount})`;
                 waitingText.style.display = 'block';
             } else if (!isHost) {
                 waitingText.textContent = 'Очікування старту гри від хоста...';
@@ -3031,11 +3034,31 @@ function updateActivatedCardsTable() {
             }
         }
         
+        // Оновлюємо GM секції якщо гра почалась
+        updateGMSections();
+        
         renderRoomPlayers();
         
         if (currentRoom.state !== 'Lobby') {
             updatePlayersTable();
         }
+    }
+    
+    // Нова функція для оновлення GM секцій
+    function updateGMSections() {
+        const gmScenarioSection = document.getElementById('gmScenarioSection');
+        const gmEventsSection = document.getElementById('gmEventsSection');
+        
+        const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started');
+        
+        if (gmScenarioSection) {
+            gmScenarioSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
+        }
+        if (gmEventsSection) {
+            gmEventsSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
+        }
+        
+        console.log("[updateGMSections] isHost:", isHost, "isGameActive:", isGameActive);
     }
 
     function renderRoomsList(rooms) {
@@ -4243,6 +4266,38 @@ function updateActivatedCardsTable() {
     font-weight: 600;
 }
 
+/* ==================== SCENARIO SECTION HEADER ==================== */
+.scenario-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+}
+
+.section-header-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    max-width: 200px;
+}
+
+.section-header-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+    padding: 0.5rem 1.5rem;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-gold);
+    border-radius: 8px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    white-space: nowrap;
+}
+
 /* ==================== APOCALYPSE & BUNKER STYLES ==================== */
 .game-info-panels {
     display: grid;
@@ -4373,6 +4428,20 @@ function updateActivatedCardsTable() {
 @@media (max-width: 900px) {
     .game-info-panels {
         grid-template-columns: 1fr;
+    }
+    
+    .scenario-section-header {
+        gap: 1rem;
+    }
+    
+    .section-header-title {
+        font-size: 1.1rem;
+        padding: 0.4rem 1rem;
+        letter-spacing: 1px;
+    }
+    
+    .section-header-line {
+        max-width: 100px;
     }
 }
 
