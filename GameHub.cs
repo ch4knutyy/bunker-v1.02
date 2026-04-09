@@ -25,141 +25,135 @@ namespace Bunker
             _logger = logger;
         }
 
-        #region Room Management
+		#region Room Management
 
-        /// <summary>
-        /// Створити нову кімнату
-        /// </summary>
-        public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null, string? stablePlayerId = null)
-        {
-            if (string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(playerName))
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Назва кімнати та ім'я гравця обов'язкові");
-                return;
-            }
-
-            try
-            {
-                // Створюємо кімнату
-                var room = _roomService.CreateRoom(roomName, Context.ConnectionId, playerName, maxPlayers, password);
-
-                // Генеруємо персонажа для хоста
-                var player = _generator.Generate(playerName);
-                player.ConnectionId = Context.ConnectionId;
-                player.StablePlayerId = stablePlayerId ?? "";
-                
-                // Генеруємо спеціальні карти
-                player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
-
-                // Приєднуємо хоста до кімнати (передаємо пароль щоб пройти перевірку)
-                var (success, error, _) = _roomService.JoinRoom(room.Id, Context.ConnectionId, player, password);
-                
-                if (!success)
-                {
-                    await Clients.Caller.SendAsync("ReceiveError", error);
-                    return;
-                }
-
-                // Додаємо до SignalR групи
-                await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
-
-                // Відправляємо дані про кімнату та гравця
-                await Clients.Caller.SendAsync("RoomCreated", new
-                {
-                    room = room.ToPublicInfo(),
-                    player = player,
-                    isHost = true
-                });
-
-                // Оновлюємо список кімнат для всіх
-                await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
-
-                _logger.LogInformation($"Кімната '{roomName}' створена гравцем {playerName}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Помилка створення кімнати");
-                await Clients.Caller.SendAsync("ReceiveError", "Помилка створення кімнати");
-            }
-        }
-
-        /// <summary>
-        /// Приєднатися до кімнати
-        /// </summary>
-        public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null)
-        {
-            if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "ID кімнати та ім'я гравця обов'язкові");
-                return;
-            }
-
-			// Генеруємо персонажа
-			var player = _generator.Generate(playerName);
-            player.ConnectionId = Context.ConnectionId;
-            player.StablePlayerId = stablePlayerId ?? "";
-            
-            // Генеруємо спеціальні карти
-            player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
-
-            var (success, error, joinedroom) = _roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
-
-            if (!success || joinedroom == null)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", error ?? "Помилка приєднання");
-                return;
-            }
-
-            // Додаємо до SignalR групи
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-
-			// Відправляємо дані новому гравцю
-			var (joinSuccess, joinError, room) = _roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
-
-			if (!success || room == null)
+		/// <summary>
+		/// Створити нову кімнату
+		/// </summary>
+		public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null, string? stablePlayerId = null)
+		{
+			if (string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(playerName))
 			{
-				await Clients.Caller.SendAsync("ReceiveError", error ?? "Помилка приєднання");
+				await Clients.Caller.SendAsync("ReceiveError", "Назва кімнати та ім'я гравця обов'язкові");
 				return;
 			}
 
-			// Додаємо до групи
-			await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-
-			// Відправляємо дані
-			await Clients.Caller.SendAsync("RoomJoined", new
+			try
 			{
-				room = room.ToPublicInfo(),
-				player = player,
-				isHost = room.IsHost(Context.ConnectionId),
-				players = room.Players.Values.Select(p => new
+				// Створюємо кімнату
+				var room = _roomService.CreateRoom(roomName, Context.ConnectionId, playerName, maxPlayers, password);
+
+				// Генеруємо персонажа для хоста
+				var player = _generator.Generate(playerName);
+				player.ConnectionId = Context.ConnectionId;
+				player.StablePlayerId = stablePlayerId ?? "";
+
+				// Генеруємо спеціальні карти
+				player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
+
+				// Приєднуємо хоста до створеної кімнати
+				var (joinSuccess, joinError, joinedRoom) =
+					_roomService.JoinRoom(room.Id, Context.ConnectionId, player, password);
+
+				if (!joinSuccess || joinedRoom == null)
 				{
-					name = p.Name,
-					connectionId = p.ConnectionId,
-					isHost = room.IsHost(p.ConnectionId),
-					revealed = p.Revealed,
-					revealedValues = p.Revealed.RevealedValues,
-					isEliminated = p.IsEliminated,
-					seatNumber = p.SeatNumber
-				}).ToList()
-			});
+					await Clients.Caller.SendAsync("ReceiveError", joinError ?? "Помилка приєднання");
+					return;
+				}
 
-			// Повідомляємо інших в кімнаті
-			await Clients.OthersInGroup(roomId).SendAsync("PlayerJoinedRoom", new
-            {
-                name = player.Name,
-                connectionId = Context.ConnectionId,
-                isHost = false,
-                revealed = player.Revealed
-            });
+				// Додаємо до SignalR групи
+				await Groups.AddToGroupAsync(Context.ConnectionId, joinedRoom.Id);
 
-            // Оновлюємо список кімнат
-            await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
-        }
+				// Повідомляємо клієнта про успішне створення кімнати
+				await Clients.Caller.SendAsync("RoomCreated", new
+				{
+					room = joinedRoom.ToPublicInfo(),
+					player = player,
+					isHost = true
+				});
 
-        /// <summary>
-        /// Покинути кімнату
-        /// </summary>
-        public async Task LeaveRoom()
+				// Оновлюємо список кімнат
+				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
+
+				_logger.LogInformation("Кімната '{RoomName}' створена гравцем {PlayerName}", roomName, playerName);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Помилка створення кімнати");
+				await Clients.Caller.SendAsync("ReceiveError", "Помилка створення кімнати");
+			}
+		}
+
+		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null)
+		{
+			if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "ID кімнати та ім'я гравця обов'язкові");
+				return;
+			}
+
+			try
+			{
+				// Генеруємо персонажа
+				var player = _generator.Generate(playerName);
+				player.ConnectionId = Context.ConnectionId;
+				player.StablePlayerId = stablePlayerId ?? "";
+
+				// Генеруємо спеціальні карти
+				player.Cards = _cardService.GenerateCardsForPlayer(Context.ConnectionId, 2);
+
+				// Один виклик JoinRoom
+				var (joinSuccess, joinError, room) =
+					_roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
+
+				if (!joinSuccess || room == null)
+				{
+					await Clients.Caller.SendAsync("ReceiveError", joinError ?? "Помилка приєднання");
+					return;
+				}
+
+				// Додаємо до SignalR групи
+				await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
+
+				// Відправляємо дані новому гравцю
+				await Clients.Caller.SendAsync("RoomJoined", new
+				{
+					room = room.ToPublicInfo(),
+					player = player,
+					isHost = room.IsHost(Context.ConnectionId),
+					players = room.Players.Values.Select(p => new
+					{
+						name = p.Name,
+						connectionId = p.ConnectionId,
+						isHost = room.IsHost(p.ConnectionId),
+						revealed = p.Revealed,
+						revealedValues = p.Revealed.RevealedValues,
+						isEliminated = p.IsEliminated,
+						seatNumber = p.SeatNumber
+					}).ToList()
+				});
+
+				// Повідомляємо інших у кімнаті
+				await Clients.OthersInGroup(room.Id).SendAsync("PlayerJoinedRoom", new
+				{
+					name = player.Name,
+					connectionId = Context.ConnectionId,
+					isHost = false,
+					revealed = player.Revealed
+				});
+
+				// Оновлюємо список кімнат
+				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Помилка приєднання до кімнати {RoomId} для {PlayerName}", roomId, playerName);
+				await Clients.Caller.SendAsync("ReceiveError", "Помилка приєднання");
+			}
+		}
+		/// Покинути кімнату
+		/// </summary>
+		public async Task LeaveRoom()
         {
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
             if (roomId == null) return;
@@ -1705,17 +1699,20 @@ namespace Bunker
                 card = card.ToClientInfo(),
                 result = resultMessage
             });
-            
-            // Повідомляємо всіх про використання карти (включаючи дані для таблиці)
-            await Clients.Group(roomId).SendAsync("CardActivated", new
-            {
-                playerName = player.Name,
-                connectionId = player.ConnectionId,
-                cardName = card.Name,
-                cardRarity = card.Rarity,
-                result = resultMessage
-            });
-        }
+
+			// Повідомляємо всіх про використання карти (включаючи дані для таблиці)
+			await Clients.Group(roomId).SendAsync("CardActivated", new
+			{
+				connectionId = player.ConnectionId,
+				playerName = player.Name,
+				card = new
+				{
+					name = card.Name,
+					rarity = card.Rarity,
+					description = card.Description
+				}
+			});
+		}
 
         #endregion
 
