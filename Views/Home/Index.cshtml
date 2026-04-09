@@ -538,6 +538,110 @@ connection.start()
             .replace(/'/g, '&#039;');
     }
 
+    // Normalize player data from server (PascalCase) to client (camelCase)
+    function normalizePlayer(player) {
+        if (!player) return null;
+        
+        console.log('[normalizePlayer] Input:', player);
+        
+        // Helper to get value from either camelCase or PascalCase
+        function get(obj, camel, pascal) {
+            return obj?.[camel] ?? obj?.[pascal] ?? null;
+        }
+        
+        // Helper to normalize a simple object with name/tooltip
+        function normalizeSimple(obj, camelKey, pascalKey) {
+            const source = obj?.[camelKey] || obj?.[pascalKey];
+            if (!source) return { name: null, tooltip: null };
+            return {
+                name: source.name ?? source.Name ?? null,
+                tooltip: source.tooltip ?? source.Tooltip ?? null
+            };
+        }
+        
+        const normalized = {
+            name: player.name ?? player.Name ?? 'Гравець',
+            connectionId: player.connectionId ?? player.ConnectionId ?? null,
+            isHost: player.isHost ?? player.IsHost ?? false,
+            isEliminated: player.isEliminated ?? player.IsEliminated ?? false,
+            seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
+            revealed: player.revealed ?? player.Revealed ?? {},
+            
+            // Personality
+            personality: {
+                age: get(player.personality || player.Personality, 'age', 'Age') ?? 25,
+                sex: get(player.personality || player.Personality, 'sex', 'Sex') ?? 'Невизначено',
+                sexOrientation: get(player.personality || player.Personality, 'sexOrientation', 'SexOrientation') ?? 'Невизначено',
+                isChildfree: get(player.personality || player.Personality, 'isChildfree', 'IsChildfree') ?? false
+            },
+            
+            // Body
+            body: {
+                height: get(player.body || player.Body, 'height', 'Height') ?? 170,
+                weight: get(player.body || player.Body, 'weight', 'Weight') ?? 70,
+                bodyType: get(player.body || player.Body, 'bodyType', 'BodyType') ?? 'Звичайний'
+            },
+            
+            // Profession
+            profession: (() => {
+                const src = player.profession || player.Profession || {};
+                return {
+                    name: src.name ?? src.Name ?? 'Безробітний',
+                    tooltip: src.tooltip ?? src.Tooltip ?? null,
+                    experienceYears: src.experienceYears ?? src.ExperienceYears ?? 0,
+                    selectedItem: src.selectedItem ?? src.SelectedItem ?? null
+                };
+            })(),
+            
+            // Health
+            physicalHealth: normalizeSimple(player, 'physicalHealth', 'PhysicalHealth'),
+            mentalHealth: normalizeSimple(player, 'mentalHealth', 'MentalHealth'),
+            
+            // Other characteristics
+            hobby: normalizeSimple(player, 'hobby', 'Hobby'),
+            characterTrait: normalizeSimple(player, 'characterTrait', 'CharacterTrait'),
+            phobia: normalizeSimple(player, 'phobia', 'Phobia'),
+            traits: normalizeSimple(player, 'traits', 'Traits'),
+            secret: normalizeSimple(player, 'secret', 'Secret'),
+            
+            // Secret goal
+            secretGoal: (() => {
+                const src = player.secretGoal || player.SecretGoal || {};
+                return {
+                    goal: src.goal ?? src.Goal ?? 'Вижити',
+                    type: src.type ?? src.Type ?? null,
+                    tooltip: src.tooltip ?? src.Tooltip ?? null
+                };
+            })(),
+            
+            // Inventory
+            inventory: (() => {
+                const src = player.inventory || player.Inventory || {};
+                const items = src.items ?? src.Items ?? [];
+                return {
+                    items: items.map(item => ({
+                        name: item.name ?? item.Name ?? 'Предмет',
+                        description: item.description ?? item.Description ?? ''
+                    }))
+                };
+            })(),
+            
+            // Cards
+            cards: (player.cards || player.Cards || []).map(card => ({
+                id: card.id ?? card.Id ?? null,
+                name: card.name ?? card.Name ?? 'Карта',
+                description: card.description ?? card.Description ?? '',
+                rarity: card.rarity ?? card.Rarity ?? 'common',
+                effectType: card.effectType ?? card.EffectType ?? null,
+                effectValue: card.effectValue ?? card.EffectValue ?? null,
+                state: card.state ?? card.State ?? 'Available'
+            }))
+        };
+        
+        console.log('[normalizePlayer] Output:', normalized);
+        return normalized;
+    }
+
     // Render activated card badge with tooltip
     function renderActivatedCardBadge(card) {
         const rarity = card?.rarity || "common";
@@ -568,18 +672,21 @@ function registerSignalREvents() {
         console.log("[RoomCreated] Received:", data);
         console.log("[RoomCreated] Player cards:", data.player.cards || data.player.Cards);
 
-        currentRoom = data.room;
-        myPlayerData = data.player;
-        isHost = data.isHost;
-        myConnectionId = data.player.connectionId;
+        currentRoom = data.room || data.Room;
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        isHost = data.isHost ?? data.IsHost ?? true;
+        myConnectionId = myPlayerData.connectionId;
 
         if (currentRoom) {
-            currentRoom.state = currentRoom.state || "Lobby";
+            currentRoom.state = currentRoom.state || currentRoom.State || "Lobby";
+            currentRoom.name = currentRoom.name || currentRoom.Name || "Кімната";
+            currentRoom.id = currentRoom.id || currentRoom.Id;
+            currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
 
-        if (myPlayerData) {
-            myPlayerData.cards = myPlayerData.cards || myPlayerData.Cards || [];
-        }
+        console.log("[RoomCreated] Normalized myPlayerData:", myPlayerData);
+        console.log("[RoomCreated] myConnectionId:", myConnectionId);
+        console.log("[RoomCreated] isHost:", isHost);
 
         const btn = document.getElementById('createRoomBtn');
         if (btn) {
@@ -601,6 +708,8 @@ function registerSignalREvents() {
             seatNumber: 1
         };
 
+        console.log("[RoomCreated] roomPlayers:", roomPlayers);
+
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
@@ -613,12 +722,23 @@ function registerSignalREvents() {
     // Приєднались до кімнати
     connection.off("RoomJoined");
     connection.on("RoomJoined", function (data) {
-        console.log("Joined room:", data);
-        console.log("[RoomJoined] Player cards:", data.player.cards || data.player.Cards);
-        currentRoom = data.room;
-        myPlayerData = data.player;
-        isHost = data.isHost;
-        myConnectionId = data.player.connectionId;
+        console.log("[RoomJoined] Received:", data);
+        console.log("[RoomJoined] Player cards:", data.player?.cards || data.player?.Cards);
+        
+        currentRoom = data.room || data.Room;
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        isHost = data.isHost ?? data.IsHost ?? false;
+        myConnectionId = myPlayerData.connectionId;
+        
+        if (currentRoom) {
+            currentRoom.state = currentRoom.state || currentRoom.State || "Lobby";
+            currentRoom.name = currentRoom.name || currentRoom.Name || "Кімната";
+            currentRoom.id = currentRoom.id || currentRoom.Id;
+            currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
+        }
+        
+        console.log("[RoomJoined] Normalized myPlayerData:", myPlayerData);
+        console.log("[RoomJoined] myConnectionId:", myConnectionId);
         
         // Закриваємо модалку join якщо була відкрита
         pendingJoinRoomId = null;
@@ -628,20 +748,24 @@ function registerSignalREvents() {
         saveSession(currentRoom.id, myPlayerData.name);
         
         roomPlayers = {};
-        data.players.forEach(p => {
-            roomPlayers[p.connectionId] = {
-                name: p.name,
-                connectionId: p.connectionId,
-                isHost: p.isHost,
-                revealed: p.revealed || {},
+        const players = data.players || data.Players || [];
+        players.forEach(p => {
+            const connId = p.connectionId || p.ConnectionId;
+            roomPlayers[connId] = {
+                name: p.name || p.Name,
+                connectionId: connId,
+                isHost: p.isHost ?? p.IsHost ?? false,
+                revealed: p.revealed || p.Revealed || {},
                 revealedData: {}
             };
         });
         
+        console.log("[RoomJoined] roomPlayers:", roomPlayers);
+        
         showRoomSection();
         updateRoomUI();
         renderMyPlayerCards(myPlayerData);
-        renderMyCards(); // Показуємо спеціальні карти
+        renderMyCards();
         addEventMessage(`Ви приєднались до кімнати <span class="event-room">${currentRoom.name}</span>`);
     });
 
@@ -919,36 +1043,36 @@ function registerSignalREvents() {
         console.log("[RejoinSuccess] data.activatedCards:", data.activatedCards);
         console.log("[RejoinSuccess] data.players:", data.players);
 
-        currentRoom = data.room;
-        myPlayerData = data.player;
-        isHost = data.isHost;
-        myConnectionId = data.player.connectionId;
+        currentRoom = data.room || data.Room;
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        isHost = data.isHost ?? data.IsHost ?? false;
+        myConnectionId = myPlayerData.connectionId;
 
-        // ВАЖЛИВО
+        // Normalize room
         if (currentRoom) {
-            currentRoom.state = data.roomState || currentRoom.state || "Lobby";
+            currentRoom.state = data.roomState || currentRoom.state || currentRoom.State || "Lobby";
+            currentRoom.name = currentRoom.name || currentRoom.Name || "Кімната";
+            currentRoom.id = currentRoom.id || currentRoom.Id;
+            currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
 
         console.log("[RejoinSuccess] currentRoom:", currentRoom);
         console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
         console.log("[RejoinSuccess] myConnectionId:", myConnectionId);
 
-        if (myPlayerData) {
-            myPlayerData.cards = myPlayerData.cards || myPlayerData.Cards || [];
-        }
-
-        console.log("[RejoinSuccess] normalized myPlayerData.cards:", myPlayerData?.cards);
-
         saveSession(currentRoom.id, myPlayerData.name);
 
         roomPlayers = {};
-        (data.players || []).forEach(function (p, index) {
+        (data.players || data.Players || []).forEach(function (p, index) {
             var revealedData = {};
             var revealedTooltips = {};
+            
+            const connId = p.connectionId || p.ConnectionId;
 
-            if (p.revealedValues) {
-                Object.keys(p.revealedValues).forEach(function (key) {
-                    var rd = p.revealedValues[key];
+            if (p.revealedValues || p.RevealedValues) {
+                const rv = p.revealedValues || p.RevealedValues;
+                Object.keys(rv).forEach(function (key) {
+                    var rd = rv[key];
                     var camelKey = key.charAt(0).toLowerCase() + key.slice(1);
 
                     revealedData[camelKey] = rd.value || rd.Value || 'Розкрито';
@@ -959,18 +1083,18 @@ function registerSignalREvents() {
                 });
             }
 
-            roomPlayers[p.connectionId] = {
-                name: p.name,
-                connectionId: p.connectionId,
-                isHost: p.isHost,
-                revealed: p.revealed || {},
+            roomPlayers[connId] = {
+                name: p.name || p.Name,
+                connectionId: connId,
+                isHost: p.isHost ?? p.IsHost ?? false,
+                revealed: p.revealed || p.Revealed || {},
                 revealedData: revealedData,
                 revealedTooltips: revealedTooltips,
-                isEliminated: p.isEliminated,
-                seatNumber: p.seatNumber || 0
+                isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
+                seatNumber: p.seatNumber ?? p.SeatNumber ?? 0
             };
 
-            console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[p.connectionId]);
+            console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[connId]);
         });
 
         console.log("[RejoinSuccess] roomPlayers final:", roomPlayers);
@@ -1025,9 +1149,9 @@ function registerSignalREvents() {
         console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
 
         const isGameState =
-            data.roomState === 'Playing' ||
-            data.roomState === 'Voting' ||
-            data.roomState === 'Started';
+            currentRoom.state === 'Playing' ||
+            currentRoom.state === 'Voting' ||
+            currentRoom.state === 'Started';
 
         showRoomSection();
         updateRoomUI();
@@ -1038,15 +1162,15 @@ function registerSignalREvents() {
         }
 
         if (isGameState) {
-            currentApocalypse = data.apocalypse;
-            currentBunker = data.bunker;
+            currentApocalypse = data.apocalypse || data.Apocalypse;
+            currentBunker = data.bunker || data.Bunker;
 
             document.getElementById('roomLobby').style.display = 'none';
             document.getElementById('gameSection').style.display = 'block';
             document.getElementById('myPlayerSection').style.display = 'block';
 
             document.getElementById('currentRoomState').textContent =
-                data.roomState === 'Voting' ? 'Голосування' : 'Гра';
+                currentRoom.state === 'Voting' ? 'Голосування' : 'Гра';
 
             const startBtn = document.getElementById('startGameBtn');
             if (startBtn) {
@@ -1054,8 +1178,8 @@ function registerSignalREvents() {
                 startBtn.disabled = true;
             }
 
-            if (data.apocalypse) renderApocalypse(data.apocalypse);
-            if (data.bunker) renderBunker(data.bunker);
+            if (currentApocalypse) renderApocalypse(currentApocalypse);
+            if (currentBunker) renderBunker(currentBunker);
         } else {
             document.getElementById('roomLobby').style.display = 'block';
             document.getElementById('gameSection').style.display = 'none';
@@ -2751,48 +2875,57 @@ function updateActivatedCardsTable() {
     function updateRoomUI() {
         if (!currentRoom) return;
         
-        document.getElementById('currentRoomName').textContent = currentRoom.name;
-        document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id}`;
+        document.getElementById('currentRoomName').textContent = currentRoom.name || 'Кімната';
+        document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id || ''}`;
         document.getElementById('currentRoomState').textContent = currentRoom.state === 'Lobby' ? 'Лобі' : 'Гра';
         
         const playerCount = Object.keys(roomPlayers).length;
-        document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers}`;
+        document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers || 12}`;
         
-        // Показуємо кнопку GM панелі тільки хосту
-        const gmPanelBtn = document.getElementById('gmPanelBtn');
-            if (isHost && currentRoom.state === 'Started' && !currentVoting) {
-            votingBtn.style.display = 'inline-block';
-            } else {
-            votingBtn.style.display = 'none';
-            }
         // Показуємо кнопку старту тільки хосту
         const startBtn = document.getElementById('startGameBtn');
-        if (isHost && currentRoom.state === 'Lobby') {
-            startBtn.style.display = 'inline-block';
-            startBtn.disabled = playerCount < 4;
-            startBtn.title = playerCount < 4 ? 'Потрібно мінімум 4 гравці' : '';
-        } else {
-            startBtn.style.display = 'none';
+        if (startBtn) {
+            if (isHost && currentRoom.state === 'Lobby') {
+                startBtn.style.display = 'inline-block';
+                startBtn.disabled = playerCount < 4;
+                startBtn.title = playerCount < 4 ? 'Потрібно мінімум 4 гравці' : '';
+            } else {
+                startBtn.style.display = 'none';
+            }
         }
         
         // Показуємо кнопку голосування тільки хосту під час гри
         const votingBtn = document.getElementById('startVotingBtn');
-        if (isHost && currentRoom.state === 'Playing' && !currentVoting) {
-            votingBtn.style.display = 'inline-block';
-        } else {
-            votingBtn.style.display = 'none';
+        if (votingBtn) {
+            if (isHost && (currentRoom.state === 'Playing' || currentRoom.state === 'Started') && !currentVoting) {
+                votingBtn.style.display = 'inline-block';
+            } else {
+                votingBtn.style.display = 'none';
+            }
+        }
+        
+        // Показуємо кнопку GM панелі тільки хосту
+        const gmPanelBtn = document.getElementById('gmPanelBtn');
+        if (gmPanelBtn) {
+            if (isHost && (currentRoom.state === 'Playing' || currentRoom.state === 'Started')) {
+                gmPanelBtn.style.display = 'inline-block';
+            } else {
+                gmPanelBtn.style.display = 'none';
+            }
         }
         
         // Текст очікування
         const waitingText = document.getElementById('waitingText');
-        if (playerCount < 4) {
-            waitingText.textContent = `Очікування гравців... (потрібно ще ${4 - playerCount})`;
-            waitingText.style.display = 'block';
-        } else if (!isHost) {
-            waitingText.textContent = 'Очікування старту гри від хоста...';
-            waitingText.style.display = 'block';
-        } else {
-            waitingText.style.display = 'none';
+        if (waitingText) {
+            if (playerCount < 4) {
+                waitingText.textContent = `Очікування гравців... (потрібно ще ${4 - playerCount})`;
+                waitingText.style.display = 'block';
+            } else if (!isHost) {
+                waitingText.textContent = 'Очікування старту гри від хоста...';
+                waitingText.style.display = 'block';
+            } else {
+                waitingText.style.display = 'none';
+            }
         }
         
         renderRoomPlayers();
