@@ -13,15 +13,17 @@ namespace Bunker
         private readonly RoomService _roomService;
         private readonly CardService _cardService;
         private readonly GameDataService _gameData;
+        private readonly ScenarioImageService _imageService;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, CardService cardService, GameDataService gameData, ILogger<GameHub> logger)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, CardService cardService, GameDataService gameData, ScenarioImageService imageService, ILogger<GameHub> logger)
         {
             _generator = generator;
             _roomService = roomService;
             _cardService = cardService;
             _gameData = gameData;
+            _imageService = imageService;
             _logger = logger;
         }
 
@@ -249,6 +251,9 @@ namespace Bunker
 					);
 				}
 
+				// Оновлюємо URL зображень з кешу
+				_imageService.UpdateApocalypseImageUrl(room.Apocalypse);
+				_imageService.UpdateBunkerImageUrl(room.Bunker);
 
 				await Clients.Caller.SendAsync("RejoinSuccess", new
 				{
@@ -322,11 +327,15 @@ namespace Bunker
             if (_gameData.Apocalypses.Count > 0)
             {
                 room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
+                // Оновлюємо URL зображення з кешу
+                _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
             }
             
             if (_gameData.Bunkers.Count > 0)
             {
                 room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
+                // Оновлюємо URL зображення з кешу
+                _imageService.UpdateBunkerImageUrl(room.Bunker);
             }
 
             // Рандомізація номерів місць гравців

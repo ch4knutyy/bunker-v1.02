@@ -1586,6 +1586,53 @@ function registerSignalREvents() {
         
         addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
     });
+
+    // ==================== SCENARIO IMAGE HANDLERS ====================
+    
+    // Зображення апокаліпсису оновлено
+    connection.off("ApocalypseImageUpdated");
+    connection.on("ApocalypseImageUpdated", function (data) {
+        console.log("[ApocalypseImageUpdated]", data);
+        if (currentApocalypse && currentApocalypse.id === data.apocalypseId) {
+            currentApocalypse.imageUrl = data.imageUrl;
+            renderApocalypse(currentApocalypse);
+            addEventMessage(`<span class="event-image">🖼️</span> Зображення апокаліпсису оновлено`);
+        }
+    });
+    
+    // Зображення бункера оновлено
+    connection.off("BunkerImageUpdated");
+    connection.on("BunkerImageUpdated", function (data) {
+        console.log("[BunkerImageUpdated]", data);
+        if (currentBunker && currentBunker.id === data.bunkerId) {
+            currentBunker.imageUrl = data.imageUrl;
+            renderBunker(currentBunker);
+            addEventMessage(`<span class="event-image">🖼️</span> Зображення бункера оновлено`);
+        }
+    });
+    
+    // Зображення апокаліпсису видалено
+    connection.off("ApocalypseImageRemoved");
+    connection.on("ApocalypseImageRemoved", function (data) {
+        console.log("[ApocalypseImageRemoved]", data);
+        if (currentApocalypse && currentApocalypse.id === data.apocalypseId) {
+            currentApocalypse.imageUrl = null;
+            renderApocalypse(currentApocalypse);
+            addEventMessage(`<span class="event-image">🗑️</span> Зображення апокаліпсису видалено`);
+        }
+    });
+    
+    // Зображення бункера видалено
+    connection.off("BunkerImageRemoved");
+    connection.on("BunkerImageRemoved", function (data) {
+        console.log("[BunkerImageRemoved]", data);
+        if (currentBunker && currentBunker.id === data.bunkerId) {
+            currentBunker.imageUrl = null;
+            renderBunker(currentBunker);
+            addEventMessage(`<span class="event-image">🗑️</span> Зображення бункера видалено`);
+        }
+    });
+
 } // End of registerSignalREvents()
 
 // ==================== GLOBAL FUNCTIONS ====================
@@ -1677,6 +1724,283 @@ function addActivatedCard(connectionId, card) {
             createBtn.style.opacity = isError ? '0.5' : '1';
         }
     }
+
+// ==================== SCENARIO IMAGE FUNCTIONS ====================
+
+// Завантаження зображення апокаліпсису
+async function uploadApocalypseImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    // Валідація розміру (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Файл занадто великий. Максимум 5 MB');
+        return;
+    }
+    
+    // Валідація типу
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('roomId', currentRoom?.id || '');
+    formData.append('connectionId', myConnectionId || '');
+    formData.append('apocalypseId', currentApocalypse?.id || '');
+    
+    try {
+        const response = await fetch('/api/ScenarioImage/apocalypse', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка завантаження');
+            return;
+        }
+        
+        console.log('[uploadApocalypseImage] Success');
+    } catch (error) {
+        console.error('[uploadApocalypseImage] Error:', error);
+        alert('Помилка завантаження зображення');
+    }
+    
+    // Очищаємо input
+    input.value = '';
+}
+
+// Завантаження зображення бункера
+async function uploadBunkerImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    // Валідація розміру (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Файл занадто великий. Максимум 5 MB');
+        return;
+    }
+    
+    // Валідація типу
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('roomId', currentRoom?.id || '');
+    formData.append('connectionId', myConnectionId || '');
+    formData.append('bunkerId', currentBunker?.id || '');
+    
+    try {
+        const response = await fetch('/api/ScenarioImage/bunker', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка завантаження');
+            return;
+        }
+        
+        console.log('[uploadBunkerImage] Success');
+    } catch (error) {
+        console.error('[uploadBunkerImage] Error:', error);
+        alert('Помилка завантаження зображення');
+    }
+    
+    // Очищаємо input
+    input.value = '';
+}
+
+// Видалення зображення апокаліпсису
+async function removeApocalypseImage() {
+    if (!confirm('Видалити зображення апокаліпсису?')) return;
+    
+    try {
+        const params = new URLSearchParams({
+            roomId: currentRoom?.id || '',
+            connectionId: myConnectionId || '',
+            apocalypseId: currentApocalypse?.id || ''
+        });
+        
+        const response = await fetch(`/api/ScenarioImage/apocalypse?${params}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка видалення');
+            return;
+        }
+        
+        console.log('[removeApocalypseImage] Success');
+    } catch (error) {
+        console.error('[removeApocalypseImage] Error:', error);
+        alert('Помилка видалення зображення');
+    }
+}
+
+// Видалення зображення бункера
+async function removeBunkerImage() {
+    if (!confirm('Видалити зображення бункера?')) return;
+    
+    try {
+        const params = new URLSearchParams({
+            roomId: currentRoom?.id || '',
+            connectionId: myConnectionId || '',
+            bunkerId: currentBunker?.id || ''
+        });
+        
+        const response = await fetch(`/api/ScenarioImage/bunker?${params}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка видалення');
+            return;
+        }
+        
+        console.log('[removeBunkerImage] Success');
+    } catch (error) {
+        console.error('[removeBunkerImage] Error:', error);
+        alert('Помилка видалення зображення');
+    }
+}
+
+// Генерація промпту для апокаліпсису
+async function generateApocalypsePrompt() {
+    try {
+        const response = await fetch(`/api/ScenarioImage/apocalypse/prompt?roomId=${currentRoom?.id || ''}`);
+        
+        if (!response.ok) {
+            alert('Помилка отримання промпту');
+            return;
+        }
+        
+        const data = await response.json();
+        showPromptModal('Промпт для апокаліпсису', data.prompt);
+    } catch (error) {
+        console.error('[generateApocalypsePrompt] Error:', error);
+        alert('Помилка отримання промпту');
+    }
+}
+
+// Генерація промпту для бункера
+async function generateBunkerPrompt() {
+    try {
+        const response = await fetch(`/api/ScenarioImage/bunker/prompt?roomId=${currentRoom?.id || ''}`);
+        
+        if (!response.ok) {
+            alert('Помилка отримання промпту');
+            return;
+        }
+        
+        const data = await response.json();
+        showPromptModal('Промпт для бункера', data.prompt);
+    } catch (error) {
+        console.error('[generateBunkerPrompt] Error:', error);
+        alert('Помилка отримання промпту');
+    }
+}
+
+// Показати модальне вікно з промптом
+function showPromptModal(title, prompt) {
+    // Створюємо модальне вікно якщо його немає
+    let modal = document.getElementById('promptModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'promptModal';
+        modal.className = 'prompt-modal-overlay';
+        modal.innerHTML = `
+            <div class="prompt-modal">
+                <div class="prompt-modal-header">
+                    <h3 id="promptModalTitle"></h3>
+                    <button class="prompt-modal-close" onclick="closePromptModal()">×</button>
+                </div>
+                <div class="prompt-modal-body">
+                    <textarea id="promptModalText" readonly></textarea>
+                    <button class="btn-copy-prompt" onclick="copyPromptToClipboard()">📋 Копіювати промпт</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('promptModalTitle').textContent = title;
+    document.getElementById('promptModalText').value = prompt;
+    modal.style.display = 'flex';
+}
+
+// Закрити модальне вікно з промптом
+function closePromptModal() {
+    const modal = document.getElementById('promptModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Копіювати промпт в буфер обміну
+function copyPromptToClipboard() {
+    const textarea = document.getElementById('promptModalText');
+    if (textarea) {
+        textarea.select();
+        document.execCommand('copy');
+        
+        // Показуємо підтвердження
+        const btn = document.querySelector('.btn-copy-prompt');
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Скопійовано!';
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
+    }
+}
+
+// Відкрити зображення в модальному вікні
+function openImageModal(imageUrl, title) {
+    let modal = document.getElementById('imageModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'imageModal';
+        modal.className = 'image-modal-overlay';
+        modal.onclick = function(e) {
+            if (e.target === modal) closeImageModal();
+        };
+        modal.innerHTML = `
+            <div class="image-modal">
+                <div class="image-modal-header">
+                    <h3 id="imageModalTitle"></h3>
+                    <button class="image-modal-close" onclick="closeImageModal()">×</button>
+                </div>
+                <div class="image-modal-body">
+                    <img id="imageModalImg" src="" alt="" />
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('imageModalTitle').textContent = title;
+    document.getElementById('imageModalImg').src = imageUrl;
+    document.getElementById('imageModalImg').alt = title;
+    modal.style.display = 'flex';
+}
+
+// Закрити модальне вікно із зображенням
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
 
     // ==================== BUTTON EVENT BINDING ====================
     
@@ -2157,9 +2481,33 @@ function addActivatedCard(connectionId, card) {
             'extreme': 'Екстремальна'
         };
         
+        // Перевіряємо наявність зображення
+        const imageUrl = apocalypse.imageUrl || apocalypse.ImageUrl;
+        const imageSection = imageUrl ? `
+            <div class="scenario-image-container">
+                <img src="${imageUrl}" alt="${apocalypse.name}" class="scenario-image" onclick="openImageModal('${imageUrl}', '${escapeHtml(apocalypse.name)}')" />
+            </div>
+        ` : '';
+        
+        // Контроли хоста для зображення
+        const hostControls = isHost ? `
+            <div class="scenario-image-controls">
+                <input type="file" id="apocalypseImageInput" accept="image/*" style="display: none;" onchange="uploadApocalypseImage(this)" />
+                <button class="btn-scenario-image" onclick="document.getElementById('apocalypseImageInput').click()">
+                    📤 Завантажити зображення
+                </button>
+                <button class="btn-scenario-image btn-generate" onclick="generateApocalypsePrompt()">
+                    ✨ Згенерувати промпт
+                </button>
+                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeApocalypseImage()">🗑️ Видалити</button>` : ''}
+            </div>
+        ` : '';
+        
         container.innerHTML = `
             <h4 class="apocalypse-name">${apocalypse.name}</h4>
             <p class="apocalypse-desc">${apocalypse.description}</p>
+            ${imageSection}
+            ${hostControls}
             <div class="apocalypse-stats">
                 <div class="stat-item">
                     <span class="stat-label">Загроза:</span>
@@ -2177,11 +2525,11 @@ function addActivatedCard(connectionId, card) {
             <div class="apocalypse-lists">
                 <div class="list-section">
                     <span class="list-title">⚠️ Загрози:</span>
-                    <ul>${apocalypse.threats.map(t => `<li>${t}</li>`).join('')}</ul>
+                    <ul>${(apocalypse.threats || []).map(t => `<li>${t}</li>`).join('')}</ul>
                 </div>
                 <div class="list-section">
                     <span class="list-title">✓ Потрібно:</span>
-                    <ul>${apocalypse.requirements.map(r => `<li>${r}</li>`).join('')}</ul>
+                    <ul>${(apocalypse.requirements || []).map(r => `<li>${r}</li>`).join('')}</ul>
                 </div>
             </div>
         `;
@@ -2359,9 +2707,33 @@ function addActivatedCard(connectionId, card) {
             'excellent': 'Відмінний'
         };
         
+        // Перевіряємо наявність зображення
+        const imageUrl = bunker.imageUrl || bunker.ImageUrl;
+        const imageSection = imageUrl ? `
+            <div class="scenario-image-container">
+                <img src="${imageUrl}" alt="${bunker.name}" class="scenario-image" onclick="openImageModal('${imageUrl}', '${escapeHtml(bunker.name)}')" />
+            </div>
+        ` : '';
+        
+        // Контроли хоста для зображення
+        const hostControls = isHost ? `
+            <div class="scenario-image-controls">
+                <input type="file" id="bunkerImageInput" accept="image/*" style="display: none;" onchange="uploadBunkerImage(this)" />
+                <button class="btn-scenario-image" onclick="document.getElementById('bunkerImageInput').click()">
+                    📤 Завантажити зображення
+                </button>
+                <button class="btn-scenario-image btn-generate" onclick="generateBunkerPrompt()">
+                    ✨ Згенерувати промпт
+                </button>
+                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeBunkerImage()">🗑️ Видалити</button>` : ''}
+            </div>
+        ` : '';
+        
         container.innerHTML = `
             <h4 class="bunker-name">${bunker.name}</h4>
             <p class="bunker-desc">${bunker.description}</p>
+            ${imageSection}
+            ${hostControls}
             <div class="bunker-stats">
                 <div class="stat-item">
                     <span class="stat-label">Місткість:</span>
@@ -2383,13 +2755,13 @@ function addActivatedCard(connectionId, card) {
             <div class="bunker-lists">
                 <div class="list-section">
                     <span class="list-title">🏗️ Приміщення:</span>
-                    <ul>${bunker.facilities.map(f => `<li>${f}</li>`).join('')}</ul>
+                    <ul>${(bunker.facilities || []).map(f => `<li>${f}</li>`).join('')}</ul>
                 </div>
                 <div class="list-section">
                     <span class="list-title">📦 Ресурси:</span>
-                    <ul>${bunker.resources.map(r => `<li>${r}</li>`).join('')}</ul>
+                    <ul>${(bunker.resources || []).map(r => `<li>${r}</li>`).join('')}</ul>
                 </div>
-                ${bunker.problems.length > 0 ? `
+                ${(bunker.problems || []).length > 0 ? `
                 <div class="list-section problems">
                     <span class="list-title">⚠️ Проблеми:</span>
                     <ul>${bunker.problems.map(p => `<li>${p}</li>`).join('')}</ul>
@@ -4201,6 +4573,249 @@ function updateActivatedCardsTable() {
 .event-danger { color: #e74c3c; font-weight: 600; }
 .event-success { color: #27ae60; font-weight: 500; }
 .event-catastrophe { color: #e74c3c; font-weight: 700; text-transform: uppercase; }
+.event-image { color: #9b59b6; font-weight: 500; }
+
+/* ==================== SCENARIO IMAGE STYLES ==================== */
+.scenario-image-container {
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.scenario-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.scenario-image:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.scenario-image-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+.btn-scenario-image {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-scenario-image:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    background: rgba(216, 155, 43, 0.1);
+}
+
+.btn-scenario-image.btn-generate {
+    border-color: #9b59b6;
+    color: #9b59b6;
+}
+
+.btn-scenario-image.btn-generate:hover {
+    background: rgba(155, 89, 182, 0.15);
+}
+
+.btn-scenario-image.btn-remove {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.btn-scenario-image.btn-remove:hover {
+    background: rgba(231, 76, 60, 0.15);
+}
+
+/* Prompt Modal */
+.prompt-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 1rem;
+}
+
+.prompt-modal {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.prompt-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.prompt-modal-header h3 {
+    margin: 0;
+    color: var(--color-gold);
+    font-size: 1.1rem;
+}
+
+.prompt-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.prompt-modal-close:hover {
+    color: var(--color-red);
+}
+
+.prompt-modal-body {
+    padding: 1.5rem;
+}
+
+.prompt-modal-body textarea {
+    width: 100%;
+    min-height: 200px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 1rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.btn-copy-prompt {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-copy-prompt:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Image Modal */
+.image-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    padding: 1rem;
+}
+
+.image-modal {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.image-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.image-modal-header h3 {
+    margin: 0;
+    color: var(--color-gold);
+    font-size: 1rem;
+}
+
+.image-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.image-modal-close:hover {
+    color: var(--color-red);
+}
+
+.image-modal-body {
+    max-height: calc(90vh - 60px);
+    overflow: auto;
+}
+
+.image-modal-body img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(90vh - 80px);
+    margin: 0 auto;
+}
+
+@@media (max-width: 768px) {
+    .scenario-image-controls {
+        flex-direction: column;
+    }
+    
+    .btn-scenario-image {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .scenario-image {
+        max-height: 200px;
+    }
+}
 
 /* Voting badges */
 .badge-protected {

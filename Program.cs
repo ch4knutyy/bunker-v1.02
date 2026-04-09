@@ -11,12 +11,12 @@ builder.Services.AddSingleton<CharacterGeneratorService>();
 builder.Services.AddSingleton<PlayerStorageService>();
 builder.Services.AddSingleton<RoomService>();
 builder.Services.AddSingleton<CardService>();
+builder.Services.AddSingleton<ScenarioImageService>();
 
 var app = builder.Build();
 
 app.UseStaticFiles();
 app.UseRouting();
-app.UseStaticFiles();
 
 app.MapControllerRoute(
 	name: "default",
