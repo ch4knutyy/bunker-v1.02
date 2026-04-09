@@ -540,28 +540,18 @@ connection.start()
 
     // Render activated card badge with tooltip
     function renderActivatedCardBadge(card) {
-    const rarity = card?.rarity || "common";
-    const name = card?.name || "Карта";
-    const description = card?.description || "Без опису";
+        const rarity = card?.rarity || "common";
+        const name = card?.name || "Карта";
+        const description = card?.description || "Без опису";
 
-    return `
-        <span class="activated-card-badge rarity-${rarity} card-tooltip-wrapper"
-              data-tooltip="${escapeHtml(description)}">
-            <span class="card-badge-text">${escapeHtml(name)}</span>
-            <span class="card-badge-icon">!</span>
-        </span>
-    `;
-}
-
-function escapeHtml(text) {
-    if (text == null) return "";
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+        return `
+            <span class="activated-card-badge rarity-${rarity} card-tooltip-wrapper"
+                  data-tooltip="${escapeHtml(description)}">
+                <span class="card-badge-text">${escapeHtml(name)}</span>
+                <span class="card-badge-icon">!</span>
+            </span>
+        `;
+    }
 
     // ==================== SIGNALR HANDLERS ====================
 
@@ -620,17 +610,9 @@ function registerSignalREvents() {
         addEventMessage(`Ви створили кімнату <span class="event-room">${currentRoom.name}</span>`);
     });
 
-    // тут далі мають йти інші connection.on(...)
-    // Повертаємо кнопку до нормального стану
-        const btn = document.getElementById('createRoomBtn');
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = 'Створити кімнату';
-        }
-
     // Приєднались до кімнати
-        connection.off("RoomJoined");
-        connection.on("RoomJoined", function (data) {
+    connection.off("RoomJoined");
+    connection.on("RoomJoined", function (data) {
         console.log("Joined room:", data);
         console.log("[RoomJoined] Player cards:", data.player.cards || data.player.Cards);
         currentRoom = data.room;
@@ -664,8 +646,8 @@ function registerSignalREvents() {
     });
 
     // Гравець приєднався до кімнати
-        connection.off("PlayerJoinedRoom");
-        connection.on("PlayerJoinedRoom", function (info) {
+    connection.off("PlayerJoinedRoom");
+    connection.on("PlayerJoinedRoom", function (info) {
         console.log("Player joined room:", info);
         roomPlayers[info.connectionId] = {
             name: info.name,
@@ -680,7 +662,7 @@ function registerSignalREvents() {
 
     // Гравець покинув кімнату
     connection.off("PlayerLeftRoom");
-        connection.on("PlayerLeftRoom", function (info) {
+    connection.on("PlayerLeftRoom", function (info) {
         console.log("Player left room:", info);
         const leftPlayer = roomPlayers[info.connectionId];
         const leftName = leftPlayer?.name || info.playerName || 'Гравець';
@@ -724,93 +706,67 @@ function registerSignalREvents() {
         addEventMessage(`Ви покинули кімнату`);
     });
 
-
-let isStartingGame = false;
-
-function startGame() {
-    if (isStartingGame) return;
-    if (!confirm("Почати гру?")) return;
-
-    isStartingGame = true;
-
-    const btn = document.getElementById("startGameBtn");
-    if (btn) {
-        btn.disabled = true;
-        btn.style.pointerEvents = "none";
-    }
-
-    connection.invoke("StartGame")
-        .catch(err => {
-            console.error("StartGame error:", err);
-            isStartingGame = false;
-
-            if (btn) {
-                btn.disabled = false;
-                btn.style.pointerEvents = "auto";
-            }
-        });
-}
     // Гра почалась
-connection.off("GameStarted");
-connection.on("GameStarted", function (data) {
-    console.log("Game started:", data);
+    connection.off("GameStarted");
+    connection.on("GameStarted", function (data) {
+        console.log("Game started:", data);
 
-    isStartingGame = false;
+        isStartingGame = false;
 
-    if (currentRoom) {
-        currentRoom.state = data.roomState;
-    }
+        if (currentRoom) {
+            currentRoom.state = data.roomState;
+        }
 
-    currentApocalypse = data.apocalypse;
-    currentBunker = data.bunker;
+        currentApocalypse = data.apocalypse;
+        currentBunker = data.bunker;
 
-    if (data.players) {
-        data.players.forEach(function (p) {
-            if (roomPlayers[p.connectionId]) {
-                roomPlayers[p.connectionId].seatNumber = p.seatNumber;
+        if (data.players) {
+            data.players.forEach(function (p) {
+                if (roomPlayers[p.connectionId]) {
+                    roomPlayers[p.connectionId].seatNumber = p.seatNumber;
+                }
+            });
+        }
+
+        document.getElementById('roomLobby').style.display = 'none';
+        document.getElementById('gameSection').style.display = 'block';
+        document.getElementById('myPlayerSection').style.display = 'block';
+        document.getElementById('currentRoomState').textContent = 'Гра';
+        document.getElementById('currentRoomState').classList.add('state-playing');
+
+        const startBtn = document.getElementById('startGameBtn');
+        if (startBtn) {
+            startBtn.style.display = 'none';
+            startBtn.disabled = true;
+            startBtn.style.pointerEvents = 'none';
+        }
+
+        updateActivatedCardsTable();
+
+        if (isHost) {
+            document.getElementById('gmScenarioSection').style.display = 'block';
+            document.getElementById('gmEventsSection').style.display = 'block';
+
+            if (data.bunker) {
+                currentBunkerCapacity = data.bunker.capacity;
+                document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
             }
-        });
-    }
+        }
 
-    document.getElementById('roomLobby').style.display = 'none';
-    document.getElementById('gameSection').style.display = 'block';
-    document.getElementById('myPlayerSection').style.display = 'block';
-    document.getElementById('currentRoomState').textContent = 'Гра';
-    document.getElementById('currentRoomState').classList.add('state-playing');
+        renderApocalypse(data.apocalypse);
+        renderBunker(data.bunker);
+        updatePlayersTable();
 
-    const startBtn = document.getElementById('startGameBtn');
-    if (startBtn) {
-        startBtn.style.display = 'none';
-        startBtn.disabled = true;
-        startBtn.style.pointerEvents = 'none';
-    }
+        addEventMessage(`Гра почалась! Раунд ${data.currentRound}`);
 
-    updateActivatedCardsTable();
-
-    if (isHost) {
-        document.getElementById('gmScenarioSection').style.display = 'block';
-        document.getElementById('gmEventsSection').style.display = 'block';
+        if (data.apocalypse) {
+            addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${data.apocalypse.name}`);
+        }
 
         if (data.bunker) {
-            currentBunkerCapacity = data.bunker.capacity;
-            document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+            addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${data.bunker.name}`);
         }
-    }
-
-    renderApocalypse(data.apocalypse);
-    renderBunker(data.bunker);
-    updatePlayersTable();
-
-    addEventMessage(`Гра почалась! Раунд ${data.currentRound}`);
-
-    if (data.apocalypse) {
-        addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${data.apocalypse.name}`);
-    }
-
-    if (data.bunker) {
-        addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${data.bunker.name}`);
-    }
-});
+    });
 
     // Характеристику розкрито
     connection.off("CharacteristicRevealed");
@@ -942,183 +898,180 @@ connection.on("GameStarted", function (data) {
     });
 
     // Помилка
-connection.off("ReceiveError");
-connection.on("ReceiveError", function (message) {
-    if (message === "Гра вже запущена") {
-        console.warn("ReceiveError ignored:", message);
-        return;
-    }
-
-    console.error("ReceiveError:", message);
-    addEventMessage("Помилка: " + message);
-    });
- }
-
-
-// ==================== SESSION RESTORE HANDLERS ====================
-
-// ==================== SESSION RESTORE HANDLERS ====================
-
-// Успішне перепідключення
-connection.off("RejoinSuccess");
-connection.on("RejoinSuccess", function (data) {
-    console.log("=== REJOIN SUCCESS START ===");
-    console.log("[RejoinSuccess] raw data:", data);
-    console.log("[RejoinSuccess] data.activatedCards:", data.activatedCards);
-    console.log("[RejoinSuccess] data.players:", data.players);
-
-    currentRoom = data.room;
-    myPlayerData = data.player;
-    isHost = data.isHost;
-    myConnectionId = data.player.connectionId;
-
-    // 🔥 ВАЖЛИВО
-    if (currentRoom) {
-        currentRoom.state = data.roomState || currentRoom.state || "Lobby";
-    }
-
-    console.log("[RejoinSuccess] currentRoom:", currentRoom);
-    console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
-    console.log("[RejoinSuccess] myConnectionId:", myConnectionId);
-
-    if (myPlayerData) {
-        myPlayerData.cards = myPlayerData.cards || myPlayerData.Cards || [];
-    }
-
-    console.log("[RejoinSuccess] normalized myPlayerData.cards:", myPlayerData?.cards);
-
-    saveSession(currentRoom.id, myPlayerData.name);
-
-    roomPlayers = {};
-    (data.players || []).forEach(function (p, index) {
-        var revealedData = {};
-        var revealedTooltips = {};
-
-        if (p.revealedValues) {
-            Object.keys(p.revealedValues).forEach(function (key) {
-                var rd = p.revealedValues[key];
-                var camelKey = key.charAt(0).toLowerCase() + key.slice(1);
-
-                revealedData[camelKey] = rd.value || rd.Value || 'Розкрито';
-
-                if (rd.tooltip || rd.Tooltip) {
-                    revealedTooltips[camelKey] = rd.tooltip || rd.Tooltip;
-                }
-            });
-        }
-
-        roomPlayers[p.connectionId] = {
-            name: p.name,
-            connectionId: p.connectionId,
-            isHost: p.isHost,
-            revealed: p.revealed || {},
-            revealedData: revealedData,
-            revealedTooltips: revealedTooltips,
-            isEliminated: p.isEliminated,
-            seatNumber: p.seatNumber || 0
-        };
-
-        console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[p.connectionId]);
-    });
-
-    console.log("[RejoinSuccess] roomPlayers final:", roomPlayers);
-
-    activatedCards = (data.activatedCards || data.ActivatedCards || []).map(function (card, index) {
-        const normalized = {
-            cardId: card.cardId || card.CardId || '',
-            name: card.name || card.Name || card.cardName || card.CardName || '',
-            rarity: card.rarity || card.Rarity || 'common',
-            description: card.description || card.Description || card.cardDescription || card.CardDescription || '',
-            playerId: card.playerId || card.PlayerId || card.connectionId || card.ConnectionId || '',
-            playerName: card.playerName || card.PlayerName || '',
-            targetPlayerId: card.targetPlayerId || card.TargetPlayerId || null,
-            targetPlayerName: card.targetPlayerName || card.TargetPlayerName || null,
-            targetCharacteristic: card.targetCharacteristic || card.TargetCharacteristic || null,
-            activatedAt: card.activatedAt || card.ActivatedAt || null
-        };
-
-        console.log(`[RejoinSuccess] normalized activatedCard[${index}]`, normalized);
-        return normalized;
-    });
-
-    console.log("[RejoinSuccess] activatedCards final:", activatedCards);
-
-    activatedCardsTable = {};
-
-    activatedCards.forEach(function (card, index) {
-        const connectionId = card.playerId;
-
-        console.log(`[RejoinSuccess] rebuild card[${index}] connectionId=`, connectionId);
-
-        if (!connectionId) {
-            console.warn(`[RejoinSuccess] card[${index}] skipped because no connectionId`, card);
+    connection.off("ReceiveError");
+    connection.on("ReceiveError", function (message) {
+        if (message === "Гра вже запущена") {
+            console.warn("ReceiveError ignored:", message);
             return;
         }
 
-        if (!activatedCardsTable[connectionId]) {
-            activatedCardsTable[connectionId] = [];
-        }
-
-        if (activatedCardsTable[connectionId].length < 2) {
-            activatedCardsTable[connectionId].push({
-                name: card.name || 'Карта',
-                rarity: card.rarity || 'common',
-                description: card.description || ''
-            });
-        }
+        console.error("ReceiveError:", message);
+        addEventMessage("Помилка: " + message);
     });
 
-    console.log("[RejoinSuccess] activatedCardsTable final:", activatedCardsTable);
-    console.log("[RejoinSuccess] Object.keys(activatedCardsTable):", Object.keys(activatedCardsTable));
-    console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
+    // ==================== SESSION RESTORE HANDLERS ====================
 
-    const isGameState =
-    data.roomState === 'Playing' ||
-    data.roomState === 'Voting' ||
-    data.roomState === 'Started';
+    // Успішне перепідключення
+    connection.off("RejoinSuccess");
+    connection.on("RejoinSuccess", function (data) {
+        console.log("=== REJOIN SUCCESS START ===");
+        console.log("[RejoinSuccess] raw data:", data);
+        console.log("[RejoinSuccess] data.activatedCards:", data.activatedCards);
+        console.log("[RejoinSuccess] data.players:", data.players);
 
-showRoomSection();
-updateRoomUI();
+        currentRoom = data.room;
+        myPlayerData = data.player;
+        isHost = data.isHost;
+        myConnectionId = data.player.connectionId;
 
-if (myPlayerData) {
-    renderMyPlayerCards(myPlayerData);
-    renderMyCards();
-}
+        // ВАЖЛИВО
+        if (currentRoom) {
+            currentRoom.state = data.roomState || currentRoom.state || "Lobby";
+        }
 
-if (isGameState) {
-    currentApocalypse = data.apocalypse;
-    currentBunker = data.bunker;
+        console.log("[RejoinSuccess] currentRoom:", currentRoom);
+        console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
+        console.log("[RejoinSuccess] myConnectionId:", myConnectionId);
 
-    document.getElementById('roomLobby').style.display = 'none';
-    document.getElementById('gameSection').style.display = 'block';
-    document.getElementById('myPlayerSection').style.display = 'block';
+        if (myPlayerData) {
+            myPlayerData.cards = myPlayerData.cards || myPlayerData.Cards || [];
+        }
 
-    document.getElementById('currentRoomState').textContent =
-        data.roomState === 'Voting' ? 'Голосування' : 'Гра';
+        console.log("[RejoinSuccess] normalized myPlayerData.cards:", myPlayerData?.cards);
 
-    const startBtn = document.getElementById('startGameBtn');
-    if (startBtn) {
-        startBtn.style.display = 'none';
-        startBtn.disabled = true;
-    }
+        saveSession(currentRoom.id, myPlayerData.name);
 
-    if (data.apocalypse) renderApocalypse(data.apocalypse);
-    if (data.bunker) renderBunker(data.bunker);
-} else {
-    document.getElementById('roomLobby').style.display = 'block';
-    document.getElementById('gameSection').style.display = 'none';
-    document.getElementById('myPlayerSection').style.display = 'block';
-}
+        roomPlayers = {};
+        (data.players || []).forEach(function (p, index) {
+            var revealedData = {};
+            var revealedTooltips = {};
 
-updatePlayersTable();
-updateActivatedCardsTable();
+            if (p.revealedValues) {
+                Object.keys(p.revealedValues).forEach(function (key) {
+                    var rd = p.revealedValues[key];
+                    var camelKey = key.charAt(0).toLowerCase() + key.slice(1);
 
-    console.log("=== REJOIN SUCCESS END ===");
+                    revealedData[camelKey] = rd.value || rd.Value || 'Розкрито';
 
-    addEventMessage(`Сесію відновлено! Ви знову в кімнаті <span class="event-room">${currentRoom.name}</span>`);
-});
+                    if (rd.tooltip || rd.Tooltip) {
+                        revealedTooltips[camelKey] = rd.tooltip || rd.Tooltip;
+                    }
+                });
+            }
+
+            roomPlayers[p.connectionId] = {
+                name: p.name,
+                connectionId: p.connectionId,
+                isHost: p.isHost,
+                revealed: p.revealed || {},
+                revealedData: revealedData,
+                revealedTooltips: revealedTooltips,
+                isEliminated: p.isEliminated,
+                seatNumber: p.seatNumber || 0
+            };
+
+            console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[p.connectionId]);
+        });
+
+        console.log("[RejoinSuccess] roomPlayers final:", roomPlayers);
+
+        activatedCards = (data.activatedCards || data.ActivatedCards || []).map(function (card, index) {
+            const normalized = {
+                cardId: card.cardId || card.CardId || '',
+                name: card.name || card.Name || card.cardName || card.CardName || '',
+                rarity: card.rarity || card.Rarity || 'common',
+                description: card.description || card.Description || card.cardDescription || card.CardDescription || '',
+                playerId: card.playerId || card.PlayerId || card.connectionId || card.ConnectionId || '',
+                playerName: card.playerName || card.PlayerName || '',
+                targetPlayerId: card.targetPlayerId || card.TargetPlayerId || null,
+                targetPlayerName: card.targetPlayerName || card.TargetPlayerName || null,
+                targetCharacteristic: card.targetCharacteristic || card.TargetCharacteristic || null,
+                activatedAt: card.activatedAt || card.ActivatedAt || null
+            };
+
+            console.log(`[RejoinSuccess] normalized activatedCard[${index}]`, normalized);
+            return normalized;
+        });
+
+        console.log("[RejoinSuccess] activatedCards final:", activatedCards);
+
+        activatedCardsTable = {};
+
+        activatedCards.forEach(function (card, index) {
+            const connectionId = card.playerId;
+
+            console.log(`[RejoinSuccess] rebuild card[${index}] connectionId=`, connectionId);
+
+            if (!connectionId) {
+                console.warn(`[RejoinSuccess] card[${index}] skipped because no connectionId`, card);
+                return;
+            }
+
+            if (!activatedCardsTable[connectionId]) {
+                activatedCardsTable[connectionId] = [];
+            }
+
+            if (activatedCardsTable[connectionId].length < 2) {
+                activatedCardsTable[connectionId].push({
+                    name: card.name || 'Карта',
+                    rarity: card.rarity || 'common',
+                    description: card.description || ''
+                });
+            }
+        });
+
+        console.log("[RejoinSuccess] activatedCardsTable final:", activatedCardsTable);
+        console.log("[RejoinSuccess] Object.keys(activatedCardsTable):", Object.keys(activatedCardsTable));
+        console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
+
+        const isGameState =
+            data.roomState === 'Playing' ||
+            data.roomState === 'Voting' ||
+            data.roomState === 'Started';
+
+        showRoomSection();
+        updateRoomUI();
+
+        if (myPlayerData) {
+            renderMyPlayerCards(myPlayerData);
+            renderMyCards();
+        }
+
+        if (isGameState) {
+            currentApocalypse = data.apocalypse;
+            currentBunker = data.bunker;
+
+            document.getElementById('roomLobby').style.display = 'none';
+            document.getElementById('gameSection').style.display = 'block';
+            document.getElementById('myPlayerSection').style.display = 'block';
+
+            document.getElementById('currentRoomState').textContent =
+                data.roomState === 'Voting' ? 'Голосування' : 'Гра';
+
+            const startBtn = document.getElementById('startGameBtn');
+            if (startBtn) {
+                startBtn.style.display = 'none';
+                startBtn.disabled = true;
+            }
+
+            if (data.apocalypse) renderApocalypse(data.apocalypse);
+            if (data.bunker) renderBunker(data.bunker);
+        } else {
+            document.getElementById('roomLobby').style.display = 'block';
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('myPlayerSection').style.display = 'block';
+        }
+
+        updatePlayersTable();
+        updateActivatedCardsTable();
+
+        console.log("=== REJOIN SUCCESS END ===");
+
+        addEventMessage(`Сесію відновлено! Ви знову в кімнаті <span class="event-room">${currentRoom.name}</span>`);
+    });
 
     // Перепідключення не вдалося
+    connection.off("RejoinFailed");
     connection.on("RejoinFailed", function (message) {
         console.log("Rejoin failed:", message);
         clearSession();
@@ -1126,6 +1079,7 @@ updateActivatedCardsTable();
     });
 
     // Інший гравець перепідключився
+    connection.off("PlayerReconnected");
     connection.on("PlayerReconnected", function (info) {
         console.log("Player reconnected:", info);
         // Оновлюємо connectionId гравця
@@ -1150,6 +1104,7 @@ updateActivatedCardsTable();
     // ==================== PEEK CHARACTERISTIC HANDLER ====================
 
     // Хост підглянув приховану характеристику
+    connection.off("CharacteristicPeeked");
     connection.on("CharacteristicPeeked", function (info) {
         console.log("Characteristic peeked:", info);
         showPeekModal(info.playerName, info.characteristicKey, info.data, info.isRevealed);
@@ -1158,6 +1113,7 @@ updateActivatedCardsTable();
     // ==================== CARD SIGNALR HANDLERS ====================
 
     // Карта очікує підтвердження
+    connection.off("CardPending");
     connection.on("CardPending", function (card) {
         console.log("Card pending:", card);
         renderMyCards();
@@ -1165,6 +1121,7 @@ updateActivatedCardsTable();
     });
 
     // Запит на підтвердження карти (для хоста)
+    connection.off("CardApprovalRequest");
     connection.on("CardApprovalRequest", function (data) {
         console.log("Card approval request:", data);
         pendingCardApprovals.push(data);
@@ -1173,6 +1130,7 @@ updateActivatedCardsTable();
     });
 
     // Карта використана
+    connection.off("CardUsed");
     connection.on("CardUsed", function (data) {
         console.log("Card used:", data);
         if (myPlayerData) {
@@ -1186,6 +1144,7 @@ updateActivatedCardsTable();
     });
 
     // Карта відхилена
+    connection.off("CardRejected");
     connection.on("CardRejected", function (data) {
         console.log("Card rejected:", data);
         if (myPlayerData) {
@@ -1199,6 +1158,7 @@ updateActivatedCardsTable();
     });
 
     // Нова карта отримана
+    connection.off("CardReceived");
     connection.on("CardReceived", function (card) {
         console.log("Card received:", card);
         if (myPlayerData) {
@@ -1210,65 +1170,242 @@ updateActivatedCardsTable();
     });
 
     // Карта активована (для всіх)
-connection.on("CardActivated", function (data) {
-    console.log("=== CardActivated START ===");
-    console.log("[CardActivated] RAW DATA:", data);
+    connection.off("CardActivated");
+    connection.on("CardActivated", function (data) {
+        console.log("=== CardActivated START ===");
+        console.log("[CardActivated] RAW DATA:", data);
 
-    const connectionId =
-        data.connectionId ||
-        data.playerConnectionId ||
-        data.ConnectionId ||
-        data.PlayerConnectionId;
+        const connectionId =
+            data.connectionId ||
+            data.playerConnectionId ||
+            data.ConnectionId ||
+            data.PlayerConnectionId;
 
-    const card = data.card || data.Card || data;
+        const card = data.card || data.Card || data;
 
-    const normalizedCard = {
-        name:
-            data.cardName ||
-            data.CardName ||
-            card?.name ||
-            card?.Name ||
-            data.name ||
-            data.Name ||
-            "Карта",
+        const normalizedCard = {
+            name:
+                data.cardName ||
+                data.CardName ||
+                card?.name ||
+                card?.Name ||
+                data.name ||
+                data.Name ||
+                "Карта",
 
-        rarity:
-            data.cardRarity ||
-            data.CardRarity ||
-            card?.rarity ||
-            card?.Rarity ||
-            data.rarity ||
-            data.Rarity ||
-            "common",
+            rarity:
+                data.cardRarity ||
+                data.CardRarity ||
+                card?.rarity ||
+                card?.Rarity ||
+                data.rarity ||
+                data.Rarity ||
+                "common",
 
-        description:
-            data.cardDescription ||
-            data.CardDescription ||
-            card?.description ||
-            card?.Description ||
-            data.description ||
-            data.Description ||
-            ""
-    };
+            description:
+                data.cardDescription ||
+                data.CardDescription ||
+                card?.description ||
+                card?.Description ||
+                data.description ||
+                data.Description ||
+                ""
+        };
 
-    console.log("[CardActivated] normalizedCard:", normalizedCard);
+        console.log("[CardActivated] normalizedCard:", normalizedCard);
 
-    if (!connectionId) return;
+        if (!connectionId) return;
 
-    addActivatedCard(connectionId, normalizedCard);
+        addActivatedCard(connectionId, normalizedCard);
 
-    const section = document.getElementById("specialCardsTableSection");
-    if (section) {
-        section.style.display = "block";
+        const section = document.getElementById("specialCardsTableSection");
+        if (section) {
+            section.style.display = "block";
+        }
+
+        addEventMessage(
+            `<span class="event-card">🃏</span> ${data.playerName || data.PlayerName || "Гравець"} активував карту <span class="card-name">${normalizedCard.name}</span>`
+        );
+    });
+
+    // Секрет переглянуто (тільки власнику карти)
+    connection.off("SecretViewed");
+    connection.on("SecretViewed", function (data) {
+        console.log("Secret viewed:", data);
+        alert(`${data.secretType} гравця ${data.targetPlayerName}:\n\n${data.secretValue}`);
+        addEventMessage(`Ви дізналися ${data.secretType} гравця ${data.targetPlayerName}`);
+    });
+
+    // Характеристику обміняно
+    connection.off("CharacteristicSwapped");
+    connection.on("CharacteristicSwapped", function (data) {
+        console.log("Characteristic swapped:", data);
+        myPlayerData = data.player;
+        renderMyPlayerCards(myPlayerData);
+        addEventMessage(`Вашу характеристику ${data.characteristicName} обміняно з ${data.withPlayerName}`);
+    });
+
+    // ==================== SCENARIO & EVENT SIGNALR HANDLERS ====================
+
+    // Кількість слотів бункера змінено
+    connection.off("BunkerCapacityUpdated");
+    connection.on("BunkerCapacityUpdated", function (data) {
+        console.log("Bunker capacity updated:", data);
+        if (currentBunker) currentBunker.capacity = data.capacity;
+        document.getElementById('gmBunkerCapacity').textContent = data.capacity;
+        renderBunker(data.bunker);
+        addEventMessage(`<span class="event-gm">GM</span> змінив кількість слотів бункера на <strong>${data.capacity}</strong>`);
+    });
+
+    // Бункер змінено
+    connection.off("BunkerChanged");
+    connection.on("BunkerChanged", function (data) {
+        console.log("Bunker changed:", data);
+        currentBunker = data.bunker;
+        document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+        renderBunker(data.bunker);
+        addEventMessage(`<span class="event-bunker">🏠 Новий бункер:</span> ${data.bunker.name}`);
+    });
+
+    // Апокаліпсис змінено
+    connection.off("ApocalypseChanged");
+    connection.on("ApocalypseChanged", function (data) {
+        console.log("Apocalypse changed:", data);
+        currentApocalypse = data.apocalypse;
+        renderApocalypse(data.apocalypse);
+        addEventMessage(`<span class="event-apocalypse">☢️ Новий апокаліпсис:</span> ${data.apocalypse.name}`);
+    });
+
+    // Ігрова подія від GM
+    connection.off("GameEvent");
+    connection.on("GameEvent", function (data) {
+        console.log("Game event:", data);
+        var typeClass = 'event-' + data.type;
+        addEventMessage(`<span class="${typeClass}"><strong>[Подія ${data.timestamp}]</strong> ${data.text}</span>`);
+    });
+
+    // Нова подія з ефектом (показується всім)
+    connection.off("NewGameEvent");
+    connection.on("NewGameEvent", function (eventData) {
+        console.log("New game event:", eventData);
+        showCurrentEvent(eventData);
+        addEventToHistory(`<strong>${eventData.name || eventData.Name}</strong>: ${eventData.description || eventData.Description}`, 'game');
+    });
+
+    // Ефект події застосовано
+    connection.off("EventEffectApplied");
+    connection.on("EventEffectApplied", function (data) {
+        console.log("Event effect applied:", data);
+        // Оновлюємо бункер якщо потрібно
+        if (data.bunker) {
+            currentBunker = data.bunker;
+            renderBunker(data.bunker);
+        }
+        addEventToHistory(`<span class="event-special">Застосовано ефект: ${data.effectDescription}</span>`, 'special');
+    });
+
+    // ==================== VOTING SIGNALR HANDLERS ====================
+
+    // Голосування почалось
+    connection.off("VotingStarted");
+    connection.on("VotingStarted", function (data) {
+        console.log("Voting started:", data);
+        currentVoting = data;
+        myVote = null;
+        showVotingPanel(data);
+        addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round}`);
+    });
+
+    // Голос зараховано
+    connection.off("VoteCast");
+    connection.on("VoteCast", function (data) {
+        console.log("Vote cast:", data);
+        myVote = data;
+        document.getElementById('myVoteStatus').style.display = 'block';
+        document.getElementById('myVoteTarget').textContent = data.targetName;
+        updateVotingCandidates();
+        addEventMessage(`Ви проголосували за ${data.targetName}${data.changed ? ' (змінено)' : ''}`);
+    });
+
+    // Прогрес голосування
+    connection.off("VotingProgress");
+    connection.on("VotingProgress", function (data) {
+        console.log("Voting progress:", data);
+        document.getElementById('votingProgressText').textContent = `${data.votedCount}/${data.totalVoters} проголосували`;
+    });
+
+    // Голосування завершено
+    connection.off("VotingEnded");
+    connection.on("VotingEnded", function (data) {
+        console.log("Voting ended:", data);
+        currentVoting = data;
+        
+        // Ховаємо панель голосування
+        document.getElementById('votingPanel').style.display = 'none';
+        
+        // Показуємо результати (тільки хосту показуємо кнопки)
+        showVotingResults(data);
+        
+        addEventMessage(`<span class="event-voting">🗳️ Голосування завершено!</span> Лідер: ${data.topVotedPlayerName || 'Нічия'}`);
+    });
+
+    // Рішення по голосуванню прийнято
+    connection.off("VotingResolved");
+    connection.on("VotingResolved", function (data) {
+        console.log("Voting resolved:", data);
+        currentVoting = null;
+        
+        // Ховаємо панель результатів
+        document.getElementById('votingResultsPanel').style.display = 'none';
+        
+        // Оновлюємо UI
+        updateRoomUI();
+        
+        addEventMessage(`<span class="event-voting">⚖️</span> ${data.message}. Раунд ${data.nextRound}`);
+    });
+
+    // Голосування скасовано
+    connection.off("VotingCancelled");
+    connection.on("VotingCancelled", function (data) {
+        console.log("Voting cancelled:", data);
+        currentVoting = null;
+        
+        document.getElementById('votingPanel').style.display = 'none';
+        document.getElementById('votingResultsPanel').style.display = 'none';
+        
+        addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
+    });
+} // End of registerSignalREvents()
+
+// ==================== GLOBAL FUNCTIONS ====================
+
+let isStartingGame = false;
+
+function startGame() {
+    if (isStartingGame) return;
+    if (!confirm("Почати гру?")) return;
+
+    isStartingGame = true;
+
+    const btn = document.getElementById("startGameBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.style.pointerEvents = "none";
     }
 
-    addEventMessage(
-        `<span class="event-card">🃏</span> ${data.playerName || data.PlayerName || "Гравець"} активував карту <span class="card-name">${normalizedCard.name}</span>`
-    );
-});
+    connection.invoke("StartGame")
+        .catch(err => {
+            console.error("StartGame error:", err);
+            isStartingGame = false;
 
+            if (btn) {
+                btn.disabled = false;
+                btn.style.pointerEvents = "auto";
+            }
+        });
+}
 
-     function addActivatedCard(connectionId, card) {
+function addActivatedCard(connectionId, card) {
     console.log("=== addActivatedCard START ===");
     console.log("[addActivatedCard] connectionId:", connectionId);
     console.log("[addActivatedCard] card:", card);
@@ -1295,141 +1432,8 @@ connection.on("CardActivated", function (data) {
 
     console.log("=== addActivatedCard END ===");
 }
-    // Секрет переглянуто (тільки власнику карти)
-    connection.on("SecretViewed", function (data) {
-        console.log("Secret viewed:", data);
-        alert(`${data.secretType} гравця ${data.targetPlayerName}:\n\n${data.secretValue}`);
-        addEventMessage(`Ви дізналися ${data.secretType} гравця ${data.targetPlayerName}`);
-    });
 
-    // Характеристику обміняно
-    connection.on("CharacteristicSwapped", function (data) {
-        console.log("Characteristic swapped:", data);
-        myPlayerData = data.player;
-        renderMyPlayerCards(myPlayerData);
-        addEventMessage(`Вашу характеристику ${data.characteristicName} обміняно з ${data.withPlayerName}`);
-    });
-
-    // ==================== SCENARIO & EVENT SIGNALR HANDLERS ====================
-
-    // Кількість слотів бункера змінено
-    connection.on("BunkerCapacityUpdated", function (data) {
-        console.log("Bunker capacity updated:", data);
-        if (currentBunker) currentBunker.capacity = data.capacity;
-        document.getElementById('gmBunkerCapacity').textContent = data.capacity;
-        renderBunker(data.bunker);
-        addEventMessage(`<span class="event-gm">GM</span> змінив кількість слотів бункера на <strong>${data.capacity}</strong>`);
-    });
-
-    // Бункер змінено
-    connection.on("BunkerChanged", function (data) {
-        console.log("Bunker changed:", data);
-        currentBunker = data.bunker;
-        document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
-        renderBunker(data.bunker);
-        addEventMessage(`<span class="event-bunker">🏠 Новий бункер:</span> ${data.bunker.name}`);
-    });
-
-    // Апокаліпсис змінено
-    connection.on("ApocalypseChanged", function (data) {
-        console.log("Apocalypse changed:", data);
-        currentApocalypse = data.apocalypse;
-        renderApocalypse(data.apocalypse);
-        addEventMessage(`<span class="event-apocalypse">☢️ Новий апокаліпсис:</span> ${data.apocalypse.name}`);
-    });
-
-    // Ігрова подія від GM
-    connection.on("GameEvent", function (data) {
-        console.log("Game event:", data);
-        var typeClass = 'event-' + data.type;
-        addEventMessage(`<span class="${typeClass}"><strong>[Подія ${data.timestamp}]</strong> ${data.text}</span>`);
-    });
-
-    // Нова подія з ефектом (показується всім)
-    connection.on("NewGameEvent", function (eventData) {
-        console.log("New game event:", eventData);
-        showCurrentEvent(eventData);
-        addEventToHistory(`<strong>${eventData.name || eventData.Name}</strong>: ${eventData.description || eventData.Description}`, 'game');
-    });
-
-    // Ефект події застосовано
-    connection.on("EventEffectApplied", function (data) {
-        console.log("Event effect applied:", data);
-        // Оновлюємо бункер якщо потрібно
-        if (data.bunker) {
-            currentBunker = data.bunker;
-            renderBunker(data.bunker);
-        }
-        addEventToHistory(`<span class="event-special">Застосовано ефект: ${data.effectDescription}</span>`, 'special');
-    });
-
-    // ==================== VOTING SIGNALR HANDLERS ====================
-
-    // Голосування почалось
-    connection.on("VotingStarted", function (data) {
-        console.log("Voting started:", data);
-        currentVoting = data;
-        myVote = null;
-        showVotingPanel(data);
-        addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round}`);
-    });
-
-    // Голос зараховано
-    connection.on("VoteCast", function (data) {
-        console.log("Vote cast:", data);
-        myVote = data;
-        document.getElementById('myVoteStatus').style.display = 'block';
-        document.getElementById('myVoteTarget').textContent = data.targetName;
-        updateVotingCandidates();
-        addEventMessage(`Ви проголосували за ${data.targetName}${data.changed ? ' (змінено)' : ''}`);
-    });
-
-    // Прогрес голосування
-    connection.on("VotingProgress", function (data) {
-        console.log("Voting progress:", data);
-        document.getElementById('votingProgressText').textContent = `${data.votedCount}/${data.totalVoters} проголосували`;
-    });
-
-    // Голосування завершено
-    connection.on("VotingEnded", function (data) {
-        console.log("Voting ended:", data);
-        currentVoting = data;
-        
-        // Ховаємо панель голосування
-        document.getElementById('votingPanel').style.display = 'none';
-        
-        // Показуємо результати (тільки хосту показуємо кнопки)
-        showVotingResults(data);
-        
-        addEventMessage(`<span class="event-voting">🗳️ Голосування завершено!</span> Лідер: ${data.topVotedPlayerName || 'Нічия'}`);
-    });
-
-    // Рішення по голосуванню прийнято
-    connection.on("VotingResolved", function (data) {
-        console.log("Voting resolved:", data);
-        currentVoting = null;
-        
-        // Ховаємо панель результатів
-        document.getElementById('votingResultsPanel').style.display = 'none';
-        
-        // Оновлюємо UI
-        updateRoomUI();
-        
-        addEventMessage(`<span class="event-voting">⚖️</span> ${data.message}. Раунд ${data.nextRound}`);
-    });
-
-    // Голосування скасовано
-    connection.on("VotingCancelled", function (data) {
-        console.log("Voting cancelled:", data);
-        currentVoting = null;
-        
-        document.getElementById('votingPanel').style.display = 'none';
-        document.getElementById('votingResultsPanel').style.display = 'none';
-        
-        addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
-    });
-
-    // ==================== CONNECTION STATUS UI ====================
+// ==================== CONNECTION STATUS UI ====================
     
     function updateConnectionStatus(status, isError = false) {
         const statusEl = document.getElementById('connectionStatus');
