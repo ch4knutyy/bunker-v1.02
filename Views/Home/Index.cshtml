@@ -3095,12 +3095,20 @@ function updateActivatedCardsTable() {
         
         container.innerHTML = players.map((p, i) => {
             var seatLabel = p.seatNumber ? '#' + p.seatNumber : '#' + (i + 1);
+            const isEliminated = p.isEliminated || p.IsEliminated || false;
+            
+            let cardClasses = ['room-player-card'];
+            if (p.connectionId === myConnectionId) cardClasses.push('my-player');
+            if (p.isHost) cardClasses.push('host-player');
+            if (isEliminated) cardClasses.push('room-player-eliminated');
+            
             return `
-            <div class="room-player-card ${p.connectionId === myConnectionId ? 'my-player' : ''} ${p.isHost ? 'host-player' : ''}">
+            <div class="${cardClasses.join(' ')}">
                 <span class="player-number">${seatLabel}</span>
                 <span class="player-name">${p.name}</span>
                 ${p.isHost ? '<span class="host-badge">Хост</span>' : ''}
                 ${p.connectionId === myConnectionId ? '<span class="you-badge">Ви</span>' : ''}
+                ${isEliminated ? '<span class="eliminated-badge-small">ВИБУВ</span>' : ''}
             </div>`;
         }).join('');
     }
@@ -3123,10 +3131,26 @@ function updateActivatedCardsTable() {
         
         tbody.innerHTML = players.map((player, index) => {
             var seatLabel = player.seatNumber ? '#' + player.seatNumber : '#' + (index + 1);
+            const isMe = player.connectionId === myConnectionId;
+            const isEliminated = player.isEliminated || player.IsEliminated || false;
+            
+            // Build CSS classes
+            let rowClasses = [];
+            if (isMe) rowClasses.push('my-player-row');
+            if (isEliminated) rowClasses.push('player-eliminated');
+            
+            // Eliminated badge
+            const eliminatedBadge = isEliminated ? '<span class="eliminated-badge">ВИБУВ</span>' : '';
+            
             return `
-            <tr class="${player.connectionId === myConnectionId ? 'my-player-row' : ''}" data-player="${player.connectionId}">
+            <tr class="${rowClasses.join(' ')}" data-player="${player.connectionId}">
                 <td class="player-number">${seatLabel}</td>
-                <td class="player-name">${player.name}${player.connectionId === myConnectionId ? ' <span class="my-badge">(Я)</span>' : ''}${player.isHost ? ' <span class="host-badge-small">Хост</span>' : ''}</td>
+                <td class="player-name-cell">
+                    <span class="player-name-text">${player.name}</span>
+                    ${isMe ? '<span class="my-badge">(Я)</span>' : ''}
+                    ${player.isHost ? '<span class="host-badge-small">Хост</span>' : ''}
+                    ${eliminatedBadge}
+                </td>
                 <td>${renderTableCell(player, 'personality')}</td>
                 <td>${renderTableCell(player, 'body')}</td>
                 <td>${renderTableCell(player, 'profession')}</td>
@@ -3143,7 +3167,9 @@ function updateActivatedCardsTable() {
             `;
             }).join('');
         
-        document.getElementById('playerCount').textContent = `${players.length}/${currentRoom?.maxPlayers || 12}`;
+        // Count non-eliminated players for bunker capacity display
+        const activePlayers = players.filter(p => !(p.isEliminated || p.IsEliminated));
+        document.getElementById('playerCount').textContent = `${activePlayers.length}/${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
     }
 
     function renderTableCell(player, charKey) {
@@ -3658,6 +3684,95 @@ function updateActivatedCardsTable() {
 .player-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
 .event-room { color: var(--color-gold); font-weight: 600; }
 .event-error { color: #e74c3c; }
+
+/* ==================== ELIMINATED PLAYER STYLES ==================== */
+.player-eliminated {
+    opacity: 0.4;
+    filter: grayscale(70%);
+    background: rgba(100, 100, 100, 0.15) !important;
+    position: relative;
+}
+
+.player-eliminated td {
+    color: var(--color-text-muted) !important;
+}
+
+.player-eliminated .char-revealed {
+    color: var(--color-text-muted) !important;
+}
+
+.player-eliminated .player-number {
+    text-decoration: line-through;
+}
+
+.player-name-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.player-name-text {
+    font-weight: 600;
+}
+
+.player-eliminated .player-name-text {
+    text-decoration: line-through;
+    font-weight: normal;
+}
+
+.eliminated-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+    animation: eliminatedPulse 2s ease-in-out infinite;
+}
+
+@@keyframes eliminatedPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Keep my-player-row highlight even when eliminated */
+.player-eliminated.my-player-row {
+    background: rgba(216, 155, 43, 0.08) !important;
+}
+
+/* Room player card eliminated state (lobby view) */
+.room-player-eliminated {
+    opacity: 0.4;
+    filter: grayscale(60%);
+    position: relative;
+}
+
+.room-player-eliminated .player-name {
+    text-decoration: line-through;
+}
+
+.eliminated-badge-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.1rem 0.35rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 3px;
+    margin-left: 0.3rem;
+}
 
 /* Tooltip styles */
 .characteristic-with-tooltip { display: inline-flex; align-items: center; gap: 6px; position: relative; }
