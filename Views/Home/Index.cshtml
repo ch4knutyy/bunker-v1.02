@@ -15,7 +15,7 @@
             <div class="create-room-panel">
                 <h2 class="section-title">Створити кімнату</h2>
                 <div class="create-room-form">
-                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." />
+                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
                     <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." />
                     <div class="form-row">
                         <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
@@ -119,8 +119,18 @@
                     <!-- Характеристики -->
                     <div class="gm-characteristics">
                         <div class="gm-char-item">
+                            <span class="gm-char-name">Статура:</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
+                            <div class="gm-char-actions">
+                                <button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
+                                <button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
                             <span class="gm-char-name">Професія:</span>
-                            <span class="gm-char-value" id="gmProfession">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
@@ -130,7 +140,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Фіз. здоров'я:</span>
-                            <span class="gm-char-value" id="gmPhysicalHealth">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
@@ -140,7 +150,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Псих. здоров'я:</span>
-                            <span class="gm-char-value" id="gmMentalHealth">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
@@ -150,7 +160,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Хобі:</span>
-                            <span class="gm-char-value" id="gmHobby">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
@@ -160,7 +170,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Риса характеру:</span>
-                            <span class="gm-char-value" id="gmCharacterTrait">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
@@ -170,7 +180,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Фобія:</span>
-                            <span class="gm-char-value" id="gmPhobia">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
@@ -180,7 +190,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Особливості:</span>
-                            <span class="gm-char-value" id="gmTraits">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmTraits">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Traits')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Traits')" title="Редагувати">✏️</button>
@@ -190,7 +200,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Секрет:</span>
-                            <span class="gm-char-value" id="gmSecret">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmSecret">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('Secret')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('Secret')" title="Редагувати">✏️</button>
@@ -200,7 +210,7 @@
                         </div>
                         <div class="gm-char-item">
                             <span class="gm-char-name">Таємна ціль:</span>
-                            <span class="gm-char-value" id="gmSecretGoal">-</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmSecretGoal">Приховано</span>
                             <div class="gm-char-actions">
                                 <button onclick="peekCharacteristic('SecretGoal')" title="Підглянути" class="btn-peek">&#128065;</button>
                                 <button onclick="editCharacteristic('SecretGoal')" title="Редагувати">✏️</button>
@@ -394,7 +404,7 @@
     <div class="modal-content">
         <h3>Приєднатися до кімнати</h3>
         <div>
-            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." />
+            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
             <input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
             <input type="hidden" id="joinRoomId" />
             <div class="modal-actions">
@@ -2141,6 +2151,29 @@ function removeBunkerSupplies(months) {
         updateConnectionStatus("✗ З'єднання втрачено. Оновіть сторінку.", true);
     });
 
+    // ==================== NAME VALIDATION ====================
+    
+    // Sanitize player name input - max 10 chars
+    function sanitizeNameInput(input) {
+        // Trim and limit to 10 characters
+        let value = input.value;
+        if (value.length > 10) {
+            input.value = value.substring(0, 10);
+        }
+    }
+    
+    // Validate player name before submission
+    function validatePlayerName(name) {
+        if (!name || name.trim().length === 0) {
+            return { valid: false, error: "Ім'я гравця обов'язкове" };
+        }
+        name = name.trim();
+        if (name.length > 10) {
+            return { valid: false, error: "Ім'я гравця не може перевищувати 10 символів" };
+        }
+        return { valid: true, name: name };
+    }
+
     // ==================== SESSION & PROFILE FUNCTIONS ====================
 
     function saveSession(roomId, playerName) {
@@ -2215,8 +2248,75 @@ function removeBunkerSupplies(months) {
             alert('Спочатку виберіть гравця');
             return;
         }
+        
+        // Locally reveal the value in GM panel immediately
+        revealCharInGMPanel(charName);
+        
+        // Also call server to get full data
         connection.invoke("PeekCharacteristic", selectedId, charName)
             .catch(function(err) { console.error("PeekCharacteristic error:", err); });
+    }
+    
+    // Reveal a specific characteristic value in the GM panel
+    function revealCharInGMPanel(charName) {
+        const playerData = gmPlayersData[selectedPlayerForGM];
+        if (!playerData) return;
+        
+        let value = 'Невідомо';
+        let elementId = '';
+        
+        switch(charName) {
+            case 'Body':
+                value = formatBody(playerData.body);
+                elementId = 'gmBody';
+                break;
+            case 'Profession':
+                value = playerData.profession?.name || 'Невідомо';
+                elementId = 'gmProfession';
+                break;
+            case 'PhysicalHealth':
+                value = playerData.physicalHealth?.name || 'Невідомо';
+                elementId = 'gmPhysicalHealth';
+                break;
+            case 'MentalHealth':
+                value = playerData.mentalHealth?.name || 'Невідомо';
+                elementId = 'gmMentalHealth';
+                break;
+            case 'Hobby':
+                value = playerData.hobby?.name || 'Невідомо';
+                elementId = 'gmHobby';
+                break;
+            case 'CharacterTrait':
+                value = playerData.characterTrait?.name || 'Невідомо';
+                elementId = 'gmCharacterTrait';
+                break;
+            case 'Phobia':
+                value = playerData.phobia?.name || 'Невідомо';
+                elementId = 'gmPhobia';
+                break;
+            case 'Traits':
+                value = playerData.traits?.name || 'Невідомо';
+                elementId = 'gmTraits';
+                break;
+            case 'Secret':
+                value = playerData.secret?.name || 'Невідомо';
+                elementId = 'gmSecret';
+                break;
+            case 'SecretGoal':
+                value = playerData.secretGoal?.goal || 'Невідомо';
+                elementId = 'gmSecretGoal';
+                break;
+        }
+        
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.textContent = value;
+            el.classList.remove('gm-char-hidden');
+            el.classList.add('gm-char-revealed');
+        }
+        
+        // Track what's been revealed
+        gmRevealedChars[charName] = true;
     }
 
     function showPeekModal(playerName, charKey, data, isAlreadyRevealed) {
@@ -2511,23 +2611,34 @@ function removeBunkerSupplies(months) {
             document.getElementById('joinRoomId').value = roomId;
             document.getElementById('joinModal').style.display = 'flex';
         } else {
-            const playerName = prompt("Введіть ваше ім'я:");
+            let playerName = prompt("Введіть ваше ім'я (макс. 10 символів):");
             if (playerName && playerName.trim()) {
-                connection.invoke("JoinRoom", roomId, playerName.trim(), null, stablePlayerId)
+                // Validate and sanitize name
+                const validation = validatePlayerName(playerName);
+                if (!validation.valid) {
+                    alert(validation.error);
+                    return;
+                }
+                connection.invoke("JoinRoom", roomId, validation.name, null, stablePlayerId)
                     .catch(err => console.error("JoinRoom error:", err));
             }
         }
     }
 
     function submitJoinRoom() {
-        const playerName = document.getElementById('playerNameJoin').value.trim();
+        const playerNameRaw = document.getElementById('playerNameJoin').value;
         const password = document.getElementById('joinRoomPassword').value || null;
         const roomId = document.getElementById('joinRoomId').value;
         
-        if (!playerName) {
-            alert("Введіть ваше ім'я");
+        // Validate name
+        const validation = validatePlayerName(playerNameRaw);
+        if (!validation.valid) {
+            alert(validation.error);
+            document.getElementById('playerNameJoin').focus();
             return;
         }
+        
+        const playerName = validation.name;
         
         // Зберігаємо roomId для перевірки в RoomJoined handler
         pendingJoinRoomId = roomId;
@@ -3284,6 +3395,8 @@ function updateActivatedCardsTable() {
         if (!connectionId) {
             document.getElementById('gmPlayerInfo').style.display = 'none';
             selectedPlayerForGM = null;
+            // Reset all revealed states
+            gmRevealedChars = {};
             return;
         }
         
@@ -3295,19 +3408,31 @@ function updateActivatedCardsTable() {
             return;
         }
         
+        // Reset revealed characteristics for new player
+        gmRevealedChars = {};
+        
         document.getElementById('gmPlayerInfo').style.display = 'block';
         document.getElementById('gmPlayerName').textContent = playerData.name + (playerData.isEliminated ? ' (Елімінований)' : '');
         
-        // Заповнюємо характеристики
-        document.getElementById('gmProfession').textContent = playerData.profession?.name || '-';
-        document.getElementById('gmPhysicalHealth').textContent = playerData.physicalHealth?.name || '-';
-        document.getElementById('gmMentalHealth').textContent = playerData.mentalHealth?.name || '-';
-        document.getElementById('gmHobby').textContent = playerData.hobby?.name || '-';
-        document.getElementById('gmCharacterTrait').textContent = playerData.characterTrait?.name || '-';
-        document.getElementById('gmPhobia').textContent = playerData.phobia?.name || '-';
-        document.getElementById('gmTraits').textContent = playerData.traits?.name || '-';
-        document.getElementById('gmSecret').textContent = playerData.secret?.name || '-';
-        document.getElementById('gmSecretGoal').textContent = playerData.secretGoal?.goal || '-';
+        // Заповнюємо характеристики - приховано по дефолту
+        const hiddenText = 'Приховано';
+        const hiddenClass = 'gm-char-hidden';
+        
+        // Body/Статура
+        const bodyEl = document.getElementById('gmBody');
+        bodyEl.textContent = hiddenText;
+        bodyEl.classList.add(hiddenClass);
+        
+        // Інші характеристики
+        const charElements = ['gmProfession', 'gmPhysicalHealth', 'gmMentalHealth', 'gmHobby', 
+                             'gmCharacterTrait', 'gmPhobia', 'gmTraits', 'gmSecret', 'gmSecretGoal'];
+        charElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = hiddenText;
+                el.classList.add(hiddenClass);
+            }
+        });
         
         // Оновлюємо кнопки елімінації
         const eliminateBtn = document.querySelector('.btn-eliminate');
@@ -3319,6 +3444,18 @@ function updateActivatedCardsTable() {
             eliminateBtn.style.display = 'inline-block';
             restoreBtn.style.display = 'none';
         }
+    }
+    
+    // Об'єкт для зберігання розкритих характеристик у GM панелі
+    var gmRevealedChars = {};
+    
+    // Форматування статури
+    function formatBody(body) {
+        if (!body) return 'Невідомо';
+        const height = body.height || body.Height || '?';
+        const weight = body.weight || body.Weight || '?';
+        const bodyType = body.bodyType || body.BodyType || '';
+        return `${height} см, ${weight} кг${bodyType ? ', ' + bodyType : ''}`;
     }
 
     function editCharacteristic(charName) {
@@ -3332,6 +3469,7 @@ function updateActivatedCardsTable() {
         
         let currentValue = '';
         switch(charName) {
+            case 'Body': currentValue = formatBody(playerData.body); break;
             case 'Profession': currentValue = playerData.profession?.name || ''; break;
             case 'PhysicalHealth': currentValue = playerData.physicalHealth?.name || ''; break;
             case 'MentalHealth': currentValue = playerData.mentalHealth?.name || ''; break;
@@ -4186,10 +4324,16 @@ function updateActivatedCardsTable() {
     align-items: center;
     flex-wrap: wrap;
     gap: 0.4rem;
+    max-width: 150px;
+    overflow: hidden;
 }
 
 .player-name-text {
     font-weight: 600;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .player-eliminated .player-name-text {
@@ -4458,6 +4602,20 @@ function updateActivatedCardsTable() {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Hidden/revealed states for GM characteristic values */
+.gm-char-value.gm-char-hidden {
+    color: var(--color-text-muted);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.gm-char-value.gm-char-revealed {
+    color: var(--color-green);
+    font-weight: 600;
+    font-style: normal;
+    opacity: 1;
 }
 
 .gm-char-actions {

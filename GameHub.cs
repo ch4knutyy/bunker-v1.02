@@ -34,9 +34,19 @@ namespace Bunker
 		/// </summary>
 		public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null, string? stablePlayerId = null)
 		{
+			// Validate and sanitize inputs
+			roomName = roomName?.Trim() ?? "";
+			playerName = SanitizePlayerName(playerName);
+			
 			if (string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(playerName))
 			{
 				await Clients.Caller.SendAsync("ReceiveError", "Назва кімнати та ім'я гравця обов'язкові");
+				return;
+			}
+			
+			if (playerName.Length > 10)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "Ім'я гравця не може перевищувати 10 символів");
 				return;
 			}
 
@@ -88,9 +98,19 @@ namespace Bunker
 
 		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null)
 		{
+			// Validate and sanitize inputs
+			roomId = roomId?.Trim() ?? "";
+			playerName = SanitizePlayerName(playerName);
+			
 			if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
 			{
 				await Clients.Caller.SendAsync("ReceiveError", "ID кімнати та ім'я гравця обов'язкові");
+				return;
+			}
+			
+			if (playerName.Length > 10)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "Ім'я гравця не може перевищувати 10 символів");
 				return;
 			}
 
@@ -2138,6 +2158,28 @@ namespace Bunker
             }
 
             await base.OnDisconnectedAsync(exception);
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Sanitize and validate player name
+        /// </summary>
+        private string SanitizePlayerName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "";
+            
+            // Trim whitespace
+            name = name.Trim();
+            
+            // Limit to 10 characters
+            if (name.Length > 10)
+                name = name.Substring(0, 10);
+            
+            return name;
         }
 
         #endregion
