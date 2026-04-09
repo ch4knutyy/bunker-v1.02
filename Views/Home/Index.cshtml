@@ -119,6 +119,16 @@
                     <!-- Характеристики -->
                     <div class="gm-characteristics">
                         <div class="gm-char-item">
+                            <span class="gm-char-name">Особистість:</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
+                            <div class="gm-char-actions">
+                                <button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
+                                <button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
                             <span class="gm-char-name">Статура:</span>
                             <span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
                             <div class="gm-char-actions">
@@ -2266,44 +2276,49 @@ function removeBunkerSupplies(months) {
         let elementId = '';
         
         switch(charName) {
+            case 'Personality':
+                value = formatPersonality(playerData.personality || playerData.Personality);
+                elementId = 'gmPersonality';
+                break;
             case 'Body':
-                value = formatBody(playerData.body);
+                value = formatBody(playerData.body || playerData.Body);
                 elementId = 'gmBody';
                 break;
             case 'Profession':
-                value = playerData.profession?.name || 'Невідомо';
+                value = getCharValue(playerData, 'profession', 'Profession') || 'Невідомо';
                 elementId = 'gmProfession';
                 break;
             case 'PhysicalHealth':
-                value = playerData.physicalHealth?.name || 'Невідомо';
+                value = getCharValue(playerData, 'physicalHealth', 'PhysicalHealth') || 'Невідомо';
                 elementId = 'gmPhysicalHealth';
                 break;
             case 'MentalHealth':
-                value = playerData.mentalHealth?.name || 'Невідомо';
+                value = getCharValue(playerData, 'mentalHealth', 'MentalHealth') || 'Невідомо';
                 elementId = 'gmMentalHealth';
                 break;
             case 'Hobby':
-                value = playerData.hobby?.name || 'Невідомо';
+                value = getCharValue(playerData, 'hobby', 'Hobby') || 'Невідомо';
                 elementId = 'gmHobby';
                 break;
             case 'CharacterTrait':
-                value = playerData.characterTrait?.name || 'Невідомо';
+                value = getCharValue(playerData, 'characterTrait', 'CharacterTrait') || 'Невідомо';
                 elementId = 'gmCharacterTrait';
                 break;
             case 'Phobia':
-                value = playerData.phobia?.name || 'Невідомо';
+                value = getCharValue(playerData, 'phobia', 'Phobia') || 'Невідомо';
                 elementId = 'gmPhobia';
                 break;
             case 'Traits':
-                value = playerData.traits?.name || 'Невідомо';
+                value = getCharValue(playerData, 'traits', 'Traits') || 'Невідомо';
                 elementId = 'gmTraits';
                 break;
             case 'Secret':
-                value = playerData.secret?.name || 'Невідомо';
+                value = getCharValue(playerData, 'secret', 'Secret') || 'Невідомо';
                 elementId = 'gmSecret';
                 break;
             case 'SecretGoal':
-                value = playerData.secretGoal?.goal || 'Невідомо';
+                const sg = playerData.secretGoal || playerData.SecretGoal;
+                value = sg?.goal ?? sg?.Goal ?? 'Невідомо';
                 elementId = 'gmSecretGoal';
                 break;
         }
@@ -3412,50 +3427,76 @@ function updateActivatedCardsTable() {
         gmRevealedChars = {};
         
         document.getElementById('gmPlayerInfo').style.display = 'block';
-        document.getElementById('gmPlayerName').textContent = playerData.name + (playerData.isEliminated ? ' (Елімінований)' : '');
+        
+        // Get player name with elimination status
+        const playerName = playerData.name || playerData.Name || 'Гравець';
+        const isEliminated = playerData.isEliminated ?? playerData.IsEliminated ?? false;
+        document.getElementById('gmPlayerName').textContent = playerName + (isEliminated ? ' (Елімінований)' : '');
         
         // Заповнюємо характеристики - приховано по дефолту
         const hiddenText = 'Приховано';
         const hiddenClass = 'gm-char-hidden';
         
-        // Body/Статура
-        const bodyEl = document.getElementById('gmBody');
-        bodyEl.textContent = hiddenText;
-        bodyEl.classList.add(hiddenClass);
-        
-        // Інші характеристики
-        const charElements = ['gmProfession', 'gmPhysicalHealth', 'gmMentalHealth', 'gmHobby', 
-                             'gmCharacterTrait', 'gmPhobia', 'gmTraits', 'gmSecret', 'gmSecretGoal'];
+        // Всі характеристики
+        const charElements = ['gmPersonality', 'gmBody', 'gmProfession', 'gmPhysicalHealth', 'gmMentalHealth', 
+                             'gmHobby', 'gmCharacterTrait', 'gmPhobia', 'gmTraits', 'gmSecret', 'gmSecretGoal'];
         charElements.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.textContent = hiddenText;
                 el.classList.add(hiddenClass);
+                el.classList.remove('gm-char-revealed');
             }
         });
         
         // Оновлюємо кнопки елімінації
         const eliminateBtn = document.querySelector('.btn-eliminate');
         const restoreBtn = document.querySelector('.btn-restore');
-        if (playerData.isEliminated) {
-            eliminateBtn.style.display = 'none';
-            restoreBtn.style.display = 'inline-block';
+        if (isEliminated) {
+            if (eliminateBtn) eliminateBtn.style.display = 'none';
+            if (restoreBtn) restoreBtn.style.display = 'inline-block';
         } else {
-            eliminateBtn.style.display = 'inline-block';
-            restoreBtn.style.display = 'none';
+            if (eliminateBtn) eliminateBtn.style.display = 'inline-block';
+            if (restoreBtn) restoreBtn.style.display = 'none';
         }
     }
     
     // Об'єкт для зберігання розкритих характеристик у GM панелі
     var gmRevealedChars = {};
     
+    // Форматування особистості
+    function formatPersonality(personality) {
+        if (!personality) return 'Невідомо';
+        const p = personality;
+        const age = p.age ?? p.Age ?? '?';
+        const sex = p.sex ?? p.Sex ?? '?';
+        const sexOrientation = p.sexOrientation ?? p.SexOrientation ?? '';
+        const isChildfree = p.isChildfree ?? p.IsChildfree ?? false;
+        
+        let result = `${age} років, ${sex}`;
+        if (sexOrientation && sexOrientation !== 'Гетеросексуал') {
+            result += `, ${sexOrientation}`;
+        }
+        if (isChildfree) {
+            result += ', Чайлдфрі';
+        }
+        return result;
+    }
+    
     // Форматування статури
     function formatBody(body) {
         if (!body) return 'Невідомо';
-        const height = body.height || body.Height || '?';
-        const weight = body.weight || body.Weight || '?';
-        const bodyType = body.bodyType || body.BodyType || '';
+        const height = body.height ?? body.Height ?? '?';
+        const weight = body.weight ?? body.Weight ?? '?';
+        const bodyType = body.bodyType ?? body.BodyType ?? '';
         return `${height} см, ${weight} кг${bodyType ? ', ' + bodyType : ''}`;
+    }
+    
+    // Безпечне отримання значення характеристики з обох регістрів
+    function getCharValue(obj, camelKey, pascalKey) {
+        const src = obj?.[camelKey] || obj?.[pascalKey];
+        if (!src) return null;
+        return src.name ?? src.Name ?? src.goal ?? src.Goal ?? src;
     }
 
     function editCharacteristic(charName) {
@@ -3469,19 +3510,24 @@ function updateActivatedCardsTable() {
         
         let currentValue = '';
         switch(charName) {
-            case 'Body': currentValue = formatBody(playerData.body); break;
-            case 'Profession': currentValue = playerData.profession?.name || ''; break;
-            case 'PhysicalHealth': currentValue = playerData.physicalHealth?.name || ''; break;
-            case 'MentalHealth': currentValue = playerData.mentalHealth?.name || ''; break;
-            case 'Hobby': currentValue = playerData.hobby?.name || ''; break;
-            case 'CharacterTrait': currentValue = playerData.characterTrait?.name || ''; break;
-            case 'Phobia': currentValue = playerData.phobia?.name || ''; break;
-            case 'Traits': currentValue = playerData.traits?.name || ''; break;
-            case 'Secret': currentValue = playerData.secret?.name || ''; break;
-            case 'SecretGoal': currentValue = playerData.secretGoal?.goal || ''; break;
+            case 'Personality': currentValue = formatPersonality(playerData.personality || playerData.Personality); break;
+            case 'Body': currentValue = formatBody(playerData.body || playerData.Body); break;
+            case 'Profession': currentValue = getCharValue(playerData, 'profession', 'Profession') || ''; break;
+            case 'PhysicalHealth': currentValue = getCharValue(playerData, 'physicalHealth', 'PhysicalHealth') || ''; break;
+            case 'MentalHealth': currentValue = getCharValue(playerData, 'mentalHealth', 'MentalHealth') || ''; break;
+            case 'Hobby': currentValue = getCharValue(playerData, 'hobby', 'Hobby') || ''; break;
+            case 'CharacterTrait': currentValue = getCharValue(playerData, 'characterTrait', 'CharacterTrait') || ''; break;
+            case 'Phobia': currentValue = getCharValue(playerData, 'phobia', 'Phobia') || ''; break;
+            case 'Traits': currentValue = getCharValue(playerData, 'traits', 'Traits') || ''; break;
+            case 'Secret': currentValue = getCharValue(playerData, 'secret', 'Secret') || ''; break;
+            case 'SecretGoal':
+                const sg = playerData.secretGoal || playerData.SecretGoal;
+                currentValue = sg?.goal ?? sg?.Goal ?? '';
+                break;
         }
         
-        document.getElementById('editCharInfo').textContent = `Гравець: ${playerData.name} | Характеристика: ${charName}`;
+        const playerName = playerData.name || playerData.Name || 'Гравець';
+        document.getElementById('editCharInfo').textContent = `Гравець: ${playerName} | Характеристика: ${charName}`;
         document.getElementById('editCharValue').value = currentValue;
         document.getElementById('editCharName').value = charName;
         document.getElementById('editCharModal').style.display = 'flex';
