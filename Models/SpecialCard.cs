@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
 namespace Bunker.Models
 {
-    /// <summary>
-    /// Стан спеціальної карти
-    /// </summary>
-    public enum CardState
+
+
+	/// <summary>
+	/// Стан спеціальної карти
+	/// </summary>
+	public enum CardState
     {
         Available,   // Доступна для використання
         Pending,     // Очікує підтвердження хоста
@@ -71,29 +74,63 @@ namespace Bunker.Models
                 targetCharacteristic = TargetCharacteristic
             };
         }
-    }
+	}
 
     /// <summary>
     /// Шаблон карти для генерації
     /// </summary>
-    public class CardTemplate
-    {
-        public string Id { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string EffectType { get; set; } = "Custom";
-        public string EffectValue { get; set; } = "";
-        public bool RequiresApproval { get; set; } = true;
-        public string Rarity { get; set; } = "common";
-        public bool RequiresTarget { get; set; } = false;
-        public bool RequiresCharacteristic { get; set; } = false;
-    }
 
-    /// <summary>
-    /// Кореневий об'єкт для JSON
-    /// </summary>
-    public class CardsRoot
-    {
-        public List<CardTemplate> Cards { get; set; } = new();
-    }
+
+
+public class CardTemplate
+	{
+		[JsonPropertyName("id")]
+		public int Id { get; set; }
+
+		[JsonPropertyName("name")]
+		public string Name { get; set; } = "";
+
+		[JsonPropertyName("description")]
+		public string Description { get; set; } = "";
+
+		[JsonPropertyName("effectType")]
+		public string EffectType { get; set; } = "Custom";
+
+		[JsonPropertyName("rarity")]
+		public string Rarity { get; set; } = "common";
+
+		[JsonPropertyName("category")]
+		public string Category { get; set; } = "";
+
+		[JsonPropertyName("target")]
+		public string Target { get; set; } = "";
+
+		[JsonPropertyName("value")]
+		public int Value { get; set; }
+
+		// 👉 додай це
+		public string EffectValue { get; set; } = "";
+
+		[JsonPropertyName("isTemporary")]
+		public bool IsTemporary { get; set; }
+
+		// залишаємо для сумісності з існуючим кодом
+		public bool RequiresApproval { get; set; } = true;
+		public bool RequiresTarget { get; set; } = false;
+		public bool RequiresCharacteristic { get; set; } = false;
+	}
+
+	/// <summary>
+	/// Кореневий об'єкт для JSON
+	/// </summary>
+
+
+public class CardsRoot
+	{
+		[JsonPropertyName("special_cards")]
+		public List<CardTemplate> Cards { get; set; } = new();
+	}
 }
+
+
+

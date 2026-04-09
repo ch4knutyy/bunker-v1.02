@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.SignalR;
-using Bunker.Services;
 using Bunker.Models;
 using Bunker.Models.Сharacteristics;
+using Bunker.Services;
+using Microsoft.AspNetCore.SignalR;
+using System.Numerics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bunker
 {
@@ -91,22 +93,9 @@ namespace Bunker
                 await Clients.Caller.SendAsync("ReceiveError", "ID кімнати та ім'я гравця обов'язкові");
                 return;
             }
-            
-            // Спочатку перевіряємо чи гравець з таким stablePlayerId вже в кімнаті
-            var room = _roomService.GetRoom(roomId);
-            if (room != null && !string.IsNullOrEmpty(stablePlayerId))
-            {
-                var existingPlayer = room.Players.Values.FirstOrDefault(p => p.StablePlayerId == stablePlayerId);
-                if (existingPlayer != null)
-                {
-                    // Це reconnect - викликаємо RejoinRoom
-                    await RejoinRoom(roomId, playerName, stablePlayerId);
-                    return;
-                }
-            }
 
-            // Генеруємо персонажа
-            var player = _generator.Generate(playerName);
+			// Генеруємо персонажа
+			var player = _generator.Generate(playerName);
             player.ConnectionId = Context.ConnectionId;
             player.StablePlayerId = stablePlayerId ?? "";
             
@@ -115,7 +104,7 @@ namespace Bunker
 
             var (success, error, joinedroom) = _roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
 
-            if (!success || room == null)
+            if (!success || joinedroom == null)
             {
                 await Clients.Caller.SendAsync("ReceiveError", error ?? "Помилка приєднання");
                 return;
@@ -124,23 +113,38 @@ namespace Bunker
             // Додаємо до SignalR групи
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
 
-            // Відправляємо дані новому гравцю
-            await Clients.Caller.SendAsync("RoomJoined", new
-            {
-                room = room.ToPublicInfo(),
-                player = player,
-                isHost = room.IsHost(Context.ConnectionId),
-                players = room.Players.Values.Select(p => new
-                {
-                    name = p.Name,
-                    connectionId = p.ConnectionId,
-                    isHost = room.IsHost(p.ConnectionId),
-                    revealed = p.Revealed
-                })
-            });
+			// Відправляємо дані новому гравцю
+			var (joinSuccess, joinError, room) = _roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
 
-            // Повідомляємо інших в кімнаті
-            await Clients.OthersInGroup(roomId).SendAsync("PlayerJoinedRoom", new
+			if (!success || room == null)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", error ?? "Помилка приєднання");
+				return;
+			}
+
+			// Додаємо до групи
+			await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+
+			// Відправляємо дані
+			await Clients.Caller.SendAsync("RoomJoined", new
+			{
+				room = room.ToPublicInfo(),
+				player = player,
+				isHost = room.IsHost(Context.ConnectionId),
+				players = room.Players.Values.Select(p => new
+				{
+					name = p.Name,
+					connectionId = p.ConnectionId,
+					isHost = room.IsHost(p.ConnectionId),
+					revealed = p.Revealed,
+					revealedValues = p.Revealed.RevealedValues,
+					isEliminated = p.IsEliminated,
+					seatNumber = p.SeatNumber
+				}).ToList()
+			});
+
+			// Повідомляємо інших в кімнаті
+			await Clients.OthersInGroup(roomId).SendAsync("PlayerJoinedRoom", new
             {
                 name = player.Name,
                 connectionId = Context.ConnectionId,
@@ -193,72 +197,116 @@ namespace Bunker
             await Clients.Caller.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
         }
 
-        /// <summary>
-        /// Спроба повторного приєднання після перезавантаження сторінки
-        /// </summary>
-        public async Task RejoinRoom(string roomId, string playerName, string? stablePlayerId = null)
-        {
-            if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
-            {
-                await Clients.Caller.SendAsync("RejoinFailed", "Невірні дані для перепідключення");
-                return;
-            }
+		/// <summary>
+		/// Спроба повторного приєднання після перезавантаження сторінки
+		/// </summary>
+		public async Task RejoinRoom(string roomId, string playerName, string? stablePlayerId = null)
+		{
+			if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName))
+			{
+				await Clients.Caller.SendAsync("RejoinFailed", "Невірні дані для перепідключення");
+				return;
+			}
 
-            try
-            {
-                var (success, error, room, player, wasHost) = _roomService.RejoinRoom(roomId, Context.ConnectionId, playerName, stablePlayerId);
+			try
+			{
+				var (success, error, room, player, wasHost) =
+					_roomService.RejoinRoom(roomId, Context.ConnectionId, playerName, stablePlayerId);
 
-                if (!success || room == null || player == null)
-                {
-                    await Clients.Caller.SendAsync("RejoinFailed", error ?? "Не вдалося перепідключитися");
-                    return;
-                }
+				if (!success || room == null || player == null)
+				{
+					await Clients.Caller.SendAsync("RejoinFailed", error ?? "Не вдалося перепідключитися");
+					return;
+				}
 
-                // Додаємо до SignalR групи
-                await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+				await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
 
-                // Відправляємо повні дані гравцю
-                await Clients.Caller.SendAsync("RejoinSuccess", new
-                {
-                    room = room.ToPublicInfo(),
-                    player = player,
-                    isHost = wasHost,
-                    roomState = room.State.ToString(),
-                    apocalypse = room.Apocalypse?.ToClientInfo(),
-                    bunker = room.Bunker?.ToClientInfo(),
-                    players = room.Players.Values.Select(p => new
-                    {
-                        name = p.Name,
-                        connectionId = p.ConnectionId,
-                        isHost = room.IsHost(p.ConnectionId),
-                        revealed = p.Revealed,
-                        revealedValues = p.Revealed.RevealedValues,
-                        isEliminated = p.IsEliminated,
-                        seatNumber = p.SeatNumber
-                    })
-                });
+				_logger.LogInformation(
+					"REJOIN SEND: RoomId={RoomId}, State={State}, Apocalypse={Apocalypse}, Bunker={Bunker}, ActivatedCards={Count}",
+					room.Id,
+					room.State,
+					room.Apocalypse?.Name,
+					room.Bunker?.Name,
+					room.ActivatedCards.Count
+				);
 
-                // Повідомляємо інших про перепідключення
-                await Clients.OthersInGroup(roomId).SendAsync("PlayerReconnected", new
-                {
-                    name = player.Name,
-                    connectionId = Context.ConnectionId,
-                    isHost = wasHost
-                });
+				_logger.LogInformation("REJOIN DEBUG: room.ActivatedCards count = {Count}", room.ActivatedCards.Count);
 
-                _logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Помилка перепідключення");
-                await Clients.Caller.SendAsync("RejoinFailed", "Помилка перепідключення");
-            }
-        }
+				foreach (var card in room.ActivatedCards)
+				{
+					_logger.LogInformation(
+						"REJOIN DEBUG CARD: CardId={CardId}, CardName={CardName}, PlayerId={PlayerId}, PlayerName={PlayerName}, TargetPlayerId={TargetPlayerId}, TargetPlayerName={TargetPlayerName}",
+						card.CardId,
+						card.CardName,
+						card.PlayerId,
+						card.PlayerName,
+						card.TargetPlayerId,
+						card.TargetPlayerName
+					);
+				}
 
-        /// <summary>
-        /// Почати гру (тільки хост)
-        /// </summary>
-        public async Task StartGame()
+				foreach (var p in room.Players.Values)
+				{
+					_logger.LogInformation(
+						"REJOIN DEBUG PLAYER: Name={Name}, ConnectionId={ConnectionId}, Seat={Seat}",
+						p.Name,
+						p.ConnectionId,
+						p.SeatNumber
+					);
+				}
+
+
+				await Clients.Caller.SendAsync("RejoinSuccess", new
+				{
+					room = room.ToPublicInfo(),
+					player = player,
+					isHost = wasHost,
+					roomState = room.State.ToString(),
+					apocalypse = room.Apocalypse?.ToClientInfo(),
+					bunker = room.Bunker?.ToClientInfo(),
+						activatedCards = room.ActivatedCards.Select(card => new
+						{
+							playerId = card.PlayerId,
+							name = card.CardName,
+							rarity = card.Rarity,
+							playerName = card.PlayerName,
+							targetPlayerId = card.TargetPlayerId,
+							targetPlayerName = card.TargetPlayerName,
+							targetCharacteristic = card.TargetCharacteristic,
+							activatedAt = card.ActivatedAt
+						}).ToList(),
+					players = room.Players.Values.Select(p => new
+					{
+						name = p.Name,
+						connectionId = p.ConnectionId,
+						isHost = room.IsHost(p.ConnectionId),
+						revealed = p.Revealed,
+						revealedValues = p.Revealed.RevealedValues,
+						isEliminated = p.IsEliminated,
+						seatNumber = p.SeatNumber
+					}).ToList()
+				});
+
+				await Clients.OthersInGroup(roomId).SendAsync("PlayerReconnected", new
+				{
+					name = player.Name,
+					connectionId = Context.ConnectionId,
+					isHost = wasHost
+				});
+
+				_logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name}");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Помилка перепідключення");
+				await Clients.Caller.SendAsync("RejoinFailed", "Помилка перепідключення");
+			}
+		}
+		
+		/// <summary>
+		/// Почати гру (тільки хост)
+		/// </summary>
+		public async Task StartGame()
         {
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
             if (roomId == null)
@@ -1336,6 +1384,8 @@ namespace Bunker
             }
         }
 
+
+
         /// <summary>
         /// Підтвердити використання карти (тільки хост)
         /// </summary>
@@ -1490,6 +1540,8 @@ namespace Bunker
         /// </summary>
         private async Task ExecuteCard(Player player, SpecialCard card, string roomId)
         {
+            
+            
             card.State = CardState.Used;
             card.ResolvedAt = DateTime.UtcNow;
             
@@ -1609,11 +1661,44 @@ namespace Bunker
                     resultMessage = $"Карта {card.Name} активована";
                     break;
             }
-            
-            _roomService.UpdatePlayer(player.ConnectionId, player);
-            
-            // Повідомляємо гравця про успішне використання
-            await Clients.Client(player.ConnectionId).SendAsync("CardUsed", new
+
+			_roomService.UpdatePlayer(player.ConnectionId, player);
+
+			// Зберігаємо активовану карту в кімнаті для відновлення після refresh
+			string? targetPlayerName = null;
+			if (!string.IsNullOrEmpty(card.TargetPlayerId) && room.Players.TryGetValue(card.TargetPlayerId, out var targetForName))
+			{
+				targetPlayerName = targetForName.Name;
+			}
+
+			room.ActivatedCards.Add(new ActivatedCardInfo
+			{
+				CardId = card.Id,
+				CardName = card.Name,
+				Rarity = card.Rarity ?? "common",
+				PlayerId = player.ConnectionId ?? "",
+				PlayerName = player.Name,
+				TargetPlayerId = card.TargetPlayerId,
+				TargetPlayerName = targetPlayerName,
+				TargetCharacteristic = card.TargetCharacteristic,
+				ActivatedAt = DateTime.UtcNow
+			});
+
+			_logger.LogInformation("CARD SAVED TO ROOM. RoomId={RoomId}, Count={Count}, Card={CardName}, Player={PlayerName}",
+				roomId,
+				room.ActivatedCards.Count,
+				card.Name,
+				player.Name);
+
+			// Повідомляємо гравця про успішне використання
+			await Clients.Client(player.ConnectionId).SendAsync("CardUsed", new
+			{
+				card = card.ToClientInfo(),
+				result = resultMessage
+			});
+
+			// Повідомляємо гравця про успішне використання
+			await Clients.Client(player.ConnectionId).SendAsync("CardUsed", new
             {
                 card = card.ToClientInfo(),
                 result = resultMessage
@@ -1943,10 +2028,10 @@ namespace Bunker
                 // Даємо 5 секунд на перепідключення (page refresh)
                 _ = Task.Run(async () =>
                 {
-                    await Task.Delay(5000);
-                    
-                    // Перевіряємо чи гравець вже перепідключився (connectionId змінився)
-                    var currentRoomId = _roomService.GetPlayerRoomId(disconnectedId);
+					await Task.Delay(TimeSpan.FromSeconds(5000));
+
+					// Перевіряємо чи гравець вже перепідключився (connectionId змінився)
+					var currentRoomId = _roomService.GetPlayerRoomId(disconnectedId);
                     if (currentRoomId == null)
                     {
                         // Вже видалений або перепідключився з новим connectionId

@@ -5,7 +5,8 @@ namespace Bunker.Models
     /// </summary>
     public enum RoomState
     {
-        Lobby,      // Очікування гравців
+		Waiting,
+		Lobby,      // Очікування гравців
         Playing,    // Гра триває
         Voting,     // Голосування
         Finished    // Гра завершена
@@ -22,11 +23,11 @@ namespace Bunker.Models
         public bool HasPassword => !string.IsNullOrEmpty(Password);
         public int MaxPlayers { get; set; } = 12;
         public int MinPlayers { get; set; } = 4;
-        
-        /// <summary>
-        /// ConnectionId хоста (творця кімнати)
-        /// </summary>
-        public string HostConnectionId { get; set; } = "";
+
+		/// <summary>
+		/// ConnectionId хоста (творця кімнати)
+		/// </summary>
+		public string HostConnectionId { get; set; } = "";
         
         /// <summary>
         /// Ім'я хоста
@@ -92,11 +93,12 @@ namespace Bunker.Models
         /// Перевірити чи є гравець хостом
         /// </summary>
         public bool IsHost(string connectionId) => HostConnectionId == connectionId;
-        
-        /// <summary>
-        /// Отримати публічну інформацію про кімнату (для списку)
-        /// </summary>
-        public object ToPublicInfo()
+
+		/// <summary>
+		/// Отримати публічну інформацію про кімнату (для списку)
+		/// </summary>
+
+		public object ToPublicInfo()
         {
             return new
             {
@@ -110,5 +112,7 @@ namespace Bunker.Models
                 canJoin = CanJoin
             };
         }
-    }
+
+		public List<ActivatedCardInfo> ActivatedCards { get; set; } = new();
+	}
 }

@@ -144,41 +144,51 @@ namespace Bunker.Services
             }
         }
 
-        /// <summary>
-        /// Почати гру в кімнаті
-        /// </summary>
-        public (bool success, string? error, Room? room) StartGame(string roomId, string connectionId)
-        {
-            if (!_rooms.TryGetValue(roomId, out var room))
-            {
-                return (false, "Кімнату не знайдено", null);
-            }
+		/// <summary>
+		/// Почати гру в кімнаті
+		/// </summary>
+		public (bool success, string? error, Room? room) StartGame(string roomId, string connectionId)
+		{
+			if (!_rooms.TryGetValue(roomId, out var room))
+			{
+				return (false, "Кімнату не знайдено", null);
+			}
 
-            if (!room.IsHost(connectionId))
-            {
-                return (false, "Тільки хост може почати гру", null);
-            }
+			// Перевірка: тільки хост може стартувати
+			if (room.HostConnectionId != connectionId)
+			{
+				return (false, "Тільки хост може почати гру", null);
+			}
 
-            if (!room.CanStart)
-            {
-                return (false, $"Потрібно мінімум {room.MinPlayers} гравців", null);
-            }
+			// Перевірка: мінімум гравців
+			if (room.Players.Count < 2)
+			{
+				return (false, "Недостатньо гравців для початку", null);
+			}
 
-            room.State = RoomState.Playing;
-            room.CurrentRound = 1;
-            
-            // Встановлюємо першого гравця для ходу
-            room.CurrentTurnPlayerId = room.Players.Keys.First();
+			// Якщо вже запущена
+			if (room.State != RoomState.Waiting)
+			{
+				return (false, "Гра вже запущена", null);
+			}
 
-            _logger.LogInformation($"Гра почалась в кімнаті {room.Name} (ID: {room.Id}) з {room.PlayerCount} гравцями");
-            
-            return (true, null, room);
-        }
+			// Старт гри
+			room.State = RoomState.Playing;
 
-        /// <summary>
-        /// Отримати кімнату за ID
-        /// </summary>
-        public Room? GetRoom(string roomId)
+			// (опціонально) очистити тимчасові стани
+			foreach (var player in room.Players.Values)
+			{
+				player.IsEliminated = false;
+				// можна ще щось скинути якщо треба
+			}
+
+			_logger.LogInformation("Гра в кімнаті {RoomId} розпочата", roomId);
+
+			return (true, null, room);
+		}
+		/// Отримати кімнату за ID
+		/// </summary>
+		public Room? GetRoom(string roomId)
         {
             _rooms.TryGetValue(roomId, out var room);
             return room;
@@ -250,62 +260,67 @@ namespace Bunker.Services
             return (result.room, result.roomDeleted, result.newHostConnectionId);
         }
 
-        /// <summary>
-        /// Спроба повторного приєднання до кімнати (після перезавантаження сторінки)
-        /// Шукає гравця за ім'ям в кімнаті та переносить його на новий connectionId
-        /// </summary>
-        public (bool success, string? error, Room? room, Player? player, bool wasHost) RejoinRoom(string roomId, string newConnectionId, string playerName, string? stablePlayerId = null)
-        {
-            if (!_rooms.TryGetValue(roomId, out var room))
-            {
-                return (false, "Кімнату не знайдено", null, null, false);
-            }
+		/// <summary>
+		/// Спроба повторного приєднання до кімнати (після перезавантаження сторінки)
+		/// Шукає гравця за ім'ям в кімнаті та переносить його на новий connectionId
+		/// </summary>
+		public (bool success, string? error, Room? room, Player? player, bool wasHost)
+			RejoinRoom(string roomId, string newConnectionId, string playerName, string? stablePlayerId = null)
+		{
+			if (!_rooms.TryGetValue(roomId, out var room))
+			{
+				return (false, "Кімнату не знайдено", null, null, false);
+			}
 
-            // Спочатку шукаємо за stablePlayerId (більш надійно)
-            KeyValuePair<string, Player> existingEntry = default;
-            
-            if (!string.IsNullOrEmpty(stablePlayerId))
-            {
-                existingEntry = room.Players.FirstOrDefault(p => p.Value.StablePlayerId == stablePlayerId);
-            }
-            
-            // Якщо не знайшли за stablePlayerId, шукаємо за ім'ям
-            if (existingEntry.Value == null)
-            {
-                existingEntry = room.Players.FirstOrDefault(p => p.Value.Name == playerName);
-            }
-            
-            if (existingEntry.Value == null)
-            {
-                return (false, "Гравця не знайдено в кімнаті", null, null, false);
-            }
+			KeyValuePair<string, Player> existingEntry = default;
 
-            var oldConnectionId = existingEntry.Key;
-            var player = existingEntry.Value;
-            
-            // Зберігаємо SeatNumber (не змінюємо!)
-            var seatNumber = player.SeatNumber;
+			if (!string.IsNullOrEmpty(stablePlayerId))
+			{
+				existingEntry = room.Players.FirstOrDefault(p => p.Value.StablePlayerId == stablePlayerId);
+			}
 
-            // Видаляємо старий маппінг
-            room.Players.Remove(oldConnectionId);
-            _playerToRoom.TryRemove(oldConnectionId, out _);
+			if (existingEntry.Value == null)
+			{
+				existingEntry = room.Players.FirstOrDefault(p => p.Value.Name == playerName);
+			}
 
-            // Оновлюємо connectionId гравця
-            player.ConnectionId = newConnectionId;
-            player.SeatNumber = seatNumber; // Явно зберігаємо seat number
-            room.Players[newConnectionId] = player;
-            _playerToRoom[newConnectionId] = roomId;
+			if (existingEntry.Value == null)
+			{
+				return (false, "Гравця не знайдено в кімнаті", null, null, false);
+			}
 
-            // Якщо був хостом — оновлюємо
-            bool wasHost = room.HostConnectionId == oldConnectionId;
-            if (wasHost)
-            {
-                room.HostConnectionId = newConnectionId;
-            }
+			var oldConnectionId = existingEntry.Key;
+			var player = existingEntry.Value;
 
-            _logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name} (seat: {seatNumber}, старий: {oldConnectionId}, новий: {newConnectionId})");
+			room.Players.Remove(oldConnectionId);
+			_playerToRoom.TryRemove(oldConnectionId, out _);
 
-            return (true, null, room, player, wasHost);
-        }
-    }
+			player.ConnectionId = newConnectionId;
+
+			room.Players[newConnectionId] = player;
+			_playerToRoom[newConnectionId] = roomId;
+
+			bool wasHost = room.HostConnectionId == oldConnectionId;
+			if (wasHost)
+			{
+				room.HostConnectionId = newConnectionId;
+			}
+
+			// Оновлюємо вже активовані спецкарти на новий connectionId
+			foreach (var activatedCard in room.ActivatedCards.Where(c => c.PlayerId == oldConnectionId))
+			{
+				activatedCard.PlayerId = newConnectionId;
+			}
+
+			_logger.LogInformation(
+				"Гравець {PlayerName} перепідключився до кімнати {RoomName} (старий: {OldConnectionId}, новий: {NewConnectionId})",
+				player.Name,
+				room.Name,
+				oldConnectionId,
+				newConnectionId
+			);
+
+			return (true, null, room, player, wasHost);
+		}
+	}
 }
