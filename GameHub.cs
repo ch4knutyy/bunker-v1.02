@@ -430,7 +430,8 @@ namespace Bunker
                 "Inventory" => player.Revealed.Inventory,
                 "Secret" => player.Revealed.Secret,
                 "SecretGoal" => player.Revealed.SecretGoal,
-                _ => true
+				"Fact" => player.Revealed.Fact,
+				_ => true
             };
 
             if (alreadyRevealed)
@@ -568,7 +569,16 @@ namespace Bunker
                     hasTooltip = player.SecretGoal.HasTooltip,
                     typeClass = "secret-goal"
                 },
-                _ => null
+				"Fact" => new
+				{
+					label = "Факт",
+					value = $"{player.Fact.Type}: {player.Fact.Name}",
+					fact = player.Fact,
+					tooltip = player.Fact.Tooltip,
+					hasTooltip = !string.IsNullOrEmpty(player.Fact.Tooltip),
+					typeClass = "fact"
+				},
+				_ => null
             };
         }
 
@@ -609,6 +619,7 @@ namespace Bunker
                 case "Inventory": player.Revealed.Inventory = true; break;
                 case "Secret": player.Revealed.Secret = true; break;
                 case "SecretGoal": player.Revealed.SecretGoal = true; break;
+				case "Fact": player.Revealed.Fact = true; break;
             }
         }
 
@@ -656,7 +667,8 @@ namespace Bunker
                 inventory = p.Inventory.Items.Select(i => i.Name),
                 secret = new { p.Secret.Name },
                 secretGoal = new { p.SecretGoal.Goal, p.SecretGoal.Type, p.SecretGoal.Description },
-                revealed = p.Revealed
+				fact = new { p.Fact.Type, p.Fact.Name, p.Fact.Description },
+				revealed = p.Revealed
             });
 
             await Clients.Caller.SendAsync("AllPlayersData", playersData);
@@ -1267,7 +1279,8 @@ namespace Bunker
                 "Inventory" => player.Revealed.Inventory,
                 "Secret" => player.Revealed.Secret,
                 "SecretGoal" => player.Revealed.SecretGoal,
-                _ => false
+                "Fact" => player.Revealed.Fact,
+				_ => false
             };
         }
 
@@ -1304,6 +1317,9 @@ namespace Bunker
                     case "SecretGoal":
                         player.SecretGoal.Goal = newValue;
                         break;
+                    case "Fact":
+						player.Fact.Name = newValue;
+						break;
                     default:
                         return false;
                 }
@@ -1351,7 +1367,11 @@ namespace Bunker
                     case "Inventory":
                         player.Inventory = new Inventory();
                         break;
-                    default:
+                    case "Fact":
+						var tempPlayer = _generator.Generate(player.Name);
+						player.Fact = tempPlayer.Fact;
+						break;
+					default:
                         return false;
                 }
                 return true;
@@ -1404,7 +1424,10 @@ namespace Bunker
                     case "Inventory":
                         target.Inventory = source.Inventory;
                         break;
-                    default:
+                    case "Fact":
+						target.Fact = source.Fact;
+						break;
+					default:
                         return false;
                 }
                 return true;
@@ -1684,7 +1707,8 @@ namespace Bunker
                         player.CharacterTrait = tempPlayer.CharacterTrait;
                         player.Phobia = tempPlayer.Phobia;
                         player.Traits = tempPlayer.Traits;
-                        resultMessage = "Всі характеристики регенеровано";
+                        player.Fact = tempPlayer.Fact;
+						resultMessage = "Всі характеристики регенеровано";
                     }
                     else if (!string.IsNullOrEmpty(card.EffectValue))
                     {
@@ -2125,10 +2149,10 @@ namespace Bunker
             
             if (roomId != null)
             {
-                // Даємо 5 секунд на перепідключення (page refresh)
-                _ = Task.Run(async () =>
+				// Даємо 30 хвилин на перепідключення після refresh або втрати зв'язку
+				_ = Task.Run(async () =>
                 {
-					await Task.Delay(TimeSpan.FromSeconds(5000));
+					await Task.Delay(TimeSpan.FromMinutes(30));
 
 					// Перевіряємо чи гравець вже перепідключився (connectionId змінився)
 					var currentRoomId = _roomService.GetPlayerRoomId(disconnectedId);
