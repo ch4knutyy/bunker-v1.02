@@ -24,9 +24,10 @@ namespace Bunker.Models
         public Traits Traits { get; set; } = new();
         public Body Body { get; set; } = new();
         public SecretGoal SecretGoal { get; set; } = new();
+		public Fact Fact { get; set; } = new();
 
-        // Відстеження відкритих характеристик
-        public RevealedCharacteristics Revealed { get; set; } = new();
+		// Відстеження відкритих характеристик
+		public RevealedCharacteristics Revealed { get; set; } = new();
         
         // Статус гравця в грі
         public bool IsEliminated { get; set; } = false;

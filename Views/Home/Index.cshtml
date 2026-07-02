@@ -199,6 +199,16 @@
                             </div>
                         </div>
                         <div class="gm-char-item">
+                            <span class="gm-char-name">Інвентар:</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmInventory">Приховано</span>
+                            <div class="gm-char-actions">
+                                <button onclick="peekCharacteristic('Inventory')" title="Підглянути" class="btn-peek">&#128065;</button>
+                                <button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
                             <span class="gm-char-name">Особливості:</span>
                             <span class="gm-char-value gm-char-hidden" id="gmTraits">Приховано</span>
                             <div class="gm-char-actions">
@@ -226,6 +236,16 @@
                                 <button onclick="editCharacteristic('SecretGoal')" title="Редагувати">✏️</button>
                                 <button onclick="regenerateCharacteristic('SecretGoal')" title="Регенерувати">🔄</button>
                                 <button onclick="forceReveal('SecretGoal')" title="Розкрити для всіх">📢</button>
+                            </div>
+                        </div>
+                        <div class="gm-char-item">
+                            <span class="gm-char-name">Факт:</span>
+                            <span class="gm-char-value gm-char-hidden" id="gmFact">Приховано</span>
+                            <div class="gm-char-actions">
+                                <button onclick="peekCharacteristic('Fact')" title="Підглянути" class="btn-peek">&#128065;</button>
+                                <button onclick="editCharacteristic('Fact')" title="Редагувати">✏️</button>
+                                <button onclick="regenerateCharacteristic('Fact')" title="Регенерувати">🔄</button>
+                                <button onclick="forceReveal('Fact')" title="Розкрити для всіх">📢</button>
                             </div>
                         </div>
                     </div>
@@ -337,6 +357,7 @@
                             <th style="min-width: 180px;">Інвентар</th>
                             <th style="min-width: 180px;">Секрет</th>
                             <th style="min-width: 200px;">Таємна ціль</th>
+                            <th style="min-width: 200px;">Факт</th>
                         </tr>
                     </thead>
                     <tbody id="playersTableBody">
@@ -467,6 +488,8 @@
                     <option value="Traits">Особливості</option>
                     <option value="Secret">Секрет</option>
                     <option value="SecretGoal">Таємна ціль</option>
+                    <option value="Fact">Факт</option>
+                    <option value="Inventory">Інвентар</option>
                 </select>
             </div>
             <input type="hidden" id="useCardId" />
@@ -1034,12 +1057,32 @@ function registerSignalREvents() {
             }
         }
         
-        // Оновлюємо свої картки якщо це я
-        if (info.connectionId === myConnectionId && myPlayerData) {
-            if (!myPlayerData.revealed) myPlayerData.revealed = {};
-            myPlayerData.revealed[charKey] = true;
-            renderMyPlayerCards(myPlayerData);
+    // Оновлюємо свої картки якщо це я
+    if (info.connectionId === myConnectionId && myPlayerData) {
+        if (!myPlayerData.revealed) {
+            myPlayerData.revealed = {};
         }
+
+        myPlayerData.revealed[charKey] = true;
+
+        if (info.characteristicKey === "Fact") {
+            const fact = info.data.fact || info.data.Fact;
+
+            if (fact) {
+                myPlayerData.fact = fact;
+            } else if (info.data.value) {
+                const parts = info.data.value.split(":");
+
+                myPlayerData.fact = {
+                    type: parts[0]?.trim() || "",
+                    name: parts.slice(1).join(":").trim() || info.data.value,
+                    tooltip: info.data.tooltip || ""
+                };
+            }
+        }
+
+        renderMyPlayerCards(myPlayerData);
+    }
         
         updatePlayersTable();
         // Реініціалізуємо tooltip після оновлення DOM
@@ -2308,6 +2351,10 @@ function removeBunkerSupplies(months) {
                 value = getCharValue(playerData, 'phobia', 'Phobia') || 'Невідомо';
                 elementId = 'gmPhobia';
                 break;
+            case 'Inventory':
+                value = getCharValue(playerData, 'inventory', 'Inventory') || 'Невідомо';
+                elementId = 'gmInventory';
+                break;
             case 'Traits':
                 value = getCharValue(playerData, 'traits', 'Traits') || 'Невідомо';
                 elementId = 'gmTraits';
@@ -2321,6 +2368,14 @@ function removeBunkerSupplies(months) {
                 value = sg?.goal ?? sg?.Goal ?? 'Невідомо';
                 elementId = 'gmSecretGoal';
                 break;
+            case 'Fact':
+                const fact = playerData.fact ?? playerData.Fact;
+                value = fact
+                ? `${fact.type ?? fact.Type}: ${fact.name ?? fact.Name}`
+                : 'Невідомо';
+                elementId = 'gmFact';
+                break;
+
         }
         
         const el = document.getElementById(elementId);
@@ -3439,7 +3494,7 @@ function updateActivatedCardsTable() {
         
         // Всі характеристики
         const charElements = ['gmPersonality', 'gmBody', 'gmProfession', 'gmPhysicalHealth', 'gmMentalHealth', 
-                             'gmHobby', 'gmCharacterTrait', 'gmPhobia', 'gmTraits', 'gmSecret', 'gmSecretGoal'];
+                             'gmHobby', 'gmCharacterTrait', 'gmPhobia', 'gmTraits', 'gmInventory', 'gmFact', 'gmSecret', 'gmSecretGoal'];
         charElements.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -3523,6 +3578,21 @@ function updateActivatedCardsTable() {
             case 'SecretGoal':
                 const sg = playerData.secretGoal || playerData.SecretGoal;
                 currentValue = sg?.goal ?? sg?.Goal ?? '';
+                break;
+            case 'Fact':
+                const fact = playerData.fact || playerData.Fact;
+                const factType = fact?.type ?? fact?.Type ?? '';
+                const factName = fact?.name ?? fact?.Name ?? '';
+                currentValue = factType && factName
+                ? `${factType}: ${factName}`
+                : factName;
+                break;  
+            case 'Inventory':
+                const inv = playerData.inventory || playerData.Inventory;
+                const items = inv?.items ?? inv?.Items ?? [];
+                currentValue = Array.isArray(items)
+                ? items.map(item => item.name ?? item.Name).filter(Boolean).join(', ')
+                : '';
                 break;
         }
         
@@ -3822,6 +3892,7 @@ function updateActivatedCardsTable() {
                 <td>${renderTableCell(player, 'inventory')}</td>
                 <td>${renderTableCell(player, 'secret')}</td>
                 <td>${renderTableCell(player, 'secretGoal')}</td>
+                <td>${renderTableCell(player, 'fact')}</td>
             </tr>
             `;
             }).join('');
@@ -3881,8 +3952,27 @@ function updateActivatedCardsTable() {
     function renderMyPlayerCards(player) {
         const container = document.getElementById("myPlayerCards");
         if (!container || !player) return;
-        
-        const revealed = player.revealed || {};
+      const revealed = player.revealed || player.Revealed || {};
+
+    const selfPlayer = roomPlayers?.[myConnectionId] || {};
+
+    console.log("PLAYER:", player);
+    console.log("SELF PLAYER:", selfPlayer);
+    console.log("myConnectionId:", myConnectionId);
+    console.log("player.fact:", player.fact);
+    console.log("player.Fact:", player.Fact);
+    console.log("selfPlayer.fact:", selfPlayer.fact);
+    console.log("selfPlayer.Fact:", selfPlayer.Fact);
+
+    const fact =
+    player.fact ||
+    player.Fact ||
+    selfPlayer.fact ||
+    selfPlayer.Fact ||
+    {};
+        const factType = fact.type || fact.Type || 'Невідомо';
+        const factName = fact.name || fact.Name || 'Немає факту';
+        const factTooltip = fact.tooltip || fact.Tooltip || fact.description || fact.Description || '';
         
         function createTooltipHtml(text, typeClass) {
             if (!text) return '';
@@ -3984,6 +4074,22 @@ function updateActivatedCardsTable() {
                 <div class="char-row"><span class="char-label">Тип:</span><span class="char-value">${getSecretGoalTypeLabel(player.secretGoal?.type)}</span></div>
                 <div class="char-row">${revealed.secretGoal ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'SecretGoal\')">Розкрити всім</button>'}</div>
             </div>
+
+            <!-- Факт -->
+            <div class="char-card ${revealed.fact || revealed.Fact ? 'card-revealed' : ''}">
+                <h3 class="char-card-title">Факт</h3>
+                <div class="char-row">
+                    <span class="char-label">Тип:</span>
+                    <span class="char-value">${factType}</span>
+                 </div>
+             <div class="char-row">
+                    <span class="char-label">Факт:</span>
+                    <span class="char-value">${charWithTooltip(factName, factTooltip, 'fact')}</span>
+                </div>
+             <div class="char-row">
+                    ${revealed.fact || revealed.Fact ? '<span class="status-revealed">Відкрито для всіх</span>' : '<button class="char-btn locked" onclick="reveal(\'Fact\')">Розкрити всім</button>'}
+                </div>
+        </div>
         `;
         
         // Рендеримо карти

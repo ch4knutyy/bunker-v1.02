@@ -10,7 +10,7 @@ namespace Bunker.Services
         private readonly GameDataService _gameData;
         private readonly ILogger<CharacterGeneratorService> _logger;
 
-        private static readonly string[] Sexes = { "Чоловіча", "Жіноча", "Небінарна" };
+        private static readonly string[] Sexes = { "Чоловіча", "Жіноча" };
         
         // Категорії фізичних станів де НЕ потрібна ступінь тяжкості
         private static readonly HashSet<string> NoSeverityCategories = new()
@@ -50,8 +50,8 @@ namespace Bunker.Services
                 Name = name,
                 Personality = new Personality
                 {
-                    Age = _random.Next(8, 120),
-                    Sex = sex,
+					Age = GenerateRealisticAge(_random),
+					Sex = sex,
                     SexOrientation = sexOrientation,
                     IsChildfree = isChildfree
                 },
@@ -70,15 +70,40 @@ namespace Bunker.Services
                 Inventory = GenerateInventory(),
                 CharacterTrait = GenerateCharacterTrait(),
                 Phobia = GeneratePhobia(),
-                SecretGoal = GenerateSecretGoal()
+				Fact = GenerateFact(),
+				SecretGoal = GenerateSecretGoal()
             };
 
             return player;
         }
 
-        #region Phobia Generation
 
-        private Phobia GeneratePhobia()
+        #region Age Generation
+
+        private int GenerateRealisticAge(Random random)
+        {
+            int roll = random.Next(100);
+
+            if (roll < 15)
+                return random.Next(8, 18);
+
+            if (roll < 40)
+                return random.Next(18, 30);
+
+            if (roll < 75)
+                return random.Next(30, 50);
+
+            if (roll < 95)
+                return random.Next(50, 70);
+
+            return random.Next(70, 100);
+
+        }
+		#endregion
+
+		#region Phobia Generation
+
+		private Phobia GeneratePhobia()
         {
             // 30% шанс не мати фобії
             if (_random.Next(100) < 30)
@@ -662,10 +687,56 @@ namespace Bunker.Services
             return items.Last().Value;
         }
 
-        #endregion
-    }
+		#endregion
 
-    public class WeightedItem<T>
+		#region Fact Generation
+
+            private Fact GenerateFact()
+		{
+			int roll = _random.Next(100);
+
+			if (roll < 40)
+			{
+				var secret = GenerateSecret();
+
+				return new Fact
+				{
+					Type = "Секрет",
+					Name = secret.Name,
+					Category = secret.Category,
+					Tooltip = secret.Type
+				};
+			}
+
+			if (roll < 70)
+			{
+				var goal = GenerateSecretGoal();
+
+				return new Fact
+				{
+					Type = "Ціль",
+					Name = goal.Goal,
+					Description = goal.Description,
+					Tooltip = goal.BunkerEffect
+				};
+			}
+
+			var traits = GenerateTraits();
+
+			return new Fact
+			{
+				Type = "Особливість",
+				Name = traits.Name,
+				Category = traits.Category,
+				Description = traits.Effect,
+				Tooltip = traits.Tooltip
+			};
+		}
+		#endregion
+
+	}
+
+	public class WeightedItem<T>
     {
         public T Value { get; set; } = default!;
         public int Weight { get; set; }

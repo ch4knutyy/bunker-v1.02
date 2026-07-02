@@ -15,9 +15,10 @@ namespace Bunker.Models
         public bool Inventory { get; set; } = false;
         public bool Secret { get; set; } = false;
         public bool SecretGoal { get; set; } = false;
-        
-        // Збереження реальних значень для показу після reconnect
-        public Dictionary<string, RevealedData> RevealedValues { get; set; } = new();
+		public bool Fact { get; set; } = false;
+
+		// Збереження реальних значень для показу після reconnect
+		public Dictionary<string, RevealedData> RevealedValues { get; set; } = new();
     }
     
     public class RevealedData
