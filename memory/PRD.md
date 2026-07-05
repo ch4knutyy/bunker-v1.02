@@ -23,7 +23,7 @@
 - Fixed variable shadowing (room → joinedRoom)
 
 ## Files Changed
-- `/Service/CardService.cs` - debug logging
+- `/Services/CardService.cs` - debug logging
 - `/GameHub.cs` - 60s timeout, stablePlayerId check, auto-reconnect
 - `/Views/Home/Index.cshtml` - PlayerDisconnecting handler, debug logs
 

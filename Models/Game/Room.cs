@@ -28,6 +28,16 @@ namespace Bunker.Models
 		/// ConnectionId хоста (творця кімнати)
 		/// </summary>
 		public string HostConnectionId { get; set; } = "";
+
+		/// <summary>
+		/// Стабільний ID хоста. Не змінюється після refresh/reconnect.
+		/// </summary>
+        public string HostPlayerId { get; set; } = "";
+
+        /// <summary>
+        /// Секрет для HTTP-дій хоста (наприклад, завантаження зображень).
+        /// </summary>
+        public string HostToken { get; set; } = Guid.NewGuid().ToString("N");
         
         /// <summary>
         /// Ім'я хоста
@@ -93,6 +103,12 @@ namespace Bunker.Models
         /// Перевірити чи є гравець хостом
         /// </summary>
         public bool IsHost(string connectionId) => HostConnectionId == connectionId;
+
+        public bool IsHost(Player player)
+        {
+            if (player.ConnectionId == HostConnectionId) return true;
+            return !string.IsNullOrWhiteSpace(HostPlayerId) && player.StablePlayerId == HostPlayerId;
+        }
 
 		/// <summary>
 		/// Отримати публічну інформацію про кімнату (для списку)

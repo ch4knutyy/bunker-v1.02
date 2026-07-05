@@ -1,4 +1,4 @@
-using Bunker;
+﻿using Bunker.Hubs;
 using Bunker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +15,7 @@ builder.Services.AddSingleton<ScenarioImageService>();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -25,3 +26,4 @@ app.MapControllerRoute(
 app.MapHub<GameHub>("/gameHub");
 
 app.Run();
+

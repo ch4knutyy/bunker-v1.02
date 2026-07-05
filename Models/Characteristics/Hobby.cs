@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bunker.Models.Сharacteristics
 {
     public class Hobby
@@ -25,5 +28,8 @@ namespace Bunker.Models.Сharacteristics
         /// Чи є tooltip для цієї характеристики
         /// </summary>
         public bool HasTooltip => !string.IsNullOrEmpty(Tooltip);
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 }

@@ -33,8 +33,24 @@ namespace Bunker.Services
                     var json = File.ReadAllText(filePath);
                     _logger.LogInformation($"[CardService] JSON length: {json.Length}");
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var root = JsonSerializer.Deserialize<CardsRoot>(json, options);
-                    _cardTemplates = root?.Cards ?? new();
+                    using var document = JsonDocument.Parse(json);
+                    var rootElement = document.RootElement;
+
+                    if (rootElement.ValueKind == JsonValueKind.Array)
+                    {
+                        _cardTemplates = rootElement.Deserialize<List<CardTemplate>>(options) ?? new();
+                    }
+                    else if (rootElement.ValueKind == JsonValueKind.Object &&
+                             rootElement.TryGetProperty("special_cards", out var cardsElement) &&
+                             cardsElement.ValueKind == JsonValueKind.Array)
+                    {
+                        _cardTemplates = cardsElement.Deserialize<List<CardTemplate>>(options) ?? new();
+                    }
+                    else
+                    {
+                        _logger.LogWarning("[CardService] special_cards.json does not contain a card array");
+                        _cardTemplates = new();
+                    }
                     _logger.LogInformation($"[CardService] Loaded {_cardTemplates.Count} card templates");
                     
                     foreach (var t in _cardTemplates.Take(3))
@@ -136,7 +152,8 @@ namespace Bunker.Services
                 RequiresApproval = template.RequiresApproval,
                 Rarity = template.Rarity,
                 State = CardState.Available,
-                OwnerConnectionId = ownerConnectionId
+                OwnerConnectionId = ownerConnectionId,
+                I18n = template.I18n
             };
         }
 

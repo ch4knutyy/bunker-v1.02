@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bunker.Models.Сharacteristics
 {
     public class PhysicalHealth
@@ -29,6 +32,11 @@ namespace Bunker.Models.Сharacteristics
         /// Null якщо для цього стану ступінь не застосовується
         /// </summary>
         public string? SeverityLevel { get; set; }
+
+        /// <summary>
+        /// Стабільний код ступеня тяжкості для локалізації на клієнті.
+        /// </summary>
+        public string? SeverityCode { get; set; }
         
         /// <summary>
         /// Чи застосовується ступінь тяжкості для цього стану
@@ -48,7 +56,7 @@ namespace Bunker.Models.Сharacteristics
         
         /// <summary>
         /// Автоматично згенерований tooltip
-        /// Формат: "{Description}. Ефект у грі: {GameEffect}."
+        /// Формат: "{Description}. {GameEffect}."
         /// </summary>
         public string Tooltip { get; set; } = "";
         
@@ -56,5 +64,8 @@ namespace Bunker.Models.Сharacteristics
         /// Чи є tooltip для цієї характеристики
         /// </summary>
         public bool HasTooltip => !string.IsNullOrEmpty(Tooltip);
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 }

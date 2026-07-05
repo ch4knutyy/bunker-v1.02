@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Bunker.Models.GameData
 {
@@ -18,6 +19,9 @@ namespace Bunker.Models.GameData
         
         [JsonPropertyName("bonus")]
         public string Bonus { get; set; } = "";
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 
     public class ProfessionsRoot

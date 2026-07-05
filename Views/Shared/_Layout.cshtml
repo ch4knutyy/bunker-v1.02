@@ -31,10 +31,10 @@
             </nav>
 
             <div class="header-actions">
-                <div class="language-selector">
-                    <button class="lang-btn active" data-lang="uk">🇺🇦</button>
-                    <button class="lang-btn" data-lang="en">🇬🇧</button>
-                    <button class="lang-btn" data-lang="ru">🇷🇺</button>
+                <div class="language-selector language-switcher" aria-label="Language">
+                    <button type="button" class="lang-btn language-btn" data-lang="uk" onclick="changeLanguage('uk')">UA</button>
+                    <button type="button" class="lang-btn language-btn" data-lang="en" onclick="changeLanguage('en')">EN</button>
+                    <button type="button" class="lang-btn language-btn" data-lang="ru" onclick="changeLanguage('ru')">RU</button>
                 </div>
                 <button class="profile-btn" title="Профіль">👤</button>
             </div>
@@ -89,16 +89,27 @@
             });
         }
 
-        // Language selector
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                const lang = this.getAttribute('data-lang');
-                console.log('Вибрано мову:', lang);
-                // Тут можна додати логіку перемикання мови
+        if (typeof window.changeLanguage !== 'function') {
+            window.changeLanguage = function(lang) {
+                if (lang === 'gb') lang = 'en';
+                if (!['uk', 'en', 'ru'].includes(lang)) lang = 'uk';
+                localStorage.setItem('language', lang);
+                document.querySelectorAll('.language-btn').forEach(function(btn) {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+            };
+        }
+
+        (function syncHeaderLanguageButtons() {
+            var lang = localStorage.getItem('language') || 'uk';
+            if (lang === 'gb') {
+                lang = 'en';
+                localStorage.setItem('language', lang);
+            }
+            document.querySelectorAll('.language-btn').forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
             });
-        });
+        })();
     </script>
     
     @await RenderSectionAsync("Scripts", required: false)

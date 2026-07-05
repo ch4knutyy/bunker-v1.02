@@ -30,7 +30,7 @@
 | `Models/SeverityLevel.cs` | Enum та Helper для ступенів тяжкості |
 | `Helpers/TooltipHelper.cs` | Допоміжні методи для створення tooltip моделей |
 
-### 4. Сервіси (Service/)
+### 4. Сервіси (Services/)
 | Файл | Призначення |
 |------|-------------|
 | `GameDataService.cs` | Завантаження та кешування JSON даних |
@@ -67,7 +67,7 @@ builder.Services.AddSingleton<PlayerStorageService>();
 <script src="~/js/tooltip.js" asp-append-version="true"></script>
 ```
 
-### GameHub.cs
+### Hubs/GameHub/GameHub.cs
 - Оновлено `RevealCharacteristic` для передачі tooltip даних
 - Оновлено `GetRevealedData` для включення tooltip інформації
 

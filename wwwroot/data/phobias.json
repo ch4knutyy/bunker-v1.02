@@ -1,911 +1,3472 @@
 {
+  "_i18n_meta": {
+    "status": "phobias_full_i18n_complete",
+    "source_file": "phobias.json",
+    "records_total": 150,
+    "records_translated": 150,
+    "languages": [
+      "uk",
+      "en",
+      "ru"
+    ],
+    "fields_translated": [
+      "name",
+      "description",
+      "bunkerEffect"
+    ],
+    "note_uk": "Оригінальні поля не змінені. Переклади додані в _i18n. Для UI бери _i18n, для старого коду залишаються старі поля.",
+    "fallback_rule": "Якщо selected language value порожній/null, використовувати uk."
+  },
   "phobias": [
     {
       "id": "phobia_001",
       "name": "Клаустрофобія",
       "description": "Страх замкнених просторів",
-      "bunkerEffect": "Паніка при перебуванні в бункері, потребує відчинених дверей"
+      "bunkerEffect": "Паніка при перебуванні в бункері, потребує відчинених дверей",
+      "_i18n": {
+        "name": {
+          "uk": "Клаустрофобія",
+          "en": "Claustrophobia",
+          "ru": "Клаустрофобия"
+        },
+        "description": {
+          "uk": "Страх замкнених просторів",
+          "en": "Fear of enclosed spaces",
+          "ru": "Страх замкнутых пространств"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при перебуванні в бункері, потребує відчинених дверей",
+          "en": "Panic while inside the bunker; needs open doors",
+          "ru": "Паника при нахождении в бункере; требует открытых дверей"
+        }
+      }
     },
     {
       "id": "phobia_002",
       "name": "Агорафобія",
       "description": "Страх відкритих просторів та скупчень людей",
-      "bunkerEffect": "Не може виходити з бункера назовні"
+      "bunkerEffect": "Не може виходити з бункера назовні",
+      "_i18n": {
+        "name": {
+          "uk": "Агорафобія",
+          "en": "Agoraphobia",
+          "ru": "Агорафобия"
+        },
+        "description": {
+          "uk": "Страх відкритих просторів та скупчень людей",
+          "en": "Fear of open spaces and crowds",
+          "ru": "Страх открытых пространств и скоплений людей"
+        },
+        "bunkerEffect": {
+          "uk": "Не може виходити з бункера назовні",
+          "en": "Cannot leave the bunker and go outside",
+          "ru": "Не может выходить из бункера наружу"
+        }
+      }
     },
     {
       "id": "phobia_003",
       "name": "Соціальна фобія",
       "description": "Страх соціальних ситуацій та спілкування",
-      "bunkerEffect": "Не може ефективно комунікувати з групою"
+      "bunkerEffect": "Не може ефективно комунікувати з групою",
+      "_i18n": {
+        "name": {
+          "uk": "Соціальна фобія",
+          "en": "Social Phobia",
+          "ru": "Социальная фобия"
+        },
+        "description": {
+          "uk": "Страх соціальних ситуацій та спілкування",
+          "en": "Fear of social situations and communication",
+          "ru": "Страх социальных ситуаций и общения"
+        },
+        "bunkerEffect": {
+          "uk": "Не може ефективно комунікувати з групою",
+          "en": "Cannot communicate effectively with the group",
+          "ru": "Не может эффективно общаться с группой"
+        }
+      }
     },
     {
       "id": "phobia_004",
       "name": "Акрофобія",
       "description": "Страх висоти",
-      "bunkerEffect": "Не може піднятися на верхні рівні бункера"
+      "bunkerEffect": "Не може піднятися на верхні рівні бункера",
+      "_i18n": {
+        "name": {
+          "uk": "Акрофобія",
+          "en": "Acrophobia",
+          "ru": "Акрофобия"
+        },
+        "description": {
+          "uk": "Страх висоти",
+          "en": "Fear of heights",
+          "ru": "Страх высоты"
+        },
+        "bunkerEffect": {
+          "uk": "Не може піднятися на верхні рівні бункера",
+          "en": "Cannot climb to the upper levels of the bunker",
+          "ru": "Не может подниматься на верхние уровни бункера"
+        }
+      }
     },
     {
       "id": "phobia_005",
       "name": "Ніктофобія",
       "description": "Страх темряви",
-      "bunkerEffect": "Потребує постійного освітлення, витрачає ресурси"
+      "bunkerEffect": "Потребує постійного освітлення, витрачає ресурси",
+      "_i18n": {
+        "name": {
+          "uk": "Ніктофобія",
+          "en": "Nyctophobia",
+          "ru": "Никтофобия"
+        },
+        "description": {
+          "uk": "Страх темряви",
+          "en": "Fear of darkness",
+          "ru": "Страх темноты"
+        },
+        "bunkerEffect": {
+          "uk": "Потребує постійного освітлення, витрачає ресурси",
+          "en": "Needs constant lighting and wastes resources",
+          "ru": "Требует постоянного освещения и тратит ресурсы"
+        }
+      }
     },
     {
       "id": "phobia_006",
       "name": "Арахнофобія",
       "description": "Страх павуків",
-      "bunkerEffect": "Паніка при виявленні павуків у бункері"
+      "bunkerEffect": "Паніка при виявленні павуків у бункері",
+      "_i18n": {
+        "name": {
+          "uk": "Арахнофобія",
+          "en": "Arachnophobia",
+          "ru": "Арахнофобия"
+        },
+        "description": {
+          "uk": "Страх павуків",
+          "en": "Fear of spiders",
+          "ru": "Страх пауков"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при виявленні павуків у бункері",
+          "en": "Panics when spiders are found in the bunker",
+          "ru": "Паникует при обнаружении пауков в бункере"
+        }
+      }
     },
     {
       "id": "phobia_007",
       "name": "Танатофобія",
       "description": "Патологічний страх смерті",
-      "bunkerEffect": "Паралізований страхом у небезпечних ситуаціях"
+      "bunkerEffect": "Паралізований страхом у небезпечних ситуаціях",
+      "_i18n": {
+        "name": {
+          "uk": "Танатофобія",
+          "en": "Thanatophobia",
+          "ru": "Танатофобия"
+        },
+        "description": {
+          "uk": "Патологічний страх смерті",
+          "en": "Pathological fear of death",
+          "ru": "Патологический страх смерти"
+        },
+        "bunkerEffect": {
+          "uk": "Паралізований страхом у небезпечних ситуаціях",
+          "en": "Paralyzed by fear in dangerous situations",
+          "ru": "Парализован страхом в опасных ситуациях"
+        }
+      }
     },
     {
       "id": "phobia_008",
       "name": "Гемофобія",
       "description": "Страх крові",
-      "bunkerEffect": "Не може надавати першу допомогу"
+      "bunkerEffect": "Не може надавати першу допомогу",
+      "_i18n": {
+        "name": {
+          "uk": "Гемофобія",
+          "en": "Hemophobia",
+          "ru": "Гемофобия"
+        },
+        "description": {
+          "uk": "Страх крові",
+          "en": "Fear of blood",
+          "ru": "Страх крови"
+        },
+        "bunkerEffect": {
+          "uk": "Не може надавати першу допомогу",
+          "en": "Cannot provide first aid",
+          "ru": "Не может оказывать первую помощь"
+        }
+      }
     },
     {
       "id": "phobia_009",
       "name": "Мізофобія",
       "description": "Патологічний страх забруднення",
-      "bunkerEffect": "Відмовляється торкатися брудних речей"
+      "bunkerEffect": "Відмовляється торкатися брудних речей",
+      "_i18n": {
+        "name": {
+          "uk": "Мізофобія",
+          "en": "Mysophobia",
+          "ru": "Мизофобия"
+        },
+        "description": {
+          "uk": "Патологічний страх забруднення",
+          "en": "Pathological fear of contamination",
+          "ru": "Патологический страх загрязнения"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється торкатися брудних речей",
+          "en": "Refuses to touch dirty objects",
+          "ru": "Отказывается трогать грязные вещи"
+        }
+      }
     },
     {
       "id": "phobia_010",
       "name": "Еметофобія",
       "description": "Страх блювоти",
-      "bunkerEffect": "Уникає хворих людей"
+      "bunkerEffect": "Уникає хворих людей",
+      "_i18n": {
+        "name": {
+          "uk": "Еметофобія",
+          "en": "Emetophobia",
+          "ru": "Эметофобия"
+        },
+        "description": {
+          "uk": "Страх блювоти",
+          "en": "Fear of vomiting",
+          "ru": "Страх рвоты"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає хворих людей",
+          "en": "Avoids sick people",
+          "ru": "Избегает больных людей"
+        }
+      }
     },
     {
       "id": "phobia_011",
       "name": "Номофобія",
       "description": "Страх залишитися без телефону",
-      "bunkerEffect": "Постійно тримає розряджений телефон"
+      "bunkerEffect": "Постійно тримає розряджений телефон",
+      "_i18n": {
+        "name": {
+          "uk": "Номофобія",
+          "en": "Nomophobia",
+          "ru": "Номофобия"
+        },
+        "description": {
+          "uk": "Страх залишитися без телефону",
+          "en": "Fear of being without a phone",
+          "ru": "Страх остаться без телефона"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно тримає розряджений телефон",
+          "en": "Constantly holds a dead phone",
+          "ru": "Постоянно держит разряженный телефон"
+        }
+      }
     },
     {
       "id": "phobia_012",
       "name": "Кулрофобія",
       "description": "Страх клоунів",
-      "bunkerEffect": "Якщо в групі є клоун — проблеми з комунікацією"
+      "bunkerEffect": "Якщо в групі є клоун — проблеми з комунікацією",
+      "_i18n": {
+        "name": {
+          "uk": "Кулрофобія",
+          "en": "Coulrophobia",
+          "ru": "Кулрофобия"
+        },
+        "description": {
+          "uk": "Страх клоунів",
+          "en": "Fear of clowns",
+          "ru": "Страх клоунов"
+        },
+        "bunkerEffect": {
+          "uk": "Якщо в групі є клоун — проблеми з комунікацією",
+          "en": "If there is a clown in the group, communication problems begin",
+          "ru": "Если в группе есть клоун — начинаются проблемы с коммуникацией"
+        }
+      }
     },
     {
       "id": "phobia_013",
       "name": "Глософобія",
       "description": "Страх публічних виступів",
-      "bunkerEffect": "Не може захистити себе на голосуванні"
+      "bunkerEffect": "Не може захистити себе на голосуванні",
+      "_i18n": {
+        "name": {
+          "uk": "Глософобія",
+          "en": "Glossophobia",
+          "ru": "Глоссофобия"
+        },
+        "description": {
+          "uk": "Страх публічних виступів",
+          "en": "Fear of public speaking",
+          "ru": "Страх публичных выступлений"
+        },
+        "bunkerEffect": {
+          "uk": "Не може захистити себе на голосуванні",
+          "en": "Cannot defend themselves during voting",
+          "ru": "Не может защитить себя на голосовании"
+        }
+      }
     },
     {
       "id": "phobia_014",
       "name": "Трискайдекафобія",
       "description": "Страх числа 13",
-      "bunkerEffect": "Відмовляється від дій пов'язаних з числом 13"
+      "bunkerEffect": "Відмовляється від дій пов'язаних з числом 13",
+      "_i18n": {
+        "name": {
+          "uk": "Трискайдекафобія",
+          "en": "Triskaidekaphobia",
+          "ru": "Трискайдекафобия"
+        },
+        "description": {
+          "uk": "Страх числа 13",
+          "en": "Fear of the number 13",
+          "ru": "Страх числа 13"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від дій пов'язаних з числом 13",
+          "en": "Refuses actions connected to the number 13",
+          "ru": "Отказывается от действий, связанных с числом 13"
+        }
+      }
     },
     {
       "id": "phobia_015",
       "name": "Ахлуофобія",
       "description": "Страх темних кімнат",
-      "bunkerEffect": "Не може бути в кімнаті без світла"
+      "bunkerEffect": "Не може бути в кімнаті без світла",
+      "_i18n": {
+        "name": {
+          "uk": "Ахлуофобія",
+          "en": "Achluophobia",
+          "ru": "Ахлуофобия"
+        },
+        "description": {
+          "uk": "Страх темних кімнат",
+          "en": "Fear of dark rooms",
+          "ru": "Страх темных комнат"
+        },
+        "bunkerEffect": {
+          "uk": "Не може бути в кімнаті без світла",
+          "en": "Cannot stay in a room without light",
+          "ru": "Не может находиться в комнате без света"
+        }
+      }
     },
     {
       "id": "phobia_016",
       "name": "Офідіофобія",
       "description": "Страх змій",
-      "bunkerEffect": "Паніка при згадці про рептилій"
+      "bunkerEffect": "Паніка при згадці про рептилій",
+      "_i18n": {
+        "name": {
+          "uk": "Офідіофобія",
+          "en": "Ophidiophobia",
+          "ru": "Офидиофобия"
+        },
+        "description": {
+          "uk": "Страх змій",
+          "en": "Fear of snakes",
+          "ru": "Страх змей"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при згадці про рептилій",
+          "en": "Panics at the mention of reptiles",
+          "ru": "Паникует при упоминании рептилий"
+        }
+      }
     },
     {
       "id": "phobia_017",
       "name": "Кінофобія",
       "description": "Страх собак",
-      "bunkerEffect": "Не може працювати з тваринами"
+      "bunkerEffect": "Не може працювати з тваринами",
+      "_i18n": {
+        "name": {
+          "uk": "Кінофобія",
+          "en": "Cynophobia",
+          "ru": "Кинофобия"
+        },
+        "description": {
+          "uk": "Страх собак",
+          "en": "Fear of dogs",
+          "ru": "Страх собак"
+        },
+        "bunkerEffect": {
+          "uk": "Не може працювати з тваринами",
+          "en": "Cannot work with animals",
+          "ru": "Не может работать с животными"
+        }
+      }
     },
     {
       "id": "phobia_018",
       "name": "Астрафобія",
       "description": "Страх грому та блискавок",
-      "bunkerEffect": "Ховається під час грози, не виходить назовні"
+      "bunkerEffect": "Ховається під час грози, не виходить назовні",
+      "_i18n": {
+        "name": {
+          "uk": "Астрафобія",
+          "en": "Astraphobia",
+          "ru": "Астрафобия"
+        },
+        "description": {
+          "uk": "Страх грому та блискавок",
+          "en": "Fear of thunder and lightning",
+          "ru": "Страх грома и молний"
+        },
+        "bunkerEffect": {
+          "uk": "Ховається під час грози, не виходить назовні",
+          "en": "Hides during storms and does not go outside",
+          "ru": "Прячется во время грозы и не выходит наружу"
+        }
+      }
     },
     {
       "id": "phobia_019",
       "name": "Трипанофобія",
       "description": "Страх уколів та ін'єкцій",
-      "bunkerEffect": "Відмовляється від медичної допомоги"
+      "bunkerEffect": "Відмовляється від медичної допомоги",
+      "_i18n": {
+        "name": {
+          "uk": "Трипанофобія",
+          "en": "Trypanophobia",
+          "ru": "Трипанофобия"
+        },
+        "description": {
+          "uk": "Страх уколів та ін'єкцій",
+          "en": "Fear of needles and injections",
+          "ru": "Страх игл и инъекций"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від медичної допомоги",
+          "en": "Refuses medical help",
+          "ru": "Отказывается от медицинской помощи"
+        }
+      }
     },
     {
       "id": "phobia_020",
       "name": "Аерофобія",
       "description": "Страх польотів",
-      "bunkerEffect": "Не може евакуюватися повітрям"
+      "bunkerEffect": "Не може евакуюватися повітрям",
+      "_i18n": {
+        "name": {
+          "uk": "Аерофобія",
+          "en": "Aerophobia",
+          "ru": "Аэрофобия"
+        },
+        "description": {
+          "uk": "Страх польотів",
+          "en": "Fear of flying",
+          "ru": "Страх полетов"
+        },
+        "bunkerEffect": {
+          "uk": "Не може евакуюватися повітрям",
+          "en": "Cannot evacuate by air",
+          "ru": "Не может эвакуироваться по воздуху"
+        }
+      }
     },
     {
       "id": "phobia_021",
       "name": "Гідрофобія",
       "description": "Страх води",
-      "bunkerEffect": "Уникає водних процедур та переправ"
+      "bunkerEffect": "Уникає водних процедур та переправ",
+      "_i18n": {
+        "name": {
+          "uk": "Гідрофобія",
+          "en": "Hydrophobia",
+          "ru": "Гидрофобия"
+        },
+        "description": {
+          "uk": "Страх води",
+          "en": "Fear of water",
+          "ru": "Страх воды"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає водних процедур та переправ",
+          "en": "Avoids washing and water crossings",
+          "ru": "Избегает водных процедур и переправ"
+        }
+      }
     },
     {
       "id": "phobia_022",
       "name": "Пірофобія",
       "description": "Страх вогню",
-      "bunkerEffect": "Не може розпалювати вогнище"
+      "bunkerEffect": "Не може розпалювати вогнище",
+      "_i18n": {
+        "name": {
+          "uk": "Пірофобія",
+          "en": "Pyrophobia",
+          "ru": "Пирофобия"
+        },
+        "description": {
+          "uk": "Страх вогню",
+          "en": "Fear of fire",
+          "ru": "Страх огня"
+        },
+        "bunkerEffect": {
+          "uk": "Не може розпалювати вогнище",
+          "en": "Cannot start a fire",
+          "ru": "Не может разводить костер"
+        }
+      }
     },
     {
       "id": "phobia_023",
       "name": "Гефірофобія",
       "description": "Страх мостів",
-      "bunkerEffect": "Не може переходити через мости або прірви"
+      "bunkerEffect": "Не може переходити через мости або прірви",
+      "_i18n": {
+        "name": {
+          "uk": "Гефірофобія",
+          "en": "Gephyrophobia",
+          "ru": "Гефирофобия"
+        },
+        "description": {
+          "uk": "Страх мостів",
+          "en": "Fear of bridges",
+          "ru": "Страх мостов"
+        },
+        "bunkerEffect": {
+          "uk": "Не може переходити через мости або прірви",
+          "en": "Cannot cross bridges or gaps",
+          "ru": "Не может переходить мосты или пропасти"
+        }
+      }
     },
     {
       "id": "phobia_024",
       "name": "Талассофобія",
       "description": "Страх глибокої води та океану",
-      "bunkerEffect": "Не може працювати біля водойм"
+      "bunkerEffect": "Не може працювати біля водойм",
+      "_i18n": {
+        "name": {
+          "uk": "Талассофобія",
+          "en": "Thalassophobia",
+          "ru": "Талассофобия"
+        },
+        "description": {
+          "uk": "Страх глибокої води та океану",
+          "en": "Fear of deep water and the ocean",
+          "ru": "Страх глубокой воды и океана"
+        },
+        "bunkerEffect": {
+          "uk": "Не може працювати біля водойм",
+          "en": "Cannot work near bodies of water",
+          "ru": "Не может работать возле водоемов"
+        }
+      }
     },
     {
       "id": "phobia_025",
       "name": "Ентомофобія",
       "description": "Страх комах",
-      "bunkerEffect": "Паніка при появі будь-яких комах"
+      "bunkerEffect": "Паніка при появі будь-яких комах",
+      "_i18n": {
+        "name": {
+          "uk": "Ентомофобія",
+          "en": "Entomophobia",
+          "ru": "Энтомофобия"
+        },
+        "description": {
+          "uk": "Страх комах",
+          "en": "Fear of insects",
+          "ru": "Страх насекомых"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при появі будь-яких комах",
+          "en": "Panics when any insects appear",
+          "ru": "Паникует при появлении любых насекомых"
+        }
+      }
     },
     {
       "id": "phobia_026",
       "name": "Некрофобія",
       "description": "Страх мертвих тіл",
-      "bunkerEffect": "Не може допомогти з похованням"
+      "bunkerEffect": "Не може допомогти з похованням",
+      "_i18n": {
+        "name": {
+          "uk": "Некрофобія",
+          "en": "Necrophobia",
+          "ru": "Некрофобия"
+        },
+        "description": {
+          "uk": "Страх мертвих тіл",
+          "en": "Fear of dead bodies",
+          "ru": "Страх мертвых тел"
+        },
+        "bunkerEffect": {
+          "uk": "Не може допомогти з похованням",
+          "en": "Cannot help with burial",
+          "ru": "Не может помочь с похоронами"
+        }
+      }
     },
     {
       "id": "phobia_027",
       "name": "Гермафобія",
       "description": "Страх мікробів та інфекцій",
-      "bunkerEffect": "Постійно миє руки, витрачає воду"
+      "bunkerEffect": "Постійно миє руки, витрачає воду",
+      "_i18n": {
+        "name": {
+          "uk": "Гермафобія",
+          "en": "Germaphobia",
+          "ru": "Гермофобия"
+        },
+        "description": {
+          "uk": "Страх мікробів та інфекцій",
+          "en": "Fear of germs and infections",
+          "ru": "Страх микробов и инфекций"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно миє руки, витрачає воду",
+          "en": "Constantly washes hands and wastes water",
+          "ru": "Постоянно моет руки и тратит воду"
+        }
+      }
     },
     {
       "id": "phobia_028",
       "name": "Атихіфобія",
       "description": "Страх невдачі",
-      "bunkerEffect": "Не діє щоб не помилитися"
+      "bunkerEffect": "Не діє щоб не помилитися",
+      "_i18n": {
+        "name": {
+          "uk": "Атихіфобія",
+          "en": "Atychiphobia",
+          "ru": "Атихифобия"
+        },
+        "description": {
+          "uk": "Страх невдачі",
+          "en": "Fear of failure",
+          "ru": "Страх неудачи"
+        },
+        "bunkerEffect": {
+          "uk": "Не діє щоб не помилитися",
+          "en": "Does not act to avoid making mistakes",
+          "ru": "Не действует, чтобы не ошибиться"
+        }
+      }
     },
     {
       "id": "phobia_029",
       "name": "Автофобія",
       "description": "Страх самотності",
-      "bunkerEffect": "Не може залишатися на посту один"
+      "bunkerEffect": "Не може залишатися на посту один",
+      "_i18n": {
+        "name": {
+          "uk": "Автофобія",
+          "en": "Autophobia",
+          "ru": "Автофобия"
+        },
+        "description": {
+          "uk": "Страх самотності",
+          "en": "Fear of loneliness",
+          "ru": "Страх одиночества"
+        },
+        "bunkerEffect": {
+          "uk": "Не може залишатися на посту один",
+          "en": "Cannot stay on guard duty alone",
+          "ru": "Не может оставаться на посту один"
+        }
+      }
     },
     {
       "id": "phobia_030",
       "name": "Філофобія",
       "description": "Страх закоханості",
-      "bunkerEffect": "Уникає емоційної близькості"
+      "bunkerEffect": "Уникає емоційної близькості",
+      "_i18n": {
+        "name": {
+          "uk": "Філофобія",
+          "en": "Philophobia",
+          "ru": "Филофобия"
+        },
+        "description": {
+          "uk": "Страх закоханості",
+          "en": "Fear of falling in love",
+          "ru": "Страх влюбленности"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає емоційної близькості",
+          "en": "Avoids emotional closeness",
+          "ru": "Избегает эмоциональной близости"
+        }
+      }
     },
     {
       "id": "phobia_031",
       "name": "Ергофобія",
       "description": "Страх роботи",
-      "bunkerEffect": "Уникає будь-яких обов'язків"
+      "bunkerEffect": "Уникає будь-яких обов'язків",
+      "_i18n": {
+        "name": {
+          "uk": "Ергофобія",
+          "en": "Ergophobia",
+          "ru": "Эргофобия"
+        },
+        "description": {
+          "uk": "Страх роботи",
+          "en": "Fear of work",
+          "ru": "Страх работы"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає будь-яких обов'язків",
+          "en": "Avoids any duties",
+          "ru": "Избегает любых обязанностей"
+        }
+      }
     },
     {
       "id": "phobia_032",
       "name": "Децидофобія",
       "description": "Страх прийняття рішень",
-      "bunkerEffect": "Не може голосувати та обирати"
+      "bunkerEffect": "Не може голосувати та обирати",
+      "_i18n": {
+        "name": {
+          "uk": "Децидофобія",
+          "en": "Decidophobia",
+          "ru": "Децидофобия"
+        },
+        "description": {
+          "uk": "Страх прийняття рішень",
+          "en": "Fear of making decisions",
+          "ru": "Страх принятия решений"
+        },
+        "bunkerEffect": {
+          "uk": "Не може голосувати та обирати",
+          "en": "Cannot vote or choose",
+          "ru": "Не может голосовать и выбирать"
+        }
+      }
     },
     {
       "id": "phobia_033",
       "name": "Метатезіофобія",
       "description": "Страх змін",
-      "bunkerEffect": "Протидіє будь-яким новим планам"
+      "bunkerEffect": "Протидіє будь-яким новим планам",
+      "_i18n": {
+        "name": {
+          "uk": "Метатезіофобія",
+          "en": "Metathesiophobia",
+          "ru": "Метатезиофобия"
+        },
+        "description": {
+          "uk": "Страх змін",
+          "en": "Fear of change",
+          "ru": "Страх перемен"
+        },
+        "bunkerEffect": {
+          "uk": "Протидіє будь-яким новим планам",
+          "en": "Opposes any new plans",
+          "ru": "Противится любым новым планам"
+        }
+      }
     },
     {
       "id": "phobia_034",
       "name": "Антропофобія",
       "description": "Страх людей",
-      "bunkerEffect": "Важко комунікує з іншими мешканцями"
+      "bunkerEffect": "Важко комунікує з іншими мешканцями",
+      "_i18n": {
+        "name": {
+          "uk": "Антропофобія",
+          "en": "Anthropophobia",
+          "ru": "Антропофобия"
+        },
+        "description": {
+          "uk": "Страх людей",
+          "en": "Fear of people",
+          "ru": "Страх людей"
+        },
+        "bunkerEffect": {
+          "uk": "Важко комунікує з іншими мешканцями",
+          "en": "Has difficulty communicating with other residents",
+          "ru": "Трудно общается с другими жителями"
+        }
+      }
     },
     {
       "id": "phobia_035",
       "name": "Хронофобія",
       "description": "Страх часу та дедлайнів",
-      "bunkerEffect": "Паніка перед будь-яким терміном"
+      "bunkerEffect": "Паніка перед будь-яким терміном",
+      "_i18n": {
+        "name": {
+          "uk": "Хронофобія",
+          "en": "Chronophobia",
+          "ru": "Хронофобия"
+        },
+        "description": {
+          "uk": "Страх часу та дедлайнів",
+          "en": "Fear of time and deadlines",
+          "ru": "Страх времени и дедлайнов"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка перед будь-яким терміном",
+          "en": "Panics before any deadline",
+          "ru": "Паникует перед любым сроком"
+        }
+      }
     },
     {
       "id": "phobia_036",
       "name": "Ноктіфобія",
       "description": "Страх ночі",
-      "bunkerEffect": "Не може чергувати вночі"
+      "bunkerEffect": "Не може чергувати вночі",
+      "_i18n": {
+        "name": {
+          "uk": "Ноктіфобія",
+          "en": "Noctiphobia",
+          "ru": "Ноктифобия"
+        },
+        "description": {
+          "uk": "Страх ночі",
+          "en": "Fear of night",
+          "ru": "Страх ночи"
+        },
+        "bunkerEffect": {
+          "uk": "Не може чергувати вночі",
+          "en": "Cannot take night watch",
+          "ru": "Не может дежурить ночью"
+        }
+      }
     },
     {
       "id": "phobia_037",
       "name": "Кенофобія",
       "description": "Страх порожнечі",
-      "bunkerEffect": "Не може бути в порожніх приміщеннях"
+      "bunkerEffect": "Не може бути в порожніх приміщеннях",
+      "_i18n": {
+        "name": {
+          "uk": "Кенофобія",
+          "en": "Kenophobia",
+          "ru": "Кенофобия"
+        },
+        "description": {
+          "uk": "Страх порожнечі",
+          "en": "Fear of emptiness",
+          "ru": "Страх пустоты"
+        },
+        "bunkerEffect": {
+          "uk": "Не може бути в порожніх приміщеннях",
+          "en": "Cannot stay in empty rooms",
+          "ru": "Не может находиться в пустых помещениях"
+        }
+      }
     },
     {
       "id": "phobia_038",
       "name": "Лігірофобія",
       "description": "Страх гучних звуків",
-      "bunkerEffect": "Паніка при вибухах та сиренах"
+      "bunkerEffect": "Паніка при вибухах та сиренах",
+      "_i18n": {
+        "name": {
+          "uk": "Лігірофобія",
+          "en": "Ligyrophobia",
+          "ru": "Лигирофобия"
+        },
+        "description": {
+          "uk": "Страх гучних звуків",
+          "en": "Fear of loud sounds",
+          "ru": "Страх громких звуков"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при вибухах та сиренах",
+          "en": "Panics during explosions and sirens",
+          "ru": "Паникует при взрывах и сиренах"
+        }
+      }
     },
     {
       "id": "phobia_039",
       "name": "Фагофобія",
       "description": "Страх ковтання їжі",
-      "bunkerEffect": "Проблеми з прийомом їжі"
+      "bunkerEffect": "Проблеми з прийомом їжі",
+      "_i18n": {
+        "name": {
+          "uk": "Фагофобія",
+          "en": "Phagophobia",
+          "ru": "Фагофобия"
+        },
+        "description": {
+          "uk": "Страх ковтання їжі",
+          "en": "Fear of swallowing food",
+          "ru": "Страх глотания пищи"
+        },
+        "bunkerEffect": {
+          "uk": "Проблеми з прийомом їжі",
+          "en": "Has problems eating",
+          "ru": "Имеет проблемы с приемом пищи"
+        }
+      }
     },
     {
       "id": "phobia_040",
       "name": "Ксенофобія",
       "description": "Страх чужинців",
-      "bunkerEffect": "Недовіра до нових членів групи"
+      "bunkerEffect": "Недовіра до нових членів групи",
+      "_i18n": {
+        "name": {
+          "uk": "Ксенофобія",
+          "en": "Xenophobia",
+          "ru": "Ксенофобия"
+        },
+        "description": {
+          "uk": "Страх чужинців",
+          "en": "Fear of strangers",
+          "ru": "Страх чужаков"
+        },
+        "bunkerEffect": {
+          "uk": "Недовіра до нових членів групи",
+          "en": "Distrusts new group members",
+          "ru": "Не доверяет новым членам группы"
+        }
+      }
     },
     {
       "id": "phobia_041",
       "name": "Сомніфобія",
       "description": "Страх сну",
-      "bunkerEffect": "Хронічне недосипання, низька працездатність"
+      "bunkerEffect": "Хронічне недосипання, низька працездатність",
+      "_i18n": {
+        "name": {
+          "uk": "Сомніфобія",
+          "en": "Somniphobia",
+          "ru": "Сомнифобия"
+        },
+        "description": {
+          "uk": "Страх сну",
+          "en": "Fear of sleep",
+          "ru": "Страх сна"
+        },
+        "bunkerEffect": {
+          "uk": "Хронічне недосипання, низька працездатність",
+          "en": "Chronic sleep deprivation and low productivity",
+          "ru": "Хроническое недосыпание и низкая работоспособность"
+        }
+      }
     },
     {
       "id": "phobia_042",
       "name": "Апотемнофобія",
       "description": "Страх ампутації",
-      "bunkerEffect": "Паніка при травмах кінцівок"
+      "bunkerEffect": "Паніка при травмах кінцівок",
+      "_i18n": {
+        "name": {
+          "uk": "Апотемнофобія",
+          "en": "Apotemnophobia",
+          "ru": "Апотемнофобия"
+        },
+        "description": {
+          "uk": "Страх ампутації",
+          "en": "Fear of amputation",
+          "ru": "Страх ампутации"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при травмах кінцівок",
+          "en": "Panics during limb injuries",
+          "ru": "Паникует при травмах конечностей"
+        }
+      }
     },
     {
       "id": "phobia_043",
       "name": "Ерейтофобія",
       "description": "Страх почервоніти",
-      "bunkerEffect": "Уникає публічної уваги"
+      "bunkerEffect": "Уникає публічної уваги",
+      "_i18n": {
+        "name": {
+          "uk": "Ерейтофобія",
+          "en": "Erythrophobia",
+          "ru": "Эритофобия"
+        },
+        "description": {
+          "uk": "Страх почервоніти",
+          "en": "Fear of blushing",
+          "ru": "Страх покраснеть"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає публічної уваги",
+          "en": "Avoids public attention",
+          "ru": "Избегает публичного внимания"
+        }
+      }
     },
     {
       "id": "phobia_044",
       "name": "Токофобія",
       "description": "Страх пологів",
-      "bunkerEffect": "Не може допомогти при пологах"
+      "bunkerEffect": "Не може допомогти при пологах",
+      "_i18n": {
+        "name": {
+          "uk": "Токофобія",
+          "en": "Tokophobia",
+          "ru": "Токофобия"
+        },
+        "description": {
+          "uk": "Страх пологів",
+          "en": "Fear of childbirth",
+          "ru": "Страх родов"
+        },
+        "bunkerEffect": {
+          "uk": "Не може допомогти при пологах",
+          "en": "Cannot help during childbirth",
+          "ru": "Не может помочь при родах"
+        }
+      }
     },
     {
       "id": "phobia_045",
       "name": "Теофобія",
       "description": "Страх релігії та богів",
-      "bunkerEffect": "Конфліктує з релігійними членами групи"
+      "bunkerEffect": "Конфліктує з релігійними членами групи",
+      "_i18n": {
+        "name": {
+          "uk": "Теофобія",
+          "en": "Theophobia",
+          "ru": "Теофобия"
+        },
+        "description": {
+          "uk": "Страх релігії та богів",
+          "en": "Fear of religion and gods",
+          "ru": "Страх религии и богов"
+        },
+        "bunkerEffect": {
+          "uk": "Конфліктує з релігійними членами групи",
+          "en": "Conflicts with religious group members",
+          "ru": "Конфликтует с религиозными членами группы"
+        }
+      }
     },
     {
       "id": "phobia_046",
       "name": "Педіофобія",
       "description": "Страх ляльок",
-      "bunkerEffect": "Паніка при наявності ляльок у бункері"
+      "bunkerEffect": "Паніка при наявності ляльок у бункері",
+      "_i18n": {
+        "name": {
+          "uk": "Педіофобія",
+          "en": "Pediophobia",
+          "ru": "Педиофобия"
+        },
+        "description": {
+          "uk": "Страх ляльок",
+          "en": "Fear of dolls",
+          "ru": "Страх кукол"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при наявності ляльок у бункері",
+          "en": "Panics if there are dolls in the bunker",
+          "ru": "Паникует при наличии кукол в бункере"
+        }
+      }
     },
     {
       "id": "phobia_047",
       "name": "Омброфобія",
       "description": "Страх дощу",
-      "bunkerEffect": "Не може виходити під час опадів"
+      "bunkerEffect": "Не може виходити під час опадів",
+      "_i18n": {
+        "name": {
+          "uk": "Омброфобія",
+          "en": "Ombrophobia",
+          "ru": "Омброфобия"
+        },
+        "description": {
+          "uk": "Страх дощу",
+          "en": "Fear of rain",
+          "ru": "Страх дождя"
+        },
+        "bunkerEffect": {
+          "uk": "Не може виходити під час опадів",
+          "en": "Cannot go outside during precipitation",
+          "ru": "Не может выходить во время осадков"
+        }
+      }
     },
     {
       "id": "phobia_048",
       "name": "Хіонофобія",
       "description": "Страх снігу",
-      "bunkerEffect": "Не може виходити взимку"
+      "bunkerEffect": "Не може виходити взимку",
+      "_i18n": {
+        "name": {
+          "uk": "Хіонофобія",
+          "en": "Chionophobia",
+          "ru": "Хионофобия"
+        },
+        "description": {
+          "uk": "Страх снігу",
+          "en": "Fear of snow",
+          "ru": "Страх снега"
+        },
+        "bunkerEffect": {
+          "uk": "Не може виходити взимку",
+          "en": "Cannot go outside in winter",
+          "ru": "Не может выходить зимой"
+        }
+      }
     },
     {
       "id": "phobia_049",
       "name": "Сідерофобія",
       "description": "Страх зірок та космосу",
-      "bunkerEffect": "Паніка при думках про зовнішній світ"
+      "bunkerEffect": "Паніка при думках про зовнішній світ",
+      "_i18n": {
+        "name": {
+          "uk": "Сідерофобія",
+          "en": "Siderophobia",
+          "ru": "Сидерофобия"
+        },
+        "description": {
+          "uk": "Страх зірок та космосу",
+          "en": "Fear of stars and space",
+          "ru": "Страх звезд и космоса"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при думках про зовнішній світ",
+          "en": "Panics when thinking about the outside world",
+          "ru": "Паникует при мыслях о внешнем мире"
+        }
+      }
     },
     {
       "id": "phobia_050",
       "name": "Птеромеханофобія",
       "description": "Страх літаків",
-      "bunkerEffect": "Паніка при звуках авіації"
+      "bunkerEffect": "Паніка при звуках авіації",
+      "_i18n": {
+        "name": {
+          "uk": "Птеромеханофобія",
+          "en": "Pteromechanophobia",
+          "ru": "Птеромеханофобия"
+        },
+        "description": {
+          "uk": "Страх літаків",
+          "en": "Fear of airplanes",
+          "ru": "Страх самолетов"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при звуках авіації",
+          "en": "Panics at the sounds of aviation",
+          "ru": "Паникует при звуках авиации"
+        }
+      }
     },
-
     {
       "id": "phobia_051",
       "name": "Тостерофобія",
       "description": "Страх тостерів",
-      "bunkerEffect": "Не може користуватися кухонною технікою"
+      "bunkerEffect": "Не може користуватися кухонною технікою",
+      "_i18n": {
+        "name": {
+          "uk": "Тостерофобія",
+          "en": "Toasterphobia",
+          "ru": "Тостерофобия"
+        },
+        "description": {
+          "uk": "Страх тостерів",
+          "en": "Fear of toasters",
+          "ru": "Страх тостеров"
+        },
+        "bunkerEffect": {
+          "uk": "Не може користуватися кухонною технікою",
+          "en": "Cannot use kitchen appliances",
+          "ru": "Не может пользоваться кухонной техникой"
+        }
+      }
     },
     {
       "id": "phobia_052",
       "name": "Wi-Фобія",
       "description": "Страх бездротових мереж",
-      "bunkerEffect": "Вимагає вимкнути всю електроніку"
+      "bunkerEffect": "Вимагає вимкнути всю електроніку",
+      "_i18n": {
+        "name": {
+          "uk": "Wi-Фобія",
+          "en": "Wi-Phobia",
+          "ru": "Wi-Фобия"
+        },
+        "description": {
+          "uk": "Страх бездротових мереж",
+          "en": "Fear of wireless networks",
+          "ru": "Страх беспроводных сетей"
+        },
+        "bunkerEffect": {
+          "uk": "Вимагає вимкнути всю електроніку",
+          "en": "Demands that all electronics be turned off",
+          "ru": "Требует выключить всю электронику"
+        }
+      }
     },
     {
       "id": "phobia_053",
       "name": "Кнопкофобія",
       "description": "Страх кнопок на одязі",
-      "bunkerEffect": "Носить тільки одяг на блискавках"
+      "bunkerEffect": "Носить тільки одяг на блискавках",
+      "_i18n": {
+        "name": {
+          "uk": "Кнопкофобія",
+          "en": "Buttonphobia",
+          "ru": "Кнопкофобия"
+        },
+        "description": {
+          "uk": "Страх кнопок на одязі",
+          "en": "Fear of clothing buttons",
+          "ru": "Страх пуговиц на одежде"
+        },
+        "bunkerEffect": {
+          "uk": "Носить тільки одяг на блискавках",
+          "en": "Wears only clothes with zippers",
+          "ru": "Носит только одежду на молниях"
+        }
+      }
     },
     {
       "id": "phobia_054",
       "name": "Банановобія",
       "description": "Страх бананів",
-      "bunkerEffect": "Паніка при вигляді жовтих фруктів"
+      "bunkerEffect": "Паніка при вигляді жовтих фруктів",
+      "_i18n": {
+        "name": {
+          "uk": "Банановобія",
+          "en": "Bananaphobia",
+          "ru": "Бананофобия"
+        },
+        "description": {
+          "uk": "Страх бананів",
+          "en": "Fear of bananas",
+          "ru": "Страх бананов"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка при вигляді жовтих фруктів",
+          "en": "Panics at the sight of yellow fruit",
+          "ru": "Паникует при виде желтых фруктов"
+        }
+      }
     },
     {
       "id": "phobia_055",
       "name": "Папірофобія",
       "description": "Страх паперу",
-      "bunkerEffect": "Не може працювати з документами"
+      "bunkerEffect": "Не може працювати з документами",
+      "_i18n": {
+        "name": {
+          "uk": "Папірофобія",
+          "en": "Papyrophobia",
+          "ru": "Папирофобия"
+        },
+        "description": {
+          "uk": "Страх паперу",
+          "en": "Fear of paper",
+          "ru": "Страх бумаги"
+        },
+        "bunkerEffect": {
+          "uk": "Не може працювати з документами",
+          "en": "Cannot work with documents",
+          "ru": "Не может работать с документами"
+        }
+      }
     },
     {
       "id": "phobia_056",
       "name": "Повітрянокулькофобія",
       "description": "Страх повітряних кульок",
-      "bunkerEffect": "Паніка від гучних звуків"
+      "bunkerEffect": "Паніка від гучних звуків",
+      "_i18n": {
+        "name": {
+          "uk": "Повітрянокулькофобія",
+          "en": "Balloonphobia",
+          "ru": "Шарикофобия"
+        },
+        "description": {
+          "uk": "Страх повітряних кульок",
+          "en": "Fear of balloons",
+          "ru": "Страх воздушных шариков"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка від гучних звуків",
+          "en": "Panics from loud popping sounds",
+          "ru": "Паникует от громких хлопков"
+        }
+      }
     },
     {
       "id": "phobia_057",
       "name": "Хлібофобія",
       "description": "Страх хліба та випічки",
-      "bunkerEffect": "Проблеми з харчуванням"
+      "bunkerEffect": "Проблеми з харчуванням",
+      "_i18n": {
+        "name": {
+          "uk": "Хлібофобія",
+          "en": "Breadphobia",
+          "ru": "Хлебофобия"
+        },
+        "description": {
+          "uk": "Страх хліба та випічки",
+          "en": "Fear of bread and baked goods",
+          "ru": "Страх хлеба и выпечки"
+        },
+        "bunkerEffect": {
+          "uk": "Проблеми з харчуванням",
+          "en": "Has problems with food",
+          "ru": "Имеет проблемы с питанием"
+        }
+      }
     },
     {
       "id": "phobia_058",
       "name": "Дзеркалофобія",
       "description": "Страх дзеркал",
-      "bunkerEffect": "Вимагає закрити всі дзеркала"
+      "bunkerEffect": "Вимагає закрити всі дзеркала",
+      "_i18n": {
+        "name": {
+          "uk": "Дзеркалофобія",
+          "en": "Mirrorphobia",
+          "ru": "Зеркалофобия"
+        },
+        "description": {
+          "uk": "Страх дзеркал",
+          "en": "Fear of mirrors",
+          "ru": "Страх зеркал"
+        },
+        "bunkerEffect": {
+          "uk": "Вимагає закрити всі дзеркала",
+          "en": "Demands all mirrors be covered",
+          "ru": "Требует закрыть все зеркала"
+        }
+      }
     },
     {
       "id": "phobia_059",
       "name": "Ліфтофобія",
       "description": "Страх ліфтів",
-      "bunkerEffect": "Користується тільки сходами"
+      "bunkerEffect": "Користується тільки сходами",
+      "_i18n": {
+        "name": {
+          "uk": "Ліфтофобія",
+          "en": "Elevatorphobia",
+          "ru": "Лифтофобия"
+        },
+        "description": {
+          "uk": "Страх ліфтів",
+          "en": "Fear of elevators",
+          "ru": "Страх лифтов"
+        },
+        "bunkerEffect": {
+          "uk": "Користується тільки сходами",
+          "en": "Uses only stairs",
+          "ru": "Пользуется только лестницами"
+        }
+      }
     },
     {
       "id": "phobia_060",
       "name": "Пилосософобія",
       "description": "Страх пилососів",
-      "bunkerEffect": "Не дозволяє прибирати гучно"
+      "bunkerEffect": "Не дозволяє прибирати гучно",
+      "_i18n": {
+        "name": {
+          "uk": "Пилосософобія",
+          "en": "Vacuumphobia",
+          "ru": "Пылесософобия"
+        },
+        "description": {
+          "uk": "Страх пилососів",
+          "en": "Fear of vacuum cleaners",
+          "ru": "Страх пылесосов"
+        },
+        "bunkerEffect": {
+          "uk": "Не дозволяє прибирати гучно",
+          "en": "Does not allow loud cleaning",
+          "ru": "Не разрешает громко убирать"
+        }
+      }
     },
     {
       "id": "phobia_061",
       "name": "Годинникофобія",
       "description": "Страх годинників",
-      "bunkerEffect": "Не може стежити за часом"
+      "bunkerEffect": "Не може стежити за часом",
+      "_i18n": {
+        "name": {
+          "uk": "Годинникофобія",
+          "en": "Clockphobia",
+          "ru": "Часофобия"
+        },
+        "description": {
+          "uk": "Страх годинників",
+          "en": "Fear of clocks",
+          "ru": "Страх часов"
+        },
+        "bunkerEffect": {
+          "uk": "Не може стежити за часом",
+          "en": "Cannot keep track of time",
+          "ru": "Не может следить за временем"
+        }
+      }
     },
     {
       "id": "phobia_062",
       "name": "Мобілофобія",
       "description": "Страх мобільних телефонів",
-      "bunkerEffect": "Не може користуватися зв'язком"
+      "bunkerEffect": "Не може користуватися зв'язком",
+      "_i18n": {
+        "name": {
+          "uk": "Мобілофобія",
+          "en": "Mobilephobia",
+          "ru": "Мобилофобия"
+        },
+        "description": {
+          "uk": "Страх мобільних телефонів",
+          "en": "Fear of mobile phones",
+          "ru": "Страх мобильных телефонов"
+        },
+        "bunkerEffect": {
+          "uk": "Не може користуватися зв'язком",
+          "en": "Cannot use communication devices",
+          "ru": "Не может пользоваться связью"
+        }
+      }
     },
     {
       "id": "phobia_063",
       "name": "Шкарпеткофобія",
       "description": "Страх шкарпеток",
-      "bunkerEffect": "Ходить босоніж у бункері"
+      "bunkerEffect": "Ходить босоніж у бункері",
+      "_i18n": {
+        "name": {
+          "uk": "Шкарпеткофобія",
+          "en": "Sockphobia",
+          "ru": "Носкофобия"
+        },
+        "description": {
+          "uk": "Страх шкарпеток",
+          "en": "Fear of socks",
+          "ru": "Страх носков"
+        },
+        "bunkerEffect": {
+          "uk": "Ходить босоніж у бункері",
+          "en": "Walks barefoot in the bunker",
+          "ru": "Ходит босиком в бункере"
+        }
+      }
     },
     {
       "id": "phobia_064",
       "name": "Борідофобія",
       "description": "Страх бород",
-      "bunkerEffect": "Вимагає від чоловіків голитися"
+      "bunkerEffect": "Вимагає від чоловіків голитися",
+      "_i18n": {
+        "name": {
+          "uk": "Борідофобія",
+          "en": "Beardphobia",
+          "ru": "Бородофобия"
+        },
+        "description": {
+          "uk": "Страх бород",
+          "en": "Fear of beards",
+          "ru": "Страх бород"
+        },
+        "bunkerEffect": {
+          "uk": "Вимагає від чоловіків голитися",
+          "en": "Demands that men shave",
+          "ru": "Требует, чтобы мужчины брились"
+        }
+      }
     },
     {
       "id": "phobia_065",
       "name": "Пупкофобія",
       "description": "Страх пупків",
-      "bunkerEffect": "Носить закритий одяг постійно"
+      "bunkerEffect": "Носить закритий одяг постійно",
+      "_i18n": {
+        "name": {
+          "uk": "Пупкофобія",
+          "en": "Navelphobia",
+          "ru": "Пупкофобия"
+        },
+        "description": {
+          "uk": "Страх пупків",
+          "en": "Fear of navels",
+          "ru": "Страх пупков"
+        },
+        "bunkerEffect": {
+          "uk": "Носить закритий одяг постійно",
+          "en": "Wears closed clothing constantly",
+          "ru": "Постоянно носит закрытую одежду"
+        }
+      }
     },
     {
       "id": "phobia_066",
       "name": "Маринованофобія",
       "description": "Страх маринованих огірків",
-      "bunkerEffect": "Проблеми з консервами"
+      "bunkerEffect": "Проблеми з консервами",
+      "_i18n": {
+        "name": {
+          "uk": "Маринованофобія",
+          "en": "Picklephobia",
+          "ru": "Маринованофобия"
+        },
+        "description": {
+          "uk": "Страх маринованих огірків",
+          "en": "Fear of pickled cucumbers",
+          "ru": "Страх маринованных огурцов"
+        },
+        "bunkerEffect": {
+          "uk": "Проблеми з консервами",
+          "en": "Has problems with canned food",
+          "ru": "Имеет проблемы с консервами"
+        }
+      }
     },
     {
       "id": "phobia_067",
       "name": "Фольгофобія",
       "description": "Страх алюмінієвої фольги",
-      "bunkerEffect": "Не може пакувати їжу"
+      "bunkerEffect": "Не може пакувати їжу",
+      "_i18n": {
+        "name": {
+          "uk": "Фольгофобія",
+          "en": "Foilphobia",
+          "ru": "Фольгофобия"
+        },
+        "description": {
+          "uk": "Страх алюмінієвої фольги",
+          "en": "Fear of aluminum foil",
+          "ru": "Страх алюминиевой фольги"
+        },
+        "bunkerEffect": {
+          "uk": "Не може пакувати їжу",
+          "en": "Cannot pack food",
+          "ru": "Не может упаковывать еду"
+        }
+      }
     },
     {
       "id": "phobia_068",
       "name": "Арахісофобія",
       "description": "Страх арахісового масла",
-      "bunkerEffect": "Відмовляється від білкової їжі"
+      "bunkerEffect": "Відмовляється від білкової їжі",
+      "_i18n": {
+        "name": {
+          "uk": "Арахісофобія",
+          "en": "Peanutbutterphobia",
+          "ru": "Арахисофобия"
+        },
+        "description": {
+          "uk": "Страх арахісового масла",
+          "en": "Fear of peanut butter",
+          "ru": "Страх арахисового масла"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від білкової їжі",
+          "en": "Refuses protein-rich food",
+          "ru": "Отказывается от белковой пищи"
+        }
+      }
     },
     {
       "id": "phobia_069",
       "name": "Качкофобія",
       "description": "Страх качок",
-      "bunkerEffect": "Паніка біля водойм"
+      "bunkerEffect": "Паніка біля водойм",
+      "_i18n": {
+        "name": {
+          "uk": "Качкофобія",
+          "en": "Duckphobia",
+          "ru": "Уткофобия"
+        },
+        "description": {
+          "uk": "Страх качок",
+          "en": "Fear of ducks",
+          "ru": "Страх уток"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка біля водойм",
+          "en": "Panics near bodies of water",
+          "ru": "Паникует возле водоемов"
+        }
+      }
     },
     {
       "id": "phobia_070",
       "name": "Сирофобія",
       "description": "Страх сиру",
-      "bunkerEffect": "Обмежений раціон"
+      "bunkerEffect": "Обмежений раціон",
+      "_i18n": {
+        "name": {
+          "uk": "Сирофобія",
+          "en": "Cheesephobia",
+          "ru": "Сырофобия"
+        },
+        "description": {
+          "uk": "Страх сиру",
+          "en": "Fear of cheese",
+          "ru": "Страх сыра"
+        },
+        "bunkerEffect": {
+          "uk": "Обмежений раціон",
+          "en": "Has a limited diet",
+          "ru": "Имеет ограниченный рацион"
+        }
+      }
     },
-
     {
       "id": "phobia_071",
       "name": "Селфіфобія",
       "description": "Страх фотографуватися",
-      "bunkerEffect": "Уникає будь-якої документації"
+      "bunkerEffect": "Уникає будь-якої документації",
+      "_i18n": {
+        "name": {
+          "uk": "Селфіфобія",
+          "en": "Selfiephobia",
+          "ru": "Селфифобия"
+        },
+        "description": {
+          "uk": "Страх фотографуватися",
+          "en": "Fear of being photographed",
+          "ru": "Страх фотографироваться"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає будь-якої документації",
+          "en": "Avoids any documentation",
+          "ru": "Избегает любой документации"
+        }
+      }
     },
     {
       "id": "phobia_072",
       "name": "Емоджіфобія",
       "description": "Страх смайликів",
-      "bunkerEffect": "Паніка від веселих облич"
+      "bunkerEffect": "Паніка від веселих облич",
+      "_i18n": {
+        "name": {
+          "uk": "Емоджіфобія",
+          "en": "Emojiphobia",
+          "ru": "Эмоджифобия"
+        },
+        "description": {
+          "uk": "Страх смайликів",
+          "en": "Fear of emojis",
+          "ru": "Страх смайликов"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка від веселих облич",
+          "en": "Panics from happy faces",
+          "ru": "Паникует от веселых лиц"
+        }
+      }
     },
     {
       "id": "phobia_073",
       "name": "Хештегофобія",
       "description": "Страх символу решітки",
-      "bunkerEffect": "Не може читати коди та інструкції"
+      "bunkerEffect": "Не може читати коди та інструкції",
+      "_i18n": {
+        "name": {
+          "uk": "Хештегофобія",
+          "en": "Hashtagphobia",
+          "ru": "Хештегофобия"
+        },
+        "description": {
+          "uk": "Страх символу решітки",
+          "en": "Fear of the hash symbol",
+          "ru": "Страх символа решетки"
+        },
+        "bunkerEffect": {
+          "uk": "Не може читати коди та інструкції",
+          "en": "Cannot read codes and instructions",
+          "ru": "Не может читать коды и инструкции"
+        }
+      }
     },
     {
       "id": "phobia_074",
       "name": "Спойлерофобія",
       "description": "Страх спойлерів",
-      "bunkerEffect": "Не дозволяє обговорювати плани"
+      "bunkerEffect": "Не дозволяє обговорювати плани",
+      "_i18n": {
+        "name": {
+          "uk": "Спойлерофобія",
+          "en": "Spoilerphobia",
+          "ru": "Спойлерофобия"
+        },
+        "description": {
+          "uk": "Страх спойлерів",
+          "en": "Fear of spoilers",
+          "ru": "Страх спойлеров"
+        },
+        "bunkerEffect": {
+          "uk": "Не дозволяє обговорювати плани",
+          "en": "Does not allow plans to be discussed",
+          "ru": "Не позволяет обсуждать планы"
+        }
+      }
     },
     {
       "id": "phobia_075",
       "name": "Мемофобія",
       "description": "Страх мемів та жартів",
-      "bunkerEffect": "Конфліктує з веселими людьми"
+      "bunkerEffect": "Конфліктує з веселими людьми",
+      "_i18n": {
+        "name": {
+          "uk": "Мемофобія",
+          "en": "Memephobia",
+          "ru": "Мемофобия"
+        },
+        "description": {
+          "uk": "Страх мемів та жартів",
+          "en": "Fear of memes and jokes",
+          "ru": "Страх мемов и шуток"
+        },
+        "bunkerEffect": {
+          "uk": "Конфліктує з веселими людьми",
+          "en": "Conflicts with cheerful people",
+          "ru": "Конфликтует с веселыми людьми"
+        }
+      }
     },
     {
       "id": "phobia_076",
       "name": "Лайкофобія",
       "description": "Страх схвалення",
-      "bunkerEffect": "Паніка коли його хвалять"
+      "bunkerEffect": "Паніка коли його хвалять",
+      "_i18n": {
+        "name": {
+          "uk": "Лайкофобія",
+          "en": "Likephobia",
+          "ru": "Лайкофобия"
+        },
+        "description": {
+          "uk": "Страх схвалення",
+          "en": "Fear of approval",
+          "ru": "Страх одобрения"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка коли його хвалять",
+          "en": "Panics when praised",
+          "ru": "Паникует, когда его хвалят"
+        }
+      }
     },
     {
       "id": "phobia_077",
       "name": "Нотифікаціофобія",
       "description": "Страх сповіщень",
-      "bunkerEffect": "Не може отримувати повідомлення"
+      "bunkerEffect": "Не може отримувати повідомлення",
+      "_i18n": {
+        "name": {
+          "uk": "Нотифікаціофобія",
+          "en": "Notificationphobia",
+          "ru": "Нотификациофобия"
+        },
+        "description": {
+          "uk": "Страх сповіщень",
+          "en": "Fear of notifications",
+          "ru": "Страх уведомлений"
+        },
+        "bunkerEffect": {
+          "uk": "Не може отримувати повідомлення",
+          "en": "Cannot receive messages",
+          "ru": "Не может получать сообщения"
+        }
+      }
     },
     {
       "id": "phobia_078",
       "name": "Капсфобія",
       "description": "Страх великих літер",
-      "bunkerEffect": "Не може читати попередження"
+      "bunkerEffect": "Не може читати попередження",
+      "_i18n": {
+        "name": {
+          "uk": "Капсфобія",
+          "en": "Capsphobia",
+          "ru": "Капсфобия"
+        },
+        "description": {
+          "uk": "Страх великих літер",
+          "en": "Fear of capital letters",
+          "ru": "Страх заглавных букв"
+        },
+        "bunkerEffect": {
+          "uk": "Не може читати попередження",
+          "en": "Cannot read warnings",
+          "ru": "Не может читать предупреждения"
+        }
+      }
     },
     {
       "id": "phobia_079",
       "name": "Зумофобія",
       "description": "Страх відеодзвінків",
-      "bunkerEffect": "Не може брати участь у нарадах"
+      "bunkerEffect": "Не може брати участь у нарадах",
+      "_i18n": {
+        "name": {
+          "uk": "Зумофобія",
+          "en": "Zoomophobia",
+          "ru": "Зумофобия"
+        },
+        "description": {
+          "uk": "Страх відеодзвінків",
+          "en": "Fear of video calls",
+          "ru": "Страх видеозвонков"
+        },
+        "bunkerEffect": {
+          "uk": "Не може брати участь у нарадах",
+          "en": "Cannot participate in meetings",
+          "ru": "Не может участвовать в совещаниях"
+        }
+      }
     },
     {
       "id": "phobia_080",
       "name": "Тіктокофобія",
       "description": "Страх коротких відео",
-      "bunkerEffect": "Уникає будь-яких екранів"
+      "bunkerEffect": "Уникає будь-яких екранів",
+      "_i18n": {
+        "name": {
+          "uk": "Тіктокофобія",
+          "en": "TikTokphobia",
+          "ru": "Тиктокофобия"
+        },
+        "description": {
+          "uk": "Страх коротких відео",
+          "en": "Fear of short videos",
+          "ru": "Страх коротких видео"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає будь-яких екранів",
+          "en": "Avoids any screens",
+          "ru": "Избегает любых экранов"
+        }
+      }
     },
     {
       "id": "phobia_081",
       "name": "Батареофобія",
       "description": "Страх розрядженої батареї",
-      "bunkerEffect": "Постійно шукає зарядку"
+      "bunkerEffect": "Постійно шукає зарядку",
+      "_i18n": {
+        "name": {
+          "uk": "Батареофобія",
+          "en": "Batteryphobia",
+          "ru": "Батареофобия"
+        },
+        "description": {
+          "uk": "Страх розрядженої батареї",
+          "en": "Fear of a dead battery",
+          "ru": "Страх разряженной батареи"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно шукає зарядку",
+          "en": "Constantly looks for a charger",
+          "ru": "Постоянно ищет зарядку"
+        }
+      }
     },
     {
       "id": "phobia_082",
       "name": "Лагофобія",
       "description": "Страх зависань техніки",
-      "bunkerEffect": "Нервує від повільних процесів"
+      "bunkerEffect": "Нервує від повільних процесів",
+      "_i18n": {
+        "name": {
+          "uk": "Лагофобія",
+          "en": "Lagophobia",
+          "ru": "Лагофобия"
+        },
+        "description": {
+          "uk": "Страх зависань техніки",
+          "en": "Fear of technology freezing",
+          "ru": "Страх зависаний техники"
+        },
+        "bunkerEffect": {
+          "uk": "Нервує від повільних процесів",
+          "en": "Gets nervous from slow processes",
+          "ru": "Нервничает из-за медленных процессов"
+        }
+      }
     },
     {
       "id": "phobia_083",
       "name": "Капчафобія",
       "description": "Страх капчі",
-      "bunkerEffect": "Не може підтвердити що він людина"
+      "bunkerEffect": "Не може підтвердити що він людина",
+      "_i18n": {
+        "name": {
+          "uk": "Капчафобія",
+          "en": "Captchaphobia",
+          "ru": "Капчафобия"
+        },
+        "description": {
+          "uk": "Страх капчі",
+          "en": "Fear of CAPTCHA",
+          "ru": "Страх капчи"
+        },
+        "bunkerEffect": {
+          "uk": "Не може підтвердити що він людина",
+          "en": "Cannot prove they are human",
+          "ru": "Не может подтвердить, что он человек"
+        }
+      }
     },
     {
       "id": "phobia_084",
       "name": "Пасвордофобія",
       "description": "Страх забути пароль",
-      "bunkerEffect": "Записує все на папірці"
+      "bunkerEffect": "Записує все на папірці",
+      "_i18n": {
+        "name": {
+          "uk": "Пасвордофобія",
+          "en": "Passwordphobia",
+          "ru": "Паролефобия"
+        },
+        "description": {
+          "uk": "Страх забути пароль",
+          "en": "Fear of forgetting a password",
+          "ru": "Страх забыть пароль"
+        },
+        "bunkerEffect": {
+          "uk": "Записує все на папірці",
+          "en": "Writes everything on paper notes",
+          "ru": "Записывает все на бумажках"
+        }
+      }
     },
     {
       "id": "phobia_085",
       "name": "Апдейтофобія",
       "description": "Страх оновлень",
-      "bunkerEffect": "Відмовляється від будь-яких змін"
+      "bunkerEffect": "Відмовляється від будь-яких змін",
+      "_i18n": {
+        "name": {
+          "uk": "Апдейтофобія",
+          "en": "Updatephobia",
+          "ru": "Апдейтофобия"
+        },
+        "description": {
+          "uk": "Страх оновлень",
+          "en": "Fear of updates",
+          "ru": "Страх обновлений"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від будь-яких змін",
+          "en": "Refuses any changes",
+          "ru": "Отказывается от любых изменений"
+        }
+      }
     },
     {
       "id": "phobia_086",
       "name": "Блютузофобія",
       "description": "Страх Bluetooth",
-      "bunkerEffect": "Не дозволяє підключати пристрої"
+      "bunkerEffect": "Не дозволяє підключати пристрої",
+      "_i18n": {
+        "name": {
+          "uk": "Блютузофобія",
+          "en": "Bluetoothphobia",
+          "ru": "Блютузофобия"
+        },
+        "description": {
+          "uk": "Страх Bluetooth",
+          "en": "Fear of Bluetooth",
+          "ru": "Страх Bluetooth"
+        },
+        "bunkerEffect": {
+          "uk": "Не дозволяє підключати пристрої",
+          "en": "Does not allow devices to be connected",
+          "ru": "Не разрешает подключать устройства"
+        }
+      }
     },
     {
       "id": "phobia_087",
       "name": "Чатботофобія",
       "description": "Страх роботів та AI",
-      "bunkerEffect": "Не довіряє автоматизації"
+      "bunkerEffect": "Не довіряє автоматизації",
+      "_i18n": {
+        "name": {
+          "uk": "Чатботофобія",
+          "en": "Chatbotphobia",
+          "ru": "Чатботофобия"
+        },
+        "description": {
+          "uk": "Страх роботів та AI",
+          "en": "Fear of robots and AI",
+          "ru": "Страх роботов и ИИ"
+        },
+        "bunkerEffect": {
+          "uk": "Не довіряє автоматизації",
+          "en": "Distrusts automation",
+          "ru": "Не доверяет автоматизации"
+        }
+      }
     },
     {
       "id": "phobia_088",
       "name": "Скролофобія",
       "description": "Страх прокрутки",
-      "bunkerEffect": "Не може читати довгі тексти"
+      "bunkerEffect": "Не може читати довгі тексти",
+      "_i18n": {
+        "name": {
+          "uk": "Скролофобія",
+          "en": "Scrollphobia",
+          "ru": "Скроллофобия"
+        },
+        "description": {
+          "uk": "Страх прокрутки",
+          "en": "Fear of scrolling",
+          "ru": "Страх прокрутки"
+        },
+        "bunkerEffect": {
+          "uk": "Не може читати довгі тексти",
+          "en": "Cannot read long texts",
+          "ru": "Не может читать длинные тексты"
+        }
+      }
     },
     {
       "id": "phobia_089",
       "name": "Редітофобія",
       "description": "Страх форумів та обговорень",
-      "bunkerEffect": "Уникає групових дискусій"
+      "bunkerEffect": "Уникає групових дискусій",
+      "_i18n": {
+        "name": {
+          "uk": "Редітофобія",
+          "en": "Redditophobia",
+          "ru": "Реддитофобия"
+        },
+        "description": {
+          "uk": "Страх форумів та обговорень",
+          "en": "Fear of forums and discussions",
+          "ru": "Страх форумов и обсуждений"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає групових дискусій",
+          "en": "Avoids group discussions",
+          "ru": "Избегает групповых дискуссий"
+        }
+      }
     },
     {
       "id": "phobia_090",
       "name": "Вайралофобія",
       "description": "Страх популярності",
-      "bunkerEffect": "Не хоче бути помітним"
+      "bunkerEffect": "Не хоче бути помітним",
+      "_i18n": {
+        "name": {
+          "uk": "Вайралофобія",
+          "en": "Viralphobia",
+          "ru": "Вайралофобия"
+        },
+        "description": {
+          "uk": "Страх популярності",
+          "en": "Fear of popularity",
+          "ru": "Страх популярности"
+        },
+        "bunkerEffect": {
+          "uk": "Не хоче бути помітним",
+          "en": "Does not want to be noticeable",
+          "ru": "Не хочет быть заметным"
+        }
+      }
     },
-
     {
       "id": "phobia_091",
       "name": "Кардіофобія",
       "description": "Страх хвороб серця",
-      "bunkerEffect": "Постійно перевіряє пульс"
+      "bunkerEffect": "Постійно перевіряє пульс",
+      "_i18n": {
+        "name": {
+          "uk": "Кардіофобія",
+          "en": "Cardiophobia",
+          "ru": "Кардиофобия"
+        },
+        "description": {
+          "uk": "Страх хвороб серця",
+          "en": "Fear of heart disease",
+          "ru": "Страх болезней сердца"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно перевіряє пульс",
+          "en": "Constantly checks their pulse",
+          "ru": "Постоянно проверяет пульс"
+        }
+      }
     },
     {
       "id": "phobia_092",
       "name": "Ноузокомефобія",
       "description": "Страх лікарень",
-      "bunkerEffect": "Відмовляється від медпункту"
+      "bunkerEffect": "Відмовляється від медпункту",
+      "_i18n": {
+        "name": {
+          "uk": "Ноузокомефобія",
+          "en": "Nosocomephobia",
+          "ru": "Нозокомефобия"
+        },
+        "description": {
+          "uk": "Страх лікарень",
+          "en": "Fear of hospitals",
+          "ru": "Страх больниц"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від медпункту",
+          "en": "Refuses to go to the medical room",
+          "ru": "Отказывается от медпункта"
+        }
+      }
     },
     {
       "id": "phobia_093",
       "name": "Фармакофобія",
       "description": "Страх ліків",
-      "bunkerEffect": "Не приймає медикаменти"
+      "bunkerEffect": "Не приймає медикаменти",
+      "_i18n": {
+        "name": {
+          "uk": "Фармакофобія",
+          "en": "Pharmacophobia",
+          "ru": "Фармакофобия"
+        },
+        "description": {
+          "uk": "Страх ліків",
+          "en": "Fear of medicine",
+          "ru": "Страх лекарств"
+        },
+        "bunkerEffect": {
+          "uk": "Не приймає медикаменти",
+          "en": "Does not take medication",
+          "ru": "Не принимает медикаменты"
+        }
+      }
     },
     {
       "id": "phobia_094",
       "name": "Денталофобія",
       "description": "Страх стоматологів",
-      "bunkerEffect": "Проблеми зі здоров'ям зубів"
+      "bunkerEffect": "Проблеми зі здоров'ям зубів",
+      "_i18n": {
+        "name": {
+          "uk": "Денталофобія",
+          "en": "Dentalophobia",
+          "ru": "Дентофобия"
+        },
+        "description": {
+          "uk": "Страх стоматологів",
+          "en": "Fear of dentists",
+          "ru": "Страх стоматологов"
+        },
+        "bunkerEffect": {
+          "uk": "Проблеми зі здоров'ям зубів",
+          "en": "Has dental health problems",
+          "ru": "Имеет проблемы со здоровьем зубов"
+        }
+      }
     },
     {
       "id": "phobia_095",
       "name": "Гіпохондрія",
       "description": "Страх захворіти",
-      "bunkerEffect": "Постійно скаржиться на здоров'я"
+      "bunkerEffect": "Постійно скаржиться на здоров'я",
+      "_i18n": {
+        "name": {
+          "uk": "Гіпохондрія",
+          "en": "Hypochondria",
+          "ru": "Ипохондрия"
+        },
+        "description": {
+          "uk": "Страх захворіти",
+          "en": "Fear of getting sick",
+          "ru": "Страх заболеть"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно скаржиться на здоров'я",
+          "en": "Constantly complains about health",
+          "ru": "Постоянно жалуется на здоровье"
+        }
+      }
     },
     {
       "id": "phobia_096",
       "name": "Геронтофобія",
       "description": "Страх старості",
-      "bunkerEffect": "Уникає літніх людей"
+      "bunkerEffect": "Уникає літніх людей",
+      "_i18n": {
+        "name": {
+          "uk": "Геронтофобія",
+          "en": "Gerontophobia",
+          "ru": "Геронтофобия"
+        },
+        "description": {
+          "uk": "Страх старості",
+          "en": "Fear of old age",
+          "ru": "Страх старости"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає літніх людей",
+          "en": "Avoids elderly people",
+          "ru": "Избегает пожилых людей"
+        }
+      }
     },
     {
       "id": "phobia_097",
       "name": "Педофобія",
       "description": "Страх дітей",
-      "bunkerEffect": "Не може працювати з сім'ями"
+      "bunkerEffect": "Не може працювати з сім'ями",
+      "_i18n": {
+        "name": {
+          "uk": "Педофобія",
+          "en": "Pedophobia",
+          "ru": "Педофобия"
+        },
+        "description": {
+          "uk": "Страх дітей",
+          "en": "Fear of children",
+          "ru": "Страх детей"
+        },
+        "bunkerEffect": {
+          "uk": "Не може працювати з сім'ями",
+          "en": "Cannot work with families",
+          "ru": "Не может работать с семьями"
+        }
+      }
     },
     {
       "id": "phobia_098",
       "name": "Гамофобія",
       "description": "Страх шлюбу",
-      "bunkerEffect": "Уникає розмов про майбутнє"
+      "bunkerEffect": "Уникає розмов про майбутнє",
+      "_i18n": {
+        "name": {
+          "uk": "Гамофобія",
+          "en": "Gamophobia",
+          "ru": "Гамофобия"
+        },
+        "description": {
+          "uk": "Страх шлюбу",
+          "en": "Fear of marriage",
+          "ru": "Страх брака"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає розмов про майбутнє",
+          "en": "Avoids conversations about the future",
+          "ru": "Избегает разговоров о будущем"
+        }
+      }
     },
     {
       "id": "phobia_099",
       "name": "Патріофобія",
       "description": "Страх спадщини",
-      "bunkerEffect": "Відмовляється від обов'язків"
+      "bunkerEffect": "Відмовляється від обов'язків",
+      "_i18n": {
+        "name": {
+          "uk": "Патріофобія",
+          "en": "Patriophobia",
+          "ru": "Патриофобия"
+        },
+        "description": {
+          "uk": "Страх спадщини",
+          "en": "Fear of inheritance",
+          "ru": "Страх наследства"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від обов'язків",
+          "en": "Refuses responsibilities",
+          "ru": "Отказывается от обязанностей"
+        }
+      }
     },
     {
       "id": "phobia_100",
       "name": "Пенія фобія",
       "description": "Страх бідності",
-      "bunkerEffect": "Накопичує ресурси"
+      "bunkerEffect": "Накопичує ресурси",
+      "_i18n": {
+        "name": {
+          "uk": "Пенія фобія",
+          "en": "Peniaphobia",
+          "ru": "Пениафобия"
+        },
+        "description": {
+          "uk": "Страх бідності",
+          "en": "Fear of poverty",
+          "ru": "Страх бедности"
+        },
+        "bunkerEffect": {
+          "uk": "Накопичує ресурси",
+          "en": "Stockpiles resources",
+          "ru": "Накапливает ресурсы"
+        }
+      }
     },
     {
       "id": "phobia_101",
       "name": "Еремофобія",
       "description": "Страх бути забутим",
-      "bunkerEffect": "Постійно привертає увагу"
+      "bunkerEffect": "Постійно привертає увагу",
+      "_i18n": {
+        "name": {
+          "uk": "Еремофобія",
+          "en": "Eremophobia",
+          "ru": "Эремофобия"
+        },
+        "description": {
+          "uk": "Страх бути забутим",
+          "en": "Fear of being forgotten",
+          "ru": "Страх быть забытым"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно привертає увагу",
+          "en": "Constantly seeks attention",
+          "ru": "Постоянно привлекает внимание"
+        }
+      }
     },
     {
       "id": "phobia_102",
       "name": "Атазагорафобія",
       "description": "Страх що про тебе забудуть",
-      "bunkerEffect": "Нав'язливо нагадує про себе"
+      "bunkerEffect": "Нав'язливо нагадує про себе",
+      "_i18n": {
+        "name": {
+          "uk": "Атазагорафобія",
+          "en": "Athazagoraphobia",
+          "ru": "Атазагорафобия"
+        },
+        "description": {
+          "uk": "Страх що про тебе забудуть",
+          "en": "Fear that people will forget about you",
+          "ru": "Страх, что о тебе забудут"
+        },
+        "bunkerEffect": {
+          "uk": "Нав'язливо нагадує про себе",
+          "en": "Obsessively reminds others about themselves",
+          "ru": "Навязчиво напоминает о себе"
+        }
+      }
     },
     {
       "id": "phobia_103",
       "name": "Какорафіофобія",
       "description": "Страх поразки",
-      "bunkerEffect": "Не бере участь у змаганнях"
+      "bunkerEffect": "Не бере участь у змаганнях",
+      "_i18n": {
+        "name": {
+          "uk": "Какорафіофобія",
+          "en": "Kakorrhaphiophobia",
+          "ru": "Какорафиофобия"
+        },
+        "description": {
+          "uk": "Страх поразки",
+          "en": "Fear of defeat",
+          "ru": "Страх поражения"
+        },
+        "bunkerEffect": {
+          "uk": "Не бере участь у змаганнях",
+          "en": "Does not participate in competitions",
+          "ru": "Не участвует в соревнованиях"
+        }
+      }
     },
     {
       "id": "phobia_104",
       "name": "Гелотофобія",
       "description": "Страх що з нього сміються",
-      "bunkerEffect": "Агресивний до жартів"
+      "bunkerEffect": "Агресивний до жартів",
+      "_i18n": {
+        "name": {
+          "uk": "Гелотофобія",
+          "en": "Gelotophobia",
+          "ru": "Гелотофобия"
+        },
+        "description": {
+          "uk": "Страх що з нього сміються",
+          "en": "Fear that others are laughing at them",
+          "ru": "Страх, что над ним смеются"
+        },
+        "bunkerEffect": {
+          "uk": "Агресивний до жартів",
+          "en": "Aggressive toward jokes",
+          "ru": "Агрессивен к шуткам"
+        }
+      }
     },
     {
       "id": "phobia_105",
       "name": "Катагелофобія",
       "description": "Страх висміювання",
-      "bunkerEffect": "Не говорить свою думку"
+      "bunkerEffect": "Не говорить свою думку",
+      "_i18n": {
+        "name": {
+          "uk": "Катагелофобія",
+          "en": "Katagelophobia",
+          "ru": "Катагелофобия"
+        },
+        "description": {
+          "uk": "Страх висміювання",
+          "en": "Fear of ridicule",
+          "ru": "Страх высмеивания"
+        },
+        "bunkerEffect": {
+          "uk": "Не говорить свою думку",
+          "en": "Does not speak their opinion",
+          "ru": "Не говорит свое мнение"
+        }
+      }
     },
     {
       "id": "phobia_106",
       "name": "Логофобія",
       "description": "Страх слів",
-      "bunkerEffect": "Мінімально комунікує"
+      "bunkerEffect": "Мінімально комунікує",
+      "_i18n": {
+        "name": {
+          "uk": "Логофобія",
+          "en": "Logophobia",
+          "ru": "Логофобия"
+        },
+        "description": {
+          "uk": "Страх слів",
+          "en": "Fear of words",
+          "ru": "Страх слов"
+        },
+        "bunkerEffect": {
+          "uk": "Мінімально комунікує",
+          "en": "Communicates as little as possible",
+          "ru": "Минимально общается"
+        }
+      }
     },
     {
       "id": "phobia_107",
       "name": "Панофобія",
       "description": "Страх всього",
-      "bunkerEffect": "Постійно в паніці"
+      "bunkerEffect": "Постійно в паніці",
+      "_i18n": {
+        "name": {
+          "uk": "Панофобія",
+          "en": "Panophobia",
+          "ru": "Панофобия"
+        },
+        "description": {
+          "uk": "Страх всього",
+          "en": "Fear of everything",
+          "ru": "Страх всего"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно в паніці",
+          "en": "Constantly panicking",
+          "ru": "Постоянно в панике"
+        }
+      }
     },
     {
       "id": "phobia_108",
       "name": "Фобофобія",
       "description": "Страх мати страх",
-      "bunkerEffect": "Паніка від паніки"
+      "bunkerEffect": "Паніка від паніки",
+      "_i18n": {
+        "name": {
+          "uk": "Фобофобія",
+          "en": "Phobophobia",
+          "ru": "Фобофобия"
+        },
+        "description": {
+          "uk": "Страх мати страх",
+          "en": "Fear of having fear",
+          "ru": "Страх иметь страх"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка від паніки",
+          "en": "Panics from panic itself",
+          "ru": "Паникует от самой паники"
+        }
+      }
     },
     {
       "id": "phobia_109",
       "name": "Телефонофобія",
       "description": "Страх дзвінків",
-      "bunkerEffect": "Не може відповідати на виклики"
+      "bunkerEffect": "Не може відповідати на виклики",
+      "_i18n": {
+        "name": {
+          "uk": "Телефонофобія",
+          "en": "Telephonophobia",
+          "ru": "Телефонофобия"
+        },
+        "description": {
+          "uk": "Страх дзвінків",
+          "en": "Fear of phone calls",
+          "ru": "Страх звонков"
+        },
+        "bunkerEffect": {
+          "uk": "Не може відповідати на виклики",
+          "en": "Cannot answer calls",
+          "ru": "Не может отвечать на вызовы"
+        }
+      }
     },
     {
       "id": "phobia_110",
       "name": "Магейрокофобія",
       "description": "Страх готувати їжу",
-      "bunkerEffect": "Не може чергувати на кухні"
+      "bunkerEffect": "Не може чергувати на кухні",
+      "_i18n": {
+        "name": {
+          "uk": "Магейрокофобія",
+          "en": "Mageirocophobia",
+          "ru": "Магейрокофобия"
+        },
+        "description": {
+          "uk": "Страх готувати їжу",
+          "en": "Fear of cooking food",
+          "ru": "Страх готовить еду"
+        },
+        "bunkerEffect": {
+          "uk": "Не може чергувати на кухні",
+          "en": "Cannot take kitchen duty",
+          "ru": "Не может дежурить на кухне"
+        }
+      }
     },
-
     {
       "id": "phobia_111",
       "name": "Сіндромофобія",
       "description": "Страх списків",
-      "bunkerEffect": "Не може планувати"
+      "bunkerEffect": "Не може планувати",
+      "_i18n": {
+        "name": {
+          "uk": "Сіндромофобія",
+          "en": "Syndromophobia",
+          "ru": "Синдромофобия"
+        },
+        "description": {
+          "uk": "Страх списків",
+          "en": "Fear of lists",
+          "ru": "Страх списков"
+        },
+        "bunkerEffect": {
+          "uk": "Не може планувати",
+          "en": "Cannot plan",
+          "ru": "Не может планировать"
+        }
+      }
     },
     {
       "id": "phobia_112",
       "name": "Ергазіофобія",
       "description": "Страх починати роботу",
-      "bunkerEffect": "Прокрастинує постійно"
+      "bunkerEffect": "Прокрастинує постійно",
+      "_i18n": {
+        "name": {
+          "uk": "Ергазіофобія",
+          "en": "Ergasiophobia",
+          "ru": "Эргазиофобия"
+        },
+        "description": {
+          "uk": "Страх починати роботу",
+          "en": "Fear of starting work",
+          "ru": "Страх начинать работу"
+        },
+        "bunkerEffect": {
+          "uk": "Прокрастинує постійно",
+          "en": "Procrastinates constantly",
+          "ru": "Постоянно прокрастинирует"
+        }
+      }
     },
     {
       "id": "phobia_113",
       "name": "Неофобія",
       "description": "Страх нового",
-      "bunkerEffect": "Протидіє інноваціям"
+      "bunkerEffect": "Протидіє інноваціям",
+      "_i18n": {
+        "name": {
+          "uk": "Неофобія",
+          "en": "Neophobia",
+          "ru": "Неофобия"
+        },
+        "description": {
+          "uk": "Страх нового",
+          "en": "Fear of new things",
+          "ru": "Страх нового"
+        },
+        "bunkerEffect": {
+          "uk": "Протидіє інноваціям",
+          "en": "Opposes innovations",
+          "ru": "Противится инновациям"
+        }
+      }
     },
     {
       "id": "phobia_114",
       "name": "Каріофобія",
       "description": "Страх майбутнього",
-      "bunkerEffect": "Не планує наперед"
+      "bunkerEffect": "Не планує наперед",
+      "_i18n": {
+        "name": {
+          "uk": "Каріофобія",
+          "en": "Futurephobia",
+          "ru": "Футурофобия"
+        },
+        "description": {
+          "uk": "Страх майбутнього",
+          "en": "Fear of the future",
+          "ru": "Страх будущего"
+        },
+        "bunkerEffect": {
+          "uk": "Не планує наперед",
+          "en": "Does not plan ahead",
+          "ru": "Не планирует наперед"
+        }
+      }
     },
     {
       "id": "phobia_115",
       "name": "Ностальгіофобія",
       "description": "Страх спогадів",
-      "bunkerEffect": "Не говорить про минуле"
+      "bunkerEffect": "Не говорить про минуле",
+      "_i18n": {
+        "name": {
+          "uk": "Ностальгіофобія",
+          "en": "Nostalgiaphobia",
+          "ru": "Ностальгиофобия"
+        },
+        "description": {
+          "uk": "Страх спогадів",
+          "en": "Fear of memories",
+          "ru": "Страх воспоминаний"
+        },
+        "bunkerEffect": {
+          "uk": "Не говорить про минуле",
+          "en": "Does not talk about the past",
+          "ru": "Не говорит о прошлом"
+        }
+      }
     },
     {
       "id": "phobia_116",
       "name": "Кайрофобія",
       "description": "Страх нових ситуацій",
-      "bunkerEffect": "Тримається старих звичок"
+      "bunkerEffect": "Тримається старих звичок",
+      "_i18n": {
+        "name": {
+          "uk": "Кайрофобія",
+          "en": "Kairophobia",
+          "ru": "Кайрофобия"
+        },
+        "description": {
+          "uk": "Страх нових ситуацій",
+          "en": "Fear of new situations",
+          "ru": "Страх новых ситуаций"
+        },
+        "bunkerEffect": {
+          "uk": "Тримається старих звичок",
+          "en": "Clings to old habits",
+          "ru": "Держится старых привычек"
+        }
+      }
     },
     {
       "id": "phobia_117",
       "name": "Синофобія",
       "description": "Страх китайців",
-      "bunkerEffect": "Ксенофобна поведінка"
+      "bunkerEffect": "Ксенофобна поведінка",
+      "_i18n": {
+        "name": {
+          "uk": "Синофобія",
+          "en": "Sinophobia",
+          "ru": "Синофобия"
+        },
+        "description": {
+          "uk": "Страх китайців",
+          "en": "Fear of Chinese people",
+          "ru": "Страх китайцев"
+        },
+        "bunkerEffect": {
+          "uk": "Ксенофобна поведінка",
+          "en": "Xenophobic behavior",
+          "ru": "Ксенофобное поведение"
+        }
+      }
     },
     {
       "id": "phobia_118",
       "name": "Гетерофобія",
       "description": "Страх протилежної статі",
-      "bunkerEffect": "Проблеми з комунікацією"
+      "bunkerEffect": "Проблеми з комунікацією",
+      "_i18n": {
+        "name": {
+          "uk": "Гетерофобія",
+          "en": "Heterophobia",
+          "ru": "Гетерофобия"
+        },
+        "description": {
+          "uk": "Страх протилежної статі",
+          "en": "Fear of the opposite sex",
+          "ru": "Страх противоположного пола"
+        },
+        "bunkerEffect": {
+          "uk": "Проблеми з комунікацією",
+          "en": "Has communication problems",
+          "ru": "Имеет проблемы с коммуникацией"
+        }
+      }
     },
     {
       "id": "phobia_119",
       "name": "Гаммаксофобія",
       "description": "Страх виграти",
-      "bunkerEffect": "Саботує успіх групи"
+      "bunkerEffect": "Саботує успіх групи",
+      "_i18n": {
+        "name": {
+          "uk": "Гаммаксофобія",
+          "en": "Gammaxophobia",
+          "ru": "Гаммаксофобия"
+        },
+        "description": {
+          "uk": "Страх виграти",
+          "en": "Fear of winning",
+          "ru": "Страх выиграть"
+        },
+        "bunkerEffect": {
+          "uk": "Саботує успіх групи",
+          "en": "Sabotages the group's success",
+          "ru": "Саботирует успех группы"
+        }
+      }
     },
     {
       "id": "phobia_120",
       "name": "Демофобія",
       "description": "Страх натовпу",
-      "bunkerEffect": "Не може бути в групі більше 3"
+      "bunkerEffect": "Не може бути в групі більше 3",
+      "_i18n": {
+        "name": {
+          "uk": "Демофобія",
+          "en": "Demophobia",
+          "ru": "Демофобия"
+        },
+        "description": {
+          "uk": "Страх натовпу",
+          "en": "Fear of crowds",
+          "ru": "Страх толпы"
+        },
+        "bunkerEffect": {
+          "uk": "Не може бути в групі більше 3",
+          "en": "Cannot be in a group larger than 3",
+          "ru": "Не может находиться в группе больше 3"
+        }
+      }
     },
-
     {
       "id": "phobia_121",
       "name": "Віськофобія",
       "description": "Страх липкого",
-      "bunkerEffect": "Не торкається клею та смол"
+      "bunkerEffect": "Не торкається клею та смол",
+      "_i18n": {
+        "name": {
+          "uk": "Віськофобія",
+          "en": "Viscophobia",
+          "ru": "Вискофобия"
+        },
+        "description": {
+          "uk": "Страх липкого",
+          "en": "Fear of sticky things",
+          "ru": "Страх липкого"
+        },
+        "bunkerEffect": {
+          "uk": "Не торкається клею та смол",
+          "en": "Does not touch glue or resin",
+          "ru": "Не трогает клей и смолы"
+        }
+      }
     },
     {
       "id": "phobia_122",
       "name": "Погодофобія",
       "description": "Страх прогнозу погоди",
-      "bunkerEffect": "Не хоче знати що буде завтра"
+      "bunkerEffect": "Не хоче знати що буде завтра",
+      "_i18n": {
+        "name": {
+          "uk": "Погодофобія",
+          "en": "Weatherforecastphobia",
+          "ru": "Прогнозофобия"
+        },
+        "description": {
+          "uk": "Страх прогнозу погоди",
+          "en": "Fear of the weather forecast",
+          "ru": "Страх прогноза погоды"
+        },
+        "bunkerEffect": {
+          "uk": "Не хоче знати що буде завтра",
+          "en": "Does not want to know what will happen tomorrow",
+          "ru": "Не хочет знать, что будет завтра"
+        }
+      }
     },
     {
       "id": "phobia_123",
       "name": "Черевикофобія",
       "description": "Страх взуття",
-      "bunkerEffect": "Ходить босоніж"
+      "bunkerEffect": "Ходить босоніж",
+      "_i18n": {
+        "name": {
+          "uk": "Черевикофобія",
+          "en": "Shoephobia",
+          "ru": "Черевикофобия"
+        },
+        "description": {
+          "uk": "Страх взуття",
+          "en": "Fear of shoes",
+          "ru": "Страх обуви"
+        },
+        "bunkerEffect": {
+          "uk": "Ходить босоніж",
+          "en": "Walks barefoot",
+          "ru": "Ходит босиком"
+        }
+      }
     },
     {
       "id": "phobia_124",
       "name": "Парасолькофобія",
       "description": "Страх парасольок",
-      "bunkerEffect": "Мокне під дощем"
+      "bunkerEffect": "Мокне під дощем",
+      "_i18n": {
+        "name": {
+          "uk": "Парасолькофобія",
+          "en": "Umbrellaphobia",
+          "ru": "Зонтофобия"
+        },
+        "description": {
+          "uk": "Страх парасольок",
+          "en": "Fear of umbrellas",
+          "ru": "Страх зонтов"
+        },
+        "bunkerEffect": {
+          "uk": "Мокне під дощем",
+          "en": "Gets wet in the rain",
+          "ru": "Мокнет под дождем"
+        }
+      }
     },
     {
       "id": "phobia_125",
       "name": "Картофобія",
       "description": "Страх картоплі",
-      "bunkerEffect": "Обмежений раціон"
+      "bunkerEffect": "Обмежений раціон",
+      "_i18n": {
+        "name": {
+          "uk": "Картофобія",
+          "en": "Potatophobia",
+          "ru": "Картофобия"
+        },
+        "description": {
+          "uk": "Страх картоплі",
+          "en": "Fear of potatoes",
+          "ru": "Страх картофеля"
+        },
+        "bunkerEffect": {
+          "uk": "Обмежений раціон",
+          "en": "Has a limited diet",
+          "ru": "Имеет ограниченный рацион"
+        }
+      }
     },
     {
       "id": "phobia_126",
       "name": "Салатофобія",
       "description": "Страх салатів",
-      "bunkerEffect": "Не їсть овочі"
+      "bunkerEffect": "Не їсть овочі",
+      "_i18n": {
+        "name": {
+          "uk": "Салатофобія",
+          "en": "Saladophobia",
+          "ru": "Салатофобия"
+        },
+        "description": {
+          "uk": "Страх салатів",
+          "en": "Fear of salads",
+          "ru": "Страх салатов"
+        },
+        "bunkerEffect": {
+          "uk": "Не їсть овочі",
+          "en": "Does not eat vegetables",
+          "ru": "Не ест овощи"
+        }
+      }
     },
     {
       "id": "phobia_127",
       "name": "Макаронофобія",
       "description": "Страх макаронів",
-      "bunkerEffect": "Відмовляється від вуглеводів"
+      "bunkerEffect": "Відмовляється від вуглеводів",
+      "_i18n": {
+        "name": {
+          "uk": "Макаронофобія",
+          "en": "Pastaphobia",
+          "ru": "Макаронофобия"
+        },
+        "description": {
+          "uk": "Страх макаронів",
+          "en": "Fear of pasta",
+          "ru": "Страх макарон"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від вуглеводів",
+          "en": "Refuses carbohydrates",
+          "ru": "Отказывается от углеводов"
+        }
+      }
     },
     {
       "id": "phobia_128",
       "name": "Окулярофобія",
       "description": "Страх окулярів",
-      "bunkerEffect": "Погано бачить але не носить"
+      "bunkerEffect": "Погано бачить але не носить",
+      "_i18n": {
+        "name": {
+          "uk": "Окулярофобія",
+          "en": "Glassesphobia",
+          "ru": "Очкофобия"
+        },
+        "description": {
+          "uk": "Страх окулярів",
+          "en": "Fear of glasses",
+          "ru": "Страх очков"
+        },
+        "bunkerEffect": {
+          "uk": "Погано бачить але не носить",
+          "en": "Sees poorly but does not wear glasses",
+          "ru": "Плохо видит, но не носит очки"
+        }
+      }
     },
     {
       "id": "phobia_129",
       "name": "Капелюхофобія",
       "description": "Страх капелюхів",
-      "bunkerEffect": "Не захищає голову"
+      "bunkerEffect": "Не захищає голову",
+      "_i18n": {
+        "name": {
+          "uk": "Капелюхофобія",
+          "en": "Hatphobia",
+          "ru": "Шляпофобия"
+        },
+        "description": {
+          "uk": "Страх капелюхів",
+          "en": "Fear of hats",
+          "ru": "Страх шляп"
+        },
+        "bunkerEffect": {
+          "uk": "Не захищає голову",
+          "en": "Does not protect the head",
+          "ru": "Не защищает голову"
+        }
+      }
     },
     {
       "id": "phobia_130",
       "name": "Рукавичкофобія",
       "description": "Страх рукавичок",
-      "bunkerEffect": "Мерзнуть руки"
+      "bunkerEffect": "Мерзнуть руки",
+      "_i18n": {
+        "name": {
+          "uk": "Рукавичкофобія",
+          "en": "Glovephobia",
+          "ru": "Перчаткофобия"
+        },
+        "description": {
+          "uk": "Страх рукавичок",
+          "en": "Fear of gloves",
+          "ru": "Страх перчаток"
+        },
+        "bunkerEffect": {
+          "uk": "Мерзнуть руки",
+          "en": "Hands get cold",
+          "ru": "Мерзнут руки"
+        }
+      }
     },
-
     {
       "id": "phobia_131",
       "name": "Аутоматонофобія",
       "description": "Страх манекенів та воскових фігур",
-      "bunkerEffect": "Паніка від нерухомих фігур"
+      "bunkerEffect": "Паніка від нерухомих фігур",
+      "_i18n": {
+        "name": {
+          "uk": "Аутоматонофобія",
+          "en": "Automatonophobia",
+          "ru": "Аутоматонофобия"
+        },
+        "description": {
+          "uk": "Страх манекенів та воскових фігур",
+          "en": "Fear of mannequins and wax figures",
+          "ru": "Страх манекенов и восковых фигур"
+        },
+        "bunkerEffect": {
+          "uk": "Паніка від нерухомих фігур",
+          "en": "Panics from motionless figures",
+          "ru": "Паникует от неподвижных фигур"
+        }
+      }
     },
     {
       "id": "phobia_132",
       "name": "Хаптофобія",
       "description": "Страх дотиків",
-      "bunkerEffect": "Уникає фізичного контакту"
+      "bunkerEffect": "Уникає фізичного контакту",
+      "_i18n": {
+        "name": {
+          "uk": "Хаптофобія",
+          "en": "Haphephobia",
+          "ru": "Гаптофобия"
+        },
+        "description": {
+          "uk": "Страх дотиків",
+          "en": "Fear of touch",
+          "ru": "Страх прикосновений"
+        },
+        "bunkerEffect": {
+          "uk": "Уникає фізичного контакту",
+          "en": "Avoids physical contact",
+          "ru": "Избегает физического контакта"
+        }
+      }
     },
     {
       "id": "phobia_133",
       "name": "Какофобія",
       "description": "Страх потворності",
-      "bunkerEffect": "Критикує зовнішність інших"
+      "bunkerEffect": "Критикує зовнішність інших",
+      "_i18n": {
+        "name": {
+          "uk": "Какофобія",
+          "en": "Cacophobia",
+          "ru": "Какофобия"
+        },
+        "description": {
+          "uk": "Страх потворності",
+          "en": "Fear of ugliness",
+          "ru": "Страх уродства"
+        },
+        "bunkerEffect": {
+          "uk": "Критикує зовнішність інших",
+          "en": "Criticizes other people's appearance",
+          "ru": "Критикует внешность других"
+        }
+      }
     },
     {
       "id": "phobia_134",
       "name": "Катоптрофобія",
       "description": "Страх свого відображення",
-      "bunkerEffect": "Закриває всі дзеркала"
+      "bunkerEffect": "Закриває всі дзеркала",
+      "_i18n": {
+        "name": {
+          "uk": "Катоптрофобія",
+          "en": "Catoptrophobia",
+          "ru": "Катоптрофобия"
+        },
+        "description": {
+          "uk": "Страх свого відображення",
+          "en": "Fear of one's own reflection",
+          "ru": "Страх своего отражения"
+        },
+        "bunkerEffect": {
+          "uk": "Закриває всі дзеркала",
+          "en": "Covers all mirrors",
+          "ru": "Закрывает все зеркала"
+        }
+      }
     },
     {
       "id": "phobia_135",
       "name": "Матемофобія",
       "description": "Страх математики",
-      "bunkerEffect": "Не може рахувати ресурси"
+      "bunkerEffect": "Не може рахувати ресурси",
+      "_i18n": {
+        "name": {
+          "uk": "Матемофобія",
+          "en": "Mathemophobia",
+          "ru": "Матемофобия"
+        },
+        "description": {
+          "uk": "Страх математики",
+          "en": "Fear of mathematics",
+          "ru": "Страх математики"
+        },
+        "bunkerEffect": {
+          "uk": "Не може рахувати ресурси",
+          "en": "Cannot count resources",
+          "ru": "Не может считать ресурсы"
+        }
+      }
     },
     {
       "id": "phobia_136",
       "name": "Гнозіофобія",
       "description": "Страх знань",
-      "bunkerEffect": "Не хоче вчитися нового"
+      "bunkerEffect": "Не хоче вчитися нового",
+      "_i18n": {
+        "name": {
+          "uk": "Гнозіофобія",
+          "en": "Gnosiophobia",
+          "ru": "Гнозиофобия"
+        },
+        "description": {
+          "uk": "Страх знань",
+          "en": "Fear of knowledge",
+          "ru": "Страх знаний"
+        },
+        "bunkerEffect": {
+          "uk": "Не хоче вчитися нового",
+          "en": "Does not want to learn anything new",
+          "ru": "Не хочет учиться новому"
+        }
+      }
     },
     {
       "id": "phobia_137",
       "name": "Софофобія",
       "description": "Страх навчання",
-      "bunkerEffect": "Відмовляється від інструкцій"
+      "bunkerEffect": "Відмовляється від інструкцій",
+      "_i18n": {
+        "name": {
+          "uk": "Софофобія",
+          "en": "Sophophobia",
+          "ru": "Софофобия"
+        },
+        "description": {
+          "uk": "Страх навчання",
+          "en": "Fear of learning",
+          "ru": "Страх обучения"
+        },
+        "bunkerEffect": {
+          "uk": "Відмовляється від інструкцій",
+          "en": "Refuses instructions",
+          "ru": "Отказывается от инструкций"
+        }
+      }
     },
     {
       "id": "phobia_138",
       "name": "Бібліофобія",
       "description": "Страх книг",
-      "bunkerEffect": "Не читає документацію"
+      "bunkerEffect": "Не читає документацію",
+      "_i18n": {
+        "name": {
+          "uk": "Бібліофобія",
+          "en": "Bibliophobia",
+          "ru": "Библиофобия"
+        },
+        "description": {
+          "uk": "Страх книг",
+          "en": "Fear of books",
+          "ru": "Страх книг"
+        },
+        "bunkerEffect": {
+          "uk": "Не читає документацію",
+          "en": "Does not read documentation",
+          "ru": "Не читает документацию"
+        }
+      }
     },
     {
       "id": "phobia_139",
       "name": "Графофобія",
       "description": "Страх писати",
-      "bunkerEffect": "Не може вести записи"
+      "bunkerEffect": "Не може вести записи",
+      "_i18n": {
+        "name": {
+          "uk": "Графофобія",
+          "en": "Graphophobia",
+          "ru": "Графофобия"
+        },
+        "description": {
+          "uk": "Страх писати",
+          "en": "Fear of writing",
+          "ru": "Страх писать"
+        },
+        "bunkerEffect": {
+          "uk": "Не може вести записи",
+          "en": "Cannot keep records",
+          "ru": "Не может вести записи"
+        }
+      }
     },
     {
       "id": "phobia_140",
       "name": "Хромофобія",
       "description": "Страх кольорів",
-      "bunkerEffect": "Вимагає все сіре"
+      "bunkerEffect": "Вимагає все сіре",
+      "_i18n": {
+        "name": {
+          "uk": "Хромофобія",
+          "en": "Chromophobia",
+          "ru": "Хромофобия"
+        },
+        "description": {
+          "uk": "Страх кольорів",
+          "en": "Fear of colors",
+          "ru": "Страх цветов"
+        },
+        "bunkerEffect": {
+          "uk": "Вимагає все сіре",
+          "en": "Demands everything be gray",
+          "ru": "Требует, чтобы все было серым"
+        }
+      }
     },
-
     {
       "id": "phobia_141",
       "name": "Дверофобія",
       "description": "Страх дверей",
-      "bunkerEffect": "Не може відкривати двері"
+      "bunkerEffect": "Не може відкривати двері",
+      "_i18n": {
+        "name": {
+          "uk": "Дверофобія",
+          "en": "Doorphobia",
+          "ru": "Дверофобия"
+        },
+        "description": {
+          "uk": "Страх дверей",
+          "en": "Fear of doors",
+          "ru": "Страх дверей"
+        },
+        "bunkerEffect": {
+          "uk": "Не може відкривати двері",
+          "en": "Cannot open doors",
+          "ru": "Не может открывать двери"
+        }
+      }
     },
     {
       "id": "phobia_142",
       "name": "Коридорофобія",
       "description": "Страх довгих коридорів",
-      "bunkerEffect": "Обходить бункер навколо"
+      "bunkerEffect": "Обходить бункер навколо",
+      "_i18n": {
+        "name": {
+          "uk": "Коридорофобія",
+          "en": "Corridorphobia",
+          "ru": "Коридорофобия"
+        },
+        "description": {
+          "uk": "Страх довгих коридорів",
+          "en": "Fear of long corridors",
+          "ru": "Страх длинных коридоров"
+        },
+        "bunkerEffect": {
+          "uk": "Обходить бункер навколо",
+          "en": "Goes around the bunker instead",
+          "ru": "Обходит бункер вокруг"
+        }
+      }
     },
     {
       "id": "phobia_143",
       "name": "Кутофобія",
       "description": "Страх кутів",
-      "bunkerEffect": "Сидить тільки в центрі"
+      "bunkerEffect": "Сидить тільки в центрі",
+      "_i18n": {
+        "name": {
+          "uk": "Кутофобія",
+          "en": "Cornerphobia",
+          "ru": "Углофобия"
+        },
+        "description": {
+          "uk": "Страх кутів",
+          "en": "Fear of corners",
+          "ru": "Страх углов"
+        },
+        "bunkerEffect": {
+          "uk": "Сидить тільки в центрі",
+          "en": "Sits only in the center",
+          "ru": "Сидит только в центре"
+        }
+      }
     },
     {
       "id": "phobia_144",
       "name": "Сходофобія",
       "description": "Страх сходів",
-      "bunkerEffect": "Залишається на одному рівні"
+      "bunkerEffect": "Залишається на одному рівні",
+      "_i18n": {
+        "name": {
+          "uk": "Сходофобія",
+          "en": "Stairphobia",
+          "ru": "Лестникофобия"
+        },
+        "description": {
+          "uk": "Страх сходів",
+          "en": "Fear of stairs",
+          "ru": "Страх лестниц"
+        },
+        "bunkerEffect": {
+          "uk": "Залишається на одному рівні",
+          "en": "Stays on one level",
+          "ru": "Остается на одном уровне"
+        }
+      }
     },
     {
       "id": "phobia_145",
       "name": "Дахофобія",
       "description": "Страх дахів",
-      "bunkerEffect": "Не виходить на дах бункера"
+      "bunkerEffect": "Не виходить на дах бункера",
+      "_i18n": {
+        "name": {
+          "uk": "Дахофобія",
+          "en": "Roofphobia",
+          "ru": "Крышофобия"
+        },
+        "description": {
+          "uk": "Страх дахів",
+          "en": "Fear of roofs",
+          "ru": "Страх крыш"
+        },
+        "bunkerEffect": {
+          "uk": "Не виходить на дах бункера",
+          "en": "Does not go onto the bunker roof",
+          "ru": "Не выходит на крышу бункера"
+        }
+      }
     },
     {
       "id": "phobia_146",
       "name": "Підвалофобія",
       "description": "Страх підвалів",
-      "bunkerEffect": "Не спускається вниз"
+      "bunkerEffect": "Не спускається вниз",
+      "_i18n": {
+        "name": {
+          "uk": "Підвалофобія",
+          "en": "Basementphobia",
+          "ru": "Подвалофобия"
+        },
+        "description": {
+          "uk": "Страх підвалів",
+          "en": "Fear of basements",
+          "ru": "Страх подвалов"
+        },
+        "bunkerEffect": {
+          "uk": "Не спускається вниз",
+          "en": "Does not go downstairs",
+          "ru": "Не спускается вниз"
+        }
+      }
     },
     {
       "id": "phobia_147",
       "name": "Вікнофобія",
       "description": "Страх вікон",
-      "bunkerEffect": "Закриває всі вікна"
+      "bunkerEffect": "Закриває всі вікна",
+      "_i18n": {
+        "name": {
+          "uk": "Вікнофобія",
+          "en": "Windowphobia",
+          "ru": "Окнофобия"
+        },
+        "description": {
+          "uk": "Страх вікон",
+          "en": "Fear of windows",
+          "ru": "Страх окон"
+        },
+        "bunkerEffect": {
+          "uk": "Закриває всі вікна",
+          "en": "Closes all windows",
+          "ru": "Закрывает все окна"
+        }
+      }
     },
     {
       "id": "phobia_148",
       "name": "Стінофобія",
       "description": "Страх стін",
-      "bunkerEffect": "Тримається центру кімнати"
+      "bunkerEffect": "Тримається центру кімнати",
+      "_i18n": {
+        "name": {
+          "uk": "Стінофобія",
+          "en": "Wallphobia",
+          "ru": "Стенфобия"
+        },
+        "description": {
+          "uk": "Страх стін",
+          "en": "Fear of walls",
+          "ru": "Страх стен"
+        },
+        "bunkerEffect": {
+          "uk": "Тримається центру кімнати",
+          "en": "Stays in the center of the room",
+          "ru": "Держится центра комнаты"
+        }
+      }
     },
     {
       "id": "phobia_149",
       "name": "Підлогофобія",
       "description": "Страх підлоги",
-      "bunkerEffect": "Намагається не торкатися"
+      "bunkerEffect": "Намагається не торкатися",
+      "_i18n": {
+        "name": {
+          "uk": "Підлогофобія",
+          "en": "Floorphobia",
+          "ru": "Полофобия"
+        },
+        "description": {
+          "uk": "Страх підлоги",
+          "en": "Fear of the floor",
+          "ru": "Страх пола"
+        },
+        "bunkerEffect": {
+          "uk": "Намагається не торкатися",
+          "en": "Tries not to touch it",
+          "ru": "Старается не касаться пола"
+        }
+      }
     },
     {
       "id": "phobia_150",
       "name": "Стелофобія",
       "description": "Страх стелі",
-      "bunkerEffect": "Постійно дивиться вгору"
+      "bunkerEffect": "Постійно дивиться вгору",
+      "_i18n": {
+        "name": {
+          "uk": "Стелофобія",
+          "en": "Ceilingphobia",
+          "ru": "Потолкофобия"
+        },
+        "description": {
+          "uk": "Страх стелі",
+          "en": "Fear of the ceiling",
+          "ru": "Страх потолка"
+        },
+        "bunkerEffect": {
+          "uk": "Постійно дивиться вгору",
+          "en": "Constantly looks up",
+          "ru": "Постоянно смотрит вверх"
+        }
+      }
     }
   ]
 }

@@ -22,7 +22,7 @@ namespace Bunker.Models
         public DateTime? EndedAt { get; set; }
         
         /// <summary>
-        /// Голоси (VoterConnectionId -> TargetConnectionId)
+        /// Голоси (VoterPlayerId -> TargetPlayerId). PlayerId є stablePlayerId, якщо він доступний.
         /// </summary>
         public Dictionary<string, string> Votes { get; set; } = new();
         
@@ -97,10 +97,12 @@ namespace Bunker.Models
         {
             var results = VoteCounts.Select(kv => new
             {
-                connectionId = kv.Key,
-                playerName = players.ContainsKey(kv.Key) ? players[kv.Key].Name : "Unknown",
+                connectionId = ResolveConnectionId(players, kv.Key) ?? kv.Key,
+                playerName = ResolvePlayer(players, kv.Key)?.Name ?? "Unknown",
                 voteCount = kv.Value
             }).OrderByDescending(r => r.voteCount).ToList();
+
+            var topPlayer = TopVotedPlayerId != null ? ResolvePlayer(players, TopVotedPlayerId) : null;
             
             return new
             {
@@ -112,19 +114,35 @@ namespace Bunker.Models
                 votedCount = Votes.Count,
                 allVoted = AllVoted,
                 results = results,
-                topVotedPlayerId = TopVotedPlayerId,
-                topVotedPlayerName = TopVotedPlayerId != null && players.ContainsKey(TopVotedPlayerId) 
-                    ? players[TopVotedPlayerId].Name 
-                    : null,
+                topVotedPlayerId = TopVotedPlayerId != null ? ResolveConnectionId(players, TopVotedPlayerId) ?? TopVotedPlayerId : null,
+                topVotedPlayerName = topPlayer?.Name,
                 isTie = IsTie,
                 votes = showVotes ? Votes.Select(v => new 
                 {
-                    voterId = v.Key,
-                    voterName = players.ContainsKey(v.Key) ? players[v.Key].Name : "Unknown",
-                    targetId = v.Value,
-                    targetName = players.ContainsKey(v.Value) ? players[v.Value].Name : "Unknown"
+                    voterId = ResolveConnectionId(players, v.Key) ?? v.Key,
+                    voterName = ResolvePlayer(players, v.Key)?.Name ?? "Unknown",
+                    targetId = ResolveConnectionId(players, v.Value) ?? v.Value,
+                    targetName = ResolvePlayer(players, v.Value)?.Name ?? "Unknown"
                 }) : null
             };
+        }
+
+        private static Player? ResolvePlayer(Dictionary<string, Player> players, string playerIdOrConnectionId)
+        {
+            if (players.TryGetValue(playerIdOrConnectionId, out var byConnectionId))
+            {
+                return byConnectionId;
+            }
+
+            return players.Values.FirstOrDefault(p =>
+                p.StablePlayerId == playerIdOrConnectionId ||
+                p.Id.ToString() == playerIdOrConnectionId);
+        }
+
+        private static string? ResolveConnectionId(Dictionary<string, Player> players, string playerIdOrConnectionId)
+        {
+            var player = ResolvePlayer(players, playerIdOrConnectionId);
+            return player?.ConnectionId;
         }
     }
 }
