@@ -118,34 +118,17 @@
             <span class="characteristic-value">@Model.CharacterTrait.Name</span>
         </div>
         
-        @* Особливість (Trait) *@
+        @* Факт *@
         <div class="player-characteristic">
-            <span class="characteristic-label">Особливість:</span>
+            <span class="characteristic-label">Факт:</span>
             <span class="characteristic-value">
                 <div class="characteristic-with-tooltip">
-                    <span class="characteristic-name">@Model.Traits.Name</span>
-                    @if (Model.Traits.HasTooltip)
+                    <span class="characteristic-name">@Model.Fact.Name</span>
+                    @if (Model.Fact.HasTooltip)
                     {
-                        <span class="tooltip-trigger trait" title="">!</span>
+                        <span class="tooltip-trigger fact" title="">!</span>
                         <div class="tooltip-content">
-                            @Model.Traits.Tooltip
-                        </div>
-                    }
-                </div>
-            </span>
-        </div>
-        
-        @* Таємна ціль *@
-        <div class="player-characteristic">
-            <span class="characteristic-label">Таємна ціль:</span>
-            <span class="characteristic-value">
-                <div class="characteristic-with-tooltip">
-                    <span class="characteristic-name">@Model.SecretGoal.Goal</span>
-                    @if (Model.SecretGoal.HasTooltip)
-                    {
-                        <span class="tooltip-trigger secret-goal" title="">!</span>
-                        <div class="tooltip-content">
-                            @Model.SecretGoal.Tooltip
+                            @Model.Fact.Tooltip
                         </div>
                     }
                 </div>

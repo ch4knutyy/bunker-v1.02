@@ -1,219 +1,3375 @@
 {
+  "_i18n_meta": {
+    "status": "stage_1_translated",
+    "scope": "character_traits only",
+    "languages": [
+      "uk",
+      "en",
+      "ru"
+    ],
+    "note_uk": "Оригінальні поля trait/type залишені без змін. Переклади додані в _i18n.",
+    "fallback_rule": "value[lang] || value.uk"
+  },
   "character_traits": [
-    {"trait": "Боягуз", "type": "serious"},
-    {"trait": "Хоробрий", "type": "serious"},
-    {"trait": "Лідер", "type": "serious"},
-    {"trait": "Відповідальний", "type": "serious"},
-    {"trait": "Надійний", "type": "serious"},
-    {"trait": "Стриманий", "type": "serious"},
-    {"trait": "Прагматик", "type": "serious"},
-    {"trait": "Аналітик", "type": "serious"},
-    {"trait": "Обережний", "type": "serious"},
-    {"trait": "Рішучий", "type": "serious"},
-    {"trait": "Раціональний", "type": "serious"},
-    {"trait": "Спокійний", "type": "serious"},
-    {"trait": "Врівноважений", "type": "serious"},
-    {"trait": "Справедливий", "type": "serious"},
-    {"trait": "Чесний", "type": "serious"},
-    {"trait": "Принциповий", "type": "serious"},
-    {"trait": "Організований", "type": "serious"},
-    {"trait": "Дипломат", "type": "serious"},
-    {"trait": "Миротворець", "type": "serious"},
-    {"trait": "Захисник", "type": "serious"},
-    {"trait": "Скептик", "type": "serious"},
-    {"trait": "Реаліст", "type": "serious"},
-    {"trait": "Стратег", "type": "serious"},
-    {"trait": "Тактик", "type": "serious"},
-    {"trait": "Спостерігач", "type": "serious"},
-    {"trait": "Мовчун", "type": "serious"},
-    {"trait": "Інтроверт", "type": "serious"},
-    {"trait": "Перфекціоніст", "type": "serious"},
-    {"trait": "Педант", "type": "serious"},
-    {"trait": "Консерватор", "type": "serious"},
-    {"trait": "Традиціоналіст", "type": "serious"},
-    {"trait": "Фаталіст", "type": "serious"},
-    {"trait": "Альтруїст", "type": "serious"},
-    {"trait": "Філантроп", "type": "serious"},
-    {"trait": "Пацифіст", "type": "serious"},
-    {"trait": "Емпат", "type": "serious"},
-    {"trait": "Наставник", "type": "serious"},
-    {"trait": "Опікун", "type": "serious"},
-    {"trait": "Сором'язливий", "type": "serious"},
-    {"trait": "Замкнутий", "type": "serious"},
-
-    {"trait": "Клоун", "type": "meme"},
-    {"trait": "Балакун", "type": "meme"},
-    {"trait": "Весельчак", "type": "meme"},
-    {"trait": "Жартівник", "type": "meme"},
-    {"trait": "Тролль", "type": "meme"},
-    {"trait": "Мемолог", "type": "meme"},
-    {"trait": "Пофігіст", "type": "meme"},
-    {"trait": "Лінивець", "type": "meme"},
-    {"trait": "Халявщик", "type": "meme"},
-    {"trait": "Нитик", "type": "meme"},
-    {"trait": "Скиглій", "type": "meme"},
-    {"trait": "Базіка", "type": "meme"},
-    {"trait": "Пліткар", "type": "meme"},
-    {"trait": "Випендрьожник", "type": "meme"},
-    {"trait": "Позер", "type": "meme"},
-    {"trait": "Селфіман", "type": "meme"},
-    {"trait": "Хайпобіст", "type": "meme"},
-    {"trait": "Гіперактивний", "type": "meme"},
-    {"trait": "Оптиміст-ідіот", "type": "meme"},
-    {"trait": "Вічний студент", "type": "meme"},
-    {"trait": "Прокрастинатор", "type": "meme"},
-    {"trait": "Сонько", "type": "meme"},
-    {"trait": "Обжора", "type": "meme"},
-    {"trait": "Скнара", "type": "meme"},
-    {"trait": "Жлоб", "type": "meme"},
-    {"trait": "Хвалько", "type": "meme"},
-    {"trait": "Задавака", "type": "meme"},
-    {"trait": "Нарцис", "type": "meme"},
-    {"trait": "Егоцентрик", "type": "meme"},
-    {"trait": "Драмаквін", "type": "meme"},
-    {"trait": "Істерик", "type": "meme"},
-    {"trait": "Нервовий", "type": "meme"},
-    {"trait": "Забудькуватий", "type": "meme"},
-    {"trait": "Рохля", "type": "meme"},
-    {"trait": "Недотепа", "type": "meme"},
-    {"trait": "Пустобрех", "type": "meme"},
-    {"trait": "Всезнайка", "type": "meme"},
-    {"trait": "Токсик", "type": "meme"},
-    {"trait": "Кринжовий", "type": "meme"},
-    {"trait": "Зумер", "type": "meme"},
-
-    {"trait": "Психопат", "type": "dark"},
-    {"trait": "Соціопат", "type": "dark"},
-    {"trait": "Маніяк", "type": "dark"},
-    {"trait": "Садист", "type": "dark"},
-    {"trait": "Мазохіст", "type": "dark"},
-    {"trait": "Вбивця", "type": "dark"},
-    {"trait": "Канібал", "type": "dark"},
-    {"trait": "Некрофіл", "type": "dark"},
-    {"trait": "Піроман", "type": "dark"},
-    {"trait": "Клептоман", "type": "dark"},
-    {"trait": "Сталкер", "type": "dark"},
-    {"trait": "Насильник", "type": "dark"},
-    {"trait": "Тиран", "type": "dark"},
-    {"trait": "Деспот", "type": "dark"},
-    {"trait": "Диктатор", "type": "dark"},
-    {"trait": "Терорист", "type": "dark"},
-    {"trait": "Культист", "type": "dark"},
-    {"trait": "Сатаніст", "type": "dark"},
-    {"trait": "Жорстокий", "type": "dark"},
-    {"trait": "Безжалісний", "type": "dark"},
-    {"trait": "Кровожерливий", "type": "dark"},
-    {"trait": "Мстивий", "type": "dark"},
-    {"trait": "Злопам'ятний", "type": "dark"},
-    {"trait": "Підступний", "type": "dark"},
-    {"trait": "Віроломний", "type": "dark"},
-    {"trait": "Зрадник", "type": "dark"},
-    {"trait": "Донощик", "type": "dark"},
-    {"trait": "Стукач", "type": "dark"},
-    {"trait": "Шантажист", "type": "dark"},
-    {"trait": "Рекетир", "type": "dark"},
-    {"trait": "Злочинець", "type": "dark"},
-    {"trait": "Рецидивіст", "type": "dark"},
-    {"trait": "Браконьєр", "type": "dark"},
-    {"trait": "Контрабандист", "type": "dark"},
-    {"trait": "Наркоторговець", "type": "dark"},
-    {"trait": "Кілер", "type": "dark"},
-    {"trait": "Найманець", "type": "dark"},
-    {"trait": "Карниф", "type": "dark"},
-    {"trait": "Душогуб", "type": "dark"},
-    {"trait": "Маніпулятор", "type": "dark"},
-    {"trait": "Інтриган", "type": "dark"},
-    {"trait": "Провокатор", "type": "dark"},
-    {"trait": "Диверсант", "type": "dark"},
-    {"trait": "Саботажник", "type": "dark"},
-    {"trait": "Параноїк", "type": "dark"},
-    {"trait": "Шизоїд", "type": "dark"},
-    {"trait": "Соціофоб", "type": "dark"},
-    {"trait": "Мізантроп", "type": "dark"},
-    {"trait": "Агресор", "type": "dark"},
-    {"trait": "Абьюзер", "type": "dark"},
-
-    {"trait": "Збоченець", "type": "intimate"},
-    {"trait": "Педофіл", "type": "intimate"},
-    {"trait": "Вуаєрист", "type": "intimate"},
-    {"trait": "Ексгібіціоніст", "type": "intimate"},
-    {"trait": "Фетишист", "type": "intimate"},
-    {"trait": "Німфоман", "type": "intimate"},
-    {"trait": "Сатир", "type": "intimate"},
-    {"trait": "Спокусник", "type": "intimate"},
-    {"trait": "Бабій", "type": "intimate"},
-    {"trait": "Ловелас", "type": "intimate"},
-    {"trait": "Альфонс", "type": "intimate"},
-    {"trait": "Жиголо", "type": "intimate"},
-    {"trait": "Сексоголік", "type": "intimate"},
-    {"trait": "Розпусник", "type": "intimate"},
-    {"trait": "Розбещений", "type": "intimate"},
-    {"trait": "Пристрасний", "type": "intimate"},
-    {"trait": "Ревнивець", "type": "intimate"},
-    {"trait": "Власник", "type": "intimate"},
-    {"trait": "Контролер", "type": "intimate"},
-    {"trait": "Домінант", "type": "intimate"},
-    {"trait": "Сабміссів", "type": "intimate"},
-    {"trait": "Флірт", "type": "intimate"},
-    {"trait": "Кокетка", "type": "intimate"},
-    {"trait": "Спокусниця", "type": "intimate"},
-    {"trait": "Фаталь", "type": "intimate"},
-    {"trait": "Хижак", "type": "intimate"},
-    {"trait": "Мисливець", "type": "intimate"},
-    {"trait": "Романтик", "type": "intimate"},
-    {"trait": "Одержимий", "type": "intimate"},
-    {"trait": "Залежний", "type": "intimate"},
-
-    {"trait": "Лунатик", "type": "absurd"},
-    {"trait": "Сомнамбула", "type": "absurd"},
-    {"trait": "Телепат", "type": "absurd"},
-    {"trait": "Екстрасенс", "type": "absurd"},
-    {"trait": "Провидець", "type": "absurd"},
-    {"trait": "Відьмак", "type": "absurd"},
-    {"trait": "Шаман", "type": "absurd"},
-    {"trait": "Вампір", "type": "absurd"},
-    {"trait": "Перевертень", "type": "absurd"},
-    {"trait": "Зомбі", "type": "absurd"},
-    {"trait": "Прибулець", "type": "absurd"},
-    {"trait": "Андроїд", "type": "absurd"},
-    {"trait": "Клон", "type": "absurd"},
-    {"trait": "Мутант", "type": "absurd"},
-    {"trait": "Божевільний", "type": "absurd"},
-    {"trait": "Шизофренік", "type": "absurd"},
-    {"trait": "Біполярний", "type": "absurd"},
-    {"trait": "Дисоціал", "type": "absurd"},
-    {"trait": "Аутист", "type": "absurd"},
-    {"trait": "Геній-ідіот", "type": "absurd"},
-
-    {"trait": "Хамелеон", "type": "creative"},
-    {"trait": "Двуликий", "type": "creative"},
-    {"trait": "Актор", "type": "creative"},
-    {"trait": "Імітатор", "type": "creative"},
-    {"trait": "Обманщик", "type": "creative"},
-    {"trait": "Шахрай", "type": "creative"},
-    {"trait": "Афорист", "type": "creative"},
-    {"trait": "Авантюрист", "type": "creative"},
-    {"trait": "Ризикант", "type": "creative"},
-    {"trait": "Азартник", "type": "creative"},
-    {"trait": "Гравець", "type": "creative"},
-    {"trait": "Бунтар", "type": "creative"},
-    {"trait": "Революціонер", "type": "creative"},
-    {"trait": "Анархіст", "type": "creative"},
-    {"trait": "Нігіліст", "type": "creative"},
-    {"trait": "Циник", "type": "creative"},
-    {"trait": "Песиміст", "type": "creative"},
-    {"trait": "Меланхолік", "type": "creative"},
-    {"trait": "Флегматик", "type": "creative"},
-    {"trait": "Холерик", "type": "creative"},
-    {"trait": "Сангвінік", "type": "creative"},
-    {"trait": "Екстраверт", "type": "creative"},
-    {"trait": "Амбіверт", "type": "creative"},
-    {"trait": "Харизматик", "type": "creative"},
-    {"trait": "Магнетичний", "type": "creative"},
-    {"trait": "Містик", "type": "creative"},
-    {"trait": "Філософ", "type": "creative"},
-    {"trait": "Мрійник", "type": "creative"},
-    {"trait": "Фантазер", "type": "creative"},
-    {"trait": "Ідеаліст", "type": "creative"}
+    {
+      "trait": "Боягуз",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Боягуз",
+          "en": "Coward",
+          "ru": "Трус"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Хоробрий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Хоробрий",
+          "en": "Brave",
+          "ru": "Храбрый"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Лідер",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Лідер",
+          "en": "Leader",
+          "ru": "Лидер"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Відповідальний",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Відповідальний",
+          "en": "Responsible",
+          "ru": "Ответственный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Надійний",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Надійний",
+          "en": "Reliable",
+          "ru": "Надежный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Стриманий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Стриманий",
+          "en": "Reserved",
+          "ru": "Сдержанный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Прагматик",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Прагматик",
+          "en": "Pragmatist",
+          "ru": "Прагматик"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Аналітик",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Аналітик",
+          "en": "Analyst",
+          "ru": "Аналитик"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Обережний",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Обережний",
+          "en": "Cautious",
+          "ru": "Осторожный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Рішучий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Рішучий",
+          "en": "Decisive",
+          "ru": "Решительный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Раціональний",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Раціональний",
+          "en": "Rational",
+          "ru": "Рациональный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Спокійний",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Спокійний",
+          "en": "Calm",
+          "ru": "Спокойный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Врівноважений",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Врівноважений",
+          "en": "Balanced",
+          "ru": "Уравновешенный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Справедливий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Справедливий",
+          "en": "Fair-minded",
+          "ru": "Справедливый"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Чесний",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Чесний",
+          "en": "Honest",
+          "ru": "Честный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Принциповий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Принциповий",
+          "en": "Principled",
+          "ru": "Принципиальный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Організований",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Організований",
+          "en": "Organized",
+          "ru": "Организованный"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Дипломат",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Дипломат",
+          "en": "Diplomat",
+          "ru": "Дипломат"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Миротворець",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Миротворець",
+          "en": "Peacemaker",
+          "ru": "Миротворец"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Захисник",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Захисник",
+          "en": "Protector",
+          "ru": "Защитник"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Скептик",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Скептик",
+          "en": "Skeptic",
+          "ru": "Скептик"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Реаліст",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Реаліст",
+          "en": "Realist",
+          "ru": "Реалист"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Стратег",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Стратег",
+          "en": "Strategist",
+          "ru": "Стратег"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Тактик",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Тактик",
+          "en": "Tactician",
+          "ru": "Тактик"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Спостерігач",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Спостерігач",
+          "en": "Observer",
+          "ru": "Наблюдатель"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Мовчун",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Мовчун",
+          "en": "Silent Type",
+          "ru": "Молчун"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Інтроверт",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Інтроверт",
+          "en": "Introvert",
+          "ru": "Интроверт"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Перфекціоніст",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Перфекціоніст",
+          "en": "Perfectionist",
+          "ru": "Перфекционист"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Педант",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Педант",
+          "en": "Pedant",
+          "ru": "Педант"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Консерватор",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Консерватор",
+          "en": "Conservative",
+          "ru": "Консерватор"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Традиціоналіст",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Традиціоналіст",
+          "en": "Traditionalist",
+          "ru": "Традиционалист"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Фаталіст",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Фаталіст",
+          "en": "Fatalist",
+          "ru": "Фаталист"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Альтруїст",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Альтруїст",
+          "en": "Altruist",
+          "ru": "Альтруист"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Філантроп",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Філантроп",
+          "en": "Philanthropist",
+          "ru": "Филантроп"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Пацифіст",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Пацифіст",
+          "en": "Pacifist",
+          "ru": "Пацифист"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Емпат",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Емпат",
+          "en": "Empath",
+          "ru": "Эмпат"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Наставник",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Наставник",
+          "en": "Mentor",
+          "ru": "Наставник"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Опікун",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Опікун",
+          "en": "Guardian",
+          "ru": "Опекун"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Сором'язливий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Сором'язливий",
+          "en": "Shy",
+          "ru": "Застенчивый"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Замкнутий",
+      "type": "serious",
+      "_i18n": {
+        "trait": {
+          "uk": "Замкнутий",
+          "en": "Withdrawn",
+          "ru": "Замкнутый"
+        },
+        "type": {
+          "uk": "serious",
+          "en": "serious",
+          "ru": "серьезный"
+        }
+      }
+    },
+    {
+      "trait": "Клоун",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Клоун",
+          "en": "Clown",
+          "ru": "Клоун"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Балакун",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Балакун",
+          "en": "Chatterbox",
+          "ru": "Болтун"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Весельчак",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Весельчак",
+          "en": "Jolly One",
+          "ru": "Весельчак"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Жартівник",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Жартівник",
+          "en": "Joker",
+          "ru": "Шутник"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Тролль",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Тролль",
+          "en": "Troll",
+          "ru": "Тролль"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Мемолог",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Мемолог",
+          "en": "Memeologist",
+          "ru": "Мемолог"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Пофігіст",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Пофігіст",
+          "en": "Doesn’t Care",
+          "ru": "Пофигист"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Лінивець",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Лінивець",
+          "en": "Sloth",
+          "ru": "Ленивец"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Халявщик",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Халявщик",
+          "en": "Freeloader",
+          "ru": "Халявщик"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Нитик",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Нитик",
+          "en": "Whiner",
+          "ru": "Нытик"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Скиглій",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Скиглій",
+          "en": "Moaner",
+          "ru": "Скулящий"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Базіка",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Базіка",
+          "en": "Blabbermouth",
+          "ru": "Болтун"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Пліткар",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Пліткар",
+          "en": "Gossip",
+          "ru": "Сплетник"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Випендрьожник",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Випендрьожник",
+          "en": "Show-off",
+          "ru": "Выпендрежник"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Позер",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Позер",
+          "en": "Poser",
+          "ru": "Позер"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Селфіман",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Селфіман",
+          "en": "Selfie Addict",
+          "ru": "Селфиман"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Хайпобіст",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Хайпобіст",
+          "en": "Hypebeast",
+          "ru": "Хайпбист"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Гіперактивний",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Гіперактивний",
+          "en": "Hyperactive",
+          "ru": "Гиперактивный"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Оптиміст-ідіот",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Оптиміст-ідіот",
+          "en": "Idiot Optimist",
+          "ru": "Оптимист-идиот"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Вічний студент",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Вічний студент",
+          "en": "Eternal Student",
+          "ru": "Вечный студент"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Прокрастинатор",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Прокрастинатор",
+          "en": "Procrastinator",
+          "ru": "Прокрастинатор"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Сонько",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Сонько",
+          "en": "Sleepyhead",
+          "ru": "Соня"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Обжора",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Обжора",
+          "en": "Glutton",
+          "ru": "Обжора"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Скнара",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Скнара",
+          "en": "Miser",
+          "ru": "Скряга"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Жлоб",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Жлоб",
+          "en": "Cheapskate",
+          "ru": "Жлоб"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Хвалько",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Хвалько",
+          "en": "Braggart",
+          "ru": "Хвастун"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Задавака",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Задавака",
+          "en": "Snob",
+          "ru": "Задавака"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Нарцис",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Нарцис",
+          "en": "Narcissist",
+          "ru": "Нарцисс"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Егоцентрик",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Егоцентрик",
+          "en": "Egocentric",
+          "ru": "Эгоцентрик"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Драмаквін",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Драмаквін",
+          "en": "Drama Queen",
+          "ru": "Драма-квин"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Істерик",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Істерик",
+          "en": "Hysteric",
+          "ru": "Истерик"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Нервовий",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Нервовий",
+          "en": "Nervous",
+          "ru": "Нервный"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Забудькуватий",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Забудькуватий",
+          "en": "Forgetful",
+          "ru": "Забывчивый"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Рохля",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Рохля",
+          "en": "Klutz",
+          "ru": "Рохля"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Недотепа",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Недотепа",
+          "en": "Bungler",
+          "ru": "Недотепа"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Пустобрех",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Пустобрех",
+          "en": "Bullshitter",
+          "ru": "Пустобрех"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Всезнайка",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Всезнайка",
+          "en": "Know-it-all",
+          "ru": "Всезнайка"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Токсик",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Токсик",
+          "en": "Toxic",
+          "ru": "Токсик"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Кринжовий",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Кринжовий",
+          "en": "Cringe",
+          "ru": "Кринжовый"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Зумер",
+      "type": "meme",
+      "_i18n": {
+        "trait": {
+          "uk": "Зумер",
+          "en": "Zoomer",
+          "ru": "Зумер"
+        },
+        "type": {
+          "uk": "meme",
+          "en": "meme",
+          "ru": "мемный"
+        }
+      }
+    },
+    {
+      "trait": "Психопат",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Психопат",
+          "en": "Psychopath",
+          "ru": "Психопат"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Соціопат",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Соціопат",
+          "en": "Sociopath",
+          "ru": "Социопат"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Маніяк",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Маніяк",
+          "en": "Maniac",
+          "ru": "Маньяк"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Садист",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Садист",
+          "en": "Sadist",
+          "ru": "Садист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Мазохіст",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Мазохіст",
+          "en": "Masochist",
+          "ru": "Мазохист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Вбивця",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Вбивця",
+          "en": "Killer",
+          "ru": "Убийца"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Канібал",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Канібал",
+          "en": "Cannibal",
+          "ru": "Каннибал"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Некрофіл",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Некрофіл",
+          "en": "Necrophile",
+          "ru": "Некрофил"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Піроман",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Піроман",
+          "en": "Pyromaniac",
+          "ru": "Пироман"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Клептоман",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Клептоман",
+          "en": "Kleptomaniac",
+          "ru": "Клептоман"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Сталкер",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Сталкер",
+          "en": "Stalker",
+          "ru": "Сталкер"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Насильник",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Насильник",
+          "en": "Rapist",
+          "ru": "Насильник"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Тиран",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Тиран",
+          "en": "Tyrant",
+          "ru": "Тиран"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Деспот",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Деспот",
+          "en": "Despot",
+          "ru": "Деспот"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Диктатор",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Диктатор",
+          "en": "Dictator",
+          "ru": "Диктатор"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Терорист",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Терорист",
+          "en": "Terrorist",
+          "ru": "Террорист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Культист",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Культист",
+          "en": "Cultist",
+          "ru": "Культист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Сатаніст",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Сатаніст",
+          "en": "Satanist",
+          "ru": "Сатанист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Жорстокий",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Жорстокий",
+          "en": "Cruel",
+          "ru": "Жестокий"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Безжалісний",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Безжалісний",
+          "en": "Merciless",
+          "ru": "Безжалостный"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Кровожерливий",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Кровожерливий",
+          "en": "Bloodthirsty",
+          "ru": "Кровожадный"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Мстивий",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Мстивий",
+          "en": "Vengeful",
+          "ru": "Мстительный"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Злопам'ятний",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Злопам'ятний",
+          "en": "Grudge Holder",
+          "ru": "Злопамятный"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Підступний",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Підступний",
+          "en": "Treacherous",
+          "ru": "Коварный"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Віроломний",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Віроломний",
+          "en": "Backstabbing",
+          "ru": "Вероломный"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Зрадник",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Зрадник",
+          "en": "Traitor",
+          "ru": "Предатель"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Донощик",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Донощик",
+          "en": "Informer",
+          "ru": "Доносчик"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Стукач",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Стукач",
+          "en": "Snitch",
+          "ru": "Стукач"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Шантажист",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Шантажист",
+          "en": "Blackmailer",
+          "ru": "Шантажист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Рекетир",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Рекетир",
+          "en": "Racketeer",
+          "ru": "Рэкетир"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Злочинець",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Злочинець",
+          "en": "Criminal",
+          "ru": "Преступник"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Рецидивіст",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Рецидивіст",
+          "en": "Repeat Offender",
+          "ru": "Рецидивист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Браконьєр",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Браконьєр",
+          "en": "Poacher",
+          "ru": "Браконьер"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Контрабандист",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Контрабандист",
+          "en": "Smuggler",
+          "ru": "Контрабандист"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Наркоторговець",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Наркоторговець",
+          "en": "Drug Dealer",
+          "ru": "Наркоторговец"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Кілер",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Кілер",
+          "en": "Hitman",
+          "ru": "Киллер"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Найманець",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Найманець",
+          "en": "Mercenary",
+          "ru": "Наемник"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Карниф",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Карниф",
+          "en": "Carnif",
+          "ru": "Карниф"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Душогуб",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Душогуб",
+          "en": "Murderer",
+          "ru": "Душегуб"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Маніпулятор",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Маніпулятор",
+          "en": "Manipulator",
+          "ru": "Манипулятор"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Інтриган",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Інтриган",
+          "en": "Schemer",
+          "ru": "Интриган"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Провокатор",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Провокатор",
+          "en": "Provocateur",
+          "ru": "Провокатор"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Диверсант",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Диверсант",
+          "en": "Saboteur",
+          "ru": "Диверсант"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Саботажник",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Саботажник",
+          "en": "Saboteur",
+          "ru": "Саботажник"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Параноїк",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Параноїк",
+          "en": "Paranoid",
+          "ru": "Параноик"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Шизоїд",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Шизоїд",
+          "en": "Schizoid",
+          "ru": "Шизоид"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Соціофоб",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Соціофоб",
+          "en": "Social Phobe",
+          "ru": "Социофоб"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Мізантроп",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Мізантроп",
+          "en": "Misanthrope",
+          "ru": "Мизантроп"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Агресор",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Агресор",
+          "en": "Aggressor",
+          "ru": "Агрессор"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Абьюзер",
+      "type": "dark",
+      "_i18n": {
+        "trait": {
+          "uk": "Абьюзер",
+          "en": "Abuser",
+          "ru": "Абьюзер"
+        },
+        "type": {
+          "uk": "dark",
+          "en": "dark",
+          "ru": "темный"
+        }
+      }
+    },
+    {
+      "trait": "Збоченець",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Збоченець",
+          "en": "Pervert",
+          "ru": "Извращенец"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Педофіл",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Педофіл",
+          "en": "Pedophile",
+          "ru": "Педофил"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Вуаєрист",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Вуаєрист",
+          "en": "Voyeur",
+          "ru": "Вуайерист"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Ексгібіціоніст",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Ексгібіціоніст",
+          "en": "Exhibitionist",
+          "ru": "Эксгибиционист"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Фетишист",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Фетишист",
+          "en": "Fetishist",
+          "ru": "Фетишист"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Німфоман",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Німфоман",
+          "en": "Nymphomaniac",
+          "ru": "Нимфоман"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Сатир",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Сатир",
+          "en": "Satyr",
+          "ru": "Сатир"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Спокусник",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Спокусник",
+          "en": "Seducer",
+          "ru": "Соблазнитель"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Бабій",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Бабій",
+          "en": "Womanizer",
+          "ru": "Бабник"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Ловелас",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Ловелас",
+          "en": "Casanova",
+          "ru": "Ловелас"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Альфонс",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Альфонс",
+          "en": "Gigolo",
+          "ru": "Альфонс"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Жиголо",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Жиголо",
+          "en": "Gigolo",
+          "ru": "Жиголо"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Сексоголік",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Сексоголік",
+          "en": "Sex Addict",
+          "ru": "Сексоголик"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Розпусник",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Розпусник",
+          "en": "Libertine",
+          "ru": "Развратник"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Розбещений",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Розбещений",
+          "en": "Debauched",
+          "ru": "Развращенный"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Пристрасний",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Пристрасний",
+          "en": "Passionate",
+          "ru": "Страстный"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Ревнивець",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Ревнивець",
+          "en": "Jealous Type",
+          "ru": "Ревнивец"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Власник",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Власник",
+          "en": "Possessive Type",
+          "ru": "Собственник"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Контролер",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Контролер",
+          "en": "Controller",
+          "ru": "Контролер"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Домінант",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Домінант",
+          "en": "Dominant",
+          "ru": "Доминант"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Сабміссів",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Сабміссів",
+          "en": "Submissive",
+          "ru": "Сабмиссив"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Флірт",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Флірт",
+          "en": "Flirt",
+          "ru": "Флирт"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Кокетка",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Кокетка",
+          "en": "Coquette",
+          "ru": "Кокетка"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Спокусниця",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Спокусниця",
+          "en": "Seductress",
+          "ru": "Соблазнительница"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Фаталь",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Фаталь",
+          "en": "Femme Fatale",
+          "ru": "Фаталь"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Хижак",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Хижак",
+          "en": "Predator",
+          "ru": "Хищник"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Мисливець",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Мисливець",
+          "en": "Hunter",
+          "ru": "Охотник"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Романтик",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Романтик",
+          "en": "Romantic",
+          "ru": "Романтик"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Одержимий",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Одержимий",
+          "en": "Obsessed",
+          "ru": "Одержимый"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Залежний",
+      "type": "intimate",
+      "_i18n": {
+        "trait": {
+          "uk": "Залежний",
+          "en": "Dependent",
+          "ru": "Зависимый"
+        },
+        "type": {
+          "uk": "intimate",
+          "en": "intimate",
+          "ru": "интимный"
+        }
+      }
+    },
+    {
+      "trait": "Лунатик",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Лунатик",
+          "en": "Sleepwalker",
+          "ru": "Лунатик"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Сомнамбула",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Сомнамбула",
+          "en": "Somnambulist",
+          "ru": "Сомнамбула"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Телепат",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Телепат",
+          "en": "Telepath",
+          "ru": "Телепат"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Екстрасенс",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Екстрасенс",
+          "en": "Psychic",
+          "ru": "Экстрасенс"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Провидець",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Провидець",
+          "en": "Seer",
+          "ru": "Провидец"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Відьмак",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Відьмак",
+          "en": "Witcher",
+          "ru": "Ведьмак"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Шаман",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Шаман",
+          "en": "Shaman",
+          "ru": "Шаман"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Вампір",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Вампір",
+          "en": "Vampire",
+          "ru": "Вампир"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Перевертень",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Перевертень",
+          "en": "Werewolf",
+          "ru": "Оборотень"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Зомбі",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Зомбі",
+          "en": "Zombie",
+          "ru": "Зомби"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Прибулець",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Прибулець",
+          "en": "Alien",
+          "ru": "Пришелец"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Андроїд",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Андроїд",
+          "en": "Android",
+          "ru": "Андроид"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Клон",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Клон",
+          "en": "Clone",
+          "ru": "Клон"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Мутант",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Мутант",
+          "en": "Mutant",
+          "ru": "Мутант"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Божевільний",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Божевільний",
+          "en": "Madman",
+          "ru": "Безумец"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Шизофренік",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Шизофренік",
+          "en": "Schizophrenic",
+          "ru": "Шизофреник"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Біполярний",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Біполярний",
+          "en": "Bipolar",
+          "ru": "Биполярный"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Дисоціал",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Дисоціал",
+          "en": "Dissocial",
+          "ru": "Диссоциал"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Аутист",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Аутист",
+          "en": "Autistic",
+          "ru": "Аутист"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Геній-ідіот",
+      "type": "absurd",
+      "_i18n": {
+        "trait": {
+          "uk": "Геній-ідіот",
+          "en": "Idiot Genius",
+          "ru": "Гений-идиот"
+        },
+        "type": {
+          "uk": "absurd",
+          "en": "absurd",
+          "ru": "абсурдный"
+        }
+      }
+    },
+    {
+      "trait": "Хамелеон",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Хамелеон",
+          "en": "Chameleon",
+          "ru": "Хамелеон"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Двуликий",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Двуликий",
+          "en": "Two-faced",
+          "ru": "Двуликий"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Актор",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Актор",
+          "en": "Actor",
+          "ru": "Актер"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Імітатор",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Імітатор",
+          "en": "Imitator",
+          "ru": "Имитатор"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Обманщик",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Обманщик",
+          "en": "Deceiver",
+          "ru": "Обманщик"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Шахрай",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Шахрай",
+          "en": "Fraudster",
+          "ru": "Мошенник"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Афорист",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Афорист",
+          "en": "Aphorist",
+          "ru": "Афорист"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Авантюрист",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Авантюрист",
+          "en": "Adventurer",
+          "ru": "Авантюрист"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Ризикант",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Ризикант",
+          "en": "Risk-taker",
+          "ru": "Рискач"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Азартник",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Азартник",
+          "en": "Gambler",
+          "ru": "Азартный игрок"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Гравець",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Гравець",
+          "en": "Player",
+          "ru": "Игрок"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Бунтар",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Бунтар",
+          "en": "Rebel",
+          "ru": "Бунтарь"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Революціонер",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Революціонер",
+          "en": "Revolutionary",
+          "ru": "Революционер"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Анархіст",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Анархіст",
+          "en": "Anarchist",
+          "ru": "Анархист"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Нігіліст",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Нігіліст",
+          "en": "Nihilist",
+          "ru": "Нигилист"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Циник",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Циник",
+          "en": "Cynic",
+          "ru": "Циник"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Песиміст",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Песиміст",
+          "en": "Pessimist",
+          "ru": "Пессимист"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Меланхолік",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Меланхолік",
+          "en": "Melancholic",
+          "ru": "Меланхолик"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Флегматик",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Флегматик",
+          "en": "Phlegmatic",
+          "ru": "Флегматик"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Холерик",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Холерик",
+          "en": "Choleric",
+          "ru": "Холерик"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Сангвінік",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Сангвінік",
+          "en": "Sanguine",
+          "ru": "Сангвиник"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Екстраверт",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Екстраверт",
+          "en": "Extrovert",
+          "ru": "Экстраверт"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Амбіверт",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Амбіверт",
+          "en": "Ambivert",
+          "ru": "Амбиверт"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Харизматик",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Харизматик",
+          "en": "Charismatic",
+          "ru": "Харизматик"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Магнетичний",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Магнетичний",
+          "en": "Magnetic",
+          "ru": "Магнетический"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Містик",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Містик",
+          "en": "Mystic",
+          "ru": "Мистик"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Філософ",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Філософ",
+          "en": "Philosopher",
+          "ru": "Философ"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Мрійник",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Мрійник",
+          "en": "Dreamer",
+          "ru": "Мечтатель"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Фантазер",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Фантазер",
+          "en": "Fantasist",
+          "ru": "Фантазер"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    },
+    {
+      "trait": "Ідеаліст",
+      "type": "creative",
+      "_i18n": {
+        "trait": {
+          "uk": "Ідеаліст",
+          "en": "Idealist",
+          "ru": "Идеалист"
+        },
+        "type": {
+          "uk": "creative",
+          "en": "creative",
+          "ru": "креативный"
+        }
+      }
+    }
   ]
 }

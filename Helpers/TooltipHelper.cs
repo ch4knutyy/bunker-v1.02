@@ -71,32 +71,5 @@ namespace Bunker.Helpers
             };
         }
 
-        /// <summary>
-        /// Створити модель tooltip для особливості (trait)
-        /// </summary>
-        public static CharacteristicTooltipModel FromTrait(Traits trait)
-        {
-            return new CharacteristicTooltipModel
-            {
-                Name = trait.Name,
-                Tooltip = trait.Tooltip,
-                TypeClass = "trait",
-                AdditionalInfo = trait.Type
-            };
-        }
-
-        /// <summary>
-        /// Створити модель tooltip для таємної цілі
-        /// </summary>
-        public static CharacteristicTooltipModel FromSecretGoal(SecretGoal secretGoal)
-        {
-            return new CharacteristicTooltipModel
-            {
-                Name = secretGoal.Goal,
-                Tooltip = secretGoal.Tooltip,
-                TypeClass = "secret-goal",
-                AdditionalInfo = secretGoal.Type
-            };
-        }
     }
 }

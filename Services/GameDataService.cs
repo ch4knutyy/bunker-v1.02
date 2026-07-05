@@ -17,12 +17,10 @@ namespace Bunker.Services
         private List<ProfessionData>? _professions;
         private List<MentalConditionData>? _mentalConditions;
         private List<PhysicalConditionData>? _physicalConditions;
-        private List<TraitData>? _traits;
-        private List<SecretData>? _secrets;
         private List<ItemData>? _items;
         private List<CharacterTraitData>? _characterTraits;
         private List<PhobiaData>? _phobias;
-        private List<SecretGoalData>? _secretGoals;
+        private List<FactData>? _facts;
         private List<Apocalypse>? _apocalypses;
         private List<BunkerInfo>? _bunkers;
 
@@ -45,43 +43,61 @@ namespace Bunker.Services
         {
             var dataPath = Path.Combine(_env.WebRootPath, "data");
             
-            _hobbies = LoadJson<HobbiesRoot>(Path.Combine(dataPath, "hobbies.json"))?.Hobbies ?? new();
-            _professions = LoadJson<ProfessionsRoot>(Path.Combine(dataPath, "professions.json"))?.Professions ?? new();
-            _mentalConditions = LoadJson<MentalConditionsRoot>(Path.Combine(dataPath, "mental_conditions.json"))?.MentalConditions ?? new();
-            _physicalConditions = LoadJson<PhysicalConditionsRoot>(Path.Combine(dataPath, "physical_conditions.json"))?.PhysicalConditions ?? new();
-            _traits = LoadJson<TraitsRoot>(Path.Combine(dataPath, "traits.json"))?.Traits ?? new();
-            _secrets = LoadJson<SecretsRoot>(Path.Combine(dataPath, "secrets.json"))?.Secrets ?? new();
-            _items = LoadJson<ItemsRoot>(Path.Combine(dataPath, "items.json"))?.Items ?? new();
-            _characterTraits = LoadJson<CharacterTraitsRoot>(Path.Combine(dataPath, "character_traits.json"))?.CharacterTraits ?? new();
-            _phobias = LoadJson<PhobiasRoot>(Path.Combine(dataPath, "phobias.json"))?.Phobias ?? new();
-            _secretGoals = LoadJson<SecretGoalsRoot>(Path.Combine(dataPath, "secret_goals.json"))?.SecretGoals ?? new();
-            _apocalypses = LoadJson<ApocalypsesRoot>(Path.Combine(dataPath, "apocalypses.json"))?.Apocalypses ?? new();
-            _bunkers = LoadJson<BunkersRoot>(Path.Combine(dataPath, "bunkers.json"))?.Bunkers ?? new();
+            _hobbies = LoadJsonArray<HobbyData>(Path.Combine(dataPath, "hobbies.json"), "hobbies");
+            _professions = LoadJsonArray<ProfessionData>(Path.Combine(dataPath, "professions.json"), "professions");
+            _mentalConditions = LoadJsonArray<MentalConditionData>(Path.Combine(dataPath, "mental_conditions.json"), "mental_conditions");
+            _physicalConditions = LoadJsonArray<PhysicalConditionData>(Path.Combine(dataPath, "physical_conditions.json"), "physical_conditions");
+            _items = LoadJsonArray<ItemData>(Path.Combine(dataPath, "items.json"), "items");
+            _characterTraits = LoadJsonArray<CharacterTraitData>(Path.Combine(dataPath, "character_traits.json"), "character_traits");
+            _phobias = LoadJsonArray<PhobiaData>(Path.Combine(dataPath, "phobias.json"), "phobias");
+            _facts = LoadJsonArray<FactData>(Path.Combine(dataPath, "facts.json"), "facts");
+            _apocalypses = LoadJsonArray<Apocalypse>(Path.Combine(dataPath, "apocalypses.json"), "apocalypses");
+            _bunkers = LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers");
 
             _logger.LogInformation($"Завантажено: {_hobbies.Count} хобі, {_professions.Count} професій, " +
                                    $"{_mentalConditions.Count} ментальних станів, {_physicalConditions.Count} фізичних станів, " +
-                                   $"{_traits.Count} особливостей, {_secrets.Count} секретів, {_items.Count} предметів, " +
-                                   $"{_characterTraits.Count} рис характеру, {_phobias.Count} фобій, {_secretGoals.Count} таємних цілей, " +
+                                   $"{_items.Count} предметів, {_characterTraits.Count} рис характеру, " +
+                                   $"{_phobias.Count} фобій, {_facts.Count} фактів, " +
                                    $"{_apocalypses.Count} апокаліпсисів, {_bunkers.Count} бункерів");
         }
 
-        private T? LoadJson<T>(string path) where T : class
+        private List<T> LoadJsonArray<T>(string path, params string[] possibleKeys)
         {
             try
             {
                 if (!File.Exists(path))
                 {
                     _logger.LogWarning($"Файл не знайдено: {path}");
-                    return null;
+                    return new();
                 }
 
                 var json = File.ReadAllText(path);
-                return JsonSerializer.Deserialize<T>(json, _jsonOptions);
+                using var document = JsonDocument.Parse(json);
+                var root = document.RootElement;
+
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+                    return root.Deserialize<List<T>>(_jsonOptions) ?? new();
+                }
+
+                if (root.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (var key in possibleKeys)
+                    {
+                        if (root.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.Array)
+                        {
+                            return value.Deserialize<List<T>>(_jsonOptions) ?? new();
+                        }
+                    }
+                }
+
+                _logger.LogWarning($"JSON не містить очікуваного масиву: {path}");
+                return new();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Помилка завантаження JSON з {path}");
-                return null;
+                return new();
             }
         }
 
@@ -90,12 +106,10 @@ namespace Bunker.Services
         public IReadOnlyList<ProfessionData> Professions => _professions ?? new();
         public IReadOnlyList<MentalConditionData> MentalConditions => _mentalConditions ?? new();
         public IReadOnlyList<PhysicalConditionData> PhysicalConditions => _physicalConditions ?? new();
-        public IReadOnlyList<TraitData> Traits => _traits ?? new();
-        public IReadOnlyList<SecretData> Secrets => _secrets ?? new();
         public IReadOnlyList<ItemData> Items => _items ?? new();
         public IReadOnlyList<CharacterTraitData> CharacterTraits => _characterTraits ?? new();
         public IReadOnlyList<PhobiaData> Phobias => _phobias ?? new();
-        public IReadOnlyList<SecretGoalData> SecretGoals => _secretGoals ?? new();
+        public IReadOnlyList<FactData> Facts => _facts ?? new();
         public IReadOnlyList<Apocalypse> Apocalypses => _apocalypses ?? new();
         public IReadOnlyList<BunkerInfo> Bunkers => _bunkers ?? new();
     }

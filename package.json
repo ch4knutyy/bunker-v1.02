@@ -1,0 +1,26 @@
+{
+  "name": "bunker-v1-02",
+  "version": "1.0.0",
+  "description": "Онлайн-гра в стилі \"Бункер\", де гравці отримують унікальні характеристики та вирішують, хто виживе.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ch4knutyy/bunker-v1.02.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ch4knutyy/bunker-v1.02/issues"
+  },
+  "homepage": "https://github.com/ch4knutyy/bunker-v1.02#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.0"
+  }
+}

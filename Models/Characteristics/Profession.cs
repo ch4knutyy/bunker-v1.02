@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bunker.Models
 {
     public class Profession
@@ -36,5 +39,8 @@ namespace Bunker.Models
         /// Чи є tooltip для цієї характеристики
         /// </summary>
         public bool HasTooltip => !string.IsNullOrEmpty(Tooltip);
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 }

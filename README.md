@@ -28,11 +28,22 @@
 ```
 bunker-project/
  ├── Controllers/
+ ├── Hubs/
+ │   └── GameHub/
  ├── Models/
+ │   ├── Cards/
+ │   ├── Game/
+ │   ├── GameData/
+ │   └── Player/
+ ├── Services/
+ ├── Helpers/
  ├── Views/
  ├── wwwroot/
+ │   ├── css/
+ │   ├── js/
  │   └── data/
- ├── Service/
+ ├── tests/
+ ├── test_reports/
  └── Program.cs
 ```
 

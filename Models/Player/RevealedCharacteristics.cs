@@ -11,10 +11,7 @@ namespace Bunker.Models
         public bool Hobby { get; set; } = false;
         public bool CharacterTrait { get; set; } = false;
         public bool Phobia { get; set; } = false;
-        public bool Traits { get; set; } = false;
         public bool Inventory { get; set; } = false;
-        public bool Secret { get; set; } = false;
-        public bool SecretGoal { get; set; } = false;
 		public bool Fact { get; set; } = false;
 
 		// Збереження реальних значень для показу після reconnect

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.Json;
 namespace Bunker.Models
 {
 
@@ -28,7 +29,7 @@ namespace Bunker.Models
         ExtraVote,          // Додатковий голос
         SkipTurn,           // Пропустити хід іншого
         StealItem,          // Вкрасти предмет
-        ViewSecret,         // Подивитися секрет іншого
+        ViewFact,           // Подивитися факт іншого
         Custom              // Кастомний ефект
     }
 
@@ -59,6 +60,9 @@ namespace Bunker.Models
         /// </summary>
         public string Rarity { get; set; } = "common"; // common, rare, epic, legendary
 
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
+
         public object ToClientInfo()
         {
             return new
@@ -71,7 +75,8 @@ namespace Bunker.Models
                 rarity = Rarity,
                 requiresApproval = RequiresApproval,
                 targetPlayerId = TargetPlayerId,
-                targetCharacteristic = TargetCharacteristic
+                targetCharacteristic = TargetCharacteristic,
+                _i18n = I18n
             };
         }
 	}
@@ -113,6 +118,9 @@ public class CardTemplate
 
 		[JsonPropertyName("isTemporary")]
 		public bool IsTemporary { get; set; }
+
+		[JsonPropertyName("_i18n")]
+		public Dictionary<string, JsonElement>? I18n { get; set; }
 
 		// залишаємо для сумісності з існуючим кодом
 		public bool RequiresApproval { get; set; } = true;

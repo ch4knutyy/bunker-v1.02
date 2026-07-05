@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bunker.Models.Сharacteristics
 {
     /// <summary>
@@ -14,5 +17,8 @@ namespace Bunker.Models.Сharacteristics
         /// Тип риси: serious, meme, dark, intimate, absurd, creative
         /// </summary>
         public string Type { get; set; } = "";
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 }

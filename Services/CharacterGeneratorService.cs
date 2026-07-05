@@ -23,13 +23,51 @@ namespace Bunker.Services
         // Назви фізичних станів де НЕ потрібна ступінь
         private static readonly HashSet<string> NoSeverityConditions = new()
         {
+            "Відсутність",
+            "відсутність",
             "Сліпота",
             "Глухота",
+            "Ампутована",
             "Ампутована рука",
             "Ампутована нога",
+            "ампутація",
             "Параліч",
+            "Параліч нижніх кінцівок",
             "Відсутність пальців",
-            "Відсутність ока"
+            "Відсутність ока",
+            "Відсутність зубів",
+            "Відсутність однієї нирки",
+            "Протез",
+            "протез",
+            "Скляне око",
+            "Слуховий апарат",
+            "Без ноги",
+            "Без руки",
+            "Немає ока",
+            "Ампутація"
+        };
+
+        private static readonly HashSet<string> GradablePhysicalCategories = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "хронічний",
+            "тривожний",
+            "больовий",
+            "алергічний",
+            "інфекційний"
+        };
+
+        private static readonly string[] GradablePhysicalMarkers =
+        {
+            "астма",
+            "артрит",
+            "біль",
+            "мігрень",
+            "алергі",
+            "діабет",
+            "гіпертон",
+            "хроніч",
+            "тривож",
+            "синдром"
         };
 
         public CharacterGeneratorService(GameDataService gameData, ILogger<CharacterGeneratorService> logger)
@@ -44,6 +82,7 @@ namespace Bunker.Services
             var sex = GetRandom(Sexes);
             var sexOrientation = GenerateSexOrientation(sex);
             var isChildfree = _random.Next(100) < 10;
+
 
             var player = new Player
             {
@@ -65,13 +104,10 @@ namespace Bunker.Services
                 Hobby = GenerateHobby(),
                 PhysicalHealth = GeneratePhysicalHealth(),
                 MentalHealth = GenerateMentalHealth(),
-                Traits = GenerateTraits(),
-                Secret = GenerateSecret(),
                 Inventory = GenerateInventory(),
                 CharacterTrait = GenerateCharacterTrait(),
                 Phobia = GeneratePhobia(),
-				Fact = GenerateFact(),
-				SecretGoal = GenerateSecretGoal()
+				Fact = GenerateFact()
             };
 
             return player;
@@ -119,7 +155,8 @@ namespace Bunker.Services
                 Id = data.Id,
                 Name = data.Name,
                 Description = data.Description,
-                BunkerEffect = data.BunkerEffect
+                BunkerEffect = data.BunkerEffect,
+                I18n = data.I18n
             };
         }
 
@@ -137,7 +174,8 @@ namespace Bunker.Services
             return new CharacterTrait
             {
                 Name = data.Trait,
-                Type = data.Type
+                Type = data.Type,
+                I18n = data.I18n
             };
         }
 
@@ -179,7 +217,8 @@ namespace Bunker.Services
                     Unit = "шт",
                     WeightKg = Math.Round(_random.NextDouble() * 2 + 0.1, 1),
                     IsUsefulInBunker = true,
-                    Rarity = "Звичайний"
+                    Rarity = "Звичайний",
+                    I18n = itemData.I18n
                 });
             }
 
@@ -216,7 +255,8 @@ namespace Bunker.Services
                 AllItems = data.Items.ToList(),
                 SelectedItem = selectedItem,
                 Bonus = data.Bonus,
-                Tooltip = tooltip
+                Tooltip = tooltip,
+                I18n = data.I18n
             };
         }
 
@@ -264,7 +304,8 @@ namespace Bunker.Services
                 Type = data.Type,
                 Item = data.Item,
                 Bonus = data.Bonus,
-                Tooltip = tooltip
+                Tooltip = tooltip,
+                I18n = data.I18n
             };
         }
 
@@ -309,12 +350,13 @@ namespace Bunker.Services
                     Name = "Стабільний",
                     BaseName = "Стабільний",
                     SeverityLevel = "",
+                    SeverityCode = "None",
                     Tooltip = ""
                 };
             }
 
             if (_gameData.MentalConditions.Count == 0)
-                return new MentalHealth { Name = "Стабільний", BaseName = "Стабільний" };
+                return new MentalHealth { Name = "Стабільний", BaseName = "Стабільний", SeverityCode = "None" };
 
             var data = _gameData.MentalConditions[_random.Next(_gameData.MentalConditions.Count)];
             
@@ -335,6 +377,7 @@ namespace Bunker.Services
                 Rarity = data.Rarity,
                 BaseSeverity = data.Severity,
                 SeverityLevel = severityName,
+                SeverityCode = severityLevel.ToString(),
                 Visibility = data.Visibility,
                 Description = data.Description,
                 GameEffect = data.GameEffect,
@@ -343,7 +386,8 @@ namespace Bunker.Services
                 TreatmentDifficulty = data.TreatmentDifficulty,
                 IsFictional = data.IsFictional,
                 Tags = data.Tags.ToList(),
-                Tooltip = tooltip
+                Tooltip = tooltip,
+                I18n = data.I18n
             };
         }
 
@@ -360,13 +404,15 @@ namespace Bunker.Services
             // Опис
             if (!string.IsNullOrEmpty(description))
             {
-                parts.Add(description);
+                parts.Add(CleanTooltipPart(description));
             }
-            
-            // Ефект у грі
             if (!string.IsNullOrEmpty(gameEffect))
             {
-                parts.Add($"Ефект у грі: {char.ToLower(gameEffect[0])}{gameEffect[1..]}");
+                var cleanEffect = CleanTooltipPart(gameEffect);
+                if (!string.IsNullOrEmpty(cleanEffect))
+                {
+                    parts.Add($"{char.ToUpper(cleanEffect[0])}{cleanEffect[1..]}");
+                }
             }
 
             return string.Join(". ", parts) + ".";
@@ -379,7 +425,7 @@ namespace Bunker.Services
         private PhysicalHealth GeneratePhysicalHealth()
         {
             if (_gameData.PhysicalConditions.Count == 0)
-                return new PhysicalHealth { Name = "Здоровий", BaseName = "Здоровий" };
+                return new PhysicalHealth { Name = "Здоровий", BaseName = "Здоровий", SeverityCode = "None", AllowsSeverity = false };
 
             // 30% шанс бути здоровим
             if (_random.Next(100) < 30)
@@ -387,6 +433,8 @@ namespace Bunker.Services
                 { 
                     Name = "Здоровий",
                     BaseName = "Здоровий",
+                    SeverityCode = "None",
+                    AllowsSeverity = false,
                     Tooltip = ""
                 };
 
@@ -397,6 +445,7 @@ namespace Bunker.Services
             
             string severityName = "";
             string fullName = data.Name;
+            var severityCode = "None";
             
             if (allowsSeverity)
             {
@@ -404,6 +453,7 @@ namespace Bunker.Services
                 var severityLevel = GetPhysicalSeverityLevel();
                 severityName = SeverityHelper.GetSeverityName(severityLevel);
                 fullName = SeverityHelper.FormatNameWithSeverity(data.Name, severityLevel);
+                severityCode = severityLevel.ToString();
             }
             
             // Формуємо tooltip
@@ -419,6 +469,7 @@ namespace Bunker.Services
                 Rarity = data.Rarity,
                 BaseSeverity = data.Severity,
                 SeverityLevel = allowsSeverity ? severityName : null,
+                SeverityCode = allowsSeverity ? severityCode : "None",
                 AllowsSeverity = allowsSeverity,
                 Visibility = data.Visibility,
                 Description = data.Description,
@@ -430,7 +481,8 @@ namespace Bunker.Services
                 TreatmentDifficulty = data.TreatmentDifficulty,
                 IsFictional = data.IsFictional,
                 Tags = data.Tags.ToList(),
-                Tooltip = tooltip
+                Tooltip = tooltip,
+                I18n = data.I18n
             };
         }
 
@@ -451,12 +503,23 @@ namespace Bunker.Services
             if (data.Tags.Any(t => t.ToLower() is "ампутація" or "інвалідність" or "необоротне"))
                 return false;
             
-            // Для хронічних та тривожних станів - так
-            if (data.Category.ToLower() is "хронічний" or "тривожний")
+            // Для явно градуйованих станів - так
+            if (GradablePhysicalCategories.Contains(data.Category))
+                return true;
+
+            var searchable = string.Join(" ", new[]
+            {
+                data.Name,
+                data.Category,
+                data.Description,
+                string.Join(" ", data.Tags)
+            }).ToLowerInvariant();
+
+            if (GradablePhysicalMarkers.Any(marker => searchable.Contains(marker)))
                 return true;
             
-            // За замовчуванням - перевіряємо чи тяжкість < 8 (дуже важкі стани зазвичай не мають градації)
-            return data.Severity < 8;
+            // Якщо неможливо точно визначити, чи ступінь потрібен, не показуємо його.
+            return false;
         }
 
         /// <summary>
@@ -482,117 +545,28 @@ namespace Bunker.Services
         {
             var parts = new List<string>();
             
-            // Якщо є ступінь - додаємо на початок
-            if (hasSeverity && !string.IsNullOrEmpty(severityName))
-            {
-                parts.Add($"{char.ToUpper(severityName[0])}{severityName[1..]} {name.ToLower()}");
-            }
+            var header = hasSeverity && !string.IsNullOrEmpty(severityName)
+                ? $"{name} — {severityName}"
+                : name;
+
+            if (!string.IsNullOrWhiteSpace(header))
+                parts.Add(header);
             
             // Опис
             if (!string.IsNullOrEmpty(description))
             {
-                parts.Add(description);
+                parts.Add(CleanTooltipPart(description));
             }
-            
-            // Ефект у грі
             if (!string.IsNullOrEmpty(gameEffect))
             {
-                parts.Add($"Ефект у грі: {char.ToLower(gameEffect[0])}{gameEffect[1..]}");
+                var cleanEffect = CleanTooltipPart(gameEffect);
+                if (!string.IsNullOrEmpty(cleanEffect))
+                {
+                    parts.Add($"{char.ToUpper(cleanEffect[0])}{cleanEffect[1..]}");
+                }
             }
 
             return string.Join(". ", parts) + ".";
-        }
-
-        #endregion
-
-        #region Traits Generation
-
-        private Traits GenerateTraits()
-        {
-            if (_gameData.Traits.Count == 0)
-                return new Traits { Name = "Звичайний" };
-
-            var data = _gameData.Traits[_random.Next(_gameData.Traits.Count)];
-            
-            // Формуємо tooltip
-            var tooltip = BuildTraitsTooltip(data.Trait, data.Effect, data.Type);
-
-            return new Traits
-            {
-                Name = data.Trait,
-                Type = data.Type,
-                Category = data.Category,
-                Effect = data.Effect,
-                Tooltip = tooltip
-            };
-        }
-
-        private static string BuildTraitsTooltip(string name, string effect, string type)
-        {
-            var parts = new List<string>();
-            
-            // Тип (сильна/слабка)
-            if (!string.IsNullOrEmpty(type))
-            {
-                parts.Add($"Тип: {type}");
-            }
-            
-            // Ефект
-            if (!string.IsNullOrEmpty(effect))
-            {
-                parts.Add(effect);
-            }
-
-            return string.Join(". ", parts) + ".";
-        }
-
-        #endregion
-
-        #region Secret Generation
-
-        private Secret GenerateSecret()
-        {
-            if (_gameData.Secrets.Count == 0)
-                return new Secret { Name = "Без секретів" };
-
-            var data = _gameData.Secrets[_random.Next(_gameData.Secrets.Count)];
-
-            return new Secret
-            {
-                Name = data.Secret,
-                Type = data.Type,
-                Category = data.Category
-            };
-        }
-
-        #endregion
-
-        #region SecretGoal Generation
-
-        private SecretGoal GenerateSecretGoal()
-        {
-            if (_gameData.SecretGoals.Count == 0)
-                return new SecretGoal 
-                { 
-                    Id = "",
-                    Type = "normal",
-                    Goal = "Вижити",
-                    Description = "Просто вижити в бункері",
-                    BunkerEffect = "Намагається виживати",
-                    IsRevealed = false
-                };
-
-            var data = _gameData.SecretGoals[_random.Next(_gameData.SecretGoals.Count)];
-
-            return new SecretGoal
-            {
-                Id = data.Id,
-                Type = data.Type,
-                Goal = data.Goal,
-                Description = data.Description,
-                BunkerEffect = data.BunkerEffect,
-                IsRevealed = false
-            };
         }
 
         #endregion
@@ -691,47 +665,87 @@ namespace Bunker.Services
 
 		#region Fact Generation
 
-            private Fact GenerateFact()
-		{
-			int roll = _random.Next(100);
+        private Fact GenerateFact()
+        {
+            if (_gameData.Facts.Count == 0)
+            {
+                return new Fact
+                {
+                    Id = "",
+                    Source = "",
+                    Type = "",
+                    Category = "",
+                    Name = "Немає факту",
+                    Description = "",
+                    Tooltip = ""
+                };
+            }
 
-			if (roll < 40)
-			{
-				var secret = GenerateSecret();
+            var data = _gameData.Facts[_random.Next(_gameData.Facts.Count)];
 
-				return new Fact
-				{
-					Type = "Секрет",
-					Name = secret.Name,
-					Category = secret.Category,
-					Tooltip = secret.Type
-				};
-			}
+            return new Fact
+            {
+                Id = data.Id,
+                Source = data.Source,
+                Type = data.Type,
+                Category = data.Category,
+                Name = data.Fact,
+                Description = data.Description,
+                Tooltip = BuildFactTooltip(data.Fact, data.Description),
+                I18n = data.I18n
+            };
+        }
 
-			if (roll < 70)
-			{
-				var goal = GenerateSecretGoal();
+        private static string BuildFactTooltip(params string?[] parts)
+        {
+            var cleanParts = parts
+                .Where(part => !string.IsNullOrWhiteSpace(part))
+                .Select(part => CleanTooltipPart(part!).Trim().Trim('.').Trim())
+                .Where(part => !string.IsNullOrWhiteSpace(part))
+                .ToList();
 
-				return new Fact
-				{
-					Type = "Ціль",
-					Name = goal.Goal,
-					Description = goal.Description,
-					Tooltip = goal.BunkerEffect
-				};
-			}
+            return cleanParts.Count == 0 ? "" : string.Join(". ", cleanParts) + ".";
+        }
 
-			var traits = GenerateTraits();
+        private static string CleanTooltipPart(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "";
 
-			return new Fact
-			{
-				Type = "Особливість",
-				Name = traits.Name,
-				Category = traits.Category,
-				Description = traits.Effect,
-				Tooltip = traits.Tooltip
-			};
-		}
+            var cleaned = text.Trim();
+            if (System.Text.RegularExpressions.Regex.IsMatch(
+                    cleaned,
+                    @"\b(Связано\s+с|Related\s+to|Тяжкість|Тяжесть|Severity|Bunker impact|Влияние\s+в\s+бункере|Вплив\s+у\s+бункері)\b",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            {
+                return "";
+            }
+
+            var labels = new[]
+            {
+                "Ефект у грі:",
+                "Ефект в игре:",
+                "Эффект в игре:",
+                "Game effect:",
+                "Effect in game:",
+                "Bunker effect:",
+                "Bunker impact:",
+                "Ефект у бункері:",
+                "Ефект в бункере:",
+                "Эффект в бункере:"
+            };
+
+            foreach (var label in labels)
+            {
+                if (cleaned.StartsWith(label, StringComparison.OrdinalIgnoreCase))
+                {
+                    cleaned = cleaned[label.Length..].Trim();
+                }
+            }
+
+            return System.Text.RegularExpressions.Regex
+                .Replace(cleaned, @"\b(Тяжкість|Тяжесть|Severity)\s*:\s*\d+\s*/\s*10\b", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                .Trim();
+        }
 		#endregion
 
 	}

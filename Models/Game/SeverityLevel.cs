@@ -50,7 +50,7 @@ namespace Bunker.Models
                 SeverityLevel.Moderate => "середня форма",
                 SeverityLevel.Severe => "важка форма",
                 SeverityLevel.VerySevere => "дуже важка форма",
-                SeverityLevel.Critical => "критична форма",
+                SeverityLevel.Critical => "дуже важка форма",
                 _ => ""
             };
         }

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Bunker.Models.GameData
 {
@@ -45,6 +46,9 @@ namespace Bunker.Models.GameData
         
         [JsonPropertyName("теги")]
         public List<string> Tags { get; set; } = new();
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 
     public class MentalConditionsRoot

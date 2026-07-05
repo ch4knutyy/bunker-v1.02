@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bunker.Models.Сharacteristics
 {
     /// <summary>
@@ -21,7 +24,7 @@ namespace Bunker.Models.Сharacteristics
         public string Description { get; set; } = "";
         
         /// <summary>
-        /// Ефект у бункері - як фобія впливає на гру
+        /// Опис впливу фобії
         /// </summary>
         public string BunkerEffect { get; set; } = "";
         
@@ -30,11 +33,14 @@ namespace Bunker.Models.Сharacteristics
         /// </summary>
         public string Tooltip => string.IsNullOrEmpty(Description) 
             ? "" 
-            : $"{Description}. Ефект у бункері: {BunkerEffect}";
+            : string.IsNullOrEmpty(BunkerEffect) ? Description : $"{Description}. {BunkerEffect}";
         
         /// <summary>
         /// Чи є tooltip для цієї характеристики
         /// </summary>
         public bool HasTooltip => !string.IsNullOrEmpty(Description);
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
     }
 }

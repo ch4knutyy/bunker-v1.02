@@ -71,6 +71,11 @@ namespace Bunker.Services
             room.Players[connectionId] = player;
             _playerToRoom[connectionId] = roomId;
 
+            if (room.HostConnectionId == connectionId && string.IsNullOrWhiteSpace(room.HostPlayerId))
+            {
+                room.HostPlayerId = GetPlayerKey(player);
+            }
+
             _logger.LogInformation($"Гравець {player.Name} приєднався до кімнати {room.Name} (ID: {room.Id})");
             
             return (true, null, room);
@@ -110,6 +115,7 @@ namespace Bunker.Services
             {
                 var newHost = room.Players.First();
                 room.HostConnectionId = newHost.Key;
+                room.HostPlayerId = GetPlayerKey(newHost.Value);
                 room.HostName = newHost.Value.Name;
                 newHostConnectionId = newHost.Key;
                 _logger.LogInformation($"Новий хост кімнати {room.Name}: {room.HostName}");
@@ -137,6 +143,7 @@ namespace Bunker.Services
                     {
                         var newHost = oldRoom.Players.First();
                         oldRoom.HostConnectionId = newHost.Key;
+                        oldRoom.HostPlayerId = GetPlayerKey(newHost.Value);
                         oldRoom.HostName = newHost.Value.Name;
                     }
                 }
@@ -221,7 +228,7 @@ namespace Bunker.Services
         public IEnumerable<object> GetAllRooms()
         {
             return _rooms.Values
-                .Where(r => r.State == RoomState.Lobby)
+                .Where(r => r.State == RoomState.Lobby && r.Players.Values.Any(p => p.IsConnected))
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => r.ToPublicInfo());
         }
@@ -237,6 +244,82 @@ namespace Bunker.Services
                 return player;
             }
             return null;
+        }
+
+        public static string GetPlayerKey(Player player)
+        {
+            return !string.IsNullOrWhiteSpace(player.StablePlayerId)
+                ? player.StablePlayerId
+                : player.ConnectionId;
+        }
+
+        public bool TryResolvePlayer(Room room, string playerIdOrConnectionId, out string currentConnectionId, out Player player)
+        {
+            currentConnectionId = "";
+            player = null!;
+
+            if (string.IsNullOrWhiteSpace(playerIdOrConnectionId))
+            {
+                return false;
+            }
+
+            if (room.Players.TryGetValue(playerIdOrConnectionId, out var directPlayer))
+            {
+                currentConnectionId = directPlayer.ConnectionId;
+                player = directPlayer;
+                return true;
+            }
+
+            var entry = room.Players.FirstOrDefault(p =>
+                p.Value.StablePlayerId == playerIdOrConnectionId ||
+                p.Value.Id.ToString() == playerIdOrConnectionId);
+
+            if (entry.Value == null)
+            {
+                return false;
+            }
+
+            currentConnectionId = entry.Key;
+            player = entry.Value;
+            return true;
+        }
+
+        public string? GetCurrentConnectionId(Room room, string playerIdOrConnectionId)
+        {
+            return TryResolvePlayer(room, playerIdOrConnectionId, out var currentConnectionId, out _)
+                ? currentConnectionId
+                : null;
+        }
+
+        public Player? GetPlayerByAnyId(Room room, string playerIdOrConnectionId)
+        {
+            return TryResolvePlayer(room, playerIdOrConnectionId, out _, out var player)
+                ? player
+                : null;
+        }
+
+        public bool TryGetCurrentPlayer(string connectionId, out Room room, out Player player)
+        {
+            room = null!;
+            player = null!;
+
+            room = GetPlayerRoom(connectionId)!;
+            if (room == null) return false;
+
+            return TryResolvePlayer(room, connectionId, out _, out player);
+        }
+
+        /// <summary>
+        /// Позначити гравця як тимчасово відключеного без видалення з кімнати.
+        /// </summary>
+        public void MarkPlayerDisconnected(string connectionId)
+        {
+            var player = GetPlayer(connectionId);
+            if (player == null) return;
+
+            player.IsConnected = false;
+            player.DisconnectedAt = DateTime.UtcNow;
+            UpdatePlayer(connectionId, player);
         }
 
         /// <summary>
@@ -262,7 +345,7 @@ namespace Bunker.Services
 
 		/// <summary>
 		/// Спроба повторного приєднання до кімнати (після перезавантаження сторінки)
-		/// Шукає гравця за ім'ям в кімнаті та переносить його на новий connectionId
+		/// Шукає гравця за стабільним ID та переносить його на новий connectionId
 		/// </summary>
 		public (bool success, string? error, Room? room, Player? player, bool wasHost)
 			RejoinRoom(string roomId, string newConnectionId, string playerName, string? stablePlayerId = null)
@@ -272,17 +355,12 @@ namespace Bunker.Services
 				return (false, "Кімнату не знайдено", null, null, false);
 			}
 
-			KeyValuePair<string, Player> existingEntry = default;
-
-			if (!string.IsNullOrEmpty(stablePlayerId))
+			if (string.IsNullOrWhiteSpace(stablePlayerId))
 			{
-				existingEntry = room.Players.FirstOrDefault(p => p.Value.StablePlayerId == stablePlayerId);
+				return (false, "Немає стабільного ID гравця", null, null, false);
 			}
 
-			if (existingEntry.Value == null)
-			{
-				existingEntry = room.Players.FirstOrDefault(p => p.Value.Name == playerName);
-			}
+			var existingEntry = room.Players.FirstOrDefault(p => p.Value.StablePlayerId == stablePlayerId);
 
 			if (existingEntry.Value == null)
 			{
@@ -296,21 +374,64 @@ namespace Bunker.Services
 			_playerToRoom.TryRemove(oldConnectionId, out _);
 
 			player.ConnectionId = newConnectionId;
+			player.IsConnected = true;
+			player.DisconnectedAt = null;
+			var playerKey = GetPlayerKey(player);
+
+			foreach (var card in player.Cards)
+			{
+				card.OwnerConnectionId = playerKey;
+				if (card.TargetPlayerId == oldConnectionId || card.TargetPlayerId == newConnectionId)
+				{
+					card.TargetPlayerId = playerKey;
+				}
+			}
 
 			room.Players[newConnectionId] = player;
 			_playerToRoom[newConnectionId] = roomId;
 
 			bool wasHost = room.HostConnectionId == oldConnectionId;
-			if (wasHost)
+			if (wasHost || room.HostPlayerId == playerKey)
 			{
 				room.HostConnectionId = newConnectionId;
+				room.HostPlayerId = playerKey;
+				wasHost = true;
+			}
+
+			if (room.CurrentTurnPlayerId == oldConnectionId)
+			{
+				room.CurrentTurnPlayerId = newConnectionId;
 			}
 
 			// Оновлюємо вже активовані спецкарти на новий connectionId
-			foreach (var activatedCard in room.ActivatedCards.Where(c => c.PlayerId == oldConnectionId))
+			foreach (var activatedCard in room.ActivatedCards)
 			{
-				activatedCard.PlayerId = newConnectionId;
+				if (activatedCard.PlayerId == oldConnectionId)
+				{
+					activatedCard.PlayerId = playerKey;
+				}
+				if (activatedCard.TargetPlayerId == oldConnectionId || activatedCard.TargetPlayerId == newConnectionId)
+				{
+					activatedCard.TargetPlayerId = playerKey;
+				}
+				if (activatedCard.ConnectionId == oldConnectionId)
+				{
+					activatedCard.ConnectionId = newConnectionId;
+				}
 			}
+
+			foreach (var otherPlayer in room.Players.Values)
+			{
+				foreach (var card in otherPlayer.Cards)
+				{
+					if (card.TargetPlayerId == oldConnectionId || card.TargetPlayerId == newConnectionId)
+					{
+						card.TargetPlayerId = playerKey;
+					}
+				}
+			}
+
+			RemapVotingConnectionId(room, oldConnectionId, newConnectionId, playerKey);
 
 			_logger.LogInformation(
 				"Гравець {PlayerName} перепідключився до кімнати {RoomName} (старий: {OldConnectionId}, новий: {NewConnectionId})",
@@ -321,6 +442,42 @@ namespace Bunker.Services
 			);
 
 			return (true, null, room, player, wasHost);
+		}
+
+		private static void RemapVotingConnectionId(Room room, string oldConnectionId, string newConnectionId, string playerKey)
+		{
+			var voting = room.CurrentVoting;
+			if (voting == null) return;
+
+			if (voting.EligibleVoters.Remove(oldConnectionId))
+			{
+				voting.EligibleVoters.Add(playerKey);
+			}
+			if (voting.EligibleVoters.Remove(newConnectionId))
+			{
+				voting.EligibleVoters.Add(playerKey);
+			}
+
+			if (voting.Votes.Remove(oldConnectionId, out var existingTarget))
+			{
+				voting.Votes[playerKey] = existingTarget == oldConnectionId || existingTarget == newConnectionId
+					? playerKey
+					: existingTarget;
+			}
+			if (voting.Votes.Remove(newConnectionId, out var newConnectionTarget))
+			{
+				voting.Votes[playerKey] = newConnectionTarget == oldConnectionId || newConnectionTarget == newConnectionId
+					? playerKey
+					: newConnectionTarget;
+			}
+
+			foreach (var voterId in voting.Votes.Keys.ToList())
+			{
+				if (voting.Votes[voterId] == oldConnectionId || voting.Votes[voterId] == newConnectionId)
+				{
+					voting.Votes[voterId] = playerKey;
+				}
+			}
 		}
 	}
 }

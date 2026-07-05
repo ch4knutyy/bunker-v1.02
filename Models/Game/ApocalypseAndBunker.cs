@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bunker.Models
 {
     /// <summary>
@@ -15,6 +18,9 @@ namespace Bunker.Models
         public List<string> Requirements { get; set; } = new(); // Що потрібно для виживання
         public string? ImageUrl { get; set; } // URL зображення апокаліпсису
 
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
+
         public object ToClientInfo()
         {
             return new
@@ -27,7 +33,8 @@ namespace Bunker.Models
                 duration = Duration,
                 threats = Threats,
                 requirements = Requirements,
-                imageUrl = ImageUrl
+                imageUrl = ImageUrl,
+                _i18n = I18n
             };
         }
         
@@ -61,6 +68,9 @@ namespace Bunker.Models
         public string Condition { get; set; } = "good"; // poor, fair, good, excellent
         public string? ImageUrl { get; set; } // URL зображення бункера
 
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
+
         public object ToClientInfo()
         {
             return new
@@ -75,7 +85,8 @@ namespace Bunker.Models
                 resources = Resources,
                 problems = Problems,
                 condition = Condition,
-                imageUrl = ImageUrl
+                imageUrl = ImageUrl,
+                _i18n = I18n
             };
         }
         

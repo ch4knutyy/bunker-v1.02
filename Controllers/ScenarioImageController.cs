@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Bunker.Services;
+using Bunker.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Controllers
@@ -33,6 +34,7 @@ namespace Bunker.Controllers
             [FromForm] IFormFile file,
             [FromForm] string roomId,
             [FromForm] string connectionId,
+            [FromForm] string? hostToken,
             [FromForm] string apocalypseId)
         {
             // Валідація входу
@@ -47,8 +49,8 @@ namespace Bunker.Controllers
             if (room == null)
                 return NotFound(new { error = "Кімнату не знайдено" });
                 
-            if (room.HostConnectionId != connectionId)
-                return Forbid("Тільки хост може завантажувати зображення");
+            if (!IsValidHostRequest(room, hostToken))
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може завантажувати зображення" });
 
             // Зберігаємо файл
             using var stream = file.OpenReadStream();
@@ -84,6 +86,7 @@ namespace Bunker.Controllers
             [FromForm] IFormFile file,
             [FromForm] string roomId,
             [FromForm] string connectionId,
+            [FromForm] string? hostToken,
             [FromForm] string bunkerId)
         {
             // Валідація входу
@@ -98,8 +101,8 @@ namespace Bunker.Controllers
             if (room == null)
                 return NotFound(new { error = "Кімнату не знайдено" });
                 
-            if (room.HostConnectionId != connectionId)
-                return Forbid("Тільки хост може завантажувати зображення");
+            if (!IsValidHostRequest(room, hostToken))
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може завантажувати зображення" });
 
             // Зберігаємо файл
             using var stream = file.OpenReadStream();
@@ -134,6 +137,7 @@ namespace Bunker.Controllers
         public async Task<IActionResult> RemoveApocalypseImage(
             [FromQuery] string roomId,
             [FromQuery] string connectionId,
+            [FromQuery] string? hostToken,
             [FromQuery] string apocalypseId)
         {
             if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(apocalypseId))
@@ -144,8 +148,8 @@ namespace Bunker.Controllers
             if (room == null)
                 return NotFound(new { error = "Кімнату не знайдено" });
                 
-            if (room.HostConnectionId != connectionId)
-                return Forbid("Тільки хост може видаляти зображення");
+            if (!IsValidHostRequest(room, hostToken))
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може видаляти зображення" });
 
             // Видаляємо файл
             _imageService.RemoveApocalypseImage(apocalypseId);
@@ -174,6 +178,7 @@ namespace Bunker.Controllers
         public async Task<IActionResult> RemoveBunkerImage(
             [FromQuery] string roomId,
             [FromQuery] string connectionId,
+            [FromQuery] string? hostToken,
             [FromQuery] string bunkerId)
         {
             if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(bunkerId))
@@ -184,8 +189,8 @@ namespace Bunker.Controllers
             if (room == null)
                 return NotFound(new { error = "Кімнату не знайдено" });
                 
-            if (room.HostConnectionId != connectionId)
-                return Forbid("Тільки хост може видаляти зображення");
+            if (!IsValidHostRequest(room, hostToken))
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може видаляти зображення" });
 
             // Видаляємо файл
             _imageService.RemoveBunkerImage(bunkerId);
@@ -232,5 +237,13 @@ namespace Bunker.Controllers
 
             return Ok(new { prompt = room.Bunker.GenerateImagePrompt() });
         }
+
+        private static bool IsValidHostRequest(Bunker.Models.Room room, string? hostToken)
+        {
+            return !string.IsNullOrWhiteSpace(hostToken) &&
+                !string.IsNullOrWhiteSpace(room.HostToken) &&
+                string.Equals(room.HostToken, hostToken, StringComparison.Ordinal);
+        }
     }
 }
+

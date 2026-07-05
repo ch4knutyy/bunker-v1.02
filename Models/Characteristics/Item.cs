@@ -1,4 +1,7 @@
-﻿namespace Bunker.Models
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace Bunker.Models
 {
 	public class Item
 	{
@@ -9,5 +12,8 @@
 		public double WeightKg { get; set; }
 		public bool IsUsefulInBunker { get; set; }
 		public string Rarity { get; set; } = "";
+
+		[JsonPropertyName("_i18n")]
+		public Dictionary<string, JsonElement>? I18n { get; set; }
 	}
 }
