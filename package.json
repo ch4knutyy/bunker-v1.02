@@ -6,7 +6,12 @@
   "directories": {
     "test": "tests"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ch4knutyy/bunker-v1.02.git"
