@@ -32,3 +32,9 @@ Thumbs.db
 
 # Reject/patch files
 *.rej
+
+# Local dev / AI agent artifacts (not needed for the project)
+.emergent/
+memory/
+test_reports/
+tatus
