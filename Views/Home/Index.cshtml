@@ -1,499 +1,163 @@
-﻿@{
-    ViewData["Title"] = "Бункер Онлайн";
+@{
+    ViewData["Title"] = "Vault Judgment";
 }
 
-<link rel="stylesheet" href="/css/site.css" />
-<link rel="stylesheet" href="/css/tooltip.css" />
-<link rel="stylesheet" href="/css/game.css" />
+<link rel="stylesheet" href="/css/home.css" />
 
-<div class="game-container">
-    <div class="top-bar">
-        <h1 class="page-title">BUNKER ONLINE</h1>
-    </div>
-
-    <!-- Lobby Section (вибір кімнати) -->
-    <div id="lobbySection">
-        <div class="lobby-container">
-            <!-- Створення кімнати -->
-            <div class="create-room-panel">
-                <h2 class="section-title">Створити кімнату</h2>
-                <div class="create-room-form">
-                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
-                    <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." />
-                    <div class="form-row">
-                        <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="4" max="16" />
-                        <input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" />
-                    </div>
-                    <button type="button" id="createRoomBtn" class="btn-primary" data-testid="create-room-btn">Створити кімнату</button>
-                    <p id="connectionStatus" class="connection-status" style="display: none; margin-top: 0.5rem; font-size: 0.85rem;"></p>
-                </div>
-            </div>
-
-            <!-- Список кімнат -->
-            <div class="rooms-list-panel">
-                <h2 class="section-title">Доступні кімнати</h2>
-                <div id="roomsList" class="rooms-list">
-                    <p class="no-rooms">Завантаження кімнат...</p>
-                </div>
+<div class="landing-page">
+    <section class="landing-hero" aria-labelledby="landingTitle">
+        <div class="landing-hero__content">
+            <p class="landing-kicker">Онлайн настільна гра</p>
+            <h1 id="landingTitle">Vault Judgment</h1>
+            <p class="landing-lead">
+                Браузерна версія гри про виживання після апокаліпсису: гравці заходять у кімнати,
+                отримують випадкових персонажів, відкривають характеристики та разом вирішують,
+                хто має шанс потрапити до бункера.
+            </p>
+            <div class="landing-actions" aria-label="Основні дії">
+                <a class="landing-btn landing-btn--primary" href="/game">Почати гру</a>
+                <a class="landing-btn" href="/game#lobbySection">Список кімнат</a>
+                <a class="landing-btn" href="https://github.com/ch4knutyy/bunker-v1.02" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a class="landing-btn" href="#author">Про автора</a>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Room Section (в кімнаті / лобі) -->
-    <div id="roomSection" style="display: none;">
-        <div class="room-header">
-            <div class="room-info">
-                <h2 class="room-name" id="currentRoomName">Кімната</h2>
-                <span class="room-id" id="currentRoomId">ID: ---</span>
-                <span class="room-state" id="currentRoomState">Лобі</span>
-            </div>
-            <div class="room-actions">
-                <button id="gmPanelBtn" class="btn-gm" onclick="toggleGMPanel()" style="display: none;">🎮 GM Панель</button>
-                <button id="startVotingBtn" class="btn-vote" onclick="startVoting()" style="display: none;">🗳️ Голосування</button>
-                <button id="startGameBtn" class="btn-success" onclick="startGame()" style="display: none;">Почати гру</button>
-                <button class="btn-danger" onclick="leaveRoom()">Покинути кімнату</button>
-            </div>
-        </div>
-
-        <!-- Voting Panel -->
-        <div id="votingPanel" class="voting-panel" style="display: none;">
-            <div class="voting-header">
-                <h3>🗳️ Голосування (Раунд <span id="votingRound">1</span>)</h3>
-                <div class="voting-progress">
-                    <span id="votingProgressText">0/0 проголосували</span>
-                </div>
-            </div>
-            
-            <div class="voting-content">
-                <!-- Для гравців - вибір кандидата -->
-                <div id="votingCandidates" class="voting-candidates"></div>
-                
-                <!-- Моє голосування -->
-                <div id="myVoteStatus" class="my-vote-status" style="display: none;">
-                    Ви проголосували за: <span id="myVoteTarget" class="vote-target"></span>
-                </div>
-            </div>
-            
-            <!-- Кнопки хоста -->
-            <div id="votingHostControls" class="voting-host-controls" style="display: none;">
-                <button class="btn-warning" onclick="endVotingEarly()">Завершити голосування</button>
-                <button class="btn-secondary" onclick="cancelVoting()">Скасувати</button>
-            </div>
-        </div>
-
-        <!-- Voting Results Panel (для хоста) -->
-        <div id="votingResultsPanel" class="voting-results-panel" style="display: none;">
-            <div class="voting-results-header">
-                <h3>📊 Результати голосування</h3>
-            </div>
-            <div id="votingResultsContent" class="voting-results-content"></div>
-            <div id="votingDecisionControls" class="voting-decision-controls">
-                <p class="decision-prompt">Оберіть дію:</p>
-                <button id="eliminateTopBtn" class="btn-danger" onclick="eliminateTopVoted()">❌ Елімінувати лідера</button>
-                <button class="btn-success" onclick="resolveNoElimination()">✓ Нікого не елімінувати</button>
-            </div>
-        </div>
-
-        <!-- Game Master Panel (тільки для хоста) -->
-        <div id="gmPanel" class="gm-panel" style="display: none;">
-            <div class="gm-panel-header">
-                <h3>🎮 Game Master Panel</h3>
-                <button class="btn-close" onclick="toggleGMPanel()">×</button>
-            </div>
-            <div class="gm-panel-content">
-                <!-- Вибір гравця -->
-                <div class="gm-section">
-                    <label class="gm-label">Вибрати гравця:</label>
-                    <select id="gmPlayerSelect" class="gm-select" onchange="loadPlayerDataForGM()">
-                        <option value="">-- Виберіть гравця --</option>
-                    </select>
-                </div>
-
-                <!-- Інформація про вибраного гравця -->
-                <div id="gmPlayerInfo" class="gm-player-info" style="display: none;">
-                    <h4 id="gmPlayerName">Гравець</h4>
-                    
-                    <!-- Швидкі дії -->
-                    <div class="gm-quick-actions">
-                        <button class="btn-gm-action btn-eliminate" onclick="eliminateSelectedPlayer()">❌ Елімінувати</button>
-                        <button class="btn-gm-action btn-restore" onclick="restoreSelectedPlayer()">✅ Повернути</button>
-                    </div>
-
-                    <!-- Характеристики -->
-                    <div class="gm-characteristics">
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Особистість:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Статура:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Професія:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Profession')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Profession')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Фіз. здоров'я:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('PhysicalHealth')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('PhysicalHealth')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Псих. здоров'я:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('MentalHealth')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('MentalHealth')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Хобі:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Hobby')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Hobby')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Риса характеру:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('CharacterTrait')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('CharacterTrait')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Фобія:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Phobia')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Phobia')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Інвентар:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmInventory">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Inventory')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Факт:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmFact">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Fact')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Fact')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Fact')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Fact')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Бункер/Апокаліпсис контролі -->
-                <div class="gm-section" id="gmScenarioSection" style="display: none;">
-                    <h4 class="gm-section-title">Сценарій гри</h4>
-                    <div class="gm-scenario-controls">
-                        <div class="gm-control-row">
-                            <label class="gm-label">Слоти бункера:</label>
-                            <div class="gm-capacity-control">
-                                <button class="btn-gm-small" onclick="changeBunkerCapacity(-1)">-</button>
-                                <span id="gmBunkerCapacity" class="gm-capacity-value">6</span>
-                                <button class="btn-gm-small" onclick="changeBunkerCapacity(1)">+</button>
-                            </div>
-                        </div>
-                        <div class="gm-control-row">
-                            <button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
-                            <button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Система подій -->
-                <div class="gm-section" id="gmEventsSection" style="display: none;">
-                    <h4 class="gm-section-title">Ігрові події</h4>
-                    <div class="gm-event-form">
-                        <select id="gmEventType" class="gm-select">
-                            <option value="info">Інформація</option>
-                            <option value="warning">Попередження</option>
-                            <option value="danger">Небезпека</option>
-                            <option value="success">Позитив</option>
-                            <option value="catastrophe">Катастрофа</option>
-                        </select>
-                        <textarea id="gmEventText" class="input-field gm-event-textarea" placeholder="Текст події..." rows="2"></textarea>
-                        <button class="btn-gm-action btn-send-event" onclick="sendGameEvent()">Відправити подію</button>
-                    </div>
-                    <div class="gm-quick-events">
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Землетрус! Частина бункера пошкоджена.', 'catastrophe')">Землетрус</button>
-                        <button class="btn-gm-quick" onclick="addBunkerSupplies()">Запаси</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Загроза зараження! Потрібна дезінфекція.', 'warning')">Зараження</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Зовнішні виживальці просять допомоги.', 'info')">Виживальці</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Генератор зламався! Світла немає.', 'danger')">Генератор</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="roomLobby">
-            <h3 class="section-title">Гравці в кімнаті: <span id="roomPlayerCount">0/12</span></h3>
-            <div id="roomPlayersList" class="room-players-grid"></div>
-            <p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
-        </div>
-
-        <!-- My Player Detailed Cards Section (тільки для власника) -->
-        <div id="myPlayerSection" style="display:none;">
-            <h2 class="section-title">Мої характеристики (бачу тільки я)</h2>
-            <div id="myPlayerCards" class="player-cards-grid"></div>
-            
-            <!-- Мої спеціальні карти -->
-            <h2 class="section-title" style="margin-top: 2rem;">🃏 Мої спеціальні карти</h2>
-            <div id="myCardsSection" class="cards-grid"></div>
-        </div>
-
-        <!-- Players Table Section (під час гри) -->
-        <div id="gameSection" style="display: none;">
-            <!-- Section Header for Apocalypse & Bunker -->
-            <div class="scenario-section-header">
-                <div class="section-header-line"></div>
-                <h2 class="section-header-title">🎭 Бункер та Апокаліпсис</h2>
-                <div class="section-header-line"></div>
-            </div>
-            
-            <!-- Apocalypse & Bunker Info -->
-            <div class="game-info-panels">
-                <div class="apocalypse-panel" id="apocalypsePanel">
-                    <h3 class="panel-title">☢️ Апокаліпсис</h3>
-                    <div class="panel-content" id="apocalypseContent">
-                        <p>Завантаження...</p>
-                    </div>
-                </div>
-                <div class="bunker-panel" id="bunkerPanel">
-                    <h3 class="panel-title">🏠 Бункер</h3>
-                    <div class="panel-content" id="bunkerContent">
-                        <p>Завантаження...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <h2 class="section-title">
-                Гравці в бункері: <span class="bunker-count" id="playerCount">0/6</span>
-            </h2>
-
-            <div style="overflow-x: auto;">
-                <table class="players-table" id="playersTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">№</th>
-                            <th style="min-width: 150px;">Ім'я гравця</th>
-                            <th style="min-width: 200px;">Особистість</th>
-                            <th style="min-width: 200px;">Статура</th>
-                            <th style="min-width: 180px;">Професія</th>
-                            <th style="min-width: 180px;">Фізичне здоров'я</th>
-                            <th style="min-width: 180px;">Психічне здоров'я</th>
-                            <th style="min-width: 180px;">Хобі</th>
-                            <th style="min-width: 180px;">Риса характеру</th>
-                            <th style="min-width: 180px;">Фобія</th>
-                            <th style="min-width: 180px;">Інвентар</th>
-                            <th style="min-width: 200px;">Факт</th>
-                        </tr>
-                    </thead>
-                    <tbody id="playersTableBody">
-                        <tr>
-                            <td colspan="12" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
-                                Очікування гравців...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Activated Special Cards Table -->
-    <div id="specialCardsTableSection" class="special-cards-table-section" style="display: none;">
-        <h2 class="section-title">Таблиця спец. можливостей</h2>
-        <div class="special-cards-table-wrapper">
-            <table class="special-cards-table" id="specialCardsTable">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">№</th>
-                        <th style="min-width: 150px;">Ім'я</th>
-                        <th style="min-width: 200px;">Спец. можливість 1</th>
-                        <th style="min-width: 200px;">Спец. можливість 2</th>
-                    </tr>
-                </thead>
-                <tbody id="specialCardsTableBody">
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
-                            Ще ніхто не активував спецкарти
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Events Section (покращена) -->
-    <div class="events-section-wrapper">
-        <div class="events-section-main">
-            <h2 class="section-title">Ігрові події</h2>
-            
-            <!-- Поточна подія -->
-            <div id="currentEventPanel" class="current-event-panel" style="display: none;">
-                <div class="current-event-header">
-                    <span class="current-event-badge">ПОТОЧНА ПОДІЯ</span>
-                    <span id="currentEventTime" class="current-event-time"></span>
-                </div>
-                <div id="currentEventContent" class="current-event-content"></div>
-                <div id="currentEventEffect" class="current-event-effect" style="display: none;">
-                    <span class="effect-label">Можливий ефект:</span>
-                    <span id="currentEventEffectText" class="effect-text"></span>
-                </div>
-                <!-- Кнопка для ведучого -->
-                <div id="eventHostControls" class="event-host-controls" style="display: none;">
-                    <button class="btn-apply-effect" onclick="applyCurrentEventEffect()">Застосувати ефект</button>
-                    <button class="btn-dismiss-event" onclick="dismissCurrentEvent()">Закрити подію</button>
-                </div>
-            </div>
-            
-            <!-- Історія подій -->
-            <div class="events-history">
-                <h3 class="events-history-title">Історія подій</h3>
-                <div id="events" class="events-list">
-                    <p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Join Room Modal -->
-<div id="joinModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3>Приєднатися до кімнати</h3>
+    <section id="previousSession" class="previous-session" hidden>
         <div>
-            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
-            <input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
-            <input type="hidden" id="joinRoomId" />
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeJoinModal()">Скасувати</button>
-                <button type="button" class="btn-primary" onclick="submitJoinRoom()">Приєднатися</button>
-            </div>
+            <p class="section-eyebrow">Знайдена попередня сесія</p>
+            <h2>Повернутися до гри</h2>
+            <dl class="session-details">
+                <div>
+                    <dt>Ім'я гравця</dt>
+                    <dd id="previousSessionName">-</dd>
+                </div>
+                <div>
+                    <dt>Кімната</dt>
+                    <dd id="previousSessionRoom">-</dd>
+                </div>
+            </dl>
         </div>
-    </div>
-</div>
-
-<!-- Edit Characteristic Modal -->
-<div id="editCharModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3>Редагувати характеристику</h3>
-        <p id="editCharInfo" class="edit-char-info"></p>
-        <div>
-            <input id="editCharValue" type="text" class="input-field" placeholder="Нове значення..." />
-            <input type="hidden" id="editCharName" />
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeEditCharModal()">Скасувати</button>
-                <button type="button" class="btn-warning" onclick="clearCharacteristic()">Очистити</button>
-                <button type="button" class="btn-primary" onclick="submitEditCharacteristic()">Зберегти</button>
-            </div>
+        <div class="session-actions">
+            <a class="landing-btn landing-btn--primary" href="/game">Повернутися</a>
+            <button id="previousSessionForget" class="landing-btn landing-btn--muted" type="button">Забути сесію</button>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Use Card Modal -->
-<div id="useCardModal" class="modal" style="display: none;">
-    <div class="modal-content modal-card">
-        <h3 id="useCardTitle">Використати карту</h3>
-        <p id="useCardDescription" class="card-modal-desc"></p>
-        <div>
-            <div id="cardTargetSection" style="display: none;">
-                <label class="gm-label">Виберіть гравця-ціль:</label>
-                <select id="cardTargetPlayer" class="gm-select">
-                    <option value="">-- Виберіть гравця --</option>
+    <section class="landing-grid">
+        <article class="portfolio-panel">
+            <p class="section-eyebrow">Проєкт для портфоліо</p>
+            <h2>Повний ігровий цикл у реальному часі</h2>
+            <p>
+                Vault Judgment демонструє роботу з кімнатами, live-оновленнями, локалізацією,
+                відновленням сесії після оновлення сторінки та автоматизованими Playwright-перевірками.
+            </p>
+        </article>
+
+        <article id="author" class="author-panel">
+            <p class="section-eyebrow">Автор</p>
+            <h2>Дмитро Лаптєв</h2>
+            <p>
+                Проєкт зібраний як практична демонстрація frontend-логіки, ASP.NET Core MVC,
+                SignalR-комунікації та тестування критичних сценаріїв користувача.
+            </p>
+        </article>
+    </section>
+
+    <section class="landing-section">
+        <div class="section-heading">
+            <p class="section-eyebrow">Можливості</p>
+            <h2>Що вже працює</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-item">Онлайн-кімнати</div>
+            <div class="feature-item">Випадкова генерація персонажів</div>
+            <div class="feature-item">Характеристики гравців</div>
+            <div class="feature-item">Розкриття характеристик</div>
+            <div class="feature-item">Локалізація UA/RU/EN</div>
+            <div class="feature-item">Reconnect/session restore</div>
+            <div class="feature-item">Playwright tests</div>
+        </div>
+    </section>
+
+    <section class="landing-section tech-section">
+        <div class="section-heading">
+            <p class="section-eyebrow">Технології</p>
+            <h2>Стек проєкту</h2>
+        </div>
+        <div class="tech-list" aria-label="Технології">
+            <span>ASP.NET Core</span>
+            <span>SignalR</span>
+            <span>JavaScript</span>
+            <span>JSON localization</span>
+            <span>Playwright tests</span>
+        </div>
+    </section>
+
+    <section id="player-profile" class="landing-section profile-section">
+        <div class="section-heading">
+            <p class="section-eyebrow">Профіль без реєстрації</p>
+            <h2>Легкий профіль гравця</h2>
+        </div>
+
+        <form id="playerProfileForm" class="profile-form" autocomplete="off">
+            <div class="profile-preview" aria-live="polite">
+                <div id="profileAvatarPreview" class="profile-avatar-preview">◎</div>
+                <div>
+                    <p id="profileNamePreview" class="profile-name-preview">Гравець</p>
+                    <p id="profileLanguagePreview" class="profile-meta-preview">UA</p>
+                </div>
+            </div>
+
+            <div class="profile-field">
+                <label for="profileName">Ім'я гравця</label>
+                <input id="profileName" class="profile-input" type="text" maxlength="10" placeholder="Ваше ім'я" />
+            </div>
+
+            <div class="profile-field">
+                <span class="profile-label">Аватар</span>
+                <div class="avatar-picker" role="group" aria-label="Аватар">
+                    <button type="button" class="avatar-option" data-avatar="◎">◎</button>
+                    <button type="button" class="avatar-option" data-avatar="◆">◆</button>
+                    <button type="button" class="avatar-option" data-avatar="✦">✦</button>
+                    <button type="button" class="avatar-option" data-avatar="⬡">⬡</button>
+                </div>
+            </div>
+
+            <div class="profile-field">
+                <span class="profile-label">Колір гравця</span>
+                <div class="color-picker" role="group" aria-label="Колір гравця">
+                    <button type="button" class="color-option" data-color="#d89b2b" style="--swatch:#d89b2b"></button>
+                    <button type="button" class="color-option" data-color="#3b8bd6" style="--swatch:#3b8bd6"></button>
+                    <button type="button" class="color-option" data-color="#37c96b" style="--swatch:#37c96b"></button>
+                    <button type="button" class="color-option" data-color="#d63b3b" style="--swatch:#d63b3b"></button>
+                </div>
+            </div>
+
+            <div class="profile-field">
+                <label for="profileLanguage">Вибрана мова</label>
+                <select id="profileLanguage" class="profile-input">
+                    <option value="uk">UA</option>
+                    <option value="ru">RU</option>
+                    <option value="en">EN</option>
                 </select>
             </div>
-            <div id="cardCharacteristicSection" style="display: none; margin-top: 1rem;">
-                <label class="gm-label">Виберіть характеристику:</label>
-                <select id="cardTargetCharacteristic" class="gm-select">
-                    <option value="">-- Виберіть характеристику --</option>
-                    <option value="Profession">Професія</option>
-                    <option value="PhysicalHealth">Фізичне здоров'я</option>
-                    <option value="MentalHealth">Психічне здоров'я</option>
-                    <option value="Hobby">Хобі</option>
-                    <option value="CharacterTrait">Риса характеру</option>
-                    <option value="Phobia">Фобія</option>
-                    <option value="Fact">Факт</option>
-                    <option value="Inventory">Інвентар</option>
-                </select>
+
+            <dl class="profile-summary-list">
+                <div>
+                    <dt>Остання кімната</dt>
+                    <dd id="profileLastRoom">Немає</dd>
+                </div>
+            </dl>
+
+            <div class="profile-actions">
+                <button class="landing-btn landing-btn--primary" type="submit">Зберегти профіль</button>
+                <button id="forgetSessionBtn" class="landing-btn landing-btn--muted" type="button">Забути сесію</button>
             </div>
-            <input type="hidden" id="useCardId" />
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeUseCardModal()">Скасувати</button>
-                <button type="button" class="btn-primary" onclick="submitUseCard()">Використати</button>
-            </div>
-        </div>
-    </div>
+        </form>
+    </section>
 </div>
 
-<!-- Card Approval Modal (для хоста) -->
-<div id="cardApprovalModal" class="modal" style="display: none;">
-    <div class="modal-content modal-card">
-        <h3>🃏 Запит на використання карти</h3>
-        <div id="cardApprovalContent"></div>
-        <input type="hidden" id="approvalCardId" />
-        <input type="hidden" id="approvalPlayerId" />
-        <div class="modal-actions">
-            <button type="button" class="btn-danger" onclick="rejectCardApproval()">Відхилити</button>
-            <button type="button" class="btn-success" onclick="approveCardApproval()">Підтвердити</button>
-        </div>
-    </div>
-</div>
-
-<!-- Peek Characteristic Modal (тільки для хоста) -->
-<div id="peekModal" class="modal" style="display: none;">
-    <div class="modal-content modal-peek">
-        <h3>&#128065; Підгляд характеристики</h3>
-        <div id="peekModalContent"></div>
-        <div class="modal-actions">
-            <button type="button" class="btn-primary" onclick="closePeekModal()">Закрити</button>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-<script src="/js/game.js"></script>
-
-
+@section Scripts {
+    <script src="/js/home.js"></script>
+}

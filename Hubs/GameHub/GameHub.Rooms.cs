@@ -37,7 +37,7 @@ namespace Bunker.Hubs
 				// Створюємо кімнату
 				var room = _roomService.CreateRoom(roomName, Context.ConnectionId, playerName, maxPlayers, password);
 
-				var player = CreateGeneratedPlayer(playerName, stablePlayerId);
+				var player = CreateGeneratedPlayer(playerName, stablePlayerId, room);
 
 				// Приєднуємо хоста до створеної кімнати
 				var (joinSuccess, joinError, joinedRoom) =
@@ -107,7 +107,8 @@ namespace Bunker.Hubs
 					}
 				}
 
-				var player = CreateGeneratedPlayer(playerName, stablePlayerId);
+				var existingRoom = _roomService.GetRoom(roomId);
+				var player = CreateGeneratedPlayer(playerName, stablePlayerId, existingRoom);
 
 				// Один виклик JoinRoom
 				var (joinSuccess, joinError, room) =
@@ -171,12 +172,17 @@ namespace Bunker.Hubs
 
             if (!roomDeleted)
             {
+                var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+                var newHostName = newHostConnectionId != null
+                    ? playersSnapshot.FirstOrDefault(entry => entry.Key == newHostConnectionId).Value?.Name
+                    : null;
+
                 // Повідомляємо інших в кімнаті
                 await Clients.Group(roomId).SendAsync("PlayerLeftRoom", new
                 {
                     connectionId = Context.ConnectionId,
                     newHostConnectionId = newHostConnectionId,
-                    newHostName = newHostConnectionId != null ? room.Players[newHostConnectionId].Name : null
+                    newHostName = newHostName
                 });
             }
 
@@ -215,30 +221,14 @@ namespace Bunker.Hubs
 				}
 
 				_logger.LogInformation(
-					"REJOIN SEND: RoomId={RoomId}, State={State}, Apocalypse={Apocalypse}, Bunker={Bunker}, ActivatedCards={Count}",
+					"REJOIN SEND: RoomId={RoomId}, State={State}, Apocalypse={Apocalypse}, Bunker={Bunker}",
 					room.Id,
 					room.State,
 					room.Apocalypse?.Name,
-					room.Bunker?.Name,
-					room.ActivatedCards.Count
+					room.Bunker?.Name
 				);
 
-				_logger.LogInformation("REJOIN DEBUG: room.ActivatedCards count = {Count}", room.ActivatedCards.Count);
-
-				foreach (var card in room.ActivatedCards)
-				{
-					_logger.LogInformation(
-						"REJOIN DEBUG CARD: CardId={CardId}, CardName={CardName}, PlayerId={PlayerId}, PlayerName={PlayerName}, TargetPlayerId={TargetPlayerId}, TargetPlayerName={TargetPlayerName}",
-						card.CardId,
-						card.CardName,
-						card.PlayerId,
-						card.PlayerName,
-						card.TargetPlayerId,
-						card.TargetPlayerName
-					);
-				}
-
-				foreach (var p in room.Players.Values)
+				foreach (var p in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
 				{
 					_logger.LogInformation(
 						"REJOIN DEBUG PLAYER: Name={Name}, ConnectionId={ConnectionId}, Seat={Seat}",
@@ -279,18 +269,6 @@ namespace Bunker.Hubs
 				apocalypse = room.Apocalypse?.ToClientInfo(),
 				bunker = room.Bunker?.ToClientInfo(),
 				voting = BuildVotingReconnectInfo(room, player),
-				activatedCards = room.ActivatedCards.Select(card => new
-				{
-					playerId = _roomService.GetCurrentConnectionId(room, card.PlayerId) ?? card.ConnectionId ?? card.PlayerId,
-					name = card.CardName,
-					rarity = card.Rarity,
-					description = card.Description,
-					playerName = card.PlayerName,
-					targetPlayerId = card.TargetPlayerId != null ? _roomService.GetCurrentConnectionId(room, card.TargetPlayerId) ?? card.TargetPlayerId : null,
-					targetPlayerName = card.TargetPlayerName,
-					targetCharacteristic = card.TargetCharacteristic,
-					activatedAt = card.ActivatedAt
-				}).ToList(),
 				players = BuildRoomPlayersPayload(room)
 			});
 
@@ -323,7 +301,8 @@ namespace Bunker.Hubs
 				votedCount = voting.Votes.Count,
 				totalVoters = voting.EligibleVoters.Count,
 				allVoted = voting.AllVoted,
-				candidates = room.Players.Values
+				candidates = RoomService.GetPlayersSnapshot(room)
+					.Select(entry => entry.Value)
 					.Where(p => !p.IsEliminated)
 					.Select(p => new
 					{
@@ -361,12 +340,14 @@ namespace Bunker.Hubs
 			};
 		}
 
-		private Player CreateGeneratedPlayer(string playerName, string? stablePlayerId)
+		private Player CreateGeneratedPlayer(string playerName, string? stablePlayerId, Room? room = null)
 		{
-			var player = _generator.Generate(playerName);
+			var existingPlayers = room == null
+				? Enumerable.Empty<Player>()
+				: RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value);
+			var player = _generator.Generate(playerName, existingPlayers);
 			player.ConnectionId = Context.ConnectionId;
 			player.StablePlayerId = stablePlayerId ?? "";
-			EnsurePlayerCards(player);
 			return player;
 		}
 
@@ -384,23 +365,6 @@ namespace Bunker.Hubs
 			if (!HasNamedCharacteristic(player.CharacterTrait)) player.CharacterTrait = generated!.CharacterTrait;
 			if (!HasNamedCharacteristic(player.Phobia)) player.Phobia = generated!.Phobia;
 			if (!HasNamedCharacteristic(player.Fact)) player.Fact = generated!.Fact;
-
-			EnsurePlayerCards(player);
-		}
-
-		private void EnsurePlayerCards(Player player)
-		{
-			var playerKey = RoomService.GetPlayerKey(player);
-			if (player.Cards == null || player.Cards.Count == 0)
-			{
-				player.Cards = _cardService.GenerateCardsForPlayer(playerKey, 2);
-				return;
-			}
-
-			foreach (var card in player.Cards)
-			{
-				card.OwnerConnectionId = playerKey;
-			}
 		}
 
 		private static bool HasCompleteCharacterData(Player player)
@@ -453,24 +417,32 @@ namespace Bunker.Hubs
 
 		private object BuildRoomPlayersPayload(Room room)
 		{
-			foreach (var player in room.Players.Values)
+			var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+
+			foreach (var player in playersSnapshot.Select(entry => entry.Value))
 			{
 				EnsurePlayerHasGeneratedData(player);
 			}
 
-			return room.Players.Values.Select(p => new
+			return playersSnapshot.Select(entry =>
 			{
-				name = p.Name,
-				connectionId = p.ConnectionId,
-				stablePlayerId = RoomService.GetPlayerKey(p),
-				isHost = room.IsHost(p.ConnectionId),
-				revealed = p.Revealed,
-				revealedValues = p.Revealed.RevealedValues,
-				revealedSources = BuildRevealedSources(p),
-				fact = p.Fact,
-				isEliminated = p.IsEliminated,
-				seatNumber = p.SeatNumber,
-				isConnected = p.IsConnected
+				var p = entry.Value;
+				var connectionId = string.IsNullOrWhiteSpace(p.ConnectionId) ? entry.Key : p.ConnectionId;
+
+				return new
+				{
+					name = p.Name ?? "Unknown",
+					connectionId = connectionId,
+					stablePlayerId = RoomService.GetPlayerKey(p),
+					isHost = room.IsHost(connectionId),
+					revealed = p.Revealed,
+					revealedValues = p.Revealed?.RevealedValues,
+					revealedSources = BuildRevealedSources(p),
+					fact = p.Fact,
+					isEliminated = p.IsEliminated,
+					seatNumber = p.SeatNumber,
+					isConnected = p.IsConnected
+				};
 			}).ToList();
 		}
 		
@@ -510,7 +482,8 @@ namespace Bunker.Hubs
             }
 
             // Рандомізація номерів місць гравців
-            var seatNumbers = Enumerable.Range(1, room.PlayerCount).ToList();
+            var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+            var seatNumbers = Enumerable.Range(1, playersSnapshot.Count).ToList();
             // Fisher-Yates shuffle
             for (int i = seatNumbers.Count - 1; i > 0; i--)
             {
@@ -518,7 +491,7 @@ namespace Bunker.Hubs
                 (seatNumbers[i], seatNumbers[j]) = (seatNumbers[j], seatNumbers[i]);
             }
             int seatIdx = 0;
-            foreach (var p in room.Players.Values)
+            foreach (var p in playersSnapshot.Select(entry => entry.Value))
             {
                 p.SeatNumber = seatNumbers[seatIdx++];
             }
@@ -531,12 +504,17 @@ namespace Bunker.Hubs
                 currentTurnPlayerId = room.CurrentTurnPlayerId,
                 apocalypse = room.Apocalypse?.ToClientInfo(),
                 bunker = room.Bunker?.ToClientInfo(),
-                players = room.Players.Values.Select(p => new
+                players = playersSnapshot.Select(entry =>
                 {
-                    name = p.Name,
-                    connectionId = p.ConnectionId,
-                    isEliminated = p.IsEliminated,
-                    seatNumber = p.SeatNumber
+                    var p = entry.Value;
+
+                    return new
+                    {
+                        name = p.Name ?? "Unknown",
+                        connectionId = string.IsNullOrWhiteSpace(p.ConnectionId) ? entry.Key : p.ConnectionId,
+                        isEliminated = p.IsEliminated,
+                        seatNumber = p.SeatNumber
+                    };
                 })
             });
 

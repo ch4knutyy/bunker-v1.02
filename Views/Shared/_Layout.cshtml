@@ -3,7 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BUNKER ONLINE</title>
+    @{
+        var titleText = ViewData["Title"]?.ToString();
+        var pageTitle = string.IsNullOrWhiteSpace(titleText) || string.Equals(titleText, "Vault Judgment", System.StringComparison.OrdinalIgnoreCase)
+            ? "Vault Judgment"
+            : $"{titleText} - Vault Judgment";
+    }
+    <title>@pageTitle</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/tooltip.css" asp-append-version="true" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,20 +20,20 @@
     <!-- Header with Navigation -->
     <header class="main-header">
         <div class="header-container">
-            <div class="logo-section">
+            <a class="logo-section" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Vault Judgment">
                 <div class="logo-icon">🏚️</div>
                 <div class="logo-text">
-                    <span class="logo-bunker">BUNKER</span>
-                    <span class="logo-online">ONLINE</span>
+                    <span class="logo-bunker">Vault</span>
+                    <span class="logo-online">Judgment</span>
                 </div>
-            </div>
+            </a>
 
             <nav class="main-nav">
-                <a href="#" class="nav-link">Правила гри</a>
-                <a href="#" class="nav-link">Вікі</a>
                 <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Головна</a>
-                <a href="#" class="nav-link">Оновлення</a>
-                <a href="#" class="nav-link">Магазин</a>
+                <a href="/game" class="nav-link">Грати</a>
+                <a href="/game#lobbySection" class="nav-link">Кімнати</a>
+                <a href="/#author" class="nav-link">Автор</a>
+                <a href="https://github.com/ch4knutyy/bunker-v1.02" class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>
             </nav>
 
             <div class="header-actions">
@@ -36,7 +42,7 @@
                     <button type="button" class="lang-btn language-btn" data-lang="en" onclick="changeLanguage('en')">EN</button>
                     <button type="button" class="lang-btn language-btn" data-lang="ru" onclick="changeLanguage('ru')">RU</button>
                 </div>
-                <button class="profile-btn" title="Профіль">👤</button>
+                <a class="profile-btn" href="/#player-profile" title="Профіль">👤</a>
             </div>
         </div>
     </header>
@@ -46,21 +52,10 @@
         @RenderBody()
     </main>
 
-    <!-- Support Card -->
-    <div class="support-card">
-        <div class="support-icon">💳</div>
-        <div class="support-content">
-            <h3 class="support-title">Підтримати розробника</h3>
-            <p class="support-text">Допоможіть проекту розвиватися!</p>
-            <div class="card-number" id="cardNumber">4441 1110 4940 7970</div>
-            <button class="copy-btn" onclick="copyCardNumber()">📋 Копіювати</button>
-        </div>
-    </div>
-
     <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-container">
-            <p>&copy; 2026 - BUNKER ONLINE - Всі права захищено</p>
+            <p>&copy; 2026 - Vault Judgment - Всі права захищено</p>
             <div class="footer-links">
                 <a asp-area="" asp-controller="Home" asp-action="Privacy">Конфіденційність</a>
                 <a href="#">Умови використання</a>
@@ -73,22 +68,6 @@
     <script src="~/js/tooltip.js" asp-append-version="true"></script>
     
     <script>
-        // Copy card number function
-        function copyCardNumber() {
-            const cardNumber = document.getElementById('cardNumber').textContent;
-            navigator.clipboard.writeText(cardNumber).then(function() {
-                const btn = document.querySelector('.copy-btn');
-                btn.textContent = '✅ Скопійовано!';
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.textContent = '📋 Копіювати';
-                    btn.classList.remove('copied');
-                }, 2000);
-            }, function(err) {
-                console.error('Помилка копіювання: ', err);
-            });
-        }
-
         if (typeof window.changeLanguage !== 'function') {
             window.changeLanguage = function(lang) {
                 if (lang === 'gb') lang = 'en';

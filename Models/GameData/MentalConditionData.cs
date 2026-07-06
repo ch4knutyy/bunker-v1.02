@@ -10,9 +10,35 @@ namespace Bunker.Models.GameData
         
         [JsonPropertyName("назва")]
         public string Name { get; set; } = "";
+
+        [JsonPropertyName("name")]
+        public string NameAlias
+        {
+            get => Name;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value)) Name = value;
+            }
+        }
         
         [JsonPropertyName("категорія")]
         public string Category { get; set; } = "";
+
+        [JsonPropertyName("category")]
+        public string CategoryAlias
+        {
+            get => Category;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value)) Category = value;
+            }
+        }
+
+        [JsonPropertyName("hasSeverity")]
+        public bool? HasSeverity { get; set; }
+
+        [JsonPropertyName("localization")]
+        public Dictionary<string, ConditionLocalization>? Localization { get; set; }
         
         [JsonPropertyName("тон")]
         public string Tone { get; set; } = "";

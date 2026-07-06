@@ -1,0 +1,409 @@
+.landing-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.landing-hero {
+    position: relative;
+    min-height: 560px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.65) 48%, rgba(0, 0, 0, 0.2) 100%),
+        url('/uploads/bunkers/harbor_fortress_bunker.png') center / cover no-repeat;
+}
+
+.landing-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 38%;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.76), transparent);
+    pointer-events: none;
+}
+
+.landing-hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 740px;
+    padding: 5rem 3rem;
+}
+
+.landing-kicker,
+.section-eyebrow {
+    color: var(--color-green);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+    margin-bottom: 0.75rem;
+}
+
+.landing-hero h1 {
+    font-size: 4rem;
+    line-height: 1.05;
+    margin-bottom: 1.25rem;
+    text-shadow: 0 8px 28px rgba(0, 0, 0, 0.7);
+}
+
+.landing-lead {
+    max-width: 660px;
+    color: var(--color-text-secondary);
+    font-size: 1.15rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+}
+
+.landing-actions,
+.session-actions,
+.profile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+}
+
+.landing-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.75rem 1.15rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.landing-btn:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    transform: translateY(-2px);
+}
+
+.landing-btn--primary {
+    border-color: var(--color-gold);
+    background: var(--color-gold);
+    color: #111111;
+}
+
+.landing-btn--primary:hover {
+    background: var(--color-orange);
+    color: #111111;
+}
+
+.landing-btn--muted {
+    color: var(--color-text-secondary);
+}
+
+.previous-session {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid rgba(55, 201, 107, 0.35);
+    border-left: 5px solid var(--color-green);
+    border-radius: var(--radius-sm);
+    background: rgba(55, 201, 107, 0.08);
+}
+
+.previous-session[hidden] {
+    display: none;
+}
+
+.previous-session h2,
+.portfolio-panel h2,
+.author-panel h2,
+.section-heading h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1.85rem;
+}
+
+.session-details,
+.profile-summary-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0 0;
+}
+
+.session-details div,
+.profile-summary-list div {
+    min-width: 170px;
+}
+
+.session-details dt,
+.profile-summary-list dt {
+    color: var(--color-text-muted);
+    font-size: 0.84rem;
+    margin-bottom: 0.2rem;
+}
+
+.session-details dd,
+.profile-summary-list dd {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+.landing-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2rem;
+    padding: 2rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.portfolio-panel,
+.author-panel {
+    padding: 1rem 0;
+}
+
+.portfolio-panel p,
+.author-panel p {
+    color: var(--color-text-secondary);
+    max-width: 780px;
+    margin-top: 1rem;
+}
+
+.landing-section {
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.section-heading {
+    margin-bottom: 1.5rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.feature-item {
+    min-height: 88px;
+    display: flex;
+    align-items: center;
+    padding: 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, rgba(59, 139, 214, 0.12), rgba(55, 201, 107, 0.06));
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+.tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.tech-list span {
+    padding: 0.65rem 0.9rem;
+    border: 1px solid rgba(59, 139, 214, 0.45);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    background: rgba(59, 139, 214, 0.08);
+}
+
+.profile-section {
+    border-bottom: 0;
+}
+
+.profile-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.75fr) minmax(280px, 1fr) minmax(220px, 0.7fr);
+    gap: 1.25rem;
+    align-items: start;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-card);
+}
+
+.profile-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 80px;
+}
+
+.profile-avatar-preview {
+    width: 68px;
+    height: 68px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    color: var(--color-gold);
+    font-size: 2rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-name-preview {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.profile-meta-preview {
+    margin: 0.25rem 0 0;
+    color: var(--color-text-muted);
+}
+
+.profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.profile-field label,
+.profile-label {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.profile-input {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    padding: 0.75rem 0.9rem;
+    font: inherit;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 3px rgba(216, 155, 43, 0.18);
+}
+
+.avatar-picker,
+.color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.avatar-option,
+.color-option {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 1.25rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.avatar-option:hover,
+.avatar-option.is-selected,
+.color-option:hover,
+.color-option.is-selected {
+    border-color: var(--color-gold);
+    transform: translateY(-2px);
+}
+
+.color-option {
+    background: var(--swatch);
+}
+
+.color-option.is-selected {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+
+.profile-summary-list,
+.profile-actions {
+    grid-column: span 1;
+}
+
+@media (max-width: 1100px) {
+    .profile-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .profile-preview,
+    .profile-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 900px) {
+    .landing-hero {
+        min-height: 500px;
+        background:
+            linear-gradient(180deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.5) 100%),
+            url('/uploads/bunkers/harbor_fortress_bunker.png') center / cover no-repeat;
+    }
+
+    .landing-hero__content {
+        padding: 3.5rem 1.5rem;
+    }
+
+    .landing-hero h1 {
+        font-size: 3rem;
+    }
+
+    .landing-grid,
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .previous-session {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 640px) {
+    .landing-hero {
+        min-height: 460px;
+    }
+
+    .landing-hero h1 {
+        font-size: 2.4rem;
+    }
+
+    .landing-lead {
+        font-size: 1rem;
+    }
+
+    .landing-actions,
+    .session-actions,
+    .profile-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .landing-btn {
+        width: 100%;
+    }
+
+    .profile-form {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .profile-preview,
+    .profile-actions {
+        grid-column: auto;
+    }
+}

@@ -50,7 +50,19 @@ namespace Bunker.Services
                 return (false, "Кімнату не знайдено", null);
             }
 
-            if (!room.CanJoin)
+            if (player == null)
+            {
+                return (false, "Некоректний гравець", null);
+            }
+
+            EnsureRoomIdentity(room, roomId);
+            if (string.IsNullOrWhiteSpace(player.ConnectionId)) player.ConnectionId = connectionId;
+            if (string.IsNullOrWhiteSpace(player.Name)) player.Name = "Unknown";
+            if (string.IsNullOrWhiteSpace(player.StablePlayerId)) player.StablePlayerId = "";
+
+            var playersSnapshot = GetPlayersSnapshot(room, "JoinRoom", cleanupInvalid: true);
+
+            if (room.State != RoomState.Lobby || playersSnapshot.Count >= room.MaxPlayers)
             {
                 return (false, room.State != RoomState.Lobby ? "Гра вже почалась" : "Кімната заповнена", null);
             }
@@ -60,7 +72,7 @@ namespace Bunker.Services
                 return (false, "Невірний пароль", null);
             }
 
-            if (room.Players.ContainsKey(connectionId))
+            if (playersSnapshot.Any(entry => entry.Key == connectionId))
             {
                 return (false, "Ви вже в цій кімнаті", null);
             }
@@ -68,7 +80,7 @@ namespace Bunker.Services
             // Видаляємо з попередньої кімнати якщо був
             LeaveCurrentRoom(connectionId);
 
-            room.Players[connectionId] = player;
+            AddOrUpdatePlayer(room, connectionId, player);
             _playerToRoom[connectionId] = roomId;
 
             if (room.HostConnectionId == connectionId && string.IsNullOrWhiteSpace(room.HostPlayerId))
@@ -76,7 +88,7 @@ namespace Bunker.Services
                 room.HostPlayerId = GetPlayerKey(player);
             }
 
-            _logger.LogInformation($"Гравець {player.Name} приєднався до кімнати {room.Name} (ID: {room.Id})");
+            _logger.LogInformation($"Гравець {player.Name ?? "Unknown"} приєднався до кімнати {room.Name} (ID: {room.Id})");
             
             return (true, null, room);
         }
@@ -96,13 +108,15 @@ namespace Bunker.Services
                 return (false, null, false, null);
             }
 
-            room.Players.Remove(connectionId, out var player);
+            TryRemovePlayer(room, connectionId, out var player);
             var playerName = player?.Name ?? "Unknown";
 
             _logger.LogInformation($"Гравець {playerName} покинув кімнату {room.Name} (ID: {room.Id})");
 
             // Якщо кімната порожня - видаляємо
-            if (room.Players.Count == 0)
+            var playersSnapshot = GetPlayersSnapshot(room, "LeaveRoom", cleanupInvalid: true);
+
+            if (playersSnapshot.Count == 0)
             {
                 _rooms.TryRemove(roomId, out _);
                 _logger.LogInformation($"Кімната {room.Name} (ID: {room.Id}) видалена (порожня)");
@@ -113,11 +127,12 @@ namespace Bunker.Services
             string? newHostConnectionId = null;
             if (room.HostConnectionId == connectionId)
             {
-                var newHost = room.Players.First();
-                room.HostConnectionId = newHost.Key;
-                room.HostPlayerId = GetPlayerKey(newHost.Value);
-                room.HostName = newHost.Value.Name;
-                newHostConnectionId = newHost.Key;
+                if (!TryAssignNewHost(room, "LeaveRoom", out newHostConnectionId))
+                {
+                    _rooms.TryRemove(roomId, out _);
+                    _logger.LogWarning("Кімната {RoomId} видалена: не вдалося призначити нового хоста", roomId);
+                    return (true, room, true, null);
+                }
                 _logger.LogInformation($"Новий хост кімнати {room.Name}: {room.HostName}");
             }
 
@@ -133,18 +148,16 @@ namespace Bunker.Services
             {
                 if (_rooms.TryGetValue(oldRoomId, out var oldRoom))
                 {
-                    oldRoom.Players.Remove(connectionId);
-                    
-                    if (oldRoom.Players.Count == 0)
+                    TryRemovePlayer(oldRoom, connectionId, out _);
+                    var playersSnapshot = GetPlayersSnapshot(oldRoom, "LeaveCurrentRoom", cleanupInvalid: true);
+
+                    if (playersSnapshot.Count == 0)
                     {
                         _rooms.TryRemove(oldRoomId, out _);
                     }
                     else if (oldRoom.HostConnectionId == connectionId)
                     {
-                        var newHost = oldRoom.Players.First();
-                        oldRoom.HostConnectionId = newHost.Key;
-                        oldRoom.HostPlayerId = GetPlayerKey(newHost.Value);
-                        oldRoom.HostName = newHost.Value.Name;
+                        TryAssignNewHost(oldRoom, "LeaveCurrentRoom", out _);
                     }
                 }
                 _playerToRoom.TryRemove(connectionId, out _);
@@ -167,8 +180,10 @@ namespace Bunker.Services
 				return (false, "Тільки хост може почати гру", null);
 			}
 
+			var playersSnapshot = GetPlayersSnapshot(room, "StartGame", cleanupInvalid: true);
+
 			// Перевірка: мінімум гравців
-			if (room.Players.Count < 2)
+			if (playersSnapshot.Count < 2)
 			{
 				return (false, "Недостатньо гравців для початку", null);
 			}
@@ -183,7 +198,7 @@ namespace Bunker.Services
 			room.State = RoomState.Playing;
 
 			// (опціонально) очистити тимчасові стани
-			foreach (var player in room.Players.Values)
+			foreach (var player in playersSnapshot.Select(entry => entry.Value))
 			{
 				player.IsEliminated = false;
 				// можна ще щось скинути якщо треба
@@ -222,15 +237,212 @@ namespace Bunker.Services
             return roomId;
         }
 
+        private void EnsureRoomIdentity(Room room, string fallbackRoomId)
+        {
+            if (string.IsNullOrWhiteSpace(room.Id))
+            {
+                room.Id = fallbackRoomId;
+                _logger.LogWarning("Кімната без Id отримала fallback Id {RoomId}", fallbackRoomId);
+            }
+
+            if (string.IsNullOrWhiteSpace(room.Name))
+            {
+                room.Name = "Кімната";
+                _logger.LogWarning("Кімната {RoomId} мала порожню назву", room.Id);
+            }
+
+            room.HostConnectionId ??= "";
+            room.HostPlayerId ??= "";
+            room.HostName ??= "";
+        }
+
+        private List<KeyValuePair<string, Player>> GetPlayersSnapshot(Room? room, string operation, bool cleanupInvalid = false)
+        {
+            if (room == null)
+            {
+                _logger.LogWarning("{Operation}: знайдено null room", operation);
+                return new();
+            }
+
+            if (room.Players == null)
+            {
+                _logger.LogWarning("{Operation}: кімната {RoomId} має null Players, створюю порожню колекцію", operation, room.Id);
+                room.Players = new();
+                return new();
+            }
+
+            lock (room.Players)
+            {
+                var invalidKeys = room.Players
+                    .Where(entry => string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null)
+                    .Select(entry => entry.Key)
+                    .ToList();
+
+                if (invalidKeys.Count > 0)
+                {
+                    _logger.LogWarning(
+                        "{Operation}: кімната {RoomId} має {InvalidPlayersCount} некоректних гравців",
+                        operation,
+                        room.Id,
+                        invalidKeys.Count
+                    );
+
+                    if (cleanupInvalid)
+                    {
+                        foreach (var key in invalidKeys)
+                        {
+                            room.Players.Remove(key);
+
+                            if (!string.IsNullOrWhiteSpace(key))
+                            {
+                                _playerToRoom.TryRemove(key, out _);
+                            }
+                        }
+                    }
+                }
+
+                return room.Players
+                    .Where(entry => !string.IsNullOrWhiteSpace(entry.Key) && entry.Value != null)
+                    .ToList();
+            }
+        }
+
+        public static List<KeyValuePair<string, Player>> GetPlayersSnapshot(Room? room)
+        {
+            if (room?.Players == null)
+            {
+                return new();
+            }
+
+            lock (room.Players)
+            {
+                return room.Players
+                    .Where(entry => !string.IsNullOrWhiteSpace(entry.Key) && entry.Value != null)
+                    .ToList();
+            }
+        }
+
+        private bool TryRemovePlayer(Room room, string connectionId, out Player? player)
+        {
+            player = null;
+
+            if (room.Players == null)
+            {
+                return false;
+            }
+
+            lock (room.Players)
+            {
+                var removed = room.Players.Remove(connectionId, out var removedPlayer);
+                player = removedPlayer;
+                return removed;
+            }
+        }
+
+        private void AddOrUpdatePlayer(Room room, string connectionId, Player player)
+        {
+            if (room.Players == null)
+            {
+                room.Players = new();
+            }
+
+            lock (room.Players)
+            {
+                room.Players[connectionId] = player;
+            }
+        }
+
+        private bool TryGetRoomPlayer(Room room, string connectionId, out Player? player)
+        {
+            player = null;
+
+            if (room.Players == null)
+            {
+                return false;
+            }
+
+            lock (room.Players)
+            {
+                var found = room.Players.TryGetValue(connectionId, out var foundPlayer);
+                player = foundPlayer;
+                return found;
+            }
+        }
+
+        private bool TryAssignNewHost(Room room, string operation, out string? newHostConnectionId)
+        {
+            var playersSnapshot = GetPlayersSnapshot(room, operation, cleanupInvalid: true);
+            var newHost = playersSnapshot.FirstOrDefault();
+
+            if (newHost.Value == null)
+            {
+                newHostConnectionId = null;
+                return false;
+            }
+
+            newHostConnectionId = newHost.Key;
+            room.HostConnectionId = newHost.Key;
+            room.HostPlayerId = GetPlayerKey(newHost.Value);
+            room.HostName = newHost.Value.Name ?? "Unknown";
+
+            return true;
+        }
+
         /// <summary>
         /// Отримати всі публічні кімнати
         /// </summary>
         public IEnumerable<object> GetAllRooms()
         {
-            return _rooms.Values
-                .Where(r => r.State == RoomState.Lobby && r.Players.Values.Any(p => p.IsConnected))
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => r.ToPublicInfo());
+            var publicRooms = new List<(DateTime CreatedAt, object Info)>();
+
+            foreach (var entry in _rooms.ToArray())
+            {
+                var roomId = entry.Key;
+                var room = entry.Value;
+
+                try
+                {
+                    if (room == null)
+                    {
+                        _logger.LogWarning("GetAllRooms: словник містить null room для ключа {RoomId}", roomId);
+                        continue;
+                    }
+
+                    EnsureRoomIdentity(room, roomId);
+
+                    var playersSnapshot = GetPlayersSnapshot(room, "GetAllRooms", cleanupInvalid: true);
+                    var hasConnectedPlayers = playersSnapshot.Any(playerEntry => playerEntry.Value?.IsConnected == true);
+
+                    if (room.State != RoomState.Lobby || !hasConnectedPlayers)
+                    {
+                        continue;
+                    }
+
+                    publicRooms.Add((
+                        room.CreatedAt,
+                        new
+                        {
+                            id = room.Id,
+                            name = room.Name,
+                            hasPassword = room.HasPassword,
+                            playerCount = playersSnapshot.Count,
+                            maxPlayers = room.MaxPlayers,
+                            hostName = room.HostName ?? "",
+                            state = room.State.ToString(),
+                            canJoin = room.State == RoomState.Lobby && playersSnapshot.Count < room.MaxPlayers
+                        }
+                    ));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "GetAllRooms: пропускаю пошкоджену кімнату {RoomId}", roomId);
+                }
+            }
+
+            return publicRooms
+                .OrderByDescending(room => room.CreatedAt)
+                .Select(room => room.Info)
+                .ToList();
         }
 
         /// <summary>
@@ -239,7 +451,7 @@ namespace Bunker.Services
         public Player? GetPlayer(string connectionId)
         {
             var room = GetPlayerRoom(connectionId);
-            if (room != null && room.Players.TryGetValue(connectionId, out var player))
+            if (room != null && TryGetRoomPlayer(room, connectionId, out var player))
             {
                 return player;
             }
@@ -250,7 +462,7 @@ namespace Bunker.Services
         {
             return !string.IsNullOrWhiteSpace(player.StablePlayerId)
                 ? player.StablePlayerId
-                : player.ConnectionId;
+                : player.ConnectionId ?? "";
         }
 
         public bool TryResolvePlayer(Room room, string playerIdOrConnectionId, out string currentConnectionId, out Player player)
@@ -263,16 +475,18 @@ namespace Bunker.Services
                 return false;
             }
 
-            if (room.Players.TryGetValue(playerIdOrConnectionId, out var directPlayer))
+            if (TryGetRoomPlayer(room, playerIdOrConnectionId, out var directPlayer) && directPlayer != null)
             {
-                currentConnectionId = directPlayer.ConnectionId;
+                currentConnectionId = directPlayer.ConnectionId ?? "";
                 player = directPlayer;
                 return true;
             }
 
-            var entry = room.Players.FirstOrDefault(p =>
-                p.Value.StablePlayerId == playerIdOrConnectionId ||
-                p.Value.Id.ToString() == playerIdOrConnectionId);
+            var playersSnapshot = GetPlayersSnapshot(room, "TryResolvePlayer", cleanupInvalid: true);
+            var entry = playersSnapshot.FirstOrDefault(p =>
+                p.Value != null &&
+                (p.Value.StablePlayerId == playerIdOrConnectionId ||
+                p.Value.Id.ToString() == playerIdOrConnectionId));
 
             if (entry.Value == null)
             {
@@ -328,9 +542,9 @@ namespace Bunker.Services
         public void UpdatePlayer(string connectionId, Player player)
         {
             var room = GetPlayerRoom(connectionId);
-            if (room != null)
+            if (room != null && player != null)
             {
-                room.Players[connectionId] = player;
+                AddOrUpdatePlayer(room, connectionId, player);
             }
         }
 
@@ -360,7 +574,10 @@ namespace Bunker.Services
 				return (false, "Немає стабільного ID гравця", null, null, false);
 			}
 
-			var existingEntry = room.Players.FirstOrDefault(p => p.Value.StablePlayerId == stablePlayerId);
+			EnsureRoomIdentity(room, roomId);
+
+			var existingEntry = GetPlayersSnapshot(room, "RejoinRoom", cleanupInvalid: true)
+				.FirstOrDefault(p => p.Value != null && p.Value.StablePlayerId == stablePlayerId);
 
 			if (existingEntry.Value == null)
 			{
@@ -370,24 +587,17 @@ namespace Bunker.Services
 			var oldConnectionId = existingEntry.Key;
 			var player = existingEntry.Value;
 
-			room.Players.Remove(oldConnectionId);
+			TryRemovePlayer(room, oldConnectionId, out _);
 			_playerToRoom.TryRemove(oldConnectionId, out _);
 
 			player.ConnectionId = newConnectionId;
+			if (string.IsNullOrWhiteSpace(player.Name)) player.Name = playerName;
+			if (string.IsNullOrWhiteSpace(player.StablePlayerId)) player.StablePlayerId = stablePlayerId;
 			player.IsConnected = true;
 			player.DisconnectedAt = null;
 			var playerKey = GetPlayerKey(player);
 
-			foreach (var card in player.Cards)
-			{
-				card.OwnerConnectionId = playerKey;
-				if (card.TargetPlayerId == oldConnectionId || card.TargetPlayerId == newConnectionId)
-				{
-					card.TargetPlayerId = playerKey;
-				}
-			}
-
-			room.Players[newConnectionId] = player;
+			AddOrUpdatePlayer(room, newConnectionId, player);
 			_playerToRoom[newConnectionId] = roomId;
 
 			bool wasHost = room.HostConnectionId == oldConnectionId;
@@ -401,34 +611,6 @@ namespace Bunker.Services
 			if (room.CurrentTurnPlayerId == oldConnectionId)
 			{
 				room.CurrentTurnPlayerId = newConnectionId;
-			}
-
-			// Оновлюємо вже активовані спецкарти на новий connectionId
-			foreach (var activatedCard in room.ActivatedCards)
-			{
-				if (activatedCard.PlayerId == oldConnectionId)
-				{
-					activatedCard.PlayerId = playerKey;
-				}
-				if (activatedCard.TargetPlayerId == oldConnectionId || activatedCard.TargetPlayerId == newConnectionId)
-				{
-					activatedCard.TargetPlayerId = playerKey;
-				}
-				if (activatedCard.ConnectionId == oldConnectionId)
-				{
-					activatedCard.ConnectionId = newConnectionId;
-				}
-			}
-
-			foreach (var otherPlayer in room.Players.Values)
-			{
-				foreach (var card in otherPlayer.Cards)
-				{
-					if (card.TargetPlayerId == oldConnectionId || card.TargetPlayerId == newConnectionId)
-					{
-						card.TargetPlayerId = playerKey;
-					}
-				}
 			}
 
 			RemapVotingConnectionId(room, oldConnectionId, newConnectionId, playerKey);

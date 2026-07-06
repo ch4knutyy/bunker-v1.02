@@ -87,7 +87,7 @@ namespace Bunker.Models
         /// <summary>
         /// Кількість гравців
         /// </summary>
-        public int PlayerCount => Players.Count;
+        public int PlayerCount => Players?.Count ?? 0;
         
         /// <summary>
         /// Чи можна приєднатися
@@ -102,10 +102,12 @@ namespace Bunker.Models
         /// <summary>
         /// Перевірити чи є гравець хостом
         /// </summary>
-        public bool IsHost(string connectionId) => HostConnectionId == connectionId;
+        public bool IsHost(string connectionId) =>
+            !string.IsNullOrWhiteSpace(connectionId) && HostConnectionId == connectionId;
 
         public bool IsHost(Player player)
         {
+            if (player == null) return false;
             if (player.ConnectionId == HostConnectionId) return true;
             return !string.IsNullOrWhiteSpace(HostPlayerId) && player.StablePlayerId == HostPlayerId;
         }
@@ -118,17 +120,15 @@ namespace Bunker.Models
         {
             return new
             {
-                id = Id,
-                name = Name,
+                id = Id ?? "",
+                name = string.IsNullOrWhiteSpace(Name) ? "Кімната" : Name,
                 hasPassword = HasPassword,
                 playerCount = PlayerCount,
                 maxPlayers = MaxPlayers,
-                hostName = HostName,
+                hostName = HostName ?? "",
                 state = State.ToString(),
                 canJoin = CanJoin
             };
         }
-
-		public List<ActivatedCardInfo> ActivatedCards { get; set; } = new();
 	}
 }

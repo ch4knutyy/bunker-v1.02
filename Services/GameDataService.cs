@@ -59,6 +59,69 @@ namespace Bunker.Services
                                    $"{_items.Count} предметів, {_characterTraits.Count} рис характеру, " +
                                    $"{_phobias.Count} фобій, {_facts.Count} фактів, " +
                                    $"{_apocalypses.Count} апокаліпсисів, {_bunkers.Count} бункерів");
+
+            ValidateHealthConditions(_physicalConditions, "physical");
+            ValidateHealthConditions(_mentalConditions, "mental");
+        }
+
+        private void ValidateHealthConditions<T>(IReadOnlyList<T> conditions, string kind)
+        {
+            int severityTrue = 0;
+            int severityFalse = 0;
+
+            for (var i = 0; i < conditions.Count; i++)
+            {
+                var condition = conditions[i];
+                string id = GetStringProperty(condition, "Id") ?? $"{kind}_{i + 1}";
+                var hasSeverity = GetNullableBoolProperty(condition, "HasSeverity") ?? false;
+                var localization = GetLocalization(condition);
+
+                if (hasSeverity) severityTrue++;
+                else severityFalse++;
+
+                var uk = localization != null && localization.TryGetValue("uk", out var ukValue)
+                    ? ukValue
+                    : null;
+
+                if (string.IsNullOrWhiteSpace(uk?.Name))
+                {
+                    _logger.LogWarning("{Kind} condition {ConditionId} не має localization.uk.name", kind, id);
+                }
+
+                if (hasSeverity && (uk?.Descriptions == null || uk.Descriptions.Count == 0))
+                {
+                    _logger.LogWarning("{Kind} condition {ConditionId} має hasSeverity=true, але не має descriptions", kind, id);
+                }
+
+                if (!hasSeverity && string.IsNullOrWhiteSpace(uk?.Description))
+                {
+                    _logger.LogWarning("{Kind} condition {ConditionId} має hasSeverity=false, але не має description", kind, id);
+                }
+            }
+
+            _logger.LogInformation(
+                "{Kind} conditions loaded: {Total}; hasSeverity=true: {WithSeverity}; hasSeverity=false: {WithoutSeverity}",
+                kind,
+                conditions.Count,
+                severityTrue,
+                severityFalse
+            );
+        }
+
+        private static string? GetStringProperty<T>(T item, string propertyName)
+        {
+            return item?.GetType().GetProperty(propertyName)?.GetValue(item)?.ToString();
+        }
+
+        private static bool? GetNullableBoolProperty<T>(T item, string propertyName)
+        {
+            var value = item?.GetType().GetProperty(propertyName)?.GetValue(item);
+            return value is bool result ? result : null;
+        }
+
+        private static Dictionary<string, ConditionLocalization>? GetLocalization<T>(T item)
+        {
+            return item?.GetType().GetProperty("Localization")?.GetValue(item) as Dictionary<string, ConditionLocalization>;
         }
 
         private List<T> LoadJsonArray<T>(string path, params string[] possibleKeys)

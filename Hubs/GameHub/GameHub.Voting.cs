@@ -23,7 +23,13 @@ namespace Bunker.Hubs
             }
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            var room = roomId != null ? _roomService.GetRoom(roomId) : null;
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Голосування не активне");
+                return;
+            }
+
+            var room = _roomService.GetRoom(roomId);
 
             if (room == null)
             {
@@ -49,8 +55,14 @@ namespace Bunker.Hubs
                 Round = room.CurrentRound
             };
 
+            var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+            var activePlayers = playersSnapshot
+                .Select(entry => entry.Value)
+                .Where(p => !p.IsEliminated)
+                .ToList();
+
             // Додаємо всіх не елімінованих гравців як eligible voters
-            foreach (var player in room.Players.Values.Where(p => !p.IsEliminated))
+            foreach (var player in activePlayers)
             {
                 voting.EligibleVoters.Add(RoomService.GetPlayerKey(player));
             }
@@ -64,8 +76,7 @@ namespace Bunker.Hubs
                 votingId = voting.Id,
                 round = voting.Round,
                 eligibleVoters = voting.EligibleVoters.Count,
-                candidates = room.Players.Values
-                    .Where(p => !p.IsEliminated)
+                candidates = activePlayers
                     .Select(p => new { 
                         connectionId = p.ConnectionId, 
                         name = p.Name,
@@ -83,7 +94,13 @@ namespace Bunker.Hubs
         public async Task Vote(string targetConnectionId)
         {
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            var room = roomId != null ? _roomService.GetRoom(roomId) : null;
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                return;
+            }
+
+            var room = _roomService.GetRoom(roomId);
 
             if (room == null || room.CurrentVoting == null)
             {
@@ -171,7 +188,13 @@ namespace Bunker.Hubs
             }
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            var room = roomId != null ? _roomService.GetRoom(roomId) : null;
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Немає активного голосування");
+                return;
+            }
+
+            var room = _roomService.GetRoom(roomId);
 
             if (room == null || room.CurrentVoting == null || room.CurrentVoting.State != VotingState.Active)
             {
@@ -208,7 +231,10 @@ namespace Bunker.Hubs
             }
 
             // Повідомляємо всіх про результати
-            await Clients.Group(roomId).SendAsync("VotingEnded", voting.ToClientInfo(room.Players, showVotes: true));
+            var playersSnapshot = RoomService.GetPlayersSnapshot(room)
+                .ToDictionary(entry => entry.Key, entry => entry.Value);
+
+            await Clients.Group(roomId).SendAsync("VotingEnded", voting.ToClientInfo(playersSnapshot, showVotes: true));
 
             _logger.LogInformation($"Голосування завершено в кімнаті {room.Name}");
         }
@@ -225,7 +251,13 @@ namespace Bunker.Hubs
             }
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            var room = roomId != null ? _roomService.GetRoom(roomId) : null;
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Немає завершеного голосування для рішення");
+                return;
+            }
+
+            var room = _roomService.GetRoom(roomId);
 
             if (room == null || room.CurrentVoting == null || room.CurrentVoting.State != VotingState.Completed)
             {
@@ -260,7 +292,7 @@ namespace Bunker.Hubs
             room.CurrentVoting = null;
 
             // Скидаємо одноразові ефекти карт (захист, додаткові голоси)
-            foreach (var p in room.Players.Values)
+            foreach (var p in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
             {
                 p.IsProtectedFromVote = false;
                 p.ExtraVotes = 0;
@@ -299,7 +331,13 @@ namespace Bunker.Hubs
             }
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            var room = roomId != null ? _roomService.GetRoom(roomId) : null;
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Немає голосування для скасування");
+                return;
+            }
+
+            var room = _roomService.GetRoom(roomId);
 
             if (room == null || room.CurrentVoting == null)
             {

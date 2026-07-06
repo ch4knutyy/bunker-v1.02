@@ -2,8 +2,6 @@
     const ids = [
         "gameArea",
         "playersSection",
-        "myCardsSection",
-        "specialCardsTableSection",
         "developerMenu"
     ];
 
@@ -24,22 +22,6 @@ function safeRenderAll() {
         }
     } catch (e) {
         console.error("renderPlayersTable failed", e);
-    }
-
-    try {
-        if (typeof renderMyCards === "function") {
-            renderMyCards();
-        }
-    } catch (e) {
-        console.error("renderMyCards failed", e);
-    }
-
-    try {
-        if (typeof renderActivatedCardsTable === "function") {
-            renderActivatedCardsTable();
-        }
-    } catch (e) {
-        console.error("renderActivatedCardsTable failed", e);
     }
 
     try {

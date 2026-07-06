@@ -11,17 +11,15 @@ namespace Bunker.Hubs
     {
         private readonly CharacterGeneratorService _generator;
         private readonly RoomService _roomService;
-        private readonly CardService _cardService;
         private readonly GameDataService _gameData;
         private readonly ScenarioImageService _imageService;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, CardService cardService, GameDataService gameData, ScenarioImageService imageService, ILogger<GameHub> logger)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ILogger<GameHub> logger)
         {
             _generator = generator;
             _roomService = roomService;
-            _cardService = cardService;
             _gameData = gameData;
             _imageService = imageService;
             _logger = logger;
