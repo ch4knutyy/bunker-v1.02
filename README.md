@@ -77,6 +77,13 @@ wwwroot/data/
 
 ---
 
+## Roadmap
+
+Development plan: [ROADMAP.md](ROADMAP.md)
+Backlog: [docs/backlog.csv](docs/backlog.csv)
+
+---
+
 ## 👤 Автор
 
 Dima (ch4knutyy)
