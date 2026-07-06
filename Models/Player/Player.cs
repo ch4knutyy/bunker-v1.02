@@ -42,7 +42,5 @@ namespace Bunker.Models
         // Додаткові голоси (від спеціальної карти)
         public int ExtraVotes { get; set; } = 0;
         
-        // Спеціальні карти гравця
-        public List<SpecialCard> Cards { get; set; } = new();
     }
 }

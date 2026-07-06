@@ -38,13 +38,16 @@ namespace Bunker.Hubs
                     
                     if (room != null && !roomDeleted)
                     {
+                        var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+                        var newHostName = newHostConnectionId != null
+                            ? playersSnapshot.FirstOrDefault(entry => entry.Key == newHostConnectionId).Value?.Name
+                            : null;
+
                         await Clients.Group(room.Id).SendAsync("PlayerLeftRoom", new
                         {
                             connectionId = disconnectedId,
                             newHostConnectionId = newHostConnectionId,
-                            newHostName = newHostConnectionId != null && room.Players.ContainsKey(newHostConnectionId)
-                                ? room.Players[newHostConnectionId].Name
-                                : (string?)null
+                            newHostName = newHostName
                         });
                         
                         await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());

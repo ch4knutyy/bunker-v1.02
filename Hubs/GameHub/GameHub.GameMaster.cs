@@ -36,23 +36,28 @@ namespace Bunker.Hubs
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
             if (room == null) return;
 
-            var playersData = room.Players.Values.Select(p => new
+            var playersData = RoomService.GetPlayersSnapshot(room).Select(entry =>
             {
-                connectionId = p.ConnectionId,
-                name = p.Name,
-                isEliminated = p.IsEliminated,
-                personality = new { p.Personality.Age, p.Personality.Sex, p.Personality.SexOrientation, p.Personality.IsChildfree },
-                body = new { p.Body.Height, p.Body.Weight, p.Body.BodyType },
-                profession = new { p.Profession.Name, p.Profession.ExperienceYears, p.Profession.SelectedItem },
-                physicalHealth = p.PhysicalHealth,
-                mentalHealth = p.MentalHealth,
-                hobby = new { p.Hobby.Name },
-                characterTrait = new { p.CharacterTrait.Name },
-                phobia = new { p.Phobia.Name },
-                inventory = p.Inventory.Items.Select(i => i.Name),
-				fact = new { p.Fact.Type, p.Fact.Name, p.Fact.Description, Tooltip = CleanTooltip(p.Fact.Tooltip) },
-				revealed = p.Revealed
-            });
+                var p = entry.Value;
+
+                return new
+                {
+                    connectionId = string.IsNullOrWhiteSpace(p.ConnectionId) ? entry.Key : p.ConnectionId,
+                    name = p.Name ?? "Unknown",
+                    isEliminated = p.IsEliminated,
+                    personality = new { p.Personality.Age, p.Personality.Sex, p.Personality.SexOrientation, p.Personality.IsChildfree },
+                    body = new { p.Body.Height, p.Body.Weight, p.Body.BodyType },
+                    profession = new { p.Profession.Name, p.Profession.ExperienceYears, p.Profession.SelectedItem },
+                    physicalHealth = p.PhysicalHealth,
+                    mentalHealth = p.MentalHealth,
+                    hobby = new { p.Hobby.Name },
+                    characterTrait = new { p.CharacterTrait.Name },
+                    phobia = new { p.Phobia.Name },
+                    inventory = p.Inventory.Items.Select(i => i.Name),
+				    fact = new { p.Fact.Type, p.Fact.Name, p.Fact.Description, Tooltip = CleanTooltip(p.Fact.Tooltip) },
+				    revealed = p.Revealed
+                };
+            }).ToList();
 
             await Clients.Caller.SendAsync("AllPlayersData", playersData);
         }
@@ -345,7 +350,8 @@ namespace Bunker.Hubs
                 return;
             }
 
-            newCapacity = Math.Clamp(newCapacity, 1, room.PlayerCount);
+            var playerCount = RoomService.GetPlayersSnapshot(room).Count;
+            newCapacity = Math.Clamp(newCapacity, 1, Math.Max(1, playerCount));
             room.Bunker.Capacity = newCapacity;
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
@@ -569,7 +575,7 @@ namespace Bunker.Hubs
         /// <summary>
         /// Відправити нову подію з ефектом всім гравцям
         /// </summary>
-        public async Task TriggerNewEvent(string eventName, string eventDescription, string effectType = null, int? effectValue = null)
+        public async Task TriggerNewEvent(string eventName, string eventDescription, string? effectType = null, int? effectValue = null)
         {
             if (!IsCallerHost())
             {

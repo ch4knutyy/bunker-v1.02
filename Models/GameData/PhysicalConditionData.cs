@@ -10,9 +10,35 @@ namespace Bunker.Models.GameData
         
         [JsonPropertyName("назва")]
         public string Name { get; set; } = "";
+
+        [JsonPropertyName("name")]
+        public string NameAlias
+        {
+            get => Name;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value)) Name = value;
+            }
+        }
         
         [JsonPropertyName("категорія")]
         public string Category { get; set; } = "";
+
+        [JsonPropertyName("category")]
+        public string CategoryAlias
+        {
+            get => Category;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value)) Category = value;
+            }
+        }
+
+        [JsonPropertyName("hasSeverity")]
+        public bool? HasSeverity { get; set; }
+
+        [JsonPropertyName("localization")]
+        public Dictionary<string, ConditionLocalization>? Localization { get; set; }
         
         [JsonPropertyName("тон")]
         public string Tone { get; set; } = "";
@@ -56,14 +82,7 @@ namespace Bunker.Models.GameData
         [JsonPropertyName("_i18n")]
         public Dictionary<string, JsonElement>? I18n { get; set; }
         
-        // Додаткове поле для визначення чи потрібна ступінь тяжкості
-        // Визначається автоматично на основі категорії
-        public bool AllowSeverityDisplay => Category == "хронічний" || 
-                                            Category == "тривожний" ||
-                                            Name.Contains("Астма") ||
-                                            Name.Contains("Артрит") ||
-                                            Name.Contains("біль") ||
-                                            Name.Contains("Біль");
+        public bool AllowSeverityDisplay => HasSeverity ?? false;
     }
 
     public class PhysicalConditionsRoot

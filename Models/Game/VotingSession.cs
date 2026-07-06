@@ -95,6 +95,8 @@ namespace Bunker.Models
         /// </summary>
         public object ToClientInfo(Dictionary<string, Player> players, bool showVotes = false)
         {
+            players ??= new();
+
             var results = VoteCounts.Select(kv => new
             {
                 connectionId = ResolveConnectionId(players, kv.Key) ?? kv.Key,
@@ -129,12 +131,17 @@ namespace Bunker.Models
 
         private static Player? ResolvePlayer(Dictionary<string, Player> players, string playerIdOrConnectionId)
         {
-            if (players.TryGetValue(playerIdOrConnectionId, out var byConnectionId))
+            if (string.IsNullOrWhiteSpace(playerIdOrConnectionId))
+            {
+                return null;
+            }
+
+            if (players.TryGetValue(playerIdOrConnectionId, out var byConnectionId) && byConnectionId != null)
             {
                 return byConnectionId;
             }
 
-            return players.Values.FirstOrDefault(p =>
+            return players.Values.Where(p => p != null).FirstOrDefault(p =>
                 p.StablePlayerId == playerIdOrConnectionId ||
                 p.Id.ToString() == playerIdOrConnectionId);
         }

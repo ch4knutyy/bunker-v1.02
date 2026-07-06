@@ -1,4 +1,4 @@
-﻿const connection = new signalR.HubConnectionBuilder()
+const connection = new signalR.HubConnectionBuilder()
     .withUrl("/gameHub")
     .withAutomaticReconnect()
     .build();
@@ -14,6 +14,9 @@ connection.start()
             
             // Спроба перепідключення до існуючої сесії
             if (!tryRejoin()) {
+                if (initialInviteRoomId) {
+                    openJoinRoomModal(initialInviteRoomId);
+                }
                 connection.invoke("GetRooms");
             }
             
@@ -36,15 +39,13 @@ connection.start()
     let roomPlayers = {}; // connectionId -> player info
     let gmPlayersData = {}; // Повні дані гравців для GM
     let selectedPlayerForGM = null;
-    let pendingCardApprovals = []; // Запити на підтвердження карт
-    let currentCardToUse = null;
     let pendingJoinRoomId = null; // Для закриття модалки після успішного join
     let hostToken = null;
     let currentApocalypse = null;
     let currentBunker = null;
     let currentVoting = null;
     let myVote = null;
-    let activatedCardsTable = {}; // connectionId -> [card1, card2]
+    let initialInviteRoomId = getRoomIdFromPath();
 
     // ==================== GLOBAL HELPER FUNCTIONS ====================
 
@@ -59,16 +60,18 @@ connection.start()
             .replace(/'/g, '&#039;');
     }
 
+    function getRoomIdFromPath() {
+        const match = window.location.pathname.match(/^\/room\/([^/?#]+)/i);
+        return match ? decodeURIComponent(match[1]) : null;
+    }
+
     const uiTranslations = {
         uk: {
-            createRoom: "Створити кімнату", availableRooms: "Доступні кімнати", loadingRooms: "Завантаження кімнат...", noRooms: "Немає доступних кімнат. Створіть свою!", playerNamePlaceholder: "Ваше ім'я...", roomNamePlaceholder: "Назва кімнати...", maxPlayersPlaceholder: "Макс. гравців", passwordOptionalPlaceholder: "Пароль (необов'язково)", passwordIfAnyPlaceholder: "Пароль (якщо є)", room: "Кімната", lobby: "Лобі", game: "Гра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосування", startGame: "Почати гру", leaveRoom: "Покинути кімнату", players: "Гравці", host: "Хост", you: "Ви", eliminated: "ВИБУВ", myCharacteristics: "Мої характеристики (бачу тільки я)", mySpecialCards: "🃏 Мої спеціальні карти", bunkerAndApocalypse: "🎭 Бункер та Апокаліпсис", apocalypse: "Апокаліпсис", bunker: "Бункер", playersInBunker: "Гравці в бункері:", specialCardsTable: "Таблиця спец. можливостей", gameEvents: "Ігрові події", eventsHistory: "Історія подій", eventsPlaceholder: "Тут будуть відображатися події гри...", reveal: "Розкрити всім", revealed: "Відкрито для всіх", hidden: "Приховано", unknown: "Невідомо", profession: "Професія", inventory: "Інвентар", vote: "Голосувати", roomCode: "Код кімнати", name: "Назва", age: "Вік", years: "років", sex: "Стать", orientation: "Орієнтація", personality: "Особистість", body: "Статура", height: "Зріст", weight: "Вага", bodyType: "Тип тіла", physicalHealth: "Фізичне здоров'я", mentalHealth: "Психічне здоров'я", state: "Стан", hobby: "Хобі", activity: "Заняття", characterTrait: "Риса характеру", trait: "Риса", phobia: "Фобія", fear: "Страх", items: "Предмети", fact: "Факт", empty: "Порожній", noFact: "Немає факту", noData: "Немає даних гравця", noCards: "Немає карт", use: "Використати", close: "Закрити", capacity: "Місткість", condition: "Стан", supplies: "Запаси", location: "Локація", threats: "⚠️ Загрози:", requirements: "✓ Потрібно:", facilities: "🏗️ Приміщення:", resources: "📦 Ресурси:", problems: "⚠️ Проблеми:", survivalChance: "Шанс виживання", duration: "Тривалість", threatLevel: "Загроза", uploadImage: "📤 Завантажити зображення", generatePrompt: "✨ Згенерувати промпт", remove: "🗑️ Видалити", noActivatedCards: "Ще ніхто не активував спецкарти", ordinary: "Звичайна", rare: "Рідкісна", epic: "Епічна", legendary: "Легендарна", available: "✓ Доступна", pending: "⏳ Очікує", approved: "✓ Підтверджена", used: "✗ Використана", rejected: "✗ Відхилена"
-        },
+            createRoom: "Створити кімнату", availableRooms: "Доступні кімнати", loadingRooms: "Завантаження кімнат...", noRooms: "Немає доступних кімнат. Створіть свою!", playerNamePlaceholder: "Ваше ім'я...", roomNamePlaceholder: "Назва кімнати...", maxPlayersPlaceholder: "Макс. гравців", passwordOptionalPlaceholder: "Пароль (необов'язково)", passwordIfAnyPlaceholder: "Пароль (якщо є)", room: "Кімната", lobby: "Лобі", game: "Гра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосування", startGame: "Почати гру", leaveRoom: "Покинути кімнату", players: "Гравці", host: "Хост", you: "Ви", eliminated: "ВИБУВ", myCharacteristics: "Мої характеристики (бачу тільки я)", bunkerAndApocalypse: "🎭 Бункер та Апокаліпсис", apocalypse: "Апокаліпсис", bunker: "Бункер", playersInBunker: "Гравці в бункері:", gameEvents: "Ігрові події", eventsHistory: "Історія подій", eventsPlaceholder: "Тут будуть відображатися події гри...", reveal: "Розкрити всім", revealed: "Відкрито для всіх", hidden: "Приховано", unknown: "Невідомо", profession: "Професія", inventory: "Інвентар", vote: "Голосувати", roomCode: "Код кімнати", name: "Назва", age: "Вік", years: "років", sex: "Стать", orientation: "Орієнтація", personality: "Особистість", body: "Статура", height: "Зріст", weight: "Вага", bodyType: "Тип тіла", physicalHealth: "Фізичне здоров'я", mentalHealth: "Психічне здоров'я", state: "Стан", hobby: "Хобі", activity: "Заняття", characterTrait: "Риса характеру", trait: "Риса", phobia: "Фобія", fear: "Страх", items: "Предмети", fact: "Факт", empty: "Порожній", noFact: "Немає факту", noData: "Немає даних гравця", use: "Використати", close: "Закрити", capacity: "Місткість", condition: "Стан", supplies: "Запаси", location: "Локація", threats: "⚠️ Загрози:", requirements: "✓ Потрібно:", facilities: "🏗️ Приміщення:", resources: "📦 Ресурси:", problems: "⚠️ Проблеми:", survivalChance: "Шанс виживання", duration: "Тривалість", threatLevel: "Загроза", uploadImage: "📤 Завантажити зображення", generatePrompt: "✨ Згенерувати промпт", remove: "🗑️ Видалити" },
         en: {
-            createRoom: "Create Room", availableRooms: "Available Rooms", loadingRooms: "Loading rooms...", noRooms: "No available rooms. Create your own!", playerNamePlaceholder: "Your name...", roomNamePlaceholder: "Room name...", maxPlayersPlaceholder: "Max players", passwordOptionalPlaceholder: "Password (optional)", passwordIfAnyPlaceholder: "Password (if any)", room: "Room", lobby: "Lobby", game: "Game", gmPanel: "🎮 GM Panel", voting: "🗳️ Voting", startGame: "Start Game", leaveRoom: "Leave Room", players: "Players", host: "Host", you: "You", eliminated: "ELIMINATED", myCharacteristics: "My characteristics (only I can see)", mySpecialCards: "🃏 My Special Cards", bunkerAndApocalypse: "🎭 Bunker and Apocalypse", apocalypse: "Apocalypse", bunker: "Bunker", playersInBunker: "Players in bunker:", specialCardsTable: "Special Abilities Table", gameEvents: "Game Events", eventsHistory: "Event History", eventsPlaceholder: "Game events will appear here...", reveal: "Reveal to all", revealed: "Revealed to all", hidden: "Hidden", unknown: "Unknown", profession: "Profession", inventory: "Inventory", vote: "Vote", roomCode: "Room Code", name: "Name", age: "Age", years: "years", sex: "Sex", orientation: "Orientation", personality: "Personality", body: "Body", height: "Height", weight: "Weight", bodyType: "Body type", physicalHealth: "Physical health", mentalHealth: "Mental health", state: "State", hobby: "Hobby", activity: "Activity", characterTrait: "Character trait", trait: "Trait", phobia: "Phobia", fear: "Fear", items: "Items", fact: "Fact", empty: "Empty", noFact: "No fact", noData: "No player data", noCards: "No cards", use: "Use", close: "Close", capacity: "Capacity", condition: "Condition", supplies: "Supplies", location: "Location", threats: "⚠️ Threats:", requirements: "✓ Required:", facilities: "🏗️ Facilities:", resources: "📦 Resources:", problems: "⚠️ Problems:", survivalChance: "Survival chance", duration: "Duration", threatLevel: "Threat", uploadImage: "📤 Upload image", generatePrompt: "✨ Generate prompt", remove: "🗑️ Remove", noActivatedCards: "No one has activated special cards yet", ordinary: "Common", rare: "Rare", epic: "Epic", legendary: "Legendary", available: "✓ Available", pending: "⏳ Pending", approved: "✓ Approved", used: "✗ Used", rejected: "✗ Rejected"
-        },
+            createRoom: "Create Room", availableRooms: "Available Rooms", loadingRooms: "Loading rooms...", noRooms: "No available rooms. Create your own!", playerNamePlaceholder: "Your name...", roomNamePlaceholder: "Room name...", maxPlayersPlaceholder: "Max players", passwordOptionalPlaceholder: "Password (optional)", passwordIfAnyPlaceholder: "Password (if any)", room: "Room", lobby: "Lobby", game: "Game", gmPanel: "🎮 GM Panel", voting: "🗳️ Voting", startGame: "Start Game", leaveRoom: "Leave Room", players: "Players", host: "Host", you: "You", eliminated: "ELIMINATED", myCharacteristics: "My characteristics (only I can see)", bunkerAndApocalypse: "🎭 Bunker and Apocalypse", apocalypse: "Apocalypse", bunker: "Bunker", playersInBunker: "Players in bunker:", gameEvents: "Game Events", eventsHistory: "Event History", eventsPlaceholder: "Game events will appear here...", reveal: "Reveal to all", revealed: "Revealed to all", hidden: "Hidden", unknown: "Unknown", profession: "Profession", inventory: "Inventory", vote: "Vote", roomCode: "Room Code", name: "Name", age: "Age", years: "years", sex: "Sex", orientation: "Orientation", personality: "Personality", body: "Body", height: "Height", weight: "Weight", bodyType: "Body type", physicalHealth: "Physical health", mentalHealth: "Mental health", state: "State", hobby: "Hobby", activity: "Activity", characterTrait: "Character trait", trait: "Trait", phobia: "Phobia", fear: "Fear", items: "Items", fact: "Fact", empty: "Empty", noFact: "No fact", noData: "No player data", use: "Use", close: "Close", capacity: "Capacity", condition: "Condition", supplies: "Supplies", location: "Location", threats: "⚠️ Threats:", requirements: "✓ Required:", facilities: "🏗️ Facilities:", resources: "📦 Resources:", problems: "⚠️ Problems:", survivalChance: "Survival chance", duration: "Duration", threatLevel: "Threat", uploadImage: "📤 Upload image", generatePrompt: "✨ Generate prompt", remove: "🗑️ Remove" },
         ru: {
-            createRoom: "Создать комнату", availableRooms: "Доступные комнаты", loadingRooms: "Загрузка комнат...", noRooms: "Нет доступных комнат. Создайте свою!", playerNamePlaceholder: "Ваше имя...", roomNamePlaceholder: "Название комнаты...", maxPlayersPlaceholder: "Макс. игроков", passwordOptionalPlaceholder: "Пароль (необязательно)", passwordIfAnyPlaceholder: "Пароль (если есть)", room: "Комната", lobby: "Лобби", game: "Игра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосование", startGame: "Начать игру", leaveRoom: "Покинуть комнату", players: "Игроки", host: "Ведущий", you: "Вы", eliminated: "ВЫБЫЛ", myCharacteristics: "Мои характеристики (вижу только я)", mySpecialCards: "🃏 Мои специальные карты", bunkerAndApocalypse: "🎭 Бункер и Апокалипсис", apocalypse: "Апокалипсис", bunker: "Бункер", playersInBunker: "Игроки в бункере:", specialCardsTable: "Таблица спец. возможностей", gameEvents: "Игровые события", eventsHistory: "История событий", eventsPlaceholder: "Здесь будут отображаться события игры...", reveal: "Раскрыть всем", revealed: "Открыто для всех", hidden: "Скрыто", unknown: "Неизвестно", profession: "Профессия", inventory: "Инвентарь", vote: "Голосовать", roomCode: "Код комнаты", name: "Название", age: "Возраст", years: "лет", sex: "Пол", orientation: "Ориентация", personality: "Личность", body: "Телосложение", height: "Рост", weight: "Вес", bodyType: "Тип тела", physicalHealth: "Физическое здоровье", mentalHealth: "Психическое здоровье", state: "Состояние", hobby: "Хобби", activity: "Занятие", characterTrait: "Черта характера", trait: "Черта", phobia: "Фобия", fear: "Страх", items: "Предметы", fact: "Факт", empty: "Пусто", noFact: "Нет факта", noData: "Нет данных игрока", noCards: "Нет карт", use: "Использовать", close: "Закрыть", capacity: "Вместимость", condition: "Состояние", supplies: "Запасы", location: "Локация", threats: "⚠️ Угрозы:", requirements: "✓ Нужно:", facilities: "🏗️ Помещения:", resources: "📦 Ресурсы:", problems: "⚠️ Проблемы:", survivalChance: "Шанс выживания", duration: "Длительность", threatLevel: "Угроза", uploadImage: "📤 Загрузить изображение", generatePrompt: "✨ Сгенерировать промпт", remove: "🗑️ Удалить", noActivatedCards: "Еще никто не активировал спецкарты", ordinary: "Обычная", rare: "Редкая", epic: "Эпическая", legendary: "Легендарная", available: "✓ Доступна", pending: "⏳ Ожидает", approved: "✓ Подтверждена", used: "✗ Использована", rejected: "✗ Отклонена"
-        }
+            createRoom: "Создать комнату", availableRooms: "Доступные комнаты", loadingRooms: "Загрузка комнат...", noRooms: "Нет доступных комнат. Создайте свою!", playerNamePlaceholder: "Ваше имя...", roomNamePlaceholder: "Название комнаты...", maxPlayersPlaceholder: "Макс. игроков", passwordOptionalPlaceholder: "Пароль (необязательно)", passwordIfAnyPlaceholder: "Пароль (если есть)", room: "Комната", lobby: "Лобби", game: "Игра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосование", startGame: "Начать игру", leaveRoom: "Покинуть комнату", players: "Игроки", host: "Ведущий", you: "Вы", eliminated: "ВЫБЫЛ", myCharacteristics: "Мои характеристики (вижу только я)", bunkerAndApocalypse: "🎭 Бункер и Апокалипсис", apocalypse: "Апокалипсис", bunker: "Бункер", playersInBunker: "Игроки в бункере:", gameEvents: "Игровые события", eventsHistory: "История событий", eventsPlaceholder: "Здесь будут отображаться события игры...", reveal: "Раскрыть всем", revealed: "Открыто для всех", hidden: "Скрыто", unknown: "Неизвестно", profession: "Профессия", inventory: "Инвентарь", vote: "Голосовать", roomCode: "Код комнаты", name: "Название", age: "Возраст", years: "лет", sex: "Пол", orientation: "Ориентация", personality: "Личность", body: "Телосложение", height: "Рост", weight: "Вес", bodyType: "Тип тела", physicalHealth: "Физическое здоровье", mentalHealth: "Психическое здоровье", state: "Состояние", hobby: "Хобби", activity: "Занятие", characterTrait: "Черта характера", trait: "Черта", phobia: "Фобия", fear: "Страх", items: "Предметы", fact: "Факт", empty: "Пусто", noFact: "Нет факта", noData: "Нет данных игрока", use: "Использовать", close: "Закрыть", capacity: "Вместимость", condition: "Состояние", supplies: "Запасы", location: "Локация", threats: "⚠️ Угрозы:", requirements: "✓ Нужно:", facilities: "🏗️ Помещения:", resources: "📦 Ресурсы:", problems: "⚠️ Проблемы:", survivalChance: "Шанс выживания", duration: "Длительность", threatLevel: "Угроза", uploadImage: "📤 Загрузить изображение", generatePrompt: "✨ Сгенерировать промпт", remove: "🗑️ Удалить" }
     };
 
     function getCurrentLanguage() {
@@ -94,6 +97,10 @@ connection.start()
         return source?._i18n || source?.i18n || source?.I18n || null;
     }
 
+    function getLocalization(source) {
+        return source?.localization || source?.Localization || null;
+    }
+
     function getRawField(source, field) {
         if (!source) return "";
         const pascal = field ? field.charAt(0).toUpperCase() + field.slice(1) : field;
@@ -102,6 +109,13 @@ connection.start()
 
     function getLocalizedValue(source, field, lang = getCurrentLanguage()) {
         if (!source) return "";
+        const localization = getLocalization(source);
+        const localizedHealth = localization?.[lang] || localization?.uk || Object.values(localization || {}).find(Boolean);
+        if (localizedHealth) {
+            if ((field === "name" || field === "назва") && localizedHealth.name) return localizedHealth.name;
+            if ((field === "description" || field === "опис") && localizedHealth.description) return localizedHealth.description;
+        }
+
         const localized = getI18n(source)?.[field];
         if (!localized) return getRawField(source, field) ?? "";
         return localized[lang] || localized.uk || getRawField(source, field) || "";
@@ -158,10 +172,7 @@ connection.start()
         setPlaceholder('#joinRoomPassword', t('passwordIfAnyPlaceholder'));
 
         setText('#myPlayerSection > .section-title', t('myCharacteristics'));
-        const myCardsTitle = document.querySelector('#myPlayerSection > .section-title[style]');
-        if (myCardsTitle) myCardsTitle.textContent = t('mySpecialCards');
         setText('.scenario-section-header .section-header-title', t('bunkerAndApocalypse'));
-        setText('#specialCardsTableSection .section-title', t('specialCardsTable'));
         setText('.events-section-main > .section-title', t('gameEvents'));
         setText('.events-history-title', t('eventsHistory'));
 
@@ -188,21 +199,12 @@ connection.start()
             if (headerLabels[index]) th.textContent = headerLabels[index];
         });
 
-        const cardHeaders = document.querySelectorAll('#specialCardsTable thead th');
-        const cardHeaderLabels = ['№', t('name'), `${t('use')} 1`, `${t('use')} 2`];
-        cardHeaders.forEach((th, index) => {
-            if (cardHeaderLabels[index]) th.textContent = cardHeaderLabels[index];
-        });
     }
 
     function rerenderLocalizedUI() {
         renderCurrentGameUI();
         if (currentVoting && document.getElementById('votingPanel')?.style.display !== 'none' && typeof showVotingPanel === "function") showVotingPanel(currentVoting);
         if (currentVoting && document.getElementById('votingResultsPanel')?.style.display !== 'none' && typeof showVotingResults === "function") showVotingResults(currentVoting);
-        if (currentCardToUse && document.getElementById('useCardModal')?.style.display !== 'none') {
-            document.getElementById('useCardTitle').textContent = `${t('use')}: ${getLocalizedValue(currentCardToUse, 'name') || currentCardToUse.name}`;
-            document.getElementById('useCardDescription').textContent = getLocalizedValue(currentCardToUse, 'description') || currentCardToUse.description || '';
-        }
     }
 
     function renderCurrentGameUI() {
@@ -217,19 +219,9 @@ connection.start()
                 if (container) container.innerHTML = `<p style="color: var(--color-text-muted);">${t('noData')}</p>`;
             }
         }
-        if (typeof renderMyCards === "function") {
-            try {
-                renderMyCards();
-            } catch (error) {
-                console.warn("Failed to render current player special cards", error);
-                const container = document.getElementById("myCardsSection");
-                if (container) container.innerHTML = `<p style="color: var(--color-text-muted);">${t('noCards')}</p>`;
-            }
-        }
         if (currentApocalypse && typeof renderApocalypse === "function") renderApocalypse(currentApocalypse);
         if (currentBunker && typeof renderBunker === "function") renderBunker(currentBunker);
         if (typeof updatePlayersTable === "function") updatePlayersTable();
-        if (typeof updateActivatedCardsTable === "function") updateActivatedCardsTable();
         if (typeof updateGMPlayerSelect === "function") updateGMPlayerSelect();
         if (selectedPlayerForGM && typeof loadPlayerDataForGM === "function") loadPlayerDataForGM();
     }
@@ -241,23 +233,20 @@ connection.start()
         roomPlayers = {};
         gmPlayersData = {};
         selectedPlayerForGM = null;
-        pendingCardApprovals = [];
-        currentCardToUse = null;
         pendingJoinRoomId = null;
         hostToken = null;
         currentApocalypse = null;
         currentBunker = null;
         currentVoting = null;
         myVote = null;
-        activatedCardsTable = {};
         if (typeof gmRevealedChars !== "undefined") gmRevealedChars = {};
 
-        ['myPlayerCards', 'myCardsSection', 'playersTableBody', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'specialCardsTableBody', 'votingCandidates', 'votingResultsContent'].forEach(id => {
+        ['myPlayerCards', 'playersTableBody', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.innerHTML = '';
         });
 
-        ['gameSection', 'votingPanel', 'votingResultsPanel', 'specialCardsTableSection', 'gmPanel', 'gmPlayerInfo'].forEach(id => {
+        ['gameSection', 'votingPanel', 'votingResultsPanel', 'gmPanel', 'gmPlayerInfo'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
@@ -271,20 +260,16 @@ connection.start()
             "currentRoomId",
             "currentPlayerId",
             "playerCharacter",
-            "specialCards",
             "currentRoom",
-            "currentPlayerCharacter",
-            "currentPlayerSpecialCards"
+            "currentPlayerCharacter"
         ].forEach(key => localStorage.removeItem(key));
 
         [
             "currentRoomId",
             "currentPlayerId",
             "playerCharacter",
-            "specialCards",
             "currentRoom",
-            "currentPlayerCharacter",
-            "currentPlayerSpecialCards"
+            "currentPlayerCharacter"
         ].forEach(key => sessionStorage.removeItem(key));
 
         localStorage.setItem(cleanupKey, "done");
@@ -356,7 +341,12 @@ connection.start()
             Moderate: 'moderate',
             Severe: 'severe',
             VerySevere: 'verySevere',
-            Critical: 'critical'
+            Critical: 'critical',
+            light: 'light',
+            medium: 'medium',
+            hard: 'hard',
+            veryHard: 'veryHard',
+            critical: 'critical'
         };
         if (stableMap[stableCode]) return stableMap[stableCode];
 
@@ -380,9 +370,9 @@ connection.start()
         const code = getSeverityCode(source);
         if (!code) return '';
         const labels = {
-            uk: { mild: 'Легка форма', moderate: 'Середня форма', severe: 'Важка форма', verySevere: 'Дуже важка форма', critical: 'Критична форма' },
-            en: { mild: 'Mild form', moderate: 'Moderate form', severe: 'Severe form', verySevere: 'Very severe form', critical: 'Critical form' },
-            ru: { mild: 'Лёгкая форма', moderate: 'Средняя форма', severe: 'Тяжёлая форма', verySevere: 'Очень тяжёлая форма', critical: 'Критическая форма' }
+            uk: { light: 'Легка форма', medium: 'Середня форма', hard: 'Важка форма', veryHard: 'Дуже важка форма', critical: 'Критична форма', mild: 'Легка форма', moderate: 'Середня форма', severe: 'Важка форма' },
+            en: { light: 'Mild', medium: 'Moderate', hard: 'Severe', veryHard: 'Very severe', critical: 'Critical', mild: 'Mild', moderate: 'Moderate', severe: 'Severe' },
+            ru: { light: 'Лёгкая форма', medium: 'Средняя форма', hard: 'Тяжёлая форма', veryHard: 'Очень тяжёлая форма', critical: 'Критическая форма', mild: 'Лёгкая форма', moderate: 'Средняя форма', severe: 'Тяжёлая форма' }
         };
         return labels[getCurrentLanguage()]?.[code] || '';
     }
@@ -394,6 +384,11 @@ connection.start()
 
         const labels = {
             uk: {
+                light: "легка форма",
+                medium: "середня форма",
+                hard: "важка форма",
+                veryHard: "дуже важка форма",
+                critical: "критична форма",
                 Mild: "легка форма",
                 Moderate: "середня форма",
                 Severe: "важка форма",
@@ -401,6 +396,11 @@ connection.start()
                 Critical: "критична форма"
             },
             ru: {
+                light: "лёгкая форма",
+                medium: "средняя форма",
+                hard: "тяжёлая форма",
+                veryHard: "очень тяжёлая форма",
+                critical: "критическая форма",
                 Mild: "лёгкая форма",
                 Moderate: "средняя форма",
                 Severe: "тяжёлая форма",
@@ -408,11 +408,16 @@ connection.start()
                 Critical: "критическая форма"
             },
             en: {
-                Mild: "mild form",
-                Moderate: "moderate form",
-                Severe: "severe form",
-                VerySevere: "very severe form",
-                Critical: "critical form"
+                light: "mild",
+                medium: "moderate",
+                hard: "severe",
+                veryHard: "very severe",
+                critical: "critical",
+                Mild: "mild",
+                Moderate: "moderate",
+                Severe: "severe",
+                VerySevere: "very severe",
+                Critical: "critical"
             }
         };
 
@@ -513,8 +518,8 @@ connection.start()
 
     function buildLocalizedTooltip(source, kind) {
         if (!source) return '';
-        if (kind === 'physicalHealth') {
-            return buildPhysicalHealthTooltip(source);
+        if (kind === 'physicalHealth' || kind === 'mentalHealth') {
+            return buildHealthConditionTooltip(source);
         }
         const isHealth = kind === 'physicalHealth' || kind === 'mentalHealth';
         const name = kind === 'fact'
@@ -531,6 +536,40 @@ connection.start()
             ? `${healthSeverity.charAt(0).toUpperCase()}${healthSeverity.slice(1)} ${String(name).toLowerCase()}`
             : shouldShowSeverity(source, kind) ? `${getSeverityLabel(source)} ${String(name).toLowerCase()}` : '';
         return cleanTooltipText([prefix, description, effect].filter(Boolean).join('. '));
+    }
+
+    function getLocalizedHealthDescription(source, lang = getCurrentLanguage()) {
+        const localization = getLocalization(source);
+        const languageOrder = [lang, 'uk', ...Object.keys(localization || {})].filter((value, index, array) => value && array.indexOf(value) === index);
+        const severityCode = source?.severityCode || source?.SeverityCode || getSeverityCode(source);
+        const hasSeverity = conditionShouldShowSeverity(source) && severityCode && severityCode !== 'none' && severityCode !== 'None';
+
+        if (localization) {
+            if (hasSeverity) {
+                for (const language of languageOrder) {
+                    const descriptions = localization[language]?.descriptions || localization[language]?.Descriptions;
+                    const value = descriptions?.[severityCode];
+                    if (value) return value;
+                }
+
+                for (const language of languageOrder) {
+                    const descriptions = localization[language]?.descriptions || localization[language]?.Descriptions;
+                    const value = descriptions ? Object.values(descriptions).find(Boolean) : '';
+                    if (value) return value;
+                }
+            } else {
+                for (const language of languageOrder) {
+                    const value = localization[language]?.description || localization[language]?.Description;
+                    if (value) return value;
+                }
+            }
+        }
+
+        return source?.tooltip || source?.Tooltip || source?.description || source?.Description || '';
+    }
+
+    function buildHealthConditionTooltip(source) {
+        return cleanTooltipText(getLocalizedHealthDescription(source));
     }
 
     function getI18nLocalizedValue(source, field, lang = getCurrentLanguage()) {
@@ -562,21 +601,7 @@ connection.start()
     }
 
     function buildPhysicalHealthTooltip(source) {
-        const name = getLocalizedPhysicalField(source, ["назва", "name"], ["baseName", "name"]);
-        const description = getLocalizedPhysicalField(source, ["опис", "description"], ["description"]);
-        const effect = getLocalizedPhysicalField(source, ["ефект_у_грі", "gameEffect"], ["gameEffect"]);
-        const severity = conditionShouldShowSeverity(source) ? getConditionSeverityLabel(source) : "";
-        const header = name
-            ? severity
-                ? `${name} — ${severity}.`
-                : `${name}.`
-            : "";
-
-        return [header, description, effect]
-            .map(part => cleanTooltipText(part))
-            .filter(Boolean)
-            .map(sentenceCase)
-            .join(" ");
+        return sentenceCase(buildHealthConditionTooltip(source));
     }
 
     function parseFactValue(value) {
@@ -769,7 +794,8 @@ connection.start()
                 severityCode: source.severityCode ?? source.SeverityCode ?? null,
                 allowsSeverity: source.allowsSeverity ?? source.AllowsSeverity ?? null,
                 tags: source.tags ?? source.Tags ?? [],
-                _i18n: getI18n(source)
+                _i18n: getI18n(source),
+                localization: getLocalization(source)
             };
         }
         
@@ -831,36 +857,9 @@ connection.start()
                     }))
                 };
             })(),
-            
-            // Cards
-            cards: (player.cards || player.Cards || []).map(card => ({
-                id: card.id ?? card.Id ?? null,
-                name: card.name ?? card.Name ?? 'Карта',
-                description: card.description ?? card.Description ?? '',
-                rarity: card.rarity ?? card.Rarity ?? 'common',
-                effectType: card.effectType ?? card.EffectType ?? null,
-                effectValue: card.effectValue ?? card.EffectValue ?? null,
-                state: card.state ?? card.State ?? 'Available',
-                _i18n: getI18n(card)
-            }))
         };
         
         return normalized;
-    }
-
-    // Render activated card badge with tooltip
-    function renderActivatedCardBadge(card) {
-        const rarity = card?.rarity || "common";
-        const name = getLocalizedValue(card, "name") || card?.name || "Карта";
-        const description = getLocalizedValue(card, "description") || card?.description || "";
-
-        return `
-            <span class="activated-card-badge rarity-${rarity} card-tooltip-wrapper"
-                  data-tooltip="${escapeHtml(description)}">
-                <span class="card-badge-text">${escapeHtml(name)}</span>
-                <span class="card-badge-icon">!</span>
-            </span>
-        `;
     }
 
     // ==================== SIGNALR HANDLERS ====================
@@ -876,7 +875,6 @@ function registerSignalREvents() {
     connection.off("RoomCreated");
     connection.on("RoomCreated", function (data) {
         console.log("[RoomCreated] Received:", data);
-        console.log("[RoomCreated] Player cards:", data.player.cards || data.player.Cards);
 
         resetClientGameStateForNewRoom();
 
@@ -958,7 +956,6 @@ function registerSignalREvents() {
     connection.off("RoomJoined");
     connection.on("RoomJoined", function (data) {
         console.log("[RoomJoined] Received:", data);
-        console.log("[RoomJoined] Player cards:", data.player?.cards || data.player?.Cards);
         
         currentRoom = data.room || data.Room;
         myPlayerData = normalizePlayer(data.player || data.Player);
@@ -1189,10 +1186,6 @@ function registerSignalREvents() {
             }
         }
 
-        // Update activated cards table
-        console.log("[GameStarted] Calling updateActivatedCardsTable...");
-        updateActivatedCardsTable();
-
         // Show GM sections for host using the dedicated function
         console.log("[GameStarted] Calling updateGMSections...");
         updateGMSections();
@@ -1416,7 +1409,6 @@ function registerSignalREvents() {
     connection.on("RejoinSuccess", function (data) {
         console.log("=== REJOIN SUCCESS START ===");
         console.log("[RejoinSuccess] raw data:", data);
-        console.log("[RejoinSuccess] data.activatedCards:", data.activatedCards);
         console.log("[RejoinSuccess] data.players:", data.players);
 
         currentRoom = data.room || data.Room;
@@ -1467,53 +1459,6 @@ function registerSignalREvents() {
 
         console.log("[RejoinSuccess] roomPlayers final:", roomPlayers);
 
-        activatedCards = (data.activatedCards || data.ActivatedCards || []).map(function (card, index) {
-            const normalized = {
-                cardId: card.cardId || card.CardId || '',
-                name: card.name || card.Name || card.cardName || card.CardName || '',
-                rarity: card.rarity || card.Rarity || 'common',
-                description: card.description || card.Description || card.cardDescription || card.CardDescription || '',
-                playerId: card.playerId || card.PlayerId || card.connectionId || card.ConnectionId || '',
-                playerName: card.playerName || card.PlayerName || '',
-                targetPlayerId: card.targetPlayerId || card.TargetPlayerId || null,
-                targetPlayerName: card.targetPlayerName || card.TargetPlayerName || null,
-                targetCharacteristic: card.targetCharacteristic || card.TargetCharacteristic || null,
-                activatedAt: card.activatedAt || card.ActivatedAt || null
-            };
-
-            console.log(`[RejoinSuccess] normalized activatedCard[${index}]`, normalized);
-            return normalized;
-        });
-
-        console.log("[RejoinSuccess] activatedCards final:", activatedCards);
-
-        activatedCardsTable = {};
-
-        activatedCards.forEach(function (card, index) {
-            const connectionId = card.playerId;
-
-            console.log(`[RejoinSuccess] rebuild card[${index}] connectionId=`, connectionId);
-
-            if (!connectionId) {
-                console.warn(`[RejoinSuccess] card[${index}] skipped because no connectionId`, card);
-                return;
-            }
-
-            if (!activatedCardsTable[connectionId]) {
-                activatedCardsTable[connectionId] = [];
-            }
-
-            if (activatedCardsTable[connectionId].length < 2) {
-                activatedCardsTable[connectionId].push({
-                    name: card.name || 'Карта',
-                    rarity: card.rarity || 'common',
-                    description: card.description || ''
-                });
-            }
-        });
-
-        console.log("[RejoinSuccess] activatedCardsTable final:", activatedCardsTable);
-        console.log("[RejoinSuccess] Object.keys(activatedCardsTable):", Object.keys(activatedCardsTable));
         console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
 
         const isGameState =
@@ -1641,141 +1586,6 @@ function registerSignalREvents() {
     connection.on("CharacteristicPeeked", function (info) {
         console.log("Characteristic peeked:", info);
         showPeekModal(info.playerName, info.characteristicKey, info.data, info.isRevealed);
-    });
-
-    // ==================== CARD SIGNALR HANDLERS ====================
-
-    // Карта очікує підтвердження
-    connection.off("CardPending");
-    connection.on("CardPending", function (card) {
-        console.log("Card pending:", card);
-        renderCurrentGameUI();
-        addEventMessage(`Карта <span class="card-name">${card.name}</span> очікує підтвердження хоста`);
-    });
-
-    // Запит на підтвердження карти (для хоста)
-    connection.off("CardApprovalRequest");
-    connection.on("CardApprovalRequest", function (data) {
-        console.log("Card approval request:", data);
-        pendingCardApprovals.push(data);
-        showCardApprovalModal(data);
-        addEventMessage(`<span class="event-gm">🃏</span> ${data.playerName} хоче використати карту <span class="card-name">${data.card.name}</span>`);
-    });
-
-    // Карта використана
-    connection.off("CardUsed");
-    connection.on("CardUsed", function (data) {
-        console.log("Card used:", data);
-        if (myPlayerData) {
-            const cardIndex = myPlayerData.cards.findIndex(c => c.id === data.card.id);
-            if (cardIndex >= 0) {
-                myPlayerData.cards[cardIndex] = data.card;
-            }
-        }
-        renderCurrentGameUI();
-        addEventMessage(`Карта <span class="card-name">${data.card.name}</span> використана: ${data.result}`);
-    });
-
-    // Карта відхилена
-    connection.off("CardRejected");
-    connection.on("CardRejected", function (data) {
-        console.log("Card rejected:", data);
-        if (myPlayerData) {
-            const cardIndex = myPlayerData.cards.findIndex(c => c.id === data.card.id);
-            if (cardIndex >= 0) {
-                myPlayerData.cards[cardIndex] = data.card;
-            }
-        }
-        renderCurrentGameUI();
-        addEventMessage(`<span class="event-error">Карта ${data.card.name} відхилена: ${data.reason}</span>`);
-    });
-
-    // Нова карта отримана
-    connection.off("CardReceived");
-    connection.on("CardReceived", function (card) {
-        console.log("Card received:", card);
-        if (myPlayerData) {
-            if (!myPlayerData.cards) myPlayerData.cards = [];
-            myPlayerData.cards.push(card);
-        }
-        renderCurrentGameUI();
-        addEventMessage(`<span class="event-card">🃏</span> Ви отримали нову карту: <span class="card-name">${card.name}</span>`);
-    });
-
-    // Карта активована (для всіх)
-    connection.off("CardActivated");
-    connection.on("CardActivated", function (data) {
-        console.log("=== CardActivated START ===");
-        console.log("[CardActivated] RAW DATA:", data);
-
-        const connectionId =
-            data.connectionId ||
-            data.playerConnectionId ||
-            data.ConnectionId ||
-            data.PlayerConnectionId;
-
-        const card = data.card || data.Card || data;
-
-        const normalizedCard = {
-            name:
-                data.cardName ||
-                data.CardName ||
-                card?.name ||
-                card?.Name ||
-                data.name ||
-                data.Name ||
-                "Карта",
-
-            rarity:
-                data.cardRarity ||
-                data.CardRarity ||
-                card?.rarity ||
-                card?.Rarity ||
-                data.rarity ||
-                data.Rarity ||
-                "common",
-
-            description:
-                data.cardDescription ||
-                data.CardDescription ||
-                card?.description ||
-                card?.Description ||
-                data.description ||
-                data.Description ||
-                "",
-            _i18n: getI18n(card)
-        };
-
-        console.log("[CardActivated] normalizedCard:", normalizedCard);
-
-        if (!connectionId) return;
-
-        addActivatedCard(connectionId, normalizedCard);
-
-        const section = document.getElementById("specialCardsTableSection");
-        if (section) {
-            section.style.display = "block";
-        }
-
-        addEventMessage(
-            `<span class="event-card">🃏</span> ${data.playerName || data.PlayerName || "Гравець"} активував карту <span class="card-name">${normalizedCard.name}</span>`
-        );
-    });
-
-    // Факт переглянуто (тільки власнику карти)
-    connection.off("FactViewed");
-    connection.on("FactViewed", function (data) {
-        alert(`Факт гравця ${data.targetPlayerName}:\n\n${data.factValue}`);
-        addEventMessage(`Ви дізналися факт гравця ${data.targetPlayerName}`);
-    });
-
-    // Характеристику обміняно
-    connection.off("CharacteristicSwapped");
-    connection.on("CharacteristicSwapped", function (data) {
-        console.log("Characteristic swapped:", data);
-        myPlayerData = normalizePlayer(data.player);
-        renderCurrentGameUI();
-        addEventMessage(`Вашу характеристику ${data.characteristicName} обміняно з ${data.withPlayerName}`);
     });
 
     // ==================== SCENARIO & EVENT SIGNALR HANDLERS ====================
@@ -2025,34 +1835,6 @@ function startGame() {
                 btn.style.pointerEvents = "auto";
             }
         });
-}
-
-function addActivatedCard(connectionId, card) {
-    console.log("=== addActivatedCard START ===");
-    console.log("[addActivatedCard] connectionId:", connectionId);
-    console.log("[addActivatedCard] card:", card);
-
-    if (!connectionId) return;
-
-    if (!activatedCardsTable[connectionId]) {
-        activatedCardsTable[connectionId] = [];
-    }
-
-    const normalizedCard = {
-        name: card.name || card.cardName || "Карта",
-        rarity: card.rarity || card.cardRarity || "common",
-        description: card.description || card.cardDescription || ""
-    };
-
-    if (activatedCardsTable[connectionId].length < 2) {
-        activatedCardsTable[connectionId].push(normalizedCard);
-    }
-
-    console.log("[addActivatedCard] activatedCardsTable AFTER:", activatedCardsTable);
-
-    updateActivatedCardsTable();
-
-    console.log("=== addActivatedCard END ===");
 }
 
 // ==================== CONNECTION STATUS UI ====================
@@ -2721,61 +2503,12 @@ function removeBunkerSupplies(months) {
     // Ініціалізація tooltip для мобільних
     function initMobileTooltips() {
         console.log('[Tooltip] Initializing mobile tooltips');
-        initActivatedCardTooltips();
-    }
-    
-    // Initialize tooltips for activated cards with proper positioning
-    function initActivatedCardTooltips() {
-        document.querySelectorAll('.activated-card-badge').forEach(badge => {
-            // Check if badge is near the top of viewport and adjust positioning
-            badge.addEventListener('mouseenter', function() {
-                const rect = this.getBoundingClientRect();
-                const tooltipContent = this.querySelector('.card-tooltip-content');
-                if (tooltipContent) {
-                    // Check if tooltip would go above viewport
-                    const tooltipHeight = 100; // approximate height
-                    if (rect.top < tooltipHeight + 20) {
-                        this.classList.add('tooltip-bottom');
-                    } else {
-                        this.classList.remove('tooltip-bottom');
-                    }
-                }
-            });
-        });
     }
     
     // Глобальний обробник для всіх кліків - працює і для динамічно створених елементів
     document.addEventListener('click', function(e) {
         // Handle .tooltip-trigger (original tooltips)
         const trigger = e.target.closest('.tooltip-trigger');
-        
-        // Handle .activated-card-badge (new card tooltips)
-        const cardBadge = e.target.closest('.activated-card-badge');
-        
-        if (cardBadge) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const wasActive = cardBadge.classList.contains('tooltip-active');
-            
-            // Close all other tooltips
-            document.querySelectorAll('.activated-card-badge.tooltip-active').forEach(t => {
-                t.classList.remove('tooltip-active');
-            });
-            document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
-                t.classList.remove('active');
-            });
-            closeMobileTooltipOverlay();
-            
-            if (!wasActive) {
-                if (isMobileDevice()) {
-                    showMobileCardTooltipOverlay(cardBadge);
-                } else {
-                    cardBadge.classList.add('tooltip-active');
-                }
-            }
-            return;
-        }
         
         if (trigger) {
             e.preventDefault();
@@ -2786,9 +2519,6 @@ function removeBunkerSupplies(months) {
             // Закриваємо всі інші тултіпи
             document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
                 t.classList.remove('active');
-            });
-            document.querySelectorAll('.activated-card-badge.tooltip-active').forEach(t => {
-                t.classList.remove('tooltip-active');
             });
             
             // Закриваємо мобільний оверлей
@@ -2807,13 +2537,9 @@ function removeBunkerSupplies(months) {
         
         // Клік поза тултіпом - закрити всі
         if (!e.target.closest('.tooltip-content') && 
-            !e.target.closest('.card-tooltip-content') && 
             !e.target.closest('.mobile-tooltip-overlay')) {
             document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
                 t.classList.remove('active');
-            });
-            document.querySelectorAll('.activated-card-badge.tooltip-active').forEach(t => {
-                t.classList.remove('tooltip-active');
             });
             closeMobileTooltipOverlay();
         }
@@ -2822,39 +2548,15 @@ function removeBunkerSupplies(months) {
     // Touch events для мобільних
     document.addEventListener('touchend', function(e) {
         const trigger = e.target.closest('.tooltip-trigger');
-        const cardBadge = e.target.closest('.activated-card-badge');
-        if (trigger || cardBadge) {
+        if (trigger) {
             e.preventDefault();
             // Імітуємо клік
-            (trigger || cardBadge).click();
+            trigger.click();
         }
     }, { passive: false });
     
     function isMobileDevice() {
         return window.innerWidth <= 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    }
-    
-    // Mobile overlay for activated card tooltips
-    function showMobileCardTooltipOverlay(badge) {
-        closeMobileTooltipOverlay();
-        
-        const tooltipContent = badge.querySelector('.card-tooltip-content');
-        const cardName = badge.querySelector('.card-badge-text')?.textContent || 'Карта';
-        const tooltipText = tooltipContent?.textContent || badge.getAttribute('data-tooltip') || 'Без опису';
-        
-        const overlay = document.createElement('div');
-        overlay.className = 'mobile-tooltip-overlay';
-        overlay.innerHTML = `
-            <div class="mobile-tooltip-backdrop"></div>
-            <div class="mobile-tooltip-card">
-                <div class="mobile-tooltip-header" style="font-weight: 700; color: var(--color-gold); margin-bottom: 8px; font-size: 1.1rem;">${escapeHtml(cardName)}</div>
-                <div class="mobile-tooltip-content">${escapeHtml(tooltipText)}</div>
-                <button class="mobile-tooltip-close" onclick="closeMobileTooltipOverlay()">Закрити</button>
-            </div>
-        `;
-        
-        document.body.appendChild(overlay);
-        overlay.querySelector('.mobile-tooltip-backdrop').addEventListener('click', closeMobileTooltipOverlay);
     }
     
     function showMobileTooltipOverlay(trigger) {
@@ -2903,7 +2605,7 @@ function removeBunkerSupplies(months) {
         
         // Валідація
         if (!playerName) {
-            alert("Введіть ваше ім'я");
+            alert("Введіть ім’я гравця");
             document.getElementById('playerNameCreate').focus();
             return;
         }
@@ -2946,15 +2648,72 @@ function removeBunkerSupplies(months) {
             });
     }
 
+    function getInviteLink(roomId) {
+        if (!roomId) return '';
+        return `${window.location.origin}/room/${encodeURIComponent(roomId)}`;
+    }
+
+    function fallbackCopyText(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-1000px';
+        textarea.style.left = '-1000px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+    }
+
+    async function copyInviteLink() {
+        const inviteLink = getInviteLink(currentRoom?.id);
+        if (!inviteLink) return '';
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(inviteLink);
+            } else {
+                fallbackCopyText(inviteLink);
+            }
+        } catch (err) {
+            console.warn('Clipboard API failed, using fallback copy:', err);
+            fallbackCopyText(inviteLink);
+        }
+
+        const btn = document.getElementById('copyInviteLinkBtn');
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = getCurrentLanguage() === 'en' ? 'Copied' : getCurrentLanguage() === 'ru' ? 'Скопировано' : 'Скопійовано';
+            window.setTimeout(() => {
+                btn.textContent = originalText;
+            }, 1600);
+        }
+
+        return inviteLink;
+    }
+
+    window.copyInviteLink = copyInviteLink;
+
+    function openJoinRoomModal(roomId) {
+        const modal = document.getElementById('joinModal');
+        const roomInput = document.getElementById('joinRoomId');
+        const joinNameInput = document.getElementById('playerNameJoin');
+        const createNameInput = document.getElementById('playerNameCreate');
+
+        if (!modal || !roomInput) return;
+
+        roomInput.value = roomId;
+        if (joinNameInput && !joinNameInput.value.trim()) {
+            joinNameInput.value = createNameInput?.value?.trim() || localStorage.getItem('bunker_lastPlayerName') || '';
+        }
+        modal.style.display = 'flex';
+        joinNameInput?.focus();
+    }
+
     function joinRoom(roomId, hasPassword) {
         if (hasPassword) {
-            document.getElementById('joinRoomId').value = roomId;
-            const joinNameInput = document.getElementById('playerNameJoin');
-            const createNameInput = document.getElementById('playerNameCreate');
-            if (joinNameInput && !joinNameInput.value.trim()) {
-                joinNameInput.value = createNameInput?.value?.trim() || localStorage.getItem('bunker_lastPlayerName') || '';
-            }
-            document.getElementById('joinModal').style.display = 'flex';
+            openJoinRoomModal(roomId);
         } else {
             const typedName = document.getElementById('playerNameJoin')?.value?.trim()
                 || document.getElementById('playerNameCreate')?.value?.trim()
@@ -3344,277 +3103,6 @@ function removeBunkerSupplies(months) {
             </div>
         `;
     }
-
-    // ==================== SPECIAL CARDS FUNCTIONS ====================
-
-    function renderMyCards() {
-        const container = document.getElementById('myCardsSection');
-        console.log('[renderMyCards] myPlayerData:', myPlayerData);
-        
-        if (!container) {
-            console.log('[renderMyCards] Container not found');
-            return;
-        }
-        
-        if (!myPlayerData) {
-            console.warn("No current player data for special cards", {
-                currentPlayerId: myConnectionId,
-                currentRoomId: currentRoom?.id,
-                currentRoomState: currentRoom?.state
-            });
-            container.innerHTML = `<p style="color: var(--color-text-muted);">${t('noData')}</p>`;
-            return;
-        }
-        
-        // Підтримка обох варіантів: cards та Cards (через різну серіалізацію)
-        const cards = myPlayerData.cards || myPlayerData.Cards || [];
-        console.log('[renderMyCards] Cards:', cards);
-        
-        if (cards.length === 0) {
-            container.innerHTML = `<p style="color: var(--color-text-muted);">${t('noCards')}</p>`;
-            return;
-        }
-
-        container.innerHTML = cards.map(card => {
-            const rarityClass = `rarity-${card.rarity || card.Rarity || 'common'}`;
-            const rawState = card.state ?? card.State ?? 'Available';
-            const state = typeof rawState === 'string'
-             ? rawState
-            : (rawState === 0 ? 'Available'
-            : rawState === 1 ? 'Pending'
-            : rawState === 2 ? 'Approved'
-            : rawState === 3 ? 'Used'
-            : rawState === 4 ? 'Rejected'
-            : 'Available');
-
-const stateClass = `state-${state.toLowerCase()}`;
-            const isUsable = state === 'Available';
-            const cardId = card.id || card.Id;
-            const cardName = getLocalizedValue(card, 'name') || card.name || card.Name || 'Карта';
-            const cardDesc = getLocalizedValue(card, 'description') || card.description || card.Description || '';
-            const cardRarity = card.rarity || card.Rarity || 'common';
-            
-            return `
-                <div class="special-card ${rarityClass} ${stateClass}">
-                    <div class="card-header">
-                        <span class="card-name">${escapeHtml(cardName)}</span>
-                        <span class="card-rarity">${getRarityLabel(cardRarity)}</span>
-                    </div>
-                    <p class="card-description">${escapeHtml(cardDesc)}</p>
-                    <div class="card-footer">
-                        <span class="card-state">${getCardStateLabel(state)}</span>
-                        ${isUsable ? `<button class="btn-use-card" onclick="openUseCardModal('${cardId}')">${t('use')}</button>` : ''}
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function getRarityLabel(rarity) {
-        const labels = {
-            'common': t('ordinary'),
-            'rare': t('rare'),
-            'epic': t('epic'),
-            'legendary': t('legendary')
-        };
-        return labels[rarity] || rarity;
-    }
-
-    function getCardStateLabel(state) {
-        const labels = {
-            'Available': t('available'),
-            'Pending': t('pending'),
-            'Approved': t('approved'),
-            'Used': t('used'),
-            'Rejected': t('rejected')
-        };
-        return labels[state] || state;
-    }
-
-    function openUseCardModal(cardId) {
-        if (!myPlayerData || !myPlayerData.cards) return;
-        
-        const card = myPlayerData.cards.find(c => c.id === cardId);
-        if (!card) return;
-        
-        currentCardToUse = card;
-        
-        document.getElementById('useCardTitle').textContent = `${t('use')}: ${getLocalizedValue(card, 'name') || card.name}`;
-        document.getElementById('useCardDescription').textContent = getLocalizedValue(card, 'description') || card.description;
-        document.getElementById('useCardId').value = cardId;
-        
-        // Визначаємо чи потрібно вибирати ціль
-        const needsTarget = ['RevealOther', 'SwapCharacteristic', 'SkipTurn', 'StealItem', 'ViewFact', 'Custom'].includes(card.effectType);
-        const needsCharacteristic = card.effectType === 'RevealOther' && !card.effectValue;
-        
-        // Заповнюємо список гравців
-        const targetSelect = document.getElementById('cardTargetPlayer');
-        const players = Object.values(roomPlayers).filter(p => p.connectionId !== myConnectionId);
-        targetSelect.innerHTML = `<option value="">-- ${getCurrentLanguage() === 'en' ? 'Choose player' : getCurrentLanguage() === 'ru' ? 'Выберите игрока' : 'Виберіть гравця'} --</option>` + 
-            players.map(p => `<option value="${p.connectionId}">${escapeHtml(p.name)}</option>`).join('');
-        
-        document.getElementById('cardTargetSection').style.display = needsTarget ? 'block' : 'none';
-        document.getElementById('cardCharacteristicSection').style.display = needsCharacteristic ? 'block' : 'none';
-        
-        document.getElementById('useCardModal').style.display = 'flex';
-    }
-
-    function closeUseCardModal() {
-        document.getElementById('useCardModal').style.display = 'none';
-        currentCardToUse = null;
-    }
-
- function submitUseCard() {
-    const cardId = document.getElementById('useCardId').value;
-    const targetPlayerId = document.getElementById('cardTargetPlayer').value || null;
-    const targetCharacteristic = document.getElementById('cardTargetCharacteristic').value || null;
-
-    console.log("UseCard submit:", {
-        cardId,
-        targetPlayerId,
-        targetCharacteristic
-    });
-    
-    connection.invoke("UseCard", cardId, targetPlayerId, targetCharacteristic)
-        .catch(err => console.error("UseCard error:", err));
-    
-    closeUseCardModal();
-}
-
-    function showCardApprovalModal(data) {
-        document.getElementById('cardApprovalContent').innerHTML = `
-            <div class="approval-info">
-                <p><strong>Гравець:</strong> ${data.playerName}</p>
-                <p><strong>Карта:</strong> ${data.card.name}</p>
-                <p><strong>Опис:</strong> ${data.card.description}</p>
-                ${data.targetPlayerName ? `<p><strong>Ціль:</strong> ${data.targetPlayerName}</p>` : ''}
-            </div>
-        `;
-        document.getElementById('approvalCardId').value = data.card.id;
-        document.getElementById('approvalPlayerId').value = data.playerConnectionId;
-        document.getElementById('cardApprovalModal').style.display = 'flex';
-    }
-
-    function approveCardApproval() {
-        const cardId = document.getElementById('approvalCardId').value;
-        const playerId = document.getElementById('approvalPlayerId').value;
-        
-        connection.invoke("ApproveCard", playerId, cardId)
-            .catch(err => console.error("ApproveCard error:", err));
-        
-        document.getElementById('cardApprovalModal').style.display = 'none';
-    }
-
-    function rejectCardApproval() {
-        const cardId = document.getElementById('approvalCardId').value;
-        const playerId = document.getElementById('approvalPlayerId').value;
-        const reason = prompt("Причина відхилення (необов'язково):");
-        
-        connection.invoke("RejectCard", playerId, cardId, reason)
-            .catch(err => console.error("RejectCard error:", err));
-        
-        document.getElementById('cardApprovalModal').style.display = 'none';
-    }
-
-    // ==================== ACTIVATED SPECIAL CARDS TABLE ====================
-    
-function updateActivatedCardsTable() {
-    console.log("=== updateActivatedCardsTable START ===");
-
-    const tbody = document.getElementById('specialCardsTableBody');
-    const section = document.getElementById('specialCardsTableSection');
-
-    console.log("[updateActivatedCardsTable] tbody:", tbody);
-    console.log("[updateActivatedCardsTable] section:", section);
-    console.log("[updateActivatedCardsTable] myConnectionId:", myConnectionId);
-    console.log("[updateActivatedCardsTable] roomPlayers:", roomPlayers);
-    console.log("[updateActivatedCardsTable] activatedCardsTable:", activatedCardsTable);
-
-    if (!tbody) {
-        console.error("[updateActivatedCardsTable] tbody not found");
-        return;
-    }
-
-    const players = Object.values(roomPlayers || {});
-    console.log("[updateActivatedCardsTable] players array:", players);
-
-    if (players.length === 0) {
-        console.warn("[updateActivatedCardsTable] no players in roomPlayers");
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
-            ${t('noActivatedCards')}
-        </td></tr>`;
-
-        if (section) {
-            section.style.display = 'none';
-            console.log("[updateActivatedCardsTable] section display set to none because no players");
-        }
-
-        return;
-    }
-
-    let hasActivatedCards = false;
-    let html = '';
-
-    players.forEach((player, index) => {
-        const playerCards = activatedCardsTable[player.connectionId] || [];
-        const card1 = playerCards[0];
-        const card2 = playerCards[1];
-
-        console.log(`[updateActivatedCardsTable] player[${index}]`, player);
-        console.log(`[updateActivatedCardsTable] player[${index}] connectionId=`, player.connectionId);
-        console.log(`[updateActivatedCardsTable] player[${index}] cards=`, playerCards);
-        console.log(`[updateActivatedCardsTable] card1=`, card1);
-        console.log(`[updateActivatedCardsTable] card2=`, card2);
-
-        if (card1 || card2) hasActivatedCards = true;
-
-        const isMe = player.connectionId === myConnectionId;
-
-        html += `
-            <tr class="${isMe ? 'my-player-row' : ''}">
-                <td>${index + 1}</td>
-                <td>
-                    ${escapeHtml(player.name)}
-                    ${isMe ? `<span class="my-badge">${t('you')}</span>` : ''}
-                    ${player.isHost ? `<span class="host-badge-small">${t('host')}</span>` : ''}
-                </td>
-               <td>${card1 ? (typeof renderActivatedCardBadge === 'function'
-                        ? renderActivatedCardBadge(card1)
-                        : `<span class="activated-card-badge rarity-${card1.rarity || 'common'}">${escapeHtml(getLocalizedValue(card1, 'name') || card1.name || 'Карта')}</span>`)
-                        : '<span class="char-hidden">—</span>'}</td>
-                    <td>${card2 ? (typeof renderActivatedCardBadge === 'function'
-                        ? renderActivatedCardBadge(card2)
-                        : `<span class="activated-card-badge rarity-${card2.rarity || 'common'}">${escapeHtml(getLocalizedValue(card2, 'name') || card2.name || 'Карта')}</span>`)
-                        : '<span class="char-hidden">—</span>'}</td>
-            </tr>
-        `;
-    });
-
-    console.log("[updateActivatedCardsTable] hasActivatedCards:", hasActivatedCards);
-    console.log("[updateActivatedCardsTable] generated html:", html);
-
-    tbody.innerHTML = html || `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
-        ${t('noActivatedCards')}
-    </td></tr>`;
-
-    console.log("[updateActivatedCardsTable] tbody.innerHTML AFTER:", tbody.innerHTML);
-
-    if (section) {
-        section.style.display = hasActivatedCards ? 'block' : 'none';
-        console.log("[updateActivatedCardsTable] section display set to:", section.style.display);
-
-        setTimeout(() => {
-            console.log("[updateActivatedCardsTable] section display after 100ms:", section.style.display);
-            console.log("[updateActivatedCardsTable] section outerHTML:", section.outerHTML);
-            // Re-init tooltips after DOM update
-            if (typeof initActivatedCardTooltips === 'function') {
-                initActivatedCardTooltips();
-            }
-        }, 100);
-    }
-
-    console.log("=== updateActivatedCardsTable END ===");
-}
 
     // ==================== EVENTS SYSTEM ====================
     

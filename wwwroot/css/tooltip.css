@@ -234,37 +234,6 @@
 }
 
 
-.activated-card-badge {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-/* Приклади рідкості */
-.rarity-common {
-    background: linear-gradient(135deg, #6b7280, #374151);
-}
-
-.rarity-rare {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-}
-
-.rarity-epic {
-    background: linear-gradient(135deg, #a855f7, #6d28d9);
-}
-
-.rarity-legendary {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
 .custom-tooltip {
     visibility: hidden;
     opacity: 0;

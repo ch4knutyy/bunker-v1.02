@@ -11,6 +11,19 @@ namespace Bunker.Controllers
 			return View();
 		}
 
+		[HttpGet("/game")]
+		public IActionResult Game()
+		{
+			return View();
+		}
+
+		[HttpGet("/room/{roomId}")]
+		public IActionResult Room(string roomId)
+		{
+			ViewData["InviteRoomId"] = roomId;
+			return View("Game");
+		}
+
 		public IActionResult Privacy()
 		{
 			return View();

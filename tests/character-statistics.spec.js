@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const { newContextWithNgrokBypass } = require('./ngrok-bypass');
 
 test.use({
     ignoreHTTPSErrors: true,
@@ -8,7 +9,8 @@ test.use({
 
 test.describe.configure({ mode: 'serial' });
 
-const BASE_URL = 'https://localhost:7283/';
+const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
 const SAMPLE_COUNT = Number(process.env.SAMPLE_COUNT || 100);
 
 const CARD_HEADINGS = [
@@ -208,10 +210,10 @@ function createMarkdownReport(report) {
 }
 
 async function createRoom(page, playerName, roomName) {
-    await page.goto(BASE_URL);
+    await page.goto(GAME_URL);
 
-    await page.getByRole('textbox', { name: "Ваше ім'я" }).fill(playerName);
-    await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(roomName);
+    await page.getByTestId('player-name-input').fill(playerName);
+    await page.getByTestId('room-name-input').fill(roomName);
 
     await page.getByTestId('create-room-btn').click();
 
@@ -259,7 +261,7 @@ test(`STATS: згенерувати ${SAMPLE_COUNT} персонажів і по
     const errors = [];
 
     for (let i = 1; i <= SAMPLE_COUNT; i++) {
-        const context = await browser.newContext({
+        const context = await newContextWithNgrokBypass(browser, {
             ignoreHTTPSErrors: true,
         });
 

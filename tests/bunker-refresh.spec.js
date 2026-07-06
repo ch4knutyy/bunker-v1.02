@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const { setupNgrokBypass, newContextWithNgrokBypass } = require('./ngrok-bypass');
 
 test.use({
 	ignoreHTTPSErrors: true,
@@ -8,6 +9,14 @@ test.use({
 
 // Важливо для твоєї гри: тести з кімнатами краще не ганяти паралельно
 test.describe.configure({ mode: 'serial' });
+
+const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const HOME_URL = `${BASE_URL}/`;
+
+test.beforeEach(async ({ page }) => {
+	await setupNgrokBypass(page);
+});
 
 async function disableAnimations(page) {
 	await page.addStyleTag({
@@ -260,15 +269,11 @@ async function collectConsoleErrors(page) {
 	return errors;
 }
 async function fillPlayerName(page, name) {
-	await page.getByRole('textbox', {
-		name: /Ваше ім'я|Ваше имя|Your name/i,
-	}).fill(name);
+	await page.getByTestId('player-name-input').fill(name);
 }
 
 async function fillRoomName(page, roomName) {
-	await page.getByRole('textbox', {
-		name: /Назва кімнати|Название комнаты|Room name/i,
-	}).fill(roomName);
+	await page.getByTestId('room-name-input').fill(roomName);
 }
 
 async function clickCreateRoom(page) {
@@ -311,10 +316,10 @@ function countNameInText(text, name) {
 	return (text.match(new RegExp(escapeRegExp(name), 'g')) || []).length;
 }
 test('після оновлення сторінки гравець залишається в кімнаті і не дублюється', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
-	await page.getByRole('textbox', { name: "Ваше ім'я" }).fill('Діма');
-	await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(`Тестова кімната ${Date.now()}`);
+	await page.getByTestId('player-name-input').fill('Діма');
+	await page.getByTestId('room-name-input').fill(`Тестова кімната ${Date.now()}`);
 
 	await page.getByTestId('create-room-btn').click();
 
@@ -335,10 +340,10 @@ test('після оновлення сторінки гравець залиша
 });
 
 test('після кількох оновлень гравець не дублюється', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
-	await page.getByRole('textbox', { name: "Ваше ім'я" }).fill('Діма');
-	await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(`Тест F5 ${Date.now()}`);
+	await page.getByTestId('player-name-input').fill('Діма');
+	await page.getByTestId('room-name-input').fill(`Тест F5 ${Date.now()}`);
 
 	await page.getByTestId('create-room-btn').click();
 
@@ -362,10 +367,10 @@ test('після кількох оновлень гравець не дублю�
 });
 
 test('після оновлення сторінки характеристики гравця не зникають', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
-	await page.getByRole('textbox', { name: "Ваше ім'я" }).fill('Діма');
-	await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(`Тест характеристики ${Date.now()}`);
+	await page.getByTestId('player-name-input').fill('Діма');
+	await page.getByTestId('room-name-input').fill(`Тест характеристики ${Date.now()}`);
 
 	await page.getByTestId('create-room-btn').click();
 
@@ -394,10 +399,10 @@ test('після оновлення сторінки характеристик�
 });
 
 test('BUG: після створення кімнати характеристики гравця повинні генеруватися', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
-	await page.getByRole('textbox', { name: "Ваше ім'я" }).fill('Діма');
-	await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(`Тест генерації ${Date.now()}`);
+	await page.getByTestId('player-name-input').fill('Діма');
+	await page.getByTestId('room-name-input').fill(`Тест генерації ${Date.now()}`);
 
 	await page.getByTestId('create-room-btn').click();
 
@@ -413,11 +418,11 @@ test('BUG: після створення кімнати характеристи
 });
 
 test('2 гравці: після F5 хост не дублюється і другий гравець залишається в кімнаті', async ({ browser }) => {
-	const hostContext = await browser.newContext({
+	const hostContext = await newContextWithNgrokBypass(browser, {
 		ignoreHTTPSErrors: true,
 	});
 
-	const guestContext = await browser.newContext({
+	const guestContext = await newContextWithNgrokBypass(browser, {
 		ignoreHTTPSErrors: true,
 	});
 
@@ -428,10 +433,10 @@ test('2 гравці: після F5 хост не дублюється і дру
 	const guestName = 'Олег';
 	const roomName = `Тест 2 гравці ${Date.now()}`;
 
-	await host.goto('https://localhost:7283/');
+	await host.goto(GAME_URL);
 
-	await host.getByRole('textbox', { name: "Ваше ім'я" }).fill(hostName);
-	await host.getByRole('textbox', { name: 'Назва кімнати' }).fill(roomName);
+	await host.getByTestId('player-name-input').fill(hostName);
+	await host.getByTestId('room-name-input').fill(roomName);
 
 	await host.getByTestId('create-room-btn').click();
 
@@ -440,9 +445,9 @@ test('2 гравці: після F5 хост не дублюється і дру
 	await expect(hostPlayersList).toContainText(hostName);
 	await expect(hostPlayersList).toContainText(/Хост|Host/);
 
-	await guest.goto('https://localhost:7283/');
+	await guest.goto(GAME_URL);
 
-	await guest.getByRole('textbox', { name: "Ваше ім'я" }).fill(guestName);
+	await guest.getByTestId('player-name-input').fill(guestName);
 
 	const roomTitle = guest.getByText(roomName).first();
 
@@ -486,13 +491,70 @@ test('2 гравці: після F5 хост не дублюється і дру
 	await hostContext.close();
 	await guestContext.close();
 });
+
+test('invite link використовує поточний origin і дозволяє приєднати другого гравця', async ({ browser }) => {
+	const hostContext = await newContextWithNgrokBypass(browser, {
+		ignoreHTTPSErrors: true,
+	});
+
+	const guestContext = await newContextWithNgrokBypass(browser, {
+		ignoreHTTPSErrors: true,
+	});
+
+	const host = await hostContext.newPage();
+	const guest = await guestContext.newPage();
+
+	const hostName = 'Діма';
+	const guestName = 'Олег';
+	const roomName = `Invite Room ${Date.now()}`;
+
+	await host.goto(GAME_URL);
+
+	await host.getByTestId('player-name-input').fill(hostName);
+	await host.getByTestId('room-name-input').fill(roomName);
+	await host.getByTestId('create-room-btn').click();
+
+	const hostPlayersList = host.locator('#roomPlayersList');
+	await expect(hostPlayersList).toContainText(hostName, { timeout: 10000 });
+
+	const roomIdText = await host.locator('#currentRoomId').innerText();
+	const roomId = roomIdText.replace(/^ID:\s*/i, '').trim();
+	const expectedOrigin = new URL(host.url()).origin;
+
+	await expect(host.getByTestId('copy-invite-link-btn')).toBeVisible();
+	const inviteLink = await host.evaluate(() => window.copyInviteLink());
+
+	expect(inviteLink).toBe(`${expectedOrigin}/room/${encodeURIComponent(roomId)}`);
+	expect(new URL(inviteLink).origin).toBe(expectedOrigin);
+
+	await guest.goto(inviteLink);
+	await expect(guest.locator('#joinModal')).toBeVisible({ timeout: 10000 });
+
+	await guest.locator('#playerNameJoin').fill(guestName);
+	await guest.locator('#joinModal').getByRole('button', {
+		name: /Приєднатися|Присоединиться|Join/i,
+	}).click();
+
+	const guestPlayersList = guest.locator('#roomPlayersList');
+	await expect(guestPlayersList).toContainText(hostName, { timeout: 10000 });
+	await expect(guestPlayersList).toContainText(guestName, { timeout: 10000 });
+	await expect(hostPlayersList).toContainText(guestName, { timeout: 10000 });
+
+	await guest.reload();
+	await expect(guestPlayersList).toContainText(hostName, { timeout: 10000 });
+	await expect(guestPlayersList).toContainText(guestName, { timeout: 10000 });
+
+	await hostContext.close();
+	await guestContext.close();
+});
+
 test('VISUAL: головна сторінка UA стабільна частина', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(HOME_URL);
 	await expectStaticScreenshot(page, 'home-ua-static.png');
 });
 
 test('VISUAL: головна сторінка RU стабільна частина', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(HOME_URL);
 	await disableAnimations(page);
 
 	await page.getByRole('button', { name: 'RU' }).click();
@@ -501,11 +563,11 @@ test('VISUAL: головна сторінка RU стабільна частин
 });
 
 test('VISUAL: кімната після створення UA стабільна частина', async ({ page }) => {
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 	await disableAnimations(page);
 
-	await page.getByRole('textbox', { name: "Ваше ім'я" }).fill('Діма');
-	await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(`Visual Room Stable ${Date.now()}`);
+	await page.getByTestId('player-name-input').fill('Діма');
+	await page.getByTestId('room-name-input').fill(`Visual Room Stable ${Date.now()}`);
 
 	await page.getByTestId('create-room-btn').click();
 
@@ -519,10 +581,10 @@ test('VISUAL: кімната після створення UA стабільна
 test('CONSOLE: немає JS-помилок після створення кімнати і F5', async ({ page }) => {
 	const errors = await collectConsoleErrors(page);
 
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
-	await page.getByRole('textbox', { name: "Ваше ім'я" }).fill('Діма');
-	await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(`Console Test ${Date.now()}`);
+	await page.getByTestId('player-name-input').fill('Діма');
+	await page.getByTestId('room-name-input').fill(`Console Test ${Date.now()}`);
 
 	await page.getByTestId('create-room-btn').click();
 
@@ -552,7 +614,7 @@ for (const playersCount of [5, 6, 7, 8, 9, 10]) {
 				playerNames.push(`Гравець_${String(i).padStart(2, '0')}`);
 			}
 
-			const hostContext = await browser.newContext({
+			const hostContext = await newContextWithNgrokBypass(browser, {
 				ignoreHTTPSErrors: true,
 				viewport: { width: 1920, height: 1080 },
 				deviceScaleFactor: 1,
@@ -562,7 +624,7 @@ for (const playersCount of [5, 6, 7, 8, 9, 10]) {
 
 			const host = await hostContext.newPage();
 
-			await host.goto('https://localhost:7283/');
+			await host.goto(GAME_URL);
 			await fillPlayerName(host, playerNames[0]);
 			await fillRoomName(host, roomName);
 			await clickCreateRoom(host);
@@ -578,7 +640,7 @@ for (const playersCount of [5, 6, 7, 8, 9, 10]) {
 			});
 
 			for (let i = 1; i < playersCount; i++) {
-				const guestContext = await browser.newContext({
+				const guestContext = await newContextWithNgrokBypass(browser, {
 					ignoreHTTPSErrors: true,
 					viewport: { width: 1920, height: 1080 },
 					deviceScaleFactor: 1,
@@ -588,7 +650,7 @@ for (const playersCount of [5, 6, 7, 8, 9, 10]) {
 
 				const guest = await guestContext.newPage();
 
-				await guest.goto('https://localhost:7283/');
+				await guest.goto(GAME_URL);
 				await fillPlayerName(guest, playerNames[i]);
 				await joinRoom(guest, roomName);
 
@@ -628,7 +690,7 @@ for (const playersCount of [5, 6, 7, 8, 9, 10]) {
 test('RU: створення кімнати, F5 і характеристики працюють без технічного тексту', async ({ page }) => {
 	const errors = await collectConsoleErrors(page);
 
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
 	await clickLanguage(page, 'RU');
 
@@ -667,7 +729,7 @@ test('RU: створення кімнати, F5 і характеристики 
 test('EN: базова перевірка створення кімнати і F5', async ({ page }) => {
 	const errors = await collectConsoleErrors(page);
 
-	await page.goto('https://localhost:7283/');
+	await page.goto(GAME_URL);
 
 	await clickLanguage(page, 'EN');
 

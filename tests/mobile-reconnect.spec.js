@@ -1,4 +1,5 @@
 const { test, expect, devices } = require('@playwright/test');
+const { setupNgrokBypass, newContextWithNgrokBypass } = require('./ngrok-bypass');
 
 test.use({
     ...devices['iPhone 13'],
@@ -7,13 +8,18 @@ test.use({
 
 test.describe.configure({ mode: 'serial' });
 
-const BASE_URL = 'https://localhost:7283/';
+const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+
+test.beforeEach(async ({ page }) => {
+    await setupNgrokBypass(page);
+});
 
 async function createRoom(page, playerName, roomName) {
-    await page.goto(BASE_URL);
+    await page.goto(GAME_URL);
 
-    await page.getByRole('textbox', { name: "Ваше ім'я" }).fill(playerName);
-    await page.getByRole('textbox', { name: 'Назва кімнати' }).fill(roomName);
+    await page.getByTestId('player-name-input').fill(playerName);
+    await page.getByTestId('room-name-input').fill(roomName);
 
     await page.getByTestId('create-room-btn').click();
 
@@ -53,7 +59,7 @@ test('MOBILE: після F5 гравець залишається в кімна�
 });
 
 test('MOBILE: закрив сайт і повернувся — гравець відновив кімнату', async ({ browser }) => {
-    const context = await browser.newContext({
+    const context = await newContextWithNgrokBypass(browser, {
         ...devices['iPhone 13'],
         ignoreHTTPSErrors: true,
     });
@@ -68,7 +74,7 @@ test('MOBILE: закрив сайт і повернувся — гравець �
     await page.close();
 
     const returnedPage = await context.newPage();
-    await returnedPage.goto(BASE_URL);
+    await returnedPage.goto(GAME_URL);
 
     await expect(returnedPage.locator('#roomPlayersList')).toContainText(playerName, {
         timeout: 10000,
@@ -85,7 +91,7 @@ test('MOBILE: закрив сайт і повернувся — гравець �
 });
 
 test('MOBILE: після втрати інтернету і повернення гравець лишається в кімнаті', async ({ browser }) => {
-    const context = await browser.newContext({
+    const context = await newContextWithNgrokBypass(browser, {
         ...devices['iPhone 13'],
         ignoreHTTPSErrors: true,
     });
@@ -136,12 +142,12 @@ test('MOBILE: поворот телефона не ламає кімнату', a
 });
 
 test('MOBILE: другий гравець закрив сайт і повернувся в кімнату', async ({ browser }) => {
-    const hostContext = await browser.newContext({
+    const hostContext = await newContextWithNgrokBypass(browser, {
         ...devices['iPhone 13'],
         ignoreHTTPSErrors: true,
     });
 
-    const guestContext = await browser.newContext({
+    const guestContext = await newContextWithNgrokBypass(browser, {
         ...devices['iPhone 13'],
         ignoreHTTPSErrors: true,
     });
@@ -155,8 +161,8 @@ test('MOBILE: другий гравець закрив сайт і поверн�
 
     await createRoom(host, hostName, roomName);
 
-    await guest.goto(BASE_URL);
-    await guest.getByRole('textbox', { name: "Ваше ім'я" }).fill(guestName);
+    await guest.goto(GAME_URL);
+    await guest.getByTestId('player-name-input').fill(guestName);
 
     const roomTitle = guest.getByText(roomName).first();
 
@@ -181,7 +187,7 @@ test('MOBILE: другий гравець закрив сайт і поверн�
     await guest.close();
 
     const returnedGuest = await guestContext.newPage();
-    await returnedGuest.goto(BASE_URL);
+    await returnedGuest.goto(GAME_URL);
 
     await expect(returnedGuest.locator('#roomPlayersList')).toContainText(hostName, {
         timeout: 10000,

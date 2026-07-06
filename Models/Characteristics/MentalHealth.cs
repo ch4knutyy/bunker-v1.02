@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bunker.Models.GameData;
 
 namespace Bunker.Models.Сharacteristics
 {
@@ -59,5 +60,8 @@ namespace Bunker.Models.Сharacteristics
 
         [JsonPropertyName("_i18n")]
         public Dictionary<string, JsonElement>? I18n { get; set; }
+
+        [JsonPropertyName("localization")]
+        public Dictionary<string, ConditionLocalization>? Localization { get; set; }
     }
 }
