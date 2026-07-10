@@ -43,7 +43,10 @@ connection.start()
     let hostToken = null;
     let currentApocalypse = null;
     let currentBunker = null;
+    let currentThreat = null;
+    let currentThreatState = null;
     let currentVoting = null;
+    let currentRoundState = null;
     let myVote = null;
     let initialInviteRoomId = getRoomIdFromPath();
 
@@ -67,12 +70,148 @@ connection.start()
 
     const uiTranslations = {
         uk: {
-            createRoom: "Створити кімнату", availableRooms: "Доступні кімнати", loadingRooms: "Завантаження кімнат...", noRooms: "Немає доступних кімнат. Створіть свою!", playerNamePlaceholder: "Ваше ім'я...", roomNamePlaceholder: "Назва кімнати...", maxPlayersPlaceholder: "Макс. гравців", passwordOptionalPlaceholder: "Пароль (необов'язково)", passwordIfAnyPlaceholder: "Пароль (якщо є)", room: "Кімната", lobby: "Лобі", game: "Гра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосування", startGame: "Почати гру", leaveRoom: "Покинути кімнату", players: "Гравці", host: "Хост", you: "Ви", eliminated: "ВИБУВ", myCharacteristics: "Мої характеристики (бачу тільки я)", bunkerAndApocalypse: "🎭 Бункер та Апокаліпсис", apocalypse: "Апокаліпсис", bunker: "Бункер", playersInBunker: "Гравці в бункері:", gameEvents: "Ігрові події", eventsHistory: "Історія подій", eventsPlaceholder: "Тут будуть відображатися події гри...", reveal: "Розкрити всім", revealed: "Відкрито для всіх", hidden: "Приховано", unknown: "Невідомо", profession: "Професія", inventory: "Інвентар", vote: "Голосувати", roomCode: "Код кімнати", name: "Назва", age: "Вік", years: "років", sex: "Стать", orientation: "Орієнтація", personality: "Особистість", body: "Статура", height: "Зріст", weight: "Вага", bodyType: "Тип тіла", physicalHealth: "Фізичне здоров'я", mentalHealth: "Психічне здоров'я", state: "Стан", hobby: "Хобі", activity: "Заняття", characterTrait: "Риса характеру", trait: "Риса", phobia: "Фобія", fear: "Страх", items: "Предмети", fact: "Факт", empty: "Порожній", noFact: "Немає факту", noData: "Немає даних гравця", use: "Використати", close: "Закрити", capacity: "Місткість", condition: "Стан", supplies: "Запаси", location: "Локація", threats: "⚠️ Загрози:", requirements: "✓ Потрібно:", facilities: "🏗️ Приміщення:", resources: "📦 Ресурси:", problems: "⚠️ Проблеми:", survivalChance: "Шанс виживання", duration: "Тривалість", threatLevel: "Загроза", uploadImage: "📤 Завантажити зображення", generatePrompt: "✨ Згенерувати промпт", remove: "🗑️ Видалити" },
+            createRoom: "Створити кімнату", availableRooms: "Доступні кімнати", loadingRooms: "Завантаження кімнат...", noRooms: "Немає доступних кімнат. Створіть свою!", playerNamePlaceholder: "Ваше ім'я...", roomNamePlaceholder: "Назва кімнати...", maxPlayersPlaceholder: "Макс. гравців", passwordOptionalPlaceholder: "Пароль (необов'язково)", passwordIfAnyPlaceholder: "Пароль (якщо є)", room: "Кімната", lobby: "Лобі", game: "Гра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосування", startGame: "Почати гру", leaveRoom: "Покинути кімнату", players: "Гравці", host: "Хост", you: "Ви", eliminated: "ВИБУВ", myCharacteristics: "Мої характеристики (бачу тільки я)", bunkerAndApocalypse: "🎭 Бункер та Апокаліпсис", apocalypse: "Апокаліпсис", bunker: "Бункер", playersInBunker: "Гравці в бункері:", gameEvents: "Ігрові події", eventsHistory: "Історія подій", eventsPlaceholder: "Тут будуть відображатися події гри...", reveal: "Розкрити всім", revealed: "Відкрито для всіх", hidden: "Приховано", unknown: "Невідомо", profession: "Професія", inventory: "Інвентар", vote: "Голосувати", roomCode: "Код кімнати", name: "Назва", age: "Вік", years: "років", sex: "Стать", orientation: "Орієнтація", personality: "Особистість", body: "Статура", height: "Зріст", weight: "Вага", bodyType: "Тип тіла", physicalHealth: "Фізичне здоров'я", mentalHealth: "Психічне здоров'я", state: "Стан", hobby: "Хобі", activity: "Заняття", characterTrait: "Риса характеру", trait: "Риса", phobia: "Фобія", fear: "Страх", items: "Предмети", fact: "Факт", empty: "Порожній", noFact: "Немає факту", noData: "Немає даних гравця", use: "Використати", close: "Закрити", capacity: "Місткість", condition: "Стан", supplies: "Запаси", location: "Локація", threats: "⚠️ Загрози:", requirements: "✓ Потрібно:", facilities: "🏗️ Приміщення:", resources: "📦 Ресурси:", problems: "⚠️ Проблеми:", survivalChance: "Шанс виживання", duration: "Тривалість", threatLevel: "Загроза", uploadImage: "📤 Завантажити зображення", generatePrompt: "✨ Згенерувати промпт", remove: "🗑️ Видалити", specialCards: "Спеціальні карти", mySpecialCards: "Мої спеціальні карти", revealedSpecialCards: "Розкриті спеціальні карти", noRevealedSpecialCards: "Поки що немає розкритих спеціальних карт.", cardInHand: "У руці", cardRevealed: "Розкрита", cardUsed: "Використана", cardActive: "Активна", specialCard: "Спеціальна карта", description: "Опис", effect: "Ефект", target: "Ціль", status: "Статус", threat: "Загроза", threatUnknownDescription: "Загроза ще не розкрита." },
         en: {
-            createRoom: "Create Room", availableRooms: "Available Rooms", loadingRooms: "Loading rooms...", noRooms: "No available rooms. Create your own!", playerNamePlaceholder: "Your name...", roomNamePlaceholder: "Room name...", maxPlayersPlaceholder: "Max players", passwordOptionalPlaceholder: "Password (optional)", passwordIfAnyPlaceholder: "Password (if any)", room: "Room", lobby: "Lobby", game: "Game", gmPanel: "🎮 GM Panel", voting: "🗳️ Voting", startGame: "Start Game", leaveRoom: "Leave Room", players: "Players", host: "Host", you: "You", eliminated: "ELIMINATED", myCharacteristics: "My characteristics (only I can see)", bunkerAndApocalypse: "🎭 Bunker and Apocalypse", apocalypse: "Apocalypse", bunker: "Bunker", playersInBunker: "Players in bunker:", gameEvents: "Game Events", eventsHistory: "Event History", eventsPlaceholder: "Game events will appear here...", reveal: "Reveal to all", revealed: "Revealed to all", hidden: "Hidden", unknown: "Unknown", profession: "Profession", inventory: "Inventory", vote: "Vote", roomCode: "Room Code", name: "Name", age: "Age", years: "years", sex: "Sex", orientation: "Orientation", personality: "Personality", body: "Body", height: "Height", weight: "Weight", bodyType: "Body type", physicalHealth: "Physical health", mentalHealth: "Mental health", state: "State", hobby: "Hobby", activity: "Activity", characterTrait: "Character trait", trait: "Trait", phobia: "Phobia", fear: "Fear", items: "Items", fact: "Fact", empty: "Empty", noFact: "No fact", noData: "No player data", use: "Use", close: "Close", capacity: "Capacity", condition: "Condition", supplies: "Supplies", location: "Location", threats: "⚠️ Threats:", requirements: "✓ Required:", facilities: "🏗️ Facilities:", resources: "📦 Resources:", problems: "⚠️ Problems:", survivalChance: "Survival chance", duration: "Duration", threatLevel: "Threat", uploadImage: "📤 Upload image", generatePrompt: "✨ Generate prompt", remove: "🗑️ Remove" },
+            createRoom: "Create Room", availableRooms: "Available Rooms", loadingRooms: "Loading rooms...", noRooms: "No available rooms. Create your own!", playerNamePlaceholder: "Your name...", roomNamePlaceholder: "Room name...", maxPlayersPlaceholder: "Max players", passwordOptionalPlaceholder: "Password (optional)", passwordIfAnyPlaceholder: "Password (if any)", room: "Room", lobby: "Lobby", game: "Game", gmPanel: "🎮 GM Panel", voting: "🗳️ Voting", startGame: "Start Game", leaveRoom: "Leave Room", players: "Players", host: "Host", you: "You", eliminated: "ELIMINATED", myCharacteristics: "My characteristics (only I can see)", bunkerAndApocalypse: "🎭 Bunker and Apocalypse", apocalypse: "Apocalypse", bunker: "Bunker", playersInBunker: "Players in bunker:", gameEvents: "Game Events", eventsHistory: "Event History", eventsPlaceholder: "Game events will appear here...", reveal: "Reveal to all", revealed: "Revealed to all", hidden: "Hidden", unknown: "Unknown", profession: "Profession", inventory: "Inventory", vote: "Vote", roomCode: "Room Code", name: "Name", age: "Age", years: "years", sex: "Sex", orientation: "Orientation", personality: "Personality", body: "Body", height: "Height", weight: "Weight", bodyType: "Body type", physicalHealth: "Physical health", mentalHealth: "Mental health", state: "State", hobby: "Hobby", activity: "Activity", characterTrait: "Character trait", trait: "Trait", phobia: "Phobia", fear: "Fear", items: "Items", fact: "Fact", empty: "Empty", noFact: "No fact", noData: "No player data", use: "Use", close: "Close", capacity: "Capacity", condition: "Condition", supplies: "Supplies", location: "Location", threats: "⚠️ Threats:", requirements: "✓ Required:", facilities: "🏗️ Facilities:", resources: "📦 Resources:", problems: "⚠️ Problems:", survivalChance: "Survival chance", duration: "Duration", threatLevel: "Threat", uploadImage: "📤 Upload image", generatePrompt: "✨ Generate prompt", remove: "🗑️ Remove", specialCards: "Special cards", mySpecialCards: "My special cards", revealedSpecialCards: "Revealed special cards", noRevealedSpecialCards: "No special cards have been revealed yet.", cardInHand: "In hand", cardRevealed: "Revealed", cardUsed: "Used", cardActive: "Active", specialCard: "Special card", description: "Description", effect: "Effect", target: "Target", status: "Status", threat: "Threat", threatUnknownDescription: "The threat has not been revealed yet." },
         ru: {
-            createRoom: "Создать комнату", availableRooms: "Доступные комнаты", loadingRooms: "Загрузка комнат...", noRooms: "Нет доступных комнат. Создайте свою!", playerNamePlaceholder: "Ваше имя...", roomNamePlaceholder: "Название комнаты...", maxPlayersPlaceholder: "Макс. игроков", passwordOptionalPlaceholder: "Пароль (необязательно)", passwordIfAnyPlaceholder: "Пароль (если есть)", room: "Комната", lobby: "Лобби", game: "Игра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосование", startGame: "Начать игру", leaveRoom: "Покинуть комнату", players: "Игроки", host: "Ведущий", you: "Вы", eliminated: "ВЫБЫЛ", myCharacteristics: "Мои характеристики (вижу только я)", bunkerAndApocalypse: "🎭 Бункер и Апокалипсис", apocalypse: "Апокалипсис", bunker: "Бункер", playersInBunker: "Игроки в бункере:", gameEvents: "Игровые события", eventsHistory: "История событий", eventsPlaceholder: "Здесь будут отображаться события игры...", reveal: "Раскрыть всем", revealed: "Открыто для всех", hidden: "Скрыто", unknown: "Неизвестно", profession: "Профессия", inventory: "Инвентарь", vote: "Голосовать", roomCode: "Код комнаты", name: "Название", age: "Возраст", years: "лет", sex: "Пол", orientation: "Ориентация", personality: "Личность", body: "Телосложение", height: "Рост", weight: "Вес", bodyType: "Тип тела", physicalHealth: "Физическое здоровье", mentalHealth: "Психическое здоровье", state: "Состояние", hobby: "Хобби", activity: "Занятие", characterTrait: "Черта характера", trait: "Черта", phobia: "Фобия", fear: "Страх", items: "Предметы", fact: "Факт", empty: "Пусто", noFact: "Нет факта", noData: "Нет данных игрока", use: "Использовать", close: "Закрыть", capacity: "Вместимость", condition: "Состояние", supplies: "Запасы", location: "Локация", threats: "⚠️ Угрозы:", requirements: "✓ Нужно:", facilities: "🏗️ Помещения:", resources: "📦 Ресурсы:", problems: "⚠️ Проблемы:", survivalChance: "Шанс выживания", duration: "Длительность", threatLevel: "Угроза", uploadImage: "📤 Загрузить изображение", generatePrompt: "✨ Сгенерировать промпт", remove: "🗑️ Удалить" }
+            createRoom: "Создать комнату", availableRooms: "Доступные комнаты", loadingRooms: "Загрузка комнат...", noRooms: "Нет доступных комнат. Создайте свою!", playerNamePlaceholder: "Ваше имя...", roomNamePlaceholder: "Название комнаты...", maxPlayersPlaceholder: "Макс. игроков", passwordOptionalPlaceholder: "Пароль (необязательно)", passwordIfAnyPlaceholder: "Пароль (если есть)", room: "Комната", lobby: "Лобби", game: "Игра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосование", startGame: "Начать игру", leaveRoom: "Покинуть комнату", players: "Игроки", host: "Ведущий", you: "Вы", eliminated: "ВЫБЫЛ", myCharacteristics: "Мои характеристики (вижу только я)", bunkerAndApocalypse: "🎭 Бункер и Апокалипсис", apocalypse: "Апокалипсис", bunker: "Бункер", playersInBunker: "Игроки в бункере:", gameEvents: "Игровые события", eventsHistory: "История событий", eventsPlaceholder: "Здесь будут отображаться события игры...", reveal: "Раскрыть всем", revealed: "Открыто для всех", hidden: "Скрыто", unknown: "Неизвестно", profession: "Профессия", inventory: "Инвентарь", vote: "Голосовать", roomCode: "Код комнаты", name: "Название", age: "Возраст", years: "лет", sex: "Пол", orientation: "Ориентация", personality: "Личность", body: "Телосложение", height: "Рост", weight: "Вес", bodyType: "Тип тела", physicalHealth: "Физическое здоровье", mentalHealth: "Психическое здоровье", state: "Состояние", hobby: "Хобби", activity: "Занятие", characterTrait: "Черта характера", trait: "Черта", phobia: "Фобия", fear: "Страх", items: "Предметы", fact: "Факт", empty: "Пусто", noFact: "Нет факта", noData: "Нет данных игрока", use: "Использовать", close: "Закрыть", capacity: "Вместимость", condition: "Состояние", supplies: "Запасы", location: "Локация", threats: "⚠️ Угрозы:", requirements: "✓ Нужно:", facilities: "🏗️ Помещения:", resources: "📦 Ресурсы:", problems: "⚠️ Проблемы:", survivalChance: "Шанс выживания", duration: "Длительность", threatLevel: "Угроза", uploadImage: "📤 Загрузить изображение", generatePrompt: "✨ Сгенерировать промпт", remove: "🗑️ Удалить", specialCards: "Специальные карты", mySpecialCards: "Мои специальные карты", revealedSpecialCards: "Раскрытые специальные карты", noRevealedSpecialCards: "Пока нет раскрытых специальных карт.", cardInHand: "В руке", cardRevealed: "Раскрыта", cardUsed: "Использована", cardActive: "Активна", specialCard: "Специальная карта", description: "Описание", effect: "Эффект", target: "Цель", status: "Статус", threat: "Угроза", threatUnknownDescription: "Угроза ещё не раскрыта." }
     };
+
+    Object.assign(uiTranslations.uk, {
+        useSpecialCard: "Використати карту",
+        activateSpecialCard: "Активувати карту",
+        cardWasUsed: "Карту використано",
+        unavailableNow: "Недоступно зараз",
+        choosePlayer: "Оберіть гравця",
+        confirm: "Підтвердити",
+        cancel: "Скасувати",
+        noAvailableTarget: "Немає доступної цілі",
+        noBigItem: "У гравця немає великого предмета",
+        noSmallItem: "У гравця немає малого предмета",
+        noItems: "У гравця немає предметів",
+        noSpecialCards: "У гравця немає спеціальних карт",
+        cardUsedSuccessfully: "Карту успішно використано",
+        allReady: "Всі готові",
+        allPlayersReady: "Усі гравці готові",
+        threatRevealed: "Загрозу розкрито",
+        threat: "Загроза",
+        unknown: "Невідомо",
+        threatUnknownDescription: "Загроза ще не розкрита.",
+        requirements: "Потрібно",
+        risks: "Ризики",
+        consequences: "Наслідки",
+        severity: "Рівень",
+        category: "Категорія",
+        round: "Раунд",
+        revealThreat: "Розкрити загрозу",
+        hiddenSecretCard: "Прихована секретна карта",
+        hiddenDetails: "Деталі приховані",
+        secretCardBadge: "Секретна",
+        publicCardBadge: "Публічна",
+        secretRevealedBadge: "Секретна, розкрита",
+        useSecretly: "Використати тихо",
+        usePublicly: "Використати публічно",
+        activeUntilRoundEnd: "Активна до кінця раунду",
+        effectEnded: "Ефект завершено",
+        notUsed: "Не використана",
+        used: "Використана",
+        youHaveBeenEliminated: "Ви вибули з гри",
+        canRevealAllAfterElimination: "Ви можете розкрити всі свої характеристики",
+        revealAllCharacteristics: "Розкрити всі характеристики",
+        allCharacteristicsRevealed: "Усі характеристики розкрито",
+        eliminatedRevealedBadge: "Вибув — характеристики розкрито",
+        eliminatedRevealedAllLog: "Вибулий гравець розкрив усі свої характеристики"
+    });
+    Object.assign(uiTranslations.en, {
+        useSpecialCard: "Use card",
+        activateSpecialCard: "Activate card",
+        cardWasUsed: "Card used",
+        unavailableNow: "Unavailable now",
+        choosePlayer: "Choose player",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        noAvailableTarget: "No available target",
+        noBigItem: "The player has no large item",
+        noSmallItem: "The player has no small item",
+        noItems: "The player has no items",
+        noSpecialCards: "The player has no special cards",
+        cardUsedSuccessfully: "Card used successfully",
+        allReady: "Everyone ready",
+        allPlayersReady: "All players are ready",
+        threatRevealed: "Threat revealed",
+        threat: "Threat",
+        unknown: "Unknown",
+        threatUnknownDescription: "The threat has not been revealed yet.",
+        requirements: "Requirements",
+        risks: "Risks",
+        consequences: "Consequences",
+        severity: "Severity",
+        category: "Category",
+        round: "Round",
+        revealThreat: "Reveal threat",
+        hiddenSecretCard: "Hidden secret card",
+        hiddenDetails: "Details are hidden",
+        secretCardBadge: "Secret",
+        publicCardBadge: "Public",
+        secretRevealedBadge: "Secret, revealed",
+        useSecretly: "Use secretly",
+        usePublicly: "Use publicly",
+        activeUntilRoundEnd: "Active until end of round",
+        effectEnded: "Effect ended",
+        notUsed: "Not used",
+        used: "Used",
+        youHaveBeenEliminated: "You have been eliminated",
+        canRevealAllAfterElimination: "You can reveal all your characteristics",
+        revealAllCharacteristics: "Reveal all characteristics",
+        allCharacteristicsRevealed: "All characteristics revealed",
+        eliminatedRevealedBadge: "Eliminated — characteristics revealed",
+        eliminatedRevealedAllLog: "The eliminated player revealed all their characteristics"
+    });
+    Object.assign(uiTranslations.ru, {
+        useSpecialCard: "Использовать карту",
+        activateSpecialCard: "Активировать карту",
+        cardWasUsed: "Карта использована",
+        unavailableNow: "Сейчас недоступно",
+        choosePlayer: "Выберите игрока",
+        confirm: "Подтвердить",
+        cancel: "Отменить",
+        noAvailableTarget: "Нет доступной цели",
+        noBigItem: "У игрока нет большого предмета",
+        noSmallItem: "У игрока нет малого предмета",
+        noItems: "У игрока нет предметов",
+        noSpecialCards: "У игрока нет специальных карт",
+        cardUsedSuccessfully: "Карта успешно использована",
+        allReady: "Все готовы",
+        allPlayersReady: "Все игроки готовы",
+        threatRevealed: "Угроза раскрыта",
+        threat: "Угроза",
+        unknown: "Неизвестно",
+        threatUnknownDescription: "Угроза ещё не раскрыта.",
+        requirements: "Требуется",
+        risks: "Риски",
+        consequences: "Последствия",
+        severity: "Уровень",
+        category: "Категория",
+        round: "Раунд",
+        revealThreat: "Раскрыть угрозу",
+        hiddenSecretCard: "Скрытая секретная карта",
+        hiddenDetails: "Детали скрыты",
+        secretCardBadge: "Секретная",
+        publicCardBadge: "Публичная",
+        secretRevealedBadge: "Секретная, раскрыта",
+        useSecretly: "Использовать тихо",
+        usePublicly: "Использовать публично",
+        activeUntilRoundEnd: "Активна до конца раунда",
+        effectEnded: "Эффект завершён",
+        notUsed: "Не использована",
+        used: "Использована",
+        youHaveBeenEliminated: "Вы выбыли из игры",
+        canRevealAllAfterElimination: "Вы можете раскрыть все свои характеристики",
+        revealAllCharacteristics: "Раскрыть все характеристики",
+        allCharacteristicsRevealed: "Все характеристики раскрыты",
+        eliminatedRevealedBadge: "Выбыл — характеристики раскрыты",
+        eliminatedRevealedAllLog: "Выбывший игрок раскрыл все свои характеристики"
+    });
 
     function getCurrentLanguage() {
         const lang = localStorage.getItem("language") || "uk";
@@ -91,6 +230,635 @@ connection.start()
     function t(key) {
         const lang = getCurrentLanguage();
         return uiTranslations[lang]?.[key] || uiTranslations.uk?.[key] || key;
+    }
+
+    function localizeServerMessage(message) {
+        const keys = {
+            "Недоступно зараз": "unavailableNow",
+            "У гравця немає великого предмета": "noBigItem",
+            "У гравця немає малого предмета": "noSmallItem",
+            "У гравця немає предметів": "noItems",
+            "У гравця немає спеціальних карт": "noSpecialCards"
+        };
+        return keys[message] ? t(keys[message]) : message;
+    }
+
+    function normalizeRoundState(source) {
+        if (!source) return null;
+
+        const revealedPlayers = source.revealedPlayers || source.RevealedPlayers || [];
+        const readyStatuses = source.readyStatuses || source.ReadyStatuses || [];
+        const specialCards = source.specialCards || source.SpecialCards || [];
+        const threatRevealed = !!(source.threatRevealed ?? source.ThreatRevealed);
+        return {
+            currentRound: source.currentRound ?? source.CurrentRound ?? 0,
+            roomState: source.roomState || source.RoomState || currentRoom?.state || "Lobby",
+            phase: source.phase || source.Phase || currentRoundState?.phase || "Lobby",
+            activePlayerCount: source.activePlayerCount ?? source.ActivePlayerCount ?? 0,
+            revealedCount: source.revealedCount ?? source.RevealedCount ?? 0,
+            allPlayersRevealed: source.allPlayersRevealed ?? source.AllPlayersRevealed ?? false,
+            threatRevealed,
+            threatRevealedAtRound: source.threatRevealedAtRound ?? source.ThreatRevealedAtRound ?? null,
+            threat: threatRevealed ? (source.threat || source.Threat || null) : null,
+            threatState: normalizeThreatState(source.threatState || source.ThreatState || null),
+            diceRoll: normalizeDiceRoll(source.diceRoll || source.DiceRoll || null),
+            diceRolls: (source.diceRolls || source.DiceRolls || []).map(roll => normalizeDiceRoll(roll)).filter(Boolean),
+            readyStatuses: readyStatuses.map(player => ({
+                connectionId: player.connectionId || player.ConnectionId || "",
+                stablePlayerId: player.stablePlayerId || player.StablePlayerId || "",
+                name: player.name || player.Name || "",
+                seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
+                status: player.status || player.Status || "pending"
+            })),
+            specialCards: specialCards.map(card => normalizeSpecialCardState(card)),
+            revealedPlayers: revealedPlayers.map(player => ({
+                connectionId: player.connectionId || player.ConnectionId || "",
+                stablePlayerId: player.stablePlayerId || player.StablePlayerId || "",
+                name: player.name || player.Name || "",
+                characteristicKey: player.characteristicKey || player.CharacteristicKey || ""
+            }))
+        };
+    }
+
+    function applyRoundState(source) {
+        const normalized = normalizeRoundState(source);
+        if (!normalized) return;
+
+        currentRoundState = normalized;
+        if (currentRoom) {
+            currentRoom.state = normalized.roomState || currentRoom.state;
+            currentRoom.currentRound = normalized.currentRound;
+            currentRoom.phase = normalized.phase;
+        }
+        currentThreat = normalized.threat || (normalized.threatRevealed ? currentThreat : null);
+        currentThreatState = normalized.threatState || currentThreatState;
+        updateRoundStatusUI();
+        renderThreatPanel(currentThreat);
+        updateReadyCheckUI();
+        updateSpecialCardsUI();
+    }
+
+    function getCurrentRoundNumber() {
+        return currentRoundState?.currentRound || currentRoom?.currentRound || currentRoom?.CurrentRound || 0;
+    }
+
+    function getCurrentPhase() {
+        return currentRoundState?.phase || currentRoom?.phase || currentRoom?.CurrentPhase || "Lobby";
+    }
+
+    function normalizeThreatState(source) {
+        if (!source) return null;
+        const volunteer = source.volunteerSelection || source.VolunteerSelection || {};
+        const support = source.secretSupportDrop || source.SecretSupportDrop || {};
+        const contributions = source.contributions || source.Contributions || {};
+        const vote = source.threatVolunteerVote || source.ThreatVolunteerVote || {};
+        const resolution = source.resolution || source.Resolution || {};
+
+        return {
+            currentThreatId: source.currentThreatId || source.CurrentThreatId || "",
+            threatStatus: source.threatStatus || source.ThreatStatus || "hidden",
+            threatRevealedRound: source.threatRevealedRound ?? source.ThreatRevealedRound ?? null,
+            secretSupportDrop: {
+                isCompleted: !!(support.isCompleted ?? support.IsCompleted)
+            },
+            volunteerSelection: {
+                selectedPlayerId: volunteer.selectedPlayerId || volunteer.SelectedPlayerId || "",
+                selectedPlayerName: volunteer.selectedPlayerName || volunteer.SelectedPlayerName || "",
+                selectionReason: volunteer.selectionReason || volunteer.SelectionReason || "",
+                selectedAtRound: volunteer.selectedAtRound ?? volunteer.SelectedAtRound ?? null
+            },
+            contributions: {
+                total: contributions.total ?? contributions.Total ?? 0,
+                byType: contributions.byType || contributions.ByType || {},
+                mine: contributions.mine || contributions.Mine || [],
+                revealedAfterResolution: contributions.revealedAfterResolution || contributions.RevealedAfterResolution || []
+            },
+            threatVolunteerVote: {
+                type: vote.type || vote.Type || "threat_volunteer_vote",
+                status: vote.status || vote.Status || "none",
+                votedCount: vote.votedCount ?? vote.VotedCount ?? 0,
+                totalVoters: vote.totalVoters ?? vote.TotalVoters ?? 0,
+                selectedPlayerId: vote.selectedPlayerId || vote.SelectedPlayerId || ""
+            },
+            resolution: {
+                effectsApplied: !!(resolution.effectsApplied ?? resolution.EffectsApplied),
+                wasSuccessful: !!(resolution.wasSuccessful ?? resolution.WasSuccessful),
+                wasVolunteerProtected: !!(resolution.wasVolunteerProtected ?? resolution.WasVolunteerProtected),
+                publicResults: resolution.publicResults || resolution.PublicResults || []
+            }
+        };
+    }
+
+    function normalizeDiceRoll(source) {
+        if (!source) return null;
+        const value = Number(source.value ?? source.Value ?? 0);
+        if (!Number.isFinite(value) || value <= 0) return null;
+
+        return {
+            round: source.round ?? source.Round ?? 0,
+            value,
+            rolledAt: source.rolledAt || source.RolledAt || null,
+            rolledByPlayerId: source.rolledByPlayerId || source.RolledByPlayerId || "",
+            rolledByConnectionId: source.rolledByConnectionId || source.RolledByConnectionId || "",
+            rolledByPlayerName: source.rolledByPlayerName || source.RolledByPlayerName || "GM"
+        };
+    }
+
+    function hasCurrentPlayerRevealedThisRound() {
+        if (!currentRoundState?.revealedPlayers) return false;
+
+        const self = roomPlayers?.[myConnectionId] || {};
+        const selfStableId = self.stablePlayerId || stablePlayerId || "";
+
+        return currentRoundState.revealedPlayers.some(player =>
+            player.connectionId === myConnectionId ||
+            (selfStableId && player.stablePlayerId === selfStableId)
+        );
+    }
+
+    function canRevealThisRound() {
+        const state = currentRoom?.state;
+        return (state === "Playing" || state === "Started") && getCurrentPhase() === "RoundReveal" && !hasCurrentPlayerRevealedThisRound();
+    }
+
+    function getRevealBlockedReason() {
+        const state = currentRoom?.state;
+        if (state !== "Playing" && state !== "Started") {
+            return getCurrentLanguage() === "en"
+                ? "The game has not started yet"
+                : getCurrentLanguage() === "ru"
+                    ? "Игра еще не началась"
+                    : "Гра ще не почалась";
+        }
+
+        if (getCurrentPhase() !== "RoundReveal") {
+            return getCurrentLanguage() === "en"
+                ? "Revealing is not active now"
+                : getCurrentLanguage() === "ru"
+                    ? "Сейчас не фаза раскрытия характеристик"
+                    : "Зараз не фаза розкриття характеристик";
+        }
+
+        if (hasCurrentPlayerRevealedThisRound()) {
+            return getCurrentLanguage() === "en"
+                ? "You already revealed a characteristic this round"
+                : getCurrentLanguage() === "ru"
+                    ? "Вы уже раскрыли характеристику в этом раунде"
+                    : "У цьому раунді ви вже розкрили характеристику";
+        }
+
+        return "";
+    }
+
+    function getPhaseLabel(phase = getCurrentPhase()) {
+        const labels = {
+            Lobby: "Лобі",
+            RoundReveal: "Розкриття характеристик",
+            RoundEnded: "Раунд завершено",
+            Threat: "Загроза",
+            ExtraInventory: "Додатковий інвентар",
+            PreVotingReadyCheck: "Готовність до голосування",
+            Voting: "Голосування",
+            VotingResults: "Результати голосування",
+            Finished: "Гра завершена"
+        };
+        return labels[phase] || phase || "Лобі";
+    }
+
+    function canEndRoundNow() {
+        return isHost &&
+            currentRoom?.state === "Playing" &&
+            getCurrentPhase() === "RoundReveal" &&
+            currentRoundState?.allPlayersRevealed === true;
+    }
+
+    function canRollRoundDiceNow() {
+        return canEndRoundNow() && !currentRoundState?.diceRoll;
+    }
+
+    function canStartVotingNow() {
+        return isHost &&
+            currentRoom?.state === "Playing" &&
+            getCurrentRoundNumber() >= 3 &&
+            getCurrentPhase() === "PreVotingReadyCheck" &&
+            !(currentVoting && ["Active", "Completed"].includes(currentVoting.state || currentVoting.State));
+    }
+
+    function getRoomStateLabel() {
+        if (!currentRoom) return t('lobby');
+
+        if (currentRoom.state === 'Lobby') return t('lobby');
+        if (currentRoom.state === 'Voting') {
+            return getCurrentLanguage() === 'en' ? 'Voting' : getCurrentLanguage() === 'ru' ? 'Голосование' : 'Голосування';
+        }
+
+        const round = getCurrentRoundNumber();
+        if (currentRoom.state === 'Playing' || currentRoom.state === 'Started') {
+            return round > 0 ? `${t('game')} · Раунд ${round} · ${getPhaseLabel()}` : t('game');
+        }
+
+        return t('game');
+    }
+
+    function updateRoundStatusUI() {
+        const round = getCurrentRoundNumber();
+        const phase = getCurrentPhase();
+        const shouldShow = currentRoom && currentRoom.state !== "Lobby" && round > 0;
+        const panel = document.getElementById('roundStatusPanel');
+
+        if (panel) {
+            panel.style.display = shouldShow ? 'flex' : 'none';
+        }
+
+        const roundText = round > 0 ? `Раунд ${round}` : 'Раунд -';
+        setText('#roundStatusNumber', roundText);
+        setText('#roundStatusPhase', getPhaseLabel(phase));
+        setText('#roundStatusProgress', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? 0} відкрили`);
+        setText('#gmCurrentRound', roundText);
+        setText('#gmCurrentPhase', getPhaseLabel(phase));
+        setText('#gmRoundProgress', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? 0} відкрили`);
+        const diceRoll = currentRoundState?.diceRoll || null;
+        const diceText = diceRoll ? `Кубик: ${diceRoll.value}` : '';
+        setText('#roundDiceResult', diceText);
+        setText('#gmDiceResult', diceText);
+        const roundDiceResult = document.getElementById('roundDiceResult');
+        if (roundDiceResult) roundDiceResult.style.display = diceRoll ? 'inline-flex' : 'none';
+        const gmDiceResult = document.getElementById('gmDiceResult');
+        if (gmDiceResult) gmDiceResult.style.display = diceRoll ? 'inline-flex' : 'none';
+
+        const rollDiceBtn = document.getElementById('rollDiceBtn');
+        if (rollDiceBtn) {
+            rollDiceBtn.style.display = isHost && currentRoom?.state !== "Lobby" ? 'inline-flex' : 'none';
+            rollDiceBtn.disabled = !canRollRoundDiceNow();
+            rollDiceBtn.title = diceRoll
+                ? 'Кубик у цьому раунді вже кинуто'
+                : canRollRoundDiceNow()
+                    ? ''
+                    : 'Кубик доступний після reveal усіх активних гравців';
+        }
+
+        const endRoundBtn = document.getElementById('endRoundBtn');
+        if (endRoundBtn) {
+            endRoundBtn.disabled = !canEndRoundNow();
+            endRoundBtn.title = endRoundBtn.disabled
+                ? 'Раунд можна завершити після reveal усіх активних гравців'
+                : '';
+        }
+
+        const readyBtn = document.getElementById('startReadyCheckBtn');
+        if (readyBtn) {
+            const canMarkReady = isHost &&
+                currentRoom?.state === "Playing" &&
+                ['RoundReveal', 'ExtraInventory', 'PreVotingReadyCheck', 'VotingResults'].includes(phase);
+            readyBtn.style.display = isHost && currentRoom?.state !== "Lobby" ? 'inline-flex' : 'none';
+            readyBtn.disabled = !canMarkReady;
+            readyBtn.title = canMarkReady ? '' : t('unavailableNow');
+        }
+
+        const gmStartVotingBtn = document.getElementById('gmStartVotingBtn');
+        if (gmStartVotingBtn) {
+            gmStartVotingBtn.style.display = canStartVotingNow() ? 'inline-flex' : 'none';
+        }
+
+        const hint = document.getElementById('gmVotingLockedHint');
+        if (hint) {
+            if (!shouldShow) {
+                hint.textContent = 'Голосування відкриється після старту гри.';
+            } else if (round < 3) {
+                hint.textContent = 'Голосування відкриється після завершення 3 раунду.';
+            } else if (phase === "RoundReveal") {
+                hint.textContent = 'Завершіть 3 раунд після reveal усіх активних гравців.';
+            } else if (phase === "ExtraInventory") {
+                hint.textContent = 'Загрозу відкрито, інвентар видано. Запитайте, чи всі готові.';
+            } else if (phase === "PreVotingReadyCheck") {
+                hint.textContent = 'Можна починати голосування.';
+            } else if (phase === "Voting" || phase === "VotingResults") {
+                hint.textContent = getPhaseLabel(phase);
+            } else {
+                hint.textContent = getPhaseLabel(phase);
+            }
+        }
+
+        const topVotingBtn = document.getElementById('startVotingBtn');
+        if (topVotingBtn) {
+            topVotingBtn.style.display = canStartVotingNow() ? 'inline-block' : 'none';
+        }
+    }
+
+    function renderThreatPanel(threat) {
+        const panel = document.getElementById('threatPanel');
+        if (!panel) return;
+
+        const isRevealed = !!currentRoundState?.threatRevealed && !!threat;
+        const content = panel.querySelector('.panel-content');
+        if (!content) return;
+
+        if (!isRevealed) {
+            content.innerHTML = `
+                <h4 class="threat-name">${escapeHtml(t('unknown'))}</h4>
+                <p class="threat-description">${escapeHtml(t('threatUnknownDescription'))}</p>
+            `;
+            panel.classList.add('threat-unknown');
+            return;
+        }
+
+        const name = getLocalizedValue(threat, 'name') || threat.name || threat.Name || t('unknown');
+        const description = getLocalizedValue(threat, 'description') || threat.description || threat.Description || '';
+        const severity = threat.severity || threat.Severity || '';
+        const category = threat.category || threat.Category || '';
+        const round = threat.revealRound || threat.RevealRound || threat.round || threat.Round || '';
+        const imageUrl = threat.imageUrl || threat.ImageUrl || threat.uploadedImagePath || threat.UploadedImagePath || threat.imagePath || threat.ImagePath || '';
+        const requirements = getLocalizedArray(threat, 'requirements');
+        const risks = getLocalizedArray(threat, 'risks');
+        const consequences = getLocalizedArray(threat, 'consequences');
+
+        const imageSection = imageUrl ? `
+            <div class="scenario-image-container">
+                <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" class="scenario-image" onclick="openImageModal(this.src, this.alt)" />
+            </div>
+        ` : '';
+
+        const hostControls = isHost ? `
+            <div class="scenario-image-controls">
+                <input type="file" id="threatImageInput" accept="image/*" style="display: none;" onchange="uploadThreatImage(this)" />
+                <button class="btn-scenario-image" onclick="document.getElementById('threatImageInput').click()">
+                    ${t('uploadImage')}
+                </button>
+                <button class="btn-scenario-image btn-generate" onclick="generateThreatPrompt()">
+                    ${t('generatePrompt')}
+                </button>
+                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeThreatImage()">${t('remove')}</button>` : ''}
+            </div>
+        ` : '';
+
+        const metaItems = [
+            severity ? { label: t('severity'), value: severity } : null,
+            category ? { label: t('category'), value: category } : null,
+            round ? { label: t('round'), value: round } : null
+        ].filter(Boolean);
+        const metaHtml = metaItems.length ? `
+            <div class="threat-stats">
+                ${metaItems.map(item => `
+                    <div class="stat-item">
+                        <span class="stat-label">${escapeHtml(item.label)}:</span>
+                        <span class="stat-value">${escapeHtml(item.value)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '';
+
+        const listSections = [
+            { title: t('requirements'), items: requirements },
+            { title: t('risks'), items: risks },
+            { title: t('consequences'), items: consequences }
+        ].filter(section => section.items.length > 0);
+        const listsHtml = listSections.length ? `
+            <div class="threat-lists">
+                ${listSections.map(section => `
+                    <div class="list-section threat-list-section">
+                        <span class="list-title">${escapeHtml(section.title)}</span>
+                        <ul>${section.items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '';
+
+        content.innerHTML = `
+            <h4 class="threat-name">${escapeHtml(name)}</h4>
+            <p class="threat-description">${escapeHtml(description)}</p>
+            ${imageSection}
+            ${hostControls}
+            ${metaHtml}
+            ${listsHtml}
+            ${renderThreatInteractionPanel(threat)}
+        `;
+        panel.classList.remove('threat-unknown');
+    }
+
+    function renderThreatInteractionPanel(threat) {
+        const threatId = (threat?.id || threat?.Id || currentThreatState?.currentThreatId || '').toLowerCase();
+        if (threatId !== 'radiation_leak' || !currentThreatState) return '';
+
+        const state = currentThreatState;
+        const status = state.threatStatus || 'hidden';
+        const isResolved = !!state.resolution?.effectsApplied;
+        const volunteerName = state.volunteerSelection?.selectedPlayerName || 'Не вибрано';
+        const contributionTotal = state.contributions?.total || 0;
+        const vote = state.threatVolunteerVote || {};
+        const mine = state.contributions?.mine || [];
+        const myContributionRows = mine.length
+            ? mine.map(item => `<li>${escapeHtml(getThreatSourceLabel(item.sourceType || item.SourceType))}: ${escapeHtml(item.displayName || item.DisplayName || '')}</li>`).join('')
+            : '<li>Поки що немає ваших внесків.</li>';
+        const resultHtml = isResolved
+            ? `<div class="threat-resolution ${escapeHtml(status)}">${(state.resolution.publicResults || []).map(text => `<p>${escapeHtml(text)}</p>`).join('')}${renderThreatRevealedItems(state)}</div>`
+            : '';
+        const gmControls = isHost && !isResolved ? `
+            <div class="threat-actions gm-threat-actions">
+                <button class="char-btn" onclick="rollThreatSupportDice()" ${state.secretSupportDrop?.isCompleted ? 'disabled aria-disabled="true"' : ''}>Кинути секретний кубик</button>
+                <button class="char-btn" onclick="startThreatVolunteerVote()" ${state.volunteerSelection?.selectedPlayerId || vote.status === 'open' ? 'disabled aria-disabled="true"' : ''}>Голосування: хто піде усувати загрозу</button>
+                ${vote.status === 'open' ? `<button class="char-btn" onclick="closeThreatVolunteerVote()">Закрити голосування загрози</button>` : ''}
+                ${renderBunkerAssetControls()}
+                <button class="char-btn public-use" onclick="resolveCurrentThreat()">Завершити збір внесків</button>
+            </div>
+        ` : '';
+        const playerControls = !isResolved ? `
+            <div class="threat-actions player-threat-actions">
+                <button class="char-btn" onclick="submitThreatVolunteer()">Запропонувати себе</button>
+                <button class="char-btn" onclick="useProfessionForThreat()">Використати професію</button>
+                <button class="char-btn" onclick="useHobbyForThreat()">Використати хобі</button>
+                ${renderThreatItemSelect()}
+                <button class="char-btn" onclick="withdrawThreatContribution()">Відкликати свій внесок</button>
+            </div>
+        ` : '';
+        const voteControls = vote.status === 'open' && !isResolved ? renderThreatVolunteerVoteControls() : '';
+
+        return `
+            <section class="threat-interaction-panel">
+                <div class="threat-interaction-summary">
+                    <span>Стан: <strong>${escapeHtml(status)}</strong></span>
+                    <span>Доброволець: <strong>${escapeHtml(volunteerName)}</strong></span>
+                    <span>Внески: <strong>${contributionTotal}</strong></span>
+                    ${vote.status === 'open' ? `<span>Проголосувало: <strong>${vote.votedCount}/${vote.totalVoters}</strong></span>` : ''}
+                </div>
+                ${gmControls}
+                ${playerControls}
+                ${voteControls}
+                <div class="my-threat-contributions"><strong>Мої внески</strong><ul>${myContributionRows}</ul></div>
+                ${resultHtml}
+            </section>
+        `;
+    }
+
+    function getThreatSourceLabel(sourceType) {
+        const labels = {
+            profession: 'Професія',
+            hobby: 'Хобі',
+            personal_inventory: 'Предмет',
+            bunker_resource: 'Ресурс бункера',
+            bunker_facility: 'Система бункера'
+        };
+        return labels[sourceType] || sourceType || 'Внесок';
+    }
+
+    function renderThreatItemSelect() {
+        const items = myPlayerData?.inventory?.items || [];
+        if (!items.length) return '';
+        const options = items.map((item, index) => {
+            const value = item.instanceId || item.name || String(index);
+            const name = getLocalizedValue(item, 'item') || getLocalizedValue(item, 'name') || item.name || 'Предмет';
+            return `<option value="${escapeHtml(value)}">${escapeHtml(name)}</option>`;
+        }).join('');
+        return `<label class="threat-inline-control"><select id="threatItemSelect">${options}</select><button class="char-btn" onclick="contributeThreatItem()">Пожертвувати предмет</button></label>`;
+    }
+
+    function renderBunkerAssetControls() {
+        const assets = currentBunker?.threatAssets || currentBunker?.ThreatAssets || {};
+        const resources = assets.resources || assets.Resources || [];
+        const facilities = assets.facilities || assets.Facilities || [];
+        const resourceOptions = resources
+            .filter(asset => (asset.status || asset.Status || 'available') === 'available')
+            .map(asset => `<option value="${escapeHtml(asset.id || asset.Id || asset.name || asset.Name)}">${escapeHtml(asset.name || asset.Name || asset.id || asset.Id)}</option>`)
+            .join('');
+        const facilityOptions = facilities
+            .filter(asset => (asset.status || asset.Status || 'available') === 'available')
+            .map(asset => `<option value="${escapeHtml(asset.id || asset.Id || asset.name || asset.Name)}">${escapeHtml(asset.name || asset.Name || asset.id || asset.Id)}</option>`)
+            .join('');
+
+        return `
+            ${resourceOptions ? `<label class="threat-inline-control"><select id="threatBunkerResourceSelect">${resourceOptions}</select><button class="char-btn" onclick="contributeBunkerThreatAsset('bunker_resource')">Додати ресурс</button></label>` : ''}
+            ${facilityOptions ? `<label class="threat-inline-control"><select id="threatBunkerFacilitySelect">${facilityOptions}</select><button class="char-btn" onclick="contributeBunkerThreatAsset('bunker_facility')">Додати систему</button></label>` : ''}
+        `;
+    }
+
+    function renderThreatVolunteerVoteControls() {
+        const candidates = Object.values(roomPlayers || {})
+            .filter(player => player && !player.isEliminated && player.connectionId !== myConnectionId)
+            .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
+        if (!candidates.length) return '';
+        return `
+            <div class="threat-volunteer-vote">
+                <p>Оберіть гравця, якого група вважає найменш корисним і готова відправити усувати загрозу.</p>
+                <div class="threat-vote-candidates">
+                    ${candidates.map(player => `<button class="char-btn" onclick="voteThreatVolunteer('${escapeHtml(player.stablePlayerId || player.connectionId)}')">#${player.seatNumber || '?'} ${escapeHtml(player.name || t('unknown'))}</button>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderThreatRevealedItems(state) {
+        const items = state.contributions?.revealedAfterResolution || [];
+        if (!items.length) return '';
+        const names = items.map(item => item.displayName || item.DisplayName || '').filter(Boolean);
+        return names.length ? `<p>Використані предмети: ${names.map(escapeHtml).join(', ')}</p>` : '';
+    }
+
+    function rollThreatSupportDice() {
+        connection.invoke("RollThreatSupportDice").catch(err => console.error("RollThreatSupportDice error:", err));
+    }
+
+    function submitThreatVolunteer() {
+        connection.invoke("SubmitThreatVolunteer").catch(err => console.error("SubmitThreatVolunteer error:", err));
+    }
+
+    function useProfessionForThreat() {
+        connection.invoke("UseProfessionForThreat").catch(err => console.error("UseProfessionForThreat error:", err));
+    }
+
+    function useHobbyForThreat() {
+        connection.invoke("UseHobbyForThreat").catch(err => console.error("UseHobbyForThreat error:", err));
+    }
+
+    function contributeThreatItem() {
+        const select = document.getElementById('threatItemSelect');
+        if (!select?.value) {
+            addEventMessage("Оберіть предмет для внеску.");
+            return;
+        }
+        connection.invoke("ContributeThreatItem", select.value).catch(err => console.error("ContributeThreatItem error:", err));
+    }
+
+    function contributeBunkerThreatAsset(sourceType) {
+        const selectId = sourceType === 'bunker_facility' ? 'threatBunkerFacilitySelect' : 'threatBunkerResourceSelect';
+        const select = document.getElementById(selectId);
+        if (!select?.value) {
+            addEventMessage("Оберіть ресурс або систему бункера.");
+            return;
+        }
+        connection.invoke("ContributeBunkerThreatAsset", sourceType, select.value).catch(err => console.error("ContributeBunkerThreatAsset error:", err));
+    }
+
+    function withdrawThreatContribution() {
+        connection.invoke("WithdrawThreatContribution", null).catch(err => console.error("WithdrawThreatContribution error:", err));
+    }
+
+    function startThreatVolunteerVote() {
+        connection.invoke("StartThreatVolunteerVote").catch(err => console.error("StartThreatVolunteerVote error:", err));
+    }
+
+    function voteThreatVolunteer(targetPlayerId) {
+        connection.invoke("VoteThreatVolunteer", targetPlayerId).catch(err => console.error("VoteThreatVolunteer error:", err));
+    }
+
+    function closeThreatVolunteerVote() {
+        connection.invoke("CloseThreatVolunteerVote").catch(err => console.error("CloseThreatVolunteerVote error:", err));
+    }
+
+    function resolveCurrentThreat() {
+        connection.invoke("ResolveCurrentThreat").catch(err => console.error("ResolveCurrentThreat error:", err));
+    }
+
+    function getReadyStatusLabel(status) {
+        const labels = {
+            pending: 'Не відповів',
+            ready: 'Готовий',
+            add: 'Хоче щось додати',
+            special: 'Хоче використати карту'
+        };
+        return labels[status] || labels.pending;
+    }
+
+    function getReadyStatusClass(status) {
+        return ['ready', 'add', 'special'].includes(status) ? status : 'pending';
+    }
+
+    function updateReadyCheckUI() {
+        const statuses = currentRoundState?.readyStatuses || [];
+        const phase = getCurrentPhase();
+        const isReadyPhase = currentRoom?.state === 'Playing' && phase === 'PreVotingReadyCheck';
+        const hasRoundReadyStatus = statuses.some(player => player.status && player.status !== 'pending');
+        const panel = document.getElementById('readyCheckPanel');
+        const summary = document.getElementById('readyCheckSummary');
+        const gmList = document.getElementById('gmReadyStatusList');
+
+        if (panel) {
+            panel.style.display = isReadyPhase ? 'block' : 'none';
+        }
+
+        const answered = statuses.filter(player => player.status && player.status !== 'pending').length;
+        if (summary) {
+            summary.textContent = statuses.length > 0
+                ? `${answered}/${statuses.length} відповіли`
+                : 'Очікуємо відповіді гравців';
+        }
+
+        if (gmList) {
+            if (isHost && currentRoom?.state === 'Playing' && hasRoundReadyStatus && statuses.length > 0) {
+                gmList.style.display = 'grid';
+                gmList.innerHTML = statuses.map(player => {
+                    const seat = player.seatNumber ? `#${player.seatNumber} ` : '';
+                    const statusClass = getReadyStatusClass(player.status);
+                    return `
+                        <div class="gm-ready-status ${statusClass}">
+                            <span>${seat}${escapeHtml(player.name || t('unknown'))}</span>
+                            <strong>${getReadyStatusLabel(player.status)}</strong>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                gmList.style.display = 'none';
+                gmList.innerHTML = '';
+            }
+        }
     }
 
     function getI18n(source) {
@@ -160,6 +928,7 @@ connection.start()
         setText('#gmPanelBtn', t('gmPanel'));
         setText('#startVotingBtn', t('voting'));
         setText('#startGameBtn', t('startGame'));
+        setText('#startReadyCheckBtn', t('allReady'));
 
         const leaveBtn = document.querySelector('.room-actions .btn-danger');
         if (leaveBtn) leaveBtn.textContent = t('leaveRoom');
@@ -172,6 +941,8 @@ connection.start()
         setPlaceholder('#joinRoomPassword', t('passwordIfAnyPlaceholder'));
 
         setText('#myPlayerSection > .section-title', t('myCharacteristics'));
+        setText('#mySpecialCardsSection > .section-title', t('mySpecialCards'));
+        setText('#specialCardsSection > .section-title', t('revealedSpecialCards'));
         setText('.scenario-section-header .section-header-title', t('bunkerAndApocalypse'));
         setText('.events-section-main > .section-title', t('gameEvents'));
         setText('.events-history-title', t('eventsHistory'));
@@ -180,6 +951,8 @@ connection.start()
         if (apocTitle) apocTitle.textContent = `☢️ ${t('apocalypse')}`;
         const bunkerTitle = document.querySelector('#bunkerPanel .panel-title');
         if (bunkerTitle) bunkerTitle.textContent = `🏠 ${t('bunker')}`;
+        const threatTitle = document.querySelector('#threatPanel .panel-title');
+        if (threatTitle) threatTitle.textContent = `⚠️ ${t('threat')}`;
 
         const playersInBunkerTitle = document.querySelector('#gameSection > .section-title');
         if (playersInBunkerTitle) {
@@ -199,6 +972,12 @@ connection.start()
             if (headerLabels[index]) th.textContent = headerLabels[index];
         });
 
+        const specialCardHeaders = document.querySelectorAll('#specialCardsSection thead th');
+        const specialCardHeaderLabels = ['№', t('players'), t('specialCard'), `${t('description')} / ${t('effect')}`, t('target'), t('status')];
+        specialCardHeaders.forEach((th, index) => {
+            if (specialCardHeaderLabels[index]) th.textContent = specialCardHeaderLabels[index];
+        });
+
     }
 
     function rerenderLocalizedUI() {
@@ -213,6 +992,7 @@ connection.start()
         if (typeof renderMyPlayerCards === "function") {
             try {
                 renderMyPlayerCards(myPlayerData);
+                renderMySpecialCards(myPlayerData);
             } catch (error) {
                 console.warn("Failed to render current player character cards", error);
                 const container = document.getElementById("myPlayerCards");
@@ -221,7 +1001,10 @@ connection.start()
         }
         if (currentApocalypse && typeof renderApocalypse === "function") renderApocalypse(currentApocalypse);
         if (currentBunker && typeof renderBunker === "function") renderBunker(currentBunker);
+        if (typeof renderThreatPanel === "function") renderThreatPanel(currentThreat);
+        if (typeof updateRoundStatusUI === "function") updateRoundStatusUI();
         if (typeof updatePlayersTable === "function") updatePlayersTable();
+        if (typeof updateSpecialCardsUI === "function") updateSpecialCardsUI();
         if (typeof updateGMPlayerSelect === "function") updateGMPlayerSelect();
         if (selectedPlayerForGM && typeof loadPlayerDataForGM === "function") loadPlayerDataForGM();
     }
@@ -237,16 +1020,18 @@ connection.start()
         hostToken = null;
         currentApocalypse = null;
         currentBunker = null;
+        currentThreat = null;
         currentVoting = null;
+        currentRoundState = null;
         myVote = null;
         if (typeof gmRevealedChars !== "undefined") gmRevealedChars = {};
 
-        ['myPlayerCards', 'playersTableBody', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent'].forEach(id => {
+        ['myPlayerCards', 'playersTableBody', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent', 'specialCardsTableBody', 'gmSpecialCardsList'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.innerHTML = '';
         });
 
-        ['gameSection', 'votingPanel', 'votingResultsPanel', 'gmPanel', 'gmPlayerInfo'].forEach(id => {
+        ['gameSection', 'votingPanel', 'votingResultsPanel', 'gmPanel', 'gmPlayerInfo', 'roundStatusPanel', 'specialCardsSection'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
@@ -323,7 +1108,8 @@ connection.start()
         });
         cleaned = cleaned
             .replace(/\b(?:тяжкість|тяжесть|severity)\s*:\s*\d+\s*\/\s*10\b/giu, '')
-            .replace(/\b(?:weak|medium|strong|adult content|слабка|середня|сильна|дорослий контент|слабая|средняя|сильная|взрослый контент)\b/giu, '');
+            .replace(/\b(?:weak|medium|strong|adult content|слабка|середня|сильна|дорослий контент|слабая|средняя|сильная|взрослый контент)\b/giu, '')
+            .replace(/\s*\((?:міфологія|mythology|adult\s*content|combat|weird|feature|корисна|серйозна|мемна|еротична|креативна|абсурдна|неіснуюча)\)\s*/giu, ' ');
         return cleaned
             .split('.')
             .map(part => part.trim())
@@ -332,6 +1118,21 @@ connection.start()
             .replace(/\s+/g, ' ')
             .trim()
             .replace(/([^.!?])$/, '$1.');
+    }
+
+    function cleanProfessionName(value) {
+        return String(value || '')
+            .replace(/\s*\(\s*\+[^)]*?\s*\)\s*$/u, '')
+            .trim();
+    }
+
+    function getProfessionDisplayName(profession) {
+        const rawName = getLocalizedValue(profession, 'profession') ||
+            getLocalizedValue(profession, 'name') ||
+            profession?.name ||
+            profession?.Name ||
+            'Безробітний';
+        return cleanProfessionName(rawName) || 'Безробітний';
     }
 
     function getSeverityCode(source) {
@@ -518,7 +1319,10 @@ connection.start()
 
     function buildLocalizedTooltip(source, kind) {
         if (!source) return '';
-        if (kind === 'physicalHealth' || kind === 'mentalHealth') {
+        if (kind === 'physicalHealth') {
+            return buildPhysicalHealthTooltip(source);
+        }
+        if (kind === 'mentalHealth') {
             return buildHealthConditionTooltip(source);
         }
         const isHealth = kind === 'physicalHealth' || kind === 'mentalHealth';
@@ -601,7 +1405,21 @@ connection.start()
     }
 
     function buildPhysicalHealthTooltip(source) {
-        return sentenceCase(buildHealthConditionTooltip(source));
+        if (!source) return "";
+
+        const name = getConditionDisplayName(source) ||
+            getLocalizedValue(source, "name") ||
+            source.baseName ||
+            source.BaseName ||
+            source.name ||
+            source.Name ||
+            "";
+        const description = getLocalizedHealthDescription(source);
+        const parts = [name, description]
+            .map(value => cleanTooltipText(value))
+            .filter(Boolean);
+
+        return sentenceCase(cleanTooltipText(parts.join(". ")));
     }
 
     function parseFactValue(value) {
@@ -650,7 +1468,8 @@ connection.start()
             characterTrait: !!(src.characterTrait ?? src.CharacterTrait),
             phobia: !!(src.phobia ?? src.Phobia),
             inventory: !!(src.inventory ?? src.Inventory),
-            fact: !!(src.fact ?? src.Fact)
+            fact: !!(src.fact ?? src.Fact),
+            specialCard: !!(src.specialCard ?? src.SpecialCard)
         };
     }
 
@@ -684,6 +1503,7 @@ connection.start()
         const fromRevealed = player?.revealedSources?.[charKey];
         if (fromRevealed) return fromRevealed;
         if (player?.connectionId === myConnectionId && myPlayerData?.[charKey]) return myPlayerData[charKey];
+        if (charKey === 'specialCard') return player?.specialCard || myPlayerData?.specialCard;
         if (charKey === 'fact') return player?.fact || myPlayerData?.fact;
         return null;
     }
@@ -707,12 +1527,13 @@ connection.start()
         }
         if (charKey === 'profession') {
             const name = getLocalizedValue(source, 'profession') || getLocalizedValue(source, 'name') || source?.name || source?.Name || '';
-            const selectedItem = getLocalizedValue(source, 'selectedItem') || source?.selectedItem || source?.SelectedItem || '';
             const experience = source?.experienceYears ?? source?.ExperienceYears;
             const parts = [name || t('profession')];
-            if (selectedItem) parts.push(`(+${selectedItem})`);
             if (Number.isFinite(Number(experience)) && Number(experience) > 0) parts.push(`(${experience} ${t('years')})`);
             return parts.join(' ');
+        }
+        if (charKey === 'specialCard') {
+            return getSpecialCardName(source);
         }
 
         const fieldByKey = {
@@ -734,6 +1555,7 @@ connection.start()
 
     function getLocalizedRevealedTooltip(player, charKey) {
         const source = getRevealedSource(player, charKey);
+        if (charKey === 'specialCard') return getSpecialCardDescription(source);
         const kind = charKey === 'physicalHealth' ? 'physicalHealth' : charKey === 'mentalHealth' ? 'mentalHealth' : charKey;
         return buildLocalizedTooltip(source, kind) || player?.revealedTooltips?.[charKey] || '';
     }
@@ -765,6 +1587,119 @@ connection.start()
             && hasName(getObj('fact', 'Fact'))
             && Array.isArray(inventoryItems)
             && inventoryItems.length > 0;
+    }
+
+    function normalizeInventoryData(source) {
+        const src = source || {};
+        const items = src.items ?? src.Items ?? [];
+
+        return {
+            items: Array.isArray(items)
+                ? items.map(item => ({
+                    instanceId: item.instanceId ?? item.InstanceId ?? "",
+                    name: item.name ?? item.Name ?? 'Предмет',
+                    description: item.description ?? item.Description ?? '',
+                    quantity: item.quantity ?? item.Quantity ?? 1,
+                    isHidden: !!(item.isHidden ?? item.IsHidden),
+                    _i18n: getI18n(item)
+                }))
+                : []
+        };
+    }
+
+    function normalizeSpecialCard(source) {
+        const src = source || {};
+        const isUsed = !!(src.isUsed ?? src.IsUsed);
+        const isActive = !!(src.isActive ?? src.IsActive);
+        const effectDuration = src.effectDuration ?? src.EffectDuration ?? "instant";
+        const effectExpiresAtRound = src.effectExpiresAtRound ?? src.EffectExpiresAtRound ?? null;
+        const computedEffectActive = effectDuration === 'untilRoundEnd' &&
+            effectExpiresAtRound != null &&
+            Number(effectExpiresAtRound) >= Number(getCurrentRoundNumber() || 0);
+        return {
+            id: src.id ?? src.Id ?? src.cardId ?? src.CardId ?? "",
+            name: src.name ?? src.Name ?? src.cardName ?? src.CardName ?? "",
+            description: src.description ?? src.Description ?? "",
+            isSecret: src.isSecret ?? src.IsSecret ?? true,
+            isOneTimeUse: src.isOneTimeUse ?? src.IsOneTimeUse ?? true,
+            phase: src.phase ?? src.Phase ?? "beforeVoting",
+            effectType: src.effectType ?? src.EffectType ?? "",
+            requiresTarget: !!(src.requiresTarget ?? src.RequiresTarget),
+            isUsed,
+            isActive,
+            status: src.status ?? src.Status ?? (isActive ? "active" : isUsed ? "used" : "hidden"),
+            usedAtRound: src.usedAtRound ?? src.UsedAtRound ?? null,
+            activatedRound: src.activatedRound ?? src.ActivatedRound ?? null,
+            targetPlayerId: src.targetPlayerId ?? src.TargetPlayerId ?? null,
+            targetPlayerName: src.targetPlayerName ?? src.TargetPlayerName ?? null,
+            activatedVotingId: src.activatedVotingId ?? src.ActivatedVotingId ?? null,
+            effectResult: src.effectResult ?? src.EffectResult ?? null,
+            publicLog: src.publicLog ?? src.PublicLog ?? null,
+            privateResult: src.privateResult ?? src.PrivateResult ?? null,
+            useMode: src.useMode ?? src.UseMode ?? "",
+            wasUsedSilently: !!(src.wasUsedSilently ?? src.WasUsedSilently),
+            isPubliclyRevealed: !!(src.isPubliclyRevealed ?? src.IsPubliclyRevealed),
+            isEffectActive: !!(src.isEffectActive ?? src.IsEffectActive ?? computedEffectActive ?? isActive),
+            effectDuration,
+            effectExpiresAtRound,
+            publicVisibilityExpiresAtRound: src.publicVisibilityExpiresAtRound ?? src.PublicVisibilityExpiresAtRound ?? null,
+            publicDisplayName: src.publicDisplayName ?? src.PublicDisplayName ?? null,
+            publicDescription: src.publicDescription ?? src.PublicDescription ?? null,
+            publicResult: src.publicResult ?? src.PublicResult ?? null,
+            _i18n: getI18n(src)
+        };
+    }
+
+    function normalizeSpecialCards(source, fallbackCard = null) {
+        const cards = Array.isArray(source) ? source : [];
+        const normalized = cards.map(card => normalizeSpecialCard(card));
+
+        if (normalized.length === 0 && fallbackCard) {
+            normalized.push(normalizeSpecialCard(fallbackCard));
+        }
+
+        return normalized.filter(card => card.id && card.id !== 'no_special_card');
+    }
+
+    function normalizeSpecialCardState(source) {
+        const src = source || {};
+        return {
+            connectionId: src.connectionId || src.ConnectionId || "",
+            stablePlayerId: src.stablePlayerId || src.StablePlayerId || "",
+            playerName: src.playerName || src.PlayerName || src.name || src.Name || "",
+            seatNumber: src.seatNumber ?? src.SeatNumber ?? 0,
+            isOwnerHost: !!(src.isOwnerHost ?? src.IsOwnerHost),
+            isHidden: !!(src.isHidden ?? src.IsHidden),
+            status: src.status || src.Status || "hidden",
+            cardId: src.cardId ?? src.CardId ?? null,
+            cardName: src.cardName ?? src.CardName ?? src.name ?? src.Name ?? "Секретна карта",
+            description: src.description ?? src.Description ?? null,
+            effectType: src.effectType ?? src.EffectType ?? null,
+            isSecret: src.isSecret ?? src.IsSecret ?? true,
+            wasUsedSilently: !!(src.wasUsedSilently ?? src.WasUsedSilently),
+            isPubliclyRevealed: !!(src.isPubliclyRevealed ?? src.IsPubliclyRevealed),
+            isEffectActive: !!(src.isEffectActive ?? src.IsEffectActive),
+            isOneTimeUse: src.isOneTimeUse ?? src.IsOneTimeUse ?? true,
+            requiresTarget: !!(src.requiresTarget ?? src.RequiresTarget),
+            usedAtRound: src.usedAtRound ?? src.UsedAtRound ?? null,
+            activatedRound: src.activatedRound ?? src.ActivatedRound ?? null,
+            effectDuration: src.effectDuration ?? src.EffectDuration ?? "instant",
+            effectExpiresAtRound: src.effectExpiresAtRound ?? src.EffectExpiresAtRound ?? null,
+            targetPlayerId: src.targetPlayerId ?? src.TargetPlayerId ?? null,
+            targetPlayerName: src.targetPlayerName ?? src.TargetPlayerName ?? null,
+            publicResult: src.publicResult ?? src.PublicResult ?? null,
+            _i18n: getI18n(src)
+        };
+    }
+
+    function getSpecialCardName(card) {
+        if (!card) return 'Без спеціальної карти';
+        return getLocalizedValue(card, 'name') || card.name || card.Name || card.cardName || card.CardName || 'Секретна карта';
+    }
+
+    function getSpecialCardDescription(card) {
+        if (!card) return '';
+        return getLocalizedValue(card, 'description') || card.description || card.Description || '';
     }
 
     // Normalize player data from server (PascalCase) to client (camelCase)
@@ -802,11 +1737,22 @@ connection.start()
         const normalized = {
             name: player.name ?? player.Name ?? 'Гравець',
             connectionId: player.connectionId ?? player.ConnectionId ?? null,
+            stablePlayerId: player.stablePlayerId ?? player.StablePlayerId ?? "",
             isHost: player.isHost ?? player.IsHost ?? false,
             isEliminated: player.isEliminated ?? player.IsEliminated ?? false,
+            eliminatedAtRound: player.eliminatedAtRound ?? player.EliminatedAtRound ?? null,
+            eliminatedByVote: !!(player.eliminatedByVote ?? player.EliminatedByVote),
+            canRevealAllAfterElimination: !!(player.canRevealAllAfterElimination ?? player.CanRevealAllAfterElimination),
+            hasRevealedAllAfterElimination: !!(player.hasRevealedAllAfterElimination ?? player.HasRevealedAllAfterElimination),
+            eliminationVoteImmunity: normalizeEliminationVoteImmunity(player.eliminationVoteImmunity || player.EliminationVoteImmunity),
             seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
             _hasCharacter: hasGeneratedCharacterData(player),
             revealed: normalizeRevealedState(player.revealed ?? player.Revealed ?? {}),
+            specialCards: normalizeSpecialCards(
+                player.specialCards || player.SpecialCards,
+                player.specialCard || player.SpecialCard
+            ),
+            specialCard: normalizeSpecialCard(player.specialCard || player.SpecialCard),
             
             // Personality
             personality: {
@@ -827,7 +1773,7 @@ connection.start()
             profession: (() => {
                 const src = player.profession || player.Profession || {};
                 return {
-                    name: src.name ?? src.Name ?? 'Безробітний',
+                    name: cleanProfessionName(src.name ?? src.Name ?? 'Безробітний'),
                     tooltip: cleanTooltipText(src.tooltip ?? src.Tooltip ?? null),
                     experienceYears: src.experienceYears ?? src.ExperienceYears ?? 0,
                     selectedItem: src.selectedItem ?? src.SelectedItem ?? null,
@@ -846,20 +1792,24 @@ connection.start()
             fact: normalizeFactFromPlayer(player),
             
             // Inventory
-            inventory: (() => {
-                const src = player.inventory || player.Inventory || {};
-                const items = src.items ?? src.Items ?? [];
-                return {
-                    items: items.map(item => ({
-                        name: item.name ?? item.Name ?? 'Предмет',
-                        description: item.description ?? item.Description ?? '',
-                        _i18n: getI18n(item)
-                    }))
-                };
-            })(),
+            inventory: normalizeInventoryData(player.inventory || player.Inventory),
         };
-        
+
+        if (normalized.specialCards.length > 0) {
+            normalized.specialCard = normalized.specialCards[0];
+        }
+
         return normalized;
+    }
+
+    function normalizeEliminationVoteImmunity(source) {
+        const src = source || {};
+        return {
+            isActive: !!(src.isActive ?? src.IsActive),
+            sourceThreatId: src.sourceThreatId || src.SourceThreatId || "",
+            grantedAtRound: src.grantedAtRound ?? src.GrantedAtRound ?? null,
+            remainingUses: src.remainingUses ?? src.RemainingUses ?? 0
+        };
     }
 
     // ==================== SIGNALR HANDLERS ====================
@@ -890,6 +1840,7 @@ function registerSignalREvents() {
             currentRoom.id = currentRoom.id || currentRoom.Id;
             currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
+        applyRoundState(data.roundState || data.RoundState);
 
         console.log("[RoomCreated] Normalized myPlayerData:", myPlayerData);
         console.log("[RoomCreated] myConnectionId:", myConnectionId);
@@ -922,6 +1873,10 @@ function registerSignalREvents() {
                 revealedSources: revealedSources,
                 revealedTooltips: revealedValues.revealedTooltips,
                 isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
+                eliminatedAtRound: p.eliminatedAtRound ?? p.EliminatedAtRound ?? null,
+                eliminatedByVote: !!(p.eliminatedByVote ?? p.EliminatedByVote),
+                canRevealAllAfterElimination: !!(p.canRevealAllAfterElimination ?? p.CanRevealAllAfterElimination),
+                hasRevealedAllAfterElimination: !!(p.hasRevealedAllAfterElimination ?? p.HasRevealedAllAfterElimination),
                 seatNumber: p.seatNumber ?? p.SeatNumber ?? 0,
                 isConnected: p.isConnected ?? p.IsConnected ?? true
             };
@@ -939,6 +1894,10 @@ function registerSignalREvents() {
                 revealedSources: {},
                 revealedTooltips: {},
                 isEliminated: myPlayerData.isEliminated || false,
+                eliminatedAtRound: myPlayerData.eliminatedAtRound || null,
+                eliminatedByVote: !!myPlayerData.eliminatedByVote,
+                canRevealAllAfterElimination: !!myPlayerData.canRevealAllAfterElimination,
+                hasRevealedAllAfterElimination: !!myPlayerData.hasRevealedAllAfterElimination,
                 seatNumber: myPlayerData.seatNumber || 0,
                 isConnected: true
             };
@@ -969,6 +1928,7 @@ function registerSignalREvents() {
             currentRoom.id = currentRoom.id || currentRoom.Id;
             currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
+        applyRoundState(data.roundState || data.RoundState);
         
         console.log("[RoomJoined] Normalized myPlayerData:", myPlayerData);
         console.log("[RoomJoined] myConnectionId:", myConnectionId);
@@ -995,7 +1955,13 @@ function registerSignalREvents() {
                 fact: normalizeFactFromPlayer({ ...p, fact: revealedSources.fact || p.fact || p.Fact, revealedData: revealedValues.revealedData, revealedTooltips: revealedValues.revealedTooltips }),
                 revealedData: revealedValues.revealedData,
                 revealedSources: revealedSources,
-                revealedTooltips: revealedValues.revealedTooltips
+                revealedTooltips: revealedValues.revealedTooltips,
+                isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
+                eliminatedAtRound: p.eliminatedAtRound ?? p.EliminatedAtRound ?? null,
+                eliminatedByVote: !!(p.eliminatedByVote ?? p.EliminatedByVote),
+                canRevealAllAfterElimination: !!(p.canRevealAllAfterElimination ?? p.CanRevealAllAfterElimination),
+                hasRevealedAllAfterElimination: !!(p.hasRevealedAllAfterElimination ?? p.HasRevealedAllAfterElimination),
+                seatNumber: p.seatNumber ?? p.SeatNumber ?? 0
             };
         });
         
@@ -1091,6 +2057,7 @@ function registerSignalREvents() {
             currentRoom.state = roomState;
             console.log("[GameStarted] Updated currentRoom.state:", currentRoom.state);
         }
+        applyRoundState(data.roundState || data.RoundState);
 
         // Normalize apocalypse (handle both camelCase and PascalCase)
         const apocalypse = data.apocalypse || data.Apocalypse;
@@ -1119,6 +2086,7 @@ function registerSignalREvents() {
             suppliesMonths: bunker.suppliesMonths ?? bunker.SuppliesMonths ?? 12,
             facilities: bunker.facilities || bunker.Facilities || [],
             resources: bunker.resources || bunker.Resources || [],
+            threatAssets: bunker.threatAssets || bunker.ThreatAssets || { resources: [], facilities: [] },
             problems: bunker.problems || bunker.Problems || [],
             condition: bunker.condition || bunker.Condition || 'good',
             imageUrl: bunker.imageUrl || bunker.ImageUrl || null,
@@ -1137,6 +2105,10 @@ function registerSignalREvents() {
             if (roomPlayers[connId]) {
                 roomPlayers[connId].seatNumber = seatNum;
                 roomPlayers[connId].isEliminated = p.isEliminated ?? p.IsEliminated ?? false;
+                roomPlayers[connId].eliminatedAtRound = p.eliminatedAtRound ?? p.EliminatedAtRound ?? null;
+                roomPlayers[connId].eliminatedByVote = !!(p.eliminatedByVote ?? p.EliminatedByVote);
+                roomPlayers[connId].canRevealAllAfterElimination = !!(p.canRevealAllAfterElimination ?? p.CanRevealAllAfterElimination);
+                roomPlayers[connId].hasRevealedAllAfterElimination = !!(p.hasRevealedAllAfterElimination ?? p.HasRevealedAllAfterElimination);
                 console.log(`[GameStarted] Updated player ${connId} seat: ${seatNum}`);
             }
         });
@@ -1162,7 +2134,7 @@ function registerSignalREvents() {
             console.log("[GameStarted] myPlayerSection shown");
         }
         if (currentRoomState) {
-            currentRoomState.textContent = t('game');
+            currentRoomState.textContent = getRoomStateLabel();
             currentRoomState.classList.add('state-playing');
             console.log("[GameStarted] currentRoomState updated");
         }
@@ -1175,16 +2147,7 @@ function registerSignalREvents() {
             console.log("[GameStarted] startBtn hidden");
         }
 
-        // Show voting button for host now that game is active
-        const votingBtn = document.getElementById('startVotingBtn');
-        if (votingBtn) {
-            if (isHost && !currentVoting) {
-                votingBtn.style.display = 'inline-block';
-                console.log("[GameStarted] Voting button shown for host");
-            } else {
-                votingBtn.style.display = 'none';
-            }
-        }
+        updateRoundStatusUI();
 
         // Show GM sections for host using the dedicated function
         console.log("[GameStarted] Calling updateGMSections...");
@@ -1210,7 +2173,7 @@ function registerSignalREvents() {
         renderCurrentGameUI();
 
         // Add event messages
-        const currentRound = data.currentRound || data.CurrentRound || 1;
+        const currentRound = data.currentRound || data.CurrentRound || getCurrentRoundNumber() || 1;
         addEventMessage(`Гра почалась! Раунд ${currentRound}`);
 
         if (currentApocalypse && currentApocalypse.name) {
@@ -1228,6 +2191,7 @@ function registerSignalREvents() {
     connection.off("CharacteristicRevealed");
     connection.on("CharacteristicRevealed", function (info) {
         console.log("Characteristic revealed:", info);
+        applyRoundState(info.roundState || info.RoundState);
         const characteristicKey = normalizeCharacteristicKey(info.characteristicKey);
         const charKey = normalizeCharacteristicKey(toCamelCase(characteristicKey));
         
@@ -1253,6 +2217,9 @@ function registerSignalREvents() {
             if (charKey === 'fact') {
                 roomPlayers[info.connectionId].fact = normalizeFactFromPlayer({ fact: source || info.data.fact || info.data.Fact, revealedData: { fact: info.data } });
             }
+            if (charKey === 'specialCard' && source) {
+                roomPlayers[info.connectionId].specialCard = normalizeSpecialCard(source);
+            }
             if (info.data.tooltip && info.data.hasTooltip) {
                 const kind = charKey === 'physicalHealth' ? 'physicalHealth' : charKey === 'mentalHealth' ? 'mentalHealth' : charKey;
                 roomPlayers[info.connectionId].revealedTooltips[charKey] = buildLocalizedTooltip(source, kind) || cleanTooltipText(info.data.tooltip);
@@ -1271,6 +2238,15 @@ function registerSignalREvents() {
             const source = info.data.source || info.data.Source || info.data.fact || info.data.Fact;
             myPlayerData.fact = normalizeFactFromPlayer({ fact: source, revealedData: { fact: info.data } });
         }
+        if (charKey === "specialCard") {
+            const source = info.data.source || info.data.Source;
+            if (source) {
+                const revealedCard = normalizeSpecialCard(source);
+                myPlayerData.specialCard = revealedCard;
+                myPlayerData.specialCards = normalizeSpecialCards(myPlayerData.specialCards, revealedCard)
+                    .map(card => card.id === revealedCard.id ? revealedCard : card);
+            }
+        }
 
         renderCurrentGameUI();
     }
@@ -1281,6 +2257,137 @@ function registerSignalREvents() {
             setTimeout(initMobileTooltips, 100);
         }
         addEventMessage(`<span class="event-player">${info.playerName}</span> розкрив: <span class="revealed-label">${info.data.label}</span>`);
+    });
+
+    connection.off("RoundStateUpdated");
+    connection.on("RoundStateUpdated", function (data) {
+        const wasComplete = currentRoundState?.allPlayersRevealed;
+        applyRoundState(data);
+        renderCurrentGameUI();
+
+        if (isHost && currentRoundState?.allPlayersRevealed && !wasComplete) {
+            addEventMessage(`Усі активні гравці відкрили характеристику в раунді ${getCurrentRoundNumber()}. Можна завершити раунд.`);
+        }
+    });
+
+    connection.off("RoundEnded");
+    connection.on("RoundEnded", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        addEventMessage(`Раунд ${data.completedRound || data.CompletedRound} завершено.`);
+    });
+
+    connection.off("RoundAdvanced");
+    connection.on("RoundAdvanced", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        addEventMessage(`Почався раунд ${data.currentRound || data.CurrentRound || getCurrentRoundNumber()}.`);
+    });
+
+    connection.off("RoundDiceRolled");
+    connection.on("RoundDiceRolled", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        const roll = normalizeDiceRoll(data.diceRoll || data.DiceRoll || data.roll || data.Roll);
+        const value = roll?.value || '?';
+        const round = roll?.round || getCurrentRoundNumber();
+        const roller = roll?.rolledByPlayerName || 'GM';
+        addEventMessage(`${escapeHtml(roller)} кинув кубик у раунді ${round}: <strong>${value}</strong>`);
+    });
+
+    connection.off("ThreatRevealed");
+    connection.on("ThreatRevealed", function (data) {
+        currentThreat = data.threat || data.Threat || null;
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        const threatName = currentThreat ? (getLocalizedValue(currentThreat, 'name') || currentThreat.name || currentThreat.Name) : 'нова загроза';
+        addEventMessage(`<span class="event-warning">${t('threatRevealed')}:</span> ${escapeHtml(threatName)}`);
+    });
+
+    connection.off("VotingReadyCheckStarted");
+    connection.on("VotingReadyCheckStarted", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        addEventMessage(data.message || data.Message || 'Всі готові до голосування?');
+    });
+
+    connection.off("AllPlayersMarkedReady");
+    connection.on("AllPlayersMarkedReady", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        addEventMessage(t('allPlayersReady'));
+    });
+
+    connection.off("VotingReadyStatusUpdated");
+    connection.on("VotingReadyStatusUpdated", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        const playerName = data.playerName || data.PlayerName || t('unknown');
+        const status = data.status || data.Status || 'pending';
+        addEventMessage(`${playerName}: ${getReadyStatusLabel(status)}`);
+    });
+
+    connection.off("SpecialCardStateUpdated");
+    connection.on("SpecialCardStateUpdated", function (data) {
+        const card = data.card || data.Card;
+        const cards = data.cards || data.Cards;
+        if (myPlayerData) {
+            myPlayerData.specialCards = normalizeSpecialCards(cards, card);
+            myPlayerData.specialCard = myPlayerData.specialCards[0] || normalizeSpecialCard(card);
+            if (data.inventory || data.Inventory) {
+                myPlayerData.inventory = normalizeInventoryData(data.inventory || data.Inventory);
+            }
+        }
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+    });
+
+    connection.off("SpecialCardActivated");
+    connection.on("SpecialCardActivated", function (data) {
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+        const message = data.message || data.Message;
+        const ownerName = data.ownerPlayerName || data.OwnerPlayerName || t('unknown');
+        addEventMessage(escapeHtml(message || `${ownerName} використав спеціальну карту.`));
+    });
+
+    connection.off("SpecialCardPrivateResult");
+    connection.on("SpecialCardPrivateResult", function (data) {
+        const message = data.message || data.Message || t('cardUsedSuccessfully');
+        addEventMessage(`<span class="event-success">${escapeHtml(message)}</span>`);
+    });
+
+    connection.off("SpecialCardTargetStateUpdated");
+    connection.on("SpecialCardTargetStateUpdated", function (data) {
+        if (myPlayerData) {
+            if (data.inventory || data.Inventory) {
+                myPlayerData.inventory = normalizeInventoryData(data.inventory || data.Inventory);
+            }
+            const cards = data.specialCards || data.SpecialCards;
+            if (cards) {
+                myPlayerData.specialCards = normalizeSpecialCards(cards);
+                myPlayerData.specialCard = myPlayerData.specialCards[0] || normalizeSpecialCard(null);
+            }
+        }
+        renderCurrentGameUI();
+        const message = data.message || data.Message;
+        if (message) addEventMessage(`<span class="event-warning">${escapeHtml(message)}</span>`);
+    });
+
+    connection.off("CharacteristicHidden");
+    connection.on("CharacteristicHidden", function (data) {
+        const connectionId = data.connectionId || data.ConnectionId;
+        const charKey = normalizeCharacteristicKey(toCamelCase(data.characteristicKey || data.CharacteristicKey || ''));
+        const player = roomPlayers[connectionId];
+        if (player) {
+            if (player.revealed) player.revealed[charKey] = false;
+            if (player.revealedData) delete player.revealedData[charKey];
+            if (player.revealedSources) delete player.revealedSources[charKey];
+        }
+        if (connectionId === myConnectionId && myPlayerData?.revealed) {
+            myPlayerData.revealed[charKey] = false;
+        }
+        renderCurrentGameUI();
     });
 
     // Характеристику оновлено (GM змінив)
@@ -1305,9 +2412,13 @@ function registerSignalREvents() {
             if (charKey === 'fact') {
                 roomPlayers[info.connectionId].fact = normalizeFactFromPlayer({ fact: source || info.data.fact || info.data.Fact, revealedData: { fact: info.data } });
             }
+            if (charKey === 'specialCard' && source) {
+                roomPlayers[info.connectionId].specialCard = normalizeSpecialCard(source);
+            }
         }
         
         updatePlayersTable();
+        updateSpecialCardsUI();
         addEventMessage(`<span class="event-gm">GM</span> змінив характеристику <span class="event-player">${info.playerName}</span>`);
     });
 
@@ -1344,7 +2455,19 @@ function registerSignalREvents() {
         console.log("Player eliminated:", info);
         if (roomPlayers[info.connectionId]) {
             roomPlayers[info.connectionId].isEliminated = true;
+            roomPlayers[info.connectionId].eliminatedAtRound = info.eliminatedAtRound ?? info.EliminatedAtRound ?? getCurrentRoundNumber();
+            roomPlayers[info.connectionId].eliminatedByVote = !!(info.eliminatedByVote ?? info.EliminatedByVote);
+            roomPlayers[info.connectionId].canRevealAllAfterElimination = !!(info.canRevealAllAfterElimination ?? info.CanRevealAllAfterElimination ?? true);
+            roomPlayers[info.connectionId].hasRevealedAllAfterElimination = !!(info.hasRevealedAllAfterElimination ?? info.HasRevealedAllAfterElimination);
         }
+        if (info.connectionId === myConnectionId && myPlayerData) {
+            myPlayerData.isEliminated = true;
+            myPlayerData.eliminatedAtRound = info.eliminatedAtRound ?? info.EliminatedAtRound ?? getCurrentRoundNumber();
+            myPlayerData.eliminatedByVote = !!(info.eliminatedByVote ?? info.EliminatedByVote);
+            myPlayerData.canRevealAllAfterElimination = !!(info.canRevealAllAfterElimination ?? info.CanRevealAllAfterElimination ?? true);
+            myPlayerData.hasRevealedAllAfterElimination = !!(info.hasRevealedAllAfterElimination ?? info.HasRevealedAllAfterElimination);
+        }
+        renderCurrentGameUI();
         updatePlayersTable();
         updateGMPlayerSelect();
         addEventMessage(`<span class="event-eliminate">❌ ${info.playerName}</span> елімінований!`);
@@ -1356,10 +2479,35 @@ function registerSignalREvents() {
         console.log("Player restored:", info);
         if (roomPlayers[info.connectionId]) {
             roomPlayers[info.connectionId].isEliminated = false;
+            roomPlayers[info.connectionId].canRevealAllAfterElimination = false;
+            roomPlayers[info.connectionId].hasRevealedAllAfterElimination = false;
         }
+        if (info.connectionId === myConnectionId && myPlayerData) {
+            myPlayerData.isEliminated = false;
+            myPlayerData.canRevealAllAfterElimination = false;
+            myPlayerData.hasRevealedAllAfterElimination = false;
+        }
+        renderCurrentGameUI();
         updatePlayersTable();
         updateGMPlayerSelect();
         addEventMessage(`<span class="event-restore">✅ ${info.playerName}</span> повернено в гру!`);
+    });
+
+    connection.off("EliminatedPlayerRevealedAll");
+    connection.on("EliminatedPlayerRevealedAll", function (info) {
+        console.log("Eliminated player revealed all:", info);
+        applyRoundState(info.roundState || info.RoundState);
+        const connectionId = info.connectionId || info.ConnectionId;
+        if (roomPlayers[connectionId]) {
+            roomPlayers[connectionId].canRevealAllAfterElimination = false;
+            roomPlayers[connectionId].hasRevealedAllAfterElimination = true;
+        }
+        if (connectionId === myConnectionId && myPlayerData) {
+            myPlayerData.canRevealAllAfterElimination = false;
+            myPlayerData.hasRevealedAllAfterElimination = true;
+        }
+        renderCurrentGameUI();
+        addEventMessage(`<span class="event-player">${t('eliminatedRevealedAllLog')}</span>`);
     });
 
     // GM отримав дані всіх гравців
@@ -1377,6 +2525,7 @@ function registerSignalREvents() {
             };
         });
         updateGMPlayerSelect();
+        updateSpecialCardsUI();
     });
 
     // GM дія успішна
@@ -1399,7 +2548,7 @@ function registerSignalREvents() {
         }
 
         console.error("ReceiveError:", message);
-        addEventMessage("Помилка: " + message);
+        addEventMessage("Помилка: " + localizeServerMessage(message));
     });
 
     // ==================== SESSION RESTORE HANDLERS ====================
@@ -1424,6 +2573,7 @@ function registerSignalREvents() {
             currentRoom.id = currentRoom.id || currentRoom.Id;
             currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
         }
+        applyRoundState(data.roundState || data.RoundState);
 
         console.log("[RejoinSuccess] currentRoom:", currentRoom);
         console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
@@ -1451,6 +2601,10 @@ function registerSignalREvents() {
                 revealedTooltips: revealedTooltips,
                 fact: normalizeFactFromPlayer({ ...p, fact: revealedSources.fact || p.fact || p.Fact, revealedData: revealedData, revealedTooltips: revealedTooltips }),
                 isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
+                eliminatedAtRound: p.eliminatedAtRound ?? p.EliminatedAtRound ?? null,
+                eliminatedByVote: !!(p.eliminatedByVote ?? p.EliminatedByVote),
+                canRevealAllAfterElimination: !!(p.canRevealAllAfterElimination ?? p.CanRevealAllAfterElimination),
+                hasRevealedAllAfterElimination: !!(p.hasRevealedAllAfterElimination ?? p.HasRevealedAllAfterElimination),
                 seatNumber: p.seatNumber ?? p.SeatNumber ?? 0
             };
 
@@ -1479,7 +2633,7 @@ function registerSignalREvents() {
             document.getElementById('myPlayerSection').style.display = 'block';
 
             document.getElementById('currentRoomState').textContent =
-                currentRoom.state === 'Voting' ? 'Голосування' : 'Гра';
+                getRoomStateLabel();
 
             const startBtn = document.getElementById('startGameBtn');
             if (startBtn) {
@@ -1487,19 +2641,11 @@ function registerSignalREvents() {
                 startBtn.disabled = true;
             }
 
-            // Show voting button for host in game state
-            const votingBtn = document.getElementById('startVotingBtn');
-            if (votingBtn) {
-                if (isHost && !currentVoting && currentRoom.state !== 'Voting') {
-                    votingBtn.style.display = 'inline-block';
-                    console.log("[RejoinSuccess] Voting button shown for host");
-                } else {
-                    votingBtn.style.display = 'none';
-                }
-            }
+            updateRoundStatusUI();
 
             if (currentApocalypse) renderApocalypse(currentApocalypse);
             if (currentBunker) renderBunker(currentBunker);
+            if (currentThreat) renderThreatPanel(currentThreat);
 
             if (currentVoting) {
                 const votingState = currentVoting.state || currentVoting.State || currentRoom.state;
@@ -1514,7 +2660,7 @@ function registerSignalREvents() {
                         if (voteTarget) voteTarget.textContent = rejoinedVote.targetName || rejoinedVote.TargetName || '';
                         updateVotingCandidates();
                     }
-                } else if (votingState === 'Completed') {
+                } else if (votingState === 'Completed' || votingState === 'Resolved') {
                     document.getElementById('votingPanel').style.display = 'none';
                     showVotingResults(currentVoting);
                 }
@@ -1647,6 +2793,126 @@ function registerSignalREvents() {
         addEventToHistory(`<span class="event-special">Застосовано ефект: ${data.effectDescription}</span>`, 'special');
     });
 
+    connection.off("AdditionalInventoryGranted");
+    connection.on("AdditionalInventoryGranted", function (data) {
+        console.log("Additional inventory granted:", data);
+        const grants = data.grants || data.Grants || [];
+        const receivedItems = [];
+
+        grants.forEach(grant => {
+            const connId = grant.connectionId || grant.ConnectionId;
+            const stableId = grant.stablePlayerId || grant.StablePlayerId || "";
+            const inventory = grant.inventory || grant.Inventory;
+            const item = grant.item || grant.Item || {};
+            const itemName = getLocalizedValue(item, 'item') || getLocalizedValue(item, 'name') || grant.itemName || grant.ItemName || item.name || item.Name || t('unknown');
+            const normalizedInventory = normalizeInventoryData(inventory);
+
+            let playerKey = connId;
+            if (!roomPlayers[playerKey] && stableId) {
+                playerKey = Object.keys(roomPlayers).find(key => roomPlayers[key]?.stablePlayerId === stableId) || connId;
+            }
+
+            if (roomPlayers[playerKey]) {
+                roomPlayers[playerKey].revealedSources = roomPlayers[playerKey].revealedSources || {};
+                roomPlayers[playerKey].revealedData = roomPlayers[playerKey].revealedData || {};
+                roomPlayers[playerKey].revealedTooltips = roomPlayers[playerKey].revealedTooltips || {};
+
+                if (grant.isInventoryRevealed || grant.IsInventoryRevealed) {
+                    roomPlayers[playerKey].revealedSources.inventory = inventory;
+                    roomPlayers[playerKey].revealedData.inventory = normalizedInventory.items
+                        .map(inventoryItem => getLocalizedValue(inventoryItem, 'item') || getLocalizedValue(inventoryItem, 'name') || inventoryItem.name)
+                        .filter(Boolean)
+                        .join(', ');
+                }
+            }
+
+            const isMine = connId === myConnectionId || (stableId && roomPlayers[myConnectionId]?.stablePlayerId === stableId);
+            if (isMine && myPlayerData) {
+                myPlayerData.inventory = normalizedInventory;
+                receivedItems.push(itemName);
+            }
+        });
+
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+
+        if (receivedItems.length > 0) {
+            addEventMessage(`<span class="event-success">📦 Ви отримали додатковий інвентар:</span> ${receivedItems.join(', ')}`);
+        } else if (grants.length > 0) {
+            addEventMessage(`<span class="event-success">📦 Активні гравці отримали додатковий інвентар після 3 раунду.</span>`);
+        }
+    });
+
+    connection.off("ThreatStateUpdated");
+    connection.on("ThreatStateUpdated", function (data) {
+        currentThreatState = normalizeThreatState(data.threatState || data.ThreatState || currentThreatState);
+        applyRoundState(data.roundState || data.RoundState);
+        renderCurrentGameUI();
+    });
+
+    connection.off("ThreatSupportDiceRolled");
+    connection.on("ThreatSupportDiceRolled", function (data) {
+        addEventMessage(`<span class="event-success">${escapeHtml(data.message || 'Кубик кинуто. Предмет підтримки видано.')}</span>`);
+    });
+
+    connection.off("ThreatSupportDropAnnounced");
+    connection.on("ThreatSupportDropAnnounced", function (data) {
+        addEventMessage(`<span class="event-special">${escapeHtml(data.message || 'Один із гравців отримав предмет підтримки.')}</span>`);
+    });
+
+    connection.off("ThreatSupportItemReceived");
+    connection.on("ThreatSupportItemReceived", function (data) {
+        if (myPlayerData && data.inventory) {
+            myPlayerData.inventory = normalizeInventoryData(data.inventory || data.Inventory);
+        }
+        addEventMessage(`<span class="event-success">${escapeHtml(data.message || 'Ви отримали предмет підтримки.')}</span>`);
+        renderCurrentGameUI();
+    });
+
+    connection.off("ThreatPrivateMessage");
+    connection.on("ThreatPrivateMessage", function (data) {
+        addEventMessage(`<span class="event-special">${escapeHtml(data.message || data.Message || '')}</span>`);
+    });
+
+    connection.off("ThreatContributionWithdrawn");
+    connection.on("ThreatContributionWithdrawn", function (data) {
+        addEventMessage(`<span class="event-warning">${escapeHtml(data.message || data.Message || 'Внесок оновлено.')}</span>`);
+    });
+
+    connection.off("ThreatVolunteerSelected");
+    connection.on("ThreatVolunteerSelected", function (data) {
+        addEventMessage(`<span class="event-special">${escapeHtml(data.message || data.Message || 'Добровольця вибрано.')}</span>`);
+    });
+
+    connection.off("ThreatVolunteerVoteStarted");
+    connection.on("ThreatVolunteerVoteStarted", function (data) {
+        addEventMessage(`<span class="event-voting">${escapeHtml(data.message || data.Message || 'Голосування загрози почалось.')}</span>`);
+    });
+
+    connection.off("ThreatVolunteerVoteProgress");
+    connection.on("ThreatVolunteerVoteProgress", function (data) {
+        if (currentThreatState) {
+            currentThreatState.threatVolunteerVote = normalizeThreatState({ threatVolunteerVote: data }).threatVolunteerVote;
+            renderThreatPanel(currentThreat);
+        }
+    });
+
+    connection.off("ThreatVolunteerVoteCompleted");
+    connection.on("ThreatVolunteerVoteCompleted", function (data) {
+        addEventMessage(`<span class="event-voting">${escapeHtml(data.message || data.Message || 'Голосування загрози завершено.')}</span>`);
+    });
+
+    connection.off("ThreatVolunteerVoteClosed");
+    connection.on("ThreatVolunteerVoteClosed", function (data) {
+        addEventMessage(`<span class="event-warning">${escapeHtml(data.message || data.Message || 'Голосування загрози закрито.')}</span>`);
+    });
+
+    connection.off("ThreatResolved");
+    connection.on("ThreatResolved", function (data) {
+        const results = data.results || data.Results || [];
+        addEventMessage(`<span class="event-success">${results.map(escapeHtml).join(' ') || 'Загрозу завершено.'}</span>`);
+    });
+
     // ==================== VOTING SIGNALR HANDLERS ====================
 
     // Голосування почалось
@@ -1654,9 +2920,12 @@ function registerSignalREvents() {
     connection.on("VotingStarted", function (data) {
         console.log("Voting started:", data);
         currentVoting = data;
+        if (currentRoom) currentRoom.state = "Voting";
+        applyRoundState(data.roundState || data.RoundState);
         myVote = null;
         showVotingPanel(data);
-        addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round}`);
+        renderCurrentGameUI();
+        addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round || data.Round || getCurrentRoundNumber()}`);
     });
 
     // Голос зараховано
@@ -1696,15 +2965,21 @@ function registerSignalREvents() {
     connection.off("VotingResolved");
     connection.on("VotingResolved", function (data) {
         console.log("Voting resolved:", data);
-        currentVoting = null;
-        
-        // Ховаємо панель результатів
-        document.getElementById('votingResultsPanel').style.display = 'none';
+        currentVoting = data.voting || data.Voting || currentVoting;
+        if (currentRoom) {
+            currentRoom.state = "Playing";
+            currentRoom.currentRound = data.currentRound || data.CurrentRound || data.nextRound || data.NextRound || currentRoom.currentRound;
+        }
+        applyRoundState(data.roundState || data.RoundState);
+        document.getElementById('votingPanel').style.display = 'none';
+        if (currentVoting) {
+            showVotingResults(currentVoting);
+        }
         
         // Оновлюємо UI
         renderCurrentGameUI();
         
-        addEventMessage(`<span class="event-voting">⚖️</span> ${data.message}. Раунд ${data.nextRound}`);
+        addEventMessage(`<span class="event-voting">⚖️</span> ${data.message}`);
     });
 
     // Голосування скасовано
@@ -1712,6 +2987,8 @@ function registerSignalREvents() {
     connection.on("VotingCancelled", function (data) {
         console.log("Voting cancelled:", data);
         currentVoting = null;
+        if (currentRoom) currentRoom.state = "Playing";
+        applyRoundState(data.roundState || data.RoundState);
         
         document.getElementById('votingPanel').style.display = 'none';
         document.getElementById('votingResultsPanel').style.display = 'none';
@@ -1742,6 +3019,18 @@ function registerSignalREvents() {
             addEventMessage(`<span class="event-image">🖼️</span> Зображення бункера оновлено`);
         }
     });
+
+    connection.off("ThreatImageUpdated");
+    connection.on("ThreatImageUpdated", function (data) {
+        console.log("[ThreatImageUpdated]", data);
+        const currentThreatId = currentThreat?.id || currentThreat?.Id;
+        if (currentThreat && currentThreatId === data.threatId) {
+            currentThreat.imageUrl = data.imageUrl;
+            currentThreat.uploadedImagePath = data.imageUrl;
+            renderThreatPanel(currentThreat);
+            addEventMessage(`<span class="event-image">🖼️</span> Зображення загрози оновлено`);
+        }
+    });
     
     // Зображення апокаліпсису видалено
     connection.off("ApocalypseImageRemoved");
@@ -1762,6 +3051,18 @@ function registerSignalREvents() {
             currentBunker.imageUrl = null;
             renderBunker(currentBunker);
             addEventMessage(`<span class="event-image">🗑️</span> Зображення бункера видалено`);
+        }
+    });
+
+    connection.off("ThreatImageRemoved");
+    connection.on("ThreatImageRemoved", function (data) {
+        console.log("[ThreatImageRemoved]", data);
+        const currentThreatId = currentThreat?.id || currentThreat?.Id;
+        if (currentThreat && currentThreatId === data.threatId) {
+            currentThreat.imageUrl = null;
+            currentThreat.uploadedImagePath = null;
+            renderThreatPanel(currentThreat);
+            addEventMessage(`<span class="event-image">🗑️</span> Зображення загрози видалено`);
         }
     });
 
@@ -1955,6 +3256,58 @@ async function uploadBunkerImage(input) {
     input.value = '';
 }
 
+// Завантаження зображення загрози
+async function uploadThreatImage(input) {
+    if (!input.files || !input.files[0]) return;
+    if (!currentRoundState?.threatRevealed || !currentThreat) {
+        alert(t('threatUnknownDescription'));
+        input.value = '';
+        return;
+    }
+
+    const file = input.files[0];
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Файл занадто великий. Максимум 5 MB');
+        input.value = '';
+        return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
+        input.value = '';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('roomId', currentRoom?.id || '');
+    formData.append('connectionId', myConnectionId || '');
+    formData.append('hostToken', hostToken || '');
+    formData.append('threatId', currentThreat?.id || currentThreat?.Id || '');
+
+    try {
+        const response = await fetch('/api/ScenarioImage/threat', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка завантаження');
+            return;
+        }
+
+        console.log('[uploadThreatImage] Success');
+    } catch (error) {
+        console.error('[uploadThreatImage] Error:', error);
+        alert('Помилка завантаження зображення');
+    }
+
+    input.value = '';
+}
+
 // Видалення зображення апокаліпсису
 async function removeApocalypseImage() {
     if (!confirm('Видалити зображення апокаліпсису?')) return;
@@ -2013,6 +3366,40 @@ async function removeBunkerImage() {
     }
 }
 
+// Видалення зображення загрози
+async function removeThreatImage() {
+    if (!currentRoundState?.threatRevealed || !currentThreat) {
+        alert(t('threatUnknownDescription'));
+        return;
+    }
+
+    if (!confirm('Видалити зображення загрози?')) return;
+
+    try {
+        const params = new URLSearchParams({
+            roomId: currentRoom?.id || '',
+            connectionId: myConnectionId || '',
+            hostToken: hostToken || '',
+            threatId: currentThreat?.id || currentThreat?.Id || ''
+        });
+
+        const response = await fetch(`/api/ScenarioImage/threat?${params}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Помилка видалення');
+            return;
+        }
+
+        console.log('[removeThreatImage] Success');
+    } catch (error) {
+        console.error('[removeThreatImage] Error:', error);
+        alert('Помилка видалення зображення');
+    }
+}
+
 // Генерація промпту для апокаліпсису
 async function generateApocalypsePrompt() {
     try {
@@ -2045,6 +3432,29 @@ async function generateBunkerPrompt() {
         showPromptModal('Промпт для бункера', data.prompt);
     } catch (error) {
         console.error('[generateBunkerPrompt] Error:', error);
+        alert('Помилка отримання промпту');
+    }
+}
+
+// Генерація промпту для загрози
+async function generateThreatPrompt() {
+    if (!currentRoundState?.threatRevealed || !currentThreat) {
+        alert(t('threatUnknownDescription'));
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/ScenarioImage/threat/prompt?roomId=${currentRoom?.id || ''}`);
+
+        if (!response.ok) {
+            alert('Помилка отримання промпту');
+            return;
+        }
+
+        const data = await response.json();
+        showPromptModal(`${t('generatePrompt')}: ${t('threat')}`, data.prompt);
+    } catch (error) {
+        console.error('[generateThreatPrompt] Error:', error);
         alert('Помилка отримання промпту');
     }
 }
@@ -2424,7 +3834,6 @@ function removeBunkerSupplies(months) {
                 value = fact ? (getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || fact.Name || t('unknown')) : t('unknown');
                 elementId = 'gmFact';
                 break;
-
         }
         
         const el = document.getElementById(elementId);
@@ -2773,6 +4182,12 @@ function removeBunkerSupplies(months) {
 
 
     function reveal(characteristicName) {
+        if (!canRevealThisRound()) {
+            const reason = getRevealBlockedReason();
+            if (reason) addEventMessage(`Помилка: ${reason}`);
+            return;
+        }
+
         connection.invoke("RevealCharacteristic", characteristicName)
             .catch(err => console.error("RevealCharacteristic error:", err));
     }
@@ -2862,7 +4277,45 @@ function removeBunkerSupplies(months) {
 
     // ==================== VOTING FUNCTIONS ====================
 
+    function endRound() {
+        if (!canEndRoundNow()) {
+            addEventMessage('Помилка: раунд можна завершити після reveal усіх активних гравців');
+            return;
+        }
+
+        if (confirm('Завершити поточний раунд?')) {
+            connection.invoke("EndRound")
+                .catch(err => console.error("EndRound error:", err));
+        }
+    }
+
+    function rollRoundDice() {
+        if (!canRollRoundDiceNow()) {
+            addEventMessage('Помилка: кубик доступний після reveal усіх активних гравців і тільки один раз за раунд');
+            return;
+        }
+
+        connection.invoke("RollRoundDice")
+            .catch(err => console.error("RollRoundDice error:", err));
+    }
+
+    function markAllPlayersReady() {
+        if (!isHost) return;
+        connection.invoke("MarkAllPlayersReady")
+            .catch(err => console.error("MarkAllPlayersReady error:", err));
+    }
+
+    function submitVotingReadyStatus(status) {
+        connection.invoke("SubmitVotingReadyStatus", status)
+            .catch(err => console.error("SubmitVotingReadyStatus error:", err));
+    }
+
     function startVoting() {
+        if (!canStartVotingNow()) {
+            addEventMessage('Помилка: голосування доступне тільки після завершення 3 раунду та готовності гравців');
+            return;
+        }
+
         if (confirm('Почати голосування?')) {
             connection.invoke("StartVoting")
                 .catch(err => console.error("StartVoting error:", err));
@@ -2870,11 +4323,15 @@ function removeBunkerSupplies(months) {
     }
 
     function showVotingPanel(data) {
-        document.getElementById('votingRound').textContent = data.round;
+        document.getElementById('votingRound').textContent = data.round || data.Round || data.roundNumber || data.RoundNumber || getCurrentRoundNumber();
         const votedCount = data.votedCount ?? data.VotedCount ?? 0;
-        const totalVoters = data.eligibleVoters ?? data.EligibleVoters ?? data.totalVoters ?? data.TotalVoters ?? 0;
+        const totalVoters = data.totalVoters ?? data.TotalVoters ?? data.eligibleVoters ?? data.EligibleVoters ?? 0;
         document.getElementById('votingProgressText').textContent = `${votedCount}/${totalVoters} проголосували`;
         document.getElementById('myVoteStatus').style.display = 'none';
+        const blockedVoterIds = data.blockedVoterIds || data.BlockedVoterIds || [];
+        const voteMultipliers = data.voteMultipliers || data.VoteMultipliers || {};
+        const myStable = getMyStablePlayerId();
+        const isMyVoteBlocked = blockedVoterIds.includes(myStable) || blockedVoterIds.includes(myConnectionId);
         
         // Показуємо кнопки хоста
         document.getElementById('votingHostControls').style.display = isHost ? 'flex' : 'none';
@@ -2882,23 +4339,37 @@ function removeBunkerSupplies(months) {
         // Рендеримо кандидатів
         const candidatesContainer = document.getElementById('votingCandidates');
         const candidates = data.candidates || data.Candidates || [];
-        candidatesContainer.innerHTML = candidates.map(c => {
+        const blockedNotice = isMyVoteBlocked
+            ? '<div class="voting-blocked-notice">Ваш голос заблоковано активованою спеціальною картою. Ви можете бачити перебіг голосування, але не голосуєте.</div>'
+            : '';
+        candidatesContainer.innerHTML = blockedNotice + candidates.map(c => {
             var badges = '';
-            if (c.isProtected) badges += '<span class="badge-protected" title="Захищений від голосування">🛡️</span>';
-            if (c.extraVotes > 0) badges += `<span class="badge-extra-votes" title="Має ${c.extraVotes} додаткових голосів">+${c.extraVotes}🗳️</span>`;
+            const connectionId = c.connectionId || c.ConnectionId;
+            const candidateStableId = c.stablePlayerId || c.StablePlayerId || '';
+            const playerName = c.name || c.Name || t('unknown');
+            const seatNumber = c.seatNumber ?? c.SeatNumber ?? 0;
+            const isProtected = c.isProtected ?? c.IsProtected ?? false;
+            const extraVotes = c.extraVotes ?? c.ExtraVotes ?? 0;
+            const multiplier = voteMultipliers[candidateStableId] || voteMultipliers[connectionId] || 1;
+
+            if (isProtected) badges += '<span class="badge-protected" title="Захищений від голосування">🛡️</span>';
+            if (extraVotes > 0) badges += `<span class="badge-extra-votes" title="Має ${extraVotes} додаткових голосів">+${extraVotes}🗳️</span>`;
+            if (multiplier > 1) badges += `<span class="badge-vote-multiplier" title="Голоси проти цього гравця множаться">×${multiplier}</span>`;
             
             var voteBtn = '';
-            if (c.connectionId === myConnectionId) {
+            if (connectionId === myConnectionId) {
                 voteBtn = '<span class="self-label">(Ви)</span>';
-            } else if (c.isProtected) {
+            } else if (isMyVoteBlocked) {
+                voteBtn = '<span class="blocked-voter-label">Ваш голос заблоковано</span>';
+            } else if (isProtected) {
                 voteBtn = '<span class="protected-label">Захищений</span>';
             } else {
-                voteBtn = `<button class="btn-vote-for" onclick="voteFor('${c.connectionId}')">Голосувати</button>`;
+                voteBtn = `<button class="btn-vote-for" onclick="voteFor('${connectionId}')">Голосувати</button>`;
             }
-            
-            return `<div class="voting-candidate ${c.connectionId === myConnectionId ? 'self-candidate' : ''} ${c.isProtected ? 'protected-candidate' : ''}" 
-                 data-connection-id="${c.connectionId}">
-                <span class="candidate-name">${c.name} ${badges}</span>
+
+            return `<div class="voting-candidate ${connectionId === myConnectionId ? 'self-candidate' : ''} ${isProtected ? 'protected-candidate' : ''}"
+                 data-connection-id="${connectionId}">
+                <span class="candidate-name">${seatNumber ? `#${seatNumber} ` : ''}${escapeHtml(playerName)} ${badges}</span>
                 ${voteBtn}
             </div>`;
         }).join('');
@@ -2948,43 +4419,107 @@ function removeBunkerSupplies(months) {
 
     function showVotingResults(data) {
         const resultsContainer = document.getElementById('votingResultsContent');
-        
-        let resultsHtml = '<div class="voting-results-list">';
-        data.results.forEach((r, i) => {
-            const isTop = i === 0;
+
+        const results = data.results || data.Results || [];
+        const nonVoters = data.nonVoters || data.NonVoters || [];
+        const effects = data.specialCardEffects || data.SpecialCardEffects || [];
+        const roundNumber = data.roundNumber || data.RoundNumber || data.round || data.Round || getCurrentRoundNumber();
+        const totalVotes = data.totalVotes ?? data.TotalVotes ?? results.reduce((sum, r) => sum + (r.voteCount ?? r.VoteCount ?? 0), 0);
+        const votedCount = data.votedCount ?? data.VotedCount ?? 0;
+        const totalVoters = data.totalVoters ?? data.TotalVoters ?? 0;
+        const state = data.state || data.State || '';
+        const isResolved = state === 'Resolved';
+
+        let resultsHtml = `
+            <div class="voting-results-title">
+                <span>Результат останнього голосування</span>
+                <strong>Результат голосування — Раунд ${escapeHtml(roundNumber)}</strong>
+                <small>${votedCount}/${totalVoters} учасників проголосували · ${totalVotes} голосів загалом</small>
+            </div>
+        `;
+
+        if (results.length === 0) {
+            resultsHtml += '<p class="no-votes">Голосів немає.</p>';
+        } else {
+            resultsHtml += '<div class="voting-results-list detailed">';
+            results.forEach((r, i) => {
+                const voteCount = r.voteCount ?? r.VoteCount ?? 0;
+                const percentage = Number(r.percentage ?? r.Percentage ?? (totalVotes > 0 ? (voteCount * 100 / totalVotes) : 0));
+                const seatNumber = r.seatNumber ?? r.SeatNumber ?? 0;
+                const playerName = r.playerName || r.PlayerName || t('unknown');
+                const voters = r.voters || r.Voters || [];
+                const isTop = i === 0;
+                const votersText = voters.length > 0
+                    ? voters.map(v => {
+                        const voterSeat = v.voterSeatNumber ?? v.VoterSeatNumber ?? 0;
+                        const voterName = v.voterName || v.VoterName || t('unknown');
+                        const weight = v.voteWeight ?? v.VoteWeight ?? 1;
+                        const weightLabel = weight > 1 ? ` ×${weight}` : '';
+                        return `<span class="vote-voter">${voterSeat ? `#${voterSeat} ` : ''}${escapeHtml(voterName)}${weightLabel}</span>`;
+                    }).join('')
+                    : '<span class="vote-voter muted">Ніхто</span>';
+
+                resultsHtml += `
+                    <div class="vote-result-detailed ${isTop ? 'top-voted' : ''}" data-connection-id="${escapeHtml(r.connectionId || r.ConnectionId || '')}">
+                        <div class="vote-result-main">
+                            <span class="result-seat">${seatNumber ? `#${seatNumber}` : `#${i + 1}`}</span>
+                            <strong class="result-name">${escapeHtml(playerName)}</strong>
+                            <span class="result-votes">${voteCount} голосів</span>
+                            <span class="result-percent">${percentage.toFixed(1)}%</span>
+                        </div>
+                        <div class="vote-progress-bar" aria-hidden="true">
+                            <span style="width: ${Math.max(0, Math.min(100, percentage))}%"></span>
+                        </div>
+                        <div class="vote-voters-list">
+                            <span class="vote-voters-label">Голосували проти:</span>
+                            <div>${votersText}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            resultsHtml += '</div>';
+        }
+
+        if (data.isTie || data.IsTie) {
+            resultsHtml += '<p class="tie-warning">Нічия. Ведучий вирішує фінальну дію.</p>';
+        }
+
+        resultsHtml += `
+            <div class="non-voters-block">
+                <h4>Не голосували</h4>
+                ${nonVoters.length > 0
+                    ? `<div class="non-voters-list">${nonVoters.map(v => {
+                        const seat = v.seatNumber ?? v.SeatNumber ?? 0;
+                        const name = v.voterName || v.VoterName || t('unknown');
+                        const isBlocked = v.isBlocked ?? v.IsBlocked ?? false;
+                        const reason = v.reason || v.Reason || '';
+                        return `<span class="${isBlocked ? 'blocked-non-voter' : ''}">${seat ? `#${seat} ` : ''}${escapeHtml(name)}${reason ? ` — ${escapeHtml(reason)}` : ''}</span>`;
+                    }).join('')}</div>`
+                    : '<p>Усі доступні гравці проголосували.</p>'}
+            </div>
+        `;
+
+        if (effects.length > 0) {
             resultsHtml += `
-                <div class="vote-result ${isTop ? 'top-voted' : ''}" data-connection-id="${r.connectionId}">
-                    <span class="result-rank">#${i + 1}</span>
-                    <span class="result-name">${r.playerName}</span>
-                    <span class="result-votes">${r.voteCount} голосів</span>
+                <div class="special-effects-block">
+                    <h4>Ефекти спеціальних карт</h4>
+                    <ul>${effects.map(effect => `<li>${escapeHtml(effect)}</li>`).join('')}</ul>
                 </div>
             `;
-        });
-        resultsHtml += '</div>';
-        
-        if (data.isTie) {
-            resultsHtml += '<p class="tie-warning">⚠️ Нічия! Ведучий вирішує.</p>';
         }
-        
-        // Показуємо хто за кого голосував
-        if (data.votes && data.votes.length > 0) {
-            resultsHtml += '<div class="votes-breakdown"><h4>Деталі голосування:</h4><ul>';
-            data.votes.forEach(v => {
-                resultsHtml += `<li><span class="voter">${v.voterName}</span> → <span class="target">${v.targetName}</span></li>`;
-            });
-            resultsHtml += '</ul></div>';
-        }
-        
+
         resultsContainer.innerHTML = resultsHtml;
         
         // Показуємо/ховаємо кнопки рішення (тільки для хоста)
-        document.getElementById('votingDecisionControls').style.display = isHost ? 'block' : 'none';
+        document.getElementById('votingDecisionControls').style.display = isHost && !isResolved ? 'block' : 'none';
         
         // Оновлюємо кнопку елімінації
         const eliminateBtn = document.getElementById('eliminateTopBtn');
-        if (data.topVotedPlayerName) {
-            eliminateBtn.textContent = `❌ Елімінувати ${data.topVotedPlayerName}`;
-            eliminateBtn.dataset.targetId = data.topVotedPlayerId;
+        const topName = data.topVotedPlayerName || data.TopVotedPlayerName;
+        const topId = data.topVotedPlayerId || data.TopVotedPlayerId;
+        if (topName) {
+            eliminateBtn.textContent = `Елімінувати ${topName}`;
+            eliminateBtn.dataset.targetId = topId;
         }
         
         document.getElementById('votingResultsPanel').style.display = 'block';
@@ -3221,7 +4756,7 @@ function removeBunkerSupplies(months) {
     function toggleGMPanel() {
         const panel = document.getElementById('gmPanel');
         const isVisible = panel.style.display !== 'none';
-        panel.style.display = isVisible ? 'none' : 'block';
+        panel.style.display = isVisible ? 'none' : 'flex';
         
         if (!isVisible && isHost) {
             // Завантажуємо дані гравців при відкритті панелі
@@ -3493,7 +5028,7 @@ function removeBunkerSupplies(months) {
         
         document.getElementById('currentRoomName').textContent = currentRoom.name || t('room');
         document.getElementById('currentRoomId').textContent = `ID: ${currentRoom.id || ''}`;
-        document.getElementById('currentRoomState').textContent = currentRoom.state === 'Lobby' ? t('lobby') : t('game');
+        document.getElementById('currentRoomState').textContent = getRoomStateLabel();
         
         const playerCount = Object.keys(roomPlayers).length;
         document.getElementById('roomPlayerCount').textContent = `${playerCount}/${currentRoom.maxPlayers || 12}`;
@@ -3513,12 +5048,13 @@ function removeBunkerSupplies(months) {
         // Показуємо кнопку голосування тільки хосту під час гри
         const votingBtn = document.getElementById('startVotingBtn');
         if (votingBtn) {
-            if (isHost && (currentRoom.state === 'Playing' || currentRoom.state === 'Started') && !currentVoting) {
+            if (canStartVotingNow()) {
                 votingBtn.style.display = 'inline-block';
             } else {
                 votingBtn.style.display = 'none';
             }
         }
+        updateRoundStatusUI();
         
         // Показуємо кнопку GM панелі хосту ЗАВЖДИ (і в лобі, і під час гри)
         const gmPanelBtn = document.getElementById('gmPanelBtn');
@@ -3565,11 +5101,15 @@ function removeBunkerSupplies(months) {
     
     // Нова функція для оновлення GM секцій
     function updateGMSections() {
+        const gmRoundSection = document.getElementById('gmRoundSection');
         const gmScenarioSection = document.getElementById('gmScenarioSection');
         const gmEventsSection = document.getElementById('gmEventsSection');
         
-        const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started');
+        const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started' || currentRoom.state === 'Voting');
         
+        if (gmRoundSection) {
+            gmRoundSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
+        }
         if (gmScenarioSection) {
             gmScenarioSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
         }
@@ -3577,6 +5117,7 @@ function removeBunkerSupplies(months) {
             gmEventsSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
         }
         
+        updateRoundStatusUI();
         console.log("[updateGMSections] isHost:", isHost, "isGameActive:", isGameActive);
     }
 
@@ -3636,6 +5177,274 @@ function removeBunkerSupplies(months) {
         return str.charAt(0).toLowerCase() + str.slice(1);
     }
 
+    function getMyStablePlayerId() {
+        return myPlayerData?.stablePlayerId ||
+            roomPlayers?.[myConnectionId]?.stablePlayerId ||
+            stablePlayerId ||
+            "";
+    }
+
+    function isMyPlayerRef(connectionId, stableId) {
+        const myStable = getMyStablePlayerId();
+        return (!!connectionId && connectionId === myConnectionId) ||
+            (!!stableId && !!myStable && stableId === myStable);
+    }
+
+    function getSpecialCardStatusLabel(status) {
+        const labels = {
+            hidden: t('hidden'),
+            revealed: t('cardRevealed'),
+            active: t('activeUntilRoundEnd'),
+            used: t('used'),
+            ended: t('effectEnded'),
+            hand: t('notUsed')
+        };
+        return labels[status] || labels.hidden;
+    }
+
+    function getSpecialCardPrivacyLabel(card) {
+        if (card.isSecret && card.isPubliclyRevealed) return t('secretRevealedBadge');
+        return card.isSecret ? t('secretCardBadge') : t('publicCardBadge');
+    }
+
+    function getSpecialCardPrivacyClass(card) {
+        if (card.isSecret && card.isPubliclyRevealed) return 'secret-revealed';
+        return card.isSecret ? 'secret' : 'public';
+    }
+
+    function getSpecialCardTargets() {
+        return Object.values(roomPlayers || {})
+            .filter(player => player && !(player.isEliminated || player.IsEliminated))
+            .filter(player => !isMyPlayerRef(player.connectionId || player.ConnectionId, player.stablePlayerId || player.StablePlayerId))
+            .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
+    }
+
+    function renderSpecialCardControls(card, cardIndex = 0) {
+        const normalized = normalizeSpecialCard(card);
+        if (!normalized.id || normalized.id === 'no_special_card') {
+            return '<p class="special-card-note">Спеціальна карта не видана.</p>';
+        }
+
+        if (normalized.isEffectActive || normalized.isActive || normalized.status === 'active') {
+            const target = normalized.targetPlayerName ? ` проти ${escapeHtml(normalized.targetPlayerName)}` : '';
+            const note = normalized.effectDuration === 'untilRoundEnd'
+                ? t('activeUntilRoundEnd')
+                : `Карта активована${target}. Ефект спрацює в цьому голосуванні.`;
+            return `<p class="special-card-note active">${note}</p>`;
+        }
+
+        if (normalized.isUsed || normalized.status === 'used') {
+            return `<p class="special-card-note used">${t('cardWasUsed')}</p>`;
+        }
+
+        const phase = getCurrentPhase();
+        const canUseNow = currentRoom?.state === 'Playing' &&
+            (normalized.phase === 'beforeVoting'
+                ? phase === 'PreVotingReadyCheck'
+                : normalized.phase === 'discussion' &&
+                    ['RoundReveal', 'RoundEnded', 'Threat', 'ExtraInventory', 'PreVotingReadyCheck', 'VotingResults'].includes(phase));
+        if (!canUseNow) {
+            return `<button type="button" class="char-btn special-card-use-btn" disabled aria-disabled="true">${t('unavailableNow')}</button>`;
+        }
+
+        const targets = getSpecialCardTargets();
+        const targetSelectId = `specialCardTargetSelect-${cardIndex}`;
+        const characteristicSelectId = `specialCardCharacteristicSelect-${cardIndex}`;
+        const needsCharacteristicSelect = [
+            'swapSelectedCharacteristicWithTarget',
+            'rerollTargetSelectedCharacteristic'
+        ].includes(normalized.effectType);
+        const characteristicOptions = [
+            ['Profession', 'Професія'],
+            ['PersonalInfo', 'Особистість'],
+            ['Body', 'Статура'],
+            ['PhysicalHealth', 'Фізичне здоровʼя'],
+            ['MentalHealth', 'Психічне здоровʼя'],
+            ['Hobby', 'Хобі'],
+            ['CharacterTrait', 'Риса характеру'],
+            ['Fact', 'Факт']
+        ];
+        const targetSelect = normalized.requiresTarget
+            ? `<select id="${targetSelectId}" class="special-card-target-select" aria-label="${t('target')}">
+                <option value="">${t('choosePlayer')}</option>
+                ${targets.map(player => {
+                    const connectionId = player.connectionId || player.ConnectionId || '';
+                    const seat = player.seatNumber || player.SeatNumber || 0;
+                    const name = player.name || player.Name || t('unknown');
+                    return `<option value="${escapeHtml(connectionId)}">${seat ? `#${seat} ` : ''}${escapeHtml(name)}</option>`;
+                }).join('')}
+            </select>`
+            : '';
+        const characteristicSelect = needsCharacteristicSelect
+            ? `<select id="${characteristicSelectId}" class="special-card-target-select" aria-label="Характеристика">
+                <option value="">Оберіть характеристику</option>
+                ${characteristicOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}
+            </select>`
+            : '';
+        if (normalized.requiresTarget && targets.length === 0) {
+            return `<button type="button" class="char-btn special-card-use-btn" disabled aria-disabled="true">${t('noAvailableTarget')}</button>`;
+        }
+
+        const useButtons = normalized.isSecret
+            ? `
+                <button type="button" class="char-btn special-card-use-btn" data-testid="special-card-use-silent" onclick="useSpecialCardFromCard(${cardIndex}, 'silent')">${t('useSecretly')}</button>
+                <button type="button" class="char-btn special-card-use-btn public-use" data-testid="special-card-use-public" onclick="useSpecialCardFromCard(${cardIndex}, 'public')">${t('usePublicly')}</button>
+            `
+            : `<button type="button" class="char-btn special-card-use-btn" data-testid="special-card-use" onclick="useSpecialCardFromCard(${cardIndex}, 'public')">${t('useSpecialCard')}</button>`;
+
+        return `
+            <div class="special-card-controls">
+                ${targetSelect}
+                ${characteristicSelect}
+                <div class="special-card-use-actions">${useButtons}</div>
+            </div>
+        `;
+    }
+
+    function useSpecialCardFromCard(cardIndex = 0, useMode = null) {
+        const cards = normalizeSpecialCards(myPlayerData?.specialCards, myPlayerData?.specialCard);
+        const card = cards[cardIndex] || normalizeSpecialCard(myPlayerData?.specialCard);
+        const select = document.getElementById(`specialCardTargetSelect-${cardIndex}`);
+        const targetConnectionId = select ? select.value : null;
+        const characteristicSelect = document.getElementById(`specialCardCharacteristicSelect-${cardIndex}`);
+        const selectedCharacteristic = characteristicSelect ? characteristicSelect.value : null;
+        const needsCharacteristicSelect = [
+            'swapSelectedCharacteristicWithTarget',
+            'rerollTargetSelectedCharacteristic'
+        ].includes(card.effectType);
+
+        if (card.requiresTarget && !targetConnectionId) {
+            addEventMessage('Оберіть ціль для спеціальної карти.');
+            return;
+        }
+        if (needsCharacteristicSelect && !selectedCharacteristic) {
+            addEventMessage('Оберіть характеристику для спеціальної карти.');
+            return;
+        }
+
+        const resolvedUseMode = card.isSecret ? (useMode || 'silent') : 'public';
+        connection.invoke("UseSpecialCardById", card.id, targetConnectionId || null, resolvedUseMode, selectedCharacteristic || null)
+            .catch(err => console.error("UseSpecialCard error:", err));
+    }
+
+    function renderMySpecialCards(player) {
+        const section = document.getElementById('mySpecialCardsSection');
+        const container = document.getElementById('mySpecialCardsList');
+        if (!section || !container) return;
+
+        const cards = normalizeSpecialCards(player?.specialCards || player?.SpecialCards, player?.specialCard || player?.SpecialCard);
+        if (cards.length === 0) {
+            container.innerHTML = `<p class="special-cards-empty">${t('noData')}</p>`;
+            return;
+        }
+
+        container.innerHTML = cards.map((card, index) => {
+            const status = card.isEffectActive || card.isActive
+                ? 'active'
+                : card.isUsed || card.usedAtRound
+                    ? (card.effectDuration === 'untilRoundEnd' ? 'ended' : 'used')
+                    : 'hand';
+
+            return `
+                <article class="my-special-card ${status}">
+                    <div class="my-special-card-header">
+                        <strong>${escapeHtml(getSpecialCardName(card))}</strong>
+                        <span class="special-card-status ${status}">${getSpecialCardStatusLabel(status)}</span>
+                    </div>
+                    <span class="special-card-privacy ${getSpecialCardPrivacyClass(card)}">${getSpecialCardPrivacyLabel(card)}</span>
+                    <p>${escapeHtml(getSpecialCardDescription(card))}</p>
+                    <div class="my-special-card-actions">
+                        ${renderSpecialCardControls(card, index)}
+                    </div>
+                </article>
+            `;
+        }).join('');
+    }
+
+    function buildSpecialCardRows() {
+        const publicRows = currentRoundState?.specialCards || [];
+        return publicRows
+            .filter(row => row && !row.isHidden && ['revealed', 'active', 'used'].includes(row.status))
+            .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
+    }
+
+    function buildGMSpecialCardRows() {
+        return buildSpecialCardRows();
+    }
+
+    function renderSpecialCardRows(rows, compact = false) {
+        if (!rows || rows.length === 0) {
+            return compact
+                ? `<p class="special-cards-empty">${t('noRevealedSpecialCards')}</p>`
+                : `<tr><td colspan="6" class="special-cards-empty">${t('noRevealedSpecialCards')}</td></tr>`;
+        }
+
+        if (compact) {
+            return rows.map(row => {
+                const status = row.status || 'hidden';
+                const seat = row.seatNumber ? `#${row.seatNumber} ` : '';
+                const card = normalizeSpecialCardState(row);
+                const isStillHidden = card.wasUsedSilently && !card.isPubliclyRevealed;
+                const cardName = isStillHidden ? t('hiddenSecretCard') : (getLocalizedValue(row, 'name') || row.cardName || t('specialCard'));
+                const target = !card.wasUsedSilently && row.targetPlayerName ? ` -> ${row.targetPlayerName}` : '';
+                return `
+                    <div class="gm-special-card-row ${status}">
+                        <span>${seat}${escapeHtml(row.playerName || t('unknown'))}</span>
+                        <strong>${escapeHtml(cardName)}${escapeHtml(target)}</strong>
+                        <small>${getSpecialCardStatusLabel(status)}</small>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        return rows.map(row => {
+            const status = row.status || 'hidden';
+            const seat = row.seatNumber ? `#${row.seatNumber}` : '';
+            const isMine = isMyPlayerRef(row.connectionId, row.stablePlayerId);
+            const card = normalizeSpecialCardState(row);
+            const isStillHidden = card.wasUsedSilently && !card.isPubliclyRevealed;
+            const cardName = isStillHidden ? t('hiddenSecretCard') : (getLocalizedValue(row, 'name') || row.cardName || t('specialCard'));
+            const description = isStillHidden ? t('hiddenDetails') : (getLocalizedValue(row, 'description') || row.description || t('noData'));
+            const target = !card.wasUsedSilently && row.targetPlayerName ? escapeHtml(row.targetPlayerName) : '-';
+            const privacyLabel = getSpecialCardPrivacyLabel(card);
+            const privacyClass = getSpecialCardPrivacyClass(card);
+
+            return `
+                <tr class="${isMine ? 'my-special-card-row' : ''}">
+                    <td>${escapeHtml(seat)}</td>
+                    <td>${escapeHtml(row.playerName || t('unknown'))}${isMine ? ` <span class="my-badge">(${t('you')})</span>` : ''}</td>
+                    <td><strong>${escapeHtml(cardName)}</strong><span class="special-card-privacy ${privacyClass}">${privacyLabel}</span></td>
+                    <td>${escapeHtml(description)}</td>
+                    <td>${target}</td>
+                    <td><span class="special-card-status ${status}">${getSpecialCardStatusLabel(status)}</span></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function updateSpecialCardsUI() {
+        const section = document.getElementById('specialCardsSection');
+        const tbody = document.getElementById('specialCardsTableBody');
+        const gmList = document.getElementById('gmSpecialCardsList');
+        const shouldShow = currentRoom && currentRoom.state !== 'Lobby';
+        const rows = buildSpecialCardRows();
+
+        if (section && tbody) {
+            section.style.display = shouldShow ? 'block' : 'none';
+            tbody.innerHTML = renderSpecialCardRows(rows, false);
+        }
+
+        if (gmList) {
+            if (isHost && shouldShow) {
+                gmList.style.display = 'grid';
+                gmList.innerHTML = renderSpecialCardRows(buildGMSpecialCardRows(), true);
+            } else {
+                gmList.style.display = 'none';
+                gmList.innerHTML = '';
+            }
+        }
+    }
+
     function updatePlayersTable() {
         const tbody = document.getElementById('playersTableBody');
         if (!tbody) return;
@@ -3660,7 +5469,13 @@ function removeBunkerSupplies(months) {
             if (isEliminated) rowClasses.push('player-eliminated');
             
             // Eliminated badge
-            const eliminatedBadge = isEliminated ? `<span class="eliminated-badge">${t('eliminated')}</span>` : '';
+            const eliminatedBadge = isEliminated
+                ? `<span class="eliminated-badge">${player.hasRevealedAllAfterElimination ? t('eliminatedRevealedBadge') : t('eliminated')}</span>`
+                : '';
+            const immunity = normalizeEliminationVoteImmunity(player.eliminationVoteImmunity || player.EliminationVoteImmunity);
+            const immunityBadge = immunity.isActive && immunity.remainingUses > 0
+                ? `<span class="immunity-badge">Імунітет до наступного голосування</span>`
+                : '';
             
             return `
             <tr class="${rowClasses.join(' ')}" data-player="${player.connectionId}">
@@ -3670,6 +5485,7 @@ function removeBunkerSupplies(months) {
                     ${isMe ? `<span class="my-badge">(${t('you')})</span>` : ''}
                     ${player.isHost ? `<span class="host-badge-small">${t('host')}</span>` : ''}
                     ${eliminatedBadge}
+                    ${immunityBadge}
                 </td>
                 <td>${renderTableCell(player, 'personality')}</td>
                 <td>${renderTableCell(player, 'body')}</td>
@@ -3718,7 +5534,8 @@ function removeBunkerSupplies(months) {
             'mentalHealth': 'mental',
             'hobby': 'hobby',
             'phobia': 'phobia',
-            'fact': 'fact'
+            'fact': 'fact',
+            'specialCard': 'special-card-tooltip'
         };
         return typeClasses[charKey] || '';
     }
@@ -3755,16 +5572,16 @@ function removeBunkerSupplies(months) {
         });
         const factName = getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact');
         const factTooltip = buildLocalizedTooltip(fact, 'fact') || cleanTooltipText(fact.tooltip || fact.description || '');
-        const professionName = getLocalizedValue(profession, 'profession') || getLocalizedValue(profession, 'name') || profession.name || 'Безробітний';
+        const professionName = getProfessionDisplayName(profession);
         const physicalHealthName = getConditionDisplayName(physicalHealth) || physicalHealth.name || 'Здоровий';
         const mentalHealthName = getConditionDisplayName(mentalHealth) || mentalHealth.name || 'Стабільний';
         const hobbyName = getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || 'Немає хобі';
         const traitName = getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || 'Невизначений';
         const phobiaName = getLocalizedValue(phobia, 'name') || getLocalizedValue(phobia, 'phobia') || phobia.name || 'Немає фобій';
-        const localizedSelectedItem = getLocalizedValue(profession, 'selectedItem') || profession.selectedItem || '';
         const inventoryItems = inventory.items && inventory.items.length > 0
             ? inventory.items.map(i => getLocalizedValue(i, 'item') || getLocalizedValue(i, 'name') || i.name || i.Name || '').filter(Boolean).join(', ')
             : t('empty');
+        const eliminationPanel = renderEliminatedRevealAllPanel(player);
         
         function createTooltipHtml(text, typeClass) {
             if (!text) return '';
@@ -3776,15 +5593,28 @@ function removeBunkerSupplies(months) {
             if (!cleanTooltip) return name;
             return `<span class="characteristic-with-tooltip"><span>${name}</span>${createTooltipHtml(cleanTooltip, typeClass)}</span>`;
         }
+
+        function revealControl(characteristicName, isRevealed) {
+            if (isRevealed) {
+                return `<span class="status-revealed">${t('revealed')}</span>`;
+            }
+
+            const disabledReason = getRevealBlockedReason();
+            const disabled = disabledReason ? ' disabled aria-disabled="true"' : '';
+            const disabledClass = disabledReason ? ' disabled' : '';
+            const title = disabledReason ? ` title="${escapeHtml(disabledReason)}"` : '';
+            return `<button class="char-btn locked${disabledClass}" onclick="reveal('${characteristicName}')"${disabled}${title}>${t('reveal')}</button>`;
+        }
         
         container.innerHTML = `
+            ${eliminationPanel}
             <!-- Особистість -->
             <div class="char-card ${revealed.personality ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('personality')}</h3>
                 <div class="char-row"><span class="char-label">${t('age')}:</span><span class="char-value">${personality.age ?? '?'} ${t('years')}</span></div>
                 <div class="char-row"><span class="char-label">${t('sex')}:</span><span class="char-value">${personality.sex || t('unknown')}${personality.isChildfree ? " (чайлдфрі)" : ""}</span></div>
                 <div class="char-row"><span class="char-label">${t('orientation')}:</span><span class="char-value">${personality.sexOrientation || t('unknown')}</span></div>
-                <div class="char-row">${revealed.personality ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Personality')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('Personality', revealed.personality)}</div>
             </div>
 
             <!-- Статура -->
@@ -3793,57 +5623,57 @@ function removeBunkerSupplies(months) {
                 <div class="char-row"><span class="char-label">${t('height')}:</span><span class="char-value">${body.height ?? '?'} см</span></div>
                 <div class="char-row"><span class="char-label">${t('weight')}:</span><span class="char-value">${body.weight ?? '?'} кг</span></div>
                 <div class="char-row"><span class="char-label">${t('bodyType')}:</span><span class="char-value">${body.bodyType || t('unknown')}</span></div>
-                <div class="char-row">${revealed.body ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Body')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('Body', revealed.body)}</div>
             </div>
 
             <!-- Професія -->
             <div class="char-card ${revealed.profession ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('profession')}</h3>
-                <div class="char-row"><span class="char-label">${t('name')}:</span><span class="char-value">${charWithTooltip(professionName + (localizedSelectedItem ? ' <span class="selected-item-badge">(+' + localizedSelectedItem + ')</span>' : ''), profession.tooltip, 'profession')}</span></div>
+                <div class="char-row"><span class="char-label">${t('name')}:</span><span class="char-value">${charWithTooltip(professionName, profession.tooltip, 'profession')}</span></div>
                 <div class="char-row"><span class="char-label">Досвід:</span><span class="char-value">${profession.experienceYears || 0} ${t('years')}</span></div>
-                <div class="char-row">${revealed.profession ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Profession')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('Profession', revealed.profession)}</div>
             </div>
 
             <!-- Фізичне здоров'я -->
             <div class="char-card ${revealed.physicalHealth ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('physicalHealth')}</h3>
                 <div class="char-row"><span class="char-label">${t('state')}:</span><span class="char-value">${charWithTooltip(physicalHealthName, buildLocalizedTooltip(physicalHealth, 'physicalHealth') || physicalHealth.tooltip, 'physical')}</span></div>
-                <div class="char-row">${revealed.physicalHealth ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('PhysicalHealth')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('PhysicalHealth', revealed.physicalHealth)}</div>
             </div>
 
             <!-- Психічне здоров'я -->
             <div class="char-card ${revealed.mentalHealth ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('mentalHealth')}</h3>
                 <div class="char-row"><span class="char-label">${t('state')}:</span><span class="char-value">${charWithTooltip(mentalHealthName, buildLocalizedTooltip(mentalHealth, 'mentalHealth') || mentalHealth.tooltip, 'mental')}</span></div>
-                <div class="char-row">${revealed.mentalHealth ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('MentalHealth')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('MentalHealth', revealed.mentalHealth)}</div>
             </div>
 
             <!-- Хобі -->
             <div class="char-card ${revealed.hobby ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('hobby')}</h3>
                 <div class="char-row"><span class="char-label">${t('activity')}:</span><span class="char-value">${charWithTooltip(hobbyName, hobby.tooltip, 'hobby')}</span></div>
-                <div class="char-row">${revealed.hobby ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Hobby')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('Hobby', revealed.hobby)}</div>
             </div>
 
             <!-- Риса характеру -->
             <div class="char-card ${revealed.characterTrait ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('characterTrait')}</h3>
                 <div class="char-row"><span class="char-label">${t('trait')}:</span><span class="char-value">${traitName}</span></div>
-                <div class="char-row">${revealed.characterTrait ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('CharacterTrait')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('CharacterTrait', revealed.characterTrait)}</div>
             </div>
 
             <!-- Фобія -->
             <div class="char-card ${revealed.phobia ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('phobia')}</h3>
                 <div class="char-row"><span class="char-label">${t('fear')}:</span><span class="char-value">${charWithTooltip(phobiaName, getLocalizedValue(phobia, 'description') || phobia.tooltip, 'phobia')}</span></div>
-                <div class="char-row">${revealed.phobia ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Phobia')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('Phobia', revealed.phobia)}</div>
             </div>
 
             <!-- Інвентар -->
             <div class="char-card ${revealed.inventory ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('inventory')}</h3>
                 <div class="char-row"><span class="char-label">${t('items')}:</span><span class="char-value">${inventoryItems}</span></div>
-                <div class="char-row">${revealed.inventory ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Inventory')">${t('reveal')}</button>`}</div>
+                <div class="char-row">${revealControl('Inventory', revealed.inventory)}</div>
             </div>
 
             <!-- Факт -->
@@ -3854,11 +5684,53 @@ function removeBunkerSupplies(months) {
                     <span class="char-value">${charWithTooltip(factName, factTooltip, 'fact')}</span>
                 </div>
              <div class="char-row">
-                    ${revealed.fact || revealed.Fact ? `<span class="status-revealed">${t('revealed')}</span>` : `<button class="char-btn locked" onclick="reveal('Fact')">${t('reveal')}</button>`}
+                    ${revealControl('Fact', revealed.fact || revealed.Fact)}
                 </div>
         </div>
         `;
         
+    }
+
+    function renderEliminatedRevealAllPanel(player) {
+        const isEliminated = !!(player?.isEliminated || player?.IsEliminated);
+        if (!isEliminated) return '';
+
+        const hasRevealedAll = !!(player?.hasRevealedAllAfterElimination || player?.HasRevealedAllAfterElimination);
+        const canRevealAll = !!(player?.canRevealAllAfterElimination || player?.CanRevealAllAfterElimination);
+
+        if (hasRevealedAll) {
+            return `
+                <div class="eliminated-reveal-panel done">
+                    <strong>${t('youHaveBeenEliminated')}</strong>
+                    <span>${t('allCharacteristicsRevealed')}</span>
+                </div>
+            `;
+        }
+
+        if (!canRevealAll) {
+            return `
+                <div class="eliminated-reveal-panel">
+                    <strong>${t('youHaveBeenEliminated')}</strong>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="eliminated-reveal-panel">
+                <div>
+                    <strong>${t('youHaveBeenEliminated')}</strong>
+                    <span>${t('canRevealAllAfterElimination')}</span>
+                </div>
+                <button type="button" class="btn-eliminated-reveal-all" onclick="revealAllEliminatedPlayerCharacteristics()">
+                    ${t('revealAllCharacteristics')}
+                </button>
+            </div>
+        `;
+    }
+
+    function revealAllEliminatedPlayerCharacteristics() {
+        connection.invoke("RevealAllEliminatedPlayerCharacteristics")
+            .catch(err => console.error("RevealAllEliminatedPlayerCharacteristics error:", err));
     }
 
     function addEventMessage(message) {

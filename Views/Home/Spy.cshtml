@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Шпіон";
+    var inviteRoomCode = ViewData["InviteSpyRoomCode"]?.ToString() ?? "";
+}
+
+<section class="spy-page" data-invite-room="@inviteRoomCode">
+    <div class="spy-header">
+        <div>
+            <p class="spy-kicker" data-i18n="spyMode">Шпіон</p>
+            <h1 data-i18n="spyTitle">Шпіон</h1>
+        </div>
+        <div class="spy-room-code">
+            <span data-i18n="roomCode">Код кімнати</span>
+            <strong id="spyRoomCode">-</strong>
+        </div>
+    </div>
+
+    <div id="spySetup" class="spy-setup">
+        <div class="spy-panel">
+            <h2 data-i18n="createSpyRoom">Створити кімнату Шпіона</h2>
+            <label for="spyPlayerName" data-i18n="playerName">Ім’я гравця</label>
+            <input id="spyPlayerName" class="spy-input" type="text" maxlength="32" autocomplete="name" />
+            <div class="spy-actions">
+                <button type="button" class="spy-button primary" onclick="createSpyRoom()" data-i18n="createSpyRoom">Створити кімнату Шпіона</button>
+            </div>
+        </div>
+
+        <div class="spy-panel">
+            <h2 data-i18n="joinRoom">Приєднатися до кімнати</h2>
+            <label for="spyJoinCode" data-i18n="roomCode">Код кімнати</label>
+            <input id="spyJoinCode" class="spy-input" type="text" maxlength="8" value="@inviteRoomCode" />
+            <div class="spy-actions">
+                <button type="button" class="spy-button" onclick="joinSpyRoom()" data-i18n="joinRoom">Приєднатися до кімнати</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="spyGame" class="spy-game" hidden>
+        <div class="spy-status-grid">
+            <article class="spy-panel spy-role-panel">
+                <p class="spy-label" data-i18n="roundStatus">Статус раунду</p>
+                <h2 id="spyRoundStatus" data-i18n="waitingPlayers">Очікування гравців</h2>
+                <p id="spyRoundNumber"></p>
+                <div id="spyPrivateCard" class="spy-private-card"></div>
+            </article>
+
+            <article class="spy-panel">
+                <p class="spy-label" data-i18n="players">Гравці</p>
+                <div id="spyPlayersList" class="spy-players-list"></div>
+            </article>
+        </div>
+
+        <article id="spyRevealPanel" class="spy-panel spy-reveal-panel" hidden>
+            <p><span data-i18n="spyWas">Шпигун був</span>: <strong id="spyRevealedSpy">-</strong></p>
+            <p><span data-i18n="locationWas">Локація була</span>: <strong id="spyRevealedLocation">-</strong></p>
+        </article>
+
+        <article id="spyHostControls" class="spy-panel spy-host-controls" hidden>
+            <p class="spy-label">Host</p>
+            <div class="spy-actions">
+                <button type="button" class="spy-button primary" onclick="startSpyRound()" data-i18n="startRound">Почати раунд</button>
+                <button type="button" class="spy-button" onclick="endSpyRound()" data-i18n="endRound">Завершити раунд</button>
+                <button type="button" class="spy-button" onclick="newSpyRound()" data-i18n="newRound">Новий раунд</button>
+                <button type="button" class="spy-button danger" onclick="revealSpyRoles()" data-i18n="revealRoles">Розкрити ролі</button>
+            </div>
+            <p class="spy-hint" data-i18n="minPlayersRequired">Потрібно мінімум 3 гравці</p>
+        </article>
+
+        <p id="spyInviteInfo" class="spy-invite-info"></p>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="/js/signalr-lite.js"></script>
+    <script src="/js/spy.js"></script>
+}

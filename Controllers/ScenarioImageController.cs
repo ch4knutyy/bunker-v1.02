@@ -131,6 +131,55 @@ namespace Bunker.Controllers
         }
 
         /// <summary>
+        /// Завантажити зображення розкритої загрози для поточної кімнати
+        /// </summary>
+        [HttpPost("threat")]
+        public async Task<IActionResult> UploadThreatImage(
+            [FromForm] IFormFile file,
+            [FromForm] string roomId,
+            [FromForm] string connectionId,
+            [FromForm] string? hostToken,
+            [FromForm] string threatId)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { error = "Файл не вибрано" });
+
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(threatId))
+                return BadRequest(new { error = "Відсутні обов'язкові параметри" });
+
+            var room = _roomService.GetRoom(roomId);
+            if (room == null)
+                return NotFound(new { error = "Кімнату не знайдено" });
+
+            if (!IsValidHostRequest(room, hostToken))
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може завантажувати зображення" });
+
+            if (!room.IsThreatRevealed || room.CurrentThreat == null || room.CurrentThreat.Id != threatId)
+                return BadRequest(new { error = "Загрозу ще не розкрито" });
+
+            using var stream = file.OpenReadStream();
+            var threatImageKey = BuildThreatImageKey(roomId, threatId);
+            var (success, error, imageUrl) = await _imageService.SaveThreatImage(
+                threatImageKey, stream, file.FileName);
+
+            if (!success)
+                return BadRequest(new { error });
+
+            room.CurrentThreat.ImageUrl = imageUrl;
+            room.CurrentThreat.UploadedImagePath = imageUrl;
+
+            await _hubContext.Clients.Group(roomId).SendAsync("ThreatImageUpdated", new
+            {
+                threatId,
+                imageUrl
+            });
+
+            _logger.LogInformation($"Зображення загрози {threatId} завантажено для кімнати {roomId}");
+
+            return Ok(new { imageUrl });
+        }
+
+        /// <summary>
         /// Видалити зображення апокаліпсису
         /// </summary>
         [HttpDelete("apocalypse")]
@@ -213,6 +262,43 @@ namespace Bunker.Controllers
         }
 
         /// <summary>
+        /// Видалити зображення розкритої загрози для поточної кімнати
+        /// </summary>
+        [HttpDelete("threat")]
+        public async Task<IActionResult> RemoveThreatImage(
+            [FromQuery] string roomId,
+            [FromQuery] string connectionId,
+            [FromQuery] string? hostToken,
+            [FromQuery] string threatId)
+        {
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(threatId))
+                return BadRequest(new { error = "Відсутні обов'язкові параметри" });
+
+            var room = _roomService.GetRoom(roomId);
+            if (room == null)
+                return NotFound(new { error = "Кімнату не знайдено" });
+
+            if (!IsValidHostRequest(room, hostToken))
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може видаляти зображення" });
+
+            if (!room.IsThreatRevealed || room.CurrentThreat == null || room.CurrentThreat.Id != threatId)
+                return BadRequest(new { error = "Загрозу ще не розкрито" });
+
+            _imageService.RemoveThreatImage(BuildThreatImageKey(roomId, threatId));
+            room.CurrentThreat.ImageUrl = null;
+            room.CurrentThreat.UploadedImagePath = null;
+
+            await _hubContext.Clients.Group(roomId).SendAsync("ThreatImageRemoved", new
+            {
+                threatId
+            });
+
+            _logger.LogInformation($"Зображення загрози {threatId} видалено для кімнати {roomId}");
+
+            return Ok(new { success = true });
+        }
+
+        /// <summary>
         /// Отримати промпт для генерації зображення апокаліпсису
         /// </summary>
         [HttpGet("apocalypse/prompt")]
@@ -236,6 +322,27 @@ namespace Bunker.Controllers
                 return NotFound(new { error = "Бункер не знайдено" });
 
             return Ok(new { prompt = room.Bunker.GenerateImagePrompt() });
+        }
+
+        /// <summary>
+        /// Отримати промпт для генерації зображення розкритої загрози
+        /// </summary>
+        [HttpGet("threat/prompt")]
+        public IActionResult GetThreatPrompt([FromQuery] string roomId)
+        {
+            var room = _roomService.GetRoom(roomId);
+            if (room?.CurrentThreat == null || !room.IsThreatRevealed)
+                return NotFound(new { error = "Загрозу ще не розкрито" });
+
+            return Ok(new
+            {
+                prompt = room.CurrentThreat.GenerateImagePrompt(room.Apocalypse, room.Bunker)
+            });
+        }
+
+        private static string BuildThreatImageKey(string roomId, string threatId)
+        {
+            return $"{roomId}_{threatId}";
         }
 
         private static bool IsValidHostRequest(Bunker.Models.Room room, string? hostToken)

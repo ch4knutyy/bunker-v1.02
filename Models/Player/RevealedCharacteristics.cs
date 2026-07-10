@@ -13,6 +13,7 @@ namespace Bunker.Models
         public bool Phobia { get; set; } = false;
         public bool Inventory { get; set; } = false;
 		public bool Fact { get; set; } = false;
+        public bool SpecialCard { get; set; } = false;
 
 		// Збереження реальних значень для показу після reconnect
 		public Dictionary<string, RevealedData> RevealedValues { get; set; } = new();

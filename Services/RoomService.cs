@@ -196,12 +196,57 @@ namespace Bunker.Services
 
 			// Старт гри
 			room.State = RoomState.Playing;
+			room.CurrentRound = 1;
+			room.CurrentPhase = GamePhase.RoundReveal;
+			room.CurrentTurnPlayerId = null;
+			room.CurrentVoting = null;
+			room.CurrentRoundReveals.Clear();
+			room.RoundDiceRolls.Clear();
+			room.AdditionalInventoryGrantedAfterRound3 = false;
+			room.CurrentThreat = null;
+			room.IsThreatRevealed = false;
+			room.ThreatRevealedAtRound = null;
+			room.VotingReadyResponses.Clear();
 
 			// (опціонально) очистити тимчасові стани
 			foreach (var player in playersSnapshot.Select(entry => entry.Value))
 			{
 				player.IsEliminated = false;
-				// можна ще щось скинути якщо треба
+				player.EliminatedAtRound = null;
+				player.EliminatedByVote = false;
+				player.CanRevealAllAfterElimination = false;
+				player.HasRevealedAllAfterElimination = false;
+                player.IsProtectedFromVote = false;
+                player.ExtraVotes = 0;
+				player.InventoryProtectedUntilRound = null;
+				player.CharacteristicsProtectedUntilRound = null;
+				var specialCards = player.SpecialCards?.Count > 0
+					? player.SpecialCards
+					: player.SpecialCard == null
+						? new List<SpecialCard>()
+						: new List<SpecialCard> { player.SpecialCard };
+				foreach (var specialCard in specialCards)
+				{
+					specialCard.IsUsed = false;
+					specialCard.IsActive = false;
+					specialCard.UsedAtRound = null;
+					specialCard.ActivatedRound = null;
+					specialCard.TargetPlayerId = null;
+					specialCard.TargetPlayerName = null;
+					specialCard.ActivatedVotingId = null;
+					specialCard.EffectResult = null;
+					specialCard.PublicLog = null;
+					specialCard.PrivateResult = null;
+					specialCard.UseMode = "";
+					specialCard.WasUsedSilently = false;
+					specialCard.IsPubliclyRevealed = false;
+					specialCard.EffectDuration = "instant";
+					specialCard.EffectExpiresAtRound = null;
+					specialCard.PublicVisibilityExpiresAtRound = null;
+					specialCard.PublicDisplayName = null;
+					specialCard.PublicDescription = null;
+					specialCard.PublicResult = null;
+				}
 			}
 
 			_logger.LogInformation("Гра в кімнаті {RoomId} розпочата", roomId);

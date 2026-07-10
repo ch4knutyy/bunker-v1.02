@@ -17,6 +17,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    @{
+    var currentPath = (Context.Request.Path.Value ?? "/").TrimEnd('/').ToLowerInvariant();
+
+    if (string.IsNullOrEmpty(currentPath))
+    {
+        currentPath = "/";
+    }
+
+    var isHomeActive = currentPath == "/";
+    var isPlayActive =
+        currentPath == "/play" ||
+        currentPath.StartsWith("/play/") ||
+        currentPath == "/game" ||
+        currentPath.StartsWith("/game/") ||
+        currentPath == "/room" ||
+        currentPath.StartsWith("/room/") ||
+        currentPath == "/rooms" ||
+        currentPath.StartsWith("/rooms/") ||
+        currentPath == "/spy" ||
+        currentPath.StartsWith("/spy/");
+
+    var isRulesActive =
+        currentPath == "/rules" ||
+        currentPath.StartsWith("/rules/");
+}
+
     <!-- Header with Navigation -->
     <header class="main-header">
         <div class="header-container">
@@ -29,11 +55,11 @@
             </a>
 
             <nav class="main-nav">
-                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Головна</a>
-                <a href="/game" class="nav-link">Грати</a>
-                <a href="/game#lobbySection" class="nav-link">Кімнати</a>
-                <a href="/#author" class="nav-link">Автор</a>
-                <a href="https://github.com/ch4knutyy/bunker-v1.02" class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a class="nav-link @(isHomeActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index" data-i18n="navHome">Головна</a>
+                <a href="/play" class="nav-link @(isPlayActive ? "active" : "")" data-i18n="navPlay">Грати</a>
+                <a href="/rules" class="nav-link @(isRulesActive ? "active" : "")" data-i18n="navRules">Правила</a>
+                <a href="/#author" class="nav-link" data-i18n="navAuthor">Автор</a>
+                <a href="https://github.com/ch4knutyy/bunker-v1.02" class="nav-link" target="_blank" rel="noopener noreferrer" data-i18n="navGithub">GitHub</a>
             </nav>
 
             <div class="header-actions">

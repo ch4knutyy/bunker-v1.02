@@ -37,6 +37,11 @@ namespace Bunker.Models.Сharacteristics
         /// Стабільний код ступеня тяжкості для локалізації на клієнті.
         /// </summary>
         public string? SeverityCode { get; set; }
+
+        /// <summary>
+        /// Чи застосовується ступінь тяжкості для цього стану.
+        /// </summary>
+        public bool AllowsSeverity { get; set; }
         
         public string Visibility { get; set; } = "";
         public string Description { get; set; } = "";

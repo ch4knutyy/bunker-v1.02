@@ -1,0 +1,2019 @@
+{
+  "_meta": {
+    "schemaVersion": 2,
+    "status": "threat_mechanics_tag_dictionary_with_bunker_assets",
+    "languages": [
+      "uk",
+      "en",
+      "ru"
+    ],
+    "purpose_uk": "Єдиний словник технічних тегів для механіки загроз. Він пов'язує професії, хобі, особистий інвентар, ресурси бункера, стаціонарні системи бункера та захист добровольця.",
+    "namingRule": "Усі технічні id використовують lowercase snake_case.",
+    "importantRules_uk": [
+      "Теги не замінюють локалізовані назви й описи.",
+      "Порівнювати потрібно технічні id тегів, а не українські, англійські чи російські назви.",
+      "apocalypseTags, bunkerTags і tags у threats.json використовуються для вибору загрози, а не для її автоматичного вирішення.",
+      "Наявність bunkerTags=['medical'] не доводить, що в бункері є доступний медпункт або медикаменти.",
+      "Для механіки враховуються лише явно додані capabilityTags, resourceTags, facilityTags і protectionTags.",
+      "Ресурси бункера доступні всій групі, але сервер повинен перевіряти їхній стан і доступність.",
+      "Витратні ресурси бункера можуть зменшуватися або зникати після використання.",
+      "Стаціонарні системи бункера не передаються гравцю та не видаляються як звичайний предмет.",
+      "Невідомий тег повинен вважатися помилкою валідації."
+    ]
+  },
+  "threatContributionRoles": [
+    {
+      "id": "solver",
+      "label": {
+        "uk": "Виконавець",
+        "en": "Solver",
+        "ru": "Исполнитель"
+      },
+      "description_uk": "Професія або навичка, яка дозволяє виконати роботу."
+    },
+    {
+      "id": "resource",
+      "label": {
+        "uk": "Ресурс",
+        "en": "Resource",
+        "ru": "Ресурс"
+      },
+      "description_uk": "Предмет або обладнання, потрібне для усунення загрози."
+    },
+    {
+      "id": "protection",
+      "label": {
+        "uk": "Захист",
+        "en": "Protection",
+        "ru": "Защита"
+      },
+      "description_uk": "Предмет, який захищає добровольця від персонального наслідку."
+    },
+    {
+      "id": "support",
+      "label": {
+        "uk": "Підтримка",
+        "en": "Support",
+        "ru": "Поддержка"
+      },
+      "description_uk": "Необов'язковий внесок, який допомагає виконати додаткову умову."
+    },
+    {
+      "id": "infrastructure",
+      "label": {
+        "uk": "Інфраструктура",
+        "en": "Infrastructure",
+        "ru": "Инфраструктура"
+      },
+      "description_uk": "Стаціонарна система або приміщення бункера, яке допомагає усунути загрозу."
+    }
+  ],
+  "capabilityTags": [
+    {
+      "id": "engineering_general",
+      "group": "technical",
+      "label": {
+        "uk": "Інженерні знання",
+        "en": "General engineering",
+        "ru": "Инженерные знания"
+      },
+      "description_uk": "Загальні інженерні знання для технічних і конструкційних проблем."
+    },
+    {
+      "id": "mechanical_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт механізмів",
+        "en": "Mechanical repair",
+        "ru": "Ремонт механизмов"
+      },
+      "description_uk": "Ремонт механічних вузлів, приводів і обладнання."
+    },
+    {
+      "id": "electrical_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт електрики",
+        "en": "Electrical repair",
+        "ru": "Ремонт электрики"
+      },
+      "description_uk": "Робота з електромережами, проводкою та електрообладнанням."
+    },
+    {
+      "id": "electronics_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт електроніки",
+        "en": "Electronics repair",
+        "ru": "Ремонт электроники"
+      },
+      "description_uk": "Ремонт плат, датчиків, панелей і електронних систем."
+    },
+    {
+      "id": "generator_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт генераторів",
+        "en": "Generator repair",
+        "ru": "Ремонт генераторов"
+      },
+      "description_uk": "Діагностика та ремонт генераторів і систем живлення."
+    },
+    {
+      "id": "ventilation_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт вентиляції",
+        "en": "Ventilation repair",
+        "ru": "Ремонт вентиляции"
+      },
+      "description_uk": "Обслуговування вентиляції, фільтрації та циркуляції повітря."
+    },
+    {
+      "id": "plumbing_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт водних систем",
+        "en": "Plumbing repair",
+        "ru": "Ремонт водных систем"
+      },
+      "description_uk": "Ремонт труб, насосів, резервуарів і каналізації."
+    },
+    {
+      "id": "structural_repair",
+      "group": "technical",
+      "label": {
+        "uk": "Ремонт конструкцій",
+        "en": "Structural repair",
+        "ru": "Ремонт конструкций"
+      },
+      "description_uk": "Укріплення стін, гермозон, перекриттів і пошкоджених секторів."
+    },
+    {
+      "id": "construction",
+      "group": "technical",
+      "label": {
+        "uk": "Будівництво",
+        "en": "Construction",
+        "ru": "Строительство"
+      },
+      "description_uk": "Створення та відновлення споруд і приміщень."
+    },
+    {
+      "id": "welding",
+      "group": "technical",
+      "label": {
+        "uk": "Зварювання",
+        "en": "Welding",
+        "ru": "Сварка"
+      },
+      "description_uk": "Зварювання металевих конструкцій і труб."
+    },
+    {
+      "id": "technical_diagnostics",
+      "group": "technical",
+      "label": {
+        "uk": "Технічна діагностика",
+        "en": "Technical diagnostics",
+        "ru": "Техническая диагностика"
+      },
+      "description_uk": "Пошук причин несправностей і оцінювання стану систем."
+    },
+    {
+      "id": "automation_control",
+      "group": "technical",
+      "label": {
+        "uk": "Керування автоматикою",
+        "en": "Automation control",
+        "ru": "Управление автоматикой"
+      },
+      "description_uk": "Робота з автоматичними дверима, контролерами та системами керування."
+    },
+    {
+      "id": "hacking",
+      "group": "technical",
+      "label": {
+        "uk": "Злам систем",
+        "en": "Hacking",
+        "ru": "Взлом систем"
+      },
+      "description_uk": "Обхід цифрового захисту та відновлення доступу до систем."
+    },
+    {
+      "id": "access_control",
+      "group": "technical",
+      "label": {
+        "uk": "Контроль доступу",
+        "en": "Access control",
+        "ru": "Контроль доступа"
+      },
+      "description_uk": "Робота із замками, ключ-картами та системами безпеки."
+    },
+    {
+      "id": "radio_communications",
+      "group": "technical",
+      "label": {
+        "uk": "Радіозв’язок",
+        "en": "Radio communications",
+        "ru": "Радиосвязь"
+      },
+      "description_uk": "Налаштування рацій, передавачів і приймання сигналів."
+    },
+    {
+      "id": "navigation",
+      "group": "technical",
+      "label": {
+        "uk": "Навігація",
+        "en": "Navigation",
+        "ru": "Навигация"
+      },
+      "description_uk": "Робота з координатами, картами та маршрутами."
+    },
+    {
+      "id": "computer_systems",
+      "group": "technical",
+      "label": {
+        "uk": "Комп’ютерні системи",
+        "en": "Computer systems",
+        "ru": "Компьютерные системы"
+      },
+      "description_uk": "Робота з комп’ютерами, серверами та цифровою інфраструктурою."
+    },
+    {
+      "id": "medical_general",
+      "group": "medical",
+      "label": {
+        "uk": "Медичні знання",
+        "en": "Medical knowledge",
+        "ru": "Медицинские знания"
+      },
+      "description_uk": "Загальні медичні знання для лікування та оцінки ризиків."
+    },
+    {
+      "id": "first_aid",
+      "group": "medical",
+      "label": {
+        "uk": "Перша допомога",
+        "en": "First aid",
+        "ru": "Первая помощь"
+      },
+      "description_uk": "Невідкладна допомога при травмах і гострих станах."
+    },
+    {
+      "id": "surgery",
+      "group": "medical",
+      "label": {
+        "uk": "Хірургія",
+        "en": "Surgery",
+        "ru": "Хирургия"
+      },
+      "description_uk": "Проведення операцій і складних медичних втручань."
+    },
+    {
+      "id": "medical_diagnostics",
+      "group": "medical",
+      "label": {
+        "uk": "Медична діагностика",
+        "en": "Medical diagnostics",
+        "ru": "Медицинская диагностика"
+      },
+      "description_uk": "Визначення хвороб, отруєнь і фізичних ушкоджень."
+    },
+    {
+      "id": "pharmacology",
+      "group": "medical",
+      "label": {
+        "uk": "Фармакологія",
+        "en": "Pharmacology",
+        "ru": "Фармакология"
+      },
+      "description_uk": "Знання ліків, дозування та медикаментозного лікування."
+    },
+    {
+      "id": "epidemiology",
+      "group": "medical",
+      "label": {
+        "uk": "Епідеміологія",
+        "en": "Epidemiology",
+        "ru": "Эпидемиология"
+      },
+      "description_uk": "Контроль інфекцій, спалахів і шляхів передачі."
+    },
+    {
+      "id": "quarantine_management",
+      "group": "medical",
+      "label": {
+        "uk": "Організація карантину",
+        "en": "Quarantine management",
+        "ru": "Организация карантина"
+      },
+      "description_uk": "Ізоляція заражених і контроль карантинних зон."
+    },
+    {
+      "id": "biology",
+      "group": "science",
+      "label": {
+        "uk": "Біологія",
+        "en": "Biology",
+        "ru": "Биология"
+      },
+      "description_uk": "Знання живих організмів, екосистем і біологічних процесів."
+    },
+    {
+      "id": "microbiology",
+      "group": "science",
+      "label": {
+        "uk": "Мікробіологія",
+        "en": "Microbiology",
+        "ru": "Микробиология"
+      },
+      "description_uk": "Робота з бактеріями, грибками, вірусами та лабораторними зразками."
+    },
+    {
+      "id": "chemistry",
+      "group": "science",
+      "label": {
+        "uk": "Хімія",
+        "en": "Chemistry",
+        "ru": "Химия"
+      },
+      "description_uk": "Аналіз речовин, реакцій і хімічного забруднення."
+    },
+    {
+      "id": "toxicology",
+      "group": "science",
+      "label": {
+        "uk": "Токсикологія",
+        "en": "Toxicology",
+        "ru": "Токсикология"
+      },
+      "description_uk": "Виявлення отрут і лікування токсичних уражень."
+    },
+    {
+      "id": "radiation_analysis",
+      "group": "science",
+      "label": {
+        "uk": "Радіаційний аналіз",
+        "en": "Radiation analysis",
+        "ru": "Радиационный анализ"
+      },
+      "description_uk": "Вимірювання радіації та оцінка радіаційної небезпеки."
+    },
+    {
+      "id": "water_purification",
+      "group": "science",
+      "label": {
+        "uk": "Очищення води",
+        "en": "Water purification",
+        "ru": "Очистка воды"
+      },
+      "description_uk": "Фільтрація, кип’ятіння та знезараження води."
+    },
+    {
+      "id": "food_safety",
+      "group": "science",
+      "label": {
+        "uk": "Безпека харчування",
+        "en": "Food safety",
+        "ru": "Безопасность питания"
+      },
+      "description_uk": "Перевірка їжі, отруєнь і придатності запасів."
+    },
+    {
+      "id": "veterinary",
+      "group": "medical",
+      "label": {
+        "uk": "Ветеринарія",
+        "en": "Veterinary medicine",
+        "ru": "Ветеринария"
+      },
+      "description_uk": "Лікування тварин та оцінка зоологічних ризиків."
+    },
+    {
+      "id": "agriculture",
+      "group": "survival",
+      "label": {
+        "uk": "Сільське господарство",
+        "en": "Agriculture",
+        "ru": "Сельское хозяйство"
+      },
+      "description_uk": "Вирощування рослин, робота із ґрунтом і врожаєм."
+    },
+    {
+      "id": "food_preparation",
+      "group": "survival",
+      "label": {
+        "uk": "Приготування їжі",
+        "en": "Food preparation",
+        "ru": "Приготовление еды"
+      },
+      "description_uk": "Безпечне приготування їжі з обмежених ресурсів."
+    },
+    {
+      "id": "food_preservation",
+      "group": "survival",
+      "label": {
+        "uk": "Зберігання їжі",
+        "en": "Food preservation",
+        "ru": "Хранение еды"
+      },
+      "description_uk": "Консервування, сушіння та продовження строку зберігання."
+    },
+    {
+      "id": "hunting",
+      "group": "survival",
+      "label": {
+        "uk": "Полювання",
+        "en": "Hunting",
+        "ru": "Охота"
+      },
+      "description_uk": "Добування їжі та робота зі зброєю на полюванні."
+    },
+    {
+      "id": "resource_management",
+      "group": "survival",
+      "label": {
+        "uk": "Управління ресурсами",
+        "en": "Resource management",
+        "ru": "Управление ресурсами"
+      },
+      "description_uk": "Облік, розподіл і планування запасів."
+    },
+    {
+      "id": "logistics",
+      "group": "survival",
+      "label": {
+        "uk": "Логістика",
+        "en": "Logistics",
+        "ru": "Логистика"
+      },
+      "description_uk": "Організація переміщення людей, речей і запасів."
+    },
+    {
+      "id": "rationing",
+      "group": "survival",
+      "label": {
+        "uk": "Розподіл пайків",
+        "en": "Rationing",
+        "ru": "Распределение пайков"
+      },
+      "description_uk": "Контроль споживання їжі, води та інших обмежених ресурсів."
+    },
+    {
+      "id": "fire_control",
+      "group": "survival",
+      "label": {
+        "uk": "Гасіння пожеж",
+        "en": "Fire control",
+        "ru": "Тушение пожаров"
+      },
+      "description_uk": "Боротьба з вогнем, задимленням і тепловими ризиками."
+    },
+    {
+      "id": "scouting",
+      "group": "survival",
+      "label": {
+        "uk": "Розвідка",
+        "en": "Scouting",
+        "ru": "Разведка"
+      },
+      "description_uk": "Оцінка небезпечних зон, маршрутів і зовнішньої обстановки."
+    },
+    {
+      "id": "survival_skills",
+      "group": "survival",
+      "label": {
+        "uk": "Навички виживання",
+        "en": "Survival skills",
+        "ru": "Навыки выживания"
+      },
+      "description_uk": "Загальні практичні навички виживання в небезпечному середовищі."
+    },
+    {
+      "id": "security",
+      "group": "social_security",
+      "label": {
+        "uk": "Охорона",
+        "en": "Security",
+        "ru": "Охрана"
+      },
+      "description_uk": "Захист входів, людей, ресурсів і небезпечних секторів."
+    },
+    {
+      "id": "combat",
+      "group": "social_security",
+      "label": {
+        "uk": "Бойова підготовка",
+        "en": "Combat",
+        "ru": "Боевая подготовка"
+      },
+      "description_uk": "Застосування сили проти нападників або небезпечних істот."
+    },
+    {
+      "id": "crowd_control",
+      "group": "social_security",
+      "label": {
+        "uk": "Контроль натовпу",
+        "en": "Crowd control",
+        "ru": "Контроль толпы"
+      },
+      "description_uk": "Стримування паніки, бунтів і неконтрольованих груп."
+    },
+    {
+      "id": "negotiation",
+      "group": "social_security",
+      "label": {
+        "uk": "Переговори",
+        "en": "Negotiation",
+        "ru": "Переговоры"
+      },
+      "description_uk": "Вирішення конфліктів і домовленості з іншими групами."
+    },
+    {
+      "id": "leadership",
+      "group": "social_security",
+      "label": {
+        "uk": "Лідерство",
+        "en": "Leadership",
+        "ru": "Лидерство"
+      },
+      "description_uk": "Координація групи та прийняття рішень у кризі."
+    },
+    {
+      "id": "organization",
+      "group": "social_security",
+      "label": {
+        "uk": "Організація",
+        "en": "Organization",
+        "ru": "Организация"
+      },
+      "description_uk": "Планування робіт, чергувань і відповідальності."
+    },
+    {
+      "id": "investigation",
+      "group": "social_security",
+      "label": {
+        "uk": "Розслідування",
+        "en": "Investigation",
+        "ru": "Расследование"
+      },
+      "description_uk": "Пошук причин саботажу, крадіжок або невідомих подій."
+    },
+    {
+      "id": "psychology",
+      "group": "social_security",
+      "label": {
+        "uk": "Психологія",
+        "en": "Psychology",
+        "ru": "Психология"
+      },
+      "description_uk": "Робота зі стресом, панікою та психічними кризами."
+    },
+    {
+      "id": "crisis_support",
+      "group": "social_security",
+      "label": {
+        "uk": "Кризова підтримка",
+        "en": "Crisis support",
+        "ru": "Кризисная поддержка"
+      },
+      "description_uk": "Стабілізація людей після травматичних подій."
+    },
+    {
+      "id": "physical_strength",
+      "group": "physical",
+      "label": {
+        "uk": "Фізична сила",
+        "en": "Physical strength",
+        "ru": "Физическая сила"
+      },
+      "description_uk": "Виконання важких фізичних робіт і переміщення вантажів."
+    },
+    {
+      "id": "endurance",
+      "group": "physical",
+      "label": {
+        "uk": "Витривалість",
+        "en": "Endurance",
+        "ru": "Выносливость"
+      },
+      "description_uk": "Тривала робота в складних або небезпечних умовах."
+    },
+    {
+      "id": "precision_work",
+      "group": "physical",
+      "label": {
+        "uk": "Точна робота",
+        "en": "Precision work",
+        "ru": "Точная работа"
+      },
+      "description_uk": "Акуратна робота з дрібними деталями та чутливим обладнанням."
+    }
+  ],
+  "resourceTags": [
+    {
+      "id": "repair_tools",
+      "group": "tools",
+      "label": {
+        "uk": "Ремонтні інструменти",
+        "en": "Repair tools",
+        "ru": "Ремонтные инструменты"
+      },
+      "description_uk": "Універсальні інструменти для ремонту."
+    },
+    {
+      "id": "mechanical_parts",
+      "group": "parts",
+      "label": {
+        "uk": "Механічні запчастини",
+        "en": "Mechanical spare parts",
+        "ru": "Механические запчасти"
+      },
+      "description_uk": "Деталі для механічних систем."
+    },
+    {
+      "id": "electrical_parts",
+      "group": "parts",
+      "label": {
+        "uk": "Електричні запчастини",
+        "en": "Electrical spare parts",
+        "ru": "Электрические запчасти"
+      },
+      "description_uk": "Кабелі, запобіжники та компоненти електромереж."
+    },
+    {
+      "id": "electronics_parts",
+      "group": "parts",
+      "label": {
+        "uk": "Електронні компоненти",
+        "en": "Electronic components",
+        "ru": "Электронные компоненты"
+      },
+      "description_uk": "Плати, датчики та компоненти електроніки."
+    },
+    {
+      "id": "generator_parts",
+      "group": "parts",
+      "label": {
+        "uk": "Запчастини генератора",
+        "en": "Generator spare parts",
+        "ru": "Запчасти генератора"
+      },
+      "description_uk": "Спеціальні деталі для генератора."
+    },
+    {
+      "id": "plumbing_parts",
+      "group": "parts",
+      "label": {
+        "uk": "Деталі водних систем",
+        "en": "Plumbing parts",
+        "ru": "Детали водных систем"
+      },
+      "description_uk": "Труби, фітинги, клапани та інші сантехнічні деталі."
+    },
+    {
+      "id": "construction_materials",
+      "group": "materials",
+      "label": {
+        "uk": "Будівельні матеріали",
+        "en": "Construction materials",
+        "ru": "Строительные материалы"
+      },
+      "description_uk": "Матеріали для ремонту стін, підлоги та конструкцій."
+    },
+    {
+      "id": "sealant",
+      "group": "materials",
+      "label": {
+        "uk": "Герметик",
+        "en": "Sealant",
+        "ru": "Герметик"
+      },
+      "description_uk": "Матеріали для герметизації тріщин і секторів."
+    },
+    {
+      "id": "welding_equipment",
+      "group": "tools",
+      "label": {
+        "uk": "Зварювальне обладнання",
+        "en": "Welding equipment",
+        "ru": "Сварочное оборудование"
+      },
+      "description_uk": "Обладнання для зварювання конструкцій."
+    },
+    {
+      "id": "power_supply",
+      "group": "energy",
+      "label": {
+        "uk": "Джерело живлення",
+        "en": "Power supply",
+        "ru": "Источник питания"
+      },
+      "description_uk": "Акумулятори, генератори або резервне живлення."
+    },
+    {
+      "id": "fuel",
+      "group": "energy",
+      "label": {
+        "uk": "Паливо",
+        "en": "Fuel",
+        "ru": "Топливо"
+      },
+      "description_uk": "Паливо для генераторів, транспорту або опалення."
+    },
+    {
+      "id": "lighting_equipment",
+      "group": "equipment",
+      "label": {
+        "uk": "Освітлення",
+        "en": "Lighting equipment",
+        "ru": "Освещение"
+      },
+      "description_uk": "Ліхтарі, лампи та аварійне освітлення."
+    },
+    {
+      "id": "monitoring_equipment",
+      "group": "equipment",
+      "label": {
+        "uk": "Контрольне обладнання",
+        "en": "Monitoring equipment",
+        "ru": "Контрольное оборудование"
+      },
+      "description_uk": "Прилади для спостереження і вимірювання параметрів."
+    },
+    {
+      "id": "radiation_detection",
+      "group": "equipment",
+      "label": {
+        "uk": "Виявлення радіації",
+        "en": "Radiation detection",
+        "ru": "Обнаружение радиации"
+      },
+      "description_uk": "Дозиметри та прилади радіаційного контролю."
+    },
+    {
+      "id": "air_monitoring",
+      "group": "equipment",
+      "label": {
+        "uk": "Контроль повітря",
+        "en": "Air monitoring",
+        "ru": "Контроль воздуха"
+      },
+      "description_uk": "Датчики кисню, CO2 і забруднення повітря."
+    },
+    {
+      "id": "water_testing",
+      "group": "equipment",
+      "label": {
+        "uk": "Перевірка води",
+        "en": "Water testing",
+        "ru": "Проверка воды"
+      },
+      "description_uk": "Набори й прилади для аналізу якості води."
+    },
+    {
+      "id": "medical_supplies",
+      "group": "medical",
+      "label": {
+        "uk": "Медичні матеріали",
+        "en": "Medical supplies",
+        "ru": "Медицинские материалы"
+      },
+      "description_uk": "Аптечки, бинти, шприци та базові медичні ресурси."
+    },
+    {
+      "id": "antiseptics",
+      "group": "medical",
+      "label": {
+        "uk": "Антисептики",
+        "en": "Antiseptics",
+        "ru": "Антисептики"
+      },
+      "description_uk": "Засоби для знезараження поверхонь і ран."
+    },
+    {
+      "id": "antibiotics",
+      "group": "medical",
+      "label": {
+        "uk": "Антибіотики",
+        "en": "Antibiotics",
+        "ru": "Антибиотики"
+      },
+      "description_uk": "Медикаменти проти бактеріальних інфекцій."
+    },
+    {
+      "id": "medicine",
+      "group": "medical",
+      "label": {
+        "uk": "Медикаменти",
+        "en": "Medicine",
+        "ru": "Медикаменты"
+      },
+      "description_uk": "Загальна категорія лікарських засобів."
+    },
+    {
+      "id": "quarantine_equipment",
+      "group": "medical",
+      "label": {
+        "uk": "Карантинне обладнання",
+        "en": "Quarantine equipment",
+        "ru": "Карантинное оборудование"
+      },
+      "description_uk": "Перегородки, ізоляційні матеріали й засоби карантину."
+    },
+    {
+      "id": "water_filter",
+      "group": "survival",
+      "label": {
+        "uk": "Фільтр для води",
+        "en": "Water filter",
+        "ru": "Фильтр для воды"
+      },
+      "description_uk": "Обладнання для очищення води."
+    },
+    {
+      "id": "air_filter",
+      "group": "survival",
+      "label": {
+        "uk": "Повітряний фільтр",
+        "en": "Air filter",
+        "ru": "Воздушный фильтр"
+      },
+      "description_uk": "Фільтри для вентиляції та очищення повітря."
+    },
+    {
+      "id": "clean_water",
+      "group": "survival",
+      "label": {
+        "uk": "Чиста вода",
+        "en": "Clean water",
+        "ru": "Чистая вода"
+      },
+      "description_uk": "Безпечний запас питної води."
+    },
+    {
+      "id": "food_supply",
+      "group": "survival",
+      "label": {
+        "uk": "Запас їжі",
+        "en": "Food supply",
+        "ru": "Запас еды"
+      },
+      "description_uk": "Їжа та довготривалі харчові запаси."
+    },
+    {
+      "id": "food_storage",
+      "group": "survival",
+      "label": {
+        "uk": "Зберігання їжі",
+        "en": "Food storage",
+        "ru": "Хранение еды"
+      },
+      "description_uk": "Холодильне або герметичне обладнання для запасів."
+    },
+    {
+      "id": "containers",
+      "group": "survival",
+      "label": {
+        "uk": "Ємності",
+        "en": "Containers",
+        "ru": "Ёмкости"
+      },
+      "description_uk": "Ємності для води, кип’ятіння, зберігання або транспортування."
+    },
+    {
+      "id": "communication_equipment",
+      "group": "communication",
+      "label": {
+        "uk": "Засоби зв’язку",
+        "en": "Communication equipment",
+        "ru": "Средства связи"
+      },
+      "description_uk": "Рації, передавачі, антени та радіоприймачі."
+    },
+    {
+      "id": "navigation_equipment",
+      "group": "communication",
+      "label": {
+        "uk": "Навігаційне обладнання",
+        "en": "Navigation equipment",
+        "ru": "Навигационное оборудование"
+      },
+      "description_uk": "Карти, компаси, GPS і координатні пристрої."
+    },
+    {
+      "id": "computer_equipment",
+      "group": "technology",
+      "label": {
+        "uk": "Комп’ютерне обладнання",
+        "en": "Computer equipment",
+        "ru": "Компьютерное оборудование"
+      },
+      "description_uk": "Комп’ютери, ноутбуки, сервери й носії даних."
+    },
+    {
+      "id": "access_device",
+      "group": "security",
+      "label": {
+        "uk": "Засіб доступу",
+        "en": "Access device",
+        "ru": "Средство доступа"
+      },
+      "description_uk": "Ключі, ключ-карти та пристрої відкривання."
+    },
+    {
+      "id": "defensive_equipment",
+      "group": "security",
+      "label": {
+        "uk": "Засоби оборони",
+        "en": "Defensive equipment",
+        "ru": "Средства обороны"
+      },
+      "description_uk": "Нелетальні та захисні засоби для охорони."
+    },
+    {
+      "id": "weapon",
+      "group": "security",
+      "label": {
+        "uk": "Зброя",
+        "en": "Weapon",
+        "ru": "Оружие"
+      },
+      "description_uk": "Зброя для захисту або бою."
+    },
+    {
+      "id": "ammunition",
+      "group": "security",
+      "label": {
+        "uk": "Боєприпаси",
+        "en": "Ammunition",
+        "ru": "Боеприпасы"
+      },
+      "description_uk": "Набої та інші витратні боєприпаси."
+    },
+    {
+      "id": "fire_suppression",
+      "group": "safety",
+      "label": {
+        "uk": "Засоби пожежогасіння",
+        "en": "Fire suppression",
+        "ru": "Средства пожаротушения"
+      },
+      "description_uk": "Вогнегасники, протипожежні покривала й системи гасіння."
+    },
+    {
+      "id": "spare_filters",
+      "group": "parts",
+      "label": {
+        "uk": "Запасні фільтри",
+        "en": "Spare filters",
+        "ru": "Запасные фильтры"
+      },
+      "description_uk": "Змінні фільтри для вентиляції, води або інших систем."
+    },
+    {
+      "id": "spare_equipment",
+      "group": "parts",
+      "label": {
+        "uk": "Запасне обладнання",
+        "en": "Spare equipment",
+        "ru": "Запасное оборудование"
+      },
+      "description_uk": "Універсальне резервне обладнання для заміни пошкоджених вузлів."
+    },
+    {
+      "id": "chemicals",
+      "group": "science",
+      "label": {
+        "uk": "Хімікати",
+        "en": "Chemicals",
+        "ru": "Химикаты"
+      },
+      "description_uk": "Хімічні речовини для аналізу, очищення або нейтралізації."
+    },
+    {
+      "id": "laboratory_equipment",
+      "group": "science",
+      "label": {
+        "uk": "Лабораторне обладнання",
+        "en": "Laboratory equipment",
+        "ru": "Лабораторное оборудование"
+      },
+      "description_uk": "Обладнання для аналізів, досліджень і перевірки зразків."
+    },
+    {
+      "id": "scientific_equipment",
+      "group": "science",
+      "label": {
+        "uk": "Наукове обладнання",
+        "en": "Scientific equipment",
+        "ru": "Научное оборудование"
+      },
+      "description_uk": "Спеціалізовані прилади для дослідження невідомих явищ."
+    },
+    {
+      "id": "surgical_equipment",
+      "group": "medical",
+      "label": {
+        "uk": "Хірургічне обладнання",
+        "en": "Surgical equipment",
+        "ru": "Хирургическое оборудование"
+      },
+      "description_uk": "Інструменти та обладнання для операцій."
+    },
+    {
+      "id": "blood_supply",
+      "group": "medical",
+      "label": {
+        "uk": "Запаси крові",
+        "en": "Blood supply",
+        "ru": "Запасы крови"
+      },
+      "description_uk": "Кров і компоненти крові для медичних процедур."
+    },
+    {
+      "id": "vaccines",
+      "group": "medical",
+      "label": {
+        "uk": "Вакцини",
+        "en": "Vaccines",
+        "ru": "Вакцины"
+      },
+      "description_uk": "Вакцини для профілактики або стримування інфекцій."
+    },
+    {
+      "id": "oxygen_supply",
+      "group": "life_support",
+      "label": {
+        "uk": "Запас кисню",
+        "en": "Oxygen supply",
+        "ru": "Запас кислорода"
+      },
+      "description_uk": "Балони або централізований резерв кисню."
+    },
+    {
+      "id": "decontamination_supplies",
+      "group": "hazard",
+      "label": {
+        "uk": "Засоби дезактивації",
+        "en": "Decontamination supplies",
+        "ru": "Средства дезактивации"
+      },
+      "description_uk": "Матеріали для очищення від радіаційного, хімічного або біологічного забруднення."
+    },
+    {
+      "id": "seeds",
+      "group": "agriculture",
+      "label": {
+        "uk": "Насіння",
+        "en": "Seeds",
+        "ru": "Семена"
+      },
+      "description_uk": "Посівний матеріал для відновлення виробництва їжі."
+    },
+    {
+      "id": "agricultural_supplies",
+      "group": "agriculture",
+      "label": {
+        "uk": "Сільськогосподарські матеріали",
+        "en": "Agricultural supplies",
+        "ru": "Сельскохозяйственные материалы"
+      },
+      "description_uk": "Добрива, ґрунт, інструменти та інші матеріали для вирощування їжі."
+    },
+    {
+      "id": "pumping_equipment",
+      "group": "water",
+      "label": {
+        "uk": "Насосне обладнання",
+        "en": "Pumping equipment",
+        "ru": "Насосное оборудование"
+      },
+      "description_uk": "Насоси та обладнання для відкачування або подачі води."
+    },
+    {
+      "id": "rescue_equipment",
+      "group": "safety",
+      "label": {
+        "uk": "Рятувальне обладнання",
+        "en": "Rescue equipment",
+        "ru": "Спасательное оборудование"
+      },
+      "description_uk": "Спорядження для евакуації, пошуку та аварійних робіт."
+    },
+    {
+      "id": "refrigeration_equipment",
+      "group": "storage",
+      "label": {
+        "uk": "Холодильне обладнання",
+        "en": "Refrigeration equipment",
+        "ru": "Холодильное оборудование"
+      },
+      "description_uk": "Обладнання для зберігання їжі, ліків і біоматеріалів."
+    },
+    {
+      "id": "thermal_control_equipment",
+      "group": "environment",
+      "label": {
+        "uk": "Обладнання температурного контролю",
+        "en": "Thermal control equipment",
+        "ru": "Оборудование температурного контроля"
+      },
+      "description_uk": "Обігрів, охолодження та контроль температури."
+    },
+    {
+      "id": "blankets_and_warmth",
+      "group": "survival",
+      "label": {
+        "uk": "Ковдри та утеплення",
+        "en": "Blankets and insulation",
+        "ru": "Одеяла и утепление"
+      },
+      "description_uk": "Матеріали для захисту від холоду."
+    },
+    {
+      "id": "emergency_kits",
+      "group": "safety",
+      "label": {
+        "uk": "Аварійні комплекти",
+        "en": "Emergency kits",
+        "ru": "Аварийные комплекты"
+      },
+      "description_uk": "Універсальні аварійні набори для виживання."
+    },
+    {
+      "id": "books_and_manuals",
+      "group": "knowledge",
+      "label": {
+        "uk": "Книги та інструкції",
+        "en": "Books and manuals",
+        "ru": "Книги и инструкции"
+      },
+      "description_uk": "Документація, довідники та технічні інструкції."
+    },
+    {
+      "id": "nuclear_materials",
+      "group": "hazard",
+      "label": {
+        "uk": "Ядерні матеріали",
+        "en": "Nuclear materials",
+        "ru": "Ядерные материалы"
+      },
+      "description_uk": "Ядерне паливо або інші радіоактивні матеріали."
+    }
+  ],
+  "protectionTags": [
+    {
+      "id": "radiation_protection",
+      "group": "hazard",
+      "label": {
+        "uk": "Захист від радіації",
+        "en": "Radiation protection",
+        "ru": "Защита от радиации"
+      },
+      "description_uk": "Захищає добровольця від радіаційного ураження."
+    },
+    {
+      "id": "toxic_protection",
+      "group": "hazard",
+      "label": {
+        "uk": "Захист від токсинів",
+        "en": "Toxic protection",
+        "ru": "Защита от токсинов"
+      },
+      "description_uk": "Захищає від хімічного забруднення та отруйних речовин."
+    },
+    {
+      "id": "biological_protection",
+      "group": "hazard",
+      "label": {
+        "uk": "Біологічний захист",
+        "en": "Biological protection",
+        "ru": "Биологическая защита"
+      },
+      "description_uk": "Знижує ризик зараження вірусами, бактеріями, грибками й паразитами."
+    },
+    {
+      "id": "respiratory_protection",
+      "group": "hazard",
+      "label": {
+        "uk": "Захист дихання",
+        "en": "Respiratory protection",
+        "ru": "Защита дыхания"
+      },
+      "description_uk": "Захищає дихальні шляхи від пилу, диму, газів і зараженого повітря."
+    },
+    {
+      "id": "fire_protection",
+      "group": "hazard",
+      "label": {
+        "uk": "Захист від вогню",
+        "en": "Fire protection",
+        "ru": "Защита от огня"
+      },
+      "description_uk": "Захищає від високої температури, полум’я та іскор."
+    },
+    {
+      "id": "electrical_protection",
+      "group": "hazard",
+      "label": {
+        "uk": "Електричний захист",
+        "en": "Electrical protection",
+        "ru": "Электрическая защита"
+      },
+      "description_uk": "Захищає від ураження струмом і електричної дуги."
+    },
+    {
+      "id": "cold_protection",
+      "group": "environment",
+      "label": {
+        "uk": "Захист від холоду",
+        "en": "Cold protection",
+        "ru": "Защита от холода"
+      },
+      "description_uk": "Захищає від переохолодження та морозу."
+    },
+    {
+      "id": "heat_protection",
+      "group": "environment",
+      "label": {
+        "uk": "Захист від спеки",
+        "en": "Heat protection",
+        "ru": "Защита от жары"
+      },
+      "description_uk": "Захищає від перегріву та високої температури."
+    },
+    {
+      "id": "impact_protection",
+      "group": "physical",
+      "label": {
+        "uk": "Захист від травм",
+        "en": "Impact protection",
+        "ru": "Защита от травм"
+      },
+      "description_uk": "Шоломи, броня та спорядження від ударів і уламків."
+    },
+    {
+      "id": "waterproof_protection",
+      "group": "environment",
+      "label": {
+        "uk": "Водонепроникний захист",
+        "en": "Waterproof protection",
+        "ru": "Водонепроницаемая защита"
+      },
+      "description_uk": "Захищає від води, затоплення та тривалого намокання."
+    }
+  ],
+  "itemUsageEnums": {
+    "consumptionModes": [
+      {
+        "id": "never",
+        "label": {
+          "uk": "Не витрачається",
+          "en": "Not consumed",
+          "ru": "Не расходуется"
+        }
+      },
+      {
+        "id": "on_success",
+        "label": {
+          "uk": "Витрачається при успіху",
+          "en": "Consumed on success",
+          "ru": "Расходуется при успехе"
+        }
+      },
+      {
+        "id": "always",
+        "label": {
+          "uk": "Витрачається завжди",
+          "en": "Always consumed",
+          "ru": "Расходуется всегда"
+        }
+      }
+    ],
+    "revealModes": [
+      {
+        "id": "keep_hidden",
+        "label": {
+          "uk": "Залишається прихованим",
+          "en": "Remains hidden",
+          "ru": "Остаётся скрытым"
+        }
+      },
+      {
+        "id": "reveal_on_commit",
+        "label": {
+          "uk": "Розкривається при передачі",
+          "en": "Revealed on contribution",
+          "ru": "Раскрывается при передаче"
+        }
+      },
+      {
+        "id": "reveal_on_resolution",
+        "label": {
+          "uk": "Розкривається після результату",
+          "en": "Revealed after resolution",
+          "ru": "Раскрывается после результата"
+        }
+      }
+    ]
+  },
+  "threatEffectTypes": [
+    {
+      "id": "resolve_threat",
+      "label": {
+        "uk": "Усунути загрозу",
+        "en": "Resolve threat",
+        "ru": "Устранить угрозу"
+      }
+    },
+    {
+      "id": "add_physical_condition",
+      "label": {
+        "uk": "Додати фізичний стан",
+        "en": "Add physical condition",
+        "ru": "Добавить физическое состояние"
+      }
+    },
+    {
+      "id": "add_mental_condition",
+      "label": {
+        "uk": "Додати ментальний стан",
+        "en": "Add mental condition",
+        "ru": "Добавить психическое состояние"
+      }
+    },
+    {
+      "id": "increase_physical_severity",
+      "label": {
+        "uk": "Погіршити фізичний стан",
+        "en": "Increase physical severity",
+        "ru": "Ухудшить физическое состояние"
+      }
+    },
+    {
+      "id": "increase_mental_severity",
+      "label": {
+        "uk": "Погіршити ментальний стан",
+        "en": "Increase mental severity",
+        "ru": "Ухудшить психическое состояние"
+      }
+    },
+    {
+      "id": "remove_random_inventory_item",
+      "label": {
+        "uk": "Забрати випадковий предмет",
+        "en": "Remove random inventory item",
+        "ru": "Удалить случайный предмет"
+      }
+    },
+    {
+      "id": "consume_contributed_items",
+      "label": {
+        "uk": "Витратити передані предмети",
+        "en": "Consume contributed items",
+        "ru": "Израсходовать переданные предметы"
+      }
+    },
+    {
+      "id": "disable_bunker_system",
+      "label": {
+        "uk": "Вимкнути систему бункера",
+        "en": "Disable bunker system",
+        "ru": "Отключить систему бункера"
+      }
+    },
+    {
+      "id": "apply_room_debuff",
+      "label": {
+        "uk": "Додати дебаф кімнаті",
+        "en": "Apply room debuff",
+        "ru": "Применить дебаф комнаты"
+      }
+    },
+    {
+      "id": "block_action",
+      "label": {
+        "uk": "Заблокувати дію",
+        "en": "Block action",
+        "ru": "Заблокировать действие"
+      }
+    },
+    {
+      "id": "reveal_used_profession",
+      "label": {
+        "uk": "Розкрити використану професію",
+        "en": "Reveal used profession",
+        "ru": "Раскрыть использованную профессию"
+      }
+    },
+    {
+      "id": "reveal_used_item",
+      "label": {
+        "uk": "Розкрити використаний предмет",
+        "en": "Reveal used item",
+        "ru": "Раскрыть использованный предмет"
+      }
+    },
+    {
+      "id": "consume_bunker_resource",
+      "label": {
+        "uk": "Витратити ресурс бункера",
+        "en": "Consume bunker resource",
+        "ru": "Израсходовать ресурс бункера"
+      }
+    },
+    {
+      "id": "reserve_bunker_resource",
+      "label": {
+        "uk": "Зарезервувати ресурс бункера",
+        "en": "Reserve bunker resource",
+        "ru": "Зарезервировать ресурс бункера"
+      }
+    },
+    {
+      "id": "damage_bunker_resource",
+      "label": {
+        "uk": "Пошкодити ресурс бункера",
+        "en": "Damage bunker resource",
+        "ru": "Повредить ресурс бункера"
+      }
+    },
+    {
+      "id": "disable_bunker_facility",
+      "label": {
+        "uk": "Вимкнути систему бункера",
+        "en": "Disable bunker facility",
+        "ru": "Отключить систему бункера"
+      }
+    },
+    {
+      "id": "damage_bunker_facility",
+      "label": {
+        "uk": "Пошкодити систему бункера",
+        "en": "Damage bunker facility",
+        "ru": "Повредить систему бункера"
+      }
+    },
+    {
+      "id": "restore_bunker_facility",
+      "label": {
+        "uk": "Відновити систему бункера",
+        "en": "Restore bunker facility",
+        "ru": "Восстановить систему бункера"
+      }
+    }
+  ],
+  "tagNamespaces": [
+    {
+      "id": "selection",
+      "fields": [
+        "apocalypseTags",
+        "bunkerTags",
+        "tags"
+      ],
+      "description_uk": "Використовується лише для вибору відповідної загрози."
+    },
+    {
+      "id": "capability",
+      "fields": [
+        "capabilityTags"
+      ],
+      "description_uk": "Знання та навички людини, які дозволяють виконати роботу."
+    },
+    {
+      "id": "resource",
+      "fields": [
+        "resourceTags"
+      ],
+      "description_uk": "Переносні предмети, матеріали та запаси гравця або бункера."
+    },
+    {
+      "id": "facility",
+      "fields": [
+        "facilityTags"
+      ],
+      "description_uk": "Стаціонарні приміщення, системи та обладнання бункера."
+    },
+    {
+      "id": "protection",
+      "fields": [
+        "protectionTags"
+      ],
+      "description_uk": "Захист добровольця або групи від персональних наслідків."
+    }
+  ],
+  "contributionSourceTypes": [
+    {
+      "id": "profession",
+      "label": {
+        "uk": "Професія",
+        "en": "Profession",
+        "ru": "Профессия"
+      },
+      "usesTags": [
+        "capabilityTags"
+      ],
+      "privacyRule_uk": "Враховується тільки після добровільного використання або розкриття професії."
+    },
+    {
+      "id": "hobby",
+      "label": {
+        "uk": "Хобі",
+        "en": "Hobby",
+        "ru": "Хобби"
+      },
+      "usesTags": [
+        "capabilityTags"
+      ],
+      "privacyRule_uk": "Враховується тільки після добровільного використання або розкриття хобі."
+    },
+    {
+      "id": "personal_inventory",
+      "label": {
+        "uk": "Особистий інвентар",
+        "en": "Personal inventory",
+        "ru": "Личный инвентарь"
+      },
+      "usesTags": [
+        "resourceTags",
+        "protectionTags"
+      ],
+      "privacyRule_uk": "Гравець може таємно пожертвувати навіть нерозкритий предмет."
+    },
+    {
+      "id": "bunker_resource",
+      "label": {
+        "uk": "Ресурс бункера",
+        "en": "Bunker resource",
+        "ru": "Ресурс бункера"
+      },
+      "usesTags": [
+        "resourceTags",
+        "protectionTags"
+      ],
+      "privacyRule_uk": "Спільний ресурс кімнати; його використання не розкриває інвентар конкретного гравця."
+    },
+    {
+      "id": "bunker_facility",
+      "label": {
+        "uk": "Система або приміщення бункера",
+        "en": "Bunker facility",
+        "ru": "Система или помещение бункера"
+      },
+      "usesTags": [
+        "facilityTags",
+        "protectionTags"
+      ],
+      "privacyRule_uk": "Стаціонарний об'єкт; може бути доступним, пошкодженим або вимкненим."
+    }
+  ],
+  "defaultAllowedSources": {
+    "capabilityTags": [
+      "profession",
+      "hobby"
+    ],
+    "resourceTags": [
+      "personal_inventory",
+      "bunker_resource"
+    ],
+    "facilityTags": [
+      "bunker_facility"
+    ],
+    "protectionTags": [
+      "personal_inventory",
+      "bunker_resource",
+      "bunker_facility"
+    ]
+  },
+  "threatMechanicFieldGuide": {
+    "solverTagsAny": "capabilityTags",
+    "solverTagsAll": "capabilityTags",
+    "resourceTagsAny": "resourceTags",
+    "resourceTagsAll": "resourceTags",
+    "facilityTagsAny": "facilityTags",
+    "facilityTagsAll": "facilityTags",
+    "protectionTagsAny": "protectionTags",
+    "protectionTagsAll": "protectionTags",
+    "secretSupportDrop.itemTagsAny": "resourceTags або protectionTags"
+  },
+  "facilityTags": [
+    {
+      "id": "medical_station",
+      "group": "medical",
+      "label": {
+        "uk": "Медичний пункт",
+        "en": "Medical station",
+        "ru": "Медицинский пункт"
+      },
+      "description_uk": "Приміщення для першої допомоги та базового лікування."
+    },
+    {
+      "id": "operating_room",
+      "group": "medical",
+      "label": {
+        "uk": "Операційна",
+        "en": "Operating room",
+        "ru": "Операционная"
+      },
+      "description_uk": "Стаціонарне приміщення для хірургічних операцій."
+    },
+    {
+      "id": "pharmacy",
+      "group": "medical",
+      "label": {
+        "uk": "Аптека",
+        "en": "Pharmacy",
+        "ru": "Аптека"
+      },
+      "description_uk": "Місце зберігання й підготовки медикаментів."
+    },
+    {
+      "id": "laboratory",
+      "group": "science",
+      "label": {
+        "uk": "Лабораторія",
+        "en": "Laboratory",
+        "ru": "Лаборатория"
+      },
+      "description_uk": "Приміщення для аналізів, досліджень і роботи зі зразками."
+    },
+    {
+      "id": "workshop",
+      "group": "technical",
+      "label": {
+        "uk": "Майстерня",
+        "en": "Workshop",
+        "ru": "Мастерская"
+      },
+      "description_uk": "Приміщення з обладнанням для ремонту та виготовлення деталей."
+    },
+    {
+      "id": "generator_system",
+      "group": "power",
+      "label": {
+        "uk": "Генераторна система",
+        "en": "Generator system",
+        "ru": "Генераторная система"
+      },
+      "description_uk": "Основне стаціонарне джерело електроенергії."
+    },
+    {
+      "id": "backup_power_system",
+      "group": "power",
+      "label": {
+        "uk": "Резервне живлення",
+        "en": "Backup power system",
+        "ru": "Резервное питание"
+      },
+      "description_uk": "Резервне джерело живлення для критичних систем."
+    },
+    {
+      "id": "ventilation_system",
+      "group": "life_support",
+      "label": {
+        "uk": "Вентиляційна система",
+        "en": "Ventilation system",
+        "ru": "Вентиляционная система"
+      },
+      "description_uk": "Система циркуляції та оновлення повітря."
+    },
+    {
+      "id": "air_filtration_system",
+      "group": "life_support",
+      "label": {
+        "uk": "Система фільтрації повітря",
+        "en": "Air filtration system",
+        "ru": "Система фильтрации воздуха"
+      },
+      "description_uk": "Стаціонарна система очищення повітря."
+    },
+    {
+      "id": "water_system",
+      "group": "water",
+      "label": {
+        "uk": "Система водопостачання",
+        "en": "Water system",
+        "ru": "Система водоснабжения"
+      },
+      "description_uk": "Система подачі, зберігання та розподілу води."
+    },
+    {
+      "id": "water_purification_system",
+      "group": "water",
+      "label": {
+        "uk": "Система очищення води",
+        "en": "Water purification system",
+        "ru": "Система очистки воды"
+      },
+      "description_uk": "Стаціонарна система фільтрації та знезараження води."
+    },
+    {
+      "id": "pumping_station",
+      "group": "water",
+      "label": {
+        "uk": "Насосна станція",
+        "en": "Pumping station",
+        "ru": "Насосная станция"
+      },
+      "description_uk": "Система відкачування або подачі води."
+    },
+    {
+      "id": "communication_station",
+      "group": "communication",
+      "label": {
+        "uk": "Радіостанція",
+        "en": "Communication station",
+        "ru": "Радиостанция"
+      },
+      "description_uk": "Стаціонарний вузол радіозв'язку та передавання сигналів."
+    },
+    {
+      "id": "command_center",
+      "group": "control",
+      "label": {
+        "uk": "Командний центр",
+        "en": "Command center",
+        "ru": "Командный центр"
+      },
+      "description_uk": "Центр координації, спостереження та прийняття рішень."
+    },
+    {
+      "id": "control_room",
+      "group": "control",
+      "label": {
+        "uk": "Контрольна кімната",
+        "en": "Control room",
+        "ru": "Контрольная комната"
+      },
+      "description_uk": "Панелі та системи керування обладнанням бункера."
+    },
+    {
+      "id": "security_system",
+      "group": "security",
+      "label": {
+        "uk": "Система безпеки",
+        "en": "Security system",
+        "ru": "Система безопасности"
+      },
+      "description_uk": "Стаціонарна система контролю доступу, сигналізації та захисту."
+    },
+    {
+      "id": "armory",
+      "group": "security",
+      "label": {
+        "uk": "Арсенал",
+        "en": "Armory",
+        "ru": "Арсенал"
+      },
+      "description_uk": "Захищене приміщення зі зброєю та боєприпасами."
+    },
+    {
+      "id": "storage_facility",
+      "group": "storage",
+      "label": {
+        "uk": "Склад",
+        "en": "Storage facility",
+        "ru": "Склад"
+      },
+      "description_uk": "Стаціонарне місце зберігання запасів і матеріалів."
+    },
+    {
+      "id": "refrigeration_system",
+      "group": "storage",
+      "label": {
+        "uk": "Холодильна система",
+        "en": "Refrigeration system",
+        "ru": "Холодильная система"
+      },
+      "description_uk": "Система холодного зберігання їжі, ліків або зразків."
+    },
+    {
+      "id": "greenhouse",
+      "group": "agriculture",
+      "label": {
+        "uk": "Теплиця",
+        "en": "Greenhouse",
+        "ru": "Теплица"
+      },
+      "description_uk": "Стаціонарна зона вирощування рослин."
+    },
+    {
+      "id": "farm_facility",
+      "group": "agriculture",
+      "label": {
+        "uk": "Фермерська зона",
+        "en": "Farm facility",
+        "ru": "Фермерская зона"
+      },
+      "description_uk": "Інфраструктура для вирощування їжі або утримання тварин."
+    },
+    {
+      "id": "decontamination_area",
+      "group": "hazard",
+      "label": {
+        "uk": "Дезактиваційна зона",
+        "en": "Decontamination area",
+        "ru": "Зона дезактивации"
+      },
+      "description_uk": "Зона очищення людей, спорядження та матеріалів від забруднення."
+    },
+    {
+      "id": "quarantine_area",
+      "group": "medical",
+      "label": {
+        "uk": "Карантинна зона",
+        "en": "Quarantine area",
+        "ru": "Карантинная зона"
+      },
+      "description_uk": "Ізольоване приміщення для стримування інфекції."
+    },
+    {
+      "id": "server_room",
+      "group": "technology",
+      "label": {
+        "uk": "Серверна",
+        "en": "Server room",
+        "ru": "Серверная"
+      },
+      "description_uk": "Інфраструктура комп'ютерів, серверів і цифрових систем."
+    },
+    {
+      "id": "kitchen",
+      "group": "food",
+      "label": {
+        "uk": "Кухня",
+        "en": "Kitchen",
+        "ru": "Кухня"
+      },
+      "description_uk": "Стаціонарне приміщення для приготування та обробки їжі."
+    },
+    {
+      "id": "sanitation_system",
+      "group": "life_support",
+      "label": {
+        "uk": "Санітарна система",
+        "en": "Sanitation system",
+        "ru": "Санитарная система"
+      },
+      "description_uk": "Туалети, каналізація та системи санітарної обробки."
+    },
+    {
+      "id": "fire_suppression_system",
+      "group": "safety",
+      "label": {
+        "uk": "Система пожежогасіння",
+        "en": "Fire suppression system",
+        "ru": "Система пожаротушения"
+      },
+      "description_uk": "Стаціонарні засоби виявлення та гасіння пожеж."
+    },
+    {
+      "id": "observation_post",
+      "group": "security",
+      "label": {
+        "uk": "Спостережний пункт",
+        "en": "Observation post",
+        "ru": "Наблюдательный пункт"
+      },
+      "description_uk": "Місце для розвідки, спостереження та раннього попередження."
+    },
+    {
+      "id": "sealed_zone",
+      "group": "hazard",
+      "label": {
+        "uk": "Герметична зона",
+        "en": "Sealed zone",
+        "ru": "Герметичная зона"
+      },
+      "description_uk": "Герметизований сектор для ізоляції небезпеки."
+    },
+    {
+      "id": "emergency_exit",
+      "group": "safety",
+      "label": {
+        "uk": "Аварійний вихід",
+        "en": "Emergency exit",
+        "ru": "Аварийный выход"
+      },
+      "description_uk": "Альтернативний шлях евакуації з бункера."
+    }
+  ],
+  "bunkerAssetUseModes": [
+    {
+      "id": "reusable",
+      "label": {
+        "uk": "Багаторазовий",
+        "en": "Reusable",
+        "ru": "Многоразовый"
+      },
+      "description_uk": "Після використання ресурс або система залишається доступною."
+    },
+    {
+      "id": "consumable",
+      "label": {
+        "uk": "Витратний",
+        "en": "Consumable",
+        "ru": "Расходуемый"
+      },
+      "description_uk": "Після успішного використання кількість ресурсу зменшується."
+    },
+    {
+      "id": "limited",
+      "label": {
+        "uk": "Обмежений запас",
+        "en": "Limited supply",
+        "ru": "Ограниченный запас"
+      },
+      "description_uk": "Має кілька використань або числову кількість."
+    },
+    {
+      "id": "system",
+      "label": {
+        "uk": "Стаціонарна система",
+        "en": "Fixed system",
+        "ru": "Стационарная система"
+      },
+      "description_uk": "Не переноситься, але може бути пошкоджена, заблокована або вимкнена."
+    }
+  ],
+  "bunkerAssetStates": [
+    {
+      "id": "available",
+      "label": {
+        "uk": "Доступний",
+        "en": "Available",
+        "ru": "Доступен"
+      }
+    },
+    {
+      "id": "reserved",
+      "label": {
+        "uk": "Зарезервований",
+        "en": "Reserved",
+        "ru": "Зарезервирован"
+      }
+    },
+    {
+      "id": "in_use",
+      "label": {
+        "uk": "Використовується",
+        "en": "In use",
+        "ru": "Используется"
+      }
+    },
+    {
+      "id": "depleted",
+      "label": {
+        "uk": "Вичерпаний",
+        "en": "Depleted",
+        "ru": "Исчерпан"
+      }
+    },
+    {
+      "id": "damaged",
+      "label": {
+        "uk": "Пошкоджений",
+        "en": "Damaged",
+        "ru": "Повреждён"
+      }
+    },
+    {
+      "id": "disabled",
+      "label": {
+        "uk": "Вимкнений",
+        "en": "Disabled",
+        "ru": "Отключён"
+      }
+    }
+  ],
+  "usageExamples": {
+    "radiationLeak_uk": {
+      "solverTagsAny": [
+        "radiation_analysis",
+        "engineering_general",
+        "chemistry"
+      ],
+      "resourceTagsAny": [
+        "radiation_detection",
+        "sealant",
+        "decontamination_supplies"
+      ],
+      "facilityTagsAny": [
+        "laboratory",
+        "decontamination_area",
+        "sealed_zone"
+      ],
+      "protectionTagsAny": [
+        "radiation_protection"
+      ],
+      "allowedSources": [
+        "profession",
+        "personal_inventory",
+        "bunker_resource",
+        "bunker_facility"
+      ],
+      "note_uk": "Наприклад, дозиметр гравця або дозиметр у ресурсах бункера мають однаковий resourceTag=radiation_detection. Лабораторія бункера може виконати окрему інфраструктурну умову, але не замінює добровольця."
+    }
+  }
+}

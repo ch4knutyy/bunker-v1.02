@@ -1,3 +1,5 @@
+using Bunker.Models.GameData;
+
 namespace Bunker.Models
 {
     /// <summary>
@@ -10,6 +12,22 @@ namespace Bunker.Models
         Playing,    // Гра триває
         Voting,     // Голосування
         Finished    // Гра завершена
+    }
+
+    /// <summary>
+    /// Детальна фаза поточного ігрового циклу.
+    /// </summary>
+    public enum GamePhase
+    {
+        Lobby,
+        RoundReveal,
+        RoundEnded,
+        Threat,
+        ExtraInventory,
+        PreVotingReadyCheck,
+        Voting,
+        VotingResults,
+        Finished
     }
 
     /// <summary>
@@ -63,6 +81,47 @@ namespace Bunker.Models
         /// Поточний раунд
         /// </summary>
         public int CurrentRound { get; set; } = 0;
+
+        /// <summary>
+        /// Поточна фаза гри всередині загального стану кімнати.
+        /// </summary>
+        public GamePhase CurrentPhase { get; set; } = GamePhase.Lobby;
+
+        /// <summary>
+        /// Яку характеристику кожен гравець уже відкрив у поточному раунді.
+        /// Ключем є стабільний PlayerId, якщо він доступний.
+        /// </summary>
+        public Dictionary<string, string> CurrentRoundReveals { get; set; } = new();
+
+        /// <summary>
+        /// Результати кидка кубика по раундах.
+        /// </summary>
+        public Dictionary<int, RoundDiceRoll> RoundDiceRolls { get; set; } = new();
+
+        /// <summary>
+        /// Чи вже видано додатковий інвентар після завершення третього раунду.
+        /// </summary>
+        public bool AdditionalInventoryGrantedAfterRound3 { get; set; } = false;
+
+        /// <summary>
+        /// Загроза, відкрита після завершення третього раунду.
+        /// </summary>
+        public ThreatData? CurrentThreat { get; set; }
+
+        /// <summary>
+        /// Чи доступні гравцям реальні дані поточної загрози.
+        /// </summary>
+        public bool IsThreatRevealed { get; set; }
+
+        public int? ThreatRevealedAtRound { get; set; }
+
+        public ThreatInteractionState? ThreatState { get; set; }
+
+        /// <summary>
+        /// Відповіді гравців на перевірку готовності до голосування.
+        /// Ключем є stable player id, якщо він доступний.
+        /// </summary>
+        public Dictionary<string, string> VotingReadyResponses { get; set; } = new();
         
         /// <summary>
         /// ConnectionId гравця, чия черга

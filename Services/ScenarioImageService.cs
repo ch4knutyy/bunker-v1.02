@@ -14,10 +14,12 @@ namespace Bunker.Services
         // Шляхи для збереження зображень
         private readonly string _apocalypseImagesPath;
         private readonly string _bunkerImagesPath;
+        private readonly string _threatImagesPath;
         
         // Кеш URL-адрес зображень (id -> imageUrl)
         private readonly Dictionary<string, string> _apocalypseImageUrls = new();
         private readonly Dictionary<string, string> _bunkerImageUrls = new();
+        private readonly Dictionary<string, string> _threatImageUrls = new();
         
         // Дозволені розширення файлів
         private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -36,6 +38,7 @@ namespace Bunker.Services
             // Створюємо директорії для зображень
             _apocalypseImagesPath = Path.Combine(_env.WebRootPath, "uploads", "apocalypses");
             _bunkerImagesPath = Path.Combine(_env.WebRootPath, "uploads", "bunkers");
+            _threatImagesPath = Path.Combine(_env.WebRootPath, "uploads", "threats");
             
             EnsureDirectoriesExist();
             LoadExistingImages();
@@ -47,6 +50,7 @@ namespace Bunker.Services
             {
                 Directory.CreateDirectory(_apocalypseImagesPath);
                 Directory.CreateDirectory(_bunkerImagesPath);
+                Directory.CreateDirectory(_threatImagesPath);
                 _logger.LogInformation("Директорії для зображень створено/перевірено");
             }
             catch (Exception ex)
@@ -84,6 +88,17 @@ namespace Bunker.Services
                         _bunkerImageUrls[id] = url;
                     }
                     _logger.LogInformation($"Завантажено {_bunkerImageUrls.Count} зображень бункерів");
+                }
+
+                if (Directory.Exists(_threatImagesPath))
+                {
+                    foreach (var file in Directory.GetFiles(_threatImagesPath))
+                    {
+                        var id = Path.GetFileNameWithoutExtension(file);
+                        var url = $"/uploads/threats/{Path.GetFileName(file)}";
+                        _threatImageUrls[id] = url;
+                    }
+                    _logger.LogInformation($"Завантажено {_threatImageUrls.Count} зображень загроз");
                 }
             }
             catch (Exception ex)
@@ -123,6 +138,12 @@ namespace Bunker.Services
             var sanitizedId = SanitizeId(bunkerId);
             return _bunkerImageUrls.TryGetValue(sanitizedId, out var url) ? url : null;
         }
+
+        public string? GetThreatImageUrl(string threatImageKey)
+        {
+            var sanitizedId = SanitizeId(threatImageKey);
+            return _threatImageUrls.TryGetValue(sanitizedId, out var url) ? url : null;
+        }
         
         /// <summary>
         /// Зберегти зображення апокаліпсису
@@ -142,6 +163,13 @@ namespace Bunker.Services
         {
             return await SaveImage(bunkerId, imageStream, originalFileName, 
                 _bunkerImagesPath, _bunkerImageUrls, "bunkers");
+        }
+
+        public async Task<(bool success, string? error, string? imageUrl)> SaveThreatImage(
+            string threatImageKey, Stream imageStream, string originalFileName)
+        {
+            return await SaveImage(threatImageKey, imageStream, originalFileName,
+                _threatImagesPath, _threatImageUrls, "threats");
         }
         
         private async Task<(bool success, string? error, string? imageUrl)> SaveImage(
@@ -232,6 +260,13 @@ namespace Bunker.Services
             var sanitizedId = SanitizeId(bunkerId);
             RemoveExistingFiles(_bunkerImagesPath, sanitizedId);
             return _bunkerImageUrls.Remove(sanitizedId);
+        }
+
+        public bool RemoveThreatImage(string threatImageKey)
+        {
+            var sanitizedId = SanitizeId(threatImageKey);
+            RemoveExistingFiles(_threatImagesPath, sanitizedId);
+            return _threatImageUrls.Remove(sanitizedId);
         }
         
         /// <summary>

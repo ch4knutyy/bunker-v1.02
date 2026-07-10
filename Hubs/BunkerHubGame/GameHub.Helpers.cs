@@ -1,0 +1,326 @@
+﻿using Bunker.Models;
+using Bunker.Models.Сharacteristics;
+using Bunker.Services;
+using Microsoft.AspNetCore.SignalR;
+using System.Numerics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace Bunker.Hubs
+{
+    public partial class GameHub
+    {
+        #region Helper Methods
+
+        /// <summary>
+        /// Sanitize and validate player name
+        /// </summary>
+        private string SanitizePlayerName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "";
+            
+            // Trim whitespace
+            name = name.Trim();
+            
+            // Limit to 10 characters
+            if (name.Length > 10)
+                name = name.Substring(0, 10);
+            
+            return name;
+        }
+
+        private object BuildRoundState(Room room)
+        {
+            room.CurrentRoundReveals ??= new();
+            room.RoundDiceRolls ??= new();
+
+            var activePlayers = RoomService.GetPlayersSnapshot(room)
+                .Where(entry => entry.Value != null && !entry.Value.IsEliminated)
+                .ToList();
+
+            var revealedPlayers = activePlayers
+                .Where(entry => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value)))
+                .Select(entry =>
+                {
+                    var player = entry.Value;
+                    var playerKey = RoomService.GetPlayerKey(player);
+
+                    return new
+                    {
+                        connectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
+                        stablePlayerId = playerKey,
+                        name = player.Name ?? "Unknown",
+                        characteristicKey = room.CurrentRoundReveals[playerKey]
+                    };
+                })
+                .ToList();
+
+            var allPlayersRevealed = room.State == RoomState.Playing &&
+                room.CurrentPhase == GamePhase.RoundReveal &&
+                activePlayers.Count > 0 &&
+                activePlayers.All(entry => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value)));
+            var readyStatuses = BuildVotingReadyStatuses(room, activePlayers);
+            var specialCards = BuildSpecialCardsPublicState(room);
+            var threatState = BuildThreatPublicState(room);
+            var currentDiceRoll = room.RoundDiceRolls.TryGetValue(room.CurrentRound, out var diceRoll)
+                ? diceRoll
+                : null;
+
+            return new
+            {
+                currentRound = room.CurrentRound,
+                roomState = room.State.ToString(),
+                phase = room.CurrentPhase.ToString(),
+                activePlayerCount = activePlayers.Count,
+                revealedCount = revealedPlayers.Count,
+                allPlayersRevealed,
+                revealedPlayers,
+                threatRevealed = room.IsThreatRevealed,
+                threatRevealedAtRound = room.ThreatRevealedAtRound,
+                threat = room.IsThreatRevealed ? room.CurrentThreat : null,
+                threatState,
+                readyStatuses,
+                specialCards,
+                diceRoll = currentDiceRoll,
+                diceRolls = room.RoundDiceRolls.Values
+                    .OrderBy(roll => roll.Round)
+                    .ToList()
+            };
+        }
+
+        private List<object> BuildVotingReadyStatuses(Room room, List<KeyValuePair<string, Player>> activePlayers)
+        {
+            room.VotingReadyResponses ??= new();
+
+            return activePlayers
+                .Select(entry =>
+                {
+                    var player = entry.Value;
+                    var playerKey = RoomService.GetPlayerKey(player);
+                    var status = room.VotingReadyResponses.TryGetValue(playerKey, out var storedStatus)
+                        ? storedStatus
+                        : "pending";
+
+                    return new
+                    {
+                        connectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
+                        stablePlayerId = playerKey,
+                        name = player.Name ?? "Unknown",
+                        seatNumber = player.SeatNumber,
+                        eliminationVoteImmunity = player.EliminationVoteImmunity,
+                        status
+                    };
+                })
+                .OrderBy(player => player.seatNumber == 0 ? int.MaxValue : player.seatNumber)
+                .ThenBy(player => player.name)
+                .Cast<object>()
+                .ToList();
+        }
+
+        private bool HaveAllActivePlayersRevealedThisRound(Room room)
+        {
+            room.CurrentRoundReveals ??= new();
+
+            var activePlayers = RoomService.GetPlayersSnapshot(room)
+                .Where(entry => entry.Value != null && !entry.Value.IsEliminated)
+                .Select(entry => entry.Value)
+                .ToList();
+
+            return room.State == RoomState.Playing &&
+                room.CurrentPhase == GamePhase.RoundReveal &&
+                activePlayers.Count > 0 &&
+                activePlayers.All(player => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(player)));
+        }
+
+        private Bunker.Models.GameData.ThreatData? DrawThreatForRound(Room room, int round)
+        {
+            var candidates = _gameData.Threats
+                .Where(threat =>
+                    threat.RevealRound == round ||
+                    threat.Round == round ||
+                    (threat.RevealRound <= 0 && threat.Round <= 0))
+                .ToList();
+
+            if (candidates.Count == 0)
+            {
+                candidates = _gameData.Threats.ToList();
+            }
+
+            if (candidates.Count == 0)
+            {
+                return null;
+            }
+
+            if (round == 3)
+            {
+                var radiationLeak = candidates.FirstOrDefault(threat =>
+                    string.Equals(threat.Id, "radiation_leak", StringComparison.OrdinalIgnoreCase));
+                if (radiationLeak != null)
+                {
+                    return CloneThreatData(radiationLeak);
+                }
+            }
+
+            var apocalypseId = room.Apocalypse?.Id ?? "";
+            var bunkerId = room.Bunker?.Id ?? "";
+            var apocalypseTags = new HashSet<string>(
+                room.Apocalypse?.Tags ?? new List<string>(),
+                StringComparer.OrdinalIgnoreCase);
+            var bunkerTags = new HashSet<string>(
+                room.Bunker?.BunkerTags ?? new List<string>(),
+                StringComparer.OrdinalIgnoreCase);
+            var scenarioTags = new HashSet<string>(apocalypseTags, StringComparer.OrdinalIgnoreCase);
+            scenarioTags.UnionWith(bunkerTags);
+
+            int MatchTier(Bunker.Models.GameData.ThreatData threat)
+            {
+                if (!string.IsNullOrWhiteSpace(apocalypseId) &&
+                    threat.RelatedApocalypseIds.Contains(apocalypseId, StringComparer.OrdinalIgnoreCase))
+                {
+                    return 1;
+                }
+
+                if (!string.IsNullOrWhiteSpace(bunkerId) &&
+                    threat.RelatedBunkerIds.Contains(bunkerId, StringComparer.OrdinalIgnoreCase))
+                {
+                    return 2;
+                }
+
+                if (threat.ApocalypseTags.Any(apocalypseTags.Contains))
+                {
+                    return 3;
+                }
+
+                if (threat.BunkerTags.Any(bunkerTags.Contains))
+                {
+                    return 4;
+                }
+
+                if (threat.Tags.Any(scenarioTags.Contains) ||
+                    (!string.IsNullOrWhiteSpace(threat.Category) && scenarioTags.Contains(threat.Category)))
+                {
+                    return 5;
+                }
+
+                return threat.IsUniversalFallback ? 6 : 7;
+            }
+
+            var ranked = candidates
+                .Select(threat => new { Threat = threat, Tier = MatchTier(threat) })
+                .ToList();
+            var bestTier = ranked.Min(entry => entry.Tier);
+            var bestMatches = ranked
+                .Where(entry => entry.Tier == bestTier)
+                .Select(entry => entry.Threat)
+                .ToList();
+
+            return CloneThreatData(bestMatches[_random.Next(bestMatches.Count)]);
+        }
+
+        private static Bunker.Models.GameData.ThreatData CloneThreatData(Bunker.Models.GameData.ThreatData source)
+        {
+            return new Bunker.Models.GameData.ThreatData
+            {
+                Id = source.Id,
+                Name = source.Name,
+                Description = source.Description,
+                Severity = source.Severity,
+                Round = source.Round,
+                RevealRound = source.RevealRound,
+                Category = source.Category,
+                RelatedApocalypseIds = source.RelatedApocalypseIds.ToList(),
+                ApocalypseTags = source.ApocalypseTags.ToList(),
+                RelatedBunkerIds = source.RelatedBunkerIds.ToList(),
+                BunkerTags = source.BunkerTags.ToList(),
+                Tags = source.Tags.ToList(),
+                IsUniversalFallback = source.IsUniversalFallback,
+                IsRevealedByDefault = source.IsRevealedByDefault,
+                ImageUrl = source.ImageUrl,
+                ImagePath = source.ImagePath,
+                UploadedImagePath = source.UploadedImagePath,
+                ImagePrompt = source.ImagePrompt,
+                GeneratedImagePrompt = source.GeneratedImagePrompt,
+                Requirements = source.Requirements.ToList(),
+                Risks = source.Risks.ToList(),
+                Consequences = source.Consequences.ToList(),
+                Mechanics = source.Mechanics,
+                I18n = source.I18n
+            };
+        }
+
+        private Item? DrawRandomInventoryItem()
+        {
+            if (_gameData.Items.Count == 0)
+            {
+                return null;
+            }
+
+            var itemData = _gameData.Items[_random.Next(_gameData.Items.Count)];
+
+            return new Item
+            {
+                Name = itemData.Item,
+                Description = $"Категорія: {itemData.Category}",
+                Quantity = 1,
+                Unit = "шт",
+                WeightKg = Math.Round(_random.NextDouble() * 2 + 0.1, 1),
+                IsUsefulInBunker = true,
+                Rarity = "Звичайний",
+                ResourceTags = itemData.ResourceTags.ToList(),
+                ProtectionTags = itemData.ProtectionTags.ToList(),
+                ThreatUsage = itemData.ThreatUsage,
+                I18n = itemData.I18n
+            };
+        }
+
+        private List<object> GrantAdditionalInventoryAfterRound3(Room room)
+        {
+            if (room.AdditionalInventoryGrantedAfterRound3)
+            {
+                return new();
+            }
+
+            room.AdditionalInventoryGrantedAfterRound3 = true;
+            var grants = new List<object>();
+
+            foreach (var entry in RoomService.GetPlayersSnapshot(room))
+            {
+                var player = entry.Value;
+                if (player == null || player.IsEliminated)
+                {
+                    continue;
+                }
+
+                var item = DrawRandomInventoryItem();
+                if (item == null)
+                {
+                    continue;
+                }
+
+                player.Inventory.Items.Add(item);
+
+                if (player.Revealed.Inventory)
+                {
+                    SetCharacteristicRevealed(player, "Inventory");
+                }
+
+                grants.Add(new
+                {
+                    connectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
+                    stablePlayerId = RoomService.GetPlayerKey(player),
+                    playerName = player.Name ?? "Unknown",
+                    itemName = item.Name,
+                    item,
+                    inventory = player.Inventory,
+                    isInventoryRevealed = player.Revealed.Inventory
+                });
+            }
+
+            return grants;
+        }
+
+        #endregion
+    }
+}
+
+

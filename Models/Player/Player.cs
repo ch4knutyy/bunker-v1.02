@@ -26,12 +26,18 @@ namespace Bunker.Models
         public Personality Personality { get; set; } = new();
         public Body Body { get; set; } = new();
 		public Fact Fact { get; set; } = new();
+        public SpecialCard SpecialCard { get; set; } = new();
+        public List<SpecialCard> SpecialCards { get; set; } = new();
 
 		// Відстеження відкритих характеристик
 		public RevealedCharacteristics Revealed { get; set; } = new();
         
         // Статус гравця в грі
         public bool IsEliminated { get; set; } = false;
+        public int? EliminatedAtRound { get; set; }
+        public bool EliminatedByVote { get; set; }
+        public bool CanRevealAllAfterElimination { get; set; }
+        public bool HasRevealedAllAfterElimination { get; set; }
         
         // Номер місця (рандомізується при старті гри)
         public int SeatNumber { get; set; } = 0;
@@ -41,6 +47,10 @@ namespace Bunker.Models
         
         // Додаткові голоси (від спеціальної карти)
         public int ExtraVotes { get; set; } = 0;
+
+        public int? InventoryProtectedUntilRound { get; set; }
+        public int? CharacteristicsProtectedUntilRound { get; set; }
+        public EliminationVoteImmunity EliminationVoteImmunity { get; set; } = new();
         
     }
 }
