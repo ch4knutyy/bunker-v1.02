@@ -1,0 +1,1214 @@
+{
+  "special_cards": [
+    {
+      "id": "double_votes_against_target",
+      "name": "Подвійний тиск",
+      "description": "Усі голоси проти вибраного гравця подвоюються в цьому голосуванні, але власник карти не може голосувати.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "beforeVoting",
+      "effectType": "doubleVotesAgainstTargetAndBlockCasterVote",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Подвійний тиск",
+          "en": "Double Pressure",
+          "ru": "Двойное давление"
+        },
+        "description": {
+          "uk": "Усі голоси проти вибраного гравця подвоюються в цьому голосуванні, але власник карти не може голосувати.",
+          "en": "All votes against the selected player are doubled in this vote, but the card owner cannot vote.",
+          "ru": "Все голоса против выбранного игрока удваиваются в этом голосовании, но владелец карты не может голосовать."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_profession",
+      "name": "Професійний допит",
+      "description": "Вибраний гравець повинен розкрити свою професію.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealProfession",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Професійний допит",
+          "en": "Professional Interrogation",
+          "ru": "Профессиональный допрос"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити свою професію.",
+          "en": "The selected player must reveal their profession.",
+          "ru": "Выбранный игрок должен раскрыть свою профессию."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_physical_health",
+      "name": "Медичний огляд",
+      "description": "Вибраний гравець повинен розкрити свій фізичний стан.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealPhysicalHealth",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Медичний огляд",
+          "en": "Medical Checkup",
+          "ru": "Медицинский осмотр"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити свій фізичний стан.",
+          "en": "The selected player must reveal their physical health.",
+          "ru": "Выбранный игрок должен раскрыть своё физическое состояние."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_mental_health",
+      "name": "Психологічна перевірка",
+      "description": "Вибраний гравець повинен розкрити свій ментальний стан.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealMentalHealth",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Психологічна перевірка",
+          "en": "Psychological Check",
+          "ru": "Психологическая проверка"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити свій ментальний стан.",
+          "en": "The selected player must reveal their mental health.",
+          "ru": "Выбранный игрок должен раскрыть своё психическое состояние."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_hobby",
+      "name": "Незручне питання",
+      "description": "Вибраний гравець повинен розкрити своє хобі.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealHobby",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Незручне питання",
+          "en": "Uncomfortable Question",
+          "ru": "Неудобный вопрос"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити своє хобі.",
+          "en": "The selected player must reveal their hobby.",
+          "ru": "Выбранный игрок должен раскрыть своё хобби."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_trait",
+      "name": "Перевірка характеру",
+      "description": "Вибраний гравець повинен розкрити рису характеру.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealTrait",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Перевірка характеру",
+          "en": "Character Check",
+          "ru": "Проверка характера"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити рису характеру.",
+          "en": "The selected player must reveal their character trait.",
+          "ru": "Выбранный игрок должен раскрыть черту характера."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_secret",
+      "name": "Викриття",
+      "description": "Вибраний гравець повинен розкрити свою таємницю.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealSecret",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Викриття",
+          "en": "Exposure",
+          "ru": "Разоблачение"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити свою таємницю.",
+          "en": "The selected player must reveal their secret.",
+          "ru": "Выбранный игрок должен раскрыть свою тайну."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_random_characteristic",
+      "name": "Випадкове викриття",
+      "description": "Вибраний гравець повинен розкрити одну випадкову приховану характеристику.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealRandomCharacteristic",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Випадкове викриття",
+          "en": "Random Exposure",
+          "ru": "Случайное разоблачение"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити одну випадкову приховану характеристику.",
+          "en": "The selected player must reveal one random hidden characteristic.",
+          "ru": "Выбранный игрок должен раскрыть одну случайную скрытую характеристику."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_two_random_characteristics",
+      "name": "Повний тиск",
+      "description": "Вибраний гравець повинен розкрити дві випадкові приховані характеристики.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealTwoRandomCharacteristics",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Повний тиск",
+          "en": "Full Pressure",
+          "ru": "Полное давление"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити дві випадкові приховані характеристики.",
+          "en": "The selected player must reveal two random hidden characteristics.",
+          "ru": "Выбранный игрок должен раскрыть две случайные скрытые характеристики."
+        }
+      }
+    },
+    {
+      "id": "peek_target_secret",
+      "name": "Таємний погляд",
+      "description": "Власник карти таємно переглядає таємницю вибраного гравця.",
+      "isSecret": true,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "peekTargetSecret",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Таємний погляд",
+          "en": "Secret Glance",
+          "ru": "Тайный взгляд"
+        },
+        "description": {
+          "uk": "Власник карти таємно переглядає таємницю вибраного гравця.",
+          "en": "The card owner secretly views the selected player's secret.",
+          "ru": "Владелец карты тайно просматривает тайну выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "peek_target_random_characteristic",
+      "name": "Приховане спостереження",
+      "description": "Власник карти таємно переглядає одну випадкову приховану характеристику вибраного гравця.",
+      "isSecret": true,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "peekTargetRandomCharacteristic",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Приховане спостереження",
+          "en": "Hidden Observation",
+          "ru": "Скрытое наблюдение"
+        },
+        "description": {
+          "uk": "Власник карти таємно переглядає одну випадкову приховану характеристику вибраного гравця.",
+          "en": "The card owner secretly views one random hidden characteristic of the selected player.",
+          "ru": "Владелец карты тайно просматривает одну случайную скрытую характеристику выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "peek_target_inventory",
+      "name": "Обшук речей",
+      "description": "Власник карти переглядає інвентар вибраного гравця.",
+      "isSecret": true,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "peekTargetInventory",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Обшук речей",
+          "en": "Inventory Search",
+          "ru": "Обыск вещей"
+        },
+        "description": {
+          "uk": "Власник карти переглядає інвентар вибраного гравця.",
+          "en": "The card owner views the selected player's inventory.",
+          "ru": "Владелец карты просматривает инвентарь выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "steal_random_inventory_item",
+      "name": "Кишенькова крадіжка",
+      "description": "Власник карти краде один випадковий предмет з інвентарю вибраного гравця.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealRandomInventoryItem",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Кишенькова крадіжка",
+          "en": "Pickpocketing",
+          "ru": "Карманная кража"
+        },
+        "description": {
+          "uk": "Власник карти краде один випадковий предмет з інвентарю вибраного гравця.",
+          "en": "The card owner steals one random inventory item from the selected player.",
+          "ru": "Владелец карты крадёт один случайный предмет из инвентаря выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "steal_small_inventory_item",
+      "name": "Крадіжка дрібниці",
+      "description": "Власник карти краде малий предмет з інвентарю вибраного гравця.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealSmallInventoryItem",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Крадіжка дрібниці",
+          "en": "Small Theft",
+          "ru": "Кража мелочи"
+        },
+        "description": {
+          "uk": "Власник карти краде малий предмет з інвентарю вибраного гравця.",
+          "en": "The card owner steals a small inventory item from the selected player.",
+          "ru": "Владелец карты крадёт малый предмет из инвентаря выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "steal_big_inventory_item",
+      "name": "Серйозна крадіжка",
+      "description": "Власник карти краде великий предмет з інвентарю вибраного гравця.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealBigInventoryItem",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Серйозна крадіжка",
+          "en": "Major Theft",
+          "ru": "Серьёзная кража"
+        },
+        "description": {
+          "uk": "Власник карти краде великий предмет з інвентарю вибраного гравця.",
+          "en": "The card owner steals a big inventory item from the selected player.",
+          "ru": "Владелец карты крадёт большой предмет из инвентаря выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "steal_special_card",
+      "name": "Вкрадена перевага",
+      "description": "Власник карти краде одну випадкову спеціальну карту у вибраного гравця.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealRandomSpecialCard",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Вкрадена перевага",
+          "en": "Stolen Advantage",
+          "ru": "Украденное преимущество"
+        },
+        "description": {
+          "uk": "Власник карти краде одну випадкову спеціальну карту у вибраного гравця.",
+          "en": "The card owner steals one random special card from the selected player.",
+          "ru": "Владелец карты крадёт одну случайную специальную карту у выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "silent_steal_random_item",
+      "name": "Тиха крадіжка",
+      "description": "Власник карти таємно краде один випадковий предмет у вибраного гравця.",
+      "isSecret": true,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "silentStealRandomInventoryItem",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Тиха крадіжка",
+          "en": "Silent Theft",
+          "ru": "Тихая кража"
+        },
+        "description": {
+          "uk": "Власник карти таємно краде один випадковий предмет у вибраного гравця.",
+          "en": "The card owner secretly steals one random item from the selected player.",
+          "ru": "Владелец карты тайно крадёт один случайный предмет у выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "swap_inventory_with_target",
+      "name": "Обмін рюкзаками",
+      "description": "Власник карти міняється всім інвентарем з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapInventoryWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Обмін рюкзаками",
+          "en": "Backpack Swap",
+          "ru": "Обмен рюкзаками"
+        },
+        "description": {
+          "uk": "Власник карти міняється всім інвентарем з вибраним гравцем.",
+          "en": "The card owner swaps their entire inventory with the selected player.",
+          "ru": "Владелец карты меняется всем инвентарём с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_one_random_item",
+      "name": "Сліпий обмін",
+      "description": "Власник карти та вибраний гравець обмінюються одним випадковим предметом.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapOneRandomInventoryItem",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Сліпий обмін",
+          "en": "Blind Trade",
+          "ru": "Слепой обмен"
+        },
+        "description": {
+          "uk": "Власник карти та вибраний гравець обмінюються одним випадковим предметом.",
+          "en": "The card owner and the selected player exchange one random item.",
+          "ru": "Владелец карты и выбранный игрок обмениваются одним случайным предметом."
+        }
+      }
+    },
+    {
+      "id": "destroy_target_special_card",
+      "name": "Спалена карта",
+      "description": "Одна випадкова спеціальна карта вибраного гравця знищується.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "destroyRandomTargetSpecialCard",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Спалена карта",
+          "en": "Burned Card",
+          "ru": "Сожжённая карта"
+        },
+        "description": {
+          "uk": "Одна випадкова спеціальна карта вибраного гравця знищується.",
+          "en": "One random special card of the selected player is destroyed.",
+          "ru": "Одна случайная специальная карта выбранного игрока уничтожается."
+        }
+      }
+    },
+    {
+      "id": "protect_inventory_from_steal",
+      "name": "Закритий рюкзак",
+      "description": "До кінця поточного раунду у власника карти не можна красти предмети.",
+      "isSecret": true,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "protectInventoryFromStealUntilRoundEnd",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Закритий рюкзак",
+          "en": "Locked Backpack",
+          "ru": "Закрытый рюкзак"
+        },
+        "description": {
+          "uk": "До кінця поточного раунду у власника карти не можна красти предмети.",
+          "en": "Until the end of the current round, items cannot be stolen from the card owner.",
+          "ru": "До конца текущего раунда у владельца карты нельзя красть предметы."
+        }
+      }
+    },
+    {
+      "id": "protect_characteristics_from_reveal",
+      "name": "Мовчання",
+      "description": "До кінця поточного раунду характеристики власника карти не можна примусово розкрити.",
+      "isSecret": true,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "protectCharacteristicsFromRevealUntilRoundEnd",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Мовчання",
+          "en": "Silence",
+          "ru": "Молчание"
+        },
+        "description": {
+          "uk": "До кінця поточного раунду характеристики власника карти не можна примусово розкрити.",
+          "en": "Until the end of the current round, the card owner's characteristics cannot be forcibly revealed.",
+          "ru": "До конца текущего раунда характеристики владельца карты нельзя принудительно раскрыть."
+        }
+      }
+    },
+    {
+      "id": "hide_one_revealed_characteristic",
+      "name": "Стертий слід",
+      "description": "Власник карти приховує одну вже розкриту характеристику.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "hideOneRevealedCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Стертий слід",
+          "en": "Erased Trace",
+          "ru": "Стёртый след"
+        },
+        "description": {
+          "uk": "Власник карти приховує одну вже розкриту характеристику.",
+          "en": "The card owner hides one already revealed characteristic.",
+          "ru": "Владелец карты скрывает одну уже раскрытую характеристику."
+        }
+      }
+    },
+    {
+      "id": "force_target_give_random_item",
+      "name": "Вимушена передача",
+      "description": "Вибраний гравець повинен віддати власнику карти один випадковий предмет.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceTargetGiveRandomItemToOwner",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Вимушена передача",
+          "en": "Forced Handover",
+          "ru": "Принудительная передача"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен віддати власнику карти один випадковий предмет.",
+          "en": "The selected player must give one random item to the card owner.",
+          "ru": "Выбранный игрок должен отдать владельцу карты один случайный предмет."
+        }
+      }
+    },
+    {
+      "id": "force_reveal_all_inventory",
+      "name": "Повний обшук",
+      "description": "Вибраний гравець повинен розкрити весь свій інвентар.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceRevealAllInventory",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Повний обшук",
+          "en": "Full Search",
+          "ru": "Полный обыск"
+        },
+        "description": {
+          "uk": "Вибраний гравець повинен розкрити весь свій інвентар.",
+          "en": "The selected player must reveal their entire inventory.",
+          "ru": "Выбранный игрок должен раскрыть весь свой инвентарь."
+        }
+      }
+    },
+    {
+      "id": "swap_profession_with_target",
+      "name": "Зміна спеціальності",
+      "description": "Власник карти обмінюється професією з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapProfessionWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Зміна спеціальності",
+          "en": "Career Switch",
+          "ru": "Смена специальности"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється професією з вибраним гравцем.",
+          "en": "The card owner swaps professions with the selected player.",
+          "ru": "Владелец карты обменивается профессией с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_random_characteristic_with_target",
+      "name": "Переплутані досьє",
+      "description": "Власник карти та вибраний гравець обмінюються однією випадковою характеристикою.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapRandomCharacteristicWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Переплутані досьє",
+          "en": "Mixed Files",
+          "ru": "Перепутанные досье"
+        },
+        "description": {
+          "uk": "Власник карти та вибраний гравець обмінюються однією випадковою характеристикою.",
+          "en": "The card owner and the selected player swap one random characteristic.",
+          "ru": "Владелец карты и выбранный игрок обмениваются одной случайной характеристикой."
+        }
+      }
+    },
+    {
+      "id": "force_upper_player_reveal_random_characteristic",
+      "name": "Тиск згори",
+      "description": "Гравець над власником карти розкриває одну випадкову приховану характеристику.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceUpperPlayerRevealRandomCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Тиск згори",
+          "en": "Pressure from Above",
+          "ru": "Давление сверху"
+        },
+        "description": {
+          "uk": "Гравець над власником карти розкриває одну випадкову приховану характеристику.",
+          "en": "The player above the card owner reveals one random hidden characteristic.",
+          "ru": "Игрок над владельцем карты раскрывает одну случайную скрытую характеристику."
+        }
+      }
+    },
+    {
+      "id": "force_lower_player_reveal_random_characteristic",
+      "name": "Тиск знизу",
+      "description": "Гравець під власником карти розкриває одну випадкову приховану характеристику.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceLowerPlayerRevealRandomCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Тиск знизу",
+          "en": "Pressure from Below",
+          "ru": "Давление снизу"
+        },
+        "description": {
+          "uk": "Гравець під власником карти розкриває одну випадкову приховану характеристику.",
+          "en": "The player below the card owner reveals one random hidden characteristic.",
+          "ru": "Игрок под владельцем карты раскрывает одну случайную скрытую характеристику."
+        }
+      }
+    },
+    {
+      "id": "swap_physical_health_with_lower_player",
+      "name": "Медична помилка",
+      "description": "Власник карти обмінюється фізичним станом із гравцем під ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapPhysicalHealthWithLowerPlayer",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Медична помилка",
+          "en": "Medical Mix-Up",
+          "ru": "Медицинская ошибка"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється фізичним станом із гравцем під ним.",
+          "en": "The card owner swaps physical health with the player below.",
+          "ru": "Владелец карты обменивается физическим состоянием с игроком под ним."
+        }
+      }
+    },
+    {
+      "id": "swap_physical_health_with_upper_player",
+      "name": "Чужий діагноз",
+      "description": "Власник карти обмінюється фізичним станом із гравцем над ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapPhysicalHealthWithUpperPlayer",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Чужий діагноз",
+          "en": "Borrowed Diagnosis",
+          "ru": "Чужой диагноз"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється фізичним станом із гравцем над ним.",
+          "en": "The card owner swaps physical health with the player above.",
+          "ru": "Владелец карты обменивается физическим состоянием с игроком над ним."
+        }
+      }
+    },
+    {
+      "id": "swap_mental_health_with_upper_player",
+      "name": "Перенесення травми",
+      "description": "Власник карти обмінюється ментальним станом із гравцем над ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapMentalHealthWithUpperPlayer",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Перенесення травми",
+          "en": "Transferred Trauma",
+          "ru": "Перенос травмы"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється ментальним станом із гравцем над ним.",
+          "en": "The card owner swaps mental health with the player above.",
+          "ru": "Владелец карты обменивается психическим состоянием с игроком над ним."
+        }
+      }
+    },
+    {
+      "id": "swap_mental_health_with_lower_player",
+      "name": "Психічний резонанс",
+      "description": "Власник карти обмінюється ментальним станом із гравцем під ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapMentalHealthWithLowerPlayer",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Психічний резонанс",
+          "en": "Mental Resonance",
+          "ru": "Психический резонанс"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється ментальним станом із гравцем під ним.",
+          "en": "The card owner swaps mental health with the player below.",
+          "ru": "Владелец карты обменивается психическим состоянием с игроком под ним."
+        }
+      }
+    },
+    {
+      "id": "swap_random_characteristic_between_neighbors",
+      "name": "Ланцюгова плутанина",
+      "description": "Гравці над і під власником карти обмінюються однією випадковою характеристикою.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapRandomCharacteristicBetweenNeighbors",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Ланцюгова плутанина",
+          "en": "Chain Confusion",
+          "ru": "Цепная путаница"
+        },
+        "description": {
+          "uk": "Гравці над і під власником карти обмінюються однією випадковою характеристикою.",
+          "en": "The players above and below the card owner swap one random characteristic.",
+          "ru": "Игроки над и под владельцем карты обмениваются одной случайной характеристикой."
+        }
+      }
+    },
+    {
+      "id": "swap_selected_characteristic_with_target",
+      "name": "Нав’язаний обмін",
+      "description": "Власник карти вибирає тип характеристики та обмінюється нею з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapSelectedCharacteristicWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Нав’язаний обмін",
+          "en": "Forced Exchange",
+          "ru": "Навязанный обмен"
+        },
+        "description": {
+          "uk": "Власник карти вибирає тип характеристики та обмінюється нею з вибраним гравцем.",
+          "en": "The card owner chooses a characteristic type and swaps it with the selected player.",
+          "ru": "Владелец карты выбирает тип характеристики и обменивается ею с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_hobby_with_target",
+      "name": "Спільне захоплення",
+      "description": "Власник карти обмінюється хобі з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapHobbyWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Спільне захоплення",
+          "en": "Shared Passion",
+          "ru": "Общее увлечение"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється хобі з вибраним гравцем.",
+          "en": "The card owner swaps hobbies with the selected player.",
+          "ru": "Владелец карты обменивается хобби с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_trait_with_target",
+      "name": "Зміна характеру",
+      "description": "Власник карти обмінюється рисою характеру з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapTraitWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Зміна характеру",
+          "en": "Personality Shift",
+          "ru": "Смена характера"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється рисою характеру з вибраним гравцем.",
+          "en": "The card owner swaps character traits with the selected player.",
+          "ru": "Владелец карты обменивается чертой характера с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_fact_with_target",
+      "name": "Переписане минуле",
+      "description": "Власник карти обмінюється фактом із вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapFactWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Переписане минуле",
+          "en": "Rewritten Past",
+          "ru": "Переписанное прошлое"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється фактом із вибраним гравцем.",
+          "en": "The card owner swaps facts with the selected player.",
+          "ru": "Владелец карты обменивается фактом с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_body_with_target",
+      "name": "Обмін тілами",
+      "description": "Власник карти обмінюється характеристикою тіла з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapBodyWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Обмін тілами",
+          "en": "Body Swap",
+          "ru": "Обмен телами"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється характеристикою тіла з вибраним гравцем.",
+          "en": "The card owner swaps body characteristics with the selected player.",
+          "ru": "Владелец карты обменивается характеристикой тела с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "swap_personal_info_with_target",
+      "name": "Підміна особи",
+      "description": "Власник карти обмінюється персональною інформацією з вибраним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapPersonalInfoWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Підміна особи",
+          "en": "Identity Switch",
+          "ru": "Подмена личности"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється персональною інформацією з вибраним гравцем.",
+          "en": "The card owner swaps personal information with the selected player.",
+          "ru": "Владелец карты обменивается персональной информацией с выбранным игроком."
+        }
+      }
+    },
+    {
+      "id": "reroll_upper_player_random_characteristic",
+      "name": "Корекція зверху",
+      "description": "Одна випадкова характеристика гравця над власником карти замінюється новою.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "rerollUpperPlayerRandomCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Корекція зверху",
+          "en": "Upper Correction",
+          "ru": "Коррекция сверху"
+        },
+        "description": {
+          "uk": "Одна випадкова характеристика гравця над власником карти замінюється новою.",
+          "en": "One random characteristic of the player above the card owner is replaced with a new one.",
+          "ru": "Одна случайная характеристика игрока над владельцем карты заменяется новой."
+        }
+      }
+    },
+    {
+      "id": "reroll_lower_player_random_characteristic",
+      "name": "Корекція знизу",
+      "description": "Одна випадкова характеристика гравця під власником карти замінюється новою.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "rerollLowerPlayerRandomCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Корекція знизу",
+          "en": "Lower Correction",
+          "ru": "Коррекция снизу"
+        },
+        "description": {
+          "uk": "Одна випадкова характеристика гравця під власником карти замінюється новою.",
+          "en": "One random characteristic of the player below the card owner is replaced with a new one.",
+          "ru": "Одна случайная характеристика игрока под владельцем карты заменяется новой."
+        }
+      }
+    },
+    {
+      "id": "reroll_target_selected_characteristic",
+      "name": "Примусова заміна",
+      "description": "Вибрана характеристика цільового гравця замінюється новою характеристикою того самого типу.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "rerollTargetSelectedCharacteristic",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Примусова заміна",
+          "en": "Forced Replacement",
+          "ru": "Принудительная замена"
+        },
+        "description": {
+          "uk": "Вибрана характеристика цільового гравця замінюється новою характеристикою того самого типу.",
+          "en": "A selected characteristic of the target player is replaced with a new characteristic of the same type.",
+          "ru": "Выбранная характеристика целевого игрока заменяется новой характеристикой того же типа."
+        }
+      }
+    },
+    {
+      "id": "copy_target_profession_until_round_end",
+      "name": "Тимчасова кваліфікація",
+      "description": "До кінця раунду власник карти копіює професію вибраного гравця.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "copyTargetProfessionUntilRoundEnd",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Тимчасова кваліфікація",
+          "en": "Temporary Qualification",
+          "ru": "Временная квалификация"
+        },
+        "description": {
+          "uk": "До кінця раунду власник карти копіює професію вибраного гравця.",
+          "en": "Until the end of the round, the card owner copies the selected player's profession.",
+          "ru": "До конца раунда владелец карты копирует профессию выбранного игрока."
+        }
+      }
+    },
+    {
+      "id": "copy_target_hobby",
+      "name": "Запозичене хобі",
+      "description": "Власник карти копіює хобі вибраного гравця, не забираючи його у цілі.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "copyTargetHobby",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Запозичене хобі",
+          "en": "Borrowed Hobby",
+          "ru": "Заимствованное хобби"
+        },
+        "description": {
+          "uk": "Власник карти копіює хобі вибраного гравця, не забираючи його у цілі.",
+          "en": "The card owner copies the selected player's hobby without removing it from the target.",
+          "ru": "Владелец карты копирует хобби выбранного игрока, не забирая его у цели."
+        }
+      }
+    },
+    {
+      "id": "copy_upper_player_trait",
+      "name": "Віддзеркалення характеру",
+      "description": "Власник карти копіює рису характеру гравця над ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "copyUpperPlayerTrait",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Віддзеркалення характеру",
+          "en": "Reflected Personality",
+          "ru": "Отражение характера"
+        },
+        "description": {
+          "uk": "Власник карти копіює рису характеру гравця над ним.",
+          "en": "The card owner copies the character trait of the player above.",
+          "ru": "Владелец карты копирует черту характера игрока над ним."
+        }
+      }
+    },
+    {
+      "id": "copy_lower_player_fact",
+      "name": "Привласнене минуле",
+      "description": "Власник карти копіює факт гравця під ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "copyLowerPlayerFact",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Привласнене минуле",
+          "en": "Claimed Past",
+          "ru": "Присвоенное прошлое"
+        },
+        "description": {
+          "uk": "Власник карти копіює факт гравця під ним.",
+          "en": "The card owner copies the fact of the player below.",
+          "ru": "Владелец карты копирует факт игрока под ним."
+        }
+      }
+    },
+    {
+      "id": "force_neighbors_swap_inventory",
+      "name": "Обмін між сусідами",
+      "description": "Гравці над і під власником карти обмінюються всім інвентарем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceNeighborsSwapInventory",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Обмін між сусідами",
+          "en": "Neighbor Trade",
+          "ru": "Обмен между соседями"
+        },
+        "description": {
+          "uk": "Гравці над і під власником карти обмінюються всім інвентарем.",
+          "en": "The players above and below the card owner swap their entire inventories.",
+          "ru": "Игроки над и под владельцем карты обмениваются всем инвентарём."
+        }
+      }
+    },
+    {
+      "id": "steal_upper_player_random_item",
+      "name": "Крадіжка згори",
+      "description": "Власник карти краде один випадковий предмет у гравця над ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealUpperPlayerRandomInventoryItem",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Крадіжка згори",
+          "en": "Theft from Above",
+          "ru": "Кража сверху"
+        },
+        "description": {
+          "uk": "Власник карти краде один випадковий предмет у гравця над ним.",
+          "en": "The card owner steals one random item from the player above.",
+          "ru": "Владелец карты крадёт один случайный предмет у игрока над ним."
+        }
+      }
+    },
+    {
+      "id": "steal_lower_player_random_item",
+      "name": "Крадіжка знизу",
+      "description": "Власник карти краде один випадковий предмет у гравця під ним.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealLowerPlayerRandomInventoryItem",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Крадіжка знизу",
+          "en": "Theft from Below",
+          "ru": "Кража снизу"
+        },
+        "description": {
+          "uk": "Власник карти краде один випадковий предмет у гравця під ним.",
+          "en": "The card owner steals one random item from the player below.",
+          "ru": "Владелец карты крадёт один случайный предмет у игрока под ним."
+        }
+      }
+    },
+    {
+      "id": "force_neighbors_reveal_same_characteristic",
+      "name": "Подвійний допит",
+      "description": "Гравці над і під власником карти розкривають однаковий випадковий тип характеристики.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "forceNeighborsRevealSameRandomCharacteristicType",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Подвійний допит",
+          "en": "Double Interrogation",
+          "ru": "Двойной допрос"
+        },
+        "description": {
+          "uk": "Гравці над і під власником карти розкривають однаковий випадковий тип характеристики.",
+          "en": "The players above and below the card owner reveal the same random characteristic type.",
+          "ru": "Игроки над и под владельцем карты раскрывают одинаковый случайный тип характеристики."
+        }
+      }
+    },
+    {
+      "id": "reveal_upper_hide_lower",
+      "name": "Нерівний обмін",
+      "description": "Гравець над власником карти розкриває випадкову характеристику, а гравець під ним приховує одну розкриту.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "revealUpperAndHideLowerCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Нерівний обмін",
+          "en": "Uneven Exchange",
+          "ru": "Неравный обмен"
+        },
+        "description": {
+          "uk": "Гравець над власником карти розкриває випадкову характеристику, а гравець під ним приховує одну розкриту.",
+          "en": "The player above reveals a random characteristic, while the player below hides one revealed characteristic.",
+          "ru": "Игрок над владельцем карты раскрывает случайную характеристику, а игрок под ним скрывает одну раскрытую."
+        }
+      }
+    },
+    {
+      "id": "reveal_lower_hide_upper",
+      "name": "Зворотний тиск",
+      "description": "Гравець під власником карти розкриває випадкову характеристику, а гравець над ним приховує одну розкриту.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "revealLowerAndHideUpperCharacteristic",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Зворотний тиск",
+          "en": "Reverse Pressure",
+          "ru": "Обратное давление"
+        },
+        "description": {
+          "uk": "Гравець під власником карти розкриває випадкову характеристику, а гравець над ним приховує одну розкриту.",
+          "en": "The player below reveals a random characteristic, while the player above hides one revealed characteristic.",
+          "ru": "Игрок под владельцем карты раскрывает случайную характеристику, а игрок над ним скрывает одну раскрытую."
+        }
+      }
+    },
+    {
+      "id": "steal_random_characteristic_and_reroll_target",
+      "name": "Викрадена особистість",
+      "description": "Власник карти забирає випадкову характеристику вибраного гравця, а ціль отримує нову характеристику того самого типу.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "stealRandomCharacteristicAndRerollTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Викрадена особистість",
+          "en": "Stolen Identity",
+          "ru": "Украденная личность"
+        },
+        "description": {
+          "uk": "Власник карти забирає випадкову характеристику вибраного гравця, а ціль отримує нову характеристику того самого типу.",
+          "en": "The card owner takes one random characteristic from the selected player, who receives a new characteristic of the same type.",
+          "ru": "Владелец карты забирает случайную характеристику выбранного игрока, а цель получает новую характеристику того же типа."
+        }
+      }
+    },
+    {
+      "id": "swap_revealed_characteristics_with_target",
+      "name": "Відкрита рокіровка",
+      "description": "Власник карти та вибраний гравець обмінюються однією випадковою вже розкритою характеристикою.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "swapRandomRevealedCharacteristicWithTarget",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Відкрита рокіровка",
+          "en": "Open Switch",
+          "ru": "Открытая рокировка"
+        },
+        "description": {
+          "uk": "Власник карти та вибраний гравець обмінюються однією випадковою вже розкритою характеристикою.",
+          "en": "The card owner and the selected player swap one random already revealed characteristic.",
+          "ru": "Владелец карты и выбранный игрок обмениваются одной случайной уже раскрытой характеристикой."
+        }
+      }
+    }
+  ]
+}

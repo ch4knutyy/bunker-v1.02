@@ -146,8 +146,14 @@ body {
     background: rgba(216, 155, 43, 0.1);
 }
 
-.nav-link:hover::after {
+.nav-link:hover::after,
+.nav-link.active::after {
     transform: translateX(-50%) scaleX(1);
+}
+
+.nav-link.active {
+    color: var(--color-gold);
+    background: rgba(216, 155, 43, 0.12);
 }
 
 .header-actions {
@@ -339,6 +345,135 @@ body {
 
 .btn-primary:active {
     transform: translateY(0);
+}
+
+/* ===== GAME MODE / RULES PAGES ===== */
+.mode-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.mode-page-header {
+    padding: 2rem 0 0;
+    text-align: center;
+}
+
+.mode-page-header h1 {
+    margin: 0;
+    font-size: 2.6rem;
+    line-height: 1.1;
+    color: var(--color-gold);
+}
+
+.mode-page-header p {
+    max-width: 720px;
+    margin: 1rem auto 0;
+    color: var(--color-text-secondary);
+    font-size: 1.05rem;
+}
+
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.mode-card {
+    position: relative;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.35rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background:
+        linear-gradient(135deg, rgba(216, 155, 43, 0.08), rgba(59, 139, 214, 0.06)),
+        var(--color-bg-card);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.mode-card-active:hover {
+    border-color: var(--color-gold);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.mode-card-marker {
+    width: 48px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-gold);
+}
+
+.mode-card h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1.6rem;
+}
+
+.mode-card p {
+    flex: 1;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.mode-card-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+.mode-card-topline span {
+    padding: 0.25rem 0.55rem;
+    border: 1px solid rgba(216, 155, 43, 0.45);
+    border-radius: var(--radius-sm);
+    color: var(--color-gold);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.mode-action {
+    width: fit-content;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--color-gold);
+    border-radius: var(--radius-sm);
+    background: var(--color-gold);
+    color: #111111;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mode-action:hover:not(:disabled) {
+    background: var(--color-orange);
+    color: #111111;
+    transform: translateY(-2px);
+}
+
+.mode-action:disabled,
+.mode-card-disabled {
+    opacity: 0.62;
+}
+
+.mode-action:disabled {
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--color-text-muted);
+    border-color: var(--color-border-light);
+}
+
+.rules-grid .mode-card {
+    min-height: 210px;
 }
 
 /* ===== SECTION TITLE ===== */
@@ -641,9 +776,17 @@ body {
         font-size: 0.85rem;
         padding: 0.4rem 0.8rem;
     }
+
+    .mode-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
+    .main-header {
+        position: static;
+    }
+
     .header-container {
         flex-wrap: wrap;
     }
@@ -663,6 +806,14 @@ body {
     
     .page-title {
         font-size: 2rem;
+    }
+
+    .mode-page-header h1 {
+        font-size: 2rem;
+    }
+
+    .mode-card {
+        min-height: 220px;
     }
     
     .join-form {
@@ -706,6 +857,18 @@ body {
     .revealed-section {
         padding: 1rem;
         overflow: visible;
+    }
+
+    .mode-page-header {
+        padding-top: 1rem;
+    }
+
+    .mode-card {
+        padding: 1rem;
+    }
+
+    .mode-action {
+        width: 100%;
     }
 }
 
@@ -1116,5 +1279,274 @@ body {
     
     .voting-candidates {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ===== SPY MVP ===== */
+.spy-page {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 3rem 0;
+}
+
+.spy-page [hidden] {
+    display: none !important;
+}
+
+.spy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1rem;
+}
+
+.spy-kicker,
+.spy-label {
+    color: var(--color-gold);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.spy-header h1 {
+    color: var(--color-text-primary);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1;
+}
+
+.spy-room-code {
+    min-width: 170px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    text-align: right;
+}
+
+.spy-room-code span {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+.spy-room-code strong {
+    color: var(--color-gold);
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+}
+
+.spy-setup,
+.spy-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.spy-panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: rgba(17, 17, 17, 0.88);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.spy-panel h2 {
+    margin-bottom: 1rem;
+    color: var(--color-text-primary);
+}
+
+.spy-panel label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+.spy-input {
+    width: 100%;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    font: inherit;
+}
+
+.spy-input:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 3px rgba(216, 155, 43, 0.16);
+}
+
+.spy-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.spy-button {
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-primary);
+    padding: 0.75rem 1rem;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.spy-button:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+}
+
+.spy-button.primary {
+    background: linear-gradient(135deg, var(--color-gold), var(--color-orange));
+    color: #080808;
+    border-color: transparent;
+}
+
+.spy-button.danger {
+    border-color: rgba(214, 59, 59, 0.8);
+    color: #ff8f8f;
+}
+
+.spy-game {
+    display: grid;
+    gap: 1rem;
+}
+
+.spy-private-card {
+    min-height: 132px;
+    margin-top: 1rem;
+    display: grid;
+    align-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(216, 155, 43, 0.35);
+    background: rgba(216, 155, 43, 0.08);
+    padding: 1rem;
+}
+
+.spy-private-card strong {
+    display: block;
+    color: var(--color-gold);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+}
+
+.spy-private-card-danger {
+    border-color: rgba(214, 59, 59, 0.7);
+    background: rgba(214, 59, 59, 0.12);
+}
+
+.spy-private-card-danger h3 {
+    color: #ff8f8f;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.spy-players-list {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.spy-player-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid transparent;
+}
+
+.spy-player-row.is-spy {
+    border-color: rgba(214, 59, 59, 0.7);
+}
+
+.spy-player-row.is-offline {
+    opacity: 0.55;
+}
+
+.spy-player-row div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.spy-player-row em,
+.spy-player-row strong,
+.spy-player-row small {
+    border-radius: 999px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.78rem;
+    font-style: normal;
+}
+
+.spy-player-row em {
+    color: #080808;
+    background: var(--color-gold);
+}
+
+.spy-player-row strong {
+    color: #ffb3b3;
+    background: rgba(214, 59, 59, 0.18);
+}
+
+.spy-player-row small {
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.spy-reveal-panel {
+    border-color: rgba(216, 155, 43, 0.45);
+}
+
+.spy-reveal-panel strong {
+    color: var(--color-gold);
+}
+
+.spy-hint,
+.spy-invite-info {
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+    .spy-page {
+        width: min(100% - 1rem, 1180px);
+        padding: 1.25rem 0;
+    }
+
+    .spy-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .spy-room-code {
+        text-align: left;
+    }
+
+    .spy-setup,
+    .spy-status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .spy-actions,
+    .spy-button {
+        width: 100%;
+    }
+
+    .spy-player-row {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

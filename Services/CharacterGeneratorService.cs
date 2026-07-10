@@ -10,8 +10,8 @@ namespace Bunker.Services
         private readonly GameDataService _gameData;
         private readonly ILogger<CharacterGeneratorService> _logger;
         private const string DefaultHealthLanguage = "uk";
-        private const int MentalStableChancePercent = 23;
-        private const int PhysicalHealthyChancePercent = 18;
+        private const int MentalStableChancePercent = 5;
+        private const int PhysicalHealthyChancePercent = 5;
         private const int MaxNormalHealthPerRoom = 2;
 
         private static readonly string[] Sexes = { "Чоловіча", "Жіноча" };
@@ -20,7 +20,6 @@ namespace Bunker.Services
         private static readonly HashSet<string> NoSeverityCategories = new()
         {
             "інвалідність",
-            "травма",
             "ампутація"
         };
         
@@ -86,7 +85,8 @@ namespace Bunker.Services
             var sex = GetRandom(Sexes);
             var sexOrientation = GenerateSexOrientation(sex);
             var isChildfree = _random.Next(100) < 10;
-
+            var profession = GenerateProfession();
+            var specialCard = GenerateSpecialCard();
 
             var player = new Player
             {
@@ -104,17 +104,36 @@ namespace Bunker.Services
                     Weight = body.weight,
                     BodyType = body.bodyType
                 },
-                Profession = GenerateProfession(),
+                Profession = profession,
                 Hobby = GenerateHobby(),
                 PhysicalHealth = GeneratePhysicalHealth(existingRoomPlayers),
                 MentalHealth = GenerateMentalHealth(existingRoomPlayers),
-                Inventory = GenerateInventory(),
+                Inventory = GenerateInventory(profession),
                 CharacterTrait = GenerateCharacterTrait(),
                 Phobia = GeneratePhobia(),
-				Fact = GenerateFact()
+				Fact = GenerateFact(),
+				SpecialCard = specialCard,
+                SpecialCards = new List<SpecialCard> { specialCard }
             };
 
             return player;
+        }
+
+        public object? GenerateCharacteristicForSpecialCard(string characteristicKey, IEnumerable<Player>? existingRoomPlayers = null)
+        {
+            var generated = Generate("Гравець", existingRoomPlayers);
+            return characteristicKey switch
+            {
+                "Personality" or "PersonalInfo" => generated.Personality,
+                "Body" => generated.Body,
+                "Profession" => generated.Profession,
+                "PhysicalHealth" => generated.PhysicalHealth,
+                "MentalHealth" => generated.MentalHealth,
+                "Hobby" => generated.Hobby,
+                "CharacterTrait" => generated.CharacterTrait,
+                "Fact" => generated.Fact,
+                _ => null
+            };
         }
 
 
@@ -187,7 +206,7 @@ namespace Bunker.Services
 
         #region Inventory Generation
 
-        private Inventory GenerateInventory()
+        private Inventory GenerateInventory(Profession profession)
         {
             var inventory = new Inventory
             {
@@ -195,38 +214,55 @@ namespace Bunker.Services
                 Items = new List<Item>()
             };
 
+            if (!string.IsNullOrWhiteSpace(profession.SelectedItem))
+            {
+                inventory.Items.Add(CreateInventoryItem(
+                    profession.SelectedItem,
+                    "Професійний предмет",
+                    i18n: null
+                ));
+
+                return inventory;
+            }
+
             if (_gameData.Items.Count == 0)
                 return inventory;
 
-            // Генеруємо 1-3 випадкових предмети
-            int itemCount = _random.Next(1, 4);
-            var usedIndices = new HashSet<int>();
-
-            for (int i = 0; i < itemCount && usedIndices.Count < _gameData.Items.Count; i++)
-            {
-                int index;
-                do
-                {
-                    index = _random.Next(_gameData.Items.Count);
-                } while (usedIndices.Contains(index));
-                
-                usedIndices.Add(index);
-                var itemData = _gameData.Items[index];
-
-                inventory.Items.Add(new Item
-                {
-                    Name = itemData.Item,
-                    Description = $"Категорія: {itemData.Category}",
-                    Quantity = _random.Next(1, 4),
-                    Unit = "шт",
-                    WeightKg = Math.Round(_random.NextDouble() * 2 + 0.1, 1),
-                    IsUsefulInBunker = true,
-                    Rarity = "Звичайний",
-                    I18n = itemData.I18n
-                });
-            }
+            var itemData = _gameData.Items[_random.Next(_gameData.Items.Count)];
+            inventory.Items.Add(CreateInventoryItem(
+                itemData.Item,
+                $"Категорія: {itemData.Category}",
+                itemData.I18n,
+                itemData.ResourceTags,
+                itemData.ProtectionTags,
+                itemData.ThreatUsage
+            ));
 
             return inventory;
+        }
+
+        private Item CreateInventoryItem(
+            string name,
+            string description,
+            Dictionary<string, System.Text.Json.JsonElement>? i18n,
+            IEnumerable<string>? resourceTags = null,
+            IEnumerable<string>? protectionTags = null,
+            Dictionary<string, System.Text.Json.JsonElement>? threatUsage = null)
+        {
+            return new Item
+            {
+                Name = name,
+                Description = description,
+                Quantity = 1,
+                Unit = "шт",
+                WeightKg = Math.Round(_random.NextDouble() * 2 + 0.1, 1),
+                IsUsefulInBunker = true,
+                Rarity = "Звичайний",
+                ResourceTags = resourceTags?.ToList() ?? new(),
+                ProtectionTags = protectionTags?.ToList() ?? new(),
+                ThreatUsage = threatUsage,
+                I18n = i18n
+            };
         }
 
         #endregion
@@ -239,53 +275,89 @@ namespace Bunker.Services
                 return new Profession { Name = "Безробітний" };
 
             var data = _gameData.Professions[_random.Next(_gameData.Professions.Count)];
+            var parsedProfession = ParseProfessionNameAndItem(data.Profession);
             
             // Вибираємо ОДИН випадковий предмет з масиву items
-            string selectedItem = "";
+            string selectedItem = parsedProfession.Item;
             if (data.Items.Count > 0)
             {
                 selectedItem = data.Items[_random.Next(data.Items.Count)];
             }
 
-            // Формуємо tooltip
-            var tooltip = BuildProfessionTooltip(data.Bonus, selectedItem);
+            // Формуємо tooltip без предмета: предмет показується тільки в характеристиці "Інвентар".
+            var tooltip = BuildProfessionTooltip(data.Bonus);
 
             return new Profession
             {
-                Name = data.Profession,
+                Name = parsedProfession.Name,
                 Type = data.Type,
                 ExperienceYears = _random.Next(1, 30),
                 Skills = data.Skills.ToList(),
                 AllItems = data.Items.ToList(),
                 SelectedItem = selectedItem,
                 Bonus = data.Bonus,
+                CapabilityTags = data.CapabilityTags.ToList(),
                 Tooltip = tooltip,
                 I18n = data.I18n
             };
         }
 
-        private static string BuildProfessionTooltip(string bonus, string selectedItem)
+        private static string BuildProfessionTooltip(string bonus)
         {
-            if (string.IsNullOrEmpty(bonus) && string.IsNullOrEmpty(selectedItem))
+            if (string.IsNullOrEmpty(bonus))
                 return "";
 
-            var parts = new List<string>();
-            
-            if (!string.IsNullOrEmpty(bonus))
+            var cleanedBonus = CleanProfessionBonus(bonus);
+            if (string.IsNullOrWhiteSpace(cleanedBonus))
             {
-                // Перша літера бонусу - маленька, бо починаємо з "Вміє"
-                var bonusLower = char.ToLower(bonus[0]) + bonus[1..];
-                parts.Add($"Вміє {bonusLower}");
-            }
-            
-            if (!string.IsNullOrEmpty(selectedItem))
-            {
-                // Перша літера предмета - маленька
-                var itemLower = char.ToLower(selectedItem[0]) + selectedItem[1..];
-                parts.Add($"має при собі {itemLower}");
+                return "";
             }
 
-            return string.Join(" та ", parts) + ".";
+            var bonusLower = char.ToLower(cleanedBonus[0]) + cleanedBonus[1..];
+            return $"Вміє {bonusLower}.";
+        }
+
+        private static (string Name, string Item) ParseProfessionNameAndItem(string professionName)
+        {
+            if (string.IsNullOrWhiteSpace(professionName)) return ("", "");
+
+            var match = System.Text.RegularExpressions.Regex.Match(
+                professionName,
+                @"^\s*(?<name>.*?)\s*\(\s*\+\s*(?<item>[^)]*?)\s*\)\s*$");
+
+            if (!match.Success)
+            {
+                return (CleanProfessionName(professionName), "");
+            }
+
+            return (
+                CleanProfessionName(match.Groups["name"].Value),
+                match.Groups["item"].Value.Trim()
+            );
+        }
+
+        private static string CleanProfessionName(string professionName)
+        {
+            return System.Text.RegularExpressions.Regex
+                .Replace(professionName, @"\s*\(\s*\+[^)]*\)\s*$", "")
+                .Trim();
+        }
+
+        private static string CleanProfessionBonus(string bonus)
+        {
+            var cleaned = CleanTooltipPart(bonus);
+            cleaned = System.Text.RegularExpressions.Regex.Replace(
+                cleaned,
+                @"\s*\((?:міфологія|mythology|adult\s*content|combat|weird|feature|корисна|серйозна|мемна|еротична|креативна|абсурдна|неіснуюча)\)\s*",
+                " ",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            cleaned = System.Text.RegularExpressions.Regex.Replace(
+                cleaned,
+                @"^(може|умеет|can)\s+",
+                "",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            return cleaned.Trim().Trim('.').Trim();
         }
 
         #endregion
@@ -308,6 +380,7 @@ namespace Bunker.Services
                 Type = data.Type,
                 Item = data.Item,
                 Bonus = data.Bonus,
+                CapabilityTags = data.CapabilityTags.ToList(),
                 Tooltip = tooltip,
                 I18n = data.I18n
             };
@@ -339,6 +412,39 @@ namespace Bunker.Services
 
         #endregion
 
+        #region Special Card Generation
+
+        private SpecialCard GenerateSpecialCard()
+        {
+            if (_gameData.SpecialCards.Count == 0)
+            {
+                return new SpecialCard
+                {
+                    Id = "no_special_card",
+                    Name = "Без спеціальної карти",
+                    Description = "Спеціальна карта не видана.",
+                    IsSecret = false
+                };
+            }
+
+            var data = _gameData.SpecialCards[_random.Next(_gameData.SpecialCards.Count)];
+            return new SpecialCard
+            {
+                Id = data.Id,
+                Name = data.Name,
+                Description = data.Description,
+                IsSecret = data.IsSecret,
+                IsOneTimeUse = data.IsOneTimeUse,
+                Phase = data.Phase,
+                EffectType = data.EffectType,
+                EffectDuration = string.IsNullOrWhiteSpace(data.EffectDuration) ? "instant" : data.EffectDuration,
+                RequiresTarget = data.RequiresTarget,
+                I18n = data.I18n
+            };
+        }
+
+        #endregion
+
         #region Mental Health Generation
 
         private MentalHealth GenerateMentalHealth(IEnumerable<Player>? existingRoomPlayers)
@@ -351,10 +457,25 @@ namespace Bunker.Services
                 return CreateStableMentalHealth();
 
             var data = _gameData.MentalConditions[_random.Next(_gameData.MentalConditions.Count)];
-            var hasSeverity = data.HasSeverity ?? true;
-            var severityLevel = hasSeverity ? SeverityHelper.GetWeightedRandomSeverity() : SeverityLevel.None;
-            var severityCode = hasSeverity ? SeverityHelper.GetSeverityCode(severityLevel) : "none";
-            var severityName = hasSeverity ? SeverityHelper.GetSeverityName(severityLevel, DefaultHealthLanguage) : "";
+            var hasSeverity = data.HasSeverity == true;
+            var availableSeverityCodes = hasSeverity
+                ? GetAvailableSeverityCodes(data, DefaultHealthLanguage)
+                : new List<string>();
+
+            if (hasSeverity && availableSeverityCodes.Count == 0)
+                hasSeverity = false;
+
+            var severityLevel = SeverityLevel.None;
+            var severityCode = "none";
+            var severityName = "";
+
+            if (hasSeverity)
+            {
+                severityLevel = SeverityHelper.GetWeightedRandomSeverity(availableSeverityCodes);
+                severityCode = SeverityHelper.GetSeverityCode(severityLevel);
+                severityName = SeverityHelper.GetSeverityName(severityLevel, DefaultHealthLanguage);
+            }
+
             var localized = ResolveConditionText(data.Localization, DefaultHealthLanguage, severityCode, hasSeverity, data.Name, data.Description);
             var baseName = localized.Name;
 
@@ -369,6 +490,7 @@ namespace Bunker.Services
                 BaseSeverity = data.Severity,
                 SeverityLevel = severityName,
                 SeverityCode = severityCode,
+                AllowsSeverity = hasSeverity,
                 Visibility = data.Visibility,
                 Description = localized.Description,
                 GameEffect = "",
@@ -387,121 +509,375 @@ namespace Bunker.Services
         {
             return new MentalHealth
             {
+                Id = "mental_stable",
                 Name = "Стабільний",
                 BaseName = "Стабільний",
                 SeverityLevel = "",
-                SeverityCode = "none",
-                Tooltip = ""
-            };
-        }
-
-        #endregion
-
-        #region Physical Health Generation
-
-        private PhysicalHealth GeneratePhysicalHealth(IEnumerable<Player>? existingRoomPlayers)
-        {
-            if (_gameData.PhysicalConditions.Count == 0)
-                return CreateHealthyPhysicalHealth();
-
-            var healthyCount = existingRoomPlayers?.Count(p => p != null && IsHealthyPhysicalHealth(p.PhysicalHealth)) ?? 0;
-            if (healthyCount < MaxNormalHealthPerRoom && _random.Next(100) < PhysicalHealthyChancePercent)
-                return CreateHealthyPhysicalHealth();
-
-            var data = _gameData.PhysicalConditions[_random.Next(_gameData.PhysicalConditions.Count)];
-            var hasSeverity = data.HasSeverity ?? DetermineIfAllowsSeverity(data);
-            var severityLevel = hasSeverity ? SeverityHelper.GetWeightedRandomSeverity() : SeverityLevel.None;
-            var severityCode = hasSeverity ? SeverityHelper.GetSeverityCode(severityLevel) : "none";
-            var severityName = hasSeverity ? SeverityHelper.GetSeverityName(severityLevel, DefaultHealthLanguage) : "";
-            var localized = ResolveConditionText(data.Localization, DefaultHealthLanguage, severityCode, hasSeverity, data.Name, data.Description);
-            var baseName = localized.Name;
-
-            return new PhysicalHealth
-            {
-                Id = data.Id,
-                BaseName = baseName,
-                Name = hasSeverity ? SeverityHelper.FormatNameWithSeverity(baseName, severityLevel, DefaultHealthLanguage) : baseName,
-                Category = data.Category,
-                Tone = data.Tone,
-                Rarity = data.Rarity,
-                BaseSeverity = data.Severity,
-                SeverityLevel = hasSeverity ? severityName : null,
-                SeverityCode = severityCode,
-                AllowsSeverity = hasSeverity,
-                Visibility = data.Visibility,
-                Description = localized.Description,
-                GameEffect = "",
-                SurvivalImpact = data.SurvivalImpact,
-                SocialImpact = data.SocialImpact,
-                MovementImpact = data.MovementImpact,
-                PainLevel = data.PainLevel,
-                TreatmentDifficulty = data.TreatmentDifficulty,
-                IsFictional = data.IsFictional,
-                Tags = data.Tags?.ToList() ?? new(),
-                Tooltip = BuildHealthTooltip(localized.Description),
-                I18n = data.I18n,
-                Localization = data.Localization
-            };
-        }
-
-        private static PhysicalHealth CreateHealthyPhysicalHealth()
-        {
-            return new PhysicalHealth
-            {
-                Name = "Здоровий",
-                BaseName = "Здоровий",
                 SeverityCode = "none",
                 AllowsSeverity = false,
                 Tooltip = ""
             };
         }
 
-        /// <summary>
-        /// Визначити чи для цього фізичного стану потрібна ступінь тяжкості
-        /// </summary>
-        private static bool DetermineIfAllowsSeverity(PhysicalConditionData data)
+        private static List<string> GetAvailableSeverityCodes(
+            MentalConditionData data,
+            string language)
         {
-            // Перевіряємо категорію
-            var category = data.Category ?? "";
-            var name = data.Name ?? "";
-            var description = data.Description ?? "";
-            var tags = data.Tags ?? new();
+            var result = new List<string>();
 
-            if (NoSeverityCategories.Contains(category.ToLowerInvariant()))
-                return false;
-            
-            // Перевіряємо конкретні назви
-            if (NoSeverityConditions.Any(c => name.Contains(c, StringComparison.OrdinalIgnoreCase)))
-                return false;
-            
-            // Перевіряємо теги
-            if (tags.Any(t => (t ?? "").ToLowerInvariant() is "ампутація" or "інвалідність" or "необоротне"))
-                return false;
-            
-            // Для явно градуйованих станів - так
-            if (GradablePhysicalCategories.Contains(category))
-                return true;
-
-            var searchable = string.Join(" ", new[]
+            var languageOrder = BuildLanguageFallbackOrder(data.Localization, language);
+            var allowedOrder = new[]
             {
-                name,
-                category,
-                description,
-                string.Join(" ", tags.Where(t => !string.IsNullOrWhiteSpace(t)))
-            }).ToLowerInvariant();
+                "light",
+                "medium",
+                "hard",
+                "veryHard",
+                "critical"
+            };
 
-            if (GradablePhysicalMarkers.Any(marker => searchable.Contains(marker)))
-                return true;
-            
-            // Якщо неможливо точно визначити, чи ступінь потрібен, не показуємо його.
-            return false;
+            foreach (var lang in languageOrder)
+            {
+                if (data.Localization == null ||
+                    !data.Localization.TryGetValue(lang, out var localized) ||
+                    localized?.Descriptions == null ||
+                    localized.Descriptions.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var code in allowedOrder)
+                {
+                    if (localized.Descriptions.TryGetValue(code, out var text) &&
+                        !string.IsNullOrWhiteSpace(text) &&
+                        !result.Contains(code))
+                    {
+                        result.Add(code);
+                    }
+                }
+
+                if (result.Count > 0)
+                    return result;
+            }
+
+            return result;
         }
 
-        #endregion
+		#endregion
+
+	    #region Physical Health Generation
+
+		private static List<string> GetAvailablePhysicalSeverityCodes(
+			PhysicalConditionData data,
+			string language)
+		{
+			var result = new List<string>();
+
+			var allowedOrder = new[]
+			{
+				"light",
+				"medium",
+				"hard",
+				"veryHard",
+				"critical"
+			};
+
+			foreach (var lang in BuildPhysicalLanguageFallbackOrder(data.Localization, language))
+			{
+				if (data.Localization == null ||
+					!data.Localization.TryGetValue(lang, out var localized) ||
+					localized?.Descriptions == null ||
+					localized.Descriptions.Count == 0)
+				{
+					continue;
+				}
+
+				foreach (var code in allowedOrder)
+				{
+					if (localized.Descriptions.TryGetValue(code, out var text) &&
+						!string.IsNullOrWhiteSpace(text) &&
+						!result.Contains(code))
+					{
+						result.Add(code);
+					}
+				}
+
+				if (result.Count > 0)
+					return result;
+			}
+
+			return result;
+		}
+
+		private PhysicalHealth GeneratePhysicalHealth(IEnumerable<Player>? existingRoomPlayers)
+		{
+			if (_gameData.PhysicalConditions.Count == 0)
+				return CreateHealthyPhysicalHealth();
+
+			var healthyCount = existingRoomPlayers?
+				.Count(p => p != null && IsHealthyPhysicalHealth(p.PhysicalHealth)) ?? 0;
+
+			if (healthyCount < MaxNormalHealthPerRoom &&
+				_random.Next(100) < PhysicalHealthyChancePercent)
+			{
+				return CreateHealthyPhysicalHealth();
+			}
+
+			var data = _gameData.PhysicalConditions[
+				_random.Next(_gameData.PhysicalConditions.Count)
+			];
+
+			var hasSeverity = (data.HasSeverity ?? DetermineIfAllowsSeverity(data)) &&
+				!IsPhysicalNoSeverityCondition(data);
+
+			var availableSeverityCodes = hasSeverity
+				? GetAvailablePhysicalSeverityCodes(data, DefaultHealthLanguage)
+				: new List<string>();
+
+			if (hasSeverity && availableSeverityCodes.Count == 0)
+			{
+				hasSeverity = false;
+			}
+
+			var severityCode = "none";
+			var severityLevel = SeverityLevel.None;
+			var severityName = "";
+
+			if (hasSeverity)
+			{
+				severityLevel = SeverityHelper.GetWeightedRandomSeverity(availableSeverityCodes);
+				severityCode = SeverityHelper.GetSeverityCode(severityLevel);
+				severityName = SeverityHelper.GetSeverityName(severityLevel, DefaultHealthLanguage);
+			}
+
+			var localized = ResolvePhysicalConditionText(data, DefaultHealthLanguage, severityCode, hasSeverity);
+
+			var baseName = localized.Name;
+
+			return new PhysicalHealth
+			{
+				Id = data.Id,
+				BaseName = baseName,
+				Name = hasSeverity
+					? SeverityHelper.FormatNameWithSeverity(baseName, severityLevel, DefaultHealthLanguage)
+					: baseName,
+
+				Category = data.Category,
+				Tone = data.Tone,
+				Rarity = data.Rarity,
+				BaseSeverity = data.Severity,
+
+				SeverityLevel = hasSeverity ? severityName : null,
+				SeverityCode = severityCode,
+				AllowsSeverity = hasSeverity,
+
+				Visibility = data.Visibility,
+				Description = localized.Description,
+				GameEffect = "",
+
+				SurvivalImpact = data.SurvivalImpact,
+				SocialImpact = data.SocialImpact,
+				MovementImpact = data.MovementImpact,
+				PainLevel = data.PainLevel,
+				TreatmentDifficulty = data.TreatmentDifficulty,
+
+				IsFictional = data.IsFictional,
+				Tags = data.Tags?.ToList() ?? new(),
+
+				Tooltip = BuildHealthTooltip(localized.Description),
+
+				I18n = data.I18n,
+				Localization = data.Localization
+			};
+		}
+
+		private static PhysicalHealth CreateHealthyPhysicalHealth()
+		{
+			return new PhysicalHealth
+			{
+				Id = "physical_healthy",
+				Name = "Здоровий",
+				BaseName = "Здоровий",
+				SeverityLevel = null,
+				SeverityCode = "none",
+				AllowsSeverity = false,
+				Tooltip = ""
+			};
+		}
+
+		/// <summary>
+		/// Визначити чи для цього фізичного стану потрібна ступінь тяжкості
+		/// </summary>
+		private static bool DetermineIfAllowsSeverity(PhysicalConditionData data)
+		{
+			if (IsPhysicalNoSeverityCondition(data))
+				return false;
+
+			var category = data.Category ?? "";
+			var description = data.Description ?? "";
+			var tags = data.Tags ?? new();
+
+			if (NoSeverityCategories.Contains(category.ToLowerInvariant()))
+				return false;
+
+			if (GradablePhysicalCategories.Contains(category))
+				return true;
+
+			var searchable = string.Join(" ", new[]
+			{
+				GetLocalizedPhysicalConditionName(data, DefaultHealthLanguage),
+				category,
+				description,
+				string.Join(" ", tags.Where(t => !string.IsNullOrWhiteSpace(t)))
+			}).ToLowerInvariant();
+
+			if (GradablePhysicalMarkers.Any(marker => searchable.Contains(marker)))
+				return true;
+
+			return false;
+		}
+
+		private static bool IsPhysicalNoSeverityCondition(PhysicalConditionData data)
+		{
+			var text = string.Join(" ", new[]
+			{
+				data.Name,
+				data.Category,
+				data.Description,
+				GetLocalizedPhysicalConditionName(data, DefaultHealthLanguage),
+				GetLocalizedPhysicalConditionName(data, "en"),
+				GetLocalizedPhysicalConditionName(data, "ru"),
+				string.Join(" ", data.Tags?.Where(tag => !string.IsNullOrWhiteSpace(tag)) ?? Enumerable.Empty<string>())
+			}).ToLowerInvariant();
+
+			if (string.IsNullOrWhiteSpace(text))
+				return false;
+
+			var markers = new[]
+			{
+				"без руки",
+				"без ноги",
+				"немає ока",
+				"нет глаза",
+				"відсутність",
+				"отсутствие",
+				"missing",
+				"ампутац",
+				"amput",
+				"параліч",
+				"паралич",
+				"paralysis",
+				"сліп",
+				"слеп",
+				"blind",
+				"глух",
+				"deaf",
+				"протез",
+				"prosthesis",
+				"скляне око",
+				"glass eye",
+				"слуховий апарат",
+				"hearing aid",
+				"втрата кінцівки",
+				"loss of limb"
+			};
+
+			return markers.Any(marker => text.Contains(marker));
+		}
+
+		private static ConditionText ResolvePhysicalConditionText(
+			PhysicalConditionData data,
+			string language,
+			string severityCode,
+			bool hasSeverity)
+		{
+			return new ConditionText(
+				GetLocalizedPhysicalConditionName(data, language),
+				GetLocalizedPhysicalConditionDescription(data, language, severityCode, hasSeverity)
+			);
+		}
+
+		private static string GetLocalizedPhysicalConditionName(PhysicalConditionData data, string language)
+		{
+			var languageOrder = BuildPhysicalLanguageFallbackOrder(data.Localization, language);
+			var name = FirstLocalizedValue(data.Localization, languageOrder, item => item.Name);
+			if (!string.IsNullOrWhiteSpace(name)) return name;
+			if (!string.IsNullOrWhiteSpace(data.Name)) return data.Name;
+			return data.Id ?? "";
+		}
+
+		private static Dictionary<string, string> GetLocalizedPhysicalConditionDescriptions(
+			PhysicalConditionData data,
+			string language)
+		{
+			foreach (var lang in BuildPhysicalLanguageFallbackOrder(data.Localization, language))
+			{
+				if (data.Localization != null &&
+					data.Localization.TryGetValue(lang, out var localized) &&
+					localized?.Descriptions != null &&
+					localized.Descriptions.Count > 0)
+				{
+					return localized.Descriptions
+						.Where(item => !string.IsNullOrWhiteSpace(item.Value))
+						.ToDictionary(item => item.Key, item => item.Value, StringComparer.OrdinalIgnoreCase);
+				}
+			}
+
+			return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+		}
+
+		private static string GetLocalizedPhysicalConditionDescription(
+			PhysicalConditionData data,
+			string language,
+			string severityCode,
+			bool hasSeverity)
+		{
+			if (hasSeverity)
+			{
+				var descriptions = GetLocalizedPhysicalConditionDescriptions(data, language);
+				if (descriptions.TryGetValue(severityCode, out var description) &&
+					!string.IsNullOrWhiteSpace(description))
+				{
+					return description;
+				}
+			}
+
+			var languageOrder = BuildPhysicalLanguageFallbackOrder(data.Localization, language);
+			var localizedDescription = FirstLocalizedValue(data.Localization, languageOrder, item => item.Description);
+			if (!string.IsNullOrWhiteSpace(localizedDescription)) return localizedDescription;
+
+			return data.Description ?? "";
+		}
+
+		private static List<string> BuildPhysicalLanguageFallbackOrder(
+			Dictionary<string, ConditionLocalization>? localization,
+			string language)
+		{
+			var result = new List<string>();
+			void Add(string? value)
+			{
+				if (!string.IsNullOrWhiteSpace(value) && !result.Contains(value))
+					result.Add(value);
+			}
+
+			Add(language);
+			Add("uk");
+			Add("en");
+			Add("ru");
+
+			if (localization != null)
+			{
+				foreach (var key in localization.Keys)
+					Add(key);
+			}
+
+			return result;
+		}
+
+		#endregion
 
         #region Body Generation
 
-        private (int height, int weight, string bodyType) GenerateBody()
+		private (int height, int weight, string bodyType) GenerateBody()
         {
             int height = _random.Next(120, 221);
 
@@ -586,6 +962,7 @@ namespace Bunker.Services
 
             Add(lang);
             Add("uk");
+            Add("ru");
 
             if (localization != null)
             {

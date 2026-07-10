@@ -46,10 +46,6 @@
             <span class="characteristic-value">
                 <div class="characteristic-with-tooltip">
                     <span class="characteristic-name">@Model.Profession.Name</span>
-                    @if (!string.IsNullOrEmpty(Model.Profession.SelectedItem))
-                    {
-                        <span class="selected-item">(+@Model.Profession.SelectedItem)</span>
-                    }
                     @if (Model.Profession.HasTooltip)
                     {
                         <span class="tooltip-trigger profession" title="">!</span>

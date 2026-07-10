@@ -16,6 +16,7 @@ namespace Bunker.Models
         public string Duration { get; set; } = ""; // Тривалість перебування в бункері
         public List<string> Threats { get; set; } = new(); // Загрози зовні
         public List<string> Requirements { get; set; } = new(); // Що потрібно для виживання
+        public List<string> Tags { get; set; } = new();
         public string? ImageUrl { get; set; } // URL зображення апокаліпсису
 
         [JsonPropertyName("_i18n")]
@@ -33,6 +34,7 @@ namespace Bunker.Models
                 duration = Duration,
                 threats = Threats,
                 requirements = Requirements,
+                tags = Tags,
                 imageUrl = ImageUrl,
                 _i18n = I18n
             };
@@ -66,6 +68,8 @@ namespace Bunker.Models
         public List<string> Resources { get; set; } = new(); // Наявні ресурси
         public List<string> Problems { get; set; } = new(); // Проблеми бункера
         public string Condition { get; set; } = "good"; // poor, fair, good, excellent
+        public List<string> BunkerTags { get; set; } = new();
+        public BunkerThreatAssets ThreatAssets { get; set; } = new();
         public string? ImageUrl { get; set; } // URL зображення бункера
 
         [JsonPropertyName("_i18n")]
@@ -83,8 +87,10 @@ namespace Bunker.Models
                 suppliesMonths = SuppliesMonths,
                 facilities = Facilities,
                 resources = Resources,
+                threatAssets = ThreatAssets.ToClientInfo(),
                 problems = Problems,
                 condition = Condition,
+                bunkerTags = BunkerTags,
                 imageUrl = ImageUrl,
                 _i18n = I18n
             };
@@ -118,5 +124,80 @@ namespace Bunker.Models
     public class BunkersRoot
     {
         public List<BunkerInfo> Bunkers { get; set; } = new();
+    }
+
+    public class BunkerThreatAssets
+    {
+        public List<BunkerThreatAsset> Resources { get; set; } = new();
+        public List<BunkerThreatAsset> Facilities { get; set; } = new();
+
+        public object ToClientInfo()
+        {
+            return new
+            {
+                resources = Resources.Select(asset => asset.ToClientInfo()).ToList(),
+                facilities = Facilities.Select(asset => asset.ToClientInfo()).ToList()
+            };
+        }
+    }
+
+    public class BunkerThreatAsset
+    {
+        [JsonPropertyName("assetId")]
+        public string Id { get; set; } = "";
+
+        [JsonPropertyName("name")]
+        public JsonElement? NameI18n { get; set; }
+
+        [JsonPropertyName("defaultState")]
+        public string Status { get; set; } = "available";
+        public int? Quantity { get; set; }
+        public List<string> ResourceTags { get; set; } = new();
+        public List<string> FacilityTags { get; set; } = new();
+        public List<string> ProtectionTags { get; set; } = new();
+
+        [JsonPropertyName("_i18n")]
+        public Dictionary<string, JsonElement>? I18n { get; set; }
+
+        public string GetName(string language = "uk")
+        {
+            if (NameI18n is { ValueKind: JsonValueKind.String })
+            {
+                return NameI18n.Value.GetString() ?? Id;
+            }
+
+            if (NameI18n is { ValueKind: JsonValueKind.Object })
+            {
+                if (NameI18n.Value.TryGetProperty(language, out var localized) &&
+                    localized.ValueKind == JsonValueKind.String)
+                {
+                    return localized.GetString() ?? Id;
+                }
+
+                if (NameI18n.Value.TryGetProperty("uk", out var uk) &&
+                    uk.ValueKind == JsonValueKind.String)
+                {
+                    return uk.GetString() ?? Id;
+                }
+            }
+
+            return Id;
+        }
+
+        public object ToClientInfo()
+        {
+            return new
+            {
+                id = Id,
+                name = GetName(),
+                localizedName = NameI18n,
+                status = string.IsNullOrWhiteSpace(Status) ? "available" : Status,
+                quantity = Quantity,
+                resourceTags = ResourceTags,
+                facilityTags = FacilityTags,
+                protectionTags = ProtectionTags,
+                _i18n = I18n
+            };
+        }
     }
 }

@@ -56,6 +56,18 @@
             </div>
         </div>
 
+        <div id="roundStatusPanel" class="round-status-panel" style="display: none;">
+            <div class="round-status-main">
+                <span class="round-status-label">Поточний раунд</span>
+                <strong id="roundStatusNumber">Раунд 1</strong>
+            </div>
+            <div class="round-status-details">
+                <span id="roundStatusPhase">Розкриття характеристик</span>
+                <span id="roundStatusProgress">0/0 відкрили</span>
+                <span id="roundDiceResult" class="round-dice-result" style="display: none;"></span>
+            </div>
+        </div>
+
         <!-- Voting Panel -->
         <div id="votingPanel" class="voting-panel" style="display: none;">
             <div class="voting-header">
@@ -95,6 +107,18 @@
             </div>
         </div>
 
+        <div id="readyCheckPanel" class="ready-check-panel" style="display: none;">
+            <div class="ready-check-header">
+                <strong>Всі готові до голосування?</strong>
+                <span id="readyCheckSummary">Очікуємо відповіді гравців</span>
+            </div>
+            <div class="ready-check-actions">
+                <button type="button" onclick="submitVotingReadyStatus('ready')">Готовий</button>
+                <button type="button" onclick="submitVotingReadyStatus('add')">Хочу щось додати</button>
+                <button type="button" onclick="submitVotingReadyStatus('special')">Хочу використати карту</button>
+            </div>
+        </div>
+
         <!-- Game Master Panel (тільки для хоста) -->
         <div id="gmPanel" class="gm-panel" style="display: none;">
             <div class="gm-panel-header">
@@ -102,6 +126,25 @@
                 <button class="btn-close" onclick="toggleGMPanel()">×</button>
             </div>
             <div class="gm-panel-content">
+                <div class="gm-section gm-round-section" id="gmRoundSection" style="display: none;">
+                    <h4 class="gm-section-title">Керування раундом</h4>
+                    <div class="gm-round-summary">
+                        <span id="gmCurrentRound">Раунд 1</span>
+                        <strong id="gmCurrentPhase">Розкриття характеристик</strong>
+                        <small id="gmRoundProgress">0/0 відкрили</small>
+                        <small id="gmDiceResult" class="gm-dice-result" style="display: none;"></small>
+                    </div>
+                    <div class="gm-round-actions">
+                        <button id="rollDiceBtn" class="btn-gm-action" onclick="rollRoundDice()" disabled>Кинути кубик</button>
+                        <button id="endRoundBtn" class="btn-gm-action" onclick="endRound()" disabled>Раунд закінчено</button>
+                        <button id="startReadyCheckBtn" class="btn-gm-action" onclick="markAllPlayersReady()" disabled>Всі готові</button>
+                        <button id="gmStartVotingBtn" class="btn-gm-action" onclick="startVoting()" style="display: none;">Почати голосування</button>
+                    </div>
+                    <p id="gmVotingLockedHint" class="gm-round-hint">Голосування відкриється після завершення 3 раунду.</p>
+                    <div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
+                    <div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
+                </div>
+
                 <!-- Вибір гравця -->
                 <div class="gm-section">
                     <label class="gm-label">Вибрати гравця:</label>
@@ -278,6 +321,10 @@
         <div id="myPlayerSection" style="display:none;">
             <h2 class="section-title">Мої характеристики (бачу тільки я)</h2>
             <div id="myPlayerCards" class="player-cards-grid"></div>
+            <section id="mySpecialCardsSection" class="my-special-cards-section">
+                <h2 class="section-title">Мої спеціальні карти</h2>
+                <div id="mySpecialCardsList" class="my-special-cards-list"></div>
+            </section>
         </div>
 
         <!-- Players Table Section (під час гри) -->
@@ -301,6 +348,20 @@
                     <h3 class="panel-title">🏠 Бункер</h3>
                     <div class="panel-content" id="bunkerContent">
                         <p>Завантаження...</p>
+                    </div>
+                </div>
+                <div id="threatPanel" class="threat-panel">
+                    <h3 class="panel-title">⚠️ Загроза</h3>
+                    <div class="panel-content">
+                        <div id="threatImageContainer" class="scenario-image-container" style="display: none;"></div>
+                        <h4 id="threatName" class="threat-name">Невідомо</h4>
+                        <p id="threatDescription" class="threat-description">Загроза ще не розкрита.</p>
+                        <div id="threatStats" class="threat-stats" style="display: none;">
+                            <div class="stat-item">
+                                <span class="stat-label">Рівень</span>
+                                <strong id="threatSeverity" class="stat-value"></strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -335,6 +396,25 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div id="specialCardsSection" class="special-cards-section" style="display: none;">
+                <h2 class="section-title">Розкриті спеціальні карти</h2>
+                <div class="special-cards-table-wrap">
+                    <table class="special-cards-table" data-testid="special-cards-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Гравець</th>
+                                <th>Спеціальна карта</th>
+                                <th>Опис / ефект</th>
+                                <th>Ціль</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody id="specialCardsTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -417,7 +497,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="/js/signalr-lite.js"></script>
 <script src="/js/game.js"></script>
 
 

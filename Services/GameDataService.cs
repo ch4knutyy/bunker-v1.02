@@ -23,6 +23,8 @@ namespace Bunker.Services
         private List<FactData>? _facts;
         private List<Apocalypse>? _apocalypses;
         private List<BunkerInfo>? _bunkers;
+        private List<ThreatData>? _threats;
+        private List<SpecialCardData>? _specialCards;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -45,20 +47,23 @@ namespace Bunker.Services
             
             _hobbies = LoadJsonArray<HobbyData>(Path.Combine(dataPath, "hobbies.json"), "hobbies");
             _professions = LoadJsonArray<ProfessionData>(Path.Combine(dataPath, "professions.json"), "professions");
-            _mentalConditions = LoadJsonArray<MentalConditionData>(Path.Combine(dataPath, "mental_conditions.json"), "mental_conditions");
-            _physicalConditions = LoadJsonArray<PhysicalConditionData>(Path.Combine(dataPath, "physical_conditions.json"), "physical_conditions");
+            _mentalConditions = LoadMentalConditions(dataPath);
+            _physicalConditions = LoadPhysicalConditions(dataPath);
             _items = LoadJsonArray<ItemData>(Path.Combine(dataPath, "items.json"), "items");
             _characterTraits = LoadJsonArray<CharacterTraitData>(Path.Combine(dataPath, "character_traits.json"), "character_traits");
             _phobias = LoadJsonArray<PhobiaData>(Path.Combine(dataPath, "phobias.json"), "phobias");
             _facts = LoadJsonArray<FactData>(Path.Combine(dataPath, "facts.json"), "facts");
             _apocalypses = LoadJsonArray<Apocalypse>(Path.Combine(dataPath, "apocalypses.json"), "apocalypses");
             _bunkers = LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers");
+            _threats = LoadJsonArray<ThreatData>(Path.Combine(dataPath, "threats.json"), "threats");
+            _specialCards = LoadJsonArray<SpecialCardData>(Path.Combine(dataPath, "special_cards.json"), "special_cards");
 
             _logger.LogInformation($"Завантажено: {_hobbies.Count} хобі, {_professions.Count} професій, " +
                                    $"{_mentalConditions.Count} ментальних станів, {_physicalConditions.Count} фізичних станів, " +
                                    $"{_items.Count} предметів, {_characterTraits.Count} рис характеру, " +
                                    $"{_phobias.Count} фобій, {_facts.Count} фактів, " +
-                                   $"{_apocalypses.Count} апокаліпсисів, {_bunkers.Count} бункерів");
+                                   $"{_apocalypses.Count} апокаліпсисів, {_bunkers.Count} бункерів, " +
+                                   $"{_threats.Count} загроз, {_specialCards.Count} спеціальних карт");
 
             ValidateHealthConditions(_physicalConditions, "physical");
             ValidateHealthConditions(_mentalConditions, "mental");
@@ -124,6 +129,214 @@ namespace Bunker.Services
             return item?.GetType().GetProperty("Localization")?.GetValue(item) as Dictionary<string, ConditionLocalization>;
         }
 
+        private List<MentalConditionData> LoadMentalConditions(string dataPath)
+        {
+            var legacyPath = Path.Combine(dataPath, "mental_conditions.json");
+            if (File.Exists(legacyPath))
+            {
+                var legacyConditions = LoadJsonArray<MentalConditionData>(legacyPath, "mental_conditions");
+                if (legacyConditions.Count > 0)
+                    return legacyConditions;
+            }
+
+            var folderPath = Path.Combine(dataPath, "Mental_conditions");
+            if (!Directory.Exists(folderPath))
+            {
+                _logger.LogWarning($"Файл не знайдено: {legacyPath}");
+                return new();
+            }
+
+            var files = Directory
+                .GetFiles(folderPath, "mental_conditions*.json")
+                .OrderBy(GetMentalConditionFilePriority)
+                .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (files.Count == 0)
+            {
+                _logger.LogWarning($"Файли mental_conditions*.json не знайдено: {folderPath}");
+                return new();
+            }
+
+            var merged = new Dictionary<string, MentalConditionData>(StringComparer.OrdinalIgnoreCase);
+            var order = new List<string>();
+
+            foreach (var file in files)
+            {
+                var conditions = LoadJsonArray<MentalConditionData>(file, "mental_conditions");
+                foreach (var condition in conditions)
+                {
+                    var id = string.IsNullOrWhiteSpace(condition.Id)
+                        ? $"mental_{order.Count + 1}"
+                        : condition.Id.Trim();
+
+                    condition.Id = id;
+
+                    if (!merged.TryGetValue(id, out var existing))
+                    {
+                        merged[id] = condition;
+                        order.Add(id);
+                        continue;
+                    }
+
+                    MergeMentalCondition(existing, condition);
+                }
+            }
+
+            return order
+                .Where(merged.ContainsKey)
+                .Select(id => merged[id])
+                .ToList();
+        }
+
+        private static int GetMentalConditionFilePriority(string path)
+        {
+            var fileName = Path.GetFileName(path).ToLowerInvariant();
+            if (fileName.Contains(".uk")) return 0;
+            if (fileName.Contains(".ru")) return 1;
+            if (fileName.Contains(".en")) return 2;
+            return 3;
+        }
+
+        private static void MergeMentalCondition(MentalConditionData target, MentalConditionData source)
+        {
+            if (string.IsNullOrWhiteSpace(target.Name)) target.Name = source.Name;
+            if (string.IsNullOrWhiteSpace(target.Category)) target.Category = source.Category;
+            if (target.HasSeverity == null) target.HasSeverity = source.HasSeverity;
+            if (string.IsNullOrWhiteSpace(target.Tone)) target.Tone = source.Tone;
+            if (string.IsNullOrWhiteSpace(target.Rarity)) target.Rarity = source.Rarity;
+            if (target.Severity == 0) target.Severity = source.Severity;
+            if (string.IsNullOrWhiteSpace(target.Visibility)) target.Visibility = source.Visibility;
+            if (string.IsNullOrWhiteSpace(target.Description)) target.Description = source.Description;
+            if (string.IsNullOrWhiteSpace(target.GameEffect)) target.GameEffect = source.GameEffect;
+            if (target.SurvivalImpact == 0) target.SurvivalImpact = source.SurvivalImpact;
+            if (target.SocialImpact == 0) target.SocialImpact = source.SocialImpact;
+            if (target.TreatmentDifficulty == 0) target.TreatmentDifficulty = source.TreatmentDifficulty;
+            if (!target.IsFictional) target.IsFictional = source.IsFictional;
+            if ((target.Tags == null || target.Tags.Count == 0) && source.Tags != null) target.Tags = source.Tags;
+            if (target.I18n == null && source.I18n != null) target.I18n = source.I18n;
+
+            if (source.Localization == null || source.Localization.Count == 0)
+                return;
+
+            target.Localization ??= new Dictionary<string, ConditionLocalization>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in source.Localization)
+            {
+                var language = item.Key;
+                var localization = item.Value;
+
+                if (string.IsNullOrWhiteSpace(language) || localization == null)
+                    continue;
+
+                target.Localization[language] = localization;
+            }
+        }
+
+        private List<PhysicalConditionData> LoadPhysicalConditions(string dataPath)
+        {
+            var legacyPath = Path.Combine(dataPath, "physical_conditions.json");
+            if (File.Exists(legacyPath))
+            {
+                var legacyConditions = LoadJsonArray<PhysicalConditionData>(legacyPath, "physical_conditions");
+                if (legacyConditions.Count > 0)
+                    return legacyConditions;
+            }
+
+            var folderPath = Path.Combine(dataPath, "Physical_conditions");
+            if (!Directory.Exists(folderPath))
+            {
+                _logger.LogWarning($"Файл не знайдено: {legacyPath}");
+                return new();
+            }
+
+            var files = Directory
+                .GetFiles(folderPath, "physical_conditions*.json")
+                .OrderBy(GetPhysicalConditionFilePriority)
+                .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (files.Count == 0)
+            {
+                _logger.LogWarning($"Файли physical_conditions*.json не знайдено: {folderPath}");
+                return new();
+            }
+
+            var merged = new Dictionary<string, PhysicalConditionData>(StringComparer.OrdinalIgnoreCase);
+            var order = new List<string>();
+
+            foreach (var file in files)
+            {
+                var conditions = LoadJsonArray<PhysicalConditionData>(file, "physical_conditions");
+                foreach (var condition in conditions)
+                {
+                    var id = string.IsNullOrWhiteSpace(condition.Id)
+                        ? $"physical_{order.Count + 1}"
+                        : condition.Id.Trim();
+
+                    condition.Id = id;
+
+                    if (!merged.TryGetValue(id, out var existing))
+                    {
+                        merged[id] = condition;
+                        order.Add(id);
+                        continue;
+                    }
+
+                    MergePhysicalCondition(existing, condition);
+                }
+            }
+
+            return order
+                .Where(merged.ContainsKey)
+                .Select(id => merged[id])
+                .ToList();
+        }
+
+        private static int GetPhysicalConditionFilePriority(string path)
+        {
+            var fileName = Path.GetFileName(path).ToLowerInvariant();
+            if (fileName.Contains(".uk")) return 0;
+            if (fileName.Contains(".en")) return 1;
+            if (fileName.Contains(".ru")) return 2;
+            return 3;
+        }
+
+        private static void MergePhysicalCondition(PhysicalConditionData target, PhysicalConditionData source)
+        {
+            if (string.IsNullOrWhiteSpace(target.Name)) target.Name = source.Name;
+            if (string.IsNullOrWhiteSpace(target.Category)) target.Category = source.Category;
+            if (target.HasSeverity == null) target.HasSeverity = source.HasSeverity;
+            if (string.IsNullOrWhiteSpace(target.Tone)) target.Tone = source.Tone;
+            if (string.IsNullOrWhiteSpace(target.Rarity)) target.Rarity = source.Rarity;
+            if (target.Severity == 0) target.Severity = source.Severity;
+            if (string.IsNullOrWhiteSpace(target.Visibility)) target.Visibility = source.Visibility;
+            if (string.IsNullOrWhiteSpace(target.Description)) target.Description = source.Description;
+            if (string.IsNullOrWhiteSpace(target.GameEffect)) target.GameEffect = source.GameEffect;
+            if (target.SurvivalImpact == 0) target.SurvivalImpact = source.SurvivalImpact;
+            if (target.SocialImpact == 0) target.SocialImpact = source.SocialImpact;
+            if (target.MovementImpact == 0) target.MovementImpact = source.MovementImpact;
+            if (target.PainLevel == 0) target.PainLevel = source.PainLevel;
+            if (target.TreatmentDifficulty == 0) target.TreatmentDifficulty = source.TreatmentDifficulty;
+            if (!target.IsFictional) target.IsFictional = source.IsFictional;
+            if ((target.Tags == null || target.Tags.Count == 0) && source.Tags != null) target.Tags = source.Tags;
+            if (target.I18n == null && source.I18n != null) target.I18n = source.I18n;
+
+            if (source.Localization == null || source.Localization.Count == 0)
+                return;
+
+            target.Localization ??= new Dictionary<string, ConditionLocalization>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in source.Localization)
+            {
+                var language = item.Key;
+                var localization = item.Value;
+
+                if (string.IsNullOrWhiteSpace(language) || localization == null)
+                    continue;
+
+                target.Localization[language] = localization;
+            }
+        }
+
         private List<T> LoadJsonArray<T>(string path, params string[] possibleKeys)
         {
             try
@@ -175,5 +388,7 @@ namespace Bunker.Services
         public IReadOnlyList<FactData> Facts => _facts ?? new();
         public IReadOnlyList<Apocalypse> Apocalypses => _apocalypses ?? new();
         public IReadOnlyList<BunkerInfo> Bunkers => _bunkers ?? new();
+        public IReadOnlyList<ThreatData> Threats => _threats ?? new();
+        public IReadOnlyList<SpecialCardData> SpecialCards => _specialCards ?? new();
     }
 }

@@ -28,10 +28,12 @@ namespace Bunker.Models
         /// Бонус професії
         /// </summary>
         public string Bonus { get; set; } = "";
+
+        public List<string> CapabilityTags { get; set; } = new();
         
         /// <summary>
         /// Автоматично згенерований tooltip
-        /// Формат: "Вміє {bonus} та має при собі {selectedItem}."
+        /// Формат: "Вміє {bonus}."
         /// </summary>
         public string Tooltip { get; set; } = "";
         

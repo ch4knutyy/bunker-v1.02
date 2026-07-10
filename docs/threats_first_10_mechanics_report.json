@@ -1,0 +1,332 @@
+{
+  "status": "passed",
+  "sourceFile": "threats(7).json",
+  "outputFile": "threats_first_10_with_mechanics.json",
+  "threatsTotal": 100,
+  "threatsWithMechanics": 10,
+  "configuredThreatIds": [
+    "air_filter_failure",
+    "water_contamination",
+    "generator_overload",
+    "external_survivors",
+    "medical_outbreak",
+    "structural_crack",
+    "food_spoilage",
+    "communication_signal",
+    "security_lockdown",
+    "radiation_leak"
+  ],
+  "unchangedThreatsWithoutMechanics": 90,
+  "usesPointSystem": false,
+  "validation": {
+    "jsonValid": true,
+    "unknownCapabilityTags": 0,
+    "unknownResourceTags": 0,
+    "unknownFacilityTags": 0,
+    "unknownProtectionTags": 0,
+    "unknownEffectTypes": 0,
+    "invalidPreferredItemIds": 0,
+    "requiredGroupsWithoutMatches": 0,
+    "threatCountPreserved": true,
+    "threatOrderPreserved": true
+  },
+  "coverage": {
+    "air_filter_failure": {
+      "approaches": {
+        "repair_filtration": {
+          "solverMatches": 34,
+          "supportGroups": {
+            "repair_support": {
+              "matchingAssets": 148,
+              "optionCoverage": [
+                {
+                  "resource": 73
+                },
+                {
+                  "facility": 75
+                }
+              ]
+            }
+          },
+          "protectionMatches": 12
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 4,
+        "preferredItemsRequested": 4
+      }
+    },
+    "water_contamination": {
+      "approaches": {
+        "purify_water": {
+          "solverMatches": 14,
+          "supportGroups": {
+            "purification_support": {
+              "matchingAssets": 80,
+              "optionCoverage": [
+                {
+                  "resource": 26
+                },
+                {
+                  "facility": 54
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 4,
+        "preferredItemsRequested": 4
+      }
+    },
+    "generator_overload": {
+      "approaches": {
+        "repair_generator": {
+          "solverMatches": 11,
+          "supportGroups": {
+            "generator_support": {
+              "matchingAssets": 204,
+              "optionCoverage": [
+                {
+                  "resource": 157
+                },
+                {
+                  "facility": 47
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 5,
+        "preferredItemsRequested": 5
+      }
+    },
+    "external_survivors": {
+      "approaches": {
+        "negotiate": {
+          "solverMatches": 34,
+          "supportGroups": {}
+        },
+        "secure_entrance": {
+          "solverMatches": 19,
+          "supportGroups": {
+            "security_support": {
+              "matchingAssets": 230,
+              "optionCoverage": [
+                {
+                  "resource": 198
+                },
+                {
+                  "facility": 32
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 4,
+        "preferredItemsRequested": 4
+      }
+    },
+    "medical_outbreak": {
+      "approaches": {
+        "contain_infection": {
+          "solverMatches": 11,
+          "supportGroups": {
+            "medical_support": {
+              "matchingAssets": 372,
+              "optionCoverage": [
+                {
+                  "resource": 290
+                },
+                {
+                  "facility": 82
+                }
+              ]
+            }
+          },
+          "protectionMatches": 11
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 5,
+        "preferredItemsRequested": 5
+      }
+    },
+    "structural_crack": {
+      "approaches": {
+        "seal_crack": {
+          "solverMatches": 34,
+          "supportGroups": {
+            "structural_materials": {
+              "matchingAssets": 110,
+              "optionCoverage": [
+                {
+                  "resource": 77
+                },
+                {
+                  "facility": 33
+                }
+              ]
+            }
+          },
+          "protectionMatches": 7
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 5,
+        "preferredItemsRequested": 5
+      }
+    },
+    "food_spoilage": {
+      "approaches": {
+        "inspect_and_preserve": {
+          "solverMatches": 15,
+          "supportGroups": {
+            "preservation_support": {
+              "matchingAssets": 241,
+              "optionCoverage": [
+                {
+                  "resource": 176
+                },
+                {
+                  "facility": 65
+                }
+              ]
+            }
+          }
+        },
+        "replace_food": {
+          "solverMatches": 9,
+          "supportGroups": {
+            "replacement_food": {
+              "matchingAssets": 435,
+              "optionCoverage": [
+                {
+                  "resource": 312
+                },
+                {
+                  "facility": 123
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 3,
+        "preferredItemsRequested": 3
+      }
+    },
+    "communication_signal": {
+      "approaches": {
+        "analyze_signal": {
+          "solverMatches": 18,
+          "supportGroups": {
+            "communication_channel": {
+              "matchingAssets": 165,
+              "optionCoverage": [
+                {
+                  "resource": 111
+                },
+                {
+                  "facility": 54
+                }
+              ]
+            },
+            "coordinate_verification": {
+              "matchingAssets": 39,
+              "optionCoverage": [
+                {
+                  "resource": 17
+                },
+                {
+                  "facility": 22
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 6,
+        "preferredItemsRequested": 6
+      }
+    },
+    "security_lockdown": {
+      "approaches": {
+        "digital_override": {
+          "solverMatches": 8,
+          "supportGroups": {
+            "digital_access": {
+              "matchingAssets": 131,
+              "optionCoverage": [
+                {
+                  "resource": 90
+                },
+                {
+                  "facility": 41
+                }
+              ]
+            }
+          }
+        },
+        "physical_bypass": {
+          "solverMatches": 37,
+          "supportGroups": {
+            "physical_access": {
+              "matchingAssets": 189,
+              "optionCoverage": [
+                {
+                  "resource": 152
+                },
+                {
+                  "facility": 37
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 5,
+        "preferredItemsRequested": 5
+      }
+    },
+    "radiation_leak": {
+      "approaches": {
+        "contain_radiation": {
+          "solverMatches": 35,
+          "supportGroups": {
+            "radiation_control": {
+              "matchingAssets": 63,
+              "optionCoverage": [
+                {
+                  "resource": 6
+                },
+                {
+                  "facility": 57
+                }
+              ]
+            }
+          },
+          "protectionMatches": 7
+        }
+      },
+      "secretSupportDrop": {
+        "preferredItemsFound": 3,
+        "preferredItemsRequested": 3
+      }
+    }
+  },
+  "notes_uk": [
+    "Перші 10 загроз налаштовані як прототип.",
+    "Решта 90 загроз залишені без змін.",
+    "Деякі теги в окремих options поки можуть не мати конкретних предметів, але кожна обов’язкова група має хоча б один робочий шлях через предмет, ресурс або систему бункера.",
+    "ConditionId і debuffId є стабільними технічними ключами для майбутньої серверної реалізації."
+  ]
+}

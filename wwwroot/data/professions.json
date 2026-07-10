@@ -84,7 +84,16 @@
           "en": "Can save lives in extreme conditions",
           "ru": "Может спасать жизни в экстремальных условиях"
         }
-      }
+      },
+      "id": "surgeon",
+      "capabilityTags": [
+        "crisis_support",
+        "first_aid",
+        "medical_diagnostics",
+        "medical_general",
+        "precision_work",
+        "surgery"
+      ]
     },
     {
       "profession": "Інженер-електрик",
@@ -150,7 +159,14 @@
           "en": "Keeps the bunker's electrical systems working",
           "ru": "Обеспечивает работу электросистем бункера"
         }
-      }
+      },
+      "id": "electrical_engineer",
+      "capabilityTags": [
+        "electrical_repair",
+        "engineering_general",
+        "generator_repair",
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Агроном",
@@ -216,7 +232,11 @@
           "en": "Can organize food production",
           "ru": "Может организовать производство еды"
         }
-      }
+      },
+      "id": "agronomist",
+      "capabilityTags": [
+        "agriculture"
+      ]
     },
     {
       "profession": "Механік",
@@ -282,7 +302,16 @@
           "en": "Keeps all mechanisms in working condition",
           "ru": "Поддерживает все механизмы в рабочем состоянии"
         }
-      }
+      },
+      "id": "mechanic",
+      "capabilityTags": [
+        "engineering_general",
+        "generator_repair",
+        "mechanical_repair",
+        "structural_repair",
+        "technical_diagnostics",
+        "welding"
+      ]
     },
     {
       "profession": "Вчитель-біолог",
@@ -348,7 +377,12 @@
           "en": "Can teach and study the new environment",
           "ru": "Может обучать и исследовать новую среду"
         }
-      }
+      },
+      "id": "biology_teacher",
+      "capabilityTags": [
+        "biology",
+        "organization"
+      ]
     },
     {
       "profession": "Сантехнік",
@@ -414,7 +448,15 @@
           "en": "Provides water supply and sewage maintenance",
           "ru": "Обеспечивает водоснабжение и канализацию"
         }
-      }
+      },
+      "id": "plumber",
+      "capabilityTags": [
+        "engineering_general",
+        "logistics",
+        "plumbing_repair",
+        "technical_diagnostics",
+        "water_purification"
+      ]
     },
     {
       "profession": "Медсестра",
@@ -480,7 +522,14 @@
           "en": "Helps with medical issues",
           "ru": "Помогает с медицинскими вопросами"
         }
-      }
+      },
+      "id": "nurse",
+      "capabilityTags": [
+        "crisis_support",
+        "first_aid",
+        "medical_general",
+        "pharmacology"
+      ]
     },
     {
       "profession": "Кухар",
@@ -546,7 +595,13 @@
           "en": "Cooks tasty and healthy food from limited supplies",
           "ru": "Готовит вкусную и полезную еду из ограниченных продуктов"
         }
-      }
+      },
+      "id": "cook",
+      "capabilityTags": [
+        "food_preparation",
+        "food_preservation",
+        "food_safety"
+      ]
     },
     {
       "profession": "Будівельник",
@@ -612,7 +667,14 @@
           "en": "Can expand and improve the bunker",
           "ru": "Может расширить и улучшить бункер"
         }
-      }
+      },
+      "id": "builder",
+      "capabilityTags": [
+        "construction",
+        "engineering_general",
+        "physical_strength",
+        "structural_repair"
+      ]
     },
     {
       "profession": "Пілот",
@@ -678,7 +740,12 @@
           "en": "Can evacuate people or scout the area",
           "ru": "Может эвакуировать людей или разведать местность"
         }
-      }
+      },
+      "id": "pilot",
+      "capabilityTags": [
+        "navigation",
+        "scouting"
+      ]
     },
     {
       "profession": "Хімік",
@@ -744,7 +811,13 @@
           "en": "Can purify water and create needed substances",
           "ru": "Может очищать воду и создавать необходимые вещества"
         }
-      }
+      },
+      "id": "chemist",
+      "capabilityTags": [
+        "chemistry",
+        "pharmacology",
+        "water_purification"
+      ]
     },
     {
       "profession": "Ветеринар",
@@ -810,7 +883,14 @@
           "en": "Helps with animals that may be in the bunker",
           "ru": "Помогает с животными, которые могут быть в бункере"
         }
-      }
+      },
+      "id": "veterinarian",
+      "capabilityTags": [
+        "biology",
+        "precision_work",
+        "surgery",
+        "veterinary"
+      ]
     },
     {
       "profession": "Радіотехнік",
@@ -876,7 +956,14 @@
           "en": "Provides communication with the outside world",
           "ru": "Обеспечивает связь с внешним миром"
         }
-      }
+      },
+      "id": "radio_technician",
+      "capabilityTags": [
+        "electronics_repair",
+        "engineering_general",
+        "radio_communications",
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Геолог",
@@ -942,7 +1029,9 @@
           "en": "Can find minerals and water",
           "ru": "Может найти полезные ископаемые и воду"
         }
-      }
+      },
+      "id": "geologist",
+      "capabilityTags": []
     },
     {
       "profession": "Столяр",
@@ -1008,7 +1097,13 @@
           "en": "Creates furniture and wooden structures",
           "ru": "Создает мебель и деревянные конструкции"
         }
-      }
+      },
+      "id": "carpenter",
+      "capabilityTags": [
+        "construction",
+        "engineering_general",
+        "structural_repair"
+      ]
     },
     {
       "profession": "Електронщик",
@@ -1074,7 +1169,14 @@
           "en": "Repairs complex electronics",
           "ru": "Ремонтирует сложную электронику"
         }
-      }
+      },
+      "id": "electronics_technician",
+      "capabilityTags": [
+        "electronics_repair",
+        "engineering_general",
+        "logistics",
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Фізик",
@@ -1140,7 +1242,9 @@
           "en": "Can optimize energy systems",
           "ru": "Может оптимизировать энергосистемы"
         }
-      }
+      },
+      "id": "physicist",
+      "capabilityTags": []
     },
     {
       "profession": "Педіатр",
@@ -1206,7 +1310,15 @@
           "en": "Takes care of children in the bunker",
           "ru": "Заботится о детях в бункере"
         }
-      }
+      },
+      "id": "pediatrician",
+      "capabilityTags": [
+        "crisis_support",
+        "medical_diagnostics",
+        "medical_general",
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "profession": "Слюсар",
@@ -1272,7 +1384,14 @@
           "en": "Repairs metal parts of the bunker",
           "ru": "Ремонтирует металлические части бункера"
         }
-      }
+      },
+      "id": "metalworker",
+      "capabilityTags": [
+        "engineering_general",
+        "mechanical_repair",
+        "structural_repair",
+        "welding"
+      ]
     },
     {
       "profession": "Фармацевт",
@@ -1338,7 +1457,13 @@
           "en": "Provides medicine",
           "ru": "Обеспечивает медикаментами"
         }
-      }
+      },
+      "id": "pharmacist",
+      "capabilityTags": [
+        "first_aid",
+        "medical_general",
+        "pharmacology"
+      ]
     },
     {
       "profession": "Токар",
@@ -1404,7 +1529,13 @@
           "en": "Makes necessary metal parts",
           "ru": "Изготавливает необходимые металлические детали"
         }
-      }
+      },
+      "id": "lathe_operator",
+      "capabilityTags": [
+        "engineering_general",
+        "mechanical_repair",
+        "precision_work"
+      ]
     },
     {
       "profession": "Бджоляр",
@@ -1470,7 +1601,11 @@
           "en": "Provides honey and wax",
           "ru": "Обеспечивает медом и воском"
         }
-      }
+      },
+      "id": "beekeeper",
+      "capabilityTags": [
+        "agriculture"
+      ]
     },
     {
       "profession": "Садівник",
@@ -1536,7 +1671,11 @@
           "en": "Creates green areas and grows food",
           "ru": "Создает зеленые зоны и выращивает еду"
         }
-      }
+      },
+      "id": "gardener",
+      "capabilityTags": [
+        "agriculture"
+      ]
     },
     {
       "profession": "Зоотехнік",
@@ -1602,7 +1741,15 @@
           "en": "Provides meat and milk",
           "ru": "Обеспечивает мясом и молоком"
         }
-      }
+      },
+      "id": "animal_husbandry_specialist",
+      "capabilityTags": [
+        "agriculture",
+        "biology",
+        "engineering_general",
+        "technical_diagnostics",
+        "veterinary"
+      ]
     },
     {
       "profession": "Програміст",
@@ -1668,7 +1815,13 @@
           "en": "Maintains computer systems",
           "ru": "Поддерживает работу компьютерных систем"
         }
-      }
+      },
+      "id": "programmer",
+      "capabilityTags": [
+        "computer_systems",
+        "engineering_general",
+        "hacking"
+      ]
     },
     {
       "profession": "Електрозварювальник",
@@ -1734,7 +1887,13 @@
           "en": "Can weld metal parts",
           "ru": "Может сваривать металлические части"
         }
-      }
+      },
+      "id": "electric_welder",
+      "capabilityTags": [
+        "engineering_general",
+        "structural_repair",
+        "welding"
+      ]
     },
     {
       "profession": "Швачка",
@@ -1800,7 +1959,12 @@
           "en": "Makes and repairs clothing",
           "ru": "Изготавливает и ремонтирует одежду"
         }
-      }
+      },
+      "id": "seamstress",
+      "capabilityTags": [
+        "engineering_general",
+        "precision_work"
+      ]
     },
     {
       "profession": "Технік з кондиціонерів",
@@ -1866,7 +2030,13 @@
           "en": "Maintains the climate inside the bunker",
           "ru": "Поддерживает климат в бункере"
         }
-      }
+      },
+      "id": "air_conditioning_technician",
+      "capabilityTags": [
+        "engineering_general",
+        "technical_diagnostics",
+        "ventilation_repair"
+      ]
     },
     {
       "profession": "Пекар",
@@ -1932,7 +2102,12 @@
           "en": "Provides bread",
           "ru": "Обеспечивает хлебом"
         }
-      }
+      },
+      "id": "baker",
+      "capabilityTags": [
+        "food_preparation",
+        "food_preservation"
+      ]
     },
     {
       "profession": "М'ясник",
@@ -1998,7 +2173,12 @@
           "en": "Processes meat and makes preserved supplies",
           "ru": "Обрабатывает мясо и делает заготовки"
         }
-      }
+      },
+      "id": "butcher",
+      "capabilityTags": [
+        "food_preparation",
+        "food_preservation"
+      ]
     },
     {
       "profession": "Тесляр",
@@ -2064,7 +2244,13 @@
           "en": "Builds wooden structures",
           "ru": "Строит деревянные конструкции"
         }
-      }
+      },
+      "id": "woodworker",
+      "capabilityTags": [
+        "construction",
+        "engineering_general",
+        "structural_repair"
+      ]
     },
     {
       "profession": "Гончар",
@@ -2130,7 +2316,9 @@
           "en": "Creates dishes and ceramic goods",
           "ru": "Создает посуду и керамические изделия"
         }
-      }
+      },
+      "id": "potter",
+      "capabilityTags": []
     },
     {
       "profession": "Ковальс",
@@ -2196,7 +2384,14 @@
           "en": "Makes metal tools and weapons",
           "ru": "Изготавливает металлические инструменты и оружие"
         }
-      }
+      },
+      "id": "blacksmith",
+      "capabilityTags": [
+        "engineering_general",
+        "physical_strength",
+        "structural_repair",
+        "welding"
+      ]
     },
     {
       "profession": "Акушер-гінеколог",
@@ -2262,7 +2457,13 @@
           "en": "Helps with childbirth",
           "ru": "Помогает при рождении детей"
         }
-      }
+      },
+      "id": "obstetrician_gynecologist",
+      "capabilityTags": [
+        "medical_diagnostics",
+        "medical_general",
+        "surgery"
+      ]
     },
     {
       "profession": "Стоматолог",
@@ -2328,7 +2529,14 @@
           "en": "Takes care of teeth",
           "ru": "Заботится о зубах"
         }
-      }
+      },
+      "id": "dentist",
+      "capabilityTags": [
+        "medical_diagnostics",
+        "medical_general",
+        "precision_work",
+        "surgery"
+      ]
     },
     {
       "profession": "Електромонтер",
@@ -2394,7 +2602,12 @@
           "en": "Installs electrical equipment",
           "ru": "Устанавливает электрооборудование"
         }
-      }
+      },
+      "id": "electrician",
+      "capabilityTags": [
+        "electrical_repair",
+        "engineering_general"
+      ]
     },
     {
       "profession": "Рибалка",
@@ -2460,7 +2673,12 @@
           "en": "Provides fish",
           "ru": "Обеспечивает рыбой"
         }
-      }
+      },
+      "id": "fisherman",
+      "capabilityTags": [
+        "hunting",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Мисливець",
@@ -2526,7 +2744,14 @@
           "en": "Gets meat and hides",
           "ru": "Добывает мясо и шкуры"
         }
-      }
+      },
+      "id": "hunter",
+      "capabilityTags": [
+        "endurance",
+        "hunting",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Винороб",
@@ -2592,7 +2817,11 @@
           "en": "Produces alcohol for disinfection and entertainment",
           "ru": "Производит алкоголь для дезинфекции и развлечений"
         }
-      }
+      },
+      "id": "winemaker",
+      "capabilityTags": [
+        "food_preservation"
+      ]
     },
     {
       "profession": "Пивовар",
@@ -2658,7 +2887,11 @@
           "en": "Produces beer",
           "ru": "Производит пиво"
         }
-      }
+      },
+      "id": "brewer",
+      "capabilityTags": [
+        "food_preservation"
+      ]
     },
     {
       "profession": "Оптик",
@@ -2724,7 +2957,12 @@
           "en": "Helps with vision problems",
           "ru": "Помогает с проблемами зрения"
         }
-      }
+      },
+      "id": "optician",
+      "capabilityTags": [
+        "engineering_general",
+        "precision_work"
+      ]
     },
     {
       "profession": "Шевець",
@@ -2790,7 +3028,11 @@
           "en": "Repairs and makes footwear",
           "ru": "Ремонтирует и изготавливает обувь"
         }
-      }
+      },
+      "id": "shoemaker",
+      "capabilityTags": [
+        "engineering_general"
+      ]
     },
     {
       "profession": "Гідролог",
@@ -2856,7 +3098,11 @@
           "en": "Finds and purifies water",
           "ru": "Находит и очищает воду"
         }
-      }
+      },
+      "id": "hydrologist",
+      "capabilityTags": [
+        "water_purification"
+      ]
     },
     {
       "profession": "Метеоролог",
@@ -2922,7 +3168,9 @@
           "en": "Forecasts weather conditions",
           "ru": "Прогнозирует погодные условия"
         }
-      }
+      },
+      "id": "meteorologist",
+      "capabilityTags": []
     },
     {
       "profession": "Картограф",
@@ -2988,7 +3236,12 @@
           "en": "Helps with navigation",
           "ru": "Помогает в навигации"
         }
-      }
+      },
+      "id": "cartographer",
+      "capabilityTags": [
+        "navigation",
+        "scouting"
+      ]
     },
     {
       "profession": "Водій вантажівки",
@@ -3054,7 +3307,14 @@
           "en": "Can transport cargo",
           "ru": "Может перевозить грузы"
         }
-      }
+      },
+      "id": "truck_driver",
+      "capabilityTags": [
+        "engineering_general",
+        "logistics",
+        "navigation",
+        "resource_management"
+      ]
     },
     {
       "profession": "Дизельник",
@@ -3120,7 +3380,13 @@
           "en": "Keeps generators running",
           "ru": "Поддерживает работу генераторов"
         }
-      }
+      },
+      "id": "diesel_mechanic",
+      "capabilityTags": [
+        "engineering_general",
+        "generator_repair",
+        "mechanical_repair"
+      ]
     },
     {
       "profession": "Масажист",
@@ -3186,7 +3452,9 @@
           "en": "Relieves stress and tension",
           "ru": "Снимает стресс и напряжение"
         }
-      }
+      },
+      "id": "massage_therapist",
+      "capabilityTags": []
     },
     {
       "profession": "Фітнес-тренер",
@@ -3252,7 +3520,11 @@
           "en": "Maintains the group's physical fitness",
           "ru": "Поддерживает физическую форму группы"
         }
-      }
+      },
+      "id": "fitness_trainer",
+      "capabilityTags": [
+        "physical_strength"
+      ]
     },
     {
       "profession": "Дієтолог",
@@ -3318,7 +3590,12 @@
           "en": "Optimizes nutrition under limited conditions",
           "ru": "Оптимизирует питание в ограниченных условиях"
         }
-      }
+      },
+      "id": "dietitian",
+      "capabilityTags": [
+        "food_safety",
+        "rationing"
+      ]
     },
     {
       "profession": "Учитель фізики",
@@ -3384,7 +3661,9 @@
           "en": "Teaches scientific knowledge",
           "ru": "Обучает научным знаниям"
         }
-      }
+      },
+      "id": "physics_teacher",
+      "capabilityTags": []
     },
     {
       "profession": "Учитель хімії",
@@ -3450,7 +3729,11 @@
           "en": "Teaches chemistry and performs experiments",
           "ru": "Обучает химии и проводит эксперименты"
         }
-      }
+      },
+      "id": "chemistry_teacher",
+      "capabilityTags": [
+        "chemistry"
+      ]
     },
     {
       "profession": "Бібліотекар",
@@ -3516,7 +3799,11 @@
           "en": "Preserves and passes on knowledge",
           "ru": "Сохраняет и передает знания"
         }
-      }
+      },
+      "id": "librarian",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Архіваріус",
@@ -3582,7 +3869,11 @@
           "en": "Preserves historical records",
           "ru": "Сохраняет исторические записи"
         }
-      }
+      },
+      "id": "archivist",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Ювелір",
@@ -3648,7 +3939,12 @@
           "en": "Can repair small mechanisms",
           "ru": "Может ремонтировать мелкие механизмы"
         }
-      }
+      },
+      "id": "jeweler",
+      "capabilityTags": [
+        "engineering_general",
+        "precision_work"
+      ]
     },
     {
       "profession": "Годинникар",
@@ -3714,7 +4010,15 @@
           "en": "Repairs precision mechanisms",
           "ru": "Ремонтирует точные механизмы"
         }
-      }
+      },
+      "id": "watchmaker",
+      "capabilityTags": [
+        "engineering_general",
+        "generator_repair",
+        "mechanical_repair",
+        "precision_work",
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Метрдотель",
@@ -3780,7 +4084,13 @@
           "en": "Organizes meals",
           "ru": "Организует приемы пищи"
         }
-      }
+      },
+      "id": "maitre_d",
+      "capabilityTags": [
+        "food_safety",
+        "negotiation",
+        "organization"
+      ]
     },
     {
       "profession": "Офіціант",
@@ -3846,7 +4156,12 @@
           "en": "Helps organize everyday life",
           "ru": "Помогает с организацией быта"
         }
-      }
+      },
+      "id": "waiter",
+      "capabilityTags": [
+        "negotiation",
+        "organization"
+      ]
     },
     {
       "profession": "Бармен",
@@ -3912,7 +4227,14 @@
           "en": "Makes drinks and supports morale",
           "ru": "Готовит напитки и поддерживает моральный дух"
         }
-      }
+      },
+      "id": "bartender",
+      "capabilityTags": [
+        "crisis_support",
+        "food_preparation",
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "profession": "Флорист",
@@ -3978,7 +4300,11 @@
           "en": "Creates comfort",
           "ru": "Создает уют"
         }
-      }
+      },
+      "id": "florist",
+      "capabilityTags": [
+        "biology"
+      ]
     },
     {
       "profession": "Військовий",
@@ -4044,7 +4370,17 @@
           "en": "Provides security and defense",
           "ru": "Обеспечивает безопасность и оборону"
         }
-      }
+      },
+      "id": "soldier",
+      "capabilityTags": [
+        "access_control",
+        "combat",
+        "crowd_control",
+        "endurance",
+        "leadership",
+        "security",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Поліцейський",
@@ -4110,7 +4446,14 @@
           "en": "Maintains discipline and order",
           "ru": "Поддерживает дисциплину и порядок"
         }
-      }
+      },
+      "id": "police_officer",
+      "capabilityTags": [
+        "access_control",
+        "combat",
+        "crowd_control",
+        "security"
+      ]
     },
     {
       "profession": "Снайпер",
@@ -4176,7 +4519,12 @@
           "en": "Can defend the bunker from a distance",
           "ru": "Может защищать бункер на расстоянии"
         }
-      }
+      },
+      "id": "sniper",
+      "capabilityTags": [
+        "combat",
+        "precision_work"
+      ]
     },
     {
       "profession": "Сапер",
@@ -4242,7 +4590,11 @@
           "en": "Can neutralize dangerous objects",
           "ru": "Может обезвреживать опасные объекты"
         }
-      }
+      },
+      "id": "bomb_disposal_specialist",
+      "capabilityTags": [
+        "security"
+      ]
     },
     {
       "profession": "Пожежник",
@@ -4308,7 +4660,14 @@
           "en": "Extinguishes fires and rescues people",
           "ru": "Тушит пожары и спасает людей"
         }
-      }
+      },
+      "id": "firefighter",
+      "capabilityTags": [
+        "endurance",
+        "fire_control",
+        "first_aid",
+        "physical_strength"
+      ]
     },
     {
       "profession": "Рятувальник МНС",
@@ -4374,7 +4733,16 @@
           "en": "Survival expert",
           "ru": "Эксперт по выживанию"
         }
-      }
+      },
+      "id": "emergency_rescuer",
+      "capabilityTags": [
+        "crisis_support",
+        "endurance",
+        "first_aid",
+        "navigation",
+        "physical_strength",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Телохоронець",
@@ -4440,7 +4808,13 @@
           "en": "Protects important people",
           "ru": "Защищает важных людей"
         }
-      }
+      },
+      "id": "bodyguard",
+      "capabilityTags": [
+        "access_control",
+        "crowd_control",
+        "security"
+      ]
     },
     {
       "profession": "Секретний агент",
@@ -4506,7 +4880,13 @@
           "en": "Can obtain information secretly",
           "ru": "Может тайно получать информацию"
         }
-      }
+      },
+      "id": "secret_agent",
+      "capabilityTags": [
+        "access_control",
+        "scouting",
+        "security"
+      ]
     },
     {
       "profession": "Детектив",
@@ -4572,7 +4952,13 @@
           "en": "Solves mysteries and crimes",
           "ru": "Раскрывает тайны и преступления"
         }
-      }
+      },
+      "id": "detective",
+      "capabilityTags": [
+        "investigation",
+        "scouting",
+        "security"
+      ]
     },
     {
       "profession": "Суддя",
@@ -4638,7 +5024,12 @@
           "en": "Resolves conflicts and makes decisions",
           "ru": "Решает конфликты и принимает решения"
         }
-      }
+      },
+      "id": "judge",
+      "capabilityTags": [
+        "leadership",
+        "negotiation"
+      ]
     },
     {
       "profession": "Адвокат",
@@ -4704,7 +5095,11 @@
           "en": "Defends people’s rights",
           "ru": "Защищает права людей"
         }
-      }
+      },
+      "id": "lawyer",
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Прокурор",
@@ -4770,7 +5165,12 @@
           "en": "Controls law and order",
           "ru": "Контролирует соблюдение правопорядка"
         }
-      }
+      },
+      "id": "prosecutor",
+      "capabilityTags": [
+        "investigation",
+        "negotiation"
+      ]
     },
     {
       "profession": "Психіатр",
@@ -4836,7 +5236,15 @@
           "en": "Helps with mental health problems",
           "ru": "Помогает с психическими проблемами"
         }
-      }
+      },
+      "id": "psychiatrist",
+      "capabilityTags": [
+        "crisis_support",
+        "medical_diagnostics",
+        "medical_general",
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "profession": "Вірусолог",
@@ -4902,7 +5310,13 @@
           "en": "Can fight epidemics",
           "ru": "Может бороться с эпидемиями"
         }
-      }
+      },
+      "id": "virologist",
+      "capabilityTags": [
+        "epidemiology",
+        "microbiology",
+        "quarantine_management"
+      ]
     },
     {
       "profession": "Токсиколог",
@@ -4968,7 +5382,11 @@
           "en": "Neutralizes poisons",
           "ru": "Нейтрализует яды"
         }
-      }
+      },
+      "id": "toxicologist",
+      "capabilityTags": [
+        "toxicology"
+      ]
     },
     {
       "profession": "Військовий медик",
@@ -5034,7 +5452,21 @@
           "en": "Saves lives in extreme conditions",
           "ru": "Спасает жизни в экстремальных условиях"
         }
-      }
+      },
+      "id": "military_medic",
+      "capabilityTags": [
+        "access_control",
+        "combat",
+        "crowd_control",
+        "endurance",
+        "first_aid",
+        "leadership",
+        "medical_general",
+        "precision_work",
+        "security",
+        "surgery",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Інструктор з виживання",
@@ -5100,7 +5532,11 @@
           "en": "Teaches survival",
           "ru": "Обучает выживанию"
         }
-      }
+      },
+      "id": "survival_instructor",
+      "capabilityTags": [
+        "survival_skills"
+      ]
     },
     {
       "profession": "Капітан підводного човна",
@@ -5166,7 +5602,12 @@
           "en": "Has experience leading in confined spaces",
           "ru": "Имеет опыт управления в замкнутом пространстве"
         }
-      }
+      },
+      "id": "submarine_captain",
+      "capabilityTags": [
+        "leadership",
+        "navigation"
+      ]
     },
     {
       "profession": "Астронавт",
@@ -5232,7 +5673,13 @@
           "en": "Has experience surviving in isolation",
           "ru": "Имеет опыт выживания в изолированной среде"
         }
-      }
+      },
+      "id": "astronaut",
+      "capabilityTags": [
+        "endurance",
+        "navigation",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Диверсант",
@@ -5298,7 +5745,12 @@
           "en": "Can destroy objects",
           "ru": "Может уничтожать объекты"
         }
-      }
+      },
+      "id": "saboteur",
+      "capabilityTags": [
+        "combat",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Наркодилер",
@@ -5364,7 +5816,11 @@
           "en": "Has forbidden substances (morally questionable)",
           "ru": "Имеет запрещенные вещества (морально сомнительно)"
         }
-      }
+      },
+      "id": "drug_dealer",
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Кілер",
@@ -5430,7 +5886,12 @@
           "en": "Dangerous, but effective in extreme situations",
           "ru": "Опасен, но эффективен в крайних ситуациях"
         }
-      }
+      },
+      "id": "hitman",
+      "capabilityTags": [
+        "combat",
+        "toxicology"
+      ]
     },
     {
       "profession": "Злодій",
@@ -5496,7 +5957,11 @@
           "en": "Can obtain resources",
           "ru": "Может добыть ресурсы"
         }
-      }
+      },
+      "id": "thief",
+      "capabilityTags": [
+        "hacking"
+      ]
     },
     {
       "profession": "Хакер",
@@ -5562,7 +6027,13 @@
           "en": "Can hack security systems",
           "ru": "Может взламывать системы безопасности"
         }
-      }
+      },
+      "id": "hacker",
+      "capabilityTags": [
+        "access_control",
+        "computer_systems",
+        "hacking"
+      ]
     },
     {
       "profession": "Шахрай",
@@ -5628,7 +6099,11 @@
           "en": "Can manipulate people",
           "ru": "Может манипулировать людьми"
         }
-      }
+      },
+      "id": "con_artist",
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Контрабандист",
@@ -5694,7 +6169,9 @@
           "en": "Has access to rare resources",
           "ru": "Имеет доступ к редким ресурсам"
         }
-      }
+      },
+      "id": "smuggler",
+      "capabilityTags": []
     },
     {
       "profession": "Піроман",
@@ -5760,7 +6237,9 @@
           "en": "Dangerous, but can help destroy threats",
           "ru": "Опасен, но может помочь с уничтожением угроз"
         }
-      }
+      },
+      "id": "pyromaniac",
+      "capabilityTags": []
     },
     {
       "profession": "Маніяк",
@@ -5826,7 +6305,11 @@
           "en": "Extremely dangerous for the group",
           "ru": "Крайне опасен для группы"
         }
-      }
+      },
+      "id": "maniac",
+      "capabilityTags": [
+        "survival_skills"
+      ]
     },
     {
       "profession": "Канібал",
@@ -5892,7 +6375,12 @@
           "en": "Solves the food problem radically",
           "ru": "Радикально решает проблему питания"
         }
-      }
+      },
+      "id": "cannibal",
+      "capabilityTags": [
+        "food_safety",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Революціонер",
@@ -5958,7 +6446,11 @@
           "en": "Can create conflicts or unite people",
           "ru": "Может создавать конфликты или объединять людей"
         }
-      }
+      },
+      "id": "revolutionary",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Блогер-мільйонник",
@@ -6024,7 +6516,9 @@
           "en": "Lifts morale, but has little practical use",
           "ru": "Поднимает настроение, но практической пользы мало"
         }
-      }
+      },
+      "id": "million_follower_blogger",
+      "capabilityTags": []
     },
     {
       "profession": "TikTok-зірка",
@@ -6090,7 +6584,9 @@
           "en": "Entertaining, but useless",
           "ru": "Развлекает, но бесполезна"
         }
-      }
+      },
+      "id": "tiktok_star",
+      "capabilityTags": []
     },
     {
       "profession": "Мем-творець",
@@ -6156,7 +6652,9 @@
           "en": "Lifts morale in hard times",
           "ru": "Поднимает настроение в тяжелые времена"
         }
-      }
+      },
+      "id": "meme_creator",
+      "capabilityTags": []
     },
     {
       "profession": "Геймер-професіонал",
@@ -6222,7 +6720,9 @@
           "en": "Reaction and logic may be useful",
           "ru": "Реакция и логика могут пригодиться"
         }
-      }
+      },
+      "id": "professional_gamer",
+      "capabilityTags": []
     },
     {
       "profession": "Стрімер",
@@ -6288,7 +6788,11 @@
           "en": "Can entertain the group",
           "ru": "Может развлекать группу"
         }
-      }
+      },
+      "id": "streamer",
+      "capabilityTags": [
+        "computer_systems"
+      ]
     },
     {
       "profession": "Інтернет-тролль",
@@ -6354,7 +6858,11 @@
           "en": "Toxic personality, worsens the atmosphere",
           "ru": "Токсичная личность, ухудшает атмосферу"
         }
-      }
+      },
+      "id": "internet_troll",
+      "capabilityTags": [
+        "toxicology"
+      ]
     },
     {
       "profession": "Криптоінвестор",
@@ -6420,7 +6928,9 @@
           "en": "Useless without the internet",
           "ru": "Бесполезен без интернета"
         }
-      }
+      },
+      "id": "crypto_investor",
+      "capabilityTags": []
     },
     {
       "profession": "NFT-дилер",
@@ -6486,7 +6996,11 @@
           "en": "Completely useless in the apocalypse",
           "ru": "Абсолютно бесполезен в апокалипсисе"
         }
-      }
+      },
+      "id": "nft_dealer",
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Астролог",
@@ -6552,7 +7066,9 @@
           "en": "Can calm superstitious people",
           "ru": "Может успокоить суеверных"
         }
-      }
+      },
+      "id": "astrologer",
+      "capabilityTags": []
     },
     {
       "profession": "Інфлюенсер",
@@ -6618,7 +7134,9 @@
           "en": "Useless without social networks",
           "ru": "Бесполезен без соцсетей"
         }
-      }
+      },
+      "id": "influencer",
+      "capabilityTags": []
     },
     {
       "profession": "Стриптизерка",
@@ -6684,7 +7202,9 @@
           "en": "Entertains and lifts morale (for adults)",
           "ru": "Развлекает и поднимает настроение (для взрослых)"
         }
-      }
+      },
+      "id": "stripper",
+      "capabilityTags": []
     },
     {
       "profession": "Еротичний масажист",
@@ -6750,7 +7270,9 @@
           "en": "Relieves stress in a special way",
           "ru": "Снимает стресс особым способом"
         }
-      }
+      },
+      "id": "erotic_massage_therapist",
+      "capabilityTags": []
     },
     {
       "profession": "Порноактор",
@@ -6816,7 +7338,11 @@
           "en": "Can entertain an adult audience",
           "ru": "Может развлекать взрослую аудиторию"
         }
-      }
+      },
+      "id": "porn_actor",
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "profession": "Порноакторка",
@@ -6882,7 +7408,9 @@
           "en": "Lifts the mood of men in the bunker",
           "ru": "Поднимает настроение мужчинам в бункере"
         }
-      }
+      },
+      "id": "porn_actress",
+      "capabilityTags": []
     },
     {
       "profession": "Ескорт",
@@ -6948,7 +7476,9 @@
           "en": "Companionship and entertainment",
           "ru": "Компания и развлечения"
         }
-      }
+      },
+      "id": "escort",
+      "capabilityTags": []
     },
     {
       "profession": "Гей-ескорт",
@@ -7014,7 +7544,9 @@
           "en": "Entertains gay men in the bunker",
           "ru": "Развлекает геев в бункере"
         }
-      }
+      },
+      "id": "gay_escort",
+      "capabilityTags": []
     },
     {
       "profession": "Сутенер",
@@ -7080,7 +7612,12 @@
           "en": "Can organize 'services' (morally questionable)",
           "ru": "Может организовать 'услуги' (морально сомнительно)"
         }
-      }
+      },
+      "id": "pimp",
+      "capabilityTags": [
+        "negotiation",
+        "organization"
+      ]
     },
     {
       "profession": "Власник борделю",
@@ -7146,7 +7683,12 @@
           "en": "Organizes 'entertainment' for the group",
           "ru": "Организует 'развлечения' для группы"
         }
-      }
+      },
+      "id": "brothel_owner",
+      "capabilityTags": [
+        "negotiation",
+        "organization"
+      ]
     },
     {
       "profession": "БДСМ-майстриня",
@@ -7212,7 +7754,15 @@
           "en": "Maintains discipline in a nonstandard way",
           "ru": "Поддерживает дисциплину нестандартным способом"
         }
-      }
+      },
+      "id": "bdsm_mistress",
+      "capabilityTags": [
+        "crisis_support",
+        "engineering_general",
+        "negotiation",
+        "psychology",
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Сексолог",
@@ -7278,7 +7828,13 @@
           "en": "Helps with intimate problems",
           "ru": "Помогает с интимными проблемами"
         }
-      }
+      },
+      "id": "sexologist",
+      "capabilityTags": [
+        "crisis_support",
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "profession": "Продавець секс-шопу",
@@ -7344,7 +7900,11 @@
           "en": "Has useful goods for entertainment",
           "ru": "Имеет полезные товары для развлечений"
         }
-      }
+      },
+      "id": "sex_shop_salesperson",
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Еротичний фотограф",
@@ -7410,7 +7970,9 @@
           "en": "Creates memories and entertains",
           "ru": "Создает воспоминания и развлекает"
         }
-      }
+      },
+      "id": "erotic_photographer",
+      "capabilityTags": []
     },
     {
       "profession": "Організатор оргій",
@@ -7476,7 +8038,12 @@
           "en": "Organizes 'group entertainment'",
           "ru": "Организует 'групповые развлечения'"
         }
-      }
+      },
+      "id": "orgy_organizer",
+      "capabilityTags": [
+        "leadership",
+        "organization"
+      ]
     },
     {
       "profession": "Камгьорл",
@@ -7542,7 +8109,9 @@
           "en": "Useless without the internet, but can entertain",
           "ru": "Бесполезна без интернета, но может развлекать"
         }
-      }
+      },
+      "id": "camgirl",
+      "capabilityTags": []
     },
     {
       "profession": "Танцюрист у стриптиз-клубі",
@@ -7608,7 +8177,9 @@
           "en": "Entertains women in the bunker",
           "ru": "Развлекает женщин в бункере"
         }
-      }
+      },
+      "id": "strip_club_dancer",
+      "capabilityTags": []
     },
     {
       "profession": "Продюсер дорослого кіно",
@@ -7674,7 +8245,11 @@
           "en": "Can organize 'entertainment'",
           "ru": "Может организовать 'развлечения'"
         }
-      }
+      },
+      "id": "adult_film_producer",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Повія елітна",
@@ -7740,7 +8315,9 @@
           "en": "Provides intimate services (morally questionable)",
           "ru": "Предоставляет интимные услуги (морально сомнительно)"
         }
-      }
+      },
+      "id": "elite_sex_worker",
+      "capabilityTags": []
     },
     {
       "profession": "Проститутка вулична",
@@ -7806,7 +8383,11 @@
           "en": "Provides services (low social status)",
           "ru": "Предоставляет услуги (низкий социальный статус)"
         }
-      }
+      },
+      "id": "street_prostitute",
+      "capabilityTags": [
+        "survival_skills"
+      ]
     },
     {
       "profession": "Виробник афродизіаків",
@@ -7872,7 +8453,9 @@
           "en": "Creates stimulating substances",
           "ru": "Создает стимулирующие средства"
         }
-      }
+      },
+      "id": "aphrodisiac_maker",
+      "capabilityTags": []
     },
     {
       "profession": "Тантра-майстер",
@@ -7938,7 +8521,9 @@
           "en": "Teaches intimate practices",
           "ru": "Обучает интимным практикам"
         }
-      }
+      },
+      "id": "tantra_master",
+      "capabilityTags": []
     },
     {
       "profession": "Художник-сюрреаліст",
@@ -8004,7 +8589,13 @@
           "en": "Creates art for psychological release",
           "ru": "Создает искусство для психологической разрядки"
         }
-      }
+      },
+      "id": "surrealist_artist",
+      "capabilityTags": [
+        "crisis_support",
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "profession": "Музикант",
@@ -8070,7 +8661,9 @@
           "en": "Entertains and lifts morale",
           "ru": "Развлекает и поднимает настроение"
         }
-      }
+      },
+      "id": "musician",
+      "capabilityTags": []
     },
     {
       "profession": "Співак",
@@ -8136,7 +8729,9 @@
           "en": "Lifts morale",
           "ru": "Поднимает настроение"
         }
-      }
+      },
+      "id": "singer",
+      "capabilityTags": []
     },
     {
       "profession": "Актор театру",
@@ -8202,7 +8797,9 @@
           "en": "Stages performances",
           "ru": "Устраивает представления"
         }
-      }
+      },
+      "id": "theater_actor",
+      "capabilityTags": []
     },
     {
       "profession": "Режисер",
@@ -8268,7 +8865,12 @@
           "en": "Organizes entertainment and documents life in the bunker",
           "ru": "Организует развлечения и документирует жизнь в бункере"
         }
-      }
+      },
+      "id": "director",
+      "capabilityTags": [
+        "leadership",
+        "organization"
+      ]
     },
     {
       "profession": "Письменник",
@@ -8334,7 +8936,9 @@
           "en": "Records the history of the bunker",
           "ru": "Записывает историю бункера"
         }
-      }
+      },
+      "id": "writer",
+      "capabilityTags": []
     },
     {
       "profession": "Поет",
@@ -8400,7 +9004,9 @@
           "en": "Creates poetry for the soul",
           "ru": "Создает поэзию для души"
         }
-      }
+      },
+      "id": "poet",
+      "capabilityTags": []
     },
     {
       "profession": "Скульптор",
@@ -8466,7 +9072,9 @@
           "en": "Creates sculptures and decor",
           "ru": "Создает скульптуры и декор"
         }
-      }
+      },
+      "id": "sculptor",
+      "capabilityTags": []
     },
     {
       "profession": "Фотограф",
@@ -8532,7 +9140,9 @@
           "en": "Documents life in the bunker",
           "ru": "Документирует жизнь в бункере"
         }
-      }
+      },
+      "id": "photographer",
+      "capabilityTags": []
     },
     {
       "profession": "Дизайнер інтер'єрів",
@@ -8598,7 +9208,11 @@
           "en": "Makes the bunker cozy",
           "ru": "Делает бункер уютным"
         }
-      }
+      },
+      "id": "interior_designer",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Модельєр",
@@ -8664,7 +9278,9 @@
           "en": "Creates clothing",
           "ru": "Создает одежду"
         }
-      }
+      },
+      "id": "fashion_designer",
+      "capabilityTags": []
     },
     {
       "profession": "Графічний дизайнер",
@@ -8730,7 +9346,9 @@
           "en": "Creates visual content",
           "ru": "Создает визуальный контент"
         }
-      }
+      },
+      "id": "graphic_designer",
+      "capabilityTags": []
     },
     {
       "profession": "Аніматор",
@@ -8796,7 +9414,9 @@
           "en": "Entertains children",
           "ru": "Развлекает детей"
         }
-      }
+      },
+      "id": "entertainer",
+      "capabilityTags": []
     },
     {
       "profession": "Клоун",
@@ -8862,7 +9482,9 @@
           "en": "Lifts morale",
           "ru": "Поднимает настроение"
         }
-      }
+      },
+      "id": "clown",
+      "capabilityTags": []
     },
     {
       "profession": "Фокусник",
@@ -8928,7 +9550,9 @@
           "en": "Entertains the group",
           "ru": "Развлекает группу"
         }
-      }
+      },
+      "id": "magician",
+      "capabilityTags": []
     },
     {
       "profession": "Жонглер",
@@ -8994,7 +9618,11 @@
           "en": "Puts on a show",
           "ru": "Устраивает шоу"
         }
-      }
+      },
+      "id": "juggler",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Каліграф",
@@ -9060,7 +9688,9 @@
           "en": "Creates beautiful inscriptions",
           "ru": "Создает красивые надписи"
         }
-      }
+      },
+      "id": "calligrapher",
+      "capabilityTags": []
     },
     {
       "profession": "Татуювальник",
@@ -9126,7 +9756,11 @@
           "en": "Makes tattoos",
           "ru": "Делает татуировки"
         }
-      }
+      },
+      "id": "tattoo_artist",
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Перукар",
@@ -9192,7 +9826,9 @@
           "en": "Takes care of appearance",
           "ru": "Ухаживает за внешностью"
         }
-      }
+      },
+      "id": "hairdresser",
+      "capabilityTags": []
     },
     {
       "profession": "Візажист",
@@ -9258,7 +9894,9 @@
           "en": "Applies makeup",
           "ru": "Делает макияж"
         }
-      }
+      },
+      "id": "makeup_artist",
+      "capabilityTags": []
     },
     {
       "profession": "Стиліст",
@@ -9324,7 +9962,9 @@
           "en": "Helps people look stylish",
           "ru": "Помогает выглядеть стильно"
         }
-      }
+      },
+      "id": "stylist",
+      "capabilityTags": []
     },
     {
       "profession": "Флейтист",
@@ -9390,7 +10030,9 @@
           "en": "Creates atmospheric music",
           "ru": "Создает атмосферную музыку"
         }
-      }
+      },
+      "id": "flutist",
+      "capabilityTags": []
     },
     {
       "profession": "Барабанщик",
@@ -9456,7 +10098,9 @@
           "en": "Sets rhythm and energy",
           "ru": "Задает ритм и энергию"
         }
-      }
+      },
+      "id": "drummer",
+      "capabilityTags": []
     },
     {
       "profession": "Скрипаль",
@@ -9522,7 +10166,9 @@
           "en": "Creates a cultural atmosphere",
           "ru": "Создает культурную атмосферу"
         }
-      }
+      },
+      "id": "violinist",
+      "capabilityTags": []
     },
     {
       "profession": "Диджей",
@@ -9588,7 +10234,9 @@
           "en": "Organizes parties",
           "ru": "Организует вечеринки"
         }
-      }
+      },
+      "id": "dj",
+      "capabilityTags": []
     },
     {
       "profession": "Радіоведучий",
@@ -9654,7 +10302,11 @@
           "en": "Can organize bunker radio",
           "ru": "Может организовать бункерное радио"
         }
-      }
+      },
+      "id": "radio_host",
+      "capabilityTags": [
+        "radio_communications"
+      ]
     },
     {
       "profession": "Коментатор спортивний",
@@ -9720,7 +10372,9 @@
           "en": "Entertains by commenting on events",
           "ru": "Развлекает комментированием событий"
         }
-      }
+      },
+      "id": "sports_commentator",
+      "capabilityTags": []
     },
     {
       "profession": "Журналіст",
@@ -9786,7 +10440,9 @@
           "en": "Documents events in the bunker",
           "ru": "Документирует события в бункере"
         }
-      }
+      },
+      "id": "journalist",
+      "capabilityTags": []
     },
     {
       "profession": "Історик",
@@ -9852,7 +10508,9 @@
           "en": "Preserves knowledge of the past",
           "ru": "Сохраняет знания о прошлом"
         }
-      }
+      },
+      "id": "historian",
+      "capabilityTags": []
     },
     {
       "profession": "Філософ",
@@ -9918,7 +10576,9 @@
           "en": "Gives life meaning and depth",
           "ru": "Придает жизни смысл и глубину"
         }
-      }
+      },
+      "id": "philosopher",
+      "capabilityTags": []
     },
     {
       "profession": "Іпотечний брокер",
@@ -9984,7 +10644,11 @@
           "en": "Useless without an economy",
           "ru": "Бесполезен без экономики"
         }
-      }
+      },
+      "id": "mortgage_broker",
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Кондитер",
@@ -10050,7 +10714,9 @@
           "en": "Creates sweets for holidays",
           "ru": "Создает сладости для праздников"
         }
-      }
+      },
+      "id": "pastry_chef",
+      "capabilityTags": []
     },
     {
       "profession": "Бариста",
@@ -10116,7 +10782,9 @@
           "en": "Makes coffee (if there are beans)",
           "ru": "Готовит кофе (если есть зерна)"
         }
-      }
+      },
+      "id": "barista",
+      "capabilityTags": []
     },
     {
       "profession": "Сомельє",
@@ -10182,7 +10850,9 @@
           "en": "Organizes cultural tastings",
           "ru": "Организует культурные дегустации"
         }
-      }
+      },
+      "id": "sommelier",
+      "capabilityTags": []
     },
     {
       "profession": "Кулінарний критик",
@@ -10248,7 +10918,9 @@
           "en": "Evaluates food quality",
           "ru": "Оценивает качество еды"
         }
-      }
+      },
+      "id": "food_critic",
+      "capabilityTags": []
     },
     {
       "profession": "Шеф-кухар",
@@ -10314,7 +10986,14 @@
           "en": "Cooks refined food",
           "ru": "Готовит изысканную еду"
         }
-      }
+      },
+      "id": "chef",
+      "capabilityTags": [
+        "food_preparation",
+        "food_preservation",
+        "food_safety",
+        "logistics"
+      ]
     },
     {
       "profession": "Ресторатор",
@@ -10380,7 +11059,9 @@
           "en": "Can organize a canteen",
           "ru": "Может организовать столовую"
         }
-      }
+      },
+      "id": "restaurateur",
+      "capabilityTags": []
     },
     {
       "profession": "Археолог",
@@ -10446,7 +11127,9 @@
           "en": "Can study artifacts",
           "ru": "Может исследовать артефакты"
         }
-      }
+      },
+      "id": "archaeologist",
+      "capabilityTags": []
     },
     {
       "profession": "Етнограф",
@@ -10512,7 +11195,9 @@
           "en": "Studies the new culture of the bunker",
           "ru": "Изучает новую культуру бункера"
         }
-      }
+      },
+      "id": "ethnographer",
+      "capabilityTags": []
     },
     {
       "profession": "Лінгвіст",
@@ -10578,7 +11263,9 @@
           "en": "Helps with communication",
           "ru": "Помогает с коммуникацией"
         }
-      }
+      },
+      "id": "linguist",
+      "capabilityTags": []
     },
     {
       "profession": "Соціолог",
@@ -10644,7 +11331,9 @@
           "en": "Studies group dynamics",
           "ru": "Изучает динамику группы"
         }
-      }
+      },
+      "id": "sociologist",
+      "capabilityTags": []
     },
     {
       "profession": "Антрополог",
@@ -10710,7 +11399,11 @@
           "en": "Studies human behavior",
           "ru": "Изучает поведение людей"
         }
-      }
+      },
+      "id": "anthropologist",
+      "capabilityTags": [
+        "psychology"
+      ]
     },
     {
       "profession": "Дресирувальник тварин",
@@ -10776,7 +11469,9 @@
           "en": "Can train animals",
           "ru": "Может тренировать животных"
         }
-      }
+      },
+      "id": "animal_trainer",
+      "capabilityTags": []
     },
     {
       "profession": "Йог",
@@ -10842,7 +11537,9 @@
           "en": "Helps people relax",
           "ru": "Помогает расслабиться"
         }
-      }
+      },
+      "id": "yogi",
+      "capabilityTags": []
     },
     {
       "profession": "Інструктор з йоги",
@@ -10908,7 +11605,11 @@
           "en": "Supports physical and mental health",
           "ru": "Поддерживает физическое и ментальное здоровье"
         }
-      }
+      },
+      "id": "yoga_instructor",
+      "capabilityTags": [
+        "psychology"
+      ]
     },
     {
       "profession": "Інспектор якості їжі",
@@ -10974,7 +11675,9 @@
           "en": "Controls food quality (excessively)",
           "ru": "Контролирует качество еды (чрезмерно)"
         }
-      }
+      },
+      "id": "food_quality_inspector",
+      "capabilityTags": []
     },
     {
       "profession": "Критик мемів",
@@ -11040,7 +11743,9 @@
           "en": "Evaluates humor (useless)",
           "ru": "Оценивает юмор (бесполезно)"
         }
-      }
+      },
+      "id": "meme_critic",
+      "capabilityTags": []
     },
     {
       "profession": "Професійний обіймач",
@@ -11106,7 +11811,9 @@
           "en": "Provides emotional support through hugs",
           "ru": "Оказывает эмоциональную поддержку через объятия"
         }
-      }
+      },
+      "id": "professional_hugger",
+      "capabilityTags": []
     },
     {
       "profession": "Дегустатор корму для собак",
@@ -11172,7 +11879,11 @@
           "en": "Can test food for suitability",
           "ru": "Может проверить еду на пригодность"
         }
-      }
+      },
+      "id": "dog_food_taster",
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "profession": "Колекціонер пилу",
@@ -11238,7 +11949,9 @@
           "en": "Completely useless",
           "ru": "Абсолютно бесполезен"
         }
-      }
+      },
+      "id": "dust_collector",
+      "capabilityTags": []
     },
     {
       "profession": "Тестер матраців",
@@ -11304,7 +12017,9 @@
           "en": "Can test the quality of sleeping places",
           "ru": "Может проверять качество спальных мест"
         }
-      }
+      },
+      "id": "mattress_tester",
+      "capabilityTags": []
     },
     {
       "profession": "Консультант з фен-шуй",
@@ -11370,7 +12085,9 @@
           "en": "Organizes space according to feng shui principles (questionable benefit)",
           "ru": "Организует пространство по принципам фен-шуй (сомнительная польза)"
         }
-      }
+      },
+      "id": "feng_shui_consultant",
+      "capabilityTags": []
     },
     {
       "profession": "Експерт з теорій змов",
@@ -11436,7 +12153,11 @@
           "en": "Creates theories about the bunker (toxic)",
           "ru": "Создает теории о бункере (токсично)"
         }
-      }
+      },
+      "id": "conspiracy_theory_expert",
+      "capabilityTags": [
+        "toxicology"
+      ]
     },
     {
       "profession": "Тренер голубів",
@@ -11502,7 +12223,9 @@
           "en": "Can train pigeons for communication (if there are any)",
           "ru": "Может тренировать голубей для связи (если они есть)"
         }
-      }
+      },
+      "id": "pigeon_trainer",
+      "capabilityTags": []
     },
     {
       "profession": "Ворожка на кавовій гущі",
@@ -11568,7 +12291,9 @@
           "en": "Entertains superstitious people",
           "ru": "Развлекает суеверных"
         }
-      }
+      },
+      "id": "coffee_grounds_fortune_teller",
+      "capabilityTags": []
     },
     {
       "profession": "Гіпнотизер",
@@ -11634,7 +12359,9 @@
           "en": "Can calm people (questionable effectiveness)",
           "ru": "Может успокоить людей (сомнительная эффективность)"
         }
-      }
+      },
+      "id": "hypnotist",
+      "capabilityTags": []
     },
     {
       "profession": "Читач думок",
@@ -11700,7 +12427,9 @@
           "en": "Entertains the naive",
           "ru": "Развлекает наивных"
         }
-      }
+      },
+      "id": "mind_reader",
+      "capabilityTags": []
     },
     {
       "profession": "Екзорцист",
@@ -11766,7 +12495,9 @@
           "en": "Helps with superstitions (useless)",
           "ru": "Помогает с суевериями (бесполезно)"
         }
-      }
+      },
+      "id": "exorcist",
+      "capabilityTags": []
     },
     {
       "profession": "Мисливець за привидами",
@@ -11832,7 +12563,14 @@
           "en": "Searches for paranormal phenomena (useless)",
           "ru": "Ищет паранормальные явления (бесполезно)"
         }
-      }
+      },
+      "id": "ghost_hunter",
+      "capabilityTags": [
+        "endurance",
+        "hunting",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "profession": "Уфолог",
@@ -11898,7 +12636,11 @@
           "en": "Searches for aliens (useless)",
           "ru": "Ищет инопланетян (бесполезно)"
         }
-      }
+      },
+      "id": "ufologist",
+      "capabilityTags": [
+        "scouting"
+      ]
     },
     {
       "profession": "Дегустатор води",
@@ -11964,7 +12706,9 @@
           "en": "Can test water quality (excessively)",
           "ru": "Может проверить качество воды (чрезмерно)"
         }
-      }
+      },
+      "id": "water_taster",
+      "capabilityTags": []
     },
     {
       "profession": "Тестувальник туалетного паперу",
@@ -12030,7 +12774,9 @@
           "en": "Evaluates the quality of hygiene supplies",
           "ru": "Оценивает качество гигиенических средств"
         }
-      }
+      },
+      "id": "toilet_paper_tester",
+      "capabilityTags": []
     },
     {
       "profession": "Дизайнер шкарпеток",
@@ -12096,7 +12842,9 @@
           "en": "Creates unique socks",
           "ru": "Создает уникальные носки"
         }
-      }
+      },
+      "id": "sock_designer",
+      "capabilityTags": []
     },
     {
       "profession": "Консультант з вибору шпалер",
@@ -12162,7 +12910,9 @@
           "en": "Helps with decor (limited usefulness)",
           "ru": "Помогает с декором (ограниченная польза)"
         }
-      }
+      },
+      "id": "wallpaper_selection_consultant",
+      "capabilityTags": []
     },
     {
       "profession": "Нюхач парфумів",
@@ -12228,7 +12978,9 @@
           "en": "Can check smell quality",
           "ru": "Может проверять качество запахов"
         }
-      }
+      },
+      "id": "perfume_sniffer",
+      "capabilityTags": []
     },
     {
       "profession": "Збирач камінців",
@@ -12294,7 +13046,9 @@
           "en": "Can find useful minerals (unlikely)",
           "ru": "Может найти полезные минералы (маловероятно)"
         }
-      }
+      },
+      "id": "pebble_collector",
+      "capabilityTags": []
     },
     {
       "profession": "Дресирувальник блох",
@@ -12360,7 +13114,9 @@
           "en": "Entertaining (very weird)",
           "ru": "Развлекает (очень странно)"
         }
-      }
+      },
+      "id": "flea_trainer",
+      "capabilityTags": []
     },
     {
       "profession": "Філософ-нігіліст",
@@ -12426,7 +13182,9 @@
           "en": "Lowers group morale",
           "ru": "Снижает моральный дух группы"
         }
-      }
+      },
+      "id": "nihilist_philosopher",
+      "capabilityTags": []
     },
     {
       "profession": "Міміст",
@@ -12492,7 +13250,9 @@
           "en": "Entertains without words",
           "ru": "Развлекает без слов"
         }
-      }
+      },
+      "id": "mime",
+      "capabilityTags": []
     },
     {
       "profession": "Колекціонер відчуттів",
@@ -12558,7 +13318,9 @@
           "en": "Useless, but interesting",
           "ru": "Бесполезен, но интересен"
         }
-      }
+      },
+      "id": "sensation_collector",
+      "capabilityTags": []
     },
     {
       "profession": "Спостерігач за хмарами",
@@ -12624,7 +13386,11 @@
           "en": "Relaxing, but useless",
           "ru": "Расслабляет, но бесполезен"
         }
-      }
+      },
+      "id": "cloud_watcher",
+      "capabilityTags": [
+        "scouting"
+      ]
     },
     {
       "profession": "Рахувальник кроків",
@@ -12690,7 +13456,9 @@
           "en": "Can keep activity statistics",
           "ru": "Может вести статистику активности"
         }
-      }
+      },
+      "id": "step_counter",
+      "capabilityTags": []
     },
     {
       "profession": "Організатор флешмобів",
@@ -12756,7 +13524,12 @@
           "en": "Organizes entertainment",
           "ru": "Организует развлечения"
         }
-      }
+      },
+      "id": "flash_mob_organizer",
+      "capabilityTags": [
+        "leadership",
+        "organization"
+      ]
     },
     {
       "profession": "Вчитель гри на ложках",
@@ -12822,7 +13595,11 @@
           "en": "Teaches an unusual musical instrument",
           "ru": "Обучает необычному музыкальному инструменту"
         }
-      }
+      },
+      "id": "spoon_playing_teacher",
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Хроновізор",
@@ -12888,7 +13665,9 @@
           "en": "Can predict the future (if they existed)",
           "ru": "Может предсказывать будущее (если бы существовал)"
         }
-      }
+      },
+      "id": "chronovisor",
+      "capabilityTags": []
     },
     {
       "profession": "Телепортатор",
@@ -12954,7 +13733,9 @@
           "en": "Can move instantly (science fiction)",
           "ru": "Может перемещаться мгновенно (фантастика)"
         }
-      }
+      },
+      "id": "teleporter",
+      "capabilityTags": []
     },
     {
       "profession": "Маг вогню",
@@ -13020,7 +13801,11 @@
           "en": "Can create fire with magic",
           "ru": "Может создавать огонь магией"
         }
-      }
+      },
+      "id": "fire_mage",
+      "capabilityTags": [
+        "fire_control"
+      ]
     },
     {
       "profession": "Некромант",
@@ -13086,7 +13871,9 @@
           "en": "Can raise the dead (dark magic)",
           "ru": "Может оживлять мертвых (темная магия)"
         }
-      }
+      },
+      "id": "necromancer",
+      "capabilityTags": []
     },
     {
       "profession": "Алхімік",
@@ -13152,7 +13939,11 @@
           "en": "Can create gold (legend)",
           "ru": "Может создавать золото (легенда)"
         }
-      }
+      },
+      "id": "alchemist",
+      "capabilityTags": [
+        "chemistry"
+      ]
     },
     {
       "profession": "Драконовод",
@@ -13218,7 +14009,9 @@
           "en": "Has a dragon (fantasy)",
           "ru": "Имеет дракона (фэнтези)"
         }
-      }
+      },
+      "id": "dragon_rider",
+      "capabilityTags": []
     },
     {
       "profession": "Ловець снів",
@@ -13284,7 +14077,9 @@
           "en": "Can control dreams",
           "ru": "Может управлять снами"
         }
-      }
+      },
+      "id": "dreamcatcher",
+      "capabilityTags": []
     },
     {
       "profession": "Примарознавець",
@@ -13350,7 +14145,9 @@
           "en": "Can summon ghosts",
           "ru": "Может вызывать призраков"
         }
-      }
+      },
+      "id": "ghostologist",
+      "capabilityTags": []
     },
     {
       "profession": "Оборотень",
@@ -13416,7 +14213,11 @@
           "en": "Can turn into a wolf (mythology)",
           "ru": "Может превращаться в волка (мифология)"
         }
-      }
+      },
+      "id": "werewolf",
+      "capabilityTags": [
+        "physical_strength"
+      ]
     },
     {
       "profession": "Вампір",
@@ -13482,7 +14283,18 @@
           "en": "Immortal, but drinks blood (mythology)",
           "ru": "Бессмертный, но пьет кровь (мифология)"
         }
-      }
+      },
+      "id": "vampire",
+      "capabilityTags": [
+        "physical_strength"
+      ]
     }
-  ]
+  ],
+  "_threat_tagging_meta": {
+    "schemaVersion": 1,
+    "dictionaryFile": "threat_mechanics_tag_dictionary_v2.json",
+    "recordsTotal": 204,
+    "recordsWithCapabilityTags": 116,
+    "privacyRule_uk": "Прихована професія не показується GM і не враховується автоматично. Гравець має добровільно використати або розкрити її."
+  }
 }

@@ -37,4 +37,6 @@ Thumbs.db
 .emergent/
 memory/
 test_reports/
+.nuget/
+.tmp/
 tatus

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "purpose": {
+    "uk": "Зіставлення технічних conditionId із механіки загроз із реальними ID фізичних і ментальних станів.",
+    "en": "Maps threat-mechanics condition IDs to real physical and mental condition IDs.",
+    "ru": "Сопоставляет технические conditionId механики угроз с реальными ID физических и психических состояний."
+  },
+  "severityOrder": [
+    "light",
+    "medium",
+    "hard",
+    "veryHard",
+    "critical"
+  ],
+  "severityAliases": {
+    "none": null,
+    "stable": null,
+    "light": "light",
+    "mild": "light",
+    "medium": "medium",
+    "moderate": "medium",
+    "hard": "hard",
+    "heavy": "hard",
+    "severe": "hard",
+    "veryHard": "veryHard",
+    "very_hard": "veryHard",
+    "veryHeavy": "veryHard",
+    "very_severe": "veryHard",
+    "critical": "critical"
+  },
+  "physicalConditionAliases": {
+    "radiation_sickness": "physical_152",
+    "toxic_air_exposure": "physical_301",
+    "respiratory_poisoning": "physical_301",
+    "waterborne_poisoning": "physical_302",
+    "infectious_exposure": "physical_303",
+    "unknown_infection": "physical_303",
+    "structural_work_injury": "physical_304"
+  },
+  "mentalFallback": {
+    "whenPlayerMentalStateIsStable": {
+      "conditionId": "mental_068",
+      "severity": "light"
+    },
+    "whenPlayerAlreadyHasMentalCondition": {
+      "mode": "increaseExistingSeverity",
+      "steps": 1
+    },
+    "missingNextSeverityRule": "clampToHighestAvailableSeverity"
+  },
+  "physicalEscalation": {
+    "whenExistingConditionHasSeverity": {
+      "mode": "increaseExistingSeverity",
+      "steps": 1,
+      "missingNextSeverityRule": "clampToHighestAvailableSeverity"
+    },
+    "whenExistingConditionHasNoSeverity": {
+      "mode": "useMentalFallback"
+    },
+    "whenPhysicalStateIsStable": {
+      "mode": "addMappedCondition"
+    },
+    "doNotOverwriteNonScalableConditions": true
+  },
+  "notes_uk": [
+    "У файлах здоров’я використовується severity=hard, а не heavy.",
+    "Ключ heavy із mechanics потрібно нормалізувати через severityAliases або замінити на hard.",
+    "Променева хвороба вже існувала як physical_152 і не дублювалася.",
+    "Для двох близьких технічних alias може використовуватися один реальний медичний стан.",
+    "Фобії не використовуються як mental fallback.",
+    "Якщо у конкретного стану немає critical або іншого наступного опису, ступінь затискається до найвищого доступного."
+  ]
+}

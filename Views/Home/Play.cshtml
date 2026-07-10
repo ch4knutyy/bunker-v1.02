@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Грати";
+}
+
+<section class="mode-page" aria-labelledby="playTitle">
+    <div class="mode-page-header">
+        <h1 id="playTitle" data-i18n="chooseGameMode">Оберіть режим гри</h1>
+    </div>
+
+    <div class="mode-grid">
+        <article class="mode-card mode-card-active">
+            <div class="mode-card-marker"></div>
+            <h2 data-i18n="bunkerMode">Бункер</h2>
+            <p data-i18n="bunkerModeDescription">Класичний режим виживання та голосування в бункері.</p>
+            <a class="mode-action" href="/game" data-i18n="playAction">Грати</a>
+        </article>
+
+        <article class="mode-card mode-card-active">
+            <div class="mode-card-marker"></div>
+            <div class="mode-card-topline">
+                <h2 data-i18n="spyMode">Шпіон</h2>
+                <span data-i18n="mvpReady">MVP</span>
+            </div>
+            <p data-i18n="spyModeDescription">Режим соціальної дедукції: один шпигун не знає локацію.</p>
+            <a class="mode-action" href="/spy" data-i18n="playAction">Грати</a>
+        </article>
+
+        <article class="mode-card mode-card-disabled" aria-disabled="true">
+            <div class="mode-card-marker"></div>
+            <div class="mode-card-topline">
+                <h2 data-i18n="mafiaMode">Мафія</h2>
+                <span data-i18n="soon">Скоро</span>
+            </div>
+            <p data-i18n="mafiaModeDescription">Класична мафія з ролями. Буде додано пізніше.</p>
+            <button class="mode-action" type="button" disabled data-i18n="inDevelopment">В розробці</button>
+        </article>
+    </div>
+</section>

@@ -17,6 +17,8 @@ namespace Bunker.Models.Сharacteristics
         /// Бонус від хобі
         /// </summary>
         public string Bonus { get; set; } = "";
+
+        public List<string> CapabilityTags { get; set; } = new();
         
         /// <summary>
         /// Автоматично згенерований tooltip

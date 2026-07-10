@@ -20,6 +20,9 @@ namespace Bunker.Models.GameData
         [JsonPropertyName("bonus")]
         public string Bonus { get; set; } = "";
 
+        [JsonPropertyName("capabilityTags")]
+        public List<string> CapabilityTags { get; set; } = new();
+
         [JsonPropertyName("_i18n")]
         public Dictionary<string, JsonElement>? I18n { get; set; }
     }
