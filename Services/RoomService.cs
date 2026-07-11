@@ -110,6 +110,10 @@ namespace Bunker.Services
 
             TryRemovePlayer(room, connectionId, out var player);
             var playerName = player?.Name ?? "Unknown";
+            if (player != null)
+            {
+                CleanupPlayerReferences(room, connectionId, GetPlayerKey(player));
+            }
 
             _logger.LogInformation($"Гравець {playerName} покинув кімнату {room.Name} (ID: {room.Id})");
 
@@ -137,6 +141,79 @@ namespace Bunker.Services
             }
 
             return (true, room, false, newHostConnectionId);
+        }
+
+        public bool TransferHost(Room room, string targetConnectionId, out Player? newHost)
+        {
+            newHost = null;
+            if (!TryResolvePlayer(room, targetConnectionId, out var currentConnectionId, out var player) ||
+                !player.IsConnected || player.IsEliminated)
+            {
+                return false;
+            }
+
+            room.HostConnectionId = currentConnectionId;
+            room.HostPlayerId = GetPlayerKey(player);
+            room.HostName = player.Name ?? "Unknown";
+            room.GmMode = GmMode.PlayerHost;
+            newHost = player;
+            return true;
+        }
+
+        public StaleConnectionResult InspectStaleConnection(Room room, string connectionId, bool fix)
+        {
+            if (string.IsNullOrWhiteSpace(connectionId))
+                return new(false, false, "Не вказано connection mapping");
+
+            var hasMapping = _playerToRoom.TryGetValue(connectionId, out var mappedRoomId);
+            var hasActivePlayer = room.Players != null && room.Players.TryGetValue(connectionId, out var player) &&
+                                  player != null && player.IsConnected;
+            var stale = hasMapping && string.Equals(mappedRoomId, room.Id, StringComparison.OrdinalIgnoreCase) && !hasActivePlayer;
+            if (!stale)
+                return new(false, false, "Активне або відсутнє mapping не змінено");
+
+            var fixedMapping = fix && _playerToRoom.TryRemove(connectionId, out _);
+            return new(true, fixedMapping, fixedMapping ? "Застаріле mapping очищено" : "Застаріле mapping знайдено");
+        }
+
+        private static void CleanupPlayerReferences(Room room, string connectionId, string playerId)
+        {
+            if (room.CurrentTurnPlayerId == connectionId || room.CurrentTurnPlayerId == playerId)
+                room.CurrentTurnPlayerId = null;
+            room.CurrentRoundReveals.Remove(playerId);
+            room.CurrentRoundReveals.Remove(connectionId);
+            room.VotingReadyResponses.Remove(playerId);
+            room.VotingReadyResponses.Remove(connectionId);
+
+            var voting = room.CurrentVoting;
+            if (voting != null)
+            {
+                voting.Votes.Remove(playerId);
+                voting.Votes.Remove(connectionId);
+                foreach (var voter in voting.Votes.Where(vote => vote.Value == playerId || vote.Value == connectionId).Select(vote => vote.Key).ToList())
+                    voting.Votes.Remove(voter);
+                voting.EligibleVoters.Remove(playerId);
+                voting.EligibleVoters.Remove(connectionId);
+                voting.BlockedVoterIds.Remove(playerId);
+                voting.BlockedVoterIds.Remove(connectionId);
+                voting.VoteMultipliers.Remove(playerId);
+                voting.VoteMultipliers.Remove(connectionId);
+            }
+
+            var threat = room.ThreatState;
+            if (threat == null) return;
+            threat.ParticipantPlayerIds.RemoveAll(id => id == playerId || id == connectionId);
+            threat.Contributions.RemoveAll(item => item.PlayerId == playerId || item.PlayerId == connectionId || item.OwnerPlayerId == playerId || item.OwnerPlayerId == connectionId);
+            threat.ThreatVolunteerVote.Votes.Remove(playerId);
+            threat.ThreatVolunteerVote.Votes.Remove(connectionId);
+            foreach (var voter in threat.ThreatVolunteerVote.Votes.Where(vote => vote.Value == playerId || vote.Value == connectionId).Select(vote => vote.Key).ToList())
+                threat.ThreatVolunteerVote.Votes.Remove(voter);
+            if (threat.VolunteerSelection.SelectedPlayerId == playerId || threat.VolunteerSelection.SelectedPlayerId == connectionId)
+                threat.VolunteerSelection = new ThreatVolunteerSelectionState();
+            if (threat.ForcedParticipantPlayerId == playerId || threat.ForcedParticipantPlayerId == connectionId)
+                threat.ForcedParticipantPlayerId = "";
+            if (threat.MiniGame.LeaderPlayerId == playerId || threat.MiniGame.LeaderPlayerId == connectionId)
+                threat.MiniGame.LeaderPlayerId = "";
         }
 
         /// <summary>

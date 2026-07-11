@@ -1070,21 +1070,7 @@ namespace Bunker.Hubs
         }
 
         private static void SetCharacteristicHidden(Player player, string key)
-        {
-            switch (key)
-            {
-                case "Profession": player.Revealed.Profession = false; break;
-                case "PhysicalHealth": player.Revealed.PhysicalHealth = false; break;
-                case "MentalHealth": player.Revealed.MentalHealth = false; break;
-                case "Hobby": player.Revealed.Hobby = false; break;
-                case "CharacterTrait": player.Revealed.CharacterTrait = false; break;
-                case "Phobia": player.Revealed.Phobia = false; break;
-                case "Inventory": player.Revealed.Inventory = false; break;
-                case "Fact": player.Revealed.Fact = false; break;
-            }
-
-            player.Revealed.RevealedValues.Remove(key);
-        }
+            => GmPlayerStateMutator.HideCharacteristic(player, key);
 
         private static void SyncPrimarySpecialCard(Player player)
         {

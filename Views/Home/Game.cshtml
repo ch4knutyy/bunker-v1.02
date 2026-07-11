@@ -194,6 +194,30 @@
                         <button class="btn-gm-action btn-eliminate" onclick="eliminateSelectedPlayer()">❌ Елімінувати</button>
                         <button class="btn-gm-action btn-restore" onclick="restoreSelectedPlayer()">✅ Повернути</button>
                     </div>
+                    <p id="gmPlayerCommandResult" class="gm-round-hint" aria-live="polite"></p>
+                    <details class="gm-player-secondary">
+                        <summary data-gm-i18n="gmPlayerSecondaryActions">Додаткові дії</summary>
+                        <div class="gm-round-actions">
+                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmResyncPlayer" onclick="resyncSelectedPlayer()">Синхронізувати гравця</button>
+                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmInspectConnection" onclick="inspectSelectedConnection()">Перевірити connection</button>
+                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmTransferHost" onclick="transferHostToSelectedPlayer()">Передати host</button>
+                        </div>
+                        <label class="gm-label" data-gm-i18n="gmHideCharacteristic">Сховати розкриту характеристику</label>
+                        <div class="gm-round-actions">
+                            <select id="gmHideCharacteristicSelect" class="gm-select">
+                                <option value="Profession">Професія</option><option value="PhysicalHealth">Фізичне здоров'я</option>
+                                <option value="MentalHealth">Психічне здоров'я</option><option value="Hobby">Хобі</option>
+                                <option value="CharacterTrait">Риса характеру</option><option value="Phobia">Фобія</option>
+                                <option value="Inventory">Інвентар</option><option value="Fact">Факт</option>
+                            </select>
+                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmHide" onclick="hideSelectedCharacteristic()">Сховати</button>
+                        </div>
+                        <div id="gmAdditionalConditions"></div>
+                    </details>
+                    <details class="gm-player-danger">
+                        <summary data-gm-i18n="gmDangerousActions">Небезпечні дії</summary>
+                        <button class="btn-gm-action btn-danger gm-player-command" data-gm-i18n="gmKickPlayer" onclick="kickSelectedPlayer()">Виключити з кімнати</button>
+                    </details>
 
                     <!-- Характеристики -->
                     <div class="gm-characteristics">
@@ -305,12 +329,12 @@
                     <h4 class="gm-section-title">Сценарій гри</h4>
                     <div class="gm-scenario-controls">
                         <div class="gm-control-row">
-                            <label class="gm-label">Слоти бункера:</label>
+                            <label class="gm-label" for="gmBunkerCapacity" data-gm-i18n="gmBunkerCapacityLabel">Місткість бункера</label>
                             <div class="gm-capacity-control">
-                                <button class="btn-gm-small" onclick="changeBunkerCapacity(-1)">-</button>
-                                <span id="gmBunkerCapacity" class="gm-capacity-value">6</span>
-                                <button class="btn-gm-small" onclick="changeBunkerCapacity(1)">+</button>
+                                <input id="gmBunkerCapacity" class="gm-capacity-input" type="number" min="1" max="99" step="1" value="6" onkeydown="handleBunkerCapacityKeydown(event)" />
+                                <button id="gmBunkerCapacitySubmit" class="btn-gm-action" data-gm-i18n="gmCapacitySubmit" onclick="submitBunkerCapacity()">ОК</button>
                             </div>
+                            <small id="gmBunkerCapacityFeedback" class="gm-round-hint" aria-live="polite"></small>
                         </div>
                         <div class="gm-control-row">
                             <button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>

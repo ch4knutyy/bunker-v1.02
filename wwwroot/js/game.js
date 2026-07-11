@@ -41,6 +41,7 @@ connection.start()
     let selectedPlayerForGM = null;
     let gmThreatControlData = { threats: [], currentThreat: null };
     let gmThreatCommandPending = false;
+    let gmPlayerCommandPending = false;
     let activeGMTab = 'state';
     let gmLastServerUpdateAt = null;
     let gmLastCommandError = '';
@@ -163,6 +164,7 @@ connection.start()
         resolved_with_casualty: "Загрозу усунено з наслідками",
         failed: "Операція провалена"
         ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
+        ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
     });
     Object.assign(uiTranslations.en, {
         useSpecialCard: "Use card",
@@ -243,6 +245,7 @@ connection.start()
         resolved_with_casualty: "Resolved with consequences",
         failed: "Failed"
         ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
+        ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
     });
     Object.assign(uiTranslations.ru, {
         useSpecialCard: "Использовать карту",
@@ -323,6 +326,7 @@ connection.start()
         resolved_with_casualty: "Завершено с последствиями",
         failed: "Провалено"
         ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
+        ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
     });
 
     function getCurrentLanguage() {
@@ -2584,6 +2588,56 @@ function registerSignalREvents() {
         const reason = info.reason === 'timeout' ? ' (timeout)' : '';
         addEventMessage(`Гравець <span class="event-player">${leftName}</span> покинув кімнату${reason}`);
     });
+
+    connection.off("RoomPlayersUpdated");
+    connection.on("RoomPlayersUpdated", function (players) {
+        const next = {};
+        (players || []).forEach(p => {
+            const connectionId = p.connectionId || p.ConnectionId;
+            if (!connectionId) return;
+            next[connectionId] = {
+                ...(roomPlayers[connectionId] || {}), ...p, connectionId,
+                revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
+                revealedData: normalizeRevealedValues(p.revealedValues || p.RevealedValues || {}).revealedData,
+                revealedSources: normalizeRevealedSources(p.revealedSources || p.RevealedSources || {}),
+                additionalConditionEffects: normalizeAdditionalPhysicalConditions(p.additionalConditionEffects || p.AdditionalConditionEffects || [])
+            };
+        });
+        roomPlayers = next;
+        renderCurrentGameUI();
+        updateGMPlayerSelect();
+    });
+
+    connection.off("PlayerStateResynced");
+    connection.on("PlayerStateResynced", function (data) {
+        myPlayerData = normalizePlayer(data.player || data.Player);
+        renderCurrentGameUI();
+    });
+
+    connection.off("PlayerKicked");
+    connection.on("PlayerKicked", function (data) {
+        alert(data.message || data.Message || 'Вас виключено з кімнати');
+        currentRoom = null; myPlayerData = null; isHost = false; roomPlayers = {};
+        clearSession(); showLobbySection();
+    });
+
+    connection.off("HostChanged");
+    connection.on("HostChanged", function (data) {
+        const oldId = data.oldHostConnectionId || data.OldHostConnectionId;
+        const newId = data.newHostConnectionId || data.NewHostConnectionId;
+        if (roomPlayers[oldId]) roomPlayers[oldId].isHost = false;
+        if (roomPlayers[newId]) roomPlayers[newId].isHost = true;
+        isHost = newId === myConnectionId;
+        renderCurrentGameUI();
+    });
+
+    connection.off("StaleConnectionInspected");
+    connection.on("StaleConnectionInspected", function (data) {
+        gmPlayerCommandPending = false;
+        document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+        const result = document.getElementById('gmPlayerCommandResult');
+        if (result) result.textContent = data.message || data.Message || '';
+    });
     
     // Гравець відключився (може перепідключитись)
     connection.off("PlayerDisconnecting");    
@@ -3099,6 +3153,7 @@ function registerSignalREvents() {
         });
         updateGMPlayerSelect();
         updateSpecialCardsUI();
+        if (selectedPlayerForGM) loadPlayerDataForGM();
     });
 
     // GM дія успішна
@@ -3110,6 +3165,10 @@ function registerSignalREvents() {
         const result = document.getElementById('gmThreatCommandResult');
         if (result) result.textContent = action;
         gmLastCommandError = '';
+        gmPlayerCommandPending = false;
+        document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+        const playerResult = document.getElementById('gmPlayerCommandResult');
+        if (playerResult) playerResult.textContent = action;
         markGMServerUpdate();
         // Оновлюємо дані гравців
         if (isHost) {
@@ -3132,6 +3191,12 @@ function registerSignalREvents() {
         if (gmThreatCommandPending) {
             gmLastCommandError = localizeServerMessage(message);
             renderGMPanelState();
+        }
+        if (gmPlayerCommandPending) {
+            gmPlayerCommandPending = false;
+            document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+            const playerResult = document.getElementById('gmPlayerCommandResult');
+            if (playerResult) playerResult.textContent = localizeServerMessage(message);
         }
     });
 
@@ -5479,6 +5544,9 @@ function removeBunkerSupplies(months) {
             players.map(p => `<option value="${p.connectionId}" ${p.isEliminated ? 'class="eliminated-option"' : ''}>
                 ${escapeHtml(p.name)}${p.isEliminated ? ` (${t('eliminated').toLowerCase()})` : ''}${p.connectionId === myConnectionId ? ` (${t('you')})` : ''}
             </option>`).join('');
+        if (selectedPlayerForGM && [...select.options].some(option => option.value === selectedPlayerForGM)) {
+            select.value = selectedPlayerForGM;
+        }
     }
 
     function loadPlayerDataForGM() {
@@ -5537,6 +5605,29 @@ function removeBunkerSupplies(months) {
             if (eliminateBtn) eliminateBtn.style.display = 'inline-block';
             if (restoreBtn) restoreBtn.style.display = 'none';
         }
+        renderGMAdditionalConditions(playerData);
+    }
+
+    function renderGMAdditionalConditions(playerData) {
+        const container = document.getElementById('gmAdditionalConditions');
+        if (!container) return;
+        const conditions = playerData.additionalPhysicalConditions || playerData.AdditionalPhysicalConditions || [];
+        container.innerHTML = conditions.map(condition => {
+            const id = condition.id || condition.Id;
+            const name = condition.name || condition.Name || '';
+            const severity = condition.severityCode || condition.SeverityCode || 'medium';
+            const source = condition.sourceId || condition.SourceId || '';
+            const round = condition.appliedRound ?? condition.AppliedRound;
+            return `<div class="gm-condition-repair" data-condition-id="${escapeHtml(id)}">
+                <strong>${escapeHtml(name)}</strong>
+                <small>${source ? `${escapeHtml(source)}${round != null ? ` · ${round}` : ''}` : ''}</small>
+                <select class="gm-select gm-condition-severity">
+                    ${['light','medium','hard','veryHard','critical'].map(code => `<option value="${code}" ${code === severity ? 'selected' : ''}>${escapeHtml(code)}</option>`).join('')}
+                </select>
+                <button class="btn-gm-action gm-player-command" onclick="changeSelectedConditionSeverity('${escapeHtml(id)}', this)">✓</button>
+                <button class="btn-gm-action btn-danger gm-player-command" onclick="removeSelectedCondition('${escapeHtml(id)}')">×</button>
+            </div>`;
+        }).join('');
     }
     
     // Об'єкт для зберігання розкритих характеристик у GM панелі
@@ -5708,6 +5799,62 @@ function removeBunkerSupplies(months) {
             connection.invoke("RestorePlayer", selectedPlayerForGM)
                 .catch(err => console.error(err));
         }
+    }
+
+    function gmPlayerCommandId() {
+        return globalThis.crypto?.randomUUID?.() || `gm-player-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function invokeGMPlayerCommand(method, args) {
+        if (gmPlayerCommandPending || !selectedPlayerForGM) return;
+        gmPlayerCommandPending = true;
+        document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = true);
+        connection.invoke(method, ...args, gmPlayerCommandId()).catch(error => {
+            gmPlayerCommandPending = false;
+            document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+            const result = document.getElementById('gmPlayerCommandResult');
+            if (result) result.textContent = error?.message || 'Помилка команди';
+        });
+    }
+
+    function resyncSelectedPlayer() {
+        invokeGMPlayerCommand('ResyncPlayer', [selectedPlayerForGM]);
+    }
+
+    function inspectSelectedConnection() {
+        if (gmPlayerCommandPending || !selectedPlayerForGM) return;
+        gmPlayerCommandPending = true;
+        document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = true);
+        connection.invoke('InspectStalePlayerConnection', selectedPlayerForGM, false).catch(() => {
+            gmPlayerCommandPending = false;
+            document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+        });
+    }
+
+    function hideSelectedCharacteristic() {
+        const characteristic = document.getElementById('gmHideCharacteristicSelect')?.value;
+        if (characteristic) invokeGMPlayerCommand('HideRevealedCharacteristic', [selectedPlayerForGM, characteristic]);
+    }
+
+    function transferHostToSelectedPlayer() {
+        const player = gmPlayersData[selectedPlayerForGM];
+        if (confirm(`${t('gmTransferHost')}: ${player?.name || player?.Name || ''}?`))
+            invokeGMPlayerCommand('TransferHost', [selectedPlayerForGM]);
+    }
+
+    function kickSelectedPlayer() {
+        const player = gmPlayersData[selectedPlayerForGM];
+        if (confirm(`${t('gmKickPlayer')}: ${player?.name || player?.Name || ''}?`))
+            invokeGMPlayerCommand('KickPlayer', [selectedPlayerForGM]);
+    }
+
+    function changeSelectedConditionSeverity(conditionId, button) {
+        const severity = button.closest('.gm-condition-repair')?.querySelector('.gm-condition-severity')?.value;
+        if (severity) invokeGMPlayerCommand('ChangeAdditionalConditionSeverity', [selectedPlayerForGM, conditionId, severity]);
+    }
+
+    function removeSelectedCondition(conditionId) {
+        if (confirm(t('remove'))) invokeGMPlayerCommand('RemoveAdditionalCondition', [selectedPlayerForGM, conditionId]);
     }
 
     // ==================== UI FUNCTIONS ====================
