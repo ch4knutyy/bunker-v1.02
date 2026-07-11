@@ -42,6 +42,7 @@ connection.start()
     let gmThreatControlData = { threats: [], currentThreat: null };
     let gmThreatCommandPending = false;
     let gmPlayerCommandPending = false;
+    let bunkerCapacityPending = false;
     let activeGMTab = 'state';
     let gmLastServerUpdateAt = null;
     let gmLastCommandError = '';
@@ -165,6 +166,7 @@ connection.start()
         failed: "Операція провалена"
         ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
+        ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
     });
     Object.assign(uiTranslations.en, {
         useSpecialCard: "Use card",
@@ -246,6 +248,7 @@ connection.start()
         failed: "Failed"
         ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
+        ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
     });
     Object.assign(uiTranslations.ru, {
         useSpecialCard: "Использовать карту",
@@ -327,6 +330,7 @@ connection.start()
         failed: "Провалено"
         ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
+        ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
     });
 
     function getCurrentLanguage() {
@@ -2780,7 +2784,7 @@ function registerSignalREvents() {
             currentBunkerCapacity = currentBunker.capacity;
             const gmBunkerCapacity = document.getElementById('gmBunkerCapacity');
             if (gmBunkerCapacity) {
-                gmBunkerCapacity.textContent = currentBunker.capacity;
+                gmBunkerCapacity.value = currentBunker.capacity;
             }
         }
 
@@ -3198,6 +3202,13 @@ function registerSignalREvents() {
             const playerResult = document.getElementById('gmPlayerCommandResult');
             if (playerResult) playerResult.textContent = localizeServerMessage(message);
         }
+        if (bunkerCapacityPending) {
+            const input = document.getElementById('gmBunkerCapacity');
+            if (input) input.value = currentBunker?.capacity ?? currentBunkerCapacity;
+            const feedback = document.getElementById('gmBunkerCapacityFeedback');
+            if (feedback) feedback.textContent = localizeServerMessage(message);
+            setBunkerCapacityPending(false);
+        }
     });
 
     // ==================== SESSION RESTORE HANDLERS ====================
@@ -3391,9 +3402,24 @@ function registerSignalREvents() {
     connection.on("BunkerCapacityUpdated", function (data) {
         console.log("Bunker capacity updated:", data);
         if (currentBunker) currentBunker.capacity = data.capacity;
-        document.getElementById('gmBunkerCapacity').textContent = data.capacity;
+        currentBunkerCapacity = data.capacity;
+        const input = document.getElementById('gmBunkerCapacity');
+        if (input) input.value = data.capacity;
+        setBunkerCapacityPending(false);
+        const feedback = document.getElementById('gmBunkerCapacityFeedback');
+        if (feedback) feedback.textContent = t('gmCapacitySaved');
         renderBunker(data.bunker);
         addEventMessage(`<span class="event-gm">GM</span> змінив кількість слотів бункера на <strong>${data.capacity}</strong>`);
+    });
+
+    connection.off("BunkerCapacityRejected");
+    connection.on("BunkerCapacityRejected", function (data) {
+        currentBunkerCapacity = data.capacity ?? data.Capacity ?? currentBunkerCapacity;
+        const input = document.getElementById('gmBunkerCapacity');
+        if (input) input.value = currentBunkerCapacity;
+        setBunkerCapacityPending(false);
+        const feedback = document.getElementById('gmBunkerCapacityFeedback');
+        if (feedback) feedback.textContent = t('gmCapacityInvalid');
     });
 
     // Бункер змінено
@@ -3401,7 +3427,9 @@ function registerSignalREvents() {
     connection.on("BunkerChanged", function (data) {
         console.log("Bunker changed:", data);
         currentBunker = data.bunker;
-        document.getElementById('gmBunkerCapacity').textContent = data.bunker.capacity;
+        currentBunkerCapacity = data.bunker.capacity;
+        const capacityInput = document.getElementById('gmBunkerCapacity');
+        if (capacityInput) capacityInput.value = data.bunker.capacity;
         renderBunker(data.bunker);
         addEventMessage(`<span class="event-bunker">🏠 Новий бункер:</span> ${data.bunker.name}`);
     });
@@ -4592,12 +4620,40 @@ function removeBunkerSupplies(months) {
 
     var currentBunkerCapacity = 6;
 
-    function changeBunkerCapacity(delta) {
-        currentBunkerCapacity += delta;
-        if (currentBunkerCapacity < 1) currentBunkerCapacity = 1;
-        document.getElementById('gmBunkerCapacity').textContent = currentBunkerCapacity;
-        connection.invoke("UpdateBunkerCapacity", currentBunkerCapacity)
-            .catch(function(err) { console.error("UpdateBunkerCapacity error:", err); });
+    function setBunkerCapacityPending(pending) {
+        bunkerCapacityPending = pending;
+        const input = document.getElementById('gmBunkerCapacity');
+        const button = document.getElementById('gmBunkerCapacitySubmit');
+        if (input) input.disabled = pending;
+        if (button) button.disabled = pending;
+    }
+
+    function submitBunkerCapacity() {
+        if (bunkerCapacityPending) return;
+        const input = document.getElementById('gmBunkerCapacity');
+        const raw = input?.value?.trim() || '';
+        const parsed = Number(raw);
+        const feedback = document.getElementById('gmBunkerCapacityFeedback');
+        if (!/^\d+$/.test(raw) || !Number.isInteger(parsed) || parsed < 1 || parsed > 99) {
+            if (input) input.value = currentBunkerCapacity;
+            if (feedback) feedback.textContent = t('gmCapacityInvalid');
+            return;
+        }
+        setBunkerCapacityPending(true);
+        if (feedback) feedback.textContent = '';
+        connection.invoke("SetBunkerCapacity", raw).catch(function(err) {
+            console.error("SetBunkerCapacity error:", err);
+            if (input) input.value = currentBunkerCapacity;
+            if (feedback) feedback.textContent = localizeServerMessage(err?.message || t('gmCapacityInvalid'));
+            setBunkerCapacityPending(false);
+        });
+    }
+
+    function handleBunkerCapacityKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            submitBunkerCapacity();
+        }
     }
 
     function regenerateBunker() {
@@ -5430,6 +5486,11 @@ function removeBunkerSupplies(months) {
             element.textContent = t(element.dataset.gmI18n);
         });
         const round = getCurrentRoundNumber();
+        const capacityInput = document.getElementById('gmBunkerCapacity');
+        if (capacityInput && !bunkerCapacityPending && currentBunker?.capacity != null) {
+            currentBunkerCapacity = currentBunker.capacity;
+            capacityInput.value = currentBunker.capacity;
+        }
         const phase = getPhaseLabel(getCurrentPhase());
         const players = Object.values(roomPlayers || {});
         const activePlayers = players.filter(player => !(player.isEliminated || player.IsEliminated));
