@@ -3446,7 +3446,8 @@ function registerSignalREvents() {
     connection.on("GMThreatControlData", function (data) {
         gmThreatControlData = {
             threats: data.threats || data.Threats || [],
-            currentThreat: data.currentThreat || data.CurrentThreat || null
+            currentThreat: data.currentThreat || data.CurrentThreat || null,
+            canBrowseFutureThreatCatalog: data.canBrowseFutureThreatCatalog ?? data.CanBrowseFutureThreatCatalog ?? false
         };
         renderGMThreatControl();
         markGMServerUpdate();
@@ -5393,6 +5394,8 @@ function removeBunkerSupplies(months) {
     function renderGMThreatControl() {
         const current = document.getElementById('gmThreatCurrent');
         const select = document.getElementById('gmThreatSelect');
+        const specificControls = document.getElementById('gmSpecificThreatControls');
+        if (specificControls) specificControls.style.display = gmThreatControlData.canBrowseFutureThreatCatalog ? '' : 'none';
         if (current) {
             const threat = gmThreatControlData.currentThreat;
             current.textContent = threat

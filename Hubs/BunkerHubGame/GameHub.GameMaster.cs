@@ -2,6 +2,7 @@
 using Bunker.Models.GameData;
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
+using Bunker.Models.ViewModels;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -23,8 +24,35 @@ namespace Bunker.Hubs
                 room.IsHost(player);
         }
 
+        private bool HasGmCapability(Room room, GmCapability capability) =>
+            IsCallerHost() && GmCapabilities.Allows(room.GmMode, capability);
+
+        private List<PlayerHostControlDto> BuildPlayerHostControlData(Room room) =>
+            RoomService.GetPlayersSnapshot(room).Select(entry =>
+            {
+                var player = entry.Value;
+                return new PlayerHostControlDto
+                {
+                    ConnectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
+                    StablePlayerId = RoomService.GetPlayerKey(player),
+                    Name = player.Name ?? "Unknown",
+                    SeatNumber = player.SeatNumber,
+                    IsHost = room.IsHost(player),
+                    IsConnected = player.IsConnected,
+                    IsEliminated = player.IsEliminated,
+                    EliminatedAtRound = player.EliminatedAtRound,
+                    EliminatedByVote = player.EliminatedByVote,
+                    CanRevealAllAfterElimination = player.CanRevealAllAfterElimination,
+                    HasRevealedAllAfterElimination = player.HasRevealedAllAfterElimination,
+                    Revealed = player.Revealed ?? new RevealedCharacteristics()
+                };
+            }).ToList();
+
+        private Task SendPlayerHostControlData(Room room) =>
+            Clients.Caller.SendAsync("AllPlayersData", BuildPlayerHostControlData(room));
+
         /// <summary>
-        /// Отримати всіх гравців з повними даними (тільки для хоста)
+        /// Отримати безпечні технічні дані гравців (тільки для хоста)
         /// </summary>
         public async Task GetAllPlayersData()
         {
@@ -37,39 +65,7 @@ namespace Bunker.Hubs
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
             if (room == null) return;
 
-            var playersData = RoomService.GetPlayersSnapshot(room).Select(entry =>
-            {
-                var p = entry.Value;
-                RemoveCorruptedAdditionalConditions(room, p);
-
-                return new
-                {
-                    connectionId = string.IsNullOrWhiteSpace(p.ConnectionId) ? entry.Key : p.ConnectionId,
-                    stablePlayerId = RoomService.GetPlayerKey(p),
-                    name = p.Name ?? "Unknown",
-                    seatNumber = p.SeatNumber,
-                    isEliminated = p.IsEliminated,
-                    eliminatedAtRound = p.EliminatedAtRound,
-                    eliminatedByVote = p.EliminatedByVote,
-                    canRevealAllAfterElimination = p.CanRevealAllAfterElimination,
-                    hasRevealedAllAfterElimination = p.HasRevealedAllAfterElimination,
-                    personality = new { p.Personality.Age, p.Personality.Sex, p.Personality.SexOrientation, p.Personality.IsChildfree },
-                    body = new { p.Body.Height, p.Body.Weight, p.Body.BodyType },
-                    profession = new { p.Profession.Name, p.Profession.ExperienceYears, p.Profession.SelectedItem, p.Profession.SelectedItemIndex, ProfessionItem = p.ProfessionItem },
-                    physicalHealth = p.PhysicalHealth,
-                    additionalConditionEffects = p.AdditionalConditionEffects,
-                    mentalHealth = p.MentalHealth,
-                    hobby = new { p.Hobby.Name },
-                    characterTrait = new { p.CharacterTrait.Name },
-                    phobia = new { p.Phobia.Name },
-                    inventory = p.Inventory.Items.Select(i => i.Name),
-				    fact = new { p.Fact.Type, p.Fact.Name, p.Fact.Description, Tooltip = CleanTooltip(p.Fact.Tooltip) },
-                    specialCardCount = GetPlayerSpecialCards(p).Count,
-				    revealed = p.Revealed
-                };
-            }).ToList();
-
-            await Clients.Caller.SendAsync("AllPlayersData", playersData);
+            await SendPlayerHostControlData(room);
         }
 
         /// <summary>
@@ -649,17 +645,17 @@ namespace Bunker.Hubs
         /// </summary>
         public async Task PeekCharacteristic(string targetConnectionId, string characteristicName)
         {
-            if (!IsCallerHost())
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.PeekHiddenCharacteristics))
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може підглядати характеристики");
+                await Clients.Caller.SendAsync("ReceiveError", "Поточний режим GM не дозволяє перегляд прихованих характеристик");
                 return;
             }
 
             characteristicName = NormalizeCharacteristicName(characteristicName);
             if (await RejectHiddenSpecialCardAccess(characteristicName)) return;
 
-            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-            if (room == null || !_roomService.TryResolvePlayer(room, targetConnectionId, out var targetCurrentConnectionId, out var player))
+            if (!_roomService.TryResolvePlayer(room, targetConnectionId, out var targetCurrentConnectionId, out var player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
                 return;
@@ -987,6 +983,7 @@ namespace Bunker.Hubs
                 canRevealAllAfterElimination = true,
                 hasRevealedAllAfterElimination = false
             });
+            await SendPlayerHostControlData(room);
 
             _logger.LogInformation($"Гравець {player.Name} елімінований");
         }
@@ -1023,6 +1020,7 @@ namespace Bunker.Hubs
                 canRevealAllAfterElimination = false,
                 hasRevealedAllAfterElimination = false
             });
+            await SendPlayerHostControlData(room);
 
             _logger.LogInformation($"Гравець {player.Name} повернутий в гру");
         }

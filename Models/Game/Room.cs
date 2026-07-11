@@ -35,6 +35,8 @@ namespace Bunker.Models
     /// </summary>
     public class Room
     {
+        public GmMode GmMode { get; set; } = GmMode.PlayerHost;
+
         public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8].ToUpper();
         public string Name { get; set; } = "";
         public string? Password { get; set; }

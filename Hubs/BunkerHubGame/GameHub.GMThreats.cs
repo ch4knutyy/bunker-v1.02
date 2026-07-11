@@ -43,7 +43,13 @@ public partial class GameHub
 
     public async Task GMSelectThreat(string threatId, string commandId, bool confirmedReplace)
     {
-        if (!TryGetHostRoom(out var room) || !await CanRunThreatReplacement(room, commandId, confirmedReplace)) return;
+        if (!TryGetHostRoom(out var room)) return;
+        if (!HasGmCapability(room, GmCapability.BrowseFutureThreatCatalog))
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Поточний режим GM не дозволяє вибір майбутньої загрози");
+            return;
+        }
+        if (!await CanRunThreatReplacement(room, commandId, confirmedReplace)) return;
         var threat = _gameData.Threats.FirstOrDefault(item => string.Equals(item.Id, threatId, StringComparison.OrdinalIgnoreCase));
         if (threat == null || (IsExplicitSpecialThreat(threat) && !IsAvailableSpecialThreat(threat)))
         {
@@ -128,8 +134,13 @@ public partial class GameHub
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = message });
     }
 
-    private object BuildGMThreatControlData(Room room) => new
+    private object BuildGMThreatControlData(Room room)
     {
+        var canBrowseFutureThreatCatalog = GmCapabilities.Allows(room.GmMode, GmCapability.BrowseFutureThreatCatalog);
+        return new
+        {
+        gmMode = room.GmMode.ToString(),
+        canBrowseFutureThreatCatalog,
         currentThreat = room.CurrentThreat == null ? null : new
         {
             room.CurrentThreat.Id,
@@ -138,10 +149,11 @@ public partial class GameHub
             status = room.ThreatState?.ThreatStatus ?? "none",
             effectsApplied = room.ThreatState?.Resolution.EffectsApplied ?? false
         },
-        threats = _gameData.Threats.Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
+        threats = canBrowseFutureThreatCatalog ? _gameData.Threats.Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
             .Select(item => new { item.Id, item.Name, type = GetThreatControlType(item), available = !IsExplicitSpecialThreat(item) || IsAvailableSpecialThreat(item) })
-            .OrderBy(item => item.Name).ToList()
-    };
+            .OrderBy(item => item.Name).ToList() : []
+        };
+    }
 
     private bool IsAvailableSpecialThreat(ThreatData threat) =>
         string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase)
