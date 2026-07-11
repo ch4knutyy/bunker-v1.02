@@ -45,6 +45,7 @@ connection.start()
     let currentBunker = null;
     let currentThreat = null;
     let currentThreatState = null;
+    let lastThreatTimeoutCheckDeadline = null;
     let currentVoting = null;
     let currentRoundState = null;
     let myVote = null;
@@ -120,7 +121,41 @@ connection.start()
         revealAllCharacteristics: "Розкрити всі характеристики",
         allCharacteristicsRevealed: "Усі характеристики розкрито",
         eliminatedRevealedBadge: "Вибув — характеристики розкрито",
-        eliminatedRevealedAllLog: "Вибулий гравець розкрив усі свої характеристики"
+        eliminatedRevealedAllLog: "Вибулий гравець розкрив усі свої характеристики",
+        radiationOperation: "Операція",
+        openOperation: "Відкрити операцію",
+        team: "Команда",
+        equipment: "Спорядження",
+        operation: "Операція",
+        joinTeam: "Долучитися",
+        leaveTeam: "Вийти з команди",
+        addEquipment: "Додати спорядження",
+        useProfession: "Використати професію",
+        startOperation: "Почати операцію",
+        answer: "Відповісти",
+        leader: "Керівник",
+        chooseLeader: "Змінити керівника",
+        playersInRoom: "Гравців у кімнаті",
+        operationStages: "Етапів операції",
+        allowedErrors: "Допустимих помилок",
+        hints: "Підказок",
+        secondsPerStage: "Секунд на етап",
+        currentProgress: "Прогрес",
+        currentQuestion: "Поточне питання",
+        availableHints: "Доступні підказки",
+        useHint: "Підказка",
+        noOperationQuestion: "Операція ще не почалась.",
+        noLeader: "Керівника не вибрано",
+        forcedParticipant: "Примусовий учасник",
+        protectedParticipant: "Захищений",
+        additionalConditions: "Додаткові стани",
+        notStarted: "Не почато",
+        collecting_contributions: "Збір команди",
+        mini_game_active: "Операція триває",
+        active: "Операція триває",
+        resolved_safely: "Загрозу повністю усунено",
+        resolved_with_casualty: "Загрозу усунено з наслідками",
+        failed: "Операція провалена"
     });
     Object.assign(uiTranslations.en, {
         useSpecialCard: "Use card",
@@ -165,7 +200,40 @@ connection.start()
         revealAllCharacteristics: "Reveal all characteristics",
         allCharacteristicsRevealed: "All characteristics revealed",
         eliminatedRevealedBadge: "Eliminated — characteristics revealed",
-        eliminatedRevealedAllLog: "The eliminated player revealed all their characteristics"
+        eliminatedRevealedAllLog: "The eliminated player revealed all their characteristics",
+        radiationOperation: "Operation",
+        openOperation: "Open operation",
+        team: "Team",
+        equipment: "Equipment",
+        operation: "Operation",
+        joinTeam: "Join",
+        leaveTeam: "Leave team",
+        addEquipment: "Add equipment",
+        useProfession: "Use profession",
+        startOperation: "Start operation",
+        answer: "Answer",
+        leader: "Leader",
+        chooseLeader: "Change leader",
+        playersInRoom: "Players in room",
+        operationStages: "Operation stages",
+        allowedErrors: "Allowed errors",
+        hints: "Hints",
+        secondsPerStage: "Seconds per stage",
+        currentProgress: "Progress",
+        currentQuestion: "Current question",
+        availableHints: "Available hints",
+        useHint: "Hint",
+        noOperationQuestion: "The operation has not started yet.",
+        noLeader: "No leader selected",
+        forcedParticipant: "Forced participant",
+        protectedParticipant: "Protected",
+        additionalConditions: "Additional conditions",
+        notStarted: "Not started",
+        collecting_contributions: "Collecting team",
+        mini_game_active: "Operation active",
+        resolved_safely: "Resolved safely",
+        resolved_with_casualty: "Resolved with consequences",
+        failed: "Failed"
     });
     Object.assign(uiTranslations.ru, {
         useSpecialCard: "Использовать карту",
@@ -210,7 +278,40 @@ connection.start()
         revealAllCharacteristics: "Раскрыть все характеристики",
         allCharacteristicsRevealed: "Все характеристики раскрыты",
         eliminatedRevealedBadge: "Выбыл — характеристики раскрыты",
-        eliminatedRevealedAllLog: "Выбывший игрок раскрыл все свои характеристики"
+        eliminatedRevealedAllLog: "Выбывший игрок раскрыл все свои характеристики",
+        radiationOperation: "Операция",
+        openOperation: "Открыть операцию",
+        team: "Команда",
+        equipment: "Снаряжение",
+        operation: "Операция",
+        joinTeam: "Присоединиться",
+        leaveTeam: "Выйти из команды",
+        addEquipment: "Добавить снаряжение",
+        useProfession: "Использовать профессию",
+        startOperation: "Начать операцию",
+        answer: "Ответить",
+        leader: "Руководитель",
+        chooseLeader: "Сменить руководителя",
+        playersInRoom: "Игроков в комнате",
+        operationStages: "Этапов операции",
+        allowedErrors: "Допустимых ошибок",
+        hints: "Подсказок",
+        secondsPerStage: "Секунд на этап",
+        currentProgress: "Прогресс",
+        currentQuestion: "Текущий вопрос",
+        availableHints: "Доступные подсказки",
+        useHint: "Подсказка",
+        noOperationQuestion: "Операция ещё не началась.",
+        noLeader: "Руководитель не выбран",
+        forcedParticipant: "Принудительный участник",
+        protectedParticipant: "Защищен",
+        additionalConditions: "Дополнительные состояния",
+        notStarted: "Не начато",
+        collecting_contributions: "Сбор команды",
+        mini_game_active: "Операция идёт",
+        resolved_safely: "Безопасно завершено",
+        resolved_with_casualty: "Завершено с последствиями",
+        failed: "Провалено"
     });
 
     function getCurrentLanguage() {
@@ -309,10 +410,16 @@ connection.start()
     function normalizeThreatState(source) {
         if (!source) return null;
         const volunteer = source.volunteerSelection || source.VolunteerSelection || {};
-        const support = source.secretSupportDrop || source.SecretSupportDrop || {};
-        const contributions = source.contributions || source.Contributions || {};
-        const vote = source.threatVolunteerVote || source.ThreatVolunteerVote || {};
-        const resolution = source.resolution || source.Resolution || {};
+            const support = source.secretSupportDrop || source.SecretSupportDrop || {};
+            const contributions = source.contributions || source.Contributions || {};
+            const vote = source.threatVolunteerVote || source.ThreatVolunteerVote || {};
+            const resolution = source.resolution || source.Resolution || {};
+        const scaling = source.scaling || source.Scaling || {};
+        const preview = source.preview || source.Preview || {};
+        const participants = source.participants || source.Participants || [];
+        const miniGame = source.miniGame || source.MiniGame || {};
+        const currentQuestion = miniGame.currentQuestion || miniGame.CurrentQuestion || null;
+        const operationAggregates = source.operationAggregates || source.OperationAggregates || {};
 
         return {
             currentThreatId: source.currentThreatId || source.CurrentThreatId || "",
@@ -345,6 +452,80 @@ connection.start()
                 wasSuccessful: !!(resolution.wasSuccessful ?? resolution.WasSuccessful),
                 wasVolunteerProtected: !!(resolution.wasVolunteerProtected ?? resolution.WasVolunteerProtected),
                 publicResults: resolution.publicResults || resolution.PublicResults || []
+            },
+            participants: (participants || []).map(participant => ({
+                playerId: participant.playerId || participant.PlayerId || "",
+                name: participant.name || participant.Name || t('unknown'),
+                isLeader: !!(participant.isLeader ?? participant.IsLeader),
+                isForced: !!(participant.isForced ?? participant.IsForced),
+                isProtected: !!(participant.isProtected ?? participant.IsProtected)
+            })),
+            preview: {
+                activePlayerCount: preview.activePlayerCount ?? preview.ActivePlayerCount ?? 0,
+                participantCount: preview.participantCount ?? preview.ParticipantCount ?? 0,
+                minParticipants: preview.minParticipants ?? preview.MinParticipants ?? 0,
+                maxParticipants: preview.maxParticipants ?? preview.MaxParticipants ?? 0,
+                baseTaskCount: preview.baseTaskCount ?? preview.BaseTaskCount ?? 0,
+                playableTaskCount: preview.playableTaskCount ?? preview.PlayableTaskCount ?? 0,
+                baseTimeSeconds: preview.baseTimeSeconds ?? preview.BaseTimeSeconds ?? 0,
+                timeBonusSeconds: preview.timeBonusSeconds ?? preview.TimeBonusSeconds ?? 0,
+                taskTimeSeconds: preview.taskTimeSeconds ?? preview.TaskTimeSeconds ?? 0,
+                hintTokens: preview.hintTokens ?? preview.HintTokens ?? 0,
+                allowedErrors: preview.allowedErrors ?? preview.AllowedErrors ?? 0,
+                requiredTasksForSuccess: preview.requiredTasksForSuccess ?? preview.RequiredTasksForSuccess ?? 0
+            },
+            scaling: {
+                isCalculated: !!(scaling.isCalculated ?? scaling.IsCalculated),
+                scalingPlayerCount: scaling.scalingPlayerCount ?? scaling.ScalingPlayerCount ?? 0,
+                minParticipants: scaling.minParticipants ?? scaling.MinParticipants ?? 0,
+                maxParticipants: scaling.maxParticipants ?? scaling.MaxParticipants ?? 0,
+                baseTaskCount: scaling.baseTaskCount ?? scaling.BaseTaskCount ?? 0,
+                playableTaskCount: scaling.playableTaskCount ?? scaling.PlayableTaskCount ?? 0,
+                baseTimeSeconds: scaling.baseTimeSeconds ?? scaling.BaseTimeSeconds ?? 0,
+                timeBonusSeconds: scaling.timeBonusSeconds ?? scaling.TimeBonusSeconds ?? 0,
+                taskTimeSeconds: scaling.taskTimeSeconds ?? scaling.TaskTimeSeconds ?? 0,
+                hintTokens: scaling.hintTokens ?? scaling.HintTokens ?? 0,
+                allowedErrors: scaling.allowedErrors ?? scaling.AllowedErrors ?? 0,
+                requiredTasksForSuccess: scaling.requiredTasksForSuccess ?? scaling.RequiredTasksForSuccess ?? 0
+            },
+            operationAggregates: {
+                team: operationAggregates.team || operationAggregates.Team || "0/0",
+                professionContributions: operationAggregates.professionContributions ?? operationAggregates.ProfessionContributions ?? 0,
+                equipmentContributions: operationAggregates.equipmentContributions ?? operationAggregates.EquipmentContributions ?? 0,
+                protectedParticipants: operationAggregates.protectedParticipants ?? operationAggregates.ProtectedParticipants ?? 0,
+                hints: operationAggregates.hints ?? operationAggregates.Hints ?? 0,
+                status: operationAggregates.status || operationAggregates.Status || ""
+            },
+            miniGame: {
+                threatId: miniGame.threatId || miniGame.ThreatId || "",
+                status: miniGame.status || miniGame.Status || "not_started",
+                leaderPlayerId: miniGame.leaderPlayerId || miniGame.LeaderPlayerId || "",
+                currentIndex: miniGame.currentIndex ?? miniGame.CurrentIndex ?? 0,
+                totalQuestions: miniGame.totalQuestions ?? miniGame.TotalQuestions ?? 0,
+                deadlineUtc: miniGame.deadlineUtc || miniGame.DeadlineUtc || null,
+                resultStatus: miniGame.resultStatus || miniGame.ResultStatus || "",
+                outcome: miniGame.outcome || miniGame.Outcome || "",
+                score: (() => {
+                    const score = miniGame.score || miniGame.Score || {};
+                    return {
+                        correctAnswers: score.correctAnswers ?? score.CorrectAnswers ?? 0,
+                        wrongAnswers: score.wrongAnswers ?? score.WrongAnswers ?? 0,
+                        timeouts: score.timeouts ?? score.Timeouts ?? 0,
+                        completedTasks: score.completedTasks ?? score.CompletedTasks ?? 0,
+                        requiredForSuccess: score.requiredForSuccess ?? score.RequiredForSuccess ?? 0,
+                        allowedErrors: score.allowedErrors ?? score.AllowedErrors ?? 0
+                    };
+                })(),
+                currentQuestion: currentQuestion ? {
+                    questionId: currentQuestion.questionId || currentQuestion.QuestionId || "",
+                    category: currentQuestion.category || currentQuestion.Category || "",
+                    text: currentQuestion.text || currentQuestion.Text || "",
+                    options: currentQuestion.options || currentQuestion.Options || [],
+                    currentIndex: currentQuestion.currentIndex ?? currentQuestion.CurrentIndex ?? 0,
+                    totalQuestions: currentQuestion.totalQuestions ?? currentQuestion.TotalQuestions ?? 0,
+                    deadlineUtc: currentQuestion.deadlineUtc || currentQuestion.DeadlineUtc || null,
+                    hint: currentQuestion.hint || currentQuestion.Hint || ""
+                } : null
             }
         };
     }
@@ -640,53 +821,245 @@ connection.start()
         if (threatId !== 'radiation_leak' || !currentThreatState) return '';
 
         const state = currentThreatState;
-        const status = state.threatStatus || 'hidden';
-        const isResolved = !!state.resolution?.effectsApplied;
-        const volunteerName = state.volunteerSelection?.selectedPlayerName || 'Не вибрано';
-        const contributionTotal = state.contributions?.total || 0;
-        const vote = state.threatVolunteerVote || {};
-        const mine = state.contributions?.mine || [];
-        const myContributionRows = mine.length
-            ? mine.map(item => `<li>${escapeHtml(getThreatSourceLabel(item.sourceType || item.SourceType))}: ${escapeHtml(item.displayName || item.DisplayName || '')}</li>`).join('')
-            : '<li>Поки що немає ваших внесків.</li>';
-        const resultHtml = isResolved
-            ? `<div class="threat-resolution ${escapeHtml(status)}">${(state.resolution.publicResults || []).map(text => `<p>${escapeHtml(text)}</p>`).join('')}${renderThreatRevealedItems(state)}</div>`
-            : '';
-        const gmControls = isHost && !isResolved ? `
-            <div class="threat-actions gm-threat-actions">
-                <button class="char-btn" onclick="rollThreatSupportDice()" ${state.secretSupportDrop?.isCompleted ? 'disabled aria-disabled="true"' : ''}>Кинути секретний кубик</button>
-                <button class="char-btn" onclick="startThreatVolunteerVote()" ${state.volunteerSelection?.selectedPlayerId || vote.status === 'open' ? 'disabled aria-disabled="true"' : ''}>Голосування: хто піде усувати загрозу</button>
-                ${vote.status === 'open' ? `<button class="char-btn" onclick="closeThreatVolunteerVote()">Закрити голосування загрози</button>` : ''}
-                ${renderBunkerAssetControls()}
-                <button class="char-btn public-use" onclick="resolveCurrentThreat()">Завершити збір внесків</button>
-            </div>
-        ` : '';
-        const playerControls = !isResolved ? `
-            <div class="threat-actions player-threat-actions">
-                <button class="char-btn" onclick="submitThreatVolunteer()">Запропонувати себе</button>
-                <button class="char-btn" onclick="useProfessionForThreat()">Використати професію</button>
-                <button class="char-btn" onclick="useHobbyForThreat()">Використати хобі</button>
-                ${renderThreatItemSelect()}
-                <button class="char-btn" onclick="withdrawThreatContribution()">Відкликати свій внесок</button>
-            </div>
-        ` : '';
-        const voteControls = vote.status === 'open' && !isResolved ? renderThreatVolunteerVoteControls() : '';
+        const aggregates = state.operationAggregates || {};
+        const status = getRadiationOperationStatus(state);
+        const statusLabel = getThreatStatusLabel(status);
+        const teamText = buildThreatTeamText(state);
+        const equipment = aggregates.equipmentContributions ?? state.contributions?.byType?.personal_inventory ?? 0;
 
         return `
-            <section class="threat-interaction-panel">
-                <div class="threat-interaction-summary">
-                    <span>Стан: <strong>${escapeHtml(status)}</strong></span>
-                    <span>Доброволець: <strong>${escapeHtml(volunteerName)}</strong></span>
-                    <span>Внески: <strong>${contributionTotal}</strong></span>
-                    ${vote.status === 'open' ? `<span>Проголосувало: <strong>${vote.votedCount}/${vote.totalVoters}</strong></span>` : ''}
+            <section class="threat-operation-card">
+                <div class="threat-operation-card-main">
+                    <div>
+                        <span class="threat-operation-kicker">${escapeHtml(t('radiationOperation'))}</span>
+                        <strong>${escapeHtml(getLocalizedValue(threat, 'name') || threat.name || threat.Name || 'radiation_leak')}</strong>
+                    </div>
+                    <button type="button" class="char-btn public-use" onclick="openThreatOperationModal()">${escapeHtml(t('openOperation'))}</button>
                 </div>
-                ${gmControls}
-                ${playerControls}
-                ${voteControls}
-                <div class="my-threat-contributions"><strong>Мої внески</strong><ul>${myContributionRows}</ul></div>
-                ${resultHtml}
+                <div class="threat-operation-stats">
+                    <span>${escapeHtml(t('team'))}: <strong>${escapeHtml(teamText)}</strong></span>
+                    <span>${escapeHtml(t('equipment'))}: <strong>${escapeHtml(equipment)}</strong></span>
+                    <span>${escapeHtml(t('status'))}: <strong>${escapeHtml(statusLabel)}</strong></span>
+                </div>
             </section>
         `;
+    }
+
+    function getThreatStatusLabel(status) {
+        return t(status || 'notStarted') || status || t('notStarted');
+    }
+
+    function getRadiationOperationStatus(state) {
+        const miniStatus = state?.miniGame?.status || '';
+        if (['active', 'resolved_safely', 'resolved_with_casualty', 'failed'].includes(miniStatus)) {
+            return miniStatus;
+        }
+        return state?.threatStatus || state?.operationAggregates?.status || miniStatus || 'not_started';
+    }
+
+    function openThreatOperationModal() {
+        renderThreatOperationModal();
+        const modal = document.getElementById('threatOperationModal');
+        if (modal) modal.style.display = 'flex';
+        updateThreatOperationTimer();
+    }
+
+    function closeThreatOperationModal() {
+        const modal = document.getElementById('threatOperationModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function renderThreatOperationModal() {
+        let modal = document.getElementById('threatOperationModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'threatOperationModal';
+            modal.className = 'modal threat-operation-modal';
+            modal.style.display = 'none';
+            document.body.appendChild(modal);
+        }
+
+        const state = currentThreatState || {};
+        const scaling = getThreatOperationMetrics(state);
+        const aggregates = state.operationAggregates || {};
+        const miniGame = state.miniGame || {};
+        const leaderName = state.volunteerSelection?.selectedPlayerName || t('noLeader');
+        const status = getThreatStatusLabel(getRadiationOperationStatus(state));
+        const teamText = buildThreatTeamText(state, scaling);
+        const playersCount = scaling.activePlayerCount || currentRoundState?.activePlayerCount || Object.values(roomPlayers || {}).filter(p => !p.isEliminated).length || 0;
+        const hints = aggregates.hints ?? scaling.hintTokens ?? 0;
+
+        modal.innerHTML = `
+            <div class="modal-content threat-operation-content">
+                <button type="button" class="modal-close" onclick="closeThreatOperationModal()">&times;</button>
+                <div class="threat-operation-header">
+                    <span>${escapeHtml(t('radiationOperation'))}</span>
+                    <h3>${escapeHtml(t('operation'))}: radiation_leak</h3>
+                </div>
+                <div class="threat-operation-overview">
+                    <span>${escapeHtml(t('playersInRoom'))}: <strong>${escapeHtml(playersCount)}</strong></span>
+                    <span>${escapeHtml(t('team'))}: <strong>${escapeHtml(teamText)}</strong></span>
+                    <span>${escapeHtml(t('operationStages'))}: <strong>${escapeHtml(scaling.playableTaskCount || miniGame.totalQuestions || 0)}</strong></span>
+                    <span>${escapeHtml(t('allowedErrors'))}: <strong>${escapeHtml(scaling.allowedErrors ?? 0)}</strong></span>
+                    <span>${escapeHtml(t('hints'))}: <strong>${escapeHtml(hints)}</strong></span>
+                    <span>${escapeHtml(t('secondsPerStage'))}: <strong>${escapeHtml(scaling.taskTimeSeconds || 0)}</strong></span>
+                </div>
+                <div class="threat-operation-sections">
+                    <section>
+                        <h4>${escapeHtml(t('team'))}</h4>
+                        <div class="threat-operation-row">
+                            <span>${escapeHtml(t('leader'))}</span>
+                            <strong>${escapeHtml(leaderName)}</strong>
+                        </div>
+                        ${renderThreatParticipantsList(state)}
+                        <div class="threat-operation-actions">
+                            <button type="button" class="char-btn" onclick="submitThreatVolunteer()">${escapeHtml(t('joinTeam'))}</button>
+                            <button type="button" class="char-btn" onclick="withdrawThreatContribution()">${escapeHtml(t('leaveTeam'))}</button>
+                            ${renderThreatLeaderControl(state)}
+                        </div>
+                    </section>
+                    <section>
+                        <h4>${escapeHtml(t('equipment'))}</h4>
+                        <div class="threat-operation-row">
+                            <span>${escapeHtml(t('equipment'))}</span>
+                            <strong>${escapeHtml(aggregates.equipmentContributions ?? 0)}</strong>
+                        </div>
+                        <div class="threat-operation-actions">
+                            ${renderThreatItemSelect(t('addEquipment'))}
+                            <button type="button" class="char-btn" onclick="useProfessionForThreat()">${escapeHtml(t('useProfession'))}</button>
+                        </div>
+                    </section>
+                    <section>
+                        <h4>${escapeHtml(t('operation'))}</h4>
+                        <div class="threat-operation-row">
+                            <span>${escapeHtml(t('status'))}</span>
+                            <strong>${escapeHtml(status)}</strong>
+                        </div>
+                        ${renderThreatMiniGamePanel(state)}
+                    </section>
+                </div>
+            </div>
+        `;
+    }
+
+    function getThreatOperationMetrics(state) {
+        const scaling = state?.scaling || {};
+        if (scaling.isCalculated) return scaling;
+        return state?.preview || scaling || {};
+    }
+
+    function buildThreatTeamText(state, metrics = null) {
+        const data = metrics || getThreatOperationMetrics(state);
+        const participantCount = state?.participants?.length ?? data.participantCount ?? 0;
+        const maxParticipants = data.maxParticipants ?? 0;
+        if (maxParticipants > 0) return `${participantCount}/${maxParticipants}`;
+        return state?.operationAggregates?.team || '0/0';
+    }
+
+    function renderThreatParticipantsList(state) {
+        const participants = state?.participants || [];
+        if (!participants.length) {
+            return `<div class="threat-participants-list muted">${escapeHtml(t('noLeader'))}</div>`;
+        }
+
+        return `
+            <div class="threat-participants-list">
+                ${participants.map(participant => {
+                    const badges = [
+                        participant.isLeader ? `<span>${escapeHtml(t('leader'))}</span>` : '',
+                        participant.isForced ? `<span>${escapeHtml(t('forcedParticipant'))}</span>` : '',
+                        participant.isProtected ? `<span>${escapeHtml(t('protectedParticipant'))}</span>` : ''
+                    ].filter(Boolean).join('');
+                    return `
+                        <div class="threat-participant">
+                            <strong>${escapeHtml(participant.name || t('unknown'))}</strong>
+                            ${badges ? `<div class="threat-participant-badges">${badges}</div>` : ''}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    function renderThreatLeaderControl(state) {
+        if (!isHost || state?.miniGame?.status === 'active' || state?.miniGame?.status === 'completed') return '';
+        const players = Object.values(roomPlayers || {})
+            .filter(player => player && !player.isEliminated)
+            .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
+        if (!players.length) return '';
+
+        const options = players.map(player => {
+            const id = player.stablePlayerId || player.connectionId || '';
+            const selected = id && id === state?.volunteerSelection?.selectedPlayerId ? ' selected' : '';
+            return `<option value="${escapeHtml(id)}"${selected}>#${escapeHtml(player.seatNumber || '?')} ${escapeHtml(player.name || t('unknown'))}</option>`;
+        }).join('');
+
+        return `<label class="threat-inline-control"><select id="threatLeaderSelect">${options}</select><button type="button" class="char-btn" onclick="setThreatOperationLeader()">${escapeHtml(t('chooseLeader'))}</button></label>`;
+    }
+
+    function renderThreatMiniGamePanel(state) {
+        const miniGame = state?.miniGame || {};
+        const status = getRadiationOperationStatus(state);
+        const question = miniGame.currentQuestion || null;
+        const leaderId = miniGame.leaderPlayerId || state?.volunteerSelection?.selectedPlayerId || '';
+        const amLeader = isCurrentPlayerId(leaderId);
+        const isFinal = ['resolved_safely', 'resolved_with_casualty', 'failed'].includes(status);
+        const canStart = isHost && leaderId && !isFinal && status !== 'active';
+        const score = miniGame.score || {};
+        const metrics = getThreatOperationMetrics(state);
+        const progress = `${miniGame.currentIndex ?? 0}/${miniGame.totalQuestions ?? metrics.playableTaskCount ?? 0}`;
+
+        if (isFinal) {
+            return `
+                <div class="threat-mini-panel threat-mini-panel-final">
+                    <p><strong>${escapeHtml(getThreatStatusLabel(status))}</strong></p>
+                    <div class="threat-operation-row"><span>${escapeHtml(t('currentProgress'))}</span><strong>${escapeHtml(progress)}</strong></div>
+                </div>
+            `;
+        }
+
+        if (!question) {
+            return `
+                <div class="threat-mini-panel">
+                    <p>${escapeHtml(t('noOperationQuestion'))}</p>
+                    <div class="threat-operation-actions">
+                        ${canStart ? `<button type="button" class="char-btn public-use" onclick="startThreatMiniGame()">${escapeHtml(t('startOperation'))}</button>` : ''}
+                    </div>
+                    <div class="threat-operation-row"><span>${escapeHtml(t('currentProgress'))}</span><strong>${escapeHtml(progress)}</strong></div>
+                </div>
+            `;
+        }
+
+        const options = (question.options || []).map(option => {
+            const optionId = option.optionId || option.OptionId || '';
+            const text = option.text || option.Text || optionId;
+            return `<button type="button" class="char-btn threat-answer-btn" ${amLeader ? '' : 'disabled aria-disabled="true"'} onclick="submitThreatMiniGameAnswer('${escapeHtml(question.questionId)}','${escapeHtml(optionId)}')">${escapeHtml(text)}</button>`;
+        }).join('');
+
+        return `
+            <div class="threat-mini-panel">
+                <div class="threat-operation-row">
+                    <span>${escapeHtml(t('currentProgress'))}</span>
+                    <strong>${escapeHtml(question.currentIndex || miniGame.currentIndex || 0)}/${escapeHtml(question.totalQuestions || miniGame.totalQuestions || 0)}</strong>
+                </div>
+                <div class="threat-operation-row">
+                    <span>${escapeHtml(t('secondsPerStage'))}</span>
+                    <strong id="threatOperationTimer">--</strong>
+                </div>
+                <p class="threat-question-text">${escapeHtml(question.text || '')}</p>
+                <div class="threat-answer-list">${options}</div>
+                ${question.hint ? `<p class="threat-hint">${escapeHtml(question.hint)}</p>` : ''}
+                <div class="threat-operation-actions">
+                    <button type="button" class="char-btn" onclick="useThreatMiniGameHint()">${escapeHtml(t('useHint'))}</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function isCurrentPlayerId(playerId) {
+        if (!playerId) return false;
+        const self = roomPlayers?.[myConnectionId] || {};
+        return playerId === self.stablePlayerId || playerId === stablePlayerId || playerId === myConnectionId;
     }
 
     function getThreatSourceLabel(sourceType) {
@@ -694,21 +1067,30 @@ connection.start()
             profession: 'Професія',
             hobby: 'Хобі',
             personal_inventory: 'Предмет',
+            profession_item: 'Професійний предмет',
             bunker_resource: 'Ресурс бункера',
             bunker_facility: 'Система бункера'
         };
         return labels[sourceType] || sourceType || 'Внесок';
     }
 
-    function renderThreatItemSelect() {
-        const items = myPlayerData?.inventory?.items || [];
+    function renderThreatItemSelect(buttonLabel = null) {
+        const inventoryItems = (myPlayerData?.inventory?.items || []).map((item, index) => ({
+            item,
+            source: 'inventory',
+            fallbackId: String(index)
+        }));
+        const professionItem = myPlayerData?.professionItem;
+        const professionItems = professionItem?.name ? [{ item: professionItem, source: 'profession', fallbackId: 'profession' }] : [];
+        const items = [...professionItems, ...inventoryItems];
         if (!items.length) return '';
-        const options = items.map((item, index) => {
-            const value = item.instanceId || item.name || String(index);
+        const options = items.map(({ item, source, fallbackId }) => {
+            const rawValue = item.instanceId || item.name || fallbackId;
+            const value = `${source}:${rawValue}`;
             const name = getLocalizedValue(item, 'item') || getLocalizedValue(item, 'name') || item.name || 'Предмет';
             return `<option value="${escapeHtml(value)}">${escapeHtml(name)}</option>`;
         }).join('');
-        return `<label class="threat-inline-control"><select id="threatItemSelect">${options}</select><button class="char-btn" onclick="contributeThreatItem()">Пожертвувати предмет</button></label>`;
+        return `<label class="threat-inline-control"><select id="threatItemSelect">${options}</select><button type="button" class="char-btn" onclick="contributeThreatItem()">${escapeHtml(buttonLabel || t('addEquipment'))}</button></label>`;
     }
 
     function renderBunkerAssetControls() {
@@ -795,6 +1177,12 @@ connection.start()
         connection.invoke("StartThreatVolunteerVote").catch(err => console.error("StartThreatVolunteerVote error:", err));
     }
 
+    function setThreatOperationLeader() {
+        const select = document.getElementById('threatLeaderSelect');
+        if (!select?.value) return;
+        connection.invoke("SetThreatOperationLeader", select.value).catch(err => console.error("SetThreatOperationLeader error:", err));
+    }
+
     function voteThreatVolunteer(targetPlayerId) {
         connection.invoke("VoteThreatVolunteer", targetPlayerId).catch(err => console.error("VoteThreatVolunteer error:", err));
     }
@@ -806,6 +1194,34 @@ connection.start()
     function resolveCurrentThreat() {
         connection.invoke("ResolveCurrentThreat").catch(err => console.error("ResolveCurrentThreat error:", err));
     }
+
+    function startThreatMiniGame() {
+        connection.invoke("StartThreatMiniGame", getCurrentLanguage()).catch(err => console.error("StartThreatMiniGame error:", err));
+    }
+
+    function submitThreatMiniGameAnswer(questionId, optionId) {
+        connection.invoke("SubmitThreatMiniGameAnswer", questionId, optionId, getCurrentLanguage()).catch(err => console.error("SubmitThreatMiniGameAnswer error:", err));
+    }
+
+    function useThreatMiniGameHint() {
+        connection.invoke("UseThreatMiniGameHint", getCurrentLanguage()).catch(err => console.error("UseThreatMiniGameHint error:", err));
+    }
+
+    function updateThreatOperationTimer() {
+        const timer = document.getElementById('threatOperationTimer');
+        const deadline = currentThreatState?.miniGame?.currentQuestion?.deadlineUtc || currentThreatState?.miniGame?.deadlineUtc;
+        if (!timer || !deadline || getRadiationOperationStatus(currentThreatState) !== 'active') return;
+
+        const remaining = Math.max(0, Math.ceil((new Date(deadline).getTime() - Date.now()) / 1000));
+        timer.textContent = `${remaining}s`;
+        if (remaining === 0 && lastThreatTimeoutCheckDeadline !== deadline) {
+            lastThreatTimeoutCheckDeadline = deadline;
+            connection.invoke("CheckThreatMiniGameTimeout", getCurrentLanguage())
+                .catch(err => console.error("CheckThreatMiniGameTimeout error:", err));
+        }
+    }
+
+    window.setInterval(updateThreatOperationTimer, 1000);
 
     function getReadyStatusLabel(status) {
         const labels = {
@@ -1132,7 +1548,12 @@ connection.start()
             profession?.name ||
             profession?.Name ||
             'Безробітний';
-        return cleanProfessionName(rawName) || 'Безробітний';
+        const professionName = cleanProfessionName(rawName) || 'Безробітний';
+        const professionItem = profession?.professionItem || profession?.ProfessionItem || null;
+        const itemName = professionItem
+            ? (getLocalizedValue(professionItem, 'item') || getLocalizedValue(professionItem, 'name') || professionItem.name || professionItem.Name || '')
+            : '';
+        return itemName ? `${professionName} + ${itemName}` : professionName;
     }
 
     function getSeverityCode(source) {
@@ -1526,7 +1947,7 @@ connection.start()
             return names.length ? names.join(', ') : t('empty');
         }
         if (charKey === 'profession') {
-            const name = getLocalizedValue(source, 'profession') || getLocalizedValue(source, 'name') || source?.name || source?.Name || '';
+            const name = getProfessionDisplayName(source);
             const experience = source?.experienceYears ?? source?.ExperienceYears;
             const parts = [name || t('profession')];
             if (Number.isFinite(Number(experience)) && Number(experience) > 0) parts.push(`(${experience} ${t('years')})`);
@@ -1595,15 +2016,23 @@ connection.start()
 
         return {
             items: Array.isArray(items)
-                ? items.map(item => ({
-                    instanceId: item.instanceId ?? item.InstanceId ?? "",
-                    name: item.name ?? item.Name ?? 'Предмет',
-                    description: item.description ?? item.Description ?? '',
-                    quantity: item.quantity ?? item.Quantity ?? 1,
-                    isHidden: !!(item.isHidden ?? item.IsHidden),
-                    _i18n: getI18n(item)
-                }))
+                ? items.map(normalizeItemData)
                 : []
+        };
+    }
+
+    function normalizeItemData(item) {
+        const src = item || {};
+        return {
+            instanceId: src.instanceId ?? src.InstanceId ?? "",
+            name: src.name ?? src.Name ?? "",
+            description: src.description ?? src.Description ?? '',
+            quantity: src.quantity ?? src.Quantity ?? 1,
+            source: src.source ?? src.Source ?? "",
+            isHidden: !!(src.isHidden ?? src.IsHidden),
+            resourceTags: src.resourceTags || src.ResourceTags || [],
+            protectionTags: src.protectionTags || src.ProtectionTags || [],
+            _i18n: getI18n(src)
         };
     }
 
@@ -1772,17 +2201,25 @@ connection.start()
             // Profession
             profession: (() => {
                 const src = player.profession || player.Profession || {};
+                const professionItem = normalizeItemData(player.professionItem || player.ProfessionItem || src.professionItem || src.ProfessionItem);
                 return {
                     name: cleanProfessionName(src.name ?? src.Name ?? 'Безробітний'),
                     tooltip: cleanTooltipText(src.tooltip ?? src.Tooltip ?? null),
                     experienceYears: src.experienceYears ?? src.ExperienceYears ?? 0,
                     selectedItem: src.selectedItem ?? src.SelectedItem ?? null,
+                    selectedItemIndex: src.selectedItemIndex ?? src.SelectedItemIndex ?? null,
+                    professionItem,
                     _i18n: getI18n(src)
                 };
             })(),
+            professionItem: normalizeItemData(player.professionItem || player.ProfessionItem),
             
             // Health
             physicalHealth: normalizeSimple(player, 'physicalHealth', 'PhysicalHealth'),
+            additionalPhysicalConditions: normalizeAdditionalPhysicalConditions(
+                player.additionalPhysicalConditions || player.AdditionalPhysicalConditions ||
+                player.additionalConditionEffects || player.AdditionalConditionEffects || []
+            ),
             mentalHealth: normalizeSimple(player, 'mentalHealth', 'MentalHealth'),
             
             // Other characteristics
@@ -1795,11 +2232,27 @@ connection.start()
             inventory: normalizeInventoryData(player.inventory || player.Inventory),
         };
 
+        normalized.additionalConditionEffects = normalized.additionalPhysicalConditions;
         if (normalized.specialCards.length > 0) {
             normalized.specialCard = normalized.specialCards[0];
         }
 
         return normalized;
+    }
+
+    function normalizeAdditionalPhysicalConditions(conditions) {
+        return (conditions || []).map(effect => ({
+                id: effect.id || effect.Id || "",
+                conditionId: effect.conditionId || effect.ConditionId || "",
+                baseName: effect.baseName || effect.BaseName || "",
+                name: effect.name || effect.Name || "",
+                severityCode: effect.severityCode || effect.SeverityCode || "",
+                severityLevel: effect.severityLevel || effect.SeverityLevel || "",
+                sourceThreatId: effect.sourceThreatId || effect.SourceThreatId || "",
+                appliedAtRound: effect.appliedAtRound ?? effect.AppliedAtRound ?? null,
+                description: effect.description || effect.Description || "",
+                localization: getLocalization(effect)
+            })).filter(effect => effect.name && effect.baseName);
     }
 
     function normalizeEliminationVoteImmunity(source) {
@@ -1872,6 +2325,7 @@ function registerSignalREvents() {
                 fact: normalizeFactFromPlayer({ ...p, fact: revealedSources.fact || p.fact || p.Fact, revealedData: revealedValues.revealedData, revealedTooltips: revealedValues.revealedTooltips }),
                 revealedSources: revealedSources,
                 revealedTooltips: revealedValues.revealedTooltips,
+                additionalConditionEffects: normalizeAdditionalPhysicalConditions(p.additionalConditionEffects || p.AdditionalConditionEffects || []),
                 isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
                 eliminatedAtRound: p.eliminatedAtRound ?? p.EliminatedAtRound ?? null,
                 eliminatedByVote: !!(p.eliminatedByVote ?? p.EliminatedByVote),
@@ -1893,6 +2347,7 @@ function registerSignalREvents() {
                 fact: myPlayerData.fact,
                 revealedSources: {},
                 revealedTooltips: {},
+                additionalConditionEffects: myPlayerData.additionalConditionEffects || [],
                 isEliminated: myPlayerData.isEliminated || false,
                 eliminatedAtRound: myPlayerData.eliminatedAtRound || null,
                 eliminatedByVote: !!myPlayerData.eliminatedByVote,
@@ -1956,6 +2411,7 @@ function registerSignalREvents() {
                 revealedData: revealedValues.revealedData,
                 revealedSources: revealedSources,
                 revealedTooltips: revealedValues.revealedTooltips,
+                additionalConditionEffects: normalizeAdditionalPhysicalConditions(p.additionalConditionEffects || p.AdditionalConditionEffects || []),
                 isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
                 eliminatedAtRound: p.eliminatedAtRound ?? p.EliminatedAtRound ?? null,
                 eliminatedByVote: !!(p.eliminatedByVote ?? p.EliminatedByVote),
@@ -2213,6 +2669,11 @@ function registerSignalREvents() {
             const source = info.data.source || info.data.Source || info.data.fact || info.data.Fact || null;
             if (source) {
                 roomPlayers[info.connectionId].revealedSources[charKey] = source;
+            }
+            if (charKey === 'physicalHealth') {
+                roomPlayers[info.connectionId].additionalConditionEffects = normalizeAdditionalPhysicalConditions(
+                    info.data.additionalConditionEffects || info.data.AdditionalConditionEffects || []
+                );
             }
             if (charKey === 'fact') {
                 roomPlayers[info.connectionId].fact = normalizeFactFromPlayer({ fact: source || info.data.fact || info.data.Fact, revealedData: { fact: info.data } });
@@ -2600,6 +3061,7 @@ function registerSignalREvents() {
                 revealedSources: revealedSources,
                 revealedTooltips: revealedTooltips,
                 fact: normalizeFactFromPlayer({ ...p, fact: revealedSources.fact || p.fact || p.Fact, revealedData: revealedData, revealedTooltips: revealedTooltips }),
+                additionalConditionEffects: normalizeAdditionalPhysicalConditions(p.additionalConditionEffects || p.AdditionalConditionEffects || []),
                 isEliminated: p.isEliminated ?? p.IsEliminated ?? false,
                 eliminatedAtRound: p.eliminatedAtRound ?? p.EliminatedAtRound ?? null,
                 eliminatedByVote: !!(p.eliminatedByVote ?? p.EliminatedByVote),
@@ -2847,8 +3309,44 @@ function registerSignalREvents() {
     connection.on("ThreatStateUpdated", function (data) {
         currentThreatState = normalizeThreatState(data.threatState || data.ThreatState || currentThreatState);
         applyRoundState(data.roundState || data.RoundState);
+        mergeThreatPlayerSnapshots(data);
+        if (document.getElementById('threatOperationModal')?.style.display === 'flex') {
+            renderThreatOperationModal();
+            document.getElementById('threatOperationModal').style.display = 'flex';
+        }
         renderCurrentGameUI();
     });
+
+    function mergeThreatPlayerSnapshots(data) {
+        const players = data.players || data.Players || [];
+        players.forEach(player => {
+            const connectionId = player.connectionId || player.ConnectionId;
+            if (!connectionId) return;
+
+            const previous = roomPlayers[connectionId] || {};
+            const revealedValues = normalizeRevealedValues(player.revealedValues || player.RevealedValues || {});
+            roomPlayers[connectionId] = {
+                ...previous,
+                ...player,
+                connectionId,
+                revealed: normalizeRevealedState(player.revealed || player.Revealed || previous.revealed || {}),
+                revealedData: revealedValues.revealedData,
+                revealedTooltips: revealedValues.revealedTooltips,
+                revealedSources: normalizeRevealedSources(player.revealedSources || player.RevealedSources || {}),
+                additionalConditionEffects: normalizeAdditionalPhysicalConditions(
+                    player.additionalPhysicalConditions || player.AdditionalPhysicalConditions ||
+                    player.additionalConditionEffects || player.AdditionalConditionEffects || []
+                ),
+                additionalPhysicalConditions: normalizeAdditionalPhysicalConditions(
+                    player.additionalPhysicalConditions || player.AdditionalPhysicalConditions ||
+                    player.additionalConditionEffects || player.AdditionalConditionEffects || []
+                )
+            };
+        });
+
+        const privatePlayer = data.player || data.Player;
+        if (privatePlayer) myPlayerData = normalizePlayer(privatePlayer);
+    }
 
     connection.off("ThreatSupportDiceRolled");
     connection.on("ThreatSupportDiceRolled", function (data) {
@@ -2911,6 +3409,31 @@ function registerSignalREvents() {
     connection.on("ThreatResolved", function (data) {
         const results = data.results || data.Results || [];
         addEventMessage(`<span class="event-success">${results.map(escapeHtml).join(' ') || 'Загрозу завершено.'}</span>`);
+    });
+
+    connection.off("ThreatMiniGameStarted");
+    connection.on("ThreatMiniGameStarted", function (data) {
+        if (currentThreatState) {
+            currentThreatState.miniGame = normalizeThreatState({ miniGame: data }).miniGame;
+        }
+        renderThreatPanel(currentThreat);
+        if (document.getElementById('threatOperationModal')?.style.display === 'flex') {
+            renderThreatOperationModal();
+            document.getElementById('threatOperationModal').style.display = 'flex';
+        }
+        addEventMessage(`<span class="event-special">${escapeHtml(t('startOperation'))}</span>`);
+    });
+
+    connection.off("ThreatMiniGameUpdated");
+    connection.on("ThreatMiniGameUpdated", function (data) {
+        if (currentThreatState) {
+            currentThreatState.miniGame = normalizeThreatState({ miniGame: data }).miniGame;
+        }
+        renderThreatPanel(currentThreat);
+        if (document.getElementById('threatOperationModal')?.style.display === 'flex') {
+            renderThreatOperationModal();
+            document.getElementById('threatOperationModal').style.display = 'flex';
+        }
     });
 
     // ==================== VOTING SIGNALR HANDLERS ====================
@@ -5510,6 +6033,9 @@ function removeBunkerSupplies(months) {
         const revealed = player.revealed && player.revealed[charKey];
         if (revealed) {
             const value = getLocalizedRevealedValue(player, charKey);
+            const additionalPhysicalConditions = charKey === 'physicalHealth'
+                ? renderAdditionalPhysicalConditionsForTable(player)
+                : '';
             // Додаємо tooltip якщо є
             const tooltipData = getLocalizedRevealedTooltip(player, charKey);
             if (tooltipData) {
@@ -5520,11 +6046,33 @@ function removeBunkerSupplies(months) {
                         <span class="tooltip-trigger ${typeClass}">!</span>
                         <div class="tooltip-content">${escapeHtml(tooltipData)}</div>
                     </span>
+                    ${additionalPhysicalConditions}
                 </div>`;
             }
-            return `<div class="char-revealed">${escapeHtml(value)}</div>`;
+            return `<div class="char-revealed">${escapeHtml(value)}${additionalPhysicalConditions}</div>`;
         }
         return `<span class="char-hidden">${t('hidden')}</span>`;
+    }
+
+    function formatAdditionalPhysicalCondition(effect) {
+        if (!effect?.name || !effect?.baseName) return '';
+        return getConditionDisplayName({
+            ...effect,
+            allowsSeverity: true,
+            AllowsSeverity: true,
+            localization: effect.localization,
+            Localization: effect.localization
+        });
+    }
+
+    function renderAdditionalPhysicalConditionsForTable(player) {
+        const sourcePlayer = player.connectionId === myConnectionId ? myPlayerData : player;
+        const conditions = (sourcePlayer?.additionalPhysicalConditions || sourcePlayer?.additionalConditionEffects || [])
+            .map(formatAdditionalPhysicalCondition)
+            .filter(Boolean);
+        if (!conditions.length) return '';
+
+        return `<div class="additional-conditions-table">${conditions.map(name => `<span>+ ${escapeHtml(name)}</span>`).join('')}</div>`;
     }
     
     function getTooltipTypeClass(charKey) {
@@ -5575,6 +6123,17 @@ function removeBunkerSupplies(months) {
         const professionName = getProfessionDisplayName(profession);
         const physicalHealthName = getConditionDisplayName(physicalHealth) || physicalHealth.name || 'Здоровий';
         const mentalHealthName = getConditionDisplayName(mentalHealth) || mentalHealth.name || 'Стабільний';
+        const additionalConditionEffects = player.additionalPhysicalConditions || player.additionalConditionEffects || [];
+        const additionalConditionsHtml = additionalConditionEffects.length
+            ? `<div class="additional-conditions">
+                    <span class="char-label">${escapeHtml(t('additionalConditions'))}:</span>
+                    ${additionalConditionEffects.map(effect => {
+                        const label = formatAdditionalPhysicalCondition(effect);
+                        if (!label) return '';
+                        return `<span class="additional-condition-item">${escapeHtml(label)}</span>`;
+                    }).filter(Boolean).join('')}
+               </div>`
+            : '';
         const hobbyName = getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || 'Немає хобі';
         const traitName = getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || 'Невизначений';
         const phobiaName = getLocalizedValue(phobia, 'name') || getLocalizedValue(phobia, 'phobia') || phobia.name || 'Немає фобій';
@@ -5638,6 +6197,7 @@ function removeBunkerSupplies(months) {
             <div class="char-card ${revealed.physicalHealth ? 'card-revealed' : ''}">
                 <h3 class="char-card-title">${t('physicalHealth')}</h3>
                 <div class="char-row"><span class="char-label">${t('state')}:</span><span class="char-value">${charWithTooltip(physicalHealthName, buildLocalizedTooltip(physicalHealth, 'physicalHealth') || physicalHealth.tooltip, 'physical')}</span></div>
+                ${additionalConditionsHtml}
                 <div class="char-row">${revealControl('PhysicalHealth', revealed.physicalHealth)}</div>
             </div>
 

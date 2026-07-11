@@ -1,6 +1,7 @@
 ﻿using Bunker.Models;
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
+using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -13,15 +14,19 @@ namespace Bunker.Hubs
         private readonly RoomService _roomService;
         private readonly GameDataService _gameData;
         private readonly ScenarioImageService _imageService;
+        private readonly ThreatScalingService _threatScaling;
+        private readonly ThreatMiniGameRegistry _threatMiniGames;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ILogger<GameHub> logger)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, ILogger<GameHub> logger)
         {
             _generator = generator;
             _roomService = roomService;
             _gameData = gameData;
             _imageService = imageService;
+            _threatScaling = threatScaling;
+            _threatMiniGames = threatMiniGames;
             _logger = logger;
         }
     }

@@ -16,6 +16,7 @@ namespace Bunker.Models
         public DateTime? DisconnectedAt { get; set; }
 
         public Profession Profession { get; set; } = new();
+        public Item ProfessionItem { get; set; } = new();
         public Inventory Inventory { get; set; } = new();
         public PersonalInfo PersonalInfo { get; set; } = new();
         public CharacterTrait CharacterTrait { get; set; } = new();
@@ -51,6 +52,7 @@ namespace Bunker.Models
         public int? InventoryProtectedUntilRound { get; set; }
         public int? CharacteristicsProtectedUntilRound { get; set; }
         public EliminationVoteImmunity EliminationVoteImmunity { get; set; } = new();
+        public List<PlayerConditionEffect> AdditionalConditionEffects { get; set; } = new();
         
     }
 }

@@ -1,0 +1,887 @@
+{
+  "threatId": "air_filter_failure",
+  "questions": [
+    {
+      "questionId": "air_diagnosis_01",
+      "category": "diagnosis",
+      "text": {
+        "uk": "Рівень CO₂ у житловому секторі зріс із 900 до 1800 ppm за десять хвилин. Яка перша перевірка найкраща?",
+        "ru": "Уровень CO₂ в жилом секторе вырос с 900 до 1800 ppm за десять минут. Какая первая проверка лучше?",
+        "en": "CO₂ in the living sector rose from 900 to 1800 ppm in ten minutes. What is the best first check?"
+      },
+      "options": [
+        {
+          "optionId": "check_airflow_and_pressure",
+          "text": {
+            "uk": "Перевірити потік повітря та перепад тиску до і після фільтра",
+            "ru": "Проверить поток воздуха и перепад давления до и после фильтра",
+            "en": "Check airflow and pressure difference before and after the filter"
+          }
+        },
+        {
+          "optionId": "increase_heating",
+          "text": {
+            "uk": "Збільшити потужність опалення, щоб прискорити циркуляцію",
+            "ru": "Увеличить мощность отопления, чтобы ускорить циркуляцию",
+            "en": "Increase heating power to speed up circulation"
+          }
+        },
+        {
+          "optionId": "open_food_storage",
+          "text": {
+            "uk": "Відкрити сховище продуктів, щоб додати повітряного об’єму",
+            "ru": "Открыть хранилище продуктов, чтобы добавить объём воздуха",
+            "en": "Open the food storage area to add more air volume"
+          }
+        },
+        {
+          "optionId": "disable_co2_sensor",
+          "text": {
+            "uk": "Вимкнути датчик CO₂ і перевірити, чи зникне тривога",
+            "ru": "Отключить датчик CO₂ и проверить, исчезнет ли тревога",
+            "en": "Disable the CO₂ sensor and see whether the alarm stops"
+          }
+        }
+      ],
+      "correctOptionId": "check_airflow_and_pressure",
+      "hint": {
+        "uk": "Швидке зростання CO₂ часто означає проблему з обміном повітря, а не з температурою.",
+        "ru": "Быстрый рост CO₂ часто означает проблему с обменом воздуха, а не с температурой.",
+        "en": "A rapid CO₂ rise usually points to an air-exchange problem rather than temperature."
+      }
+    },
+    {
+      "questionId": "air_diagnosis_02",
+      "category": "diagnosis",
+      "text": {
+        "uk": "Вентилятор працює голосніше, а потік повітря ослаб. Що найімовірніше сталося?",
+        "ru": "Вентилятор работает громче, а поток воздуха ослаб. Что, скорее всего, произошло?",
+        "en": "The fan is louder, but airflow has weakened. What most likely happened?"
+      },
+      "options": [
+        {
+          "optionId": "filter_clogged",
+          "text": {
+            "uk": "Фільтр забився і створює надмірний опір",
+            "ru": "Фильтр забился и создаёт чрезмерное сопротивление",
+            "en": "The filter is clogged and creating excessive resistance"
+          }
+        },
+        {
+          "optionId": "air_too_cold",
+          "text": {
+            "uk": "Повітря стало занадто холодним і важчим",
+            "ru": "Воздух стал слишком холодным и тяжёлым",
+            "en": "The air became too cold and heavy"
+          }
+        },
+        {
+          "optionId": "room_too_large",
+          "text": {
+            "uk": "Житловий сектор став занадто великим для вентилятора",
+            "ru": "Жилой сектор стал слишком большим для вентилятора",
+            "en": "The living sector became too large for the fan"
+          }
+        },
+        {
+          "optionId": "lights_overloaded",
+          "text": {
+            "uk": "Освітлення забирає частину повітряного потоку",
+            "ru": "Освещение забирает часть воздушного потока",
+            "en": "The lighting system is taking away part of the airflow"
+          }
+        }
+      ],
+      "correctOptionId": "filter_clogged",
+      "hint": {
+        "uk": "Гучніша робота при меншому потоці вказує на зростання опору в системі.",
+        "ru": "Более громкая работа при меньшем потоке указывает на рост сопротивления в системе.",
+        "en": "Louder operation with weaker flow points to increased resistance in the system."
+      }
+    },
+    {
+      "questionId": "air_diagnosis_03",
+      "category": "diagnosis",
+      "text": {
+        "uk": "У житловому секторі з’явився запах гару, але температура повітря нормальна. Що перевірити насамперед?",
+        "ru": "В жилом секторе появился запах гари, но температура воздуха нормальная. Что проверить в первую очередь?",
+        "en": "A burning smell appears in the living sector, but air temperature is normal. What should be checked first?"
+      },
+      "options": [
+        {
+          "optionId": "motor_and_wiring",
+          "text": {
+            "uk": "Двигун вентилятора, проводку та підшипники",
+            "ru": "Двигатель вентилятора, проводку и подшипники",
+            "en": "The fan motor, wiring, and bearings"
+          }
+        },
+        {
+          "optionId": "water_tank",
+          "text": {
+            "uk": "Резервуар питної води",
+            "ru": "Резервуар питьевой воды",
+            "en": "The drinking-water tank"
+          }
+        },
+        {
+          "optionId": "food_rations",
+          "text": {
+            "uk": "Термін придатності сухих пайків",
+            "ru": "Срок годности сухих пайков",
+            "en": "The expiration date of food rations"
+          }
+        },
+        {
+          "optionId": "floor_insulation",
+          "text": {
+            "uk": "Утеплення підлоги житлового сектора",
+            "ru": "Утепление пола жилого сектора",
+            "en": "The living-sector floor insulation"
+          }
+        }
+      ],
+      "correctOptionId": "motor_and_wiring",
+      "hint": {
+        "uk": "Запах гару без нагріву повітря часто походить від електричної або механічної частини.",
+        "ru": "Запах гари без нагрева воздуха часто исходит от электрической или механической части.",
+        "en": "A burning smell without hotter air often comes from electrical or mechanical components."
+      }
+    },
+    {
+      "questionId": "air_diagnosis_04",
+      "category": "diagnosis",
+      "text": {
+        "uk": "Датчик кисню показує 19,2%, а CO₂ лишається нормальним. Який висновок найобережніший?",
+        "ru": "Датчик кислорода показывает 19,2%, а CO₂ остаётся нормальным. Какой вывод наиболее осторожный?",
+        "en": "The oxygen sensor reads 19.2%, while CO₂ remains normal. What is the safest conclusion?"
+      },
+      "options": [
+        {
+          "optionId": "verify_sensor_and_intake",
+          "text": {
+            "uk": "Перевірити датчик незалежним приладом і оглянути приплив свіжого повітря",
+            "ru": "Проверить датчик независимым прибором и осмотреть приток свежего воздуха",
+            "en": "Verify the sensor with an independent device and inspect the fresh-air intake"
+          }
+        },
+        {
+          "optionId": "ignore_until_co2_rises",
+          "text": {
+            "uk": "Ігнорувати показник, доки не зросте CO₂",
+            "ru": "Игнорировать показатель, пока не вырастет CO₂",
+            "en": "Ignore the reading until CO₂ rises"
+          }
+        },
+        {
+          "optionId": "add_more_people",
+          "text": {
+            "uk": "Зібрати більше людей у секторі для перевірки симптомів",
+            "ru": "Собрать больше людей в секторе для проверки симптомов",
+            "en": "Gather more people in the sector to check for symptoms"
+          }
+        },
+        {
+          "optionId": "raise_temperature",
+          "text": {
+            "uk": "Підвищити температуру, щоб збільшити частку кисню",
+            "ru": "Повысить температуру, чтобы увеличить долю кислорода",
+            "en": "Raise the temperature to increase the oxygen percentage"
+          }
+        }
+      ],
+      "correctOptionId": "verify_sensor_and_intake",
+      "hint": {
+        "uk": "Низький кисень потребує незалежної перевірки та огляду припливу, навіть якщо CO₂ ще нормальний.",
+        "ru": "Низкий кислород требует независимой проверки и осмотра притока, даже если CO₂ ещё нормальный.",
+        "en": "Low oxygen needs independent verification and an intake check even if CO₂ is still normal."
+      }
+    },
+    {
+      "questionId": "air_diagnosis_05",
+      "category": "diagnosis",
+      "text": {
+        "uk": "Після заміни фільтра потік повітря не відновився. Яка наступна перевірка найкраща?",
+        "ru": "После замены фильтра поток воздуха не восстановился. Какая следующая проверка лучше?",
+        "en": "Airflow did not recover after replacing the filter. What is the best next check?"
+      },
+      "options": [
+        {
+          "optionId": "check_damper_and_duct",
+          "text": {
+            "uk": "Перевірити заслінки, повітропровід і напрям обертання вентилятора",
+            "ru": "Проверить заслонки, воздуховод и направление вращения вентилятора",
+            "en": "Check dampers, ducting, and the fan's rotation direction"
+          }
+        },
+        {
+          "optionId": "replace_filter_again",
+          "text": {
+            "uk": "Негайно замінити новий фільтр ще раз",
+            "ru": "Немедленно заменить новый фильтр ещё раз",
+            "en": "Immediately replace the new filter again"
+          }
+        },
+        {
+          "optionId": "increase_population",
+          "text": {
+            "uk": "Перемістити більше людей у сектор, щоб перевірити відчуття потоку",
+            "ru": "Переместить больше людей в сектор, чтобы проверить ощущение потока",
+            "en": "Move more people into the sector to test whether they feel airflow"
+          }
+        },
+        {
+          "optionId": "open_emergency_hatch",
+          "text": {
+            "uk": "Відкрити аварійний люк без перевірки зовнішнього повітря",
+            "ru": "Открыть аварийный люк без проверки наружного воздуха",
+            "en": "Open the emergency hatch without checking outside air"
+          }
+        }
+      ],
+      "correctOptionId": "check_damper_and_duct",
+      "hint": {
+        "uk": "Якщо новий фільтр не допоміг, причина може бути далі по шляху повітря.",
+        "ru": "Если новый фильтр не помог, причина может быть дальше по пути воздуха.",
+        "en": "If a new filter did not help, the fault may be elsewhere along the airflow path."
+      }
+    },
+    {
+      "questionId": "air_diagnosis_06",
+      "category": "diagnosis",
+      "text": {
+        "uk": "Тиск до фільтра становить 280 Па, після фільтра — 90 Па. Для справного фільтра нормальна різниця близько 60 Па. Що це означає?",
+        "ru": "Давление до фильтра составляет 280 Па, после фильтра — 90 Па. Для исправного фильтра нормальная разница около 60 Па. Что это означает?",
+        "en": "Pressure is 280 Pa before the filter and 90 Pa after it. A healthy filter normally has about a 60 Pa difference. What does this indicate?"
+      },
+      "options": [
+        {
+          "optionId": "excessive_filter_resistance",
+          "text": {
+            "uk": "Фільтр створює надмірний опір і, ймовірно, забитий або пошкоджений",
+            "ru": "Фильтр создаёт чрезмерное сопротивление и, вероятно, забит или повреждён",
+            "en": "The filter has excessive resistance and is likely clogged or damaged"
+          }
+        },
+        {
+          "optionId": "perfect_operation",
+          "text": {
+            "uk": "Фільтр працює особливо ефективно",
+            "ru": "Фильтр работает особенно эффективно",
+            "en": "The filter is working exceptionally well"
+          }
+        },
+        {
+          "optionId": "pressure_sensor_irrelevant",
+          "text": {
+            "uk": "Різниця тиску не пов’язана зі станом фільтра",
+            "ru": "Разница давления не связана с состоянием фильтра",
+            "en": "Pressure difference is unrelated to filter condition"
+          }
+        },
+        {
+          "optionId": "increase_resistance",
+          "text": {
+            "uk": "Потрібно ще більше перекрити заслінку перед фільтром",
+            "ru": "Нужно ещё сильнее перекрыть заслонку перед фильтром",
+            "en": "The damper before the filter should be closed even further"
+          }
+        }
+      ],
+      "correctOptionId": "excessive_filter_resistance",
+      "hint": {
+        "uk": "Порівняй фактичний перепад тиску з нормальним значенням.",
+        "ru": "Сравни фактический перепад давления с нормальным значением.",
+        "en": "Compare the actual pressure drop with the normal value."
+      }
+    },
+    {
+      "questionId": "air_containment_01",
+      "category": "containment",
+      "text": {
+        "uk": "З пошкодженої вентиляційної секції може надходити пил. Що зробити до початку ремонту?",
+        "ru": "Из повреждённой вентиляционной секции может поступать пыль. Что сделать до начала ремонта?",
+        "en": "Dust may be entering from a damaged ventilation section. What should be done before repairs begin?"
+      },
+      "options": [
+        {
+          "optionId": "isolate_section",
+          "text": {
+            "uk": "Ізолювати секцію, перекрити потік і перевести людей у чисту зону",
+            "ru": "Изолировать секцию, перекрыть поток и перевести людей в чистую зону",
+            "en": "Isolate the section, stop the airflow, and move people to a clean area"
+          }
+        },
+        {
+          "optionId": "increase_fan_speed",
+          "text": {
+            "uk": "Підвищити швидкість вентилятора, щоб швидше винести пил по системі",
+            "ru": "Повысить скорость вентилятора, чтобы быстрее разнести пыль по системе",
+            "en": "Increase fan speed to move the dust through the system faster"
+          }
+        },
+        {
+          "optionId": "open_all_doors",
+          "text": {
+            "uk": "Відкрити всі двері між секторами для вирівнювання повітря",
+            "ru": "Открыть все двери между секторами для выравнивания воздуха",
+            "en": "Open all doors between sectors to equalize the air"
+          }
+        },
+        {
+          "optionId": "continue_normal_use",
+          "text": {
+            "uk": "Продовжити користуватися сектором, якщо пилу не видно",
+            "ru": "Продолжить пользоваться сектором, если пыли не видно",
+            "en": "Keep using the sector if no dust is visible"
+          }
+        }
+      ],
+      "correctOptionId": "isolate_section",
+      "hint": {
+        "uk": "Спочатку потрібно зупинити поширення забруднення.",
+        "ru": "Сначала нужно остановить распространение загрязнения.",
+        "en": "The first priority is to stop contamination from spreading."
+      }
+    },
+    {
+      "questionId": "air_containment_02",
+      "category": "containment",
+      "text": {
+        "uk": "У житловому секторі повітря стає важким, але резервний контур справний. Яка дія найкраща?",
+        "ru": "В жилом секторе воздух становится тяжёлым, но резервный контур исправен. Какое действие лучше?",
+        "en": "Air in the living sector is becoming stale, but the backup circuit is functional. What is the best action?"
+      },
+      "options": [
+        {
+          "optionId": "switch_to_verified_backup",
+          "text": {
+            "uk": "Перевірити резервний контур і переключити вентиляцію на нього",
+            "ru": "Проверить резервный контур и переключить вентиляцию на него",
+            "en": "Verify the backup circuit and switch ventilation to it"
+          }
+        },
+        {
+          "optionId": "open_external_intake",
+          "text": {
+            "uk": "Відкрити зовнішній забір повітря без аналізу атмосфери",
+            "ru": "Открыть внешний забор воздуха без анализа атмосферы",
+            "en": "Open the outside-air intake without analyzing the atmosphere"
+          }
+        },
+        {
+          "optionId": "turn_off_all_air",
+          "text": {
+            "uk": "Вимкнути всю вентиляцію до завершення ремонту",
+            "ru": "Отключить всю вентиляцию до завершения ремонта",
+            "en": "Shut down all ventilation until repairs are complete"
+          }
+        },
+        {
+          "optionId": "move_everyone_to_filter_room",
+          "text": {
+            "uk": "Перемістити всіх людей до фільтраційного відсіку",
+            "ru": "Переместить всех людей в фильтрационный отсек",
+            "en": "Move everyone into the filtration compartment"
+          }
+        }
+      ],
+      "correctOptionId": "switch_to_verified_backup",
+      "hint": {
+        "uk": "Резервна система корисна тільки після короткої перевірки її стану.",
+        "ru": "Резервная система полезна только после короткой проверки её состояния.",
+        "en": "A backup system is useful only after a quick verification."
+      }
+    },
+    {
+      "questionId": "air_containment_03",
+      "category": "containment",
+      "text": {
+        "uk": "Під час заміни фільтра з корпусу висипався дрібний пил. Як правильно діяти?",
+        "ru": "Во время замены фильтра из корпуса высыпалась мелкая пыль. Как правильно действовать?",
+        "en": "Fine dust spills from the housing during filter replacement. What is the correct response?"
+      },
+      "options": [
+        {
+          "optionId": "stop_seal_clean",
+          "text": {
+            "uk": "Зупинити роботу, обмежити доступ, герметично зібрати пил і перевірити забруднення",
+            "ru": "Остановить работу, ограничить доступ, герметично собрать пыль и проверить загрязнение",
+            "en": "Stop work, restrict access, collect the dust in a sealed way, and check contamination"
+          }
+        },
+        {
+          "optionId": "sweep_into_corridor",
+          "text": {
+            "uk": "Змести пил у коридор і продовжити заміну",
+            "ru": "Смести пыль в коридор и продолжить замену",
+            "en": "Sweep the dust into the corridor and continue"
+          }
+        },
+        {
+          "optionId": "blow_with_fan",
+          "text": {
+            "uk": "Здути пил вентилятором у напрямку витяжки",
+            "ru": "Сдуть пыль вентилятором в сторону вытяжки",
+            "en": "Blow the dust toward the exhaust with a fan"
+          }
+        },
+        {
+          "optionId": "ignore_small_amount",
+          "text": {
+            "uk": "Ігнорувати, бо кількість пилу невелика",
+            "ru": "Игнорировать, потому что пыли немного",
+            "en": "Ignore it because the amount is small"
+          }
+        }
+      ],
+      "correctOptionId": "stop_seal_clean",
+      "hint": {
+        "uk": "Розсипаний пил потрібно локалізувати, а не переміщувати потоком повітря.",
+        "ru": "Рассыпанную пыль нужно локализовать, а не переносить потоком воздуха.",
+        "en": "Spilled dust must be contained, not moved by airflow."
+      }
+    },
+    {
+      "questionId": "air_containment_04",
+      "category": "containment",
+      "text": {
+        "uk": "Один учасник почав кашляти біля несправного фільтра. Що зробити насамперед?",
+        "ru": "Один участник начал кашлять возле неисправного фильтра. Что сделать в первую очередь?",
+        "en": "A participant starts coughing near the failed filter. What should be done first?"
+      },
+      "options": [
+        {
+          "optionId": "remove_from_exposure",
+          "text": {
+            "uk": "Вивести його в чисту зону, оцінити стан і обмежити доступ до сектора",
+            "ru": "Вывести его в чистую зону, оценить состояние и ограничить доступ к сектору",
+            "en": "Move them to a clean area, assess their condition, and restrict access to the sector"
+          }
+        },
+        {
+          "optionId": "give_water_and_continue",
+          "text": {
+            "uk": "Дати води й попросити продовжити роботу",
+            "ru": "Дать воды и попросить продолжить работу",
+            "en": "Give them water and ask them to continue working"
+          }
+        },
+        {
+          "optionId": "increase_airflow",
+          "text": {
+            "uk": "Збільшити потік через несправний фільтр",
+            "ru": "Увеличить поток через неисправный фильтр",
+            "en": "Increase airflow through the failed filter"
+          }
+        },
+        {
+          "optionId": "wait_for_second_person",
+          "text": {
+            "uk": "Чекати, доки симптоми з’являться ще в когось",
+            "ru": "Ждать, пока симптомы появятся ещё у кого-то",
+            "en": "Wait until someone else develops symptoms"
+          }
+        }
+      ],
+      "correctOptionId": "remove_from_exposure",
+      "hint": {
+        "uk": "Людину спочатку забирають із небезпечного середовища.",
+        "ru": "Человека сначала выводят из опасной среды.",
+        "en": "The first step is to remove the person from the hazardous environment."
+      }
+    },
+    {
+      "questionId": "air_containment_05",
+      "category": "containment",
+      "text": {
+        "uk": "Резервний фільтр має нижчу пропускну здатність. Як зменшити ризик перевантаження?",
+        "ru": "Резервный фильтр имеет меньшую пропускную способность. Как снизить риск перегрузки?",
+        "en": "The backup filter has lower capacity. How can the risk of overload be reduced?"
+      },
+      "options": [
+        {
+          "optionId": "reduce_demand_and_monitor",
+          "text": {
+            "uk": "Зменшити навантаження на вентиляцію та постійно контролювати CO₂ і тиск",
+            "ru": "Снизить нагрузку на вентиляцию и постоянно контролировать CO₂ и давление",
+            "en": "Reduce ventilation demand and continuously monitor CO₂ and pressure"
+          }
+        },
+        {
+          "optionId": "run_at_maximum",
+          "text": {
+            "uk": "Запустити резервний фільтр на максимальній потужності без перерв",
+            "ru": "Запустить резервный фильтр на максимальной мощности без перерывов",
+            "en": "Run the backup filter at maximum power without interruption"
+          }
+        },
+        {
+          "optionId": "disable_sensors",
+          "text": {
+            "uk": "Вимкнути датчики, щоб вони не заважали роботі",
+            "ru": "Отключить датчики, чтобы они не мешали работе",
+            "en": "Disable the sensors so they do not interfere"
+          }
+        },
+        {
+          "optionId": "open_every_sector",
+          "text": {
+            "uk": "Відкрити всі сектори, щоб збільшити загальний об’єм",
+            "ru": "Открыть все сектора, чтобы увеличить общий объём",
+            "en": "Open all sectors to increase total air volume"
+          }
+        }
+      ],
+      "correctOptionId": "reduce_demand_and_monitor",
+      "hint": {
+        "uk": "Слабший резерв працює безпечніше при меншому навантаженні та постійному контролі.",
+        "ru": "Более слабый резерв работает безопаснее при меньшей нагрузке и постоянном контроле.",
+        "en": "A lower-capacity backup is safer under reduced demand with continuous monitoring."
+      }
+    },
+    {
+      "questionId": "air_containment_06",
+      "category": "containment",
+      "text": {
+        "uk": "Зовнішнє повітря потенційно токсичне, а внутрішній фільтр майже не працює. Яке рішення найкраще?",
+        "ru": "Наружный воздух потенциально токсичен, а внутренний фильтр почти не работает. Какое решение лучше?",
+        "en": "Outside air may be toxic, and the internal filter is barely working. What is the best decision?"
+      },
+      "options": [
+        {
+          "optionId": "sealed_mode_and_backup",
+          "text": {
+            "uk": "Залишити бункер герметичним, перейти на перевірений резерв і зменшити споживання повітря",
+            "ru": "Оставить бункер герметичным, перейти на проверенный резерв и снизить потребление воздуха",
+            "en": "Keep the bunker sealed, switch to a verified backup, and reduce air demand"
+          }
+        },
+        {
+          "optionId": "open_outside_intake",
+          "text": {
+            "uk": "Відкрити зовнішній забір повітря без аналізу",
+            "ru": "Открыть внешний забор воздуха без анализа",
+            "en": "Open the outside-air intake without testing it"
+          }
+        },
+        {
+          "optionId": "turn_off_all_monitoring",
+          "text": {
+            "uk": "Вимкнути моніторинг, щоб заощадити електроенергію",
+            "ru": "Отключить мониторинг, чтобы сэкономить электроэнергию",
+            "en": "Turn off monitoring to save power"
+          }
+        },
+        {
+          "optionId": "move_people_to_filter_room",
+          "text": {
+            "uk": "Зібрати людей у фільтраційній кімнаті",
+            "ru": "Собрать людей в фильтрационной комнате",
+            "en": "Gather everyone in the filtration room"
+          }
+        }
+      ],
+      "correctOptionId": "sealed_mode_and_backup",
+      "hint": {
+        "uk": "Неперевірене зовнішнє повітря не повинно потрапляти всередину.",
+        "ru": "Непроверенный наружный воздух не должен попадать внутрь.",
+        "en": "Untested outside air should not be allowed inside."
+      }
+    },
+    {
+      "questionId": "air_repair_01",
+      "category": "repair",
+      "text": {
+        "uk": "Фільтр забитий, але корпус не пошкоджений. Яка послідовність заміни правильна?",
+        "ru": "Фильтр забит, но корпус не повреждён. Какая последовательность замены правильная?",
+        "en": "The filter is clogged, but the housing is intact. What is the correct replacement sequence?"
+      },
+      "options": [
+        {
+          "optionId": "isolate_remove_seal_test",
+          "text": {
+            "uk": "Зупинити потік, ізолювати секцію, герметично зняти фільтр, встановити новий і перевірити тиск",
+            "ru": "Остановить поток, изолировать секцию, герметично снять фильтр, установить новый и проверить давление",
+            "en": "Stop airflow, isolate the section, remove the filter in a sealed way, install the new one, and test pressure"
+          }
+        },
+        {
+          "optionId": "remove_while_running",
+          "text": {
+            "uk": "Вийняти фільтр під час роботи вентилятора, щоб не втрачати час",
+            "ru": "Вынуть фильтр при работающем вентиляторе, чтобы не терять время",
+            "en": "Remove the filter while the fan is running to save time"
+          }
+        },
+        {
+          "optionId": "install_without_seal",
+          "text": {
+            "uk": "Встановити новий фільтр без перевірки ущільнення",
+            "ru": "Установить новый фильтр без проверки уплотнения",
+            "en": "Install the new filter without checking the seal"
+          }
+        },
+        {
+          "optionId": "clean_with_compressed_air",
+          "text": {
+            "uk": "Продути старий фільтр стисненим повітрям у житловому секторі",
+            "ru": "Продуть старый фильтр сжатым воздухом в жилом секторе",
+            "en": "Blow out the old filter with compressed air in the living sector"
+          }
+        }
+      ],
+      "correctOptionId": "isolate_remove_seal_test",
+      "hint": {
+        "uk": "Безпечна заміна починається із зупинки потоку й завершується перевіркою.",
+        "ru": "Безопасная замена начинается с остановки потока и заканчивается проверкой.",
+        "en": "A safe replacement starts by stopping airflow and ends with verification."
+      }
+    },
+    {
+      "questionId": "air_repair_02",
+      "category": "repair",
+      "text": {
+        "uk": "На корпусі фільтра з’явилася тріщина. Є герметик, металева накладка та затиски. Що зробити?",
+        "ru": "На корпусе фильтра появилась трещина. Есть герметик, металлическая накладка и зажимы. Что сделать?",
+        "en": "A crack appears in the filter housing. Sealant, a metal patch, and clamps are available. What should be done?"
+      },
+      "options": [
+        {
+          "optionId": "isolate_patch_test",
+          "text": {
+            "uk": "Ізолювати корпус, очистити ділянку, встановити накладку з герметиком і перевірити витік",
+            "ru": "Изолировать корпус, очистить участок, установить накладку с герметиком и проверить утечку",
+            "en": "Isolate the housing, clean the area, install the patch with sealant, and test for leakage"
+          }
+        },
+        {
+          "optionId": "seal_under_pressure",
+          "text": {
+            "uk": "Нанести герметик під повним тиском без зупинки вентиляції",
+            "ru": "Нанести герметик под полным давлением без остановки вентиляции",
+            "en": "Apply sealant under full pressure without stopping ventilation"
+          }
+        },
+        {
+          "optionId": "cover_without_cleaning",
+          "text": {
+            "uk": "Прикласти металеву накладку без очищення поверхні",
+            "ru": "Приложить металлическую накладку без очистки поверхности",
+            "en": "Place the metal patch without cleaning the surface"
+          }
+        },
+        {
+          "optionId": "increase_fan_speed",
+          "text": {
+            "uk": "Збільшити швидкість вентилятора, щоб повітря проходило швидше за тріщину",
+            "ru": "Увеличить скорость вентилятора, чтобы воздух проходил быстрее трещины",
+            "en": "Increase fan speed so air passes the crack faster"
+          }
+        }
+      ],
+      "correctOptionId": "isolate_patch_test",
+      "hint": {
+        "uk": "Тимчасовий ремонт має виконуватися без тиску на пошкоджену ділянку.",
+        "ru": "Временный ремонт должен выполняться без давления на повреждённый участок.",
+        "en": "A temporary repair should be made without pressure on the damaged section."
+      }
+    },
+    {
+      "questionId": "air_repair_03",
+      "category": "repair",
+      "text": {
+        "uk": "Вентилятор обертається, але потік майже відсутній. Заслінки відкриті. Що перевірити далі?",
+        "ru": "Вентилятор вращается, но поток почти отсутствует. Заслонки открыты. Что проверить дальше?",
+        "en": "The fan is spinning, but airflow is almost absent. Dampers are open. What should be checked next?"
+      },
+      "options": [
+        {
+          "optionId": "rotation_and_belt",
+          "text": {
+            "uk": "Напрям обертання, ремінь або муфту приводу вентилятора",
+            "ru": "Направление вращения, ремень или муфту привода вентилятора",
+            "en": "The rotation direction, belt, or drive coupling"
+          }
+        },
+        {
+          "optionId": "paint_color",
+          "text": {
+            "uk": "Колір корпусу вентилятора",
+            "ru": "Цвет корпуса вентилятора",
+            "en": "The color of the fan housing"
+          }
+        },
+        {
+          "optionId": "room_lighting",
+          "text": {
+            "uk": "Яскравість освітлення в технічному секторі",
+            "ru": "Яркость освещения в техническом секторе",
+            "en": "The brightness of lighting in the technical sector"
+          }
+        },
+        {
+          "optionId": "water_pressure",
+          "text": {
+            "uk": "Тиск у системі питної води",
+            "ru": "Давление в системе питьевой воды",
+            "en": "Pressure in the drinking-water system"
+          }
+        }
+      ],
+      "correctOptionId": "rotation_and_belt",
+      "hint": {
+        "uk": "Оберти двигуна ще не означають, що крильчатка правильно передає потік.",
+        "ru": "Обороты двигателя ещё не означают, что крыльчатка правильно создаёт поток.",
+        "en": "A running motor does not guarantee that the impeller is moving air correctly."
+      }
+    },
+    {
+      "questionId": "air_repair_04",
+      "category": "repair",
+      "text": {
+        "uk": "Після ремонту перепад тиску нормальний, але CO₂ знижується дуже повільно. Що зробити?",
+        "ru": "После ремонта перепад давления нормальный, но CO₂ снижается очень медленно. Что сделать?",
+        "en": "After repairs, pressure difference is normal, but CO₂ is falling very slowly. What should be done?"
+      },
+      "options": [
+        {
+          "optionId": "check_air_exchange_path",
+          "text": {
+            "uk": "Перевірити загальний шлях обміну повітря, заслінки та витяжний канал",
+            "ru": "Проверить общий путь обмена воздуха, заслонки и вытяжной канал",
+            "en": "Check the full air-exchange path, dampers, and exhaust duct"
+          }
+        },
+        {
+          "optionId": "replace_new_filter",
+          "text": {
+            "uk": "Одразу замінити щойно встановлений фільтр",
+            "ru": "Сразу заменить только что установленный фильтр",
+            "en": "Immediately replace the newly installed filter"
+          }
+        },
+        {
+          "optionId": "disable_co2_alarm",
+          "text": {
+            "uk": "Вимкнути тривогу CO₂, бо тиск уже нормальний",
+            "ru": "Отключить тревогу CO₂, потому что давление уже нормальное",
+            "en": "Disable the CO₂ alarm because pressure is already normal"
+          }
+        },
+        {
+          "optionId": "close_exhaust",
+          "text": {
+            "uk": "Закрити витяжний канал, щоб зберегти очищене повітря",
+            "ru": "Закрыть вытяжной канал, чтобы сохранить очищенный воздух",
+            "en": "Close the exhaust duct to preserve cleaned air"
+          }
+        }
+      ],
+      "correctOptionId": "check_air_exchange_path",
+      "hint": {
+        "uk": "Справний фільтр не допоможе, якщо повітря не проходить повний цикл.",
+        "ru": "Исправный фильтр не поможет, если воздух не проходит полный цикл.",
+        "en": "A healthy filter cannot help if air is not completing the full circulation path."
+      }
+    },
+    {
+      "questionId": "air_repair_05",
+      "category": "repair",
+      "text": {
+        "uk": "Резервний вентилятор запускається, але через хвилину вимикається через перегрів. Який крок найкращий?",
+        "ru": "Резервный вентилятор запускается, но через минуту отключается из-за перегрева. Какой шаг лучше?",
+        "en": "The backup fan starts but shuts down after a minute due to overheating. What is the best step?"
+      },
+      "options": [
+        {
+          "optionId": "inspect_load_and_bearings",
+          "text": {
+            "uk": "Зупинити вентилятор і перевірити навантаження, підшипники та охолодження двигуна",
+            "ru": "Остановить вентилятор и проверить нагрузку, подшипники и охлаждение двигателя",
+            "en": "Stop the fan and inspect load, bearings, and motor cooling"
+          }
+        },
+        {
+          "optionId": "bypass_protection",
+          "text": {
+            "uk": "Відключити захист від перегріву й запустити знову",
+            "ru": "Отключить защиту от перегрева и запустить снова",
+            "en": "Disable overheat protection and restart it"
+          }
+        },
+        {
+          "optionId": "increase_voltage",
+          "text": {
+            "uk": "Підвищити напругу живлення",
+            "ru": "Повысить напряжение питания",
+            "en": "Increase supply voltage"
+          }
+        },
+        {
+          "optionId": "cool_with_water",
+          "text": {
+            "uk": "Полити двигун водою під час роботи",
+            "ru": "Полить двигатель водой во время работы",
+            "en": "Pour water on the motor while it is running"
+          }
+        }
+      ],
+      "correctOptionId": "inspect_load_and_bearings",
+      "hint": {
+        "uk": "Перегрів часто спричиняє надмірне механічне навантаження або погане охолодження.",
+        "ru": "Перегрев часто вызывает чрезмерная механическая нагрузка или плохое охлаждение.",
+        "en": "Overheating is often caused by excessive mechanical load or poor cooling."
+      }
+    },
+    {
+      "questionId": "air_repair_06",
+      "category": "repair",
+      "text": {
+        "uk": "Після завершення ремонту який набір перевірок найкраще підтверджує безпечну роботу системи?",
+        "ru": "После завершения ремонта какой набор проверок лучше всего подтверждает безопасную работу системы?",
+        "en": "After repairs are complete, which set of checks best confirms safe operation?"
+      },
+      "options": [
+        {
+          "optionId": "full_verification",
+          "text": {
+            "uk": "Перевірити потік, перепад тиску, CO₂, кисень, герметичність і стабільність протягом кількох хвилин",
+            "ru": "Проверить поток, перепад давления, CO₂, кислород, герметичность и стабильность в течение нескольких минут",
+            "en": "Check airflow, pressure difference, CO₂, oxygen, sealing, and stability for several minutes"
+          }
+        },
+        {
+          "optionId": "alarm_only",
+          "text": {
+            "uk": "Переконатися лише в тому, що звукова тривога вимкнулася",
+            "ru": "Убедиться только в том, что звуковая тревога отключилась",
+            "en": "Only confirm that the audible alarm has stopped"
+          }
+        },
+        {
+          "optionId": "visual_only",
+          "text": {
+            "uk": "Провести лише візуальний огляд корпусу",
+            "ru": "Провести только визуальный осмотр корпуса",
+            "en": "Perform only a visual inspection of the housing"
+          }
+        },
+        {
+          "optionId": "one_sensor",
+          "text": {
+            "uk": "Перевірити один датчик біля входу",
+            "ru": "Проверить один датчик у входа",
+            "en": "Check one sensor near the entrance"
+          }
+        }
+      ],
+      "correctOptionId": "full_verification",
+      "hint": {
+        "uk": "Безпечний запуск підтверджують кількома незалежними показниками, а не одним сигналом.",
+        "ru": "Безопасный запуск подтверждают несколькими независимыми показателями, а не одним сигналом.",
+        "en": "Safe operation should be confirmed by several independent indicators, not one signal."
+      }
+    }
+  ]
+}

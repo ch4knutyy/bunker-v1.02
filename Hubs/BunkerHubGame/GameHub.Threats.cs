@@ -1,5 +1,6 @@
 using Bunker.Models;
 using Bunker.Services;
+using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
 
@@ -102,9 +103,14 @@ namespace Bunker.Hubs
                 return;
             }
 
-            threatState.VolunteerSelection.SelectedPlayerId = RoomService.GetPlayerKey(player);
-            threatState.VolunteerSelection.SelectionReason = "voluntary";
-            threatState.VolunteerSelection.SelectedAtRound = context.Room.CurrentRound;
+            var playerId = RoomService.GetPlayerKey(player);
+            AddThreatParticipant(threatState, playerId);
+            if (string.IsNullOrWhiteSpace(threatState.VolunteerSelection.SelectedPlayerId))
+            {
+                threatState.VolunteerSelection.SelectedPlayerId = playerId;
+                threatState.VolunteerSelection.SelectionReason = "voluntary";
+                threatState.VolunteerSelection.SelectedAtRound = context.Room.CurrentRound;
+            }
             threatState.ThreatStatus = "collecting_contributions";
 
             await Clients.Group(context.RoomId).SendAsync("ThreatVolunteerSelected", new
@@ -134,6 +140,10 @@ namespace Bunker.Hubs
             }
 
             var ownerId = RoomService.GetPlayerKey(player);
+            if (string.IsNullOrWhiteSpace(contributionId))
+            {
+                threatState.ParticipantPlayerIds.RemoveAll(id => string.Equals(id, ownerId, StringComparison.OrdinalIgnoreCase));
+            }
             if (string.IsNullOrWhiteSpace(contributionId) &&
                 threatState.VolunteerSelection.SelectedPlayerId == ownerId &&
                 threatState.VolunteerSelection.SelectionReason == "voluntary")
@@ -176,32 +186,25 @@ namespace Bunker.Hubs
                 return;
             }
 
-            var item = player.Inventory.Items.FirstOrDefault(i =>
-                string.Equals(i.InstanceId, itemInstanceIdOrName, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(i.Name, itemInstanceIdOrName, StringComparison.OrdinalIgnoreCase));
+            var (itemSource, itemToken) = ParseThreatItemToken(itemInstanceIdOrName);
+            var item = ResolvePlayerThreatItem(player, itemSource, itemToken);
             if (item == null)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Предмет не знайдено");
                 return;
             }
 
-            var tags = item.ResourceTags.Concat(item.ProtectionTags).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            var accepted = HasAny(tags, GetRadiationResourceTags().Concat(GetRadiationProtectionTags()));
-            if (!accepted)
-            {
-                await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Цей предмет не допомагає проти радіаційного витоку." });
-                return;
-            }
-
             var itemSourceId = GetItemSourceId(item);
-            if (FindActiveThreatContributionBySource(threatState, "personal_inventory", itemSourceId) != null)
+            var contributionSourceType = itemSource == "profession" ? "profession_item" : "personal_inventory";
+            if (FindActiveThreatContributionBySource(threatState, contributionSourceType, itemSourceId) != null)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Цей предмет уже зарезервований для загрози");
                 return;
             }
 
-            AddThreatContribution(context.Room, threatState, "personal_inventory", itemSourceId, RoomService.GetPlayerKey(player), true, true, tags, item.Name);
-            await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Предмет прийнято як прихований внесок." });
+            var tags = item.ResourceTags.Concat(item.ProtectionTags).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            AddThreatContribution(context.Room, threatState, contributionSourceType, itemSourceId, RoomService.GetPlayerKey(player), true, true, tags, item.Name);
+            await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Внесок додано до операції" });
             await BroadcastThreatState(context.Room, context.RoomId);
         }
 
@@ -242,17 +245,9 @@ namespace Bunker.Hubs
             }
 
             var tags = asset.ResourceTags.Concat(asset.FacilityTags).Concat(asset.ProtectionTags).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            var accepted = normalizedType == "bunker_facility"
-                ? HasAny(tags, GetRadiationFacilityTags().Concat(new[] { "decontamination_area" }))
-                : HasAny(tags, GetRadiationResourceTags().Concat(GetRadiationProtectionTags()));
-            if (!accepted)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Цей ресурс не підходить для radiation_leak");
-                return;
-            }
-
             asset.Status = "reserved";
             AddThreatContribution(context.Room, threatState, normalizedType, asset.Id, "", false, true, tags, asset.GetName());
+            await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Внесок додано до операції" });
             await BroadcastThreatState(context.Room, context.RoomId);
         }
 
@@ -337,6 +332,8 @@ namespace Bunker.Hubs
                 threatState.VolunteerSelection.SelectedPlayerId = unanimousTargetId;
                 threatState.VolunteerSelection.SelectionReason = "group_vote";
                 threatState.VolunteerSelection.SelectedAtRound = context.Room.CurrentRound;
+                threatState.ForcedParticipantPlayerId = unanimousTargetId;
+                AddThreatParticipant(threatState, unanimousTargetId);
                 threatState.ThreatStatus = "collecting_contributions";
 
                 await Clients.Group(context.RoomId).SendAsync("ThreatVolunteerVoteCompleted", new
@@ -389,10 +386,58 @@ namespace Bunker.Hubs
                 threatState.VolunteerSelection.SelectedPlayerId = selectedId;
                 threatState.VolunteerSelection.SelectionReason = "group_vote";
                 threatState.VolunteerSelection.SelectedAtRound = context.Room.CurrentRound;
+                threatState.ForcedParticipantPlayerId = selectedId;
+                AddThreatParticipant(threatState, selectedId);
                 message = $"Група відправила {selected?.Name ?? "гравця"} усувати загрозу.";
             }
 
             await Clients.Group(context.RoomId).SendAsync("ThreatVolunteerVoteClosed", new { message });
+            await BroadcastThreatState(context.Room, context.RoomId);
+        }
+
+        public async Task SetThreatOperationLeader(string playerId)
+        {
+            if (!IsCallerHost())
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінити керівника операції");
+                return;
+            }
+
+            var context = GetCurrentThreatContext();
+            if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                return;
+            }
+
+            var threatState = EnsureRadiationThreatState(context.Room);
+            if (!CanCollectThreatContributions(context.Room, threatState) ||
+                string.Equals(threatState.MiniGame.Status, "active", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(threatState.MiniGame.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Керівника зараз не можна змінити");
+                return;
+            }
+
+            if (!_roomService.TryResolvePlayer(context.Room, playerId, out _, out var player) || player.IsEliminated)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
+                return;
+            }
+
+            var selectedPlayerId = RoomService.GetPlayerKey(player);
+            threatState.VolunteerSelection.SelectedPlayerId = selectedPlayerId;
+            threatState.VolunteerSelection.SelectionReason = "host_assigned";
+            threatState.VolunteerSelection.SelectedAtRound = context.Room.CurrentRound;
+            AddThreatParticipant(threatState, selectedPlayerId);
+            threatState.ThreatStatus = "collecting_contributions";
+
+            await Clients.Group(context.RoomId).SendAsync("ThreatVolunteerSelected", new
+            {
+                playerName = player.Name,
+                reason = "host_assigned",
+                message = "Керівника операції оновлено."
+            });
             await BroadcastThreatState(context.Room, context.RoomId);
         }
 
@@ -413,7 +458,12 @@ namespace Bunker.Hubs
 
             var room = context.Room;
             var threatState = EnsureRadiationThreatState(room);
-            if (!IsRadiationThreatActive(room, threatState) || threatState.Resolution.EffectsApplied)
+            if (threatState.Resolution.EffectsApplied && _threatMiniGames.TryGet(RadiationLeakThreatId, out var finalizedMiniGame))
+            {
+                await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, finalizedMiniGame, "uk");
+                return;
+            }
+            if (!IsRadiationThreatActive(room, threatState))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Загрозу вже завершено або вона недоступна");
                 return;
@@ -421,6 +471,12 @@ namespace Bunker.Hubs
 
             var volunteerId = threatState.VolunteerSelection.SelectedPlayerId;
             var hasVolunteer = !string.IsNullOrWhiteSpace(volunteerId);
+            if (!threatState.OperationScaling.IsCalculated)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Спочатку почніть операцію загрози");
+                return;
+            }
+
             var hasSolver = hasVolunteer && threatState.Contributions.Any(c =>
                 c.IsAccepted &&
                 c.OwnerPlayerId == volunteerId &&
@@ -428,7 +484,7 @@ namespace Bunker.Hubs
                 HasAny(c.TagsSnapshot, GetRadiationSolverTags()));
             var hasControl = threatState.Contributions.Any(c =>
                 c.IsAccepted &&
-                (c.SourceType == "personal_inventory" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility") &&
+                (c.SourceType == "personal_inventory" || c.SourceType == "profession_item" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility") &&
                 (HasAny(c.TagsSnapshot, GetRadiationResourceTags()) || HasAny(c.TagsSnapshot, GetRadiationFacilityTags())));
             var protectedVolunteer = hasVolunteer && threatState.Contributions.Any(c =>
                 c.IsAccepted &&
@@ -436,41 +492,287 @@ namespace Bunker.Hubs
                 (HasAny(c.TagsSnapshot, GetRadiationProtectionTags()) || HasAny(c.TagsSnapshot, new[] { "decontamination_area" })));
 
             var success = hasVolunteer && hasSolver && hasControl;
-            threatState.Resolution.SelectedApproachId = "contain_radiation";
-            threatState.Resolution.WasSuccessful = success;
-            threatState.Resolution.WasVolunteerProtected = protectedVolunteer;
-            threatState.Resolution.EffectsApplied = true;
-            threatState.Resolution.CompletedAtRound = room.CurrentRound;
-
-            if (success && protectedVolunteer)
+            if (!_threatMiniGames.TryGet(RadiationLeakThreatId, out var miniGame))
             {
-                threatState.ThreatStatus = "resolved_safely";
-                threatState.Resolution.PublicResults.Add("Радіаційний витік усунено безпечно.");
-            }
-            else if (success)
-            {
-                threatState.ThreatStatus = "resolved_with_casualty";
-                ApplyRadiationSickness(room, volunteerId, "heavy");
-                threatState.Resolution.PublicResults.Add("Загрозу усунено, але доброволець отримав променеве ураження.");
-            }
-            else
-            {
-                threatState.ThreatStatus = "failed";
-                ApplyRadiationFailure(room);
-                threatState.Resolution.PublicResults.Add("Загрозу не усунено. Група отримала наслідки радіаційного витоку.");
+                await Clients.Caller.SendAsync("ReceiveError", "Для цієї загрози немає мінігри");
+                return;
             }
 
-            ConsumeAcceptedThreatItems(room, threatState, success);
-            GrantThreatVoteImmunityIfNeeded(room, threatState);
+            threatState.MiniGame.Status = "completed";
+            threatState.MiniGame.CompletedAtUtc = DateTimeOffset.UtcNow;
+            threatState.MiniGame.ResultStatus = success
+                ? protectedVolunteer ? "perfect_success" : "success_with_consequences"
+                : "failed";
+            await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, "uk");
+        }
 
-            await Clients.Group(context.RoomId).SendAsync("ThreatResolved", new
+        public async Task StartThreatMiniGame(string? language = null)
+        {
+            if (!IsCallerHost())
             {
-                status = threatState.ThreatStatus,
-                wasSuccessful = success,
-                wasVolunteerProtected = protectedVolunteer,
-                results = threatState.Resolution.PublicResults
-            });
+                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може почати операцію загрози");
+                return;
+            }
+
+            var context = GetCurrentThreatContext();
+            if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                return;
+            }
+
+            var room = context.Room;
+            var threatState = EnsureRadiationThreatState(room);
+            if (!IsRadiationThreatActive(room, threatState) || threatState.Resolution.EffectsApplied)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Операція загрози недоступна");
+                return;
+            }
+
+            if (!_threatMiniGames.TryGet(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, out var miniGame))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Для цієї загрози немає мінігри");
+                return;
+            }
+
+            var leaderId = threatState.VolunteerSelection.SelectedPlayerId;
+            if (string.IsNullOrWhiteSpace(leaderId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Спочатку потрібно обрати добровольця");
+                return;
+            }
+
+            AddThreatParticipant(threatState, leaderId);
+            EnsureThreatScalingSnapshot(room, threatState, leaderId);
+            var publicState = miniGame.Start(room, threatState, leaderId, NormalizeThreatLanguage(language));
+            if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            {
+                await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
+                return;
+            }
+
+            threatState.ThreatStatus = "mini_game_active";
+            await Clients.Group(context.RoomId).SendAsync("ThreatMiniGameStarted", publicState);
             await BroadcastThreatState(room, context.RoomId);
+        }
+
+        public async Task SubmitThreatMiniGameAnswer(string questionId, string optionId, string? language = null)
+        {
+            var context = GetCurrentThreatContext();
+            if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
+                return;
+            }
+
+            var room = context.Room;
+            var threatState = EnsureRadiationThreatState(room);
+            if (!_threatMiniGames.TryGet(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, out var miniGame))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Для цієї загрози немає мінігри");
+                return;
+            }
+
+            if (threatState.Resolution.EffectsApplied ||
+                threatState.MiniGame.Status is "resolved_safely" or "resolved_with_casualty" or "failed")
+            {
+                await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
+                return;
+            }
+
+            var result = miniGame.SubmitAnswer(
+                room,
+                threatState,
+                RoomService.GetPlayerKey(player),
+                questionId?.Trim() ?? "",
+                optionId?.Trim() ?? "",
+                NormalizeThreatLanguage(language));
+
+            if (!result.Success)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", result.Error);
+                if (result.PublicState != null)
+                {
+                    if (string.Equals(result.PublicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
+                        return;
+                    }
+                    await Clients.Group(context.RoomId).SendAsync("ThreatMiniGameUpdated", result.PublicState);
+                    await BroadcastThreatState(room, context.RoomId);
+                }
+                return;
+            }
+
+            var publicState = result.PublicState ?? miniGame.GetPublicState(threatState, NormalizeThreatLanguage(language));
+            if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            {
+                await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
+                await NotifyReturnedThreatItems(room, context.RoomId, threatState);
+                return;
+            }
+
+            await Clients.Group(context.RoomId).SendAsync("ThreatMiniGameUpdated", publicState);
+            await BroadcastThreatState(room, context.RoomId);
+        }
+
+        public async Task UseThreatMiniGameHint(string? language = null)
+        {
+            var context = GetCurrentThreatContext();
+            if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out _))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
+                return;
+            }
+
+            var room = context.Room;
+            var threatState = EnsureRadiationThreatState(room);
+            if (!_threatMiniGames.TryGet(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, out var miniGame))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Для цієї загрози немає мінігри");
+                return;
+            }
+
+            var result = miniGame.ApplyHint(threatState, NormalizeThreatLanguage(language));
+            if (!result.Success)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", result.Error);
+            }
+
+            if (result.PublicState != null)
+            {
+                if (string.Equals(result.PublicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
+                    return;
+                }
+                await Clients.Group(context.RoomId).SendAsync("ThreatMiniGameUpdated", result.PublicState);
+                await BroadcastThreatState(room, context.RoomId);
+            }
+        }
+
+        public async Task CheckThreatMiniGameTimeout(string? language = null)
+        {
+            var context = GetCurrentThreatContext();
+            if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId))
+            {
+                return;
+            }
+
+            var threatState = EnsureRadiationThreatState(context.Room);
+            if (!_threatMiniGames.TryGet(RadiationLeakThreatId, out var miniGame))
+            {
+                return;
+            }
+
+            var publicState = miniGame.GetPublicState(threatState, NormalizeThreatLanguage(language));
+            if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase) ||
+                threatState.Resolution.EffectsApplied)
+            {
+                await FinalizeRadiationOperationAsync(
+                    context.Room,
+                    context.RoomId,
+                    threatState,
+                    miniGame,
+                    NormalizeThreatLanguage(language));
+                return;
+            }
+
+            await Clients.Group(context.RoomId).SendAsync("ThreatMiniGameUpdated", publicState);
+            await BroadcastThreatState(context.Room, context.RoomId);
+        }
+
+        private async Task FinalizeRadiationOperationAsync(
+            Room room,
+            string roomId,
+            ThreatInteractionState threatState,
+            IThreatMiniGameService miniGame,
+            string language)
+        {
+            var isFinalStatus = threatState.MiniGame.Status is "resolved_safely" or "resolved_with_casualty" or "failed";
+            if (!isFinalStatus && !string.Equals(threatState.MiniGame.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (!threatState.Resolution.EffectsApplied)
+            {
+                var resultStatus = threatState.MiniGame.ResultStatus;
+                var volunteerId = threatState.VolunteerSelection.SelectedPlayerId;
+                var volunteerProtected = !string.IsNullOrWhiteSpace(volunteerId) &&
+                    threatState.OperationBonuses.ProtectedPlayerIds.Contains(volunteerId, StringComparer.OrdinalIgnoreCase);
+                var outcome = string.Equals(resultStatus, "perfect_success", StringComparison.OrdinalIgnoreCase) ||
+                    (string.Equals(resultStatus, "success_with_consequences", StringComparison.OrdinalIgnoreCase) && volunteerProtected)
+                        ? "resolved_safely"
+                        : string.Equals(resultStatus, "success_with_consequences", StringComparison.OrdinalIgnoreCase)
+                            ? "resolved_with_casualty"
+                            : "failed";
+
+                threatState.MiniGame.Outcome = outcome;
+                threatState.MiniGame.Status = outcome;
+                threatState.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
+                threatState.ThreatStatus = outcome;
+                threatState.Resolution.SelectedApproachId = "contain_radiation";
+                threatState.Resolution.CompletedAtRound = room.CurrentRound;
+                threatState.Resolution.WasSuccessful = outcome != "failed";
+                threatState.Resolution.WasVolunteerProtected = volunteerProtected;
+                threatState.Resolution.PublicResults.AddRange(threatState.OperationBonuses.PublicExplanations);
+
+                if (outcome == "resolved_with_casualty")
+                {
+                    ApplyRadiationConditionToParticipants(room, threatState, "medium");
+                    threatState.Resolution.PublicResults.Add("Операцію завершено, але учасник отримав радіаційний наслідок.");
+                }
+                else if (outcome == "failed")
+                {
+                    ApplyRadiationFailure(room, threatState);
+                    threatState.Resolution.PublicResults.Add("Операцію провалено. Радіаційний наслідок застосовано.");
+                }
+                else
+                {
+                    threatState.Resolution.PublicResults.Add("Операцію завершено без помітних втрат.");
+                }
+
+                ConsumeAcceptedThreatItems(room, threatState, threatState.Resolution.WasSuccessful);
+                GrantThreatVoteImmunityIfNeeded(room, threatState);
+                threatState.Resolution.EffectsApplied = true;
+            }
+
+            if (threatState.Resolution.EffectsApplied &&
+                threatState.ThreatStatus is "resolved_safely" or "resolved_with_casualty" or "failed")
+            {
+                threatState.MiniGame.Outcome = threatState.ThreatStatus;
+                threatState.MiniGame.Status = threatState.ThreatStatus;
+                threatState.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
+            }
+
+            var finalState = miniGame.GetPublicState(threatState, language);
+            await Clients.Group(roomId).SendAsync("ThreatMiniGameUpdated", finalState);
+            await BroadcastThreatState(room, roomId);
+        }
+
+        private async Task NotifyReturnedThreatItems(Room room, string roomId, ThreatInteractionState threatState)
+        {
+            foreach (var contribution in threatState.Contributions.Where(c =>
+                         c.SourceType == "personal_inventory" &&
+                         threatState.OperationBonuses.IneffectiveItemContributionIds.Contains(c.ContributionId, StringComparer.OrdinalIgnoreCase) &&
+                         !string.Equals(c.Status, "returned_no_effect", StringComparison.OrdinalIgnoreCase)))
+            {
+                var ownerEntry = RoomService.GetPlayersSnapshot(room).FirstOrDefault(entry =>
+                    RoomService.GetPlayerKey(entry.Value) == contribution.OwnerPlayerId);
+                if (string.IsNullOrWhiteSpace(ownerEntry.Key))
+                {
+                    continue;
+                }
+
+                contribution.Status = "returned_no_effect";
+                await Clients.Client(ownerEntry.Key).SendAsync("ThreatPrivateMessage", new
+                {
+                    message = "Ваш предмет не дав помітного ефекту та був повернений."
+                });
+            }
         }
 
         private async Task SubmitThreatCapability(string sourceType)
@@ -493,11 +795,6 @@ namespace Bunker.Hubs
             var tags = sourceType == "hobby"
                 ? player.Hobby.CapabilityTags
                 : player.Profession.CapabilityTags;
-            if (!HasAny(tags, GetRadiationSolverTags()))
-            {
-                await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Ця характеристика не підходить для radiation_leak." });
-                return;
-            }
 
             AddThreatContribution(
                 context.Room,
@@ -510,7 +807,7 @@ namespace Bunker.Hubs
                 tags,
                 sourceType == "hobby" ? player.Hobby.Name : player.Profession.Name);
 
-            await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Компетенція підтверджена." });
+            await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Внесок додано до операції" });
             await BroadcastThreatState(context.Room, context.RoomId);
         }
 
@@ -540,6 +837,231 @@ namespace Bunker.Hubs
             return room.ThreatState;
         }
 
+        private void EnsureThreatScalingSnapshot(Room room, ThreatInteractionState threatState, string? volunteerId)
+        {
+            if (threatState.OperationScaling.IsCalculated)
+            {
+                return;
+            }
+
+            threatState.OperationBonuses = BuildRadiationOperationBonuses(threatState);
+            var activePlayerCount = Math.Max(1, GetThreatScalingPlayers(room).Count);
+            var participantIds = new HashSet<string>(GetThreatParticipantIds(threatState), StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(volunteerId))
+            {
+                participantIds.Add(volunteerId);
+            }
+
+            var additionalAllowedErrors = threatState.OperationBonuses.AdditionalAllowedErrors;
+            var timeBonusSeconds = threatState.OperationBonuses.TimeBonusSeconds;
+            var autoCompletedTaskCount = threatState.OperationBonuses.AutoCompletedTaskCount;
+            var limitResult = _threatScaling.Calculate(
+                activePlayerCount,
+                1,
+                additionalAllowedErrors,
+                timeBonusSeconds,
+                autoCompletedTaskCount);
+            var participantCount = Math.Clamp(Math.Max(1, participantIds.Count), 1, limitResult.MaxParticipants);
+
+            var result = _threatScaling.Calculate(
+                activePlayerCount,
+                participantCount,
+                additionalAllowedErrors,
+                timeBonusSeconds,
+                autoCompletedTaskCount);
+
+            threatState.OperationScaling = new ThreatOperationScalingState
+            {
+                IsCalculated = true,
+                CalculatedAtRound = room.CurrentRound,
+                ScalingPlayerCount = result.ScalingPlayerCount,
+                MinParticipants = result.MinParticipants,
+                MaxParticipants = result.MaxParticipants,
+                BaseTaskCount = result.BaseTaskCount,
+                PlayableTaskCount = result.PlayableTaskCount,
+                BaseTimeSeconds = result.BaseTimeSeconds,
+                TimeBonusSeconds = result.TimeBonusSeconds,
+                TaskTimeSeconds = result.TaskTimeSeconds,
+                HintTokens = result.HintTokens,
+                AllowedErrors = result.AllowedErrors,
+                RequiredTasksForSuccess = result.RequiredTasksForSuccess
+            };
+
+            if (threatState.OperationBonuses.StrongAutoResolve)
+            {
+                threatState.OperationBonuses.AutoCompletedTaskCount = threatState.OperationScaling.BaseTaskCount;
+            }
+        }
+
+        private ThreatScalingResult BuildThreatScalingPreview(Room room, ThreatInteractionState threatState)
+        {
+            var bonuses = BuildRadiationOperationBonuses(threatState);
+            var activePlayerCount = Math.Max(1, GetThreatScalingPlayers(room).Count);
+            var limitResult = _threatScaling.Calculate(
+                activePlayerCount,
+                1,
+                bonuses.AdditionalAllowedErrors,
+                bonuses.TimeBonusSeconds,
+                bonuses.AutoCompletedTaskCount);
+            var participantCount = Math.Clamp(Math.Max(1, GetThreatParticipantIds(threatState).Count), 1, limitResult.MaxParticipants);
+
+            return _threatScaling.Calculate(
+                activePlayerCount,
+                participantCount,
+                bonuses.AdditionalAllowedErrors,
+                bonuses.TimeBonusSeconds,
+                bonuses.AutoCompletedTaskCount);
+        }
+
+        private static void AddThreatParticipant(ThreatInteractionState threatState, string? playerId)
+        {
+            if (string.IsNullOrWhiteSpace(playerId) ||
+                threatState.ParticipantPlayerIds.Contains(playerId, StringComparer.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            threatState.ParticipantPlayerIds.Add(playerId);
+        }
+
+        private static List<string> GetThreatParticipantIds(ThreatInteractionState threatState)
+        {
+            var participantIds = new HashSet<string>(threatState.ParticipantPlayerIds, StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(threatState.VolunteerSelection.SelectedPlayerId))
+            {
+                participantIds.Add(threatState.VolunteerSelection.SelectedPlayerId);
+            }
+
+            return participantIds.ToList();
+        }
+
+        private ThreatOperationBonusState BuildRadiationOperationBonuses(ThreatInteractionState threatState)
+        {
+            var bonuses = new ThreatOperationBonusState { IsCalculated = true };
+            var autoCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var usefulContributionIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var hasEngineering = false;
+            var hasRadiationDetection = false;
+            var hasSealantOrRepairTools = false;
+
+            foreach (var contribution in threatState.Contributions.Where(IsActiveThreatContribution))
+            {
+                var tags = contribution.TagsSnapshot;
+                var contributionUseful = false;
+
+                if (contribution.SourceType == "profession")
+                {
+                    if (HasAny(tags, new[] { "engineering_general", "electrical_repair", "mechanical_repair" }))
+                    {
+                        autoCategories.Add("repair");
+                        hasEngineering = true;
+                        contributionUseful = true;
+                    }
+
+                    if (HasAny(tags, new[] { "radiation_analysis" }))
+                    {
+                        autoCategories.Add("detection");
+                        contributionUseful = true;
+                    }
+
+                    if (HasAny(tags, new[] { "chemistry" }))
+                    {
+                        bonuses.HintTokens++;
+                        contributionUseful = true;
+                    }
+
+                    if (HasAny(tags, new[] { "medical_general" }))
+                    {
+                        bonuses.AdditionalAllowedErrors = Math.Max(bonuses.AdditionalAllowedErrors, 1);
+                        bonuses.MedicalMitigationCount++;
+                        contributionUseful = true;
+                    }
+                }
+
+                if (contribution.SourceType == "personal_inventory" ||
+                    contribution.SourceType == "profession_item" ||
+                    contribution.SourceType == "bunker_resource" ||
+                    contribution.SourceType == "bunker_facility")
+                {
+                    if (HasAny(tags, new[] { "radiation_detection" }))
+                    {
+                        if (!autoCategories.Add("detection"))
+                        {
+                            bonuses.HintTokens++;
+                        }
+
+                        hasRadiationDetection = true;
+                        contributionUseful = true;
+                    }
+
+                    if (HasAny(tags, new[] { "radiation_protection" }))
+                    {
+                        bonuses.TimeBonusSeconds = Math.Min(20, bonuses.TimeBonusSeconds + 10);
+                        if (!string.IsNullOrWhiteSpace(contribution.OwnerPlayerId) &&
+                            !bonuses.ProtectedPlayerIds.Contains(contribution.OwnerPlayerId, StringComparer.OrdinalIgnoreCase))
+                        {
+                            bonuses.ProtectedPlayerIds.Add(contribution.OwnerPlayerId);
+                        }
+
+                        contributionUseful = true;
+                    }
+
+                    if (HasAny(tags, new[] { "sealant", "repair_tools" }))
+                    {
+                        bonuses.RepairRetryTokens++;
+                        hasSealantOrRepairTools = true;
+                        contributionUseful = true;
+                    }
+
+                    if (HasAny(tags, new[] { "medical_supplies" }))
+                    {
+                        bonuses.MedicalMitigationCount++;
+                        contributionUseful = true;
+                    }
+                }
+
+                if (contributionUseful)
+                {
+                    usefulContributionIds.Add(contribution.ContributionId);
+                }
+                else if (contribution.SourceType == "personal_inventory" || contribution.SourceType == "profession_item")
+                {
+                    bonuses.IneffectiveItemContributionIds.Add(contribution.ContributionId);
+                }
+            }
+
+            bonuses.StrongAutoResolve = hasEngineering && hasRadiationDetection && hasSealantOrRepairTools;
+            if (bonuses.StrongAutoResolve)
+            {
+                autoCategories.Add("detection");
+                autoCategories.Add("isolation");
+                autoCategories.Add("repair");
+                bonuses.PublicExplanations.Add("Команда зібрала повний набір для автоматичного стримування витоку.");
+            }
+            else
+            {
+                if (autoCategories.Contains("detection"))
+                {
+                    bonuses.PublicExplanations.Add("Частину перевірки рівня радіації виконано автоматично.");
+                }
+
+                if (autoCategories.Contains("repair"))
+                {
+                    bonuses.PublicExplanations.Add("Частину ремонтних дій виконано автоматично.");
+                }
+
+                if (bonuses.ProtectedPlayerIds.Count > 0)
+                {
+                    bonuses.PublicExplanations.Add("Захисне спорядження зменшило ризик для учасників.");
+                }
+            }
+
+            bonuses.AutoCompletedCategories = autoCategories.ToList();
+            bonuses.AutoCompletedTaskCount = bonuses.StrongAutoResolve ? autoCategories.Count : autoCategories.Count;
+            bonuses.UsefulContributionIds = usefulContributionIds.ToList();
+            return bonuses;
+        }
+
         private bool IsRadiationThreatActive(Room room, ThreatInteractionState threatState) =>
             room.IsThreatRevealed &&
             string.Equals(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase);
@@ -555,7 +1077,8 @@ namespace Bunker.Hubs
             contribution.IsAccepted &&
             !contribution.IsConsumed &&
             !string.Equals(contribution.Status, "withdrawn", StringComparison.OrdinalIgnoreCase) &&
-            !string.Equals(contribution.Status, "rejected", StringComparison.OrdinalIgnoreCase);
+            !string.Equals(contribution.Status, "rejected", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(contribution.Status, "returned_no_effect", StringComparison.OrdinalIgnoreCase);
 
         private static ThreatContributionState? FindActiveThreatContributionBySource(
             ThreatInteractionState threatState,
@@ -571,6 +1094,13 @@ namespace Bunker.Hubs
                 .Where(entry => entry.Value != null && !entry.Value.IsEliminated && entry.Value.IsConnected)
                 .OrderBy(entry => entry.Value.SeatNumber == 0 ? int.MaxValue : entry.Value.SeatNumber)
                 .ThenBy(entry => RoomService.GetPlayerKey(entry.Value), StringComparer.OrdinalIgnoreCase);
+
+        private static List<KeyValuePair<string, Player>> GetThreatScalingPlayers(Room room) =>
+            RoomService.GetPlayersSnapshot(room)
+                .Where(entry => entry.Value != null && !entry.Value.IsEliminated)
+                .OrderBy(entry => entry.Value.SeatNumber == 0 ? int.MaxValue : entry.Value.SeatNumber)
+                .ThenBy(entry => RoomService.GetPlayerKey(entry.Value), StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
         private Item? CreateThreatSupportItem(Room room)
         {
@@ -648,7 +1178,7 @@ namespace Bunker.Hubs
                 SourceId = sourceId,
                 OwnerPlayerId = ownerPlayerId,
                 PlayerId = ownerPlayerId,
-                ItemInstanceId = sourceType == "personal_inventory" ? sourceId : "",
+                ItemInstanceId = sourceType is "personal_inventory" or "profession_item" ? sourceId : "",
                 Status = isAccepted ? "accepted" : "rejected",
                 IsHidden = isHidden,
                 IsAccepted = isAccepted,
@@ -671,6 +1201,17 @@ namespace Bunker.Hubs
             var volunteer = string.IsNullOrWhiteSpace(threatState.VolunteerSelection.SelectedPlayerId)
                 ? null
                 : _roomService.GetPlayerByAnyId(room, threatState.VolunteerSelection.SelectedPlayerId);
+            var preview = threatState.OperationScaling.IsCalculated
+                ? null
+                : BuildThreatScalingPreview(room, threatState);
+            var visibleBonuses = threatState.OperationScaling.IsCalculated
+                ? threatState.OperationBonuses
+                : BuildRadiationOperationBonuses(threatState);
+            var participantIds = GetThreatParticipantIds(threatState);
+            var protectedIds = new HashSet<string>(visibleBonuses.ProtectedPlayerIds, StringComparer.OrdinalIgnoreCase);
+            var teamMax = threatState.OperationScaling.IsCalculated
+                ? threatState.OperationScaling.MaxParticipants
+                : preview?.MaxParticipants ?? 0;
             return new
             {
                 currentThreatId = threatState.CurrentThreatId,
@@ -707,12 +1248,71 @@ namespace Bunker.Hubs
                             .Cast<object>()
                             .ToList(),
                     revealedAfterResolution = threatState.Resolution.EffectsApplied
-                        ? threatState.Contributions
-                            .Where(c => c.IsAccepted && c.SourceType == "personal_inventory")
-                            .Select(c => new { c.DisplayName })
-                            .ToList()
+                        ? threatState.OperationBonuses.PublicExplanations
                         : null
                 },
+                participants = participantIds
+                    .Select(id =>
+                    {
+                        var participant = _roomService.GetPlayerByAnyId(room, id);
+                        return new
+                        {
+                            playerId = id,
+                            name = participant?.Name ?? "Гравець",
+                            isLeader = string.Equals(id, threatState.VolunteerSelection.SelectedPlayerId, StringComparison.OrdinalIgnoreCase),
+                            isForced = string.Equals(id, threatState.ForcedParticipantPlayerId, StringComparison.OrdinalIgnoreCase),
+                            isProtected = protectedIds.Contains(id)
+                        };
+                    })
+                    .ToList(),
+                operationAggregates = new
+                {
+                    team = $"{participantIds.Count}/{teamMax}",
+                    professionContributions = threatState.Contributions.Count(c => IsActiveThreatContribution(c) && c.SourceType == "profession"),
+                    equipmentContributions = threatState.Contributions.Count(c => IsActiveThreatContribution(c) && (c.SourceType == "personal_inventory" || c.SourceType == "profession_item" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility")),
+                    protectedParticipants = protectedIds.Count,
+                    hints = threatState.OperationScaling.IsCalculated
+                        ? threatState.OperationScaling.HintTokens + threatState.OperationBonuses.HintTokens
+                        : preview?.HintTokens + visibleBonuses.HintTokens ?? 0,
+                    status = threatState.ThreatStatus
+                },
+                preview = preview == null
+                    ? null
+                    : new
+                    {
+                        activePlayerCount = preview.ScalingPlayerCount,
+                        participantCount = participantIds.Count,
+                        preview.MinParticipants,
+                        preview.MaxParticipants,
+                        preview.BaseTaskCount,
+                        preview.PlayableTaskCount,
+                        preview.BaseTimeSeconds,
+                        preview.TimeBonusSeconds,
+                        preview.TaskTimeSeconds,
+                        preview.HintTokens,
+                        preview.AllowedErrors,
+                        preview.RequiredTasksForSuccess
+                    },
+                scaling = threatState.OperationScaling.IsCalculated
+                    ? new
+                    {
+                        threatState.OperationScaling.IsCalculated,
+                        threatState.OperationScaling.ScalingPlayerCount,
+                        threatState.OperationScaling.MinParticipants,
+                        threatState.OperationScaling.MaxParticipants,
+                        threatState.OperationScaling.BaseTaskCount,
+                        threatState.OperationScaling.PlayableTaskCount,
+                        threatState.OperationScaling.BaseTimeSeconds,
+                        threatState.OperationScaling.TimeBonusSeconds,
+                        threatState.OperationScaling.TaskTimeSeconds,
+                        threatState.OperationScaling.HintTokens,
+                        threatState.OperationScaling.AllowedErrors,
+                        threatState.OperationScaling.RequiredTasksForSuccess
+                    }
+                    : null,
+                miniGame = _threatMiniGames.TryGet(threatState.CurrentThreatId, out var miniGame)
+                    ? miniGame.GetPublicState(threatState, "uk")
+                    : null,
                 threatVolunteerVote = BuildThreatVotePublicInfo(room, threatState),
                 resolution = new
                 {
@@ -765,11 +1365,22 @@ namespace Bunker.Hubs
         private async Task BroadcastThreatState(Room room, string roomId)
         {
             var roundState = BuildRoundState(room);
-            await Clients.Group(roomId).SendAsync("ThreatStateUpdated", new
+            var threatState = BuildThreatPublicState(room);
+            var players = BuildRoomPlayersPayload(room);
+
+            foreach (var entry in RoomService.GetPlayersSnapshot(room))
             {
-                threatState = BuildThreatPublicState(room),
-                roundState
-            });
+                var connectionId = string.IsNullOrWhiteSpace(entry.Value.ConnectionId)
+                    ? entry.Key
+                    : entry.Value.ConnectionId;
+                await Clients.Client(connectionId).SendAsync("ThreatStateUpdated", new
+                {
+                    threatState,
+                    roundState,
+                    players,
+                    player = entry.Value
+                });
+            }
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
         }
 
@@ -783,7 +1394,7 @@ namespace Bunker.Hubs
             new() { "radiation_analysis", "chemistry", "engineering_general", "medical_general" };
 
         private static List<string> GetRadiationResourceTags() =>
-            new() { "radiation_detection", "sealant", "decontamination_supplies" };
+            new() { "radiation_detection", "sealant", "repair_tools", "decontamination_supplies" };
 
         private static List<string> GetRadiationFacilityTags() =>
             new() { "laboratory", "decontamination_area", "sealed_zone", "control_room" };
@@ -794,51 +1405,238 @@ namespace Bunker.Hubs
         private static string GetItemSourceId(Item item) =>
             !string.IsNullOrWhiteSpace(item.InstanceId) ? item.InstanceId : item.Name;
 
-        private void ApplyRadiationSickness(Room room, string playerId, string severity)
+        private static (string Source, string Token) ParseThreatItemToken(string value)
         {
+            var trimmed = value?.Trim() ?? "";
+            var separatorIndex = trimmed.IndexOf(':');
+            if (separatorIndex <= 0)
+            {
+                return ("inventory", trimmed);
+            }
+
+            var source = trimmed[..separatorIndex].Trim().ToLowerInvariant();
+            var token = trimmed[(separatorIndex + 1)..].Trim();
+            return source is "profession" or "inventory"
+                ? (source, token)
+                : ("inventory", trimmed);
+        }
+
+        private static Item? ResolvePlayerThreatItem(Player player, string source, string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return null;
+            }
+
+            if (source == "profession")
+            {
+                var professionItem = player.ProfessionItem;
+                if (professionItem == null || string.IsNullOrWhiteSpace(professionItem.Name))
+                {
+                    return null;
+                }
+
+                return string.Equals(professionItem.InstanceId, token, StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(professionItem.Name, token, StringComparison.OrdinalIgnoreCase)
+                    ? professionItem
+                    : null;
+            }
+
+            return player.Inventory.Items.FirstOrDefault(i =>
+                string.Equals(i.InstanceId, token, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(i.Name, token, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string NormalizeThreatLanguage(string? language)
+        {
+            var normalized = string.IsNullOrWhiteSpace(language) ? "uk" : language.Trim().ToLowerInvariant();
+            return normalized is "uk" or "en" or "ru" ? normalized : "uk";
+        }
+
+        private string GetMitigatedRadiationSeverity(string baseSeverity, ThreatInteractionState threatState)
+        {
+            if (threatState.OperationBonuses.MedicalMitigationCount <= 0)
+            {
+                return baseSeverity;
+            }
+
+            threatState.OperationBonuses.MedicalMitigationCount--;
+            return baseSeverity.Trim().ToLowerInvariant() switch
+            {
+                "hard" => "medium",
+                "medium" => "light",
+                _ => baseSeverity
+            };
+        }
+
+        private void ApplyRadiationConditionToParticipants(Room room, ThreatInteractionState threatState, string baseSeverityCode)
+        {
+            var participantIds = GetThreatParticipantIds(threatState);
+            if (participantIds.Count == 0 && !string.IsNullOrWhiteSpace(threatState.VolunteerSelection.SelectedPlayerId))
+            {
+                participantIds.Add(threatState.VolunteerSelection.SelectedPlayerId);
+            }
+
+            foreach (var participantId in participantIds.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(participantId))
+                {
+                    continue;
+                }
+
+                if (threatState.OperationBonuses.ProtectedPlayerIds.Contains(participantId, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                ApplyRadiationCondition(room, participantId, GetMitigatedRadiationSeverity(baseSeverityCode, threatState));
+            }
+        }
+
+        private void ApplyRadiationCondition(Room room, string playerId, string severityCode)
+        {
+            if (string.IsNullOrWhiteSpace(playerId))
+            {
+                return;
+            }
+
             var player = _roomService.GetPlayerByAnyId(room, playerId);
             if (player == null) return;
-
-            player.PhysicalHealth.Id = "radiation_sickness";
-            player.PhysicalHealth.BaseName = "Променева хвороба";
-            player.PhysicalHealth.Name = severity == "heavy"
-                ? "Променева хвороба (важка форма)"
-                : "Променева хвороба (легка форма)";
-            player.PhysicalHealth.SeverityCode = severity == "heavy" ? "hard" : "light";
-            player.PhysicalHealth.SeverityLevel = severity == "heavy" ? "Важкий" : "Легкий";
-            player.PhysicalHealth.AllowsSeverity = true;
-            player.PhysicalHealth.Description = "Наслідок радіаційного витоку.";
-
-            if (player.Revealed.PhysicalHealth)
+            if (player.AdditionalConditionEffects.Any(effect =>
+                    string.Equals(effect.ConditionId, RadiationConsequenceFactory.RadiationConditionId, StringComparison.OrdinalIgnoreCase)))
             {
-                SetCharacteristicRevealed(player, "PhysicalHealth");
+                return;
             }
+
+            var condition = _gameData.PhysicalConditions.FirstOrDefault(item =>
+                string.Equals(item.Id, "physical_152", StringComparison.OrdinalIgnoreCase));
+            if (!RadiationConsequenceFactory.TryAddRadiationCondition(
+                    player,
+                    condition,
+                    severityCode,
+                    RadiationLeakThreatId,
+                    room.CurrentRound,
+                    out _))
+            {
+                _logger.LogWarning(
+                    "Radiation consequence skipped. RoomId={RoomId}, PlayerId={PlayerId}, ConditionId={ConditionId}",
+                    room.Id,
+                    playerId,
+                    "physical_152");
+                return;
+            }
+
+            var playerEntry = RoomService.GetPlayersSnapshot(room).FirstOrDefault(entry =>
+                ReferenceEquals(entry.Value, player));
+            if (!string.IsNullOrWhiteSpace(playerEntry.Key))
+            {
+                _roomService.UpdatePlayer(playerEntry.Key, player);
+            }
+        }
+
+        private void ApplyRadiationFailure(Room room, ThreatInteractionState threatState)
+        {
+            ApplyRadiationConditionToParticipants(room, threatState, "hard");
         }
 
         private void ApplyRadiationFailure(Room room)
         {
-            foreach (var player in GetActiveThreatPlayers(room).Select(entry => entry.Value))
+            ApplyRadiationFailure(room, EnsureRadiationThreatState(room));
+        }
+
+        private static string GetLocalizedConditionName(Models.GameData.PhysicalConditionData? condition, string language)
+        {
+            if (condition == null)
             {
-                if (string.IsNullOrWhiteSpace(player.PhysicalHealth.Id) ||
-                    string.Equals(player.PhysicalHealth.SeverityCode, "none", StringComparison.OrdinalIgnoreCase))
+                return "";
+            }
+
+            foreach (var lang in GetConditionLanguageOrder(condition.Localization, language))
+            {
+                if (condition.Localization != null &&
+                    condition.Localization.TryGetValue(lang, out var localized) &&
+                    !string.IsNullOrWhiteSpace(localized.Name))
                 {
-                    ApplyRadiationSickness(room, RoomService.GetPlayerKey(player), "light");
-                }
-                else
-                {
-                    player.MentalHealth.Description = string.IsNullOrWhiteSpace(player.MentalHealth.Description)
-                        ? "Стрес після провалу усунення загрози."
-                        : player.MentalHealth.Description + " Додатковий стрес після радіаційного витоку.";
+                    return localized.Name.Trim();
                 }
             }
+
+            return string.IsNullOrWhiteSpace(condition.Name) ? "" : condition.Name.Trim();
+        }
+
+        private static string GetLocalizedConditionDescription(Models.GameData.PhysicalConditionData? condition, string language, string severityCode)
+        {
+            if (condition == null)
+            {
+                return "";
+            }
+
+            foreach (var lang in GetConditionLanguageOrder(condition.Localization, language))
+            {
+                if (condition.Localization == null ||
+                    !condition.Localization.TryGetValue(lang, out var localized))
+                {
+                    continue;
+                }
+
+                if (localized.Descriptions != null &&
+                    localized.Descriptions.TryGetValue(severityCode, out var severityDescription) &&
+                    !string.IsNullOrWhiteSpace(severityDescription))
+                {
+                    return severityDescription.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(localized.Description))
+                {
+                    return localized.Description.Trim();
+                }
+            }
+
+            return condition.Description?.Trim() ?? "";
+        }
+
+        private static IEnumerable<string> GetConditionLanguageOrder(
+            Dictionary<string, Models.GameData.ConditionLocalization>? localization,
+            string language)
+        {
+            var result = new List<string>();
+            void Add(string? value)
+            {
+                if (!string.IsNullOrWhiteSpace(value) && !result.Contains(value, StringComparer.OrdinalIgnoreCase))
+                {
+                    result.Add(value);
+                }
+            }
+
+            Add(language);
+            Add("uk");
+            Add("ru");
+            Add("en");
+
+            if (localization != null)
+            {
+                foreach (var key in localization.Keys)
+                {
+                    Add(key);
+                }
+            }
+
+            return result;
         }
 
         private void ConsumeAcceptedThreatItems(Room room, ThreatInteractionState threatState, bool success)
         {
+            if (string.Equals(threatState.CurrentThreatId, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             if (!success) return;
 
             foreach (var contribution in threatState.Contributions.Where(c =>
-                         IsActiveThreatContribution(c) && c.SourceType == "personal_inventory"))
+                         IsActiveThreatContribution(c) &&
+                         c.SourceType == "personal_inventory" &&
+                         threatState.OperationBonuses.UsefulContributionIds.Contains(c.ContributionId, StringComparer.OrdinalIgnoreCase)))
             {
                 var owner = _roomService.GetPlayerByAnyId(room, contribution.OwnerPlayerId);
                 var item = owner?.Inventory.Items.FirstOrDefault(i => GetItemSourceId(i) == contribution.SourceId);
