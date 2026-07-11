@@ -160,6 +160,7 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
             }
+            if (await RejectPausedPlayerAction(room)) return;
 
             var voterId = RoomService.GetPlayerKey(voterPlayer);
 
@@ -284,7 +285,7 @@ namespace Bunker.Hubs
             var playersSnapshot = RoomService.GetPlayersSnapshot(room)
                 .ToDictionary(entry => entry.Key, entry => entry.Value);
 
-            await Clients.Group(roomId).SendAsync("VotingEnded", voting.ToClientInfo(playersSnapshot, showVotes: true));
+            await Clients.Group(roomId).SendAsync("VotingEnded", voting.ToClientInfo(playersSnapshot, showVotes: false));
 
             _logger.LogInformation($"Голосування завершено в кімнаті {room.Name}");
         }
@@ -316,6 +317,15 @@ namespace Bunker.Hubs
             }
 
             var voting = room.CurrentVoting;
+            if (!string.IsNullOrEmpty(eliminateConnectionId))
+            {
+                if (!_roomService.TryResolvePlayer(room, eliminateConnectionId, out _, out var selectedPlayer) ||
+                    !RoundVotingAdminService.GetTiedCandidateIds(voting).Contains(RoomService.GetPlayerKey(selectedPlayer), StringComparer.OrdinalIgnoreCase))
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", "Обраний гравець не входить до актуального набору лідерів голосування");
+                    return;
+                }
+            }
             voting.State = VotingState.Resolved;
 
             string resultMessage;
@@ -393,6 +403,80 @@ namespace Bunker.Hubs
             }
 
             _logger.LogInformation($"Голосування вирішено в кімнаті {room.Name}: {resultMessage}");
+        }
+
+        public async Task ClearCurrentVotes(string? commandId = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState) ||
+                room.CurrentVoting?.State != VotingState.Active)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Немає активного голосування або недостатньо прав");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await SendVotingAdminState(Clients.Caller, room); return; }
+            RoundVotingAdminService.ClearVotes(room.CurrentVoting);
+            await SendVotingAdminState(Clients.Group(room.Id), room);
+        }
+
+        public async Task RemoveCurrentVote(string voterPlayerId, string? commandId = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState) ||
+                room.CurrentVoting?.State != VotingState.Active ||
+                !_roomService.TryResolvePlayer(room, voterPlayerId, out _, out var voter))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Голосування або voter не знайдено");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await SendVotingAdminState(Clients.Caller, room); return; }
+            RoundVotingAdminService.RemoveVote(room.CurrentVoting, RoomService.GetPlayerKey(voter));
+            await SendVotingAdminState(Clients.Group(room.Id), room);
+        }
+
+        public async Task ResyncVotingState()
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для синхронізації голосування");
+                return;
+            }
+            await SendVotingAdminState(Clients.Caller, room);
+        }
+
+        private Task SendVotingAdminState(IClientProxy client, Room room) =>
+            client.SendAsync("VotingAdminUpdated", BuildVotingAdminState(room));
+
+        private object BuildVotingAdminState(Room room)
+        {
+            var voting = room.CurrentVoting;
+            var players = RoomService.GetPlayersSnapshot(room);
+            var realVoters = voting?.Votes.Keys.Where(id => !VotingSession.IsExtraVoteId(id)).ToHashSet(StringComparer.OrdinalIgnoreCase)
+                ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var nonVoters = voting?.EligibleVoters
+                .Where(id => !realVoters.Contains(id))
+                .Select(id => _roomService.GetPlayerByAnyId(room, id))
+                .Where(player => player != null)
+                .Select(player => new
+                {
+                    playerId = RoomService.GetPlayerKey(player!),
+                    connectionId = player!.ConnectionId,
+                    name = player.Name
+                }).ToList() ?? [];
+            return new
+            {
+                active = voting?.State == VotingState.Active,
+                state = voting?.State.ToString() ?? "none",
+                votedCount = voting?.RealVoteCount ?? 0,
+                totalVoters = voting?.RequiredVoterCount ?? 0,
+                nonVoters,
+                eligibleVoters = voting?.EligibleVoters.Select(id =>
+                {
+                    var player = _roomService.GetPlayerByAnyId(room, id);
+                    return new { playerId = id, connectionId = player?.ConnectionId, name = player?.Name ?? "Unknown" };
+                }).ToList() ?? []
+            };
         }
 
         private static bool HasActiveEliminationVoteImmunity(Player player) =>

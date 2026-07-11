@@ -86,6 +86,13 @@ namespace Bunker.Hubs
         private async Task SendPublicPlayersUpdate(Room room) =>
             await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
 
+        private async Task<bool> RejectPausedPlayerAction(Room room)
+        {
+            if (!room.IsPaused) return false;
+            await Clients.Caller.SendAsync("ReceiveError", "Гру призупинено хостом");
+            return true;
+        }
+
         /// <summary>
         /// Отримати безпечні технічні дані гравців (тільки для хоста)
         /// </summary>
@@ -1067,6 +1074,96 @@ namespace Bunker.Hubs
             await SendPlayerHostControlData(room);
 
             _logger.LogInformation($"Гравець {player.Name} повернутий в гру");
+        }
+
+        public async Task SetGamePaused(bool paused, string? reason, string? commandId = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для pause/resume");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("GamePauseUpdated", BuildPauseState(room)); return; }
+            var cleanReason = SanitizePauseReason(reason);
+            var hostId = _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var host)
+                ? RoomService.GetPlayerKey(host) : null;
+            RoundVotingAdminService.SetPaused(room, paused, cleanReason, hostId, DateTimeOffset.UtcNow);
+            await Clients.Group(room.Id).SendAsync("GamePauseUpdated", BuildPauseState(room));
+            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
+        }
+
+        public async Task PreviewRoundChange(string? roundValue)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState) ||
+                !RoundVotingAdminService.TryParseRound(roundValue, out var targetRound))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Некоректний номер раунду");
+                return;
+            }
+            var blockedReason = targetRound < room.CurrentRound
+                ? "Повернення назад заблоковано"
+                : room.CurrentVoting?.State == VotingState.Active ? "Активне голосування потрібно завершити або скасувати" : null;
+            await Clients.Caller.SendAsync("RoundChangePreview", new
+            {
+                currentRound = room.CurrentRound,
+                targetRound,
+                allowed = blockedReason == null,
+                blockedReason,
+                clears = new[] { "currentRoundReveals", "votingReadyResponses" },
+                preserves = new[] { "characteristics", "threatEffects", "bunker" }
+            });
+        }
+
+        public async Task SetRoundNumber(string? roundValue, string? commandId = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState) ||
+                !RoundVotingAdminService.TryParseRound(roundValue, out var targetRound))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Некоректний номер раунду");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room)); return; }
+            if (!RoundVotingAdminService.TrySetRound(room, targetRound, out var error))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", error);
+                return;
+            }
+            var state = BuildRoundState(room);
+            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", state);
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "round_set", round = targetRound });
+        }
+
+        public async Task ResetRoundReadiness(string? commandId = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для скидання готовності");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room)); return; }
+            RoundVotingAdminService.ResetReadiness(room);
+            var state = BuildRoundState(room);
+            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", state);
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "readiness_reset" });
+        }
+
+        private static object BuildPauseState(Room room) => new
+        {
+            isPaused = room.IsPaused,
+            reason = room.PauseReason,
+            pausedAtUtc = room.PausedAtUtc
+        };
+
+        private static string? SanitizePauseReason(string? reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason)) return null;
+            var clean = new string(reason.Where(character => !char.IsControl(character)).ToArray())
+                .Replace("<", "").Replace(">", "").Trim();
+            return clean.Length > 160 ? clean[..160] : clean;
         }
 
         public async Task KickPlayer(string targetPlayerId, string? commandId = null)

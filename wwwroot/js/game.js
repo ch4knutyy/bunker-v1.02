@@ -43,6 +43,8 @@ connection.start()
     let gmThreatCommandPending = false;
     let gmPlayerCommandPending = false;
     let bunkerCapacityPending = false;
+    let gmRoundCommandPending = false;
+    let gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };
     let activeGMTab = 'state';
     let gmLastServerUpdateAt = null;
     let gmLastCommandError = '';
@@ -167,6 +169,7 @@ connection.start()
         ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
         ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
+        ,gmPauseReason: "Причина паузи", gmPause: "Пауза", gmResume: "Продовжити", gmManualRound: "Номер раунду", gmSetRound: "Встановити", gmResetReadiness: "Скинути готовність", gmVotingRecovery: "Відновлення голосування", gmClearVotes: "Очистити голоси", gmVotingResync: "Синхронізувати", gmRemoveVote: "Видалити голос voter", gmUnavailableRecovery: "Недоступні recovery controls", gmStageUnavailable: "Reopen/skip потребує transition helper", gmTimerUnavailable: "Round/voting timer відсутній"
     });
     Object.assign(uiTranslations.en, {
         useSpecialCard: "Use card",
@@ -249,6 +252,7 @@ connection.start()
         ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
         ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
+        ,gmPauseReason: "Pause reason", gmPause: "Pause", gmResume: "Resume", gmManualRound: "Round number", gmSetRound: "Set", gmResetReadiness: "Reset readiness", gmVotingRecovery: "Voting recovery", gmClearVotes: "Clear votes", gmVotingResync: "Resync", gmRemoveVote: "Remove voter vote", gmUnavailableRecovery: "Unavailable recovery controls", gmStageUnavailable: "Reopen/skip requires a transition helper", gmTimerUnavailable: "Round/voting timer is unavailable"
     });
     Object.assign(uiTranslations.ru, {
         useSpecialCard: "Использовать карту",
@@ -331,6 +335,7 @@ connection.start()
         ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
         ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
+        ,gmPauseReason: "Причина паузы", gmPause: "Пауза", gmResume: "Продолжить", gmManualRound: "Номер раунда", gmSetRound: "Установить", gmResetReadiness: "Сбросить готовность", gmVotingRecovery: "Восстановление голосования", gmClearVotes: "Очистить голоса", gmVotingResync: "Синхронизировать", gmRemoveVote: "Удалить голос voter", gmUnavailableRecovery: "Недоступные recovery controls", gmStageUnavailable: "Reopen/skip требует transition helper", gmTimerUnavailable: "Round/voting timer отсутствует"
     });
 
     function getCurrentLanguage() {
@@ -374,6 +379,9 @@ connection.start()
             currentRound: source.currentRound ?? source.CurrentRound ?? 0,
             roomState: source.roomState || source.RoomState || currentRoom?.state || "Lobby",
             phase: source.phase || source.Phase || currentRoundState?.phase || "Lobby",
+            isPaused: source.isPaused ?? source.IsPaused ?? false,
+            pauseReason: source.pauseReason || source.PauseReason || null,
+            pausedAtUtc: source.pausedAtUtc || source.PausedAtUtc || null,
             activePlayerCount: source.activePlayerCount ?? source.ActivePlayerCount ?? 0,
             revealedCount: source.revealedCount ?? source.RevealedCount ?? 0,
             allPlayersRevealed: source.allPlayersRevealed ?? source.AllPlayersRevealed ?? false,
@@ -686,6 +694,10 @@ connection.start()
         setText('#gmCurrentRound', roundText);
         setText('#gmCurrentPhase', getPhaseLabel(phase));
         setText('#gmRoundProgress', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? 0} відкрили`);
+        const pauseBadge = document.getElementById('gmPauseBadge');
+        if (pauseBadge) pauseBadge.textContent = currentRoundState?.isPaused ? t('gmPause') : t('gmResume');
+        const manualRound = document.getElementById('gmManualRound');
+        if (manualRound && document.activeElement !== manualRound) manualRound.value = round || 1;
         const diceRoll = currentRoundState?.diceRoll || null;
         const diceText = diceRoll ? `Кубик: ${diceRoll.value}` : '';
         setText('#roundDiceResult', diceText);
@@ -3209,6 +3221,7 @@ function registerSignalREvents() {
             if (feedback) feedback.textContent = localizeServerMessage(message);
             setBunkerCapacityPending(false);
         }
+        if (gmRoundCommandPending) finishGmRoundCommand(localizeServerMessage(message));
     });
 
     // ==================== SESSION RESTORE HANDLERS ====================
@@ -3410,6 +3423,29 @@ function registerSignalREvents() {
         if (feedback) feedback.textContent = t('gmCapacitySaved');
         renderBunker(data.bunker);
         addEventMessage(`<span class="event-gm">GM</span> змінив кількість слотів бункера на <strong>${data.capacity}</strong>`);
+    });
+
+    connection.off("GamePauseUpdated");
+    connection.on("GamePauseUpdated", function (data) {
+        currentRoundState = currentRoundState || {};
+        currentRoundState.isPaused = data.isPaused ?? data.IsPaused ?? false;
+        currentRoundState.pauseReason = data.reason || data.Reason || null;
+        finishGmRoundCommand(currentRoundState.isPaused ? t('gmPause') : t('gmResume'));
+        renderCurrentGameUI();
+        if (gmRoundCommandPending) finishGmRoundCommand('');
+    });
+
+    connection.off("RoundChangePreview");
+    connection.on("RoundChangePreview", function (data) {
+        if (!(data.allowed ?? data.Allowed)) {
+            finishGmRoundCommand(data.blockedReason || data.BlockedReason || t('unavailableNow'));
+            return;
+        }
+        const target = data.targetRound ?? data.TargetRound;
+        const clears = data.clears || data.Clears || [];
+        if (confirm(`${t('gmSetRound')} ${target}? ${clears.join(', ')}`)) {
+            connection.invoke('SetRoundNumber', String(target), gmRoundCommandId()).catch(handleGmRoundCommandError);
+        } else finishGmRoundCommand('');
     });
 
     connection.off("BunkerCapacityRejected");
@@ -3746,6 +3782,20 @@ function registerSignalREvents() {
         document.getElementById('votingResultsPanel').style.display = 'none';
         
         addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
+    });
+
+    connection.off("VotingAdminUpdated");
+    connection.on("VotingAdminUpdated", function (data) {
+        gmVotingAdminState = {
+            active: data.active ?? data.Active ?? false,
+            state: data.state || data.State || 'none',
+            votedCount: data.votedCount ?? data.VotedCount ?? 0,
+            totalVoters: data.totalVoters ?? data.TotalVoters ?? 0,
+            nonVoters: data.nonVoters || data.NonVoters || [],
+            eligibleVoters: data.eligibleVoters || data.EligibleVoters || []
+        };
+        renderGmVotingAdmin();
+        finishGmRoundCommand('');
     });
 
     // ==================== SCENARIO IMAGE HANDLERS ====================
@@ -5455,8 +5505,80 @@ function removeBunkerSupplies(months) {
             // Завантажуємо дані гравців при відкритті панелі
             connection.invoke("GetAllPlayersData").catch(err => console.error(err));
             connection.invoke("GetGMThreatControlData").catch(err => console.error(err));
+            connection.invoke("ResyncVotingState").catch(err => console.error(err));
             renderGMPanelState();
         }
+    }
+
+    function gmRoundCommandId() {
+        return globalThis.crypto?.randomUUID?.() || `gm-round-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function setGmRoundCommandPending(pending) {
+        gmRoundCommandPending = pending;
+        document.querySelectorAll('.gm-round-command').forEach(button => button.disabled = pending || button.dataset.permanentlyDisabled === 'true');
+    }
+
+    function finishGmRoundCommand(message) {
+        setGmRoundCommandPending(false);
+        const result = document.getElementById('gmRoundCommandResult');
+        if (result && message) result.textContent = message;
+    }
+
+    function handleGmRoundCommandError(error) {
+        finishGmRoundCommand(error?.message || t('unavailableNow'));
+    }
+
+    function invokeGmRoundCommand(method, args = []) {
+        if (gmRoundCommandPending) return;
+        setGmRoundCommandPending(true);
+        connection.invoke(method, ...args, gmRoundCommandId()).catch(handleGmRoundCommandError);
+    }
+
+    function setGamePause(paused) {
+        const reason = document.getElementById('gmPauseReason')?.value || '';
+        invokeGmRoundCommand('SetGamePaused', [paused, reason]);
+    }
+
+    function previewManualRoundChange() {
+        if (gmRoundCommandPending) return;
+        const raw = document.getElementById('gmManualRound')?.value?.trim() || '';
+        if (!/^\d+$/.test(raw) || Number(raw) < 1 || Number(raw) > 99) {
+            finishGmRoundCommand(t('gmCapacityInvalid'));
+            return;
+        }
+        setGmRoundCommandPending(true);
+        connection.invoke('PreviewRoundChange', raw).catch(handleGmRoundCommandError);
+    }
+
+    function resetRoundReadiness() {
+        if (confirm(t('gmResetReadiness'))) invokeGmRoundCommand('ResetRoundReadiness');
+    }
+
+    function clearCurrentVotes() {
+        if (confirm(t('gmClearVotes'))) invokeGmRoundCommand('ClearCurrentVotes');
+    }
+
+    function removeSelectedVote() {
+        const voterId = document.getElementById('gmRemoveVoterSelect')?.value;
+        if (voterId && confirm(t('gmRemoveVote'))) invokeGmRoundCommand('RemoveCurrentVote', [voterId]);
+    }
+
+    function resyncVotingAdmin() {
+        if (gmRoundCommandPending) return;
+        setGmRoundCommandPending(true);
+        connection.invoke('ResyncVotingState').catch(handleGmRoundCommandError);
+    }
+
+    function renderGmVotingAdmin() {
+        const select = document.getElementById('gmRemoveVoterSelect');
+        if (select) select.innerHTML = `<option value="">—</option>` + gmVotingAdminState.eligibleVoters.map(voter => {
+            const id = voter.playerId || voter.PlayerId || voter.connectionId || voter.ConnectionId;
+            return `<option value="${escapeHtml(id)}">${escapeHtml(voter.name || voter.Name || '')}</option>`;
+        }).join('');
+        const list = document.getElementById('gmNonVotersList');
+        if (list) list.innerHTML = gmVotingAdminState.nonVoters.map(voter =>
+            `<div>${escapeHtml(voter.name || voter.Name || '')}</div>`).join('');
     }
 
     function switchGMTab(tab) {
