@@ -15,4 +15,16 @@ public sealed class PlayerHostControlDto
     public bool CanRevealAllAfterElimination { get; init; }
     public bool HasRevealedAllAfterElimination { get; init; }
     public RevealedCharacteristics Revealed { get; init; } = new();
+    public IReadOnlyList<PlayerHostConditionDto> AdditionalPhysicalConditions { get; init; } = [];
+}
+
+public sealed class PlayerHostConditionDto
+{
+    public string Id { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string SeverityCode { get; init; } = "";
+    public string SeverityLevel { get; init; } = "";
+    public string SourceType { get; init; } = "";
+    public string SourceId { get; init; } = "";
+    public int? AppliedRound { get; init; }
 }

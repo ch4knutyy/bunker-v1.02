@@ -44,12 +44,47 @@ namespace Bunker.Hubs
                     EliminatedByVote = player.EliminatedByVote,
                     CanRevealAllAfterElimination = player.CanRevealAllAfterElimination,
                     HasRevealedAllAfterElimination = player.HasRevealedAllAfterElimination,
-                    Revealed = player.Revealed ?? new RevealedCharacteristics()
+                    Revealed = player.Revealed ?? new RevealedCharacteristics(),
+                    AdditionalPhysicalConditions = player.Revealed?.PhysicalHealth == true
+                        ? player.AdditionalConditionEffects.Select(effect => new PlayerHostConditionDto
+                        {
+                            Id = effect.Id,
+                            Name = effect.Name,
+                            SeverityCode = effect.SeverityCode,
+                            SeverityLevel = effect.SeverityLevel,
+                            SourceType = string.IsNullOrWhiteSpace(effect.SourceThreatId) ? "" : "threat",
+                            SourceId = effect.SourceThreatId,
+                            AppliedRound = effect.AppliedAtRound
+                        }).ToList()
+                        : []
                 };
             }).ToList();
 
         private Task SendPlayerHostControlData(Room room) =>
             Clients.Caller.SendAsync("AllPlayersData", BuildPlayerHostControlData(room));
+
+        private bool TryGetManagedPlayer(string targetId, out Room room, out string connectionId, out Player player)
+        {
+            room = _roomService.GetPlayerRoom(Context.ConnectionId)!;
+            connectionId = "";
+            player = null!;
+            return room != null &&
+                   HasGmCapability(room, GmCapability.ManagePlayersWithoutHiddenData) &&
+                   _roomService.TryResolvePlayer(room, targetId, out connectionId, out player);
+        }
+
+        private bool RememberPlayerCommand(Room room, string? commandId)
+        {
+            if (string.IsNullOrWhiteSpace(commandId)) return true;
+            lock (room.ProcessedGmPlayerCommandIds)
+                return room.ProcessedGmPlayerCommandIds.Add(commandId);
+        }
+
+        private Task SendPersonalPlayerSnapshot(string connectionId, Player player, string reason) =>
+            Clients.Client(connectionId).SendAsync("PlayerStateResynced", new { player, reason });
+
+        private async Task SendPublicPlayersUpdate(Room room) =>
+            await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
 
         /// <summary>
         /// Отримати безпечні технічні дані гравців (тільки для хоста)
@@ -684,23 +719,31 @@ namespace Bunker.Hubs
         /// <summary>
         /// Змінити кількість слотів бункера (тільки хост)
         /// </summary>
-        public async Task UpdateBunkerCapacity(int newCapacity)
+        public async Task SetBunkerCapacity(string? capacityValue)
         {
-            if (!IsCallerHost())
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати слоти бункера");
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для зміни місткості бункера");
                 return;
             }
 
-            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-            if (room == null || room.Bunker == null)
+            if (room.Bunker == null)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Бункер не знайдено");
                 return;
             }
 
-            var playerCount = RoomService.GetPlayersSnapshot(room).Count;
-            newCapacity = Math.Clamp(newCapacity, 1, Math.Max(1, playerCount));
+            if (!BunkerCapacityPolicy.TryParse(capacityValue, out var newCapacity))
+            {
+                await Clients.Caller.SendAsync("BunkerCapacityRejected", new
+                {
+                    capacity = room.Bunker.Capacity,
+                    message = "Місткість має бути цілим числом від 1 до 99"
+                });
+                return;
+            }
+
             room.Bunker.Capacity = newCapacity;
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
@@ -709,6 +752,7 @@ namespace Bunker.Hubs
                 capacity = newCapacity,
                 bunker = room.Bunker.ToClientInfo()
             });
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "bunker_capacity", capacity = newCapacity });
 
             _logger.LogInformation($"GM змінив кількість слотів бункера на {newCapacity} в кімнаті {room.Name}");
         }
@@ -1024,6 +1068,191 @@ namespace Bunker.Hubs
 
             _logger.LogInformation($"Гравець {player.Name} повернутий в гру");
         }
+
+        public async Task KickPlayer(string targetPlayerId, string? commandId = null)
+        {
+            var callerRoom = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (callerRoom == null || !HasGmCapability(callerRoom, GmCapability.ManagePlayersWithoutHiddenData))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для керування гравцями");
+                return;
+            }
+            if (!RememberPlayerCommand(callerRoom, commandId))
+            {
+                await SendPlayerHostControlData(callerRoom);
+                return;
+            }
+            if (!_roomService.TryResolvePlayer(callerRoom, targetPlayerId, out var targetConnectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
+                return;
+            }
+            if (targetConnectionId == Context.ConnectionId || callerRoom.IsHost(player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Хост не може виключити себе");
+                return;
+            }
+
+            await Clients.Client(targetConnectionId).SendAsync("PlayerKicked", new { message = "Вас виключено хостом із кімнати" });
+            var result = _roomService.LeaveRoom(targetConnectionId);
+            if (!result.success)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Не вдалося виключити гравця");
+                return;
+            }
+            await Groups.RemoveFromGroupAsync(targetConnectionId, callerRoom.Id);
+            await Clients.Group(callerRoom.Id).SendAsync("PlayerLeftRoom", new { connectionId = targetConnectionId, kicked = true });
+            await SendPublicPlayersUpdate(callerRoom);
+            await SendPlayerHostControlData(callerRoom);
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "kick", playerName = player.Name });
+        }
+
+        public async Task HideRevealedCharacteristic(string targetPlayerId, string characteristicName, string? commandId = null)
+        {
+            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
+            characteristicName = NormalizeCharacteristicName(characteristicName);
+            if (!TrySetCharacteristicHidden(player, characteristicName))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Невідома характеристика");
+                return;
+            }
+            _roomService.UpdatePlayer(connectionId, player);
+            await SendPersonalPlayerSnapshot(connectionId, player, "characteristic_hidden");
+            await Clients.Group(room.Id).SendAsync("CharacteristicHidden", new { connectionId, characteristicKey = characteristicName });
+            await SendPublicPlayersUpdate(room);
+            await SendPlayerHostControlData(room);
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "hide", playerName = player.Name, characteristicName });
+        }
+
+        public async Task ResyncPlayer(string targetPlayerId, string? commandId = null)
+        {
+            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
+            await SendPersonalPlayerSnapshot(connectionId, player, "host_resync");
+            await SendPlayerHostControlData(room);
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "resync", playerName = player.Name });
+        }
+
+        public async Task TransferHost(string targetPlayerId, string? commandId = null)
+        {
+            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) return;
+            if (room.IsHost(player))
+            {
+                await SendPlayerHostControlData(room);
+                return;
+            }
+            var oldHostConnectionId = Context.ConnectionId;
+            if (!_roomService.TransferHost(room, connectionId, out _))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
+                return;
+            }
+            await Clients.Group(room.Id).SendAsync("HostChanged", new
+            {
+                oldHostConnectionId,
+                newHostConnectionId = connectionId,
+                newHostName = player.Name,
+                gmMode = GmMode.PlayerHost.ToString()
+            });
+            await Clients.Client(connectionId).SendAsync("AllPlayersData", BuildPlayerHostControlData(room));
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "transfer_host", playerName = player.Name });
+            await SendPublicPlayersUpdate(room);
+        }
+
+        public async Task InspectStalePlayerConnection(string targetConnectionId, bool fix = false)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePlayersWithoutHiddenData))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для діагностики");
+                return;
+            }
+            var result = _roomService.InspectStaleConnection(room, targetConnectionId, fix);
+            await Clients.Caller.SendAsync("StaleConnectionInspected", result);
+            if (result.WasFixed) await SendPlayerHostControlData(room);
+        }
+
+        public async Task ChangeAdditionalConditionSeverity(string targetPlayerId, string conditionId, string severityCode, string? commandId = null)
+        {
+            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
+            var normalized = NormalizeSeverityCode(severityCode);
+            if (normalized == null || !GmPlayerStateMutator.ChangeConditionSeverity(player, conditionId, normalized, SeverityLabel(normalized)))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Стан або рівень тяжкості не знайдено");
+                return;
+            }
+            _roomService.UpdatePlayer(connectionId, player);
+            await BroadcastConditionRepair(room, connectionId, player);
+        }
+
+        public async Task RemoveAdditionalCondition(string targetPlayerId, string conditionId, string? commandId = null)
+        {
+            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
+            if (!GmPlayerStateMutator.RemoveCondition(player, conditionId))
+            {
+                await SendPlayerHostControlData(room);
+                return;
+            }
+            _roomService.UpdatePlayer(connectionId, player);
+            await BroadcastConditionRepair(room, connectionId, player);
+        }
+
+        private async Task BroadcastConditionRepair(Room room, string connectionId, Player player)
+        {
+            await SendPersonalPlayerSnapshot(connectionId, player, "condition_repaired");
+            if (player.Revealed.PhysicalHealth)
+            {
+                await Clients.Group(room.Id).SendAsync("CharacteristicUpdated", new
+                {
+                    connectionId,
+                    playerName = player.Name,
+                    characteristicKey = "PhysicalHealth",
+                    data = GetRevealedDataForCharacteristic(player, "PhysicalHealth")
+                });
+            }
+            await SendPublicPlayersUpdate(room);
+            await SendPlayerHostControlData(room);
+            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "condition_repair", playerName = player.Name });
+        }
+
+        private static string? NormalizeSeverityCode(string? code) => code?.Trim().ToLowerInvariant() switch
+        {
+            "light" => "light", "medium" => "medium", "hard" => "hard",
+            "veryhard" => "veryHard", "critical" => "critical", _ => null
+        };
+
+        private static string SeverityLabel(string code) => code switch
+        {
+            "light" => "Легка форма", "medium" => "Середня форма", "hard" => "Важка форма",
+            "veryHard" => "Дуже важка форма", "critical" => "Критична форма", _ => ""
+        };
+
+        private static bool TrySetCharacteristicHidden(Player player, string characteristicName)
+            => GmPlayerStateMutator.HideCharacteristic(player, characteristicName);
 
         // Допоміжні методи для GM
 
