@@ -1,6 +1,6 @@
 {
   "_i18n_meta": {
-    "status": "threats_round3_visual_ready_100_fixed",
+    "status": "threats_air_filter_plan_choice_grounded",
     "source_file": "threats.json",
     "records_total": 100,
     "languages": [
@@ -32,12 +32,21 @@
       "risks[]",
       "selectionPriority",
       "tags[]",
-      "uploadedImagePath"
+      "uploadedImagePath",
+      "mechanics.interactionType",
+      "mechanics.planChoice",
+      "mechanics.planChoice.plans[].capabilityTiers",
+      "mechanics.planChoice.plans[].outcomePreview",
+      "mechanics.planChoice.solutionGuide",
+      "mechanics.planChoice.plans[].requirementsPreview"
     ],
     "image_rule_uk": "Картинки можна завантажувати під час гри. threats.json є шаблоном: imageUrl/imagePath/uploadedImagePath можуть бути порожні. Завантажене зображення краще зберігати у стані конкретної кімнати/currentThreat, а не глобально перезаписувати threats.json.",
     "records_translated": 100,
     "fallback_rule_uk": "isUniversalFallback=true залишено тільки для більш універсальних загроз. Специфічні загрози мають випадати через relatedApocalypseIds, relatedBunkerIds або теги.",
-    "prompt_rule_uk": "Основним полем для генерації картинки є root imagePrompt/generatedImagePrompt. _i18n.imagePrompt видалено, щоб не дублювати джерело prompt."
+    "prompt_rule_uk": "Основним полем для генерації картинки є root imagePrompt/generatedImagePrompt. _i18n.imagePrompt видалено, щоб не дублювати джерело prompt.",
+    "plan_choice_note_uk": "Для air_filter_failure додано три соціальні плани. Старе mechanics.resolution залишено як fallback, доки сервер і клієнт не підтримують planChoice.",
+    "solution_guide_note_uk": "Для air_filter_failure додано зрозумілий публічний блок «Що потрібно для вирішення». Він не розкриває внутрішні теги, оцінки або приховані внески.",
+    "air_filter_grounding_note_uk": "air_filter_failure використовує реальний фізичний стан physical_301. Предмети звірені з items.json, технічні теги — зі словником threat_mechanics_tag.json. facilityTags ще потребують звірки з актуальним bunkers.json."
   },
   "hiddenThreatPlaceholder": {
     "name": {
@@ -241,8 +250,8 @@
         "Виживання залежить від стабільної роботи фільтрів"
       ],
       "mechanics": {
-        "schemaVersion": 1,
-        "status": "prototypeReady",
+        "schemaVersion": 2,
+        "status": "planChoiceDataReady",
         "allowedActions": [
           "volunteer",
           "useProfession",
@@ -250,7 +259,10 @@
           "contributeItem",
           "useBunkerResource",
           "useBunkerFacility",
-          "withdrawContribution"
+          "withdrawContribution",
+          "choosePlan",
+          "changePlanBeforeStart",
+          "startPlanResolution"
         ],
         "privacy": {
           "hiddenProfessionCanBeSubmitted": true,
@@ -448,6 +460,651 @@
               "durationRounds": 1
             }
           ]
+        },
+        "interactionType": "plan_choice",
+        "planChoice": {
+          "schemaVersion": 1,
+          "selection": {
+            "mode": "leader_after_discussion",
+            "requiresVolunteer": true,
+            "publicSelectedPlan": true,
+            "lockPlanWhenResolutionStarts": true,
+            "gmCanOverrideBeforeStart": true
+          },
+          "scoring": {
+            "serverAuthoritative": true,
+            "randomModifier": {
+              "min": -8,
+              "max": 8
+            },
+            "tierScores": {
+              "strong": 25,
+              "related": 14,
+              "support": 5
+            },
+            "sourceMultipliers": {
+              "profession": 1.0,
+              "hobby": 0.65
+            },
+            "contributionLimits": {
+              "maxStrongContributors": 1,
+              "maxRelatedContributors": 2,
+              "maxSupportContributors": 2,
+              "supportScoreCap": 10,
+              "samePlayerBestCapabilityOnly": true,
+              "sameCapabilityGroupCountsOnce": true
+            },
+            "assetScores": {
+              "acceptedPersonalItem": 12,
+              "acceptedBunkerResource": 10,
+              "acceptedBunkerFacility": 15,
+              "participantProtection": 8
+            },
+            "thresholds": {
+              "safeSuccess": 80,
+              "successWithConsequence": 55
+            },
+            "rules": {
+              "supportCannotCreateSafeSuccessAlone": true,
+              "randomCannotReducePreparedTeamBelowSuccessWithConsequence": true,
+              "randomCannotRaiseUnpreparedTeamToSafeSuccess": true,
+              "doNotExposeScoresOrMatchedTagsToClients": true
+            }
+          },
+          "plans": [
+            {
+              "id": "repair_main_filter",
+              "baseScore": 35,
+              "riskLevel": "high",
+              "resourceCost": "medium",
+              "outcomeCeiling": "safe_success",
+              "title": {
+                "uk": "Негайно відремонтувати основний фільтр",
+                "ru": "Немедленно отремонтировать основной фильтр",
+                "en": "Repair the main filter immediately"
+              },
+              "description": {
+                "uk": "Учасники заходять у забруднений технічний сектор і намагаються повністю відновити основну систему очищення.",
+                "ru": "Участники входят в загрязнённый технический сектор и пытаются полностью восстановить основную систему очистки.",
+                "en": "Participants enter the contaminated technical sector and attempt to fully restore the main purification system."
+              },
+              "tradeoff": {
+                "uk": "Найкращий довгостроковий результат, але найбільший ризик отруєння для незахищених учасників.",
+                "ru": "Лучший долгосрочный результат, но наибольший риск отравления для незащищённых участников.",
+                "en": "Best long-term result, but the greatest poisoning risk for unprotected participants."
+              },
+              "capabilityTiers": {
+                "strongAny": [
+                  "ventilation_repair"
+                ],
+                "relatedAllGroups": [
+                  [
+                    "mechanical_repair",
+                    "technical_diagnostics"
+                  ],
+                  [
+                    "electrical_repair",
+                    "technical_diagnostics"
+                  ],
+                  [
+                    "electronics_repair",
+                    "technical_diagnostics"
+                  ]
+                ],
+                "supportAny": [
+                  "chemistry",
+                  "medical_general",
+                  "crisis_support"
+                ]
+              },
+              "assets": {
+                "resourceTagsAny": [
+                  "repair_tools",
+                  "sealant"
+                ],
+                "facilityTagsAny": [
+                  "workshop",
+                  "air_filtration_system",
+                  "ventilation_system"
+                ],
+                "protectionTagsAny": [
+                  "respiratory_protection",
+                  "toxic_protection"
+                ],
+                "acceptedItemIdsAny": [
+                  "tool_kit",
+                  "multitool",
+                  "hammer",
+                  "construction_hammer",
+                  "crowbar",
+                  "reinforced_tape",
+                  "electrical_tape"
+                ]
+              },
+              "outcomePreview": {
+                "safeSuccess": {
+                  "uk": "Основну фільтрацію відновлено. Учасники із захистом не отримують нового фізичного стану.",
+                  "ru": "Основная фильтрация восстановлена. Защищённые участники не получают нового физического состояния.",
+                  "en": "Main filtration is restored. Protected participants receive no new physical condition."
+                },
+                "successWithConsequence": {
+                  "uk": "Фільтрацію відновлено, але незахищений учасник може отримати токсичне ураження середньої форми.",
+                  "ru": "Фильтрация восстановлена, но незащищённый участник может получить токсическое поражение средней формы.",
+                  "en": "Filtration is restored, but an unprotected participant may receive moderate toxic exposure."
+                },
+                "failure": {
+                  "uk": "Якість повітря погіршується, а активні гравці ризикують отримати респіраторне отруєння.",
+                  "ru": "Качество воздуха ухудшается, а активные игроки рискуют получить респираторное отравление.",
+                  "en": "Air quality worsens, and active players risk respiratory poisoning."
+                }
+              },
+              "effects": {
+                "onSafeSuccess": [
+                  {
+                    "type": "resolve_threat",
+                    "target": "current_threat"
+                  },
+                  {
+                    "type": "consume_contributed_items",
+                    "target": "accepted_contributions",
+                    "onlyWhenConsumptionMode": "on_success"
+                  }
+                ],
+                "onSuccessWithConsequence": [
+                  {
+                    "type": "resolve_threat",
+                    "target": "current_threat"
+                  },
+                  {
+                    "type": "add_physical_condition",
+                    "target": "first_unprotected_participant",
+                    "conditionId": "physical_301",
+                    "severity": "medium"
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 1
+                  }
+                ],
+                "onFailure": [
+                  {
+                    "type": "add_physical_condition",
+                    "target": "all_active_players",
+                    "conditionId": "physical_301",
+                    "severity": "light",
+                    "mergeRule": "increaseExistingSeverityByOne"
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 2
+                  }
+                ]
+              },
+              "requirementsPreview": {
+                "shortSummary": {
+                  "uk": "Потрібні ремонтні навички, інструменти та захист учасників.",
+                  "ru": "Нужны ремонтные навыки, инструменты и защита участников.",
+                  "en": "Repair skills, tools, and participant protection are needed."
+                },
+                "primary": [
+                  {
+                    "uk": "Фахівець з вентиляції або суміжний технічний спеціаліст.",
+                    "ru": "Специалист по вентиляции или смежный технический специалист.",
+                    "en": "A ventilation specialist or related technical specialist."
+                  },
+                  {
+                    "uk": "Ремонтні інструменти, запасний фільтр, герметик або запчастини.",
+                    "ru": "Ремонтные инструменты, запасной фильтр, герметик или запчасти.",
+                    "en": "Repair tools, a spare filter, sealant, or spare parts."
+                  }
+                ],
+                "helpful": [
+                  {
+                    "uk": "Механік, електрик, електронщик або технічна діагностика.",
+                    "ru": "Механик, электрик, электронщик или техническая диагностика.",
+                    "en": "A mechanic, electrician, electronics specialist, or technical diagnostics."
+                  },
+                  {
+                    "uk": "Майстерня, система вентиляції або фільтрації бункера.",
+                    "ru": "Мастерская, система вентиляции или фильтрации бункера.",
+                    "en": "A workshop, ventilation system, or bunker filtration system."
+                  },
+                  {
+                    "uk": "Медична допомога для зменшення наслідків у разі ураження.",
+                    "ru": "Медицинская помощь для уменьшения последствий при поражении.",
+                    "en": "Medical support to reduce consequences if exposure occurs."
+                  }
+                ],
+                "warning": {
+                  "uk": "Без захисту учасники мають високий ризик токсичного ураження.",
+                  "ru": "Без защиты участники имеют высокий риск токсического поражения.",
+                  "en": "Without protection, participants face a high risk of toxic exposure."
+                }
+              }
+            },
+            {
+              "id": "switch_to_backup_circuit",
+              "baseScore": 43,
+              "riskLevel": "medium",
+              "resourceCost": "medium",
+              "outcomeCeiling": "safe_success",
+              "title": {
+                "uk": "Переключитися на резервний контур",
+                "ru": "Переключиться на резервный контур",
+                "en": "Switch to the backup circuit"
+              },
+              "description": {
+                "uk": "Команда відключає несправний фільтр і переналаштовує живлення та повітропроводи на резервну систему.",
+                "ru": "Команда отключает неисправный фильтр и перенастраивает питание и воздуховоды на резервную систему.",
+                "en": "The team disconnects the failed filter and reroutes power and ducting to the backup system."
+              },
+              "tradeoff": {
+                "uk": "Менший ризик для людей, але вентиляція тимчасово працюватиме зі зниженою продуктивністю.",
+                "ru": "Меньший риск для людей, но вентиляция временно будет работать с пониженной производительностью.",
+                "en": "Lower risk to people, but ventilation will temporarily operate at reduced capacity."
+              },
+              "capabilityTiers": {
+                "strongAny": [
+                  "electrical_repair",
+                  "electronics_repair"
+                ],
+                "relatedAllGroups": [
+                  [
+                    "generator_repair",
+                    "technical_diagnostics"
+                  ],
+                  [
+                    "mechanical_repair",
+                    "technical_diagnostics"
+                  ],
+                  [
+                    "computer_systems",
+                    "technical_diagnostics"
+                  ]
+                ],
+                "supportAny": [
+                  "organization",
+                  "resource_management",
+                  "logistics",
+                  "crisis_support"
+                ]
+              },
+              "assets": {
+                "resourceTagsAny": [
+                  "electrical_parts",
+                  "power_supply",
+                  "repair_tools"
+                ],
+                "facilityTagsAny": [
+                  "backup_power_system",
+                  "control_room",
+                  "ventilation_system"
+                ],
+                "protectionTagsAny": [
+                  "respiratory_protection",
+                  "toxic_protection"
+                ],
+                "acceptedItemIdsAny": [
+                  "electrical_tape",
+                  "wire",
+                  "portable_solar_panel",
+                  "hand_crank_generator",
+                  "spare_batteries",
+                  "fully_charged_power_bank",
+                  "tool_kit",
+                  "multitool"
+                ]
+              },
+              "outcomePreview": {
+                "safeSuccess": {
+                  "uk": "Резервний контур запущено без травм, але якість повітря буде знижена протягом одного раунду.",
+                  "ru": "Резервный контур запущен без травм, но качество воздуха будет снижено в течение одного раунда.",
+                  "en": "The backup circuit starts without injuries, but air quality is reduced for one round."
+                },
+                "successWithConsequence": {
+                  "uk": "Резерв працює нестабільно. Один незахищений учасник отримує легке токсичне ураження.",
+                  "ru": "Резерв работает нестабильно. Один незащищённый участник получает лёгкое токсическое поражение.",
+                  "en": "The backup operates unstably. One unprotected participant receives light toxic exposure."
+                },
+                "failure": {
+                  "uk": "Резерв не запускається, виникає дефіцит живлення та продовжується погіршення повітря.",
+                  "ru": "Резерв не запускается, возникает дефицит питания и продолжается ухудшение воздуха.",
+                  "en": "The backup fails to start, causing a power shortage while air quality continues to deteriorate."
+                }
+              },
+              "effects": {
+                "onSafeSuccess": [
+                  {
+                    "type": "resolve_threat",
+                    "target": "current_threat"
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 1
+                  }
+                ],
+                "onSuccessWithConsequence": [
+                  {
+                    "type": "resolve_threat",
+                    "target": "current_threat"
+                  },
+                  {
+                    "type": "add_physical_condition",
+                    "target": "first_unprotected_participant",
+                    "conditionId": "physical_301",
+                    "severity": "light"
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 1
+                  }
+                ],
+                "onFailure": [
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "power_shortage",
+                    "durationRounds": 1
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 2
+                  }
+                ]
+              },
+              "requirementsPreview": {
+                "shortSummary": {
+                  "uk": "Потрібні електротехнічні навички, резервне живлення та контроль систем.",
+                  "ru": "Нужны электротехнические навыки, резервное питание и контроль систем.",
+                  "en": "Electrical skills, backup power, and system control are needed."
+                },
+                "primary": [
+                  {
+                    "uk": "Електрик, електронщик або фахівець із діагностики систем.",
+                    "ru": "Электрик, электронщик или специалист по диагностике систем.",
+                    "en": "An electrician, electronics specialist, or systems diagnostics specialist."
+                  },
+                  {
+                    "uk": "Резервне живлення, електричні деталі або доступ до контрольної кімнати.",
+                    "ru": "Резервное питание, электрические детали или доступ к комнате управления.",
+                    "en": "Backup power, electrical parts, or access to a control room."
+                  }
+                ],
+                "helpful": [
+                  {
+                    "uk": "Механік або спеціаліст із генераторів.",
+                    "ru": "Механик или специалист по генераторам.",
+                    "en": "A mechanic or generator specialist."
+                  },
+                  {
+                    "uk": "Організатор або логіст для безпечного перемикання систем.",
+                    "ru": "Организатор или логист для безопасного переключения систем.",
+                    "en": "An organizer or logistics specialist for safe system switching."
+                  },
+                  {
+                    "uk": "Захист дихання на випадок витоку забрудненого повітря.",
+                    "ru": "Защита дыхания на случай утечки загрязнённого воздуха.",
+                    "en": "Respiratory protection in case contaminated air leaks."
+                  }
+                ],
+                "warning": {
+                  "uk": "Навіть успішний перехід тимчасово знизить продуктивність вентиляції.",
+                  "ru": "Даже успешный переход временно снизит производительность вентиляции.",
+                  "en": "Even a successful switch temporarily reduces ventilation performance."
+                }
+              }
+            },
+            {
+              "id": "seal_sector_and_ration_air",
+              "baseScore": 50,
+              "riskLevel": "low",
+              "resourceCost": "high",
+              "outcomeCeiling": "success_with_consequence",
+              "title": {
+                "uk": "Ізолювати сектор і перейти на економію повітря",
+                "ru": "Изолировать сектор и перейти на экономию воздуха",
+                "en": "Seal the sector and ration air"
+              },
+              "description": {
+                "uk": "Група відмовляється від негайного ремонту, герметизує небезпечну зону та вводить суворий режим споживання повітря.",
+                "ru": "Группа отказывается от немедленного ремонта, герметизирует опасную зону и вводит строгий режим потребления воздуха.",
+                "en": "The group avoids an immediate repair, seals the dangerous area, and introduces strict air rationing."
+              },
+              "tradeoff": {
+                "uk": "Найнижчий ризик для добровольців, але частина систем бункера тимчасово втрачається.",
+                "ru": "Самый низкий риск для добровольцев, но часть систем бункера временно теряется.",
+                "en": "Lowest risk to volunteers, but part of the bunker systems is temporarily lost."
+              },
+              "capabilityTiers": {
+                "strongAny": [
+                  "rationing"
+                ],
+                "relatedAllGroups": [
+                  [
+                    "leadership",
+                    "organization"
+                  ],
+                  [
+                    "organization",
+                    "resource_management"
+                  ],
+                  [
+                    "medical_general",
+                    "crisis_support"
+                  ],
+                  [
+                    "survival_skills",
+                    "endurance"
+                  ]
+                ],
+                "supportAny": [
+                  "organization",
+                  "resource_management",
+                  "medical_general",
+                  "crisis_support",
+                  "psychology",
+                  "negotiation",
+                  "survival_skills",
+                  "endurance"
+                ]
+              },
+              "assets": {
+                "resourceTagsAny": [
+                  "communication_equipment",
+                  "medical_supplies",
+                  "clean_water"
+                ],
+                "facilityTagsAny": [
+                  "command_center",
+                  "medical_station",
+                  "decontamination_area"
+                ],
+                "protectionTagsAny": [
+                  "respiratory_protection",
+                  "toxic_protection"
+                ],
+                "acceptedItemIdsAny": [
+                  "walkie_talkie",
+                  "battery_powered_radio",
+                  "full_first_aid_kit",
+                  "sterile_bandages",
+                  "tourniquet",
+                  "1_5_l_bottle_of_water"
+                ]
+              },
+              "outcomePreview": {
+                "safeSuccess": {
+                  "uk": "Цей план не може дати повністю безкоштовний успіх: сектор буде закритий щонайменше на один раунд.",
+                  "ru": "Этот план не может дать полностью бесплатный успех: сектор будет закрыт минимум на один раунд.",
+                  "en": "This plan cannot produce a cost-free success: the sector is sealed for at least one round."
+                },
+                "successWithConsequence": {
+                  "uk": "Зараження локалізовано без нового фізичного стану, але вентиляційний сектор тимчасово недоступний.",
+                  "ru": "Заражение локализовано без нового физического состояния, но вентиляционный сектор временно недоступен.",
+                  "en": "Contamination is contained without a new physical condition, but the ventilation sector is temporarily unavailable."
+                },
+                "failure": {
+                  "uk": "Герметизація виконана погано: якість повітря падає, а активні гравці отримують легке респіраторне отруєння.",
+                  "ru": "Герметизация выполнена плохо: качество воздуха падает, а активные игроки получают лёгкое респираторное отравление.",
+                  "en": "The seal is inadequate: air quality drops, and active players receive light respiratory poisoning."
+                }
+              },
+              "effects": {
+                "onSafeSuccess": [],
+                "onSuccessWithConsequence": [
+                  {
+                    "type": "resolve_threat",
+                    "target": "current_threat"
+                  },
+                  {
+                    "type": "disable_bunker_facility",
+                    "target": "first_available_match",
+                    "facilityTagsAny": [
+                      "air_filtration_system",
+                      "ventilation_system"
+                    ],
+                    "durationRounds": 1
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 1
+                  }
+                ],
+                "onFailure": [
+                  {
+                    "type": "add_physical_condition",
+                    "target": "all_active_players",
+                    "conditionId": "physical_301",
+                    "severity": "light",
+                    "mergeRule": "increaseExistingSeverityByOne"
+                  },
+                  {
+                    "type": "apply_room_debuff",
+                    "target": "room",
+                    "debuffId": "reduced_air_quality",
+                    "durationRounds": 2
+                  }
+                ]
+              },
+              "requirementsPreview": {
+                "shortSummary": {
+                  "uk": "Потрібні дисципліна, контроль ресурсів і здатність безпечно ізолювати сектор.",
+                  "ru": "Нужны дисциплина, контроль ресурсов и способность безопасно изолировать сектор.",
+                  "en": "Discipline, resource control, and the ability to safely seal the sector are needed."
+                },
+                "primary": [
+                  {
+                    "uk": "Лідер, організатор або людина з досвідом контролю ресурсів.",
+                    "ru": "Лидер, организатор или человек с опытом контроля ресурсов.",
+                    "en": "A leader, organizer, or someone experienced in resource control."
+                  },
+                  {
+                    "uk": "Можливість герметизувати сектор та запровадити економію повітря.",
+                    "ru": "Возможность герметизировать сектор и ввести экономию воздуха.",
+                    "en": "The ability to seal the sector and introduce air rationing."
+                  }
+                ],
+                "helpful": [
+                  {
+                    "uk": "Медик, психолог або кризовий спеціаліст для контролю стану людей.",
+                    "ru": "Медик, психолог или кризисный специалист для контроля состояния людей.",
+                    "en": "A medic, psychologist, or crisis specialist to monitor people."
+                  },
+                  {
+                    "uk": "Засоби зв’язку, медичні запаси, чиста вода або командний центр.",
+                    "ru": "Средства связи, медицинские запасы, чистая вода или командный центр.",
+                    "en": "Communication equipment, medical supplies, clean water, or a command center."
+                  },
+                  {
+                    "uk": "Витривалі люди або досвід виживання допомагають перенести обмеження.",
+                    "ru": "Выносливые люди или опыт выживания помогают перенести ограничения.",
+                    "en": "Enduring people or survival experience help withstand restrictions."
+                  }
+                ],
+                "warning": {
+                  "uk": "Цей план майже не ризикує учасниками, але сектор і частина систем будуть тимчасово втрачені.",
+                  "ru": "Этот план почти не рискует участниками, но сектор и часть систем будут временно потеряны.",
+                  "en": "This plan risks participants the least, but the sector and some systems are temporarily lost."
+                }
+              }
+            }
+          ],
+          "solutionGuide": {
+            "title": {
+              "uk": "Що потрібно для вирішення",
+              "ru": "Что нужно для решения",
+              "en": "What is needed to resolve it"
+            },
+            "summary": {
+              "uk": "Оберіть план, зберіть учасників і використайте відповідні навички, спорядження або ресурси бункера. Точна професія не є обов’язковою, але краща підготовка зменшує ризик.",
+              "ru": "Выберите план, соберите участников и используйте подходящие навыки, снаряжение или ресурсы бункера. Точная профессия не обязательна, но лучшая подготовка снижает риск.",
+              "en": "Choose a plan, assemble participants, and use suitable skills, equipment, or bunker resources. An exact profession is not mandatory, but better preparation reduces risk."
+            },
+            "commonNeeds": [
+              {
+                "icon": "people",
+                "text": {
+                  "uk": "Щонайменше один учасник, готовий виконати план.",
+                  "ru": "Как минимум один участник, готовый выполнить план.",
+                  "en": "At least one participant ready to carry out the plan."
+                }
+              },
+              {
+                "icon": "skill",
+                "text": {
+                  "uk": "Технічна, організаційна або медична компетенція — залежно від обраного плану.",
+                  "ru": "Техническая, организационная или медицинская компетенция — в зависимости от выбранного плана.",
+                  "en": "Technical, organizational, or medical capability, depending on the chosen plan."
+                }
+              },
+              {
+                "icon": "equipment",
+                "text": {
+                  "uk": "Хоча б один відповідний предмет, ресурс або об’єкт бункера значно покращує шанси.",
+                  "ru": "Хотя бы один подходящий предмет, ресурс или объект бункера значительно улучшает шансы.",
+                  "en": "At least one suitable item, resource, or bunker facility greatly improves the odds."
+                }
+              },
+              {
+                "icon": "protection",
+                "text": {
+                  "uk": "Захист дихання або токсичний захист зменшує ризик фізичних наслідків.",
+                  "ru": "Защита дыхания или токсическая защита снижает риск физических последствий.",
+                  "en": "Respiratory or toxic protection reduces the risk of physical consequences."
+                }
+              }
+            ],
+            "note": {
+              "uk": "Це підказка для обговорення, а не список жорстких обов’язкових умов.",
+              "ru": "Это подсказка для обсуждения, а не список жёстких обязательных условий.",
+              "en": "This is a discussion guide, not a list of strict mandatory conditions."
+            }
+          }
+        },
+        "consequenceCatalog": {
+          "toxicRespiratoryInjury": {
+            "conditionId": "physical_301",
+            "hasSeverity": true,
+            "allowedSeverities": [
+              "light",
+              "medium",
+              "hard"
+            ],
+            "duplicateRule": "do_not_duplicate_same_condition",
+            "mergeRule": "increase_existing_severity_by_one_when_effect_requests_it"
+          }
         }
       }
     },

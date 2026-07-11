@@ -117,6 +117,8 @@ namespace Bunker.Models
 
         public ThreatInteractionState? ThreatState { get; set; }
 
+        public HashSet<string> ProcessedGmThreatCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>
         /// Відповіді гравців на перевірку готовності до голосування.
         /// Ключем є stable player id, якщо він доступний.

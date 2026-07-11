@@ -39,6 +39,11 @@ connection.start()
     let roomPlayers = {}; // connectionId -> player info
     let gmPlayersData = {}; // Повні дані гравців для GM
     let selectedPlayerForGM = null;
+    let gmThreatControlData = { threats: [], currentThreat: null };
+    let gmThreatCommandPending = false;
+    let activeGMTab = 'state';
+    let gmLastServerUpdateAt = null;
+    let gmLastCommandError = '';
     let pendingJoinRoomId = null; // Для закриття модалки після успішного join
     let hostToken = null;
     let currentApocalypse = null;
@@ -131,6 +136,7 @@ connection.start()
         leaveTeam: "Вийти з команди",
         addEquipment: "Додати спорядження",
         useProfession: "Використати професію",
+        useHobby: "Використати хобі",
         startOperation: "Почати операцію",
         answer: "Відповісти",
         leader: "Керівник",
@@ -156,6 +162,7 @@ connection.start()
         resolved_safely: "Загрозу повністю усунено",
         resolved_with_casualty: "Загрозу усунено з наслідками",
         failed: "Операція провалена"
+        ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
     });
     Object.assign(uiTranslations.en, {
         useSpecialCard: "Use card",
@@ -210,6 +217,7 @@ connection.start()
         leaveTeam: "Leave team",
         addEquipment: "Add equipment",
         useProfession: "Use profession",
+        useHobby: "Use hobby",
         startOperation: "Start operation",
         answer: "Answer",
         leader: "Leader",
@@ -234,6 +242,7 @@ connection.start()
         resolved_safely: "Resolved safely",
         resolved_with_casualty: "Resolved with consequences",
         failed: "Failed"
+        ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
     });
     Object.assign(uiTranslations.ru, {
         useSpecialCard: "Использовать карту",
@@ -288,6 +297,7 @@ connection.start()
         leaveTeam: "Выйти из команды",
         addEquipment: "Добавить снаряжение",
         useProfession: "Использовать профессию",
+        useHobby: "Использовать хобби",
         startOperation: "Начать операцию",
         answer: "Ответить",
         leader: "Руководитель",
@@ -312,6 +322,7 @@ connection.start()
         resolved_safely: "Безопасно завершено",
         resolved_with_casualty: "Завершено с последствиями",
         failed: "Провалено"
+        ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
     });
 
     function getCurrentLanguage() {
@@ -418,6 +429,7 @@ connection.start()
         const preview = source.preview || source.Preview || {};
         const participants = source.participants || source.Participants || [];
         const miniGame = source.miniGame || source.MiniGame || {};
+        const planChoice = source.planChoice || source.PlanChoice || {};
         const currentQuestion = miniGame.currentQuestion || miniGame.CurrentQuestion || null;
         const operationAggregates = source.operationAggregates || source.OperationAggregates || {};
 
@@ -495,6 +507,14 @@ connection.start()
                 protectedParticipants: operationAggregates.protectedParticipants ?? operationAggregates.ProtectedParticipants ?? 0,
                 hints: operationAggregates.hints ?? operationAggregates.Hints ?? 0,
                 status: operationAggregates.status || operationAggregates.Status || ""
+            },
+            planChoice: {
+                selectedPlanId: planChoice.selectedPlanId || planChoice.SelectedPlanId || "",
+                isLocked: !!(planChoice.isLocked ?? planChoice.IsLocked),
+                outcome: planChoice.outcome || planChoice.Outcome || "",
+                resolvedAtRound: planChoice.resolvedAtRound ?? planChoice.ResolvedAtRound ?? null,
+                solutionGuide: planChoice.solutionGuide || planChoice.SolutionGuide || null,
+                plans: planChoice.plans || planChoice.Plans || []
             },
             miniGame: {
                 threatId: miniGame.threatId || miniGame.ThreatId || "",
@@ -818,7 +838,11 @@ connection.start()
 
     function renderThreatInteractionPanel(threat) {
         const threatId = (threat?.id || threat?.Id || currentThreatState?.currentThreatId || '').toLowerCase();
-        if (threatId !== 'radiation_leak' || !currentThreatState) return '';
+        if (!currentThreatState) return '';
+        if (threatId === 'air_filter_failure' && currentThreatState.planChoice?.plans?.length) {
+            return renderAirFilterPlanChoice(currentThreatState);
+        }
+        if (threatId !== 'radiation_leak') return '';
 
         const state = currentThreatState;
         const aggregates = state.operationAggregates || {};
@@ -843,6 +867,90 @@ connection.start()
                 </div>
             </section>
         `;
+    }
+
+    function getPlanChoiceText(value) {
+        if (!value) return '';
+        const lang = getCurrentLanguage();
+        return value[lang] || value.uk || value.en || Object.values(value).find(item => typeof item === 'string') || '';
+    }
+
+    function renderPlanRequirementList(items) {
+        if (!Array.isArray(items) || !items.length) return '';
+        return `<ul>${items.map(item => `<li>${escapeHtml(getPlanChoiceText(item))}</li>`).join('')}</ul>`;
+    }
+
+    function planChoiceLabel(key) {
+        const labels = {
+            uk: { primary: 'Основне', helpful: 'Може допомогти', risk: 'Ризик', resources: 'Вартість ресурсів', selected: 'Обрано', choose: 'Обрати план', change: 'Змінити вибір', start: 'Почати розв’язку', safe: 'Безпечний результат', consequence: 'Успіх із наслідками', failure: 'Провал', note: 'Це орієнтири для обговорення, а не жорсткі обов’язкові умови.' },
+            ru: { primary: 'Основное', helpful: 'Может помочь', risk: 'Риск', resources: 'Стоимость ресурсов', selected: 'Выбрано', choose: 'Выбрать план', change: 'Изменить выбор', start: 'Начать решение', safe: 'Безопасный результат', consequence: 'Успех с последствиями', failure: 'Провал', note: 'Это ориентиры для обсуждения, а не жёсткие обязательные условия.' },
+            en: { primary: 'Primary', helpful: 'May help', risk: 'Risk', resources: 'Resource cost', selected: 'Selected', choose: 'Choose plan', change: 'Change selection', start: 'Start resolution', safe: 'Safe outcome', consequence: 'Success with consequences', failure: 'Failure', note: 'These are discussion guidelines, not rigid mandatory requirements.' }
+        };
+        return labels[getCurrentLanguage()]?.[key] || labels.uk[key] || key;
+    }
+
+    function planChoiceLevel(value) {
+        const labels = {
+            uk: { low: 'низький', medium: 'середній', high: 'високий' },
+            ru: { low: 'низкий', medium: 'средний', high: 'высокий' },
+            en: { low: 'low', medium: 'medium', high: 'high' }
+        };
+        return labels[getCurrentLanguage()]?.[value] || value || '—';
+    }
+
+    function renderAirFilterPlanChoice(state) {
+        const choice = state.planChoice || {};
+        const guide = choice.solutionGuide || {};
+        const leaderId = state.volunteerSelection?.selectedPlayerId || '';
+        const canChoose = !choice.isLocked && (isCurrentPlayerId(leaderId) || isHost);
+        const commonNeeds = guide.commonNeeds || guide.CommonNeeds || [];
+        const guideHtml = guide && (guide.title || guide.Title) ? `
+            <section class="plan-choice-guide">
+                <h3>${escapeHtml(getPlanChoiceText(guide.title || guide.Title))}</h3>
+                <p>${escapeHtml(getPlanChoiceText(guide.summary || guide.Summary))}</p>
+                ${commonNeeds.length ? `<ul>${commonNeeds.map(item => `<li>${escapeHtml(getPlanChoiceText(item.text || item.Text))}</li>`).join('')}</ul>` : ''}
+                <p class="plan-choice-note">${escapeHtml(getPlanChoiceText(guide.note || guide.Note) || planChoiceLabel('note'))}</p>
+            </section>` : '';
+        const plansHtml = (choice.plans || []).map(raw => {
+            const plan = raw || {};
+            const id = plan.id || plan.Id || '';
+            const selected = id === choice.selectedPlanId;
+            const preview = plan.outcomePreview || plan.OutcomePreview || {};
+            const requirements = plan.requirementsPreview || plan.RequirementsPreview || null;
+            return `<article class="plan-choice-card${selected ? ' selected' : ''}">
+                <header><h4>${escapeHtml(getPlanChoiceText(plan.title || plan.Title))}</h4>${selected ? `<span class="plan-choice-selected">${escapeHtml(planChoiceLabel('selected'))}</span>` : ''}</header>
+                <p>${escapeHtml(getPlanChoiceText(plan.description || plan.Description))}</p>
+                <p class="plan-choice-tradeoff">${escapeHtml(getPlanChoiceText(plan.tradeoff || plan.Tradeoff))}</p>
+                <div class="plan-choice-meta"><span>${escapeHtml(planChoiceLabel('risk'))}: ${escapeHtml(planChoiceLevel(plan.riskLevel || plan.RiskLevel))}</span><span>${escapeHtml(planChoiceLabel('resources'))}: ${escapeHtml(planChoiceLevel(plan.resourceCost || plan.ResourceCost))}</span></div>
+                ${requirements ? `<section class="plan-requirements">
+                    <strong>${escapeHtml(getPlanChoiceText(requirements.shortSummary || requirements.ShortSummary))}</strong>
+                    <h5>${escapeHtml(planChoiceLabel('primary'))}</h5>${renderPlanRequirementList(requirements.primary || requirements.Primary)}
+                    <h5>${escapeHtml(planChoiceLabel('helpful'))}</h5>${renderPlanRequirementList(requirements.helpful || requirements.Helpful)}
+                    ${getPlanChoiceText(requirements.warning || requirements.Warning) ? `<p class="plan-warning">${escapeHtml(getPlanChoiceText(requirements.warning || requirements.Warning))}</p>` : ''}
+                </section>` : ''}
+                <section class="plan-outcomes">
+                    <p><strong>${escapeHtml(planChoiceLabel('safe'))}:</strong> ${escapeHtml(getPlanChoiceText(preview.safeSuccess || preview.SafeSuccess))}</p>
+                    <p><strong>${escapeHtml(planChoiceLabel('consequence'))}:</strong> ${escapeHtml(getPlanChoiceText(preview.successWithConsequence || preview.SuccessWithConsequence))}</p>
+                    <p><strong>${escapeHtml(planChoiceLabel('failure'))}:</strong> ${escapeHtml(getPlanChoiceText(preview.failure || preview.Failure))}</p>
+                </section>
+                ${canChoose ? `<button type="button" class="char-btn" onclick="selectThreatPlan('${escapeHtml(id)}')">${escapeHtml(planChoiceLabel(selected ? 'change' : 'choose'))}</button>` : ''}
+            </article>`;
+        }).join('');
+        const discussionControls = !choice.isLocked ? `<section class="plan-choice-contributions">
+            <h3>${escapeHtml(t('team'))}</h3>
+            ${renderThreatParticipantsList(state)}
+            <div class="threat-operation-actions">
+                <button type="button" class="char-btn" onclick="submitThreatVolunteer()">${escapeHtml(t('joinTeam'))}</button>
+                <button type="button" class="char-btn" onclick="withdrawThreatContribution()">${escapeHtml(t('leaveTeam'))}</button>
+                ${renderThreatLeaderControl(state)}
+            </div>
+            <div class="threat-operation-actions">
+                ${renderThreatItemSelect(t('addEquipment'))}
+                <button type="button" class="char-btn" onclick="useProfessionForThreat()">${escapeHtml(t('useProfession'))}</button>
+                <button type="button" class="char-btn" onclick="useHobbyForThreat()">${escapeHtml(t('useHobby'))}</button>
+            </div>
+        </section>` : '';
+        return `<section class="plan-choice-panel">${guideHtml}${discussionControls}<div class="plan-choice-grid">${plansHtml}</div>${isHost && choice.selectedPlanId && !choice.isLocked ? `<button type="button" class="char-btn public-use" onclick="resolveCurrentThreat()">${escapeHtml(planChoiceLabel('start'))}</button>` : ''}</section>`;
     }
 
     function getThreatStatusLabel(status) {
@@ -1193,6 +1301,10 @@ connection.start()
 
     function resolveCurrentThreat() {
         connection.invoke("ResolveCurrentThreat").catch(err => console.error("ResolveCurrentThreat error:", err));
+    }
+
+    function selectThreatPlan(planId) {
+        connection.invoke("SelectThreatPlan", planId).catch(err => console.error("SelectThreatPlan error:", err));
     }
 
     function startThreatMiniGame() {
@@ -2993,7 +3105,12 @@ function registerSignalREvents() {
     connection.off("GMActionSuccess");
     connection.on("GMActionSuccess", function (info) {
         console.log("GM action success:", info);
-        addEventMessage(`<span class="event-gm">GM</span> ${info.action}: ${info.playerName} - ${info.characteristicName || ''}`);
+        const action = info.action || info.Action || 'Дію виконано';
+        addEventMessage(`<span class="event-gm">GM</span> ${escapeHtml(action)}`);
+        const result = document.getElementById('gmThreatCommandResult');
+        if (result) result.textContent = action;
+        gmLastCommandError = '';
+        markGMServerUpdate();
         // Оновлюємо дані гравців
         if (isHost) {
             connection.invoke("GetAllPlayersData").catch(err => console.error(err));
@@ -3010,6 +3127,12 @@ function registerSignalREvents() {
 
         console.error("ReceiveError:", message);
         addEventMessage("Помилка: " + localizeServerMessage(message));
+        const gmThreatResult = document.getElementById('gmThreatCommandResult');
+        if (gmThreatResult && gmThreatCommandPending) gmThreatResult.textContent = localizeServerMessage(message);
+        if (gmThreatCommandPending) {
+            gmLastCommandError = localizeServerMessage(message);
+            renderGMPanelState();
+        }
     });
 
     // ==================== SESSION RESTORE HANDLERS ====================
@@ -3315,6 +3438,18 @@ function registerSignalREvents() {
             document.getElementById('threatOperationModal').style.display = 'flex';
         }
         renderCurrentGameUI();
+        markGMServerUpdate();
+        markGMServerUpdate();
+    });
+
+    connection.off("GMThreatControlData");
+    connection.on("GMThreatControlData", function (data) {
+        gmThreatControlData = {
+            threats: data.threats || data.Threats || [],
+            currentThreat: data.currentThreat || data.CurrentThreat || null
+        };
+        renderGMThreatControl();
+        markGMServerUpdate();
     });
 
     function mergeThreatPlayerSnapshots(data) {
@@ -4434,94 +4569,7 @@ function removeBunkerSupplies(months) {
     
     // Ініціалізація tooltip для мобільних
     function initMobileTooltips() {
-        console.log('[Tooltip] Initializing mobile tooltips');
-    }
-    
-    // Глобальний обробник для всіх кліків - працює і для динамічно створених елементів
-    document.addEventListener('click', function(e) {
-        // Handle .tooltip-trigger (original tooltips)
-        const trigger = e.target.closest('.tooltip-trigger');
-        
-        if (trigger) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const wasActive = trigger.classList.contains('active');
-            
-            // Закриваємо всі інші тултіпи
-            document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
-                t.classList.remove('active');
-            });
-            
-            // Закриваємо мобільний оверлей
-            closeMobileTooltipOverlay();
-            
-            if (!wasActive) {
-                // На мобільних показуємо модальний оверлей
-                if (isMobileDevice()) {
-                    showMobileTooltipOverlay(trigger);
-                } else {
-                    trigger.classList.add('active');
-                }
-            }
-            return;
-        }
-        
-        // Клік поза тултіпом - закрити всі
-        if (!e.target.closest('.tooltip-content') && 
-            !e.target.closest('.mobile-tooltip-overlay')) {
-            document.querySelectorAll('.tooltip-trigger.active').forEach(t => {
-                t.classList.remove('active');
-            });
-            closeMobileTooltipOverlay();
-        }
-    }, true);
-    
-    // Touch events для мобільних
-    document.addEventListener('touchend', function(e) {
-        const trigger = e.target.closest('.tooltip-trigger');
-        if (trigger) {
-            e.preventDefault();
-            // Імітуємо клік
-            trigger.click();
-        }
-    }, { passive: false });
-    
-    function isMobileDevice() {
-        return window.innerWidth <= 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    }
-    
-    function showMobileTooltipOverlay(trigger) {
-        // Видаляємо старий оверлей якщо є
-        closeMobileTooltipOverlay();
-        
-        const tooltipContent = trigger.nextElementSibling;
-        if (!tooltipContent || !tooltipContent.classList.contains('tooltip-content')) return;
-        
-        const tooltipText = tooltipContent.textContent || tooltipContent.innerText;
-        
-        // Створюємо мобільний оверлей
-        const overlay = document.createElement('div');
-        overlay.className = 'mobile-tooltip-overlay';
-        overlay.innerHTML = `
-            <div class="mobile-tooltip-backdrop"></div>
-            <div class="mobile-tooltip-card">
-                <div class="mobile-tooltip-content">${tooltipText}</div>
-                <button class="mobile-tooltip-close" onclick="closeMobileTooltipOverlay()">Закрити</button>
-            </div>
-        `;
-        
-        document.body.appendChild(overlay);
-        
-        // Закриття по кліку на backdrop
-        overlay.querySelector('.mobile-tooltip-backdrop').addEventListener('click', closeMobileTooltipOverlay);
-    }
-    
-    function closeMobileTooltipOverlay() {
-        const overlay = document.querySelector('.mobile-tooltip-overlay');
-        if (overlay) {
-            overlay.remove();
-        }
+        window.reinitTooltips?.();
     }
 
     // ==================== ROOM FUNCTIONS ====================
@@ -5284,7 +5332,139 @@ function removeBunkerSupplies(months) {
         if (!isVisible && isHost) {
             // Завантажуємо дані гравців при відкритті панелі
             connection.invoke("GetAllPlayersData").catch(err => console.error(err));
+            connection.invoke("GetGMThreatControlData").catch(err => console.error(err));
+            renderGMPanelState();
         }
+    }
+
+    function switchGMTab(tab) {
+        activeGMTab = ['state', 'round', 'threat', 'content', 'diagnostics'].includes(tab) ? tab : 'state';
+        renderGMTabsVisibility();
+        renderGMPanelState();
+    }
+
+    function renderGMTabsVisibility() {
+        document.querySelectorAll('[data-gm-tab]').forEach(section => {
+            const active = section.dataset.gmTab === activeGMTab;
+            if (section.id === 'gmPlayerInfo') section.style.display = active && selectedPlayerForGM ? 'block' : 'none';
+            else section.style.display = active && isHost ? 'block' : 'none';
+        });
+        document.querySelectorAll('[data-gm-tab-button]').forEach(button => {
+            button.classList.toggle('active', button.dataset.gmTabButton === activeGMTab);
+        });
+    }
+
+    function markGMServerUpdate() {
+        gmLastServerUpdateAt = new Date();
+        renderGMPanelState();
+    }
+
+    function renderGMPanelState() {
+        document.querySelectorAll('[data-gm-i18n]').forEach(element => {
+            element.textContent = t(element.dataset.gmI18n);
+        });
+        const round = getCurrentRoundNumber();
+        const phase = getPhaseLabel(getCurrentPhase());
+        const players = Object.values(roomPlayers || {});
+        const activePlayers = players.filter(player => !(player.isEliminated || player.IsEliminated));
+        const connectedPlayers = activePlayers.filter(player => player.isConnected ?? player.IsConnected ?? true);
+        const threatName = currentThreat ? getLocalizedValue(currentThreat, 'name') || currentThreat.name || currentThreat.Name : '—';
+        const interactionStatus = currentThreatState ? getThreatStatusLabel(currentThreatState.threatStatus) : '—';
+        const stateSummary = document.getElementById('gmGameStateSummary');
+        if (stateSummary) stateSummary.innerHTML = [
+            ['Кімната', currentRoom?.name || currentRoom?.Name || '—'],
+            ['Раунд', round], ['Етап', phase], ['Активні гравці', activePlayers.length],
+            ['Готовність', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? activePlayers.length}`],
+            ['Поточна загроза', threatName], ['Interaction status', interactionStatus]
+        ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('');
+        const diagnostics = document.getElementById('gmDiagnosticsSummary');
+        if (diagnostics) diagnostics.innerHTML = [
+            ['Останнє серверне оновлення', gmLastServerUpdateAt ? gmLastServerUpdateAt.toLocaleTimeString() : '—'],
+            ['Підключені активні', connectedPlayers.length],
+            ['Незавершений interaction', currentThreat && !currentThreatState?.resolution?.effectsApplied ? 'Так' : 'Ні']
+        ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(label)}</span><strong class="gm-status-badge">${escapeHtml(value)}</strong></div>`).join('');
+        const error = document.getElementById('gmLastCommandError');
+        if (error) {
+            error.textContent = gmLastCommandError;
+            error.style.display = gmLastCommandError ? 'block' : 'none';
+        }
+    }
+
+    function renderGMThreatControl() {
+        const current = document.getElementById('gmThreatCurrent');
+        const select = document.getElementById('gmThreatSelect');
+        if (current) {
+            const threat = gmThreatControlData.currentThreat;
+            current.textContent = threat
+                ? `${threat.name || threat.Name} — ${threat.status || threat.Status || '—'}`
+                : 'Поточна загроза відсутня';
+        }
+        if (select) {
+            const previous = select.value;
+            select.innerHTML = gmThreatControlData.threats.map(threat => {
+                const id = threat.id || threat.Id;
+                const name = threat.name || threat.Name;
+                const type = threat.type || threat.Type || 'text';
+                const available = threat.available ?? threat.Available ?? true;
+                return `<option value="${escapeHtml(id)}" data-search="${escapeHtml(`${name} ${id} ${type}`.toLowerCase())}" ${available ? '' : 'disabled'}>${escapeHtml(name)} — ${escapeHtml(type)}</option>`;
+            }).join('');
+            if ([...select.options].some(option => option.value === previous)) select.value = previous;
+        }
+    }
+
+    function filterGMThreatOptions() {
+        const query = (document.getElementById('gmThreatSearch')?.value || '').trim().toLowerCase();
+        document.querySelectorAll('#gmThreatSelect option').forEach(option => {
+            option.hidden = !!query && !option.dataset.search.includes(query);
+        });
+    }
+
+    function gmThreatCommandId() {
+        return globalThis.crypto?.randomUUID?.() || `gm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function confirmGMThreatReplacement(message) {
+        if (!gmThreatControlData.currentThreat) return true;
+        return confirm(message) && confirm('Підтвердіть ще раз: стара interaction state буде закрита без застосування її наслідків.');
+    }
+
+    function invokeGMThreatCommand(method, args, confirmationMessage) {
+        if (gmThreatCommandPending) return;
+        const confirmed = confirmationMessage ? confirmGMThreatReplacement(confirmationMessage) : true;
+        if (!confirmed) return;
+        gmThreatCommandPending = true;
+        document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = true);
+        connection.invoke(method, ...args, confirmed)
+            .catch(err => {
+                const result = document.getElementById('gmThreatCommandResult');
+                if (result) result.textContent = err?.message || 'Помилка GM-команди';
+            })
+            .finally(() => {
+                gmThreatCommandPending = false;
+                document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = false);
+            });
+    }
+
+    function gmGenerateRareThreat() {
+        invokeGMThreatCommand('GMGenerateRandomRareThreat', [gmThreatCommandId()], 'Замінити поточну загрозу випадковою рідкісною?');
+    }
+    function gmGenerateTextThreat() {
+        invokeGMThreatCommand('GMGenerateTextThreat', [gmThreatCommandId()], 'Замінити поточну загрозу випадковою текстовою?');
+    }
+    function gmSelectSpecificThreat() {
+        const id = document.getElementById('gmThreatSelect')?.value;
+        if (id) invokeGMThreatCommand('GMSelectThreat', [id, gmThreatCommandId()], 'Замінити поточну загрозу обраною?');
+    }
+    function gmCancelThreat() {
+        invokeGMThreatCommand('GMCancelCurrentThreat', [gmThreatCommandId()], 'Скасувати поточну загрозу без наслідків?');
+    }
+    function gmRestartThreat() {
+        invokeGMThreatCommand('GMRestartCurrentThreat', [gmThreatCommandId()], 'Перезапустити interaction state поточної загрози?');
+    }
+    function gmResyncThreatRoom() {
+        if (gmThreatCommandPending) return;
+        gmThreatCommandPending = true;
+        connection.invoke('GMResyncThreatRoom').finally(() => gmThreatCommandPending = false);
     }
 
     function updateGMPlayerSelect() {
@@ -5624,23 +5804,12 @@ function removeBunkerSupplies(months) {
     
     // Нова функція для оновлення GM секцій
     function updateGMSections() {
-        const gmRoundSection = document.getElementById('gmRoundSection');
-        const gmScenarioSection = document.getElementById('gmScenarioSection');
-        const gmEventsSection = document.getElementById('gmEventsSection');
-        
         const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started' || currentRoom.state === 'Voting');
-        
-        if (gmRoundSection) {
-            gmRoundSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
-        }
-        if (gmScenarioSection) {
-            gmScenarioSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
-        }
-        if (gmEventsSection) {
-            gmEventsSection.style.display = (isHost && isGameActive) ? 'block' : 'none';
-        }
-        
+        renderGMTabsVisibility();
+        const roundTab = document.querySelector('[data-gm-tab-button="round"]');
+        if (roundTab) roundTab.disabled = !isGameActive;
         updateRoundStatusUI();
+        renderGMPanelState();
         console.log("[updateGMSections] isHost:", isHost, "isGameActive:", isGameActive);
     }
 
@@ -6065,14 +6234,50 @@ function removeBunkerSupplies(months) {
         });
     }
 
+    function buildAdditionalPhysicalConditionTooltip(effect, lang = getCurrentLanguage()) {
+        if (!effect) return '';
+        const localization = getLocalization(effect) || {};
+        const localized = localization[lang] || localization.uk || null;
+        const name = cleanTooltipText(
+            localized?.name || localized?.Name || effect.baseName || effect.BaseName || ''
+        );
+        const severity = cleanTooltipText(getConditionSeverityLabel(effect, lang));
+        const severityCode = effect.severityCode || effect.SeverityCode || '';
+        const descriptions = localized?.descriptions || localized?.Descriptions || {};
+        const localizedDescription = descriptions[severityCode] || localized?.description || localized?.Description || '';
+        const description = cleanTooltipText(localized
+            ? localizedDescription
+            : effect.description || effect.Description || effect.tooltip || effect.Tooltip || '');
+        const validName = /^(невідомо|неизвестно|unknown)$/i.test(name) ? '' : name;
+        if (!validName && !severity && !description) return '';
+
+        return [
+            validName ? `<span class="tooltip-medical-name">${escapeHtml(validName)}</span>` : '',
+            severity ? `<span class="tooltip-medical-severity">${escapeHtml(severity.charAt(0).toUpperCase() + severity.slice(1))}</span>` : '',
+            description ? `<span class="tooltip-medical-description">${escapeHtml(description)}</span>` : ''
+        ].filter(Boolean).join('');
+    }
+
+    function renderAdditionalPhysicalCondition(effect, prefix = '') {
+        const label = formatAdditionalPhysicalCondition(effect);
+        if (!label) return '';
+        const tooltip = buildAdditionalPhysicalConditionTooltip(effect);
+        if (!tooltip) return `<span class="additional-condition-item">${escapeHtml(prefix + label)}</span>`;
+        return `<span class="characteristic-with-tooltip additional-condition-item">
+            <span>${escapeHtml(prefix + label)}</span>
+            <button type="button" class="tooltip-trigger physical" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button>
+            <span class="tooltip-content">${tooltip}</span>
+        </span>`;
+    }
+
     function renderAdditionalPhysicalConditionsForTable(player) {
         const sourcePlayer = player.connectionId === myConnectionId ? myPlayerData : player;
         const conditions = (sourcePlayer?.additionalPhysicalConditions || sourcePlayer?.additionalConditionEffects || [])
-            .map(formatAdditionalPhysicalCondition)
+            .map(effect => renderAdditionalPhysicalCondition(effect, '+ '))
             .filter(Boolean);
         if (!conditions.length) return '';
 
-        return `<div class="additional-conditions-table">${conditions.map(name => `<span>+ ${escapeHtml(name)}</span>`).join('')}</div>`;
+        return `<div class="additional-conditions-table">${conditions.join('')}</div>`;
     }
     
     function getTooltipTypeClass(charKey) {
@@ -6128,9 +6333,7 @@ function removeBunkerSupplies(months) {
             ? `<div class="additional-conditions">
                     <span class="char-label">${escapeHtml(t('additionalConditions'))}:</span>
                     ${additionalConditionEffects.map(effect => {
-                        const label = formatAdditionalPhysicalCondition(effect);
-                        if (!label) return '';
-                        return `<span class="additional-condition-item">${escapeHtml(label)}</span>`;
+                        return renderAdditionalPhysicalCondition(effect);
                     }).filter(Boolean).join('')}
                </div>`
             : '';

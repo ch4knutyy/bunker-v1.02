@@ -1,6 +1,6 @@
 {
   "_i18n_meta": {
-    "status": "stage_1_translated",
+    "status": "items_air_filter_relevant_tags_audited",
     "scope": "items only",
     "languages": [
       "uk",
@@ -8,7 +8,8 @@
       "ru"
     ],
     "note_uk": "Оригінальні поля item/category залишені без змін. Переклади додані в _i18n.",
-    "fallback_rule": "value[lang] || value.uk"
+    "fallback_rule": "value[lang] || value.uk",
+    "air_filter_tag_audit_note_uk": "Виправлено лише очевидно хибні resourceTags, які могли помилково зараховувати предмети для air_filter_failure. Інші предмети не змінено."
   },
   "items": [
     {
@@ -5007,7 +5008,6 @@
       },
       "id": "battle_axe",
       "resourceTags": [
-        "repair_tools",
         "weapon"
       ],
       "protectionTags": [],
@@ -5941,7 +5941,6 @@
       },
       "id": "throwing_axe",
       "resourceTags": [
-        "repair_tools",
         "weapon"
       ],
       "protectionTags": [],
@@ -6322,7 +6321,6 @@
       },
       "id": "garrote_wire",
       "resourceTags": [
-        "electrical_parts",
         "weapon"
       ],
       "protectionTags": [],
@@ -6588,7 +6586,6 @@
       },
       "id": "dull_axe",
       "resourceTags": [
-        "repair_tools",
         "weapon"
       ],
       "protectionTags": [],
@@ -6879,7 +6876,6 @@
       },
       "id": "scissors",
       "resourceTags": [
-        "repair_tools",
         "weapon"
       ],
       "protectionTags": [],
@@ -6909,7 +6905,6 @@
       },
       "id": "can_opener",
       "resourceTags": [
-        "repair_tools",
         "weapon"
       ],
       "protectionTags": [],
@@ -7233,9 +7228,7 @@
         }
       },
       "id": "philology_diploma",
-      "resourceTags": [
-        "repair_tools"
-      ],
+      "resourceTags": [],
       "protectionTags": [],
       "threatUsage": {
         "eligible": true,
@@ -8715,9 +8708,7 @@
         }
       },
       "id": "streaming_microphone",
-      "resourceTags": [
-        "communication_equipment"
-      ],
+      "resourceTags": [],
       "protectionTags": [],
       "threatUsage": {
         "eligible": true,
@@ -11297,8 +11288,7 @@
       },
       "id": "battery_powered_radio",
       "resourceTags": [
-        "communication_equipment",
-        "power_supply"
+        "communication_equipment"
       ],
       "protectionTags": [],
       "threatUsage": {
@@ -13520,9 +13510,7 @@
         }
       },
       "id": "phone_stand",
-      "resourceTags": [
-        "communication_equipment"
-      ],
+      "resourceTags": [],
       "protectionTags": [],
       "threatUsage": {
         "eligible": true,
@@ -13549,10 +13537,7 @@
         }
       },
       "id": "lightning_cable_without_a_phone",
-      "resourceTags": [
-        "communication_equipment",
-        "electrical_parts"
-      ],
+      "resourceTags": [],
       "protectionTags": [],
       "threatUsage": {
         "eligible": true,

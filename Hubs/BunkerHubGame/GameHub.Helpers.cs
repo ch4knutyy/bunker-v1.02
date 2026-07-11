@@ -1,6 +1,7 @@
 ﻿using Bunker.Models;
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
+using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -146,75 +147,22 @@ namespace Bunker.Hubs
                 candidates = _gameData.Threats.ToList();
             }
 
-            if (candidates.Count == 0)
+            var safeFallback = candidates.FirstOrDefault() ?? _gameData.Threats.FirstOrDefault() ?? new Bunker.Models.GameData.ThreatData
             {
-                return null;
-            }
-
-            if (round == 3)
-            {
-                var radiationLeak = candidates.FirstOrDefault(threat =>
-                    string.Equals(threat.Id, "radiation_leak", StringComparison.OrdinalIgnoreCase));
-                if (radiationLeak != null)
-                {
-                    return CloneThreatData(radiationLeak);
-                }
-            }
-
-            var apocalypseId = room.Apocalypse?.Id ?? "";
-            var bunkerId = room.Bunker?.Id ?? "";
-            var apocalypseTags = new HashSet<string>(
-                room.Apocalypse?.Tags ?? new List<string>(),
-                StringComparer.OrdinalIgnoreCase);
-            var bunkerTags = new HashSet<string>(
-                room.Bunker?.BunkerTags ?? new List<string>(),
-                StringComparer.OrdinalIgnoreCase);
-            var scenarioTags = new HashSet<string>(apocalypseTags, StringComparer.OrdinalIgnoreCase);
-            scenarioTags.UnionWith(bunkerTags);
-
-            int MatchTier(Bunker.Models.GameData.ThreatData threat)
-            {
-                if (!string.IsNullOrWhiteSpace(apocalypseId) &&
-                    threat.RelatedApocalypseIds.Contains(apocalypseId, StringComparer.OrdinalIgnoreCase))
-                {
-                    return 1;
-                }
-
-                if (!string.IsNullOrWhiteSpace(bunkerId) &&
-                    threat.RelatedBunkerIds.Contains(bunkerId, StringComparer.OrdinalIgnoreCase))
-                {
-                    return 2;
-                }
-
-                if (threat.ApocalypseTags.Any(apocalypseTags.Contains))
-                {
-                    return 3;
-                }
-
-                if (threat.BunkerTags.Any(bunkerTags.Contains))
-                {
-                    return 4;
-                }
-
-                if (threat.Tags.Any(scenarioTags.Contains) ||
-                    (!string.IsNullOrWhiteSpace(threat.Category) && scenarioTags.Contains(threat.Category)))
-                {
-                    return 5;
-                }
-
-                return threat.IsUniversalFallback ? 6 : 7;
-            }
-
-            var ranked = candidates
-                .Select(threat => new { Threat = threat, Tier = MatchTier(threat) })
-                .ToList();
-            var bestTier = ranked.Min(entry => entry.Tier);
-            var bestMatches = ranked
-                .Where(entry => entry.Tier == bestTier)
-                .Select(entry => entry.Threat)
-                .ToList();
-
-            return CloneThreatData(bestMatches[_random.Next(bestMatches.Count)]);
+                Id = "fallback_threat",
+                Name = "Невідома загроза",
+                Description = "Бункер зіткнувся з непередбаченою небезпекою.",
+                Round = round
+            };
+            var selected = new ThreatPoolSelector().Select(
+                candidates,
+                threat => string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase)
+                    ? _threatMiniGames.TryGet(RadiationLeakThreatId, out _)
+                    : string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
+                      IsPlanChoiceMechanics(threat.Mechanics),
+                _random.Next,
+                safeFallback);
+            return CloneThreatData(selected);
         }
 
         private static Bunker.Models.GameData.ThreatData CloneThreatData(Bunker.Models.GameData.ThreatData source)

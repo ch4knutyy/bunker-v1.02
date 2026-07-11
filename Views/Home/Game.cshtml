@@ -125,8 +125,20 @@
                 <h3>🎮 Game Master Panel</h3>
                 <button class="btn-close" onclick="toggleGMPanel()">×</button>
             </div>
+            <nav class="gm-tabs" aria-label="GM sections">
+                <button type="button" class="gm-tab active" data-gm-tab-button="state" data-gm-i18n="gmGameState" onclick="switchGMTab('state')">Стан гри</button>
+                <button type="button" class="gm-tab" data-gm-tab-button="round" data-gm-i18n="gmRoundControl" onclick="switchGMTab('round')">Керування раундом</button>
+                <button type="button" class="gm-tab" data-gm-tab-button="threat" data-gm-i18n="gmThreatControl" onclick="switchGMTab('threat')">Керування загрозою</button>
+                <button type="button" class="gm-tab" data-gm-tab-button="content" data-gm-i18n="gmContent" onclick="switchGMTab('content')">Контент</button>
+                <button type="button" class="gm-tab" data-gm-tab-button="diagnostics" data-gm-i18n="gmDiagnostics" onclick="switchGMTab('diagnostics')">Діагностика</button>
+            </nav>
             <div class="gm-panel-content">
-                <div class="gm-section gm-round-section" id="gmRoundSection" style="display: none;">
+                <div class="gm-section" id="gmGameStateSection" data-gm-tab="state">
+                    <h4 class="gm-section-title">Стан гри</h4>
+                    <div id="gmGameStateSummary" class="gm-status-grid"></div>
+                </div>
+
+                <div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="round" style="display: none;">
                     <h4 class="gm-section-title">Керування раундом</h4>
                     <div class="gm-round-summary">
                         <span id="gmCurrentRound">Раунд 1</span>
@@ -145,8 +157,26 @@
                     <div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
                 </div>
 
+                <div class="gm-section" id="gmThreatControlSection" data-gm-tab="threat" style="display: none;">
+                    <h4 class="gm-section-title">Керування загрозою</h4>
+                    <div id="gmThreatCurrent" class="gm-threat-current">Поточна загроза відсутня</div>
+                    <input id="gmThreatSearch" class="gm-select" type="search" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
+                    <select id="gmThreatSelect" class="gm-select"></select>
+                    <div class="gm-round-actions">
+                        <button class="btn-gm-action" onclick="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
+                        <button class="btn-gm-action" onclick="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
+                        <button class="btn-gm-action" onclick="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
+                        <button class="btn-gm-action" onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
+                    </div>
+                    <div class="gm-threat-danger-zone">
+                        <button class="btn-gm-action btn-danger" onclick="gmRestartThreat()">Перезапустити стан загрози</button>
+                        <button class="btn-gm-action btn-danger" onclick="gmCancelThreat()">Скасувати без наслідків</button>
+                    </div>
+                    <p id="gmThreatCommandResult" class="gm-round-hint"></p>
+                </div>
+
                 <!-- Вибір гравця -->
-                <div class="gm-section">
+                <div class="gm-section" id="gmPlayerSelectSection" data-gm-tab="state">
                     <label class="gm-label">Вибрати гравця:</label>
                     <select id="gmPlayerSelect" class="gm-select" onchange="loadPlayerDataForGM()">
                         <option value="">-- Виберіть гравця --</option>
@@ -154,7 +184,7 @@
                 </div>
 
                 <!-- Інформація про вибраного гравця -->
-                <div id="gmPlayerInfo" class="gm-player-info" style="display: none;">
+                <div id="gmPlayerInfo" class="gm-player-info" data-gm-tab="state" style="display: none;">
                     <h4 id="gmPlayerName">Гравець</h4>
                     
                     <!-- Швидкі дії -->
@@ -269,7 +299,7 @@
                 </div>
 
                 <!-- Бункер/Апокаліпсис контролі -->
-                <div class="gm-section" id="gmScenarioSection" style="display: none;">
+                <div class="gm-section" id="gmScenarioSection" data-gm-tab="content" style="display: none;">
                     <h4 class="gm-section-title">Сценарій гри</h4>
                     <div class="gm-scenario-controls">
                         <div class="gm-control-row">
@@ -288,7 +318,7 @@
                 </div>
 
                 <!-- Система подій -->
-                <div class="gm-section" id="gmEventsSection" style="display: none;">
+                <div class="gm-section" id="gmEventsSection" data-gm-tab="content" style="display: none;">
                     <h4 class="gm-section-title">Ігрові події</h4>
                     <div class="gm-event-form">
                         <select id="gmEventType" class="gm-select">
@@ -308,6 +338,13 @@
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Зовнішні виживальці просять допомоги.', 'info')">Виживальці</button>
                         <button class="btn-gm-quick" onclick="sendQuickEvent('Генератор зламався! Світла немає.', 'danger')">Генератор</button>
                     </div>
+                </div>
+
+                <div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="diagnostics" style="display: none;">
+                    <h4 class="gm-section-title">Діагностика</h4>
+                    <div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
+                    <p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
+                    <button type="button" class="btn-gm-action" onclick="gmResyncThreatRoom()">Безпечна синхронізація</button>
                 </div>
             </div>
         </div>
