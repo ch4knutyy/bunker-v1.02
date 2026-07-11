@@ -23,6 +23,7 @@ namespace Bunker.Models
         /// Вибраний один предмет з масиву items
         /// </summary>
         public string SelectedItem { get; set; } = "";
+        public int? SelectedItemIndex { get; set; }
         
         /// <summary>
         /// Бонус професії

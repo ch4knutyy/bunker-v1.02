@@ -1,6 +1,7 @@
 ﻿using Bunker.Hubs;
 using Bunker.Hubs.GameHunSpy;
 using Bunker.Services;
+using Bunker.Services.Threats;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddSingleton<PlayerStorageService>();
 builder.Services.AddSingleton<RoomService>();
 builder.Services.AddSingleton<SpyRoomService>();
 builder.Services.AddSingleton<ScenarioImageService>();
+builder.Services.AddSingleton<ThreatScalingService>();
+builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
+builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 
 var app = builder.Build();
 

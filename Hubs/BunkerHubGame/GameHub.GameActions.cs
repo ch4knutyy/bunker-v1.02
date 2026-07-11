@@ -275,10 +275,24 @@ namespace Bunker.Hubs
                     label = "Професія",
                     value = string.IsNullOrEmpty(player.Profession.Name) 
                         ? "Безробітний" 
-                        : $"{player.Profession.Name} ({player.Profession.ExperienceYears} р. досвіду)",
+                        : $"{player.Profession.Name}{(string.IsNullOrWhiteSpace(player.ProfessionItem?.Name) ? "" : $" + {player.ProfessionItem.Name}")} ({player.Profession.ExperienceYears} р. досвіду)",
                     tooltip = CleanTooltip(player.Profession.Tooltip),
                     hasTooltip = !string.IsNullOrEmpty(CleanTooltip(player.Profession.Tooltip)),
-                    source = player.Profession,
+                    source = new
+                    {
+                        player.Profession.Name,
+                        player.Profession.ExperienceYears,
+                        player.Profession.Type,
+                        player.Profession.Skills,
+                        player.Profession.AllItems,
+                        player.Profession.SelectedItem,
+                        player.Profession.SelectedItemIndex,
+                        player.Profession.Bonus,
+                        player.Profession.CapabilityTags,
+                        player.Profession.Tooltip,
+                        player.Profession.I18n,
+                        ProfessionItem = player.ProfessionItem
+                    },
                     typeClass = "profession"
                 },
                 "PhysicalHealth" => new
@@ -290,6 +304,7 @@ namespace Bunker.Hubs
                     tooltip = CleanTooltip(player.PhysicalHealth.Tooltip),
                     hasTooltip = !string.IsNullOrEmpty(CleanTooltip(player.PhysicalHealth.Tooltip)),
                     source = player.PhysicalHealth,
+                    additionalConditionEffects = player.AdditionalConditionEffects,
                     typeClass = "physical"
                 },
                 "MentalHealth" => new
@@ -358,7 +373,21 @@ namespace Bunker.Hubs
         private Dictionary<string, object?> BuildRevealedSources(Player player)
         {
             var sources = new Dictionary<string, object?>();
-            if (player.Revealed.Profession) sources["Profession"] = player.Profession;
+            if (player.Revealed.Profession) sources["Profession"] = new
+            {
+                player.Profession.Name,
+                player.Profession.ExperienceYears,
+                player.Profession.Type,
+                player.Profession.Skills,
+                player.Profession.AllItems,
+                player.Profession.SelectedItem,
+                player.Profession.SelectedItemIndex,
+                player.Profession.Bonus,
+                player.Profession.CapabilityTags,
+                player.Profession.Tooltip,
+                player.Profession.I18n,
+                ProfessionItem = player.ProfessionItem
+            };
             if (player.Revealed.PhysicalHealth) sources["PhysicalHealth"] = player.PhysicalHealth;
             if (player.Revealed.MentalHealth) sources["MentalHealth"] = player.MentalHealth;
             if (player.Revealed.Hobby) sources["Hobby"] = player.Hobby;

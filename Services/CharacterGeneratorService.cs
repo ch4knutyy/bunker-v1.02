@@ -1,6 +1,7 @@
 using Bunker.Models;
 using Bunker.Models.Сharacteristics;
 using Bunker.Models.GameData;
+using System.Text.Json;
 
 namespace Bunker.Services
 {
@@ -86,6 +87,7 @@ namespace Bunker.Services
             var sexOrientation = GenerateSexOrientation(sex);
             var isChildfree = _random.Next(100) < 10;
             var profession = GenerateProfession();
+            var professionItem = CreateProfessionItem(profession);
             var specialCard = GenerateSpecialCard();
 
             var player = new Player
@@ -105,10 +107,11 @@ namespace Bunker.Services
                     BodyType = body.bodyType
                 },
                 Profession = profession,
+                ProfessionItem = professionItem,
                 Hobby = GenerateHobby(),
                 PhysicalHealth = GeneratePhysicalHealth(existingRoomPlayers),
                 MentalHealth = GenerateMentalHealth(existingRoomPlayers),
-                Inventory = GenerateInventory(profession),
+                Inventory = GenerateInventory(),
                 CharacterTrait = GenerateCharacterTrait(),
                 Phobia = GeneratePhobia(),
 				Fact = GenerateFact(),
@@ -206,24 +209,13 @@ namespace Bunker.Services
 
         #region Inventory Generation
 
-        private Inventory GenerateInventory(Profession profession)
+        private Inventory GenerateInventory()
         {
             var inventory = new Inventory
             {
                 Size = "Середній",
                 Items = new List<Item>()
             };
-
-            if (!string.IsNullOrWhiteSpace(profession.SelectedItem))
-            {
-                inventory.Items.Add(CreateInventoryItem(
-                    profession.SelectedItem,
-                    "Професійний предмет",
-                    i18n: null
-                ));
-
-                return inventory;
-            }
 
             if (_gameData.Items.Count == 0)
                 return inventory;
@@ -239,6 +231,43 @@ namespace Bunker.Services
             ));
 
             return inventory;
+        }
+
+        private Item CreateProfessionItem(Profession profession)
+        {
+            if (string.IsNullOrWhiteSpace(profession.SelectedItem))
+            {
+                return new Item();
+            }
+
+            var catalogItem = FindCatalogItemByName(profession.SelectedItem);
+            if (catalogItem != null)
+            {
+                var item = CreateInventoryItem(
+                    catalogItem.Item,
+                    $"Категорія: {catalogItem.Category}",
+                    catalogItem.I18n,
+                    catalogItem.ResourceTags,
+                    catalogItem.ProtectionTags,
+                    catalogItem.ThreatUsage);
+                item.InstanceId = $"profession:{Guid.NewGuid():N}";
+                item.Source = "profession";
+                return item;
+            }
+
+            return new Item
+            {
+                Name = profession.SelectedItem,
+                Description = "Професійний предмет",
+                Quantity = 1,
+                Unit = "шт",
+                WeightKg = 1,
+                IsUsefulInBunker = true,
+                Rarity = "Професійний",
+                InstanceId = $"profession:{Guid.NewGuid():N}",
+                Source = "profession",
+                I18n = BuildProfessionItemI18n(profession)
+            };
         }
 
         private Item CreateInventoryItem(
@@ -258,11 +287,62 @@ namespace Bunker.Services
                 WeightKg = Math.Round(_random.NextDouble() * 2 + 0.1, 1),
                 IsUsefulInBunker = true,
                 Rarity = "Звичайний",
+                InstanceId = $"inventory:{Guid.NewGuid():N}",
+                Source = "inventory",
                 ResourceTags = resourceTags?.ToList() ?? new(),
                 ProtectionTags = protectionTags?.ToList() ?? new(),
                 ThreatUsage = threatUsage,
                 I18n = i18n
             };
+        }
+
+        private ItemData? FindCatalogItemByName(string name)
+        {
+            return _gameData.Items.FirstOrDefault(item =>
+                string.Equals(item.Item, name, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(GetLocalizedJsonValue(item.I18n, "item", "uk"), name, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(GetLocalizedJsonValue(item.I18n, "item", "en"), name, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(GetLocalizedJsonValue(item.I18n, "item", "ru"), name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static Dictionary<string, JsonElement>? BuildProfessionItemI18n(Profession profession)
+        {
+            if (profession.I18n == null ||
+                !profession.SelectedItemIndex.HasValue ||
+                !profession.I18n.TryGetValue("items", out var itemsElement) ||
+                itemsElement.ValueKind != JsonValueKind.Array ||
+                profession.SelectedItemIndex.Value < 0 ||
+                profession.SelectedItemIndex.Value >= itemsElement.GetArrayLength())
+            {
+                return null;
+            }
+
+            var itemLocalization = itemsElement.EnumerateArray()
+                .ElementAt(profession.SelectedItemIndex.Value)
+                .Clone();
+
+            using var document = JsonDocument.Parse(JsonSerializer.Serialize(new Dictionary<string, JsonElement>
+            {
+                ["item"] = itemLocalization,
+                ["name"] = itemLocalization
+            }));
+
+            return document.RootElement.EnumerateObject()
+                .ToDictionary(property => property.Name, property => property.Value.Clone());
+        }
+
+        private static string GetLocalizedJsonValue(Dictionary<string, JsonElement>? i18n, string field, string language)
+        {
+            if (i18n == null ||
+                !i18n.TryGetValue(field, out var fieldElement) ||
+                fieldElement.ValueKind != JsonValueKind.Object ||
+                !fieldElement.TryGetProperty(language, out var valueElement) ||
+                valueElement.ValueKind != JsonValueKind.String)
+            {
+                return "";
+            }
+
+            return valueElement.GetString() ?? "";
         }
 
         #endregion
@@ -279,9 +359,11 @@ namespace Bunker.Services
             
             // Вибираємо ОДИН випадковий предмет з масиву items
             string selectedItem = parsedProfession.Item;
+            int? selectedItemIndex = null;
             if (data.Items.Count > 0)
             {
-                selectedItem = data.Items[_random.Next(data.Items.Count)];
+                selectedItemIndex = _random.Next(data.Items.Count);
+                selectedItem = data.Items[selectedItemIndex.Value];
             }
 
             // Формуємо tooltip без предмета: предмет показується тільки в характеристиці "Інвентар".
@@ -295,6 +377,7 @@ namespace Bunker.Services
                 Skills = data.Skills.ToList(),
                 AllItems = data.Items.ToList(),
                 SelectedItem = selectedItem,
+                SelectedItemIndex = selectedItemIndex,
                 Bonus = data.Bonus,
                 CapabilityTags = data.CapabilityTags.ToList(),
                 Tooltip = tooltip,

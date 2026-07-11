@@ -1,0 +1,446 @@
+{
+  "threatId": "radiation_leak",
+  "questions": [
+    {
+      "questionId": "rad_detection_01",
+      "category": "detection",
+      "text": {
+        "uk": "Дозиметр показує: сектор A — 0,4 мЗв/год, сектор B — 7,8 мЗв/год, сектор C — 1,1 мЗв/год. Фоновий рівень — 0,2 мЗв/год. Яка перша дія найкраща?",
+        "en": "The dosimeter shows: sector A — 0.4 mSv/h, sector B — 7.8 mSv/h, sector C — 1.1 mSv/h. Background level is 0.2 mSv/h. What is the best first action?",
+        "ru": "Дозиметр показывает: сектор A — 0,4 мЗв/ч, сектор B — 7,8 мЗв/ч, сектор C — 1,1 мЗв/ч. Фоновый уровень — 0,2 мЗв/ч. Какое первое действие лучше?"
+      },
+      "options": [
+        {
+          "optionId": "isolate_and_confirm",
+          "text": {
+            "uk": "Обмежити доступ до сектора B і підтвердити показник повторним вимірюванням з безпечної точки",
+            "en": "Restrict access to sector B and confirm the reading with a second measurement from a safe position",
+            "ru": "Ограничить доступ к сектору B и подтвердить показатель повторным измерением из безопасной точки"
+          }
+        },
+        {
+          "optionId": "shutdown_all_systems",
+          "text": {
+            "uk": "Негайно вимкнути всі системи бункера, не виконуючи повторної перевірки",
+            "en": "Immediately shut down every bunker system without performing another check",
+            "ru": "Немедленно отключить все системы бункера без повторной проверки"
+          }
+        },
+        {
+          "optionId": "send_team_inside",
+          "text": {
+            "uk": "Відправити двох учасників у сектор B для швидкого візуального огляду",
+            "en": "Send two participants into sector B for a quick visual inspection",
+            "ru": "Отправить двух участников в сектор B для быстрого визуального осмотра"
+          }
+        },
+        {
+          "optionId": "move_sensor_to_living",
+          "text": {
+            "uk": "Перенести дозиметр у житловий сектор і спостерігати, чи зміниться сигнал",
+            "en": "Move the dosimeter to the living sector and watch whether the signal changes",
+            "ru": "Перенести дозиметр в жилой сектор и наблюдать, изменится ли сигнал"
+          }
+        }
+      ],
+      "correctOptionId": "isolate_and_confirm",
+      "hint": {
+        "uk": "Найкраща перша дія одночасно зменшує ризик і перевіряє, чи показник справжній.",
+        "en": "The best first action both reduces exposure and verifies whether the reading is real.",
+        "ru": "Лучшее первое действие одновременно снижает риск и проверяет, реален ли показатель."
+      }
+    },
+    {
+      "questionId": "rad_detection_02",
+      "category": "detection",
+      "text": {
+        "uk": "Є два маршрути до аварійного клапана. На маршруті A рівень стабільний: 1,6 мЗв/год. На маршруті B він зріс з 0,5 до 4,3 мЗв/год за дві хвилини. Який маршрут обрати?",
+        "en": "There are two routes to the emergency valve. Route A is stable at 1.6 mSv/h. Route B rose from 0.5 to 4.3 mSv/h in two minutes. Which route should be chosen?",
+        "ru": "Есть два маршрута к аварийному клапану. На маршруте A уровень стабилен: 1,6 мЗв/ч. На маршруте B он вырос с 0,5 до 4,3 мЗв/ч за две минуты. Какой маршрут выбрать?"
+      },
+      "options": [
+        {
+          "optionId": "route_a",
+          "text": {
+            "uk": "Маршрут A, бо його рівень вищий за початковий показник B, але не зростає",
+            "en": "Route A, because its level is higher than B's initial reading but is not increasing",
+            "ru": "Маршрут A, потому что его уровень выше начального показателя B, но не растёт"
+          }
+        },
+        {
+          "optionId": "route_b",
+          "text": {
+            "uk": "Маршрут B, бо він починався з нижчого рівня",
+            "en": "Route B, because it started at a lower level",
+            "ru": "Маршрут B, потому что он начинался с более низкого уровня"
+          }
+        },
+        {
+          "optionId": "shortest_route",
+          "text": {
+            "uk": "Найкоротший маршрут незалежно від динаміки показників",
+            "en": "Whichever route is shortest, regardless of how the readings are changing",
+            "ru": "Самый короткий маршрут независимо от динамики показателей"
+          }
+        },
+        {
+          "optionId": "split_team",
+          "text": {
+            "uk": "Розділити команду й одночасно перевірити обидва маршрути",
+            "en": "Split the team and inspect both routes at the same time",
+            "ru": "Разделить команду и одновременно проверить оба маршрута"
+          }
+        }
+      ],
+      "correctOptionId": "route_a",
+      "hint": {
+        "uk": "Важливий не тільки рівень, а й те, як швидко він змінюється.",
+        "en": "The current level matters, but so does how quickly it is changing.",
+        "ru": "Важен не только уровень, но и то, как быстро он меняется."
+      }
+    },
+    {
+      "questionId": "rad_detection_03",
+      "category": "detection",
+      "text": {
+        "uk": "Один датчик подає тривогу, але сусідній датчик показує норму. Як найкраще відрізнити несправність датчика від реального витоку?",
+        "en": "One detector is alarming while a nearby detector shows normal levels. How should you best distinguish a faulty detector from a real leak?",
+        "ru": "Один датчик подаёт тревогу, но соседний показывает норму. Как лучше отличить неисправность датчика от реальной утечки?"
+      },
+      "options": [
+        {
+          "optionId": "cross_check",
+          "text": {
+            "uk": "Перевірити зону переносним відкаліброваним дозиметром, не входячи в сектор без захисту",
+            "en": "Check the area with a calibrated portable dosimeter without entering the sector unprotected",
+            "ru": "Проверить зону откалиброванным переносным дозиметром, не входя в сектор без защиты"
+          }
+        },
+        {
+          "optionId": "trust_nearest",
+          "text": {
+            "uk": "Вважати правильним показник датчика, який розташований ближче до дверей",
+            "en": "Trust whichever detector is closer to the door",
+            "ru": "Считать правильным показание датчика, расположенного ближе к двери"
+          }
+        },
+        {
+          "optionId": "reset_both",
+          "text": {
+            "uk": "Одночасно перезапустити обидва датчики та продовжити роботу без перевірки",
+            "en": "Restart both detectors and continue working without another check",
+            "ru": "Одновременно перезапустить оба датчика и продолжить работу без проверки"
+          }
+        },
+        {
+          "optionId": "enter_and_smell",
+          "text": {
+            "uk": "Зайти в сектор і перевірити повітря за запахом",
+            "en": "Enter the sector and check the air by smell",
+            "ru": "Зайти в сектор и проверить воздух по запаху"
+          }
+        }
+      ],
+      "correctOptionId": "cross_check",
+      "hint": {
+        "uk": "Потрібне незалежне вимірювання, яке не збільшує опромінення команди.",
+        "en": "You need an independent measurement that does not increase the team's exposure.",
+        "ru": "Нужно независимое измерение, которое не увеличивает облучение команды."
+      }
+    },
+    {
+      "questionId": "rad_isolation_01",
+      "category": "isolation",
+      "text": {
+        "uk": "У пошкодженому секторі тиск на 12 Па вищий, ніж у житловому. Це може виштовхувати забруднене повітря назовні. Що слід зробити?",
+        "en": "Pressure in the damaged sector is 12 Pa higher than in the living area. This may push contaminated air outward. What should be done?",
+        "ru": "В повреждённом секторе давление на 12 Па выше, чем в жилом. Это может выталкивать загрязнённый воздух наружу. Что следует сделать?"
+      },
+      "options": [
+        {
+          "optionId": "isolate_and_reduce_pressure",
+          "text": {
+            "uk": "Ізолювати сектор і перевести його вентиляцію в режим зниженого тиску",
+            "en": "Isolate the sector and switch its ventilation to a lower-pressure mode",
+            "ru": "Изолировать сектор и перевести его вентиляцию в режим пониженного давления"
+          }
+        },
+        {
+          "optionId": "increase_pressure",
+          "text": {
+            "uk": "Підвищити тиск у пошкодженому секторі, щоб швидше очистити повітря",
+            "en": "Increase pressure in the damaged sector to clear the air faster",
+            "ru": "Повысить давление в повреждённом секторе, чтобы быстрее очистить воздух"
+          }
+        },
+        {
+          "optionId": "open_shared_duct",
+          "text": {
+            "uk": "Відкрити спільний повітропровід із житловою зоною для вирівнювання тиску",
+            "en": "Open the shared duct to the living area to equalize pressure",
+            "ru": "Открыть общий воздуховод с жилой зоной для выравнивания давления"
+          }
+        },
+        {
+          "optionId": "stop_all_airflow",
+          "text": {
+            "uk": "Повністю зупинити всю вентиляцію бункера на невизначений час",
+            "en": "Stop all bunker ventilation indefinitely",
+            "ru": "Полностью остановить всю вентиляцию бункера на неопределённое время"
+          }
+        }
+      ],
+      "correctOptionId": "isolate_and_reduce_pressure",
+      "hint": {
+        "uk": "Повітря не повинно рухатися з небезпечного сектора до чистого.",
+        "en": "Air should not move from the hazardous sector toward a clean one.",
+        "ru": "Воздух не должен двигаться из опасного сектора в чистый."
+      }
+    },
+    {
+      "questionId": "rad_isolation_02",
+      "category": "isolation",
+      "text": {
+        "uk": "Учасник повернувся з огляду сектора. Яка послідовність дій найкраще зменшує ризик поширення забруднення?",
+        "en": "A participant has returned from inspecting the sector. Which sequence best reduces the risk of spreading contamination?",
+        "ru": "Участник вернулся после осмотра сектора. Какая последовательность лучше всего снижает риск распространения загрязнения?"
+      },
+      "options": [
+        {
+          "optionId": "decon_sequence",
+          "text": {
+            "uk": "Залишитися у шлюзі, зняти зовнішні рукавички, помістити їх у герметичний контейнер, пройти контроль і лише потім вийти",
+            "en": "Remain in the airlock, remove outer gloves, seal them in a container, complete a contamination check, and only then exit",
+            "ru": "Остаться в шлюзе, снять внешние перчатки, поместить их в герметичный контейнер, пройти контроль и только потом выйти"
+          }
+        },
+        {
+          "optionId": "wash_in_living",
+          "text": {
+            "uk": "Пройти до житлового сектора, там зняти спорядження і помити руки",
+            "en": "Go to the living area, remove equipment there, and wash hands",
+            "ru": "Пройти в жилой сектор, там снять снаряжение и вымыть руки"
+          }
+        },
+        {
+          "optionId": "remove_mask_first",
+          "text": {
+            "uk": "Спочатку зняти маску, а решту спорядження залишити до наступної перевірки",
+            "en": "Remove the mask first and keep the rest of the equipment on until the next inspection",
+            "ru": "Сначала снять маску, а остальное снаряжение оставить до следующей проверки"
+          }
+        },
+        {
+          "optionId": "skip_check",
+          "text": {
+            "uk": "Не проводити контроль, якщо учасник не торкався пошкодженого обладнання",
+            "en": "Skip the check if the participant did not touch the damaged equipment",
+            "ru": "Не проводить контроль, если участник не касался повреждённого оборудования"
+          }
+        }
+      ],
+      "correctOptionId": "decon_sequence",
+      "hint": {
+        "uk": "Спорядження знімають до входу в чисту зону, а не після.",
+        "en": "Equipment should be removed before entering a clean area, not after.",
+        "ru": "Снаряжение снимают до входа в чистую зону, а не после."
+      }
+    },
+    {
+      "questionId": "rad_isolation_03",
+      "category": "isolation",
+      "text": {
+        "uk": "Для ремонту потрібен інструмент із сусіднього сектора. Прямий коридор проходить через забруднену зону, а обхід займає на три хвилини довше. Яке рішення правильніше?",
+        "en": "A tool is needed from a neighboring sector. The direct corridor crosses a contaminated zone, while the detour takes three minutes longer. Which decision is better?",
+        "ru": "Для ремонта нужен инструмент из соседнего сектора. Прямой коридор проходит через загрязнённую зону, а обход занимает на три минуты дольше. Какое решение правильнее?"
+      },
+      "options": [
+        {
+          "optionId": "clean_route_or_airlock",
+          "text": {
+            "uk": "Використати чистий обхід або передати інструмент через шлюз, не порушуючи ізоляцію",
+            "en": "Use the clean detour or pass the tool through an airlock without breaking isolation",
+            "ru": "Использовать чистый обход или передать инструмент через шлюз, не нарушая изоляцию"
+          }
+        },
+        {
+          "optionId": "quick_crossing",
+          "text": {
+            "uk": "Швидко перетнути забруднену зону, якщо учасник затримає дихання",
+            "en": "Cross the contaminated zone quickly if the participant holds their breath",
+            "ru": "Быстро пересечь загрязнённую зону, если участник задержит дыхание"
+          }
+        },
+        {
+          "optionId": "temporarily_remove_barrier",
+          "text": {
+            "uk": "На кілька хвилин відкрити ізоляційні двері, щоб скоротити шлях",
+            "en": "Open the isolation doors for a few minutes to shorten the route",
+            "ru": "На несколько минут открыть изоляционные двери, чтобы сократить путь"
+          }
+        },
+        {
+          "optionId": "wait_without_repair",
+          "text": {
+            "uk": "Відкласти ремонт до завершення загрози, навіть якщо витік продовжується",
+            "en": "Postpone the repair until the threat is over, even if the leak continues",
+            "ru": "Отложить ремонт до завершения угрозы, даже если утечка продолжается"
+          }
+        }
+      ],
+      "correctOptionId": "clean_route_or_airlock",
+      "hint": {
+        "uk": "Кілька додаткових хвилин безпечніші за порушення бар’єра між секторами.",
+        "en": "A few extra minutes are safer than breaking the barrier between sectors.",
+        "ru": "Несколько дополнительных минут безопаснее, чем нарушение барьера между секторами."
+      }
+    },
+    {
+      "questionId": "rad_repair_01",
+      "category": "repair",
+      "text": {
+        "uk": "На фланці захисного контуру виявлено невеликий витік. Є герметик, затиск і ремонтні інструменти. Який порядок дій найкращий?",
+        "en": "A small leak is found at a protective-system flange. Sealant, a clamp, and repair tools are available. What is the best sequence?",
+        "ru": "На фланце защитного контура обнаружена небольшая утечка. Есть герметик, зажим и ремонтные инструменты. Какой порядок действий лучше?"
+      },
+      "options": [
+        {
+          "optionId": "safe_patch_sequence",
+          "text": {
+            "uk": "Ізолювати ділянку, знизити тиск, очистити поверхню, встановити затиск із герметиком і повторно перевірити",
+            "en": "Isolate the section, reduce pressure, clean the surface, install the clamp with sealant, and recheck",
+            "ru": "Изолировать участок, снизить давление, очистить поверхность, установить зажим с герметиком и повторно проверить"
+          }
+        },
+        {
+          "optionId": "seal_under_pressure",
+          "text": {
+            "uk": "Нанести герметик без зниження тиску, щоб не зупиняти систему",
+            "en": "Apply sealant without reducing pressure so the system does not have to stop",
+            "ru": "Нанести герметик без снижения давления, чтобы не останавливать систему"
+          }
+        },
+        {
+          "optionId": "tighten_only",
+          "text": {
+            "uk": "Максимально затягнути кріплення й не витрачати герметик",
+            "en": "Tighten the fasteners as much as possible and save the sealant",
+            "ru": "Максимально затянуть крепления и не тратить герметик"
+          }
+        },
+        {
+          "optionId": "cover_with_panel",
+          "text": {
+            "uk": "Закрити місце металевою панеллю без перевірки герметичності",
+            "en": "Cover the area with a metal panel without checking whether it is airtight",
+            "ru": "Закрыть место металлической панелью без проверки герметичности"
+          }
+        }
+      ],
+      "correctOptionId": "safe_patch_sequence",
+      "hint": {
+        "uk": "Тимчасовий ремонт має бути виконаний на безпечній ділянці й завершуватися перевіркою.",
+        "en": "A temporary repair should be performed on a safe, isolated section and end with verification.",
+        "ru": "Временный ремонт выполняют на безопасном изолированном участке и завершают проверкой."
+      }
+    },
+    {
+      "questionId": "rad_repair_02",
+      "category": "repair",
+      "text": {
+        "uk": "Корпус фільтра тріснув, але є справний резервний канал. Яке рішення найкраще зменшує ризик під час ремонту?",
+        "en": "The filter housing is cracked, but a functioning bypass channel is available. Which decision best reduces risk during repair?",
+        "ru": "Корпус фильтра треснул, но есть исправный резервный канал. Какое решение лучше всего снижает риск во время ремонта?"
+      },
+      "options": [
+        {
+          "optionId": "switch_isolate_replace",
+          "text": {
+            "uk": "Перевірити резервний канал, переключити потік, ізолювати пошкоджений корпус і замінити фільтр",
+            "en": "Verify the bypass, switch the flow, isolate the damaged housing, and replace the filter",
+            "ru": "Проверить резервный канал, переключить поток, изолировать повреждённый корпус и заменить фильтр"
+          }
+        },
+        {
+          "optionId": "switch_without_check",
+          "text": {
+            "uk": "Одразу переключити потік на резервний канал без перевірки його стану",
+            "en": "Immediately switch the flow to the bypass without checking its condition",
+            "ru": "Сразу переключить поток на резервный канал без проверки его состояния"
+          }
+        },
+        {
+          "optionId": "repair_live_filter",
+          "text": {
+            "uk": "Ремонтувати корпус під час роботи основного потоку",
+            "en": "Repair the housing while the main airflow remains active",
+            "ru": "Ремонтировать корпус при работающем основном потоке"
+          }
+        },
+        {
+          "optionId": "reduce_flow_only",
+          "text": {
+            "uk": "Лише зменшити швидкість потоку й відкласти ремонт",
+            "en": "Only reduce the airflow and postpone the repair",
+            "ru": "Только уменьшить скорость потока и отложить ремонт"
+          }
+        }
+      ],
+      "correctOptionId": "switch_isolate_replace",
+      "hint": {
+        "uk": "Резервна система допомагає лише після перевірки, а пошкоджену частину треба ізолювати.",
+        "en": "A backup system helps only after it is checked, and the damaged part must be isolated.",
+        "ru": "Резервная система помогает только после проверки, а повреждённую часть нужно изолировать."
+      }
+    },
+    {
+      "questionId": "rad_repair_03",
+      "category": "repair",
+      "text": {
+        "uk": "Після ремонту тривога зникла, але один дозиметр ще показує 0,9 мЗв/год при фоні 0,2. Коли сектор можна вважати безпечним?",
+        "en": "After the repair, the alarm stops, but one dosimeter still reads 0.9 mSv/h against a background of 0.2. When can the sector be considered safe?",
+        "ru": "После ремонта тревога исчезла, но один дозиметр всё ещё показывает 0,9 мЗв/ч при фоне 0,2. Когда сектор можно считать безопасным?"
+      },
+      "options": [
+        {
+          "optionId": "stable_rechecks",
+          "text": {
+            "uk": "Після повторних вимірювань у кількох точках, стабільного зниження рівня та перевірки вентиляції",
+            "en": "After repeated measurements at several points, a stable decrease in readings, and a ventilation check",
+            "ru": "После повторных измерений в нескольких точках, стабильного снижения уровня и проверки вентиляции"
+          }
+        },
+        {
+          "optionId": "alarm_off",
+          "text": {
+            "uk": "Одразу після вимкнення звукової тривоги",
+            "en": "Immediately after the audible alarm stops",
+            "ru": "Сразу после отключения звуковой тревоги"
+          }
+        },
+        {
+          "optionId": "one_low_reading",
+          "text": {
+            "uk": "Після одного низького показника біля входу",
+            "en": "After one low reading near the entrance",
+            "ru": "После одного низкого показателя у входа"
+          }
+        },
+        {
+          "optionId": "visual_check",
+          "text": {
+            "uk": "Коли на обладнанні більше не видно пошкоджень",
+            "en": "When no visible damage remains on the equipment",
+            "ru": "Когда на оборудовании больше не видно повреждений"
+          }
+        }
+      ],
+      "correctOptionId": "stable_rechecks",
+      "hint": {
+        "uk": "Відсутність сигналу ще не доводить, що рівень стабільно повернувся до безпечного.",
+        "en": "The absence of an alarm does not prove that readings have returned to a stable safe level.",
+        "ru": "Отсутствие сигнала ещё не доказывает, что уровень стабильно вернулся к безопасному."
+      }
+    }
+  ]
+}

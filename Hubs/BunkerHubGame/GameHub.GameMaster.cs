@@ -40,6 +40,7 @@ namespace Bunker.Hubs
             var playersData = RoomService.GetPlayersSnapshot(room).Select(entry =>
             {
                 var p = entry.Value;
+                RemoveCorruptedAdditionalConditions(room, p);
 
                 return new
                 {
@@ -54,8 +55,9 @@ namespace Bunker.Hubs
                     hasRevealedAllAfterElimination = p.HasRevealedAllAfterElimination,
                     personality = new { p.Personality.Age, p.Personality.Sex, p.Personality.SexOrientation, p.Personality.IsChildfree },
                     body = new { p.Body.Height, p.Body.Weight, p.Body.BodyType },
-                    profession = new { p.Profession.Name, p.Profession.ExperienceYears, p.Profession.SelectedItem },
+                    profession = new { p.Profession.Name, p.Profession.ExperienceYears, p.Profession.SelectedItem, p.Profession.SelectedItemIndex, ProfessionItem = p.ProfessionItem },
                     physicalHealth = p.PhysicalHealth,
+                    additionalConditionEffects = p.AdditionalConditionEffects,
                     mentalHealth = p.MentalHealth,
                     hobby = new { p.Hobby.Name },
                     characterTrait = new { p.CharacterTrait.Name },

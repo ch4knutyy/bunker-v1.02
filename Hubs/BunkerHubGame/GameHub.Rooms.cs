@@ -254,6 +254,7 @@ namespace Bunker.Hubs
 		private async Task SendRejoinSuccess(string roomId, Room room, Player player, bool wasHost)
 		{
 			EnsurePlayerHasGeneratedData(player);
+			RemoveCorruptedAdditionalConditions(room, player);
 
 			// Оновлюємо URL зображень з кешу
 			_imageService.UpdateApocalypseImageUrl(room.Apocalypse);
@@ -359,6 +360,21 @@ namespace Bunker.Hubs
 			if (!HasPersonality(player)) player.Personality = generated!.Personality;
 			if (!HasBody(player)) player.Body = generated!.Body;
 			if (!HasNamedCharacteristic(player.Profession)) player.Profession = generated!.Profession;
+			if (!HasProfessionItem(player) && !string.IsNullOrWhiteSpace(player.Profession?.SelectedItem))
+			{
+				player.ProfessionItem = new Item
+				{
+					Name = player.Profession.SelectedItem,
+					Description = "Професійний предмет",
+					Quantity = 1,
+					Unit = "шт",
+					WeightKg = 1,
+					IsUsefulInBunker = true,
+					Rarity = "Професійний",
+					InstanceId = $"profession:{Guid.NewGuid():N}",
+					Source = "profession"
+				};
+			}
 			if (!HasInventory(player)) player.Inventory = generated!.Inventory;
 			if (!HasNamedCharacteristic(player.PhysicalHealth)) player.PhysicalHealth = generated!.PhysicalHealth;
 			if (!HasNamedCharacteristic(player.MentalHealth)) player.MentalHealth = generated!.MentalHealth;
@@ -368,6 +384,28 @@ namespace Bunker.Hubs
 			if (!HasNamedCharacteristic(player.Fact)) player.Fact = generated!.Fact;
 			if (!HasSpecialCard(player.SpecialCard)) player.SpecialCard = generated!.SpecialCard;
 			GetPlayerSpecialCards(player);
+		}
+
+		private void RemoveCorruptedAdditionalConditions(Room room, Player player)
+		{
+			if (player.AdditionalConditionEffects == null || player.AdditionalConditionEffects.Count == 0)
+			{
+				return;
+			}
+
+			var playerId = RoomService.GetPlayerKey(player);
+			var removed = player.AdditionalConditionEffects.RemoveAll(effect =>
+				string.IsNullOrWhiteSpace(effect.Name) ||
+				string.IsNullOrWhiteSpace(effect.BaseName));
+
+			if (removed > 0)
+			{
+				_logger.LogWarning(
+					"Removed {Count} corrupted additional physical condition(s). RoomId={RoomId}, PlayerId={PlayerId}",
+					removed,
+					room.Id,
+					playerId);
+			}
 		}
 
 		private static bool HasCompleteCharacterData(Player player)
@@ -406,6 +444,11 @@ namespace Bunker.Hubs
 			return player.Inventory?.Items != null && player.Inventory.Items.Count > 0;
 		}
 
+		private static bool HasProfessionItem(Player player)
+		{
+			return !string.IsNullOrWhiteSpace(player.ProfessionItem?.Name);
+		}
+
 		private static bool HasName(string? name)
 		{
 			return !string.IsNullOrWhiteSpace(name);
@@ -428,6 +471,7 @@ namespace Bunker.Hubs
 			foreach (var player in playersSnapshot.Select(entry => entry.Value))
 			{
 				EnsurePlayerHasGeneratedData(player);
+				RemoveCorruptedAdditionalConditions(room, player);
 			}
 
 			return playersSnapshot.Select(entry =>
@@ -444,6 +488,9 @@ namespace Bunker.Hubs
 					revealed = p.Revealed,
 					revealedValues = p.Revealed?.RevealedValues,
 					revealedSources = BuildRevealedSources(p),
+					additionalConditionEffects = p.Revealed?.PhysicalHealth == true
+						? p.AdditionalConditionEffects
+						: new List<PlayerConditionEffect>(),
 					fact = p.Fact,
 					isEliminated = p.IsEliminated,
 					eliminatedAtRound = p.EliminatedAtRound,
