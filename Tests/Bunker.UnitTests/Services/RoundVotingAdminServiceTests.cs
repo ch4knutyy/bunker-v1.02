@@ -1,0 +1,123 @@
+using Bunker.Models;
+using Bunker.Services;
+using System.Text.Json;
+
+namespace Bunker.UnitTests.Services;
+
+public sealed class RoundVotingAdminServiceTests
+{
+    [Fact]
+    public void PausePersistsWithoutChangingRoundVotingOrThreat()
+    {
+        var voting = ActiveVoting();
+        var threat = new ThreatInteractionState { ThreatStatus = "active" };
+        var room = new Room { CurrentRound = 3, CurrentVoting = voting, ThreatState = threat };
+        var now = DateTimeOffset.UtcNow;
+
+        RoundVotingAdminService.SetPaused(room, true, "break", "host", now);
+
+        Assert.True(room.IsPaused);
+        Assert.Equal("break", room.PauseReason);
+        Assert.Equal(now, room.PausedAtUtc);
+        Assert.Equal(3, room.CurrentRound);
+        Assert.Same(voting, room.CurrentVoting);
+        Assert.Equal(VotingState.Active, voting.State);
+        Assert.Same(threat, room.ThreatState);
+        Assert.Equal("active", threat.ThreatStatus);
+
+        RoundVotingAdminService.SetPaused(room, false, null, "host", now.AddMinutes(1));
+        Assert.False(room.IsPaused);
+        Assert.Null(room.PausedAtUtc);
+        Assert.Equal(VotingState.Active, voting.State);
+    }
+
+    [Theory]
+    [InlineData("1", 1)]
+    [InlineData("99", 99)]
+    public void RoundParserAcceptsValidIntegers(string value, int expected)
+    {
+        Assert.True(RoundVotingAdminService.TryParseRound(value, out var round));
+        Assert.Equal(expected, round);
+    }
+
+    [Theory]
+    [InlineData("0")]
+    [InlineData("-1")]
+    [InlineData("2.5")]
+    [InlineData("")]
+    [InlineData("NaN")]
+    public void RoundParserRejectsInvalidValues(string value) =>
+        Assert.False(RoundVotingAdminService.TryParseRound(value, out _));
+
+    [Fact]
+    public void BackwardOrActiveVotingRoundChangeDoesNotMutateState()
+    {
+        var room = new Room { CurrentRound = 3, CurrentPhase = GamePhase.PreVotingReadyCheck };
+        Assert.False(RoundVotingAdminService.TrySetRound(room, 2, out _));
+        Assert.Equal(3, room.CurrentRound);
+        Assert.Equal(GamePhase.PreVotingReadyCheck, room.CurrentPhase);
+
+        room.CurrentVoting = ActiveVoting();
+        Assert.False(RoundVotingAdminService.TrySetRound(room, 4, out _));
+        Assert.Equal(3, room.CurrentRound);
+    }
+
+    [Fact]
+    public void ResetReadinessOnlyRemovesActivePlayersAndDoesNotTransition()
+    {
+        var active = new Player { ConnectionId = "a", StablePlayerId = "active" };
+        var eliminated = new Player { ConnectionId = "e", StablePlayerId = "eliminated", IsEliminated = true };
+        var room = new Room { CurrentPhase = GamePhase.PreVotingReadyCheck, Players = new() { ["a"] = active, ["e"] = eliminated } };
+        room.VotingReadyResponses["active"] = "ready";
+        room.VotingReadyResponses["eliminated"] = "ready";
+
+        RoundVotingAdminService.ResetReadiness(room);
+
+        Assert.DoesNotContain("active", room.VotingReadyResponses.Keys);
+        Assert.Contains("eliminated", room.VotingReadyResponses.Keys);
+        Assert.Equal(GamePhase.PreVotingReadyCheck, room.CurrentPhase);
+    }
+
+    [Fact]
+    public void ClearAndRemoveVotesKeepSessionActiveAndTouchOnlyRequestedVotes()
+    {
+        var voting = ActiveVoting();
+        voting.Votes["a"] = "x";
+        voting.Votes["b"] = "y";
+        Assert.True(RoundVotingAdminService.RemoveVote(voting, "a"));
+        Assert.False(voting.Votes.ContainsKey("a"));
+        Assert.Equal("y", voting.Votes["b"]);
+        Assert.Equal(VotingState.Active, voting.State);
+
+        RoundVotingAdminService.ClearVotes(voting);
+        Assert.Empty(voting.Votes);
+        Assert.Equal(VotingState.Active, voting.State);
+    }
+
+    [Fact]
+    public void TiedCandidatesAreComputedFromCurrentVotes()
+    {
+        var voting = ActiveVoting();
+        voting.Votes = new() { ["a"] = "x", ["b"] = "y", ["c"] = "z", ["d"] = "x" };
+        Assert.Equal(new[] { "x" }, RoundVotingAdminService.GetTiedCandidateIds(voting));
+        voting.Votes["e"] = "y";
+        Assert.Equal(new[] { "x", "y" }, RoundVotingAdminService.GetTiedCandidateIds(voting).Order());
+    }
+
+    [Fact]
+    public void PublicVotingPayloadDoesNotContainSecretVoteTargets()
+    {
+        var voting = ActiveVoting();
+        voting.Votes["voter"] = "secret-target";
+        var players = new Dictionary<string, Player>
+        {
+            ["voter"] = new() { ConnectionId = "voter", StablePlayerId = "voter", Name = "Voter" },
+            ["secret-target"] = new() { ConnectionId = "secret-target", StablePlayerId = "secret-target", Name = "Target" }
+        };
+        var json = JsonSerializer.Serialize(voting.ToClientInfo(players, showVotes: false));
+        Assert.Contains("\"votes\":null", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\"voters\":[]", json, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static VotingSession ActiveVoting() => new() { State = VotingState.Active };
+}

@@ -31,6 +31,7 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
                 return;
             }
+            if (await RejectPausedPlayerAction(room)) return;
 
             if (room.State != RoomState.Playing)
             {
@@ -137,6 +138,7 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
                 return;
             }
+            if (await RejectPausedPlayerAction(room)) return;
 
             if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.PreVotingReadyCheck)
             {
@@ -190,6 +192,7 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
                 return;
             }
+            if (await RejectPausedPlayerAction(room)) return;
 
             if (!player.IsEliminated || !player.CanRevealAllAfterElimination)
             {

@@ -36,6 +36,10 @@ namespace Bunker.Models
     public class Room
     {
         public GmMode GmMode { get; set; } = GmMode.PlayerHost;
+        public bool IsPaused { get; set; }
+        public string? PauseReason { get; set; }
+        public DateTimeOffset? PausedAtUtc { get; set; }
+        public string? PausedByPlayerId { get; set; }
 
         public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8].ToUpper();
         public string Name { get; set; } = "";

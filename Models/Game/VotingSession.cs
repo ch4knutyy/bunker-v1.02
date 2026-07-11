@@ -128,10 +128,10 @@ namespace Bunker.Models
                 seatNumber = ResolvePlayer(players, kv.Key)?.SeatNumber ?? 0,
                 voteCount = kv.Value,
                 percentage = totalVotes > 0 ? Math.Round(kv.Value * 100.0 / totalVotes, 1) : 0,
-                voters = Votes
+                voters = showVotes ? Votes
                     .Where(v => v.Value == kv.Key)
                     .Select(v => BuildVoterInfo(players, v.Key, v.Value))
-                    .ToList()
+                    .ToList() : []
             }).OrderByDescending(r => r.voteCount).ToList();
 
             var topPlayer = TopVotedPlayerId != null ? ResolvePlayer(players, TopVotedPlayerId) : null;
@@ -268,7 +268,7 @@ namespace Bunker.Models
             return string.IsNullOrWhiteSpace(player?.StablePlayerId) ? null : player.StablePlayerId;
         }
 
-        private static bool IsExtraVoteId(string voterId)
+        public static bool IsExtraVoteId(string voterId)
         {
             return voterId.StartsWith("_extra_", StringComparison.Ordinal);
         }
