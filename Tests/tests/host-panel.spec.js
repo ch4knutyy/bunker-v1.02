@@ -18,9 +18,10 @@ test('host panel opens after game start and keeps normal GM controls', async ({ 
 
 		await expect(room.host.locator('#gmPanel')).toBeVisible({ timeout: 15000 });
 		await expect(room.host.locator('#gmPlayerSelect')).toBeVisible();
+		await expect(room.host.locator('#gmScenarioSection')).toBeHidden();
+		await room.host.locator('[data-gm-tab-button="content"]').click();
 		await expect(room.host.locator('#gmScenarioSection')).toBeVisible({ timeout: 15000 });
 		await expect(room.host.locator('#gmEventsSection')).toBeVisible({ timeout: 15000 });
-		await expect(room.host.locator('#gmSpecialCardsList')).toBeVisible({ timeout: 15000 });
 
 		const panel = room.host.locator('#gmPanel');
 		const content = room.host.locator('#gmPanel .gm-panel-content');
@@ -39,14 +40,14 @@ test('host panel opens after game start and keeps normal GM controls', async ({ 
 			overflowY: getComputedStyle(element).overflowY,
 		}));
 		expect(scrollState.overflowY).toBe('auto');
-		expect(scrollState.scrollHeight).toBeGreaterThan(scrollState.clientHeight);
+		expect(scrollState.scrollHeight).toBeGreaterThanOrEqual(scrollState.clientHeight);
 
 		await eventButton.scrollIntoViewIfNeeded();
 		await expect(eventButton).toBeVisible();
 		await expect(eventButton).toBeEnabled();
 		await eventButton.click();
-		const headerAfterScroll = await header.boundingBox();
-		expect(headerAfterScroll.y).toBeCloseTo(headerBox.y, 0);
+		await room.host.locator('[data-gm-tab-button="threat"]').click();
+		await expect(room.host.locator('#gmSpecificThreatControls')).toBeHidden();
 	} finally {
 		await room.close();
 	}

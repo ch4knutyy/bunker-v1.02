@@ -160,11 +160,13 @@
                 <div class="gm-section" id="gmThreatControlSection" data-gm-tab="threat" style="display: none;">
                     <h4 class="gm-section-title">Керування загрозою</h4>
                     <div id="gmThreatCurrent" class="gm-threat-current">Поточна загроза відсутня</div>
-                    <input id="gmThreatSearch" class="gm-select" type="search" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
-                    <select id="gmThreatSelect" class="gm-select"></select>
+                    <div id="gmSpecificThreatControls" style="display: none;">
+                        <input id="gmThreatSearch" class="gm-select" type="search" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
+                        <select id="gmThreatSelect" class="gm-select"></select>
+                        <button class="btn-gm-action" onclick="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
+                    </div>
                     <div class="gm-round-actions">
                         <button class="btn-gm-action" onclick="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
-                        <button class="btn-gm-action" onclick="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
                         <button class="btn-gm-action" onclick="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
                         <button class="btn-gm-action" onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
                     </div>
