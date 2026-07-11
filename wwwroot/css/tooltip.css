@@ -128,6 +128,56 @@
     text-align: left;
 }
 
+/* Source content stays next to its trigger for semantics; the shared portal renders it. */
+.characteristic-with-tooltip > .tooltip-content {
+    display: none !important;
+}
+
+.tooltip-portal {
+    position: fixed;
+    z-index: 100000;
+    width: max-content;
+    min-width: 200px;
+    max-width: min(360px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(20, 20, 20, 0.98);
+    color: #f0f0f0;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
+
+.tooltip-portal[hidden] {
+    display: none;
+}
+
+.tooltip-medical-name,
+.tooltip-medical-severity,
+.tooltip-medical-description {
+    display: block;
+}
+
+.tooltip-medical-name {
+    font-weight: 700;
+}
+
+.tooltip-medical-severity {
+    margin-top: 2px;
+    color: #ffd39a;
+}
+
+.tooltip-medical-description {
+    margin-top: 8px;
+}
+
 /* Стрілка tooltip */
 .tooltip-content::after {
     content: '';

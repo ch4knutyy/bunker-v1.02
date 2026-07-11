@@ -9,6 +9,7 @@ namespace Bunker.Hubs
     public partial class GameHub
     {
         private const string RadiationLeakThreatId = "radiation_leak";
+        private const string AirFilterFailureThreatId = "air_filter_failure";
 
         public async Task RollThreatSupportDice()
         {
@@ -441,6 +442,32 @@ namespace Bunker.Hubs
             await BroadcastThreatState(context.Room, context.RoomId);
         }
 
+        public async Task SelectThreatPlan(string planId)
+        {
+            var context = GetCurrentThreatContext();
+            if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var caller))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
+                return;
+            }
+            var state = EnsureRadiationThreatState(context.Room);
+            var callerId = RoomService.GetPlayerKey(caller);
+            if (!IsAirFilterPlanChoiceActive(context.Room, state) ||
+                (!IsCallerHost() && !string.Equals(callerId, state.VolunteerSelection.SelectedPlayerId, StringComparison.OrdinalIgnoreCase)))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "План зараз не можна змінити");
+                return;
+            }
+            if (!TryGetPlanElement(context.Room.CurrentThreat?.Mechanics, planId, out _))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "План не знайдено");
+                return;
+            }
+            state.PlanChoice.SelectedPlanId = planId;
+            await BroadcastThreatState(context.Room, context.RoomId);
+        }
+
         public async Task ResolveCurrentThreat()
         {
             if (!IsCallerHost())
@@ -458,6 +485,12 @@ namespace Bunker.Hubs
 
             var room = context.Room;
             var threatState = EnsureRadiationThreatState(room);
+            if (IsPlanChoiceMechanics(room.CurrentThreat?.Mechanics) &&
+                string.Equals(room.CurrentThreat?.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase))
+            {
+                await ResolveAirFilterPlanChoice(room, context.RoomId, threatState);
+                return;
+            }
             if (threatState.Resolution.EffectsApplied && _threatMiniGames.TryGet(RadiationLeakThreatId, out var finalizedMiniGame))
             {
                 await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, finalizedMiniGame, "uk");
@@ -823,7 +856,17 @@ namespace Bunker.Hubs
             var threatId = room.CurrentThreat?.Id ?? room.ThreatState?.CurrentThreatId ?? "";
             if (!string.Equals(threatId, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase))
             {
-                return room.ThreatState ??= new ThreatInteractionState();
+                room.ThreatState ??= new ThreatInteractionState();
+                if (string.Equals(threatId, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase))
+                {
+                    room.ThreatState.CurrentThreatId = AirFilterFailureThreatId;
+                    if (room.IsThreatRevealed && room.ThreatState.ThreatStatus == "hidden")
+                    {
+                        room.ThreatState.ThreatStatus = "collecting_contributions";
+                        room.ThreatState.ThreatRevealedRound = room.ThreatRevealedAtRound ?? room.CurrentRound;
+                    }
+                }
+                return room.ThreatState;
             }
 
             room.ThreatState ??= new ThreatInteractionState();
@@ -1067,11 +1110,29 @@ namespace Bunker.Hubs
             string.Equals(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase);
 
         private bool CanCollectThreatContributions(Room room, ThreatInteractionState threatState) =>
-            IsRadiationThreatActive(room, threatState) &&
+            (IsRadiationThreatActive(room, threatState) || IsAirFilterPlanChoiceActive(room, threatState)) &&
             (threatState.ThreatStatus == "collecting_contributions" ||
              threatState.ThreatStatus == "revealed" ||
              threatState.ThreatStatus == "volunteer_vote_open") &&
             !threatState.Resolution.EffectsApplied;
+
+        private static bool IsAirFilterPlanChoiceActive(Room room, ThreatInteractionState threatState) =>
+            room.IsThreatRevealed &&
+            string.Equals(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
+            IsPlanChoiceMechanics(room.CurrentThreat?.Mechanics) &&
+            !threatState.PlanChoice.IsLocked;
+
+        private static bool IsPlanChoiceMechanics(JsonElement? mechanics) =>
+            mechanics is { ValueKind: JsonValueKind.Object } value &&
+            value.TryGetProperty("interactionType", out var interactionType) &&
+            string.Equals(interactionType.GetString(), "plan_choice", StringComparison.OrdinalIgnoreCase) &&
+            value.TryGetProperty("planChoice", out var planChoice) &&
+            planChoice.ValueKind == JsonValueKind.Object &&
+            planChoice.TryGetProperty("plans", out var plans) && plans.ValueKind == JsonValueKind.Array &&
+            plans.GetArrayLength() > 0 && plans.EnumerateArray().All(plan =>
+                plan.ValueKind == JsonValueKind.Object &&
+                plan.TryGetProperty("id", out var id) && id.ValueKind == JsonValueKind.String &&
+                !string.IsNullOrWhiteSpace(id.GetString()));
 
         private static bool IsActiveThreatContribution(ThreatContributionState contribution) =>
             contribution.IsAccepted &&
@@ -1153,6 +1214,175 @@ namespace Bunker.Hubs
                 : new();
         }
 
+        private async Task ResolveAirFilterPlanChoice(Room room, string roomId, ThreatInteractionState state)
+        {
+            if (state.Resolution.EffectsApplied)
+            {
+                await BroadcastThreatState(room, roomId);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(state.PlanChoice.SelectedPlanId) ||
+                !TryGetPlanElement(room.CurrentThreat?.Mechanics, state.PlanChoice.SelectedPlanId, out var plan))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Спочатку оберіть план");
+                return;
+            }
+
+            state.PlanChoice.IsLocked = true;
+            state.ThreatStatus = "resolving";
+            state.PlanChoice.RandomModifier ??= _random.Next(
+                GetJsonInt(room.CurrentThreat?.Mechanics, -8, "planChoice", "scoring", "randomModifier", "min"),
+                GetJsonInt(room.CurrentThreat?.Mechanics, 8, "planChoice", "scoring", "randomModifier", "max") + 1);
+            var request = BuildPlanChoiceScoreRequest(room, state, plan);
+            var result = new PlanChoiceScoringService().Score(request, state.PlanChoice.RandomModifier.Value);
+            state.PlanChoice.Outcome = result.Outcome;
+            state.PlanChoice.ResolvedAtRound = room.CurrentRound;
+            state.ThreatStatus = result.Outcome switch
+            {
+                "safe_success" => "resolved_safely",
+                "success_with_consequence" => "resolved_with_casualty",
+                _ => "failed"
+            };
+            state.Resolution.SelectedApproachId = state.PlanChoice.SelectedPlanId;
+            state.Resolution.WasSuccessful = result.Outcome != "failure";
+            state.Resolution.CompletedAtRound = room.CurrentRound;
+            ApplyAirFilterPlanEffects(room, state, plan, result.Outcome);
+            state.Resolution.EffectsApplied = true;
+            await BroadcastThreatState(room, roomId);
+        }
+
+        private PlanChoiceScoreRequest BuildPlanChoiceScoreRequest(Room room, ThreatInteractionState state, JsonElement plan)
+        {
+            var mechanics = room.CurrentThreat!.Mechanics;
+            var tierScores = new PlanChoiceTierScores(
+                GetJsonDouble(mechanics, 25, "planChoice", "scoring", "tierScores", "strong"),
+                GetJsonDouble(mechanics, 14, "planChoice", "scoring", "tierScores", "related"),
+                GetJsonDouble(mechanics, 5, "planChoice", "scoring", "tierScores", "support"));
+            var planModel = new PlanChoicePlan(
+                plan.GetProperty("id").GetString() ?? "",
+                GetJsonDouble(plan, 0, "baseScore"),
+                GetJsonString(plan, "safe_success", "outcomeCeiling"),
+                GetJsonStringArray(plan, "capabilityTiers", "strongAny"),
+                GetJsonStringGroups(plan, "capabilityTiers", "relatedAllGroups"),
+                GetJsonStringArray(plan, "capabilityTiers", "supportAny"),
+                tierScores);
+            var capabilities = state.Contributions
+                .Where(c => IsActiveThreatContribution(c) && c.SourceType is "profession" or "hobby" && !string.IsNullOrWhiteSpace(c.OwnerPlayerId))
+                .Select(c => new PlanChoiceCapability(c.OwnerPlayerId, c.SourceType, c.TagsSnapshot))
+                .ToList();
+            var limits = new PlanChoiceLimits(
+                GetJsonInt(mechanics, 1, "planChoice", "scoring", "contributionLimits", "maxStrongContributors"),
+                GetJsonInt(mechanics, 2, "planChoice", "scoring", "contributionLimits", "maxRelatedContributors"),
+                GetJsonInt(mechanics, 2, "planChoice", "scoring", "contributionLimits", "maxSupportContributors"),
+                GetJsonDouble(mechanics, 10, "planChoice", "scoring", "contributionLimits", "supportScoreCap"));
+            var assetScores = new PlanChoiceAssetScores(
+                GetJsonDouble(mechanics, 12, "planChoice", "scoring", "assetScores", "acceptedPersonalItem"),
+                GetJsonDouble(mechanics, 10, "planChoice", "scoring", "assetScores", "acceptedBunkerResource"),
+                GetJsonDouble(mechanics, 15, "planChoice", "scoring", "assetScores", "acceptedBunkerFacility"),
+                GetJsonDouble(mechanics, 8, "planChoice", "scoring", "assetScores", "participantProtection"));
+            var thresholds = new PlanChoiceThresholds(
+                GetJsonDouble(mechanics, 80, "planChoice", "scoring", "thresholds", "safeSuccess"),
+                GetJsonDouble(mechanics, 55, "planChoice", "scoring", "thresholds", "successWithConsequence"));
+            var resourceTags = GetJsonStringArray(plan, "assets", "resourceTagsAny");
+            var facilityTags = GetJsonStringArray(plan, "assets", "facilityTagsAny");
+            var protectionTags = GetJsonStringArray(plan, "assets", "protectionTagsAny");
+            int Count(string type, IEnumerable<string> tags) => state.Contributions.Count(c =>
+                IsActiveThreatContribution(c) && c.SourceType == type && c.TagsSnapshot.Any(tag => tags.Contains(tag, StringComparer.OrdinalIgnoreCase)));
+            var protectedPlayers = GetThreatParticipantIds(state).Count(id => state.Contributions.Any(c =>
+                IsActiveThreatContribution(c) && c.OwnerPlayerId == id && c.TagsSnapshot.Any(tag => protectionTags.Contains(tag, StringComparer.OrdinalIgnoreCase))));
+            return new PlanChoiceScoreRequest(planModel, capabilities, limits, assetScores, thresholds,
+                Count("personal_inventory", resourceTags), Count("bunker_resource", resourceTags),
+                Count("bunker_facility", facilityTags), protectedPlayers);
+        }
+
+        private void ApplyAirFilterPlanEffects(Room room, ThreatInteractionState state, JsonElement plan, string outcome)
+        {
+            var effectsKey = outcome == "safe_success" ? "onSafeSuccess" : outcome == "success_with_consequence" ? "onSuccessWithConsequence" : "onFailure";
+            if (!plan.TryGetProperty("effects", out var effects) || !effects.TryGetProperty(effectsKey, out var list) || list.ValueKind != JsonValueKind.Array) return;
+            if (list.EnumerateArray().Any(effect => GetJsonString(effect, "", "type") == "consume_contributed_items"))
+            {
+                state.OperationBonuses.UsefulContributionIds = state.Contributions
+                    .Where(item => IsActiveThreatContribution(item) && item.SourceType == "personal_inventory")
+                    .Select(item => item.ContributionId).ToList();
+                ConsumeAcceptedThreatItems(room, state, success: true);
+            }
+            foreach (var effect in list.EnumerateArray().Where(effect => GetJsonString(effect, "", "type") == "add_physical_condition"))
+            {
+                var target = GetJsonString(effect, "", "target");
+                var conditionId = GetJsonString(effect, "", "conditionId");
+                var severity = GetJsonString(effect, "light", "severity");
+                var mergeRule = GetJsonString(effect, "", "mergeRule");
+                var targets = target == "all_active_players"
+                    ? GetActiveThreatPlayers(room).Select(entry => RoomService.GetPlayerKey(entry.Value)).ToList()
+                    : GetThreatParticipantIds(state).Where(id => !IsPlanChoiceParticipantProtected(state, plan, id)).Take(1).ToList();
+                foreach (var playerId in targets) ApplyAirFilterPhysicalCondition(room, playerId, conditionId, severity, mergeRule);
+            }
+        }
+
+        private static bool IsPlanChoiceParticipantProtected(ThreatInteractionState state, JsonElement plan, string playerId)
+        {
+            var tags = GetJsonStringArray(plan, "assets", "protectionTagsAny");
+            return state.Contributions.Any(c => IsActiveThreatContribution(c) && c.OwnerPlayerId == playerId && c.TagsSnapshot.Any(tag => tags.Contains(tag, StringComparer.OrdinalIgnoreCase)));
+        }
+
+        private void ApplyAirFilterPhysicalCondition(Room room, string playerId, string effectConditionId, string severityCode, string mergeRule)
+        {
+            var player = _roomService.GetPlayerByAnyId(room, playerId);
+            if (player == null) return;
+            var conditionId = effectConditionId is "toxic_air_exposure" or "respiratory_poisoning" ? "physical_301" : effectConditionId;
+            var existing = player.AdditionalConditionEffects.FirstOrDefault(item => string.Equals(item.ConditionId, conditionId, StringComparison.OrdinalIgnoreCase));
+            var condition = _gameData.PhysicalConditions.FirstOrDefault(item => string.Equals(item.Id, conditionId, StringComparison.OrdinalIgnoreCase));
+            if (condition == null) return;
+            if (existing != null)
+            {
+                if (!string.Equals(mergeRule, "increaseExistingSeverityByOne", StringComparison.OrdinalIgnoreCase)) return;
+                var nextCode = existing.SeverityCode.ToLowerInvariant() switch
+                {
+                    "light" => "medium", "medium" => "hard", "hard" => "veryHard", "veryhard" => "critical", _ => existing.SeverityCode
+                };
+                var nextLevel = SeverityHelper.GetSeverityLevelFromCode(nextCode);
+                existing.SeverityCode = nextCode;
+                existing.SeverityLevel = SeverityHelper.GetSeverityName(nextLevel, "uk");
+                existing.Name = SeverityHelper.FormatNameWithSeverity(existing.BaseName, nextLevel, "uk");
+                return;
+            }
+            var level = SeverityHelper.GetSeverityLevelFromCode(severityCode);
+            player.AdditionalConditionEffects.Add(new PlayerConditionEffect
+            {
+                Id = Guid.NewGuid().ToString("N"), ConditionId = conditionId, BaseName = condition.Name,
+                Name = SeverityHelper.FormatNameWithSeverity(condition.Name, level, "uk"), SeverityCode = severityCode,
+                SeverityLevel = SeverityHelper.GetSeverityName(level, "uk"), SourceThreatId = AirFilterFailureThreatId,
+                AppliedAtRound = room.CurrentRound, Description = condition.Description ?? "", Localization = condition.Localization
+            });
+            var entry = RoomService.GetPlayersSnapshot(room).FirstOrDefault(item => ReferenceEquals(item.Value, player));
+            if (!string.IsNullOrWhiteSpace(entry.Key)) _roomService.UpdatePlayer(entry.Key, player);
+        }
+
+        private static bool TryGetPlanElement(JsonElement? mechanics, string planId, out JsonElement plan)
+        {
+            plan = default;
+            if (!IsPlanChoiceMechanics(mechanics) || !mechanics!.Value.GetProperty("planChoice").TryGetProperty("plans", out var plans)) return false;
+            foreach (var candidate in plans.EnumerateArray())
+                if (string.Equals(GetJsonString(candidate, "", "id"), planId, StringComparison.OrdinalIgnoreCase)) { plan = candidate; return true; }
+            return false;
+        }
+
+        private static JsonElement? GetJsonElement(JsonElement? root, params string[] path)
+        {
+            if (root == null) return null;
+            var current = root.Value;
+            foreach (var segment in path)
+                if (current.ValueKind != JsonValueKind.Object || !current.TryGetProperty(segment, out current)) return null;
+            return current;
+        }
+        private static string GetJsonString(JsonElement? root, string fallback, params string[] path) => GetJsonElement(root, path) is { ValueKind: JsonValueKind.String } value ? value.GetString() ?? fallback : fallback;
+        private static int GetJsonInt(JsonElement? root, int fallback, params string[] path) => GetJsonElement(root, path) is { ValueKind: JsonValueKind.Number } value && value.TryGetInt32(out var result) ? result : fallback;
+        private static double GetJsonDouble(JsonElement? root, double fallback, params string[] path) => GetJsonElement(root, path) is { ValueKind: JsonValueKind.Number } value && value.TryGetDouble(out var result) ? result : fallback;
+        private static List<IReadOnlyList<string>> GetJsonStringGroups(JsonElement? root, params string[] path) =>
+            GetJsonElement(root, path) is { ValueKind: JsonValueKind.Array } value
+                ? value.EnumerateArray().Where(group => group.ValueKind == JsonValueKind.Array).Select(group => (IReadOnlyList<string>)group.EnumerateArray().Where(item => item.ValueKind == JsonValueKind.String).Select(item => item.GetString() ?? "").Where(item => item.Length > 0).ToList()).ToList()
+                : new();
+
         private void AddThreatContribution(
             Room room,
             ThreatInteractionState threatState,
@@ -1195,6 +1425,11 @@ namespace Bunker.Hubs
             var threatState = EnsureRadiationThreatState(room);
             if (!IsRadiationThreatActive(room, threatState))
             {
+                if (string.Equals(room.CurrentThreat?.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
+                    IsPlanChoiceMechanics(room.CurrentThreat?.Mechanics))
+                {
+                    return BuildAirFilterPlanChoicePublicState(room, threatState);
+                }
                 return new { currentThreatId = room.CurrentThreat?.Id ?? "", threatStatus = threatState.ThreatStatus };
             }
 
@@ -1322,6 +1557,62 @@ namespace Bunker.Hubs
                     threatState.Resolution.EffectsApplied,
                     threatState.Resolution.CompletedAtRound,
                     threatState.Resolution.PublicResults
+                }
+            };
+        }
+
+        private object BuildAirFilterPlanChoicePublicState(Room room, ThreatInteractionState state)
+        {
+            var mechanics = room.CurrentThreat!.Mechanics!.Value;
+            var planChoice = mechanics.GetProperty("planChoice");
+            var plans = planChoice.GetProperty("plans").EnumerateArray().Select(plan => new
+            {
+                id = GetJsonString(plan, "", "id"),
+                title = GetJsonElement(plan, "title"),
+                description = GetJsonElement(plan, "description"),
+                tradeoff = GetJsonElement(plan, "tradeoff"),
+                riskLevel = GetJsonString(plan, "", "riskLevel"),
+                resourceCost = GetJsonString(plan, "", "resourceCost"),
+                outcomePreview = GetJsonElement(plan, "outcomePreview"),
+                requirementsPreview = GetJsonElement(plan, "requirementsPreview")
+            }).ToList();
+            var leader = string.IsNullOrWhiteSpace(state.VolunteerSelection.SelectedPlayerId)
+                ? null : _roomService.GetPlayerByAnyId(room, state.VolunteerSelection.SelectedPlayerId);
+            return new
+            {
+                currentThreatId = AirFilterFailureThreatId,
+                threatStatus = state.ThreatStatus,
+                volunteerSelection = new
+                {
+                    selectedPlayerId = state.VolunteerSelection.SelectedPlayerId,
+                    selectedPlayerName = leader?.Name,
+                    selectionReason = state.VolunteerSelection.SelectionReason,
+                    selectedAtRound = state.VolunteerSelection.SelectedAtRound
+                },
+                participants = GetThreatParticipantIds(state).Select(id => new
+                {
+                    playerId = id,
+                    name = _roomService.GetPlayerByAnyId(room, id)?.Name ?? "Гравець",
+                    isLeader = string.Equals(id, state.VolunteerSelection.SelectedPlayerId, StringComparison.OrdinalIgnoreCase)
+                }).ToList(),
+                contributions = new
+                {
+                    total = state.Contributions.Count(IsActiveThreatContribution),
+                    byType = state.Contributions.Where(IsActiveThreatContribution).GroupBy(item => item.SourceType).ToDictionary(group => group.Key, group => group.Count())
+                },
+                planChoice = new
+                {
+                    selectedPlanId = state.PlanChoice.SelectedPlanId,
+                    isLocked = state.PlanChoice.IsLocked,
+                    outcome = state.PlanChoice.Outcome,
+                    resolvedAtRound = state.PlanChoice.ResolvedAtRound,
+                    solutionGuide = GetJsonElement(planChoice, "solutionGuide"),
+                    plans
+                },
+                resolution = new
+                {
+                    effectsApplied = state.Resolution.EffectsApplied,
+                    completedAtRound = state.Resolution.CompletedAtRound
                 }
             };
         }

@@ -1,6 +1,6 @@
 {
   "_i18n_meta": {
-    "status": "stage_2a_hobbies_complete",
+    "status": "stage_2b_hobbies_capability_tags_complete",
     "source_file": "hobbies.json",
     "records": 200,
     "languages": [
@@ -9,7 +9,11 @@
       "ru"
     ],
     "note_uk": "Оригінальні поля не змінені. Переклади додані в _i18n. Якщо код ще не підтримує _i18n, старий сайт продовжить читати старі поля.",
-    "fallback_rule": "Якщо selected language value порожній, використовувати uk."
+    "fallback_rule": "Якщо selected language value порожній, використовувати uk.",
+    "capability_tags_added_to_records": 200,
+    "capability_tag_dictionary": "threat_mechanics_tag_dictionary_v2",
+    "capability_tag_rule_uk": "Теги описують лише реальну навичку хобі. Предмет з поля item не перетворює хобі на професійну компетенцію. Для сумнівних або суто мемних хобі дозволено порожній масив.",
+    "capability_tag_levels_uk": "Рівень strong/related/support визначається конкретною загрозою, а не самим хобі."
   },
   "hobbies": [
     {
@@ -38,7 +42,12 @@
           "en": "Finds the way better and does not get lost",
           "ru": "Лучше находит путь и не теряется"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Збирання грибів",
@@ -66,7 +75,12 @@
           "en": "Knows edible and poisonous mushrooms",
           "ru": "Знает съедобные и ядовитые грибы"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "food_safety",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Риболовля",
@@ -94,7 +108,11 @@
           "en": "Can catch fish for the group",
           "ru": "Может добывать рыбу для группы"
         }
-      }
+      },
+      "capabilityTags": [
+        "hunting",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Садівництво",
@@ -122,7 +140,10 @@
           "en": "Can grow vegetables and fruit",
           "ru": "Умеет выращивать овощи и фрукты"
         }
-      }
+      },
+      "capabilityTags": [
+        "agriculture"
+      ]
     },
     {
       "hobby": "Полювання",
@@ -150,7 +171,12 @@
           "en": "Can hunt game",
           "ru": "Может добывать дичь"
         }
-      }
+      },
+      "capabilityTags": [
+        "hunting",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "В'язання",
@@ -178,7 +204,10 @@
           "en": "Makes warm clothing",
           "ru": "Изготавливает теплую одежду"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Столярство",
@@ -206,7 +235,12 @@
           "en": "Repairs and builds with wood",
           "ru": "Ремонтирует и строит из дерева"
         }
-      }
+      },
+      "capabilityTags": [
+        "construction",
+        "structural_repair",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Перша допомога",
@@ -234,7 +268,12 @@
           "en": "Provides emergency medical care",
           "ru": "Оказывает экстренную медицинскую помощь"
         }
-      }
+      },
+      "capabilityTags": [
+        "first_aid",
+        "medical_general",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Радіоаматорство",
@@ -262,7 +301,12 @@
           "en": "Can establish communication",
           "ru": "Может наладить связь"
         }
-      }
+      },
+      "capabilityTags": [
+        "radio_communications",
+        "electronics_repair",
+        "technical_diagnostics"
+      ]
     },
     {
       "hobby": "Туризм",
@@ -290,7 +334,13 @@
           "en": "Has wilderness survival experience",
           "ru": "Имеет опыт выживания на природе"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "scouting",
+        "survival_skills",
+        "endurance"
+      ]
     },
     {
       "hobby": "Скелелазіння",
@@ -318,7 +368,12 @@
           "en": "Overcomes vertical obstacles",
           "ru": "Преодолевает вертикальные препятствия"
         }
-      }
+      },
+      "capabilityTags": [
+        "scouting",
+        "endurance",
+        "physical_strength"
+      ]
     },
     {
       "hobby": "Готування на вогнищі",
@@ -346,7 +401,12 @@
           "en": "Cooks food without a stove",
           "ru": "Готовит еду без плиты"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preparation",
+        "fire_control",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Консервування",
@@ -374,7 +434,12 @@
           "en": "Stores food for a long time",
           "ru": "Хранит продукты надолго"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preservation",
+        "food_safety",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Бджільництво",
@@ -402,7 +467,12 @@
           "en": "Knows how to work with bees",
           "ru": "Знает, как работать с пчелами"
         }
-      }
+      },
+      "capabilityTags": [
+        "agriculture",
+        "veterinary",
+        "food_safety"
+      ]
     },
     {
       "hobby": "Стрільба з лука",
@@ -430,7 +500,12 @@
           "en": "Silent hunting and defense",
           "ru": "Бесшумная охота и защита"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "hunting",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Самооборона",
@@ -458,7 +533,12 @@
           "en": "Can protect self and others",
           "ru": "Может защитить себя и других"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "security",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Виживання в екстремальних умовах",
@@ -486,7 +566,13 @@
           "en": "Adapts to any conditions",
           "ru": "Адаптируется к любым условиям"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills",
+        "endurance",
+        "crisis_support",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Ремонт техніки",
@@ -514,7 +600,12 @@
           "en": "Repairs broken equipment",
           "ru": "Чинит неисправное оборудование"
         }
-      }
+      },
+      "capabilityTags": [
+        "mechanical_repair",
+        "technical_diagnostics",
+        "engineering_general"
+      ]
     },
     {
       "hobby": "Шиття",
@@ -542,7 +633,10 @@
           "en": "Repairs and sews clothes",
           "ru": "Ремонтирует и шьет одежду"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Збирання лікарських трав",
@@ -570,7 +664,12 @@
           "en": "Knows the healing properties of plants",
           "ru": "Знает лечебные свойства растений"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "pharmacology",
+        "toxicology"
+      ]
     },
     {
       "hobby": "Автомеханіка",
@@ -598,7 +697,12 @@
           "en": "Repairs vehicles",
           "ru": "Ремонтирует транспортные средства"
         }
-      }
+      },
+      "capabilityTags": [
+        "mechanical_repair",
+        "technical_diagnostics",
+        "engineering_general"
+      ]
     },
     {
       "hobby": "Електрика",
@@ -626,7 +730,11 @@
           "en": "Repairs wiring",
           "ru": "Чинит электропроводку"
         }
-      }
+      },
+      "capabilityTags": [
+        "electrical_repair",
+        "technical_diagnostics"
+      ]
     },
     {
       "hobby": "Водопровід",
@@ -654,7 +762,12 @@
           "en": "Repairs plumbing systems",
           "ru": "Ремонтирует водопроводные системы"
         }
-      }
+      },
+      "capabilityTags": [
+        "plumbing_repair",
+        "water_purification",
+        "technical_diagnostics"
+      ]
     },
     {
       "hobby": "Картографія",
@@ -682,7 +795,11 @@
           "en": "Navigates terrain well",
           "ru": "Ориентируется на местности"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Їзда верхи",
@@ -710,7 +827,12 @@
           "en": "Can use horses",
           "ru": "Может использовать лошадей"
         }
-      }
+      },
+      "capabilityTags": [
+        "veterinary",
+        "navigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Плавання",
@@ -738,7 +860,11 @@
           "en": "Overcomes water obstacles",
           "ru": "Преодолевает водные препятствия"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "scouting"
+      ]
     },
     {
       "hobby": "Дайвінг",
@@ -766,7 +892,12 @@
           "en": "Can retrieve things from underwater",
           "ru": "Может доставать вещи из-под воды"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Паркур",
@@ -794,7 +925,12 @@
           "en": "Quickly overcomes obstacles",
           "ru": "Быстро преодолевает препятствия"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "scouting",
+        "physical_strength"
+      ]
     },
     {
       "hobby": "Біг на довгі дистанції",
@@ -822,7 +958,11 @@
           "en": "Enduring and fast",
           "ru": "Выносливый и быстрый"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "scouting"
+      ]
     },
     {
       "hobby": "Бокс",
@@ -850,7 +990,11 @@
           "en": "Effective in hand-to-hand combat",
           "ru": "Эффективен в рукопашном бою"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "endurance"
+      ]
     },
     {
       "hobby": "Кросфіт",
@@ -878,7 +1022,11 @@
           "en": "Excellent physical shape",
           "ru": "Отличная физическая форма"
         }
-      }
+      },
+      "capabilityTags": [
+        "physical_strength",
+        "endurance"
+      ]
     },
     {
       "hobby": "Стрільба",
@@ -906,7 +1054,12 @@
           "en": "Shoots accurately",
           "ru": "Метко стреляет"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "security",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Випалювання по дереву",
@@ -934,7 +1087,10 @@
           "en": "Creates signs and markings",
           "ru": "Создает знаки и метки"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Ковальство",
@@ -962,7 +1118,12 @@
           "en": "Forges tools and weapons",
           "ru": "Кует инструменты и оружие"
         }
-      }
+      },
+      "capabilityTags": [
+        "welding",
+        "mechanical_repair",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Гончарство",
@@ -990,7 +1151,10 @@
           "en": "Makes dishes",
           "ru": "Изготавливает посуду"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Випічка хліба",
@@ -1018,7 +1182,11 @@
           "en": "Makes bread from minimal ingredients",
           "ru": "Готовит хлеб из минимума продуктов"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preparation",
+        "food_preservation"
+      ]
     },
     {
       "hobby": "Виноробство",
@@ -1046,7 +1214,12 @@
           "en": "Produces alcohol for disinfection",
           "ru": "Производит алкоголь для дезинфекции"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preservation",
+        "food_safety",
+        "chemistry"
+      ]
     },
     {
       "hobby": "Самогоноваріння",
@@ -1074,7 +1247,11 @@
           "en": "Creates alcohol for medical needs",
           "ru": "Создает спирт для медицинских нужд"
         }
-      }
+      },
+      "capabilityTags": [
+        "chemistry",
+        "food_preservation"
+      ]
     },
     {
       "hobby": "Нічне бачення",
@@ -1102,7 +1279,11 @@
           "en": "Navigates in darkness",
           "ru": "Ориентируется в темноте"
         }
-      }
+      },
+      "capabilityTags": [
+        "scouting",
+        "navigation"
+      ]
     },
     {
       "hobby": "Альпінізм",
@@ -1130,7 +1311,12 @@
           "en": "Overcomes mountainous terrain",
           "ru": "Преодолевает горную местность"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills",
+        "navigation",
+        "endurance"
+      ]
     },
     {
       "hobby": "Колекціонування холодної зброї",
@@ -1158,7 +1344,11 @@
           "en": "Has a weapon and knows how to use it",
           "ru": "Имеет оружие и знает, как им пользоваться"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "security"
+      ]
     },
     {
       "hobby": "Таксидермія",
@@ -1186,7 +1376,11 @@
           "en": "Can process animal carcasses",
           "ru": "Умеет обрабатывать туши животных"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Вивчення отрут",
@@ -1214,7 +1408,11 @@
           "en": "Knows deadly substances",
           "ru": "Знает смертельные вещества"
         }
-      }
+      },
+      "capabilityTags": [
+        "toxicology",
+        "chemistry"
+      ]
     },
     {
       "hobby": "Слідкування за людьми",
@@ -1242,7 +1440,11 @@
           "en": "Watches targets unnoticed",
           "ru": "Незаметно следит за объектами"
         }
-      }
+      },
+      "capabilityTags": [
+        "scouting",
+        "investigation"
+      ]
     },
     {
       "hobby": "Маніпулювання людьми",
@@ -1270,7 +1472,11 @@
           "en": "Pushes people toward their opinion",
           "ru": "Склоняет людей к своему мнению"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology",
+        "negotiation"
+      ]
     },
     {
       "hobby": "Збирання інформації про людей",
@@ -1298,7 +1504,10 @@
           "en": "Knows everyone's secrets",
           "ru": "Знает секреты каждого"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Підпали",
@@ -1326,7 +1535,10 @@
           "en": "Can start a fire quickly",
           "ru": "Умеет быстро разжечь огонь"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Злам замків",
@@ -1354,7 +1566,11 @@
           "en": "Opens almost any lock",
           "ru": "Открывает почти любые замки"
         }
-      }
+      },
+      "capabilityTags": [
+        "access_control",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Виготовлення пасток",
@@ -1382,7 +1598,12 @@
           "en": "Creates deadly traps",
           "ru": "Создает смертельные ловушки"
         }
-      }
+      },
+      "capabilityTags": [
+        "security",
+        "hunting",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Полювання на людей",
@@ -1410,7 +1631,12 @@
           "en": "Tracks a target silently",
           "ru": "Бесшумно выслеживает цель"
         }
-      }
+      },
+      "capabilityTags": [
+        "scouting",
+        "hunting",
+        "combat"
+      ]
     },
     {
       "hobby": "Колекціонування кісток",
@@ -1438,7 +1664,11 @@
           "en": "Knows skeletal anatomy",
           "ru": "Знает анатомию скелета"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Підслуховування",
@@ -1466,7 +1696,11 @@
           "en": "Hears conversations from a distance",
           "ru": "Слышит разговоры на расстоянии"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Шантаж",
@@ -1494,7 +1728,11 @@
           "en": "Keeps people under control",
           "ru": "Держит людей под контролем"
         }
-      }
+      },
+      "capabilityTags": [
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "hobby": "Фальсифікація документів",
@@ -1522,7 +1760,11 @@
           "en": "Creates forged papers",
           "ru": "Создает поддельные бумаги"
         }
-      }
+      },
+      "capabilityTags": [
+        "access_control",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Карткове шулерство",
@@ -1550,7 +1792,11 @@
           "en": "Always wins at gambling",
           "ru": "Всегда выигрывает в азартные игры"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Тортури",
@@ -1578,7 +1824,11 @@
           "en": "Can extract information",
           "ru": "Умеет вытягивать информацию"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "psychology"
+      ]
     },
     {
       "hobby": "Вивчення серійних вбивць",
@@ -1606,7 +1856,11 @@
           "en": "Knows their psychology",
           "ru": "Знает их психологию"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology",
+        "investigation"
+      ]
     },
     {
       "hobby": "Створення вибухівки",
@@ -1634,7 +1888,11 @@
           "en": "Makes homemade bombs",
           "ru": "Изготавливает самодельные бомбы"
         }
-      }
+      },
+      "capabilityTags": [
+        "chemistry",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Збирання зброї",
@@ -1662,7 +1920,10 @@
           "en": "Has an arsenal",
           "ru": "Имеет арсенал"
         }
-      }
+      },
+      "capabilityTags": [
+        "security"
+      ]
     },
     {
       "hobby": "Чорна магія",
@@ -1690,7 +1951,8 @@
           "en": "Believes in dark rituals",
           "ru": "Верит в темные ритуалы"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Канібалізм у культурах",
@@ -1718,7 +1980,10 @@
           "en": "Knows about extreme survival",
           "ru": "Знает об экстремальном выживании"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Некрофілія до мистецтва смерті",
@@ -1746,7 +2011,8 @@
           "en": "Is not afraid of corpses",
           "ru": "Не боится трупов"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Збирання комах-паразитів",
@@ -1774,7 +2040,11 @@
           "en": "Knows dangerous insects",
           "ru": "Знает опасных насекомых"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "toxicology"
+      ]
     },
     {
       "hobby": "Культ особистості",
@@ -1802,7 +2072,12 @@
           "en": "Can lead fanatics",
           "ru": "Умеет вести за собой фанатиков"
         }
-      }
+      },
+      "capabilityTags": [
+        "leadership",
+        "crowd_control",
+        "psychology"
+      ]
     },
     {
       "hobby": "Написання погроз",
@@ -1830,7 +2105,11 @@
           "en": "Intimidates enemies",
           "ru": "Запугивает врагов"
         }
-      }
+      },
+      "capabilityTags": [
+        "crowd_control",
+        "negotiation"
+      ]
     },
     {
       "hobby": "Переслідування колишніх",
@@ -1858,7 +2137,11 @@
           "en": "Knows everything about the target of attention",
           "ru": "Знает все об объекте внимания"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Садизм",
@@ -1886,7 +2169,10 @@
           "en": "Takes pleasure in others' pain",
           "ru": "Получает удовольствие от чужой боли"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology"
+      ]
     },
     {
       "hobby": "Мазохізм",
@@ -1914,7 +2200,10 @@
           "en": "Endures pain better than others",
           "ru": "Терпит боль лучше других"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "hobby": "Нелегальні перегони",
@@ -1942,7 +2231,11 @@
           "en": "Drives aggressively and fast",
           "ru": "Ездит агрессивно и быстро"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "endurance"
+      ]
     },
     {
       "hobby": "Браконьєрство",
@@ -1970,7 +2263,12 @@
           "en": "Hunts without rules",
           "ru": "Охотится без правил"
         }
-      }
+      },
+      "capabilityTags": [
+        "hunting",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Торгівля органами (фікція)",
@@ -1998,7 +2296,8 @@
           "en": "Knows the price of the human body",
           "ru": "Знает цену человеческого тела"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Створення культу",
@@ -2026,7 +2325,12 @@
           "en": "Leads the faithful",
           "ru": "Ведет за собой верных"
         }
-      }
+      },
+      "capabilityTags": [
+        "leadership",
+        "crowd_control",
+        "psychology"
+      ]
     },
     {
       "hobby": "Вивчення способів страти",
@@ -2054,7 +2358,10 @@
           "en": "Knows efficient methods",
           "ru": "Знает эффективные методы"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Психологічне насильство",
@@ -2082,7 +2389,11 @@
           "en": "Destroys people with words",
           "ru": "Разрушает людей словами"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology",
+        "negotiation"
+      ]
     },
     {
       "hobby": "Газлайтинг",
@@ -2110,7 +2421,11 @@
           "en": "Makes others doubt reality",
           "ru": "Заставляет сомневаться в реальности"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology",
+        "negotiation"
+      ]
     },
     {
       "hobby": "Виготовлення наркотиків",
@@ -2138,7 +2453,12 @@
           "en": "Synthesizes chemical substances",
           "ru": "Синтезирует химические вещества"
         }
-      }
+      },
+      "capabilityTags": [
+        "chemistry",
+        "pharmacology",
+        "toxicology"
+      ]
     },
     {
       "hobby": "Підробка грошей",
@@ -2166,7 +2486,10 @@
           "en": "Can create fake valuables",
           "ru": "Может создать фальшивые ценности"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Торгівля людьми (рольова гра)",
@@ -2194,7 +2517,11 @@
           "en": "Knows how to control people",
           "ru": "Знает, как контролировать людей"
         }
-      }
+      },
+      "capabilityTags": [
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "hobby": "Екстремальний голодування",
@@ -2222,7 +2549,11 @@
           "en": "Can last longer without food",
           "ru": "Выдерживает без еды дольше"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "rationing"
+      ]
     },
     {
       "hobby": "Прослуховування",
@@ -2250,7 +2581,11 @@
           "en": "Collects secret information",
           "ru": "Собирает секретную информацию"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "computer_systems"
+      ]
     },
     {
       "hobby": "Перегляд TikTok",
@@ -2278,7 +2613,8 @@
           "en": "Knows all trends that are already outdated",
           "ru": "Знает все тренды, которые уже неактуальны"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Колекціонування NFT",
@@ -2306,7 +2642,8 @@
           "en": "Has digital assets without the internet",
           "ru": "Имеет цифровые активы без интернета"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Фотографування їжі",
@@ -2334,7 +2671,8 @@
           "en": "Food looks tastier than it is",
           "ru": "Еда выглядит вкуснее, чем есть на самом деле"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Складання Lego",
@@ -2362,7 +2700,10 @@
           "en": "Builds miniature models",
           "ru": "Строит миниатюрные модели"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Колекціонування вінілу",
@@ -2390,7 +2731,8 @@
           "en": "Has music without electricity... theoretically",
           "ru": "Имеет музыку без электричества... теоретически"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Speedrun ігор",
@@ -2418,7 +2760,11 @@
           "en": "Makes decisions quickly",
           "ru": "Быстро принимает решения"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Косплей",
@@ -2446,7 +2792,11 @@
           "en": "Can disguise themselves",
           "ru": "Может замаскироваться"
         }
-      }
+      },
+      "capabilityTags": [
+        "scouting",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Написання фанфіків",
@@ -2474,7 +2824,10 @@
           "en": "Entertains the group with stories",
           "ru": "Развлекает группу историями"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Перегляд аніме",
@@ -2502,7 +2855,8 @@
           "en": "Quotes philosophy from cartoons",
           "ru": "Цитирует философию из мультиков"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "ASMR",
@@ -2530,7 +2884,11 @@
           "en": "Calms others with whispering",
           "ru": "Успокаивает шепотом"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support",
+        "psychology"
+      ]
     },
     {
       "hobby": "Створення мемів",
@@ -2558,7 +2916,10 @@
           "en": "Lifts morale in hard times",
           "ru": "Поднимает настроение в тяжелые времена"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Полювання за покемонами",
@@ -2586,7 +2947,10 @@
           "en": "Ready to search for anything",
           "ru": "Готов искать что угодно"
         }
-      }
+      },
+      "capabilityTags": [
+        "scouting"
+      ]
     },
     {
       "hobby": "Крипто-трейдинг",
@@ -2614,7 +2978,8 @@
           "en": "Believes Bitcoin will save them",
           "ru": "Верит, что Bitcoin спасет"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Лайв-стрімінг",
@@ -2642,7 +3007,10 @@
           "en": "Can behave well on camera",
           "ru": "Умеет держаться перед камерой"
         }
-      }
+      },
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "hobby": "Колекціонування кросівок",
@@ -2670,7 +3038,8 @@
           "en": "Has shoes for running",
           "ru": "Обувь для бега есть"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Челенджі з інтернету",
@@ -2698,7 +3067,8 @@
           "en": "Ready for nonsense",
           "ru": "Готов к глупостям"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Флет Ерс теорія",
@@ -2726,7 +3096,8 @@
           "en": "Confident in being right",
           "ru": "Уверен в своей правоте"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Збирання підписів зірок",
@@ -2754,7 +3125,10 @@
           "en": "Knows how to approach people",
           "ru": "Знает, как подойти к людям"
         }
-      }
+      },
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "hobby": "Споглядання за котиками",
@@ -2782,7 +3156,10 @@
           "en": "Calms nerves",
           "ru": "Успокаивает нервы"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Коллекціонування фігурок Funko Pop",
@@ -2810,7 +3187,8 @@
           "en": "Has plastic friends",
           "ru": "Имеет пластиковых друзей"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Розмова з рослинами",
@@ -2838,7 +3216,8 @@
           "en": "Plants grow better... maybe",
           "ru": "Растения растут лучше... возможно"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Колекціонування серветок",
@@ -2866,7 +3245,8 @@
           "en": "Always has something to wipe hands with",
           "ru": "Всегда есть чем вытереть руки"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Сортування сміття за кольором",
@@ -2894,7 +3274,11 @@
           "en": "Organizes chaos",
           "ru": "Организует хаос"
         }
-      }
+      },
+      "capabilityTags": [
+        "organization",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Рахування зірок",
@@ -2922,7 +3306,10 @@
           "en": "Patient and attentive",
           "ru": "Терпеливый и внимательный"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Спілкування з уявним другом",
@@ -2950,7 +3337,8 @@
           "en": "Never lonely",
           "ru": "Никогда не одинок"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Колекціонування волосся",
@@ -2978,7 +3366,8 @@
           "en": "Has... hair",
           "ru": "Имеет... волосы"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Малювання карикатур",
@@ -3006,7 +3395,10 @@
           "en": "Lifts morale with laughter",
           "ru": "Поднимает настроение смехом"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Годування голубів",
@@ -3034,7 +3426,8 @@
           "en": "Attracts birds",
           "ru": "Привлекает птиц"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Екстремальне прасування",
@@ -3062,7 +3455,10 @@
           "en": "Neat in any conditions",
           "ru": "Опрятный в любых условиях"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Колекціонування магнітиків",
@@ -3090,7 +3486,8 @@
           "en": "Remembers every place",
           "ru": "Помнит каждое место"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Бульбашкова плівка",
@@ -3118,7 +3515,10 @@
           "en": "Relieves stress by popping it",
           "ru": "Снимает стресс лопаньем пузырьков"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Малювання пальцями",
@@ -3146,7 +3546,8 @@
           "en": "Creates without tools",
           "ru": "Творит без инструментов"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Колекціонування кришечок",
@@ -3174,7 +3575,8 @@
           "en": "Can always close a jar",
           "ru": "Всегда закроет банку"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Побудова карткових будинків",
@@ -3202,7 +3604,10 @@
           "en": "Patient and focused",
           "ru": "Терпеливый и сосредоточенный"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Спів у душі",
@@ -3230,7 +3635,10 @@
           "en": "Lifts own mood",
           "ru": "Поднимает настроение себе"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Гра на повітряній гітарі",
@@ -3258,7 +3666,10 @@
           "en": "Entertains without instruments",
           "ru": "Развлекает без инструментов"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Читання вголос",
@@ -3286,7 +3697,10 @@
           "en": "Entertains the group with stories",
           "ru": "Развлекает группу историями"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Медитація",
@@ -3314,7 +3728,11 @@
           "en": "Keeps calm in a crisis",
           "ru": "Сохраняет спокойствие в кризисе"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support",
+        "psychology"
+      ]
     },
     {
       "hobby": "Гіпноз",
@@ -3342,7 +3760,11 @@
           "en": "Can calm panicking people",
           "ru": "Может успокоить паникеров"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Холотропне дихання",
@@ -3370,7 +3792,10 @@
           "en": "Controls stress states",
           "ru": "Контролирует стрессовые состояния"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Сновидіння усвідомлені",
@@ -3398,7 +3823,8 @@
           "en": "Sleeps better",
           "ru": "Лучше высыпается"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Мовчазні ретрити",
@@ -3426,7 +3852,11 @@
           "en": "Endures silence and loneliness",
           "ru": "Выдерживает тишину и одиночество"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Каліграфія",
@@ -3454,7 +3884,10 @@
           "en": "Writes beautifully and clearly",
           "ru": "Пишет красиво и разборчиво"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Орігамі",
@@ -3482,7 +3915,10 @@
           "en": "Creates useful things from paper",
           "ru": "Создает полезные вещи из бумаги"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Моржування",
@@ -3510,7 +3946,10 @@
           "en": "Hardened against cold",
           "ru": "Закален к холоду"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "hobby": "Голодування",
@@ -3538,7 +3977,11 @@
           "en": "Can last longer without food",
           "ru": "Выдерживает без еды дольше"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance",
+        "rationing"
+      ]
     },
     {
       "hobby": "Вегетаріанство",
@@ -3566,7 +4009,8 @@
           "en": "Eats what others refuse",
           "ru": "Ест то, от чего другие отказываются"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Сироїдіння",
@@ -3594,7 +4038,8 @@
           "en": "Survives on raw foods",
           "ru": "Выживает на сырых продуктах"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Збирання дощової води",
@@ -3622,7 +4067,11 @@
           "en": "Has a water reserve",
           "ru": "Имеет запас воды"
         }
-      }
+      },
+      "capabilityTags": [
+        "resource_management",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Хендпан",
@@ -3650,7 +4099,10 @@
           "en": "Creates calming music",
           "ru": "Создает успокаивающую музыку"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Горлове співання",
@@ -3678,7 +4130,10 @@
           "en": "Unique musical talent",
           "ru": "Уникальный музыкальный талант"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Читання по губах",
@@ -3706,7 +4161,10 @@
           "en": "Understands without sound",
           "ru": "Понимает без звука"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Мова жестів",
@@ -3734,7 +4192,11 @@
           "en": "Communicates silently",
           "ru": "Общается бесшумно"
         }
-      }
+      },
+      "capabilityTags": [
+        "negotiation",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Складання пазлів",
@@ -3762,7 +4224,11 @@
           "en": "Patient and attentive to details",
           "ru": "Терпеливый и внимательный к деталям"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Збирання равликів",
@@ -3790,7 +4256,10 @@
           "en": "Can cook delicacies",
           "ru": "Может готовить деликатесы"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preparation"
+      ]
     },
     {
       "hobby": "Астрономія",
@@ -3818,7 +4287,10 @@
           "en": "Navigates by the stars",
           "ru": "Ориентируется по звездам"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation"
+      ]
     },
     {
       "hobby": "Нумерологія",
@@ -3846,7 +4318,8 @@
           "en": "Believes in numbers",
           "ru": "Верит в числа"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Хіромантія",
@@ -3874,7 +4347,10 @@
           "en": "Reads fate from hands",
           "ru": "Читает судьбы по рукам"
         }
-      }
+      },
+      "capabilityTags": [
+        "psychology"
+      ]
     },
     {
       "hobby": "Графологія",
@@ -3902,7 +4378,11 @@
           "en": "Analyzes character by handwriting",
           "ru": "Анализирует характер по почерку"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "psychology"
+      ]
     },
     {
       "hobby": "Вивчення шрифту Брайля",
@@ -3930,7 +4410,8 @@
           "en": "Reads in the dark",
           "ru": "Читает в темноте"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Колекціонування монет",
@@ -3958,7 +4439,8 @@
           "en": "Can use it as currency",
           "ru": "Может использовать как валюту"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Вишивання хрестиком",
@@ -3986,7 +4468,10 @@
           "en": "Patches clothes beautifully",
           "ru": "Красиво латает одежду"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Макраме",
@@ -4014,7 +4499,10 @@
           "en": "Weaves ropes and nets",
           "ru": "Плетет веревки и сети"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Бісероплетіння",
@@ -4042,7 +4530,10 @@
           "en": "Creates jewelry",
           "ru": "Создает украшения"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "hobby": "Карти Таро",
@@ -4070,7 +4561,8 @@
           "en": "Predicts the future, according to them",
           "ru": "Предсказывает будущее, по его словам"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Спіритизм",
@@ -4098,7 +4590,8 @@
           "en": "Communicates with spirits, supposedly",
           "ru": "Общается с духами, якобы"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Збирання особистих даних",
@@ -4126,7 +4619,10 @@
           "en": "Knows too much about everyone",
           "ru": "Знает слишком много о каждом"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Стеження в соцмережах",
@@ -4154,7 +4650,10 @@
           "en": "Knows people's entire history",
           "ru": "Знает всю историю людей"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Фотографування незнайомців",
@@ -4182,7 +4681,11 @@
           "en": "Has photos of everyone",
           "ru": "Имеет фото всех"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Спостереження за сусідами",
@@ -4210,7 +4713,11 @@
           "en": "Knows everything about the surroundings",
           "ru": "Знает все об окружении"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Анонімні дзвінки",
@@ -4238,7 +4745,8 @@
           "en": "Remains anonymous",
           "ru": "Остается анонимным"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Робота з deepfake",
@@ -4266,7 +4774,12 @@
           "en": "Creates fake evidence",
           "ru": "Создает фальшивые доказательства"
         }
-      }
+      },
+      "capabilityTags": [
+        "computer_systems",
+        "hacking",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Вивчення вірусів",
@@ -4294,7 +4807,11 @@
           "en": "Knows how diseases spread",
           "ru": "Знает, как распространяются болезни"
         }
-      }
+      },
+      "capabilityTags": [
+        "epidemiology",
+        "microbiology"
+      ]
     },
     {
       "hobby": "Колекціонування замків",
@@ -4322,7 +4839,11 @@
           "en": "Understands protection mechanisms",
           "ru": "Разбирается в защитных механизмах"
         }
-      }
+      },
+      "capabilityTags": [
+        "access_control",
+        "technical_diagnostics"
+      ]
     },
     {
       "hobby": "Шифрування повідомлень",
@@ -4350,7 +4871,11 @@
           "en": "Hides communication",
           "ru": "Скрывает коммуникацию"
         }
-      }
+      },
+      "capabilityTags": [
+        "computer_systems",
+        "hacking"
+      ]
     },
     {
       "hobby": "Збирання ключів",
@@ -4378,7 +4903,8 @@
           "en": "May have access anywhere",
           "ru": "Может иметь доступ куда угодно"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Радикальний веганізм",
@@ -4406,7 +4932,8 @@
           "en": "Imposes their views",
           "ru": "Навязывает свои взгляды"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Конспірологія",
@@ -4434,7 +4961,8 @@
           "en": "Sees conspiracies everywhere",
           "ru": "Видит заговоры повсюду"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Анархізм",
@@ -4462,7 +4990,8 @@
           "en": "Does not recognize authorities",
           "ru": "Не признает авторитетов"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Препперство",
@@ -4490,7 +5019,13 @@
           "en": "Ready for the apocalypse better than anyone",
           "ru": "Готов к апокалипсису лучше всех"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills",
+        "resource_management",
+        "rationing",
+        "logistics"
+      ]
     },
     {
       "hobby": "Вивчення секретних товариств",
@@ -4518,7 +5053,10 @@
           "en": "Knows about secret organizations",
           "ru": "Знает о тайных организациях"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Хакінг",
@@ -4546,7 +5084,12 @@
           "en": "Breaks into security systems",
           "ru": "Взламывает системы безопасности"
         }
-      }
+      },
+      "capabilityTags": [
+        "hacking",
+        "computer_systems",
+        "access_control"
+      ]
     },
     {
       "hobby": "Соціальна інженерія",
@@ -4574,7 +5117,13 @@
           "en": "Gets information through deception",
           "ru": "Получает информацию обманом"
         }
-      }
+      },
+      "capabilityTags": [
+        "negotiation",
+        "psychology",
+        "investigation",
+        "access_control"
+      ]
     },
     {
       "hobby": "Відстеження GPS",
@@ -4602,7 +5151,12 @@
           "en": "Knows where everyone is",
           "ru": "Знает, где кто находится"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "scouting",
+        "computer_systems"
+      ]
     },
     {
       "hobby": "Соколине полювання",
@@ -4630,7 +5184,12 @@
           "en": "Can use birds of prey",
           "ru": "Может использовать хищных птиц"
         }
-      }
+      },
+      "capabilityTags": [
+        "hunting",
+        "veterinary",
+        "scouting"
+      ]
     },
     {
       "hobby": "Виготовлення мечів",
@@ -4658,7 +5217,12 @@
           "en": "Has a quality melee weapon",
           "ru": "Имеет качественное холодное оружие"
         }
-      }
+      },
+      "capabilityTags": [
+        "welding",
+        "precision_work",
+        "mechanical_repair"
+      ]
     },
     {
       "hobby": "Середньовічні бої",
@@ -4686,7 +5250,11 @@
           "en": "Can fight in armor",
           "ru": "Умеет сражаться в броне"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "endurance"
+      ]
     },
     {
       "hobby": "Полювання на трюфелі",
@@ -4714,7 +5282,11 @@
           "en": "Finds rare food",
           "ru": "Находит редкую еду"
         }
-      }
+      },
+      "capabilityTags": [
+        "hunting",
+        "scouting"
+      ]
     },
     {
       "hobby": "Виготовлення сиру",
@@ -4742,7 +5314,12 @@
           "en": "Makes cheese from milk",
           "ru": "Делает сыр из молока"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preparation",
+        "food_preservation",
+        "food_safety"
+      ]
     },
     {
       "hobby": "Бонсай",
@@ -4770,7 +5347,11 @@
           "en": "Patient and attentive",
           "ru": "Терпеливый и внимательный"
         }
-      }
+      },
+      "capabilityTags": [
+        "agriculture",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Ікебана",
@@ -4798,7 +5379,11 @@
           "en": "Creates beauty from plants",
           "ru": "Создает красоту из растений"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Чайна церемонія",
@@ -4826,7 +5411,10 @@
           "en": "Calms the group with ritual",
           "ru": "Успокаивает группу ритуалом"
         }
-      }
+      },
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Каякінг",
@@ -4854,7 +5442,12 @@
           "en": "Travels over water",
           "ru": "Передвигается по воде"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "endurance",
+        "scouting"
+      ]
     },
     {
       "hobby": "Дельтапланеризм",
@@ -4882,7 +5475,11 @@
           "en": "Aerial scouting",
           "ru": "Разведка с воздуха"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "scouting"
+      ]
     },
     {
       "hobby": "Печерний туризм",
@@ -4910,7 +5507,12 @@
           "en": "Navigates underground",
           "ru": "Ориентируется под землей"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "survival_skills",
+        "scouting"
+      ]
     },
     {
       "hobby": "Фрідайвінг",
@@ -4938,7 +5540,10 @@
           "en": "Holds breath for a long time",
           "ru": "Надолго задерживает дыхание"
         }
-      }
+      },
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "hobby": "Буши-крафт",
@@ -4966,7 +5571,12 @@
           "en": "Survives in the wild",
           "ru": "Выживает в дикой природе"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills",
+        "construction",
+        "fire_control"
+      ]
     },
     {
       "hobby": "Спелеологія",
@@ -4994,7 +5604,12 @@
           "en": "Explores underground spaces",
           "ru": "Исследует подземелья"
         }
-      }
+      },
+      "capabilityTags": [
+        "navigation",
+        "scouting",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Ферментація",
@@ -5022,7 +5637,11 @@
           "en": "Preserves food without a refrigerator",
           "ru": "Консервирует еду без холодильника"
         }
-      }
+      },
+      "capabilityTags": [
+        "food_preservation",
+        "food_safety"
+      ]
     },
     {
       "hobby": "Виготовлення свічок",
@@ -5050,7 +5669,11 @@
           "en": "Provides lighting",
           "ru": "Обеспечивает освещение"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Виготовлення мила",
@@ -5078,7 +5701,11 @@
           "en": "Maintains group hygiene",
           "ru": "Поддерживает гигиену группы"
         }
-      }
+      },
+      "capabilityTags": [
+        "chemistry",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Плетіння кошиків",
@@ -5106,7 +5733,11 @@
           "en": "Creates useful containers",
           "ru": "Создает полезные емкости"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Таксидермія риб",
@@ -5134,7 +5765,11 @@
           "en": "Preserves the catch",
           "ru": "Сохраняет добычу"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Виготовлення духів",
@@ -5162,7 +5797,11 @@
           "en": "Masks unpleasant odors",
           "ru": "Маскирует неприятные запахи"
         }
-      }
+      },
+      "capabilityTags": [
+        "chemistry",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Лозоходство",
@@ -5190,7 +5829,8 @@
           "en": "Searches for underground water",
           "ru": "Ищет воду под землей"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Вироблення стріл",
@@ -5218,7 +5858,11 @@
           "en": "Creates ammunition",
           "ru": "Создает боеприпасы"
         }
-      }
+      },
+      "capabilityTags": [
+        "precision_work",
+        "combat"
+      ]
     },
     {
       "hobby": "Підготовка до зомбі-апокаліпсису",
@@ -5246,7 +5890,11 @@
           "en": "Morally ready for the end",
           "ru": "Морально готов к концу"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Танці з вогнем",
@@ -5274,7 +5922,11 @@
           "en": "Can scare off predators",
           "ru": "Может отпугивать хищников"
         }
-      }
+      },
+      "capabilityTags": [
+        "fire_control",
+        "crisis_support"
+      ]
     },
     {
       "hobby": "Мінімалізм",
@@ -5302,7 +5954,11 @@
           "en": "Survives with the bare minimum",
           "ru": "Выживает с минимумом"
         }
-      }
+      },
+      "capabilityTags": [
+        "rationing",
+        "resource_management"
+      ]
     },
     {
       "hobby": "Аматорська ботаніка",
@@ -5330,7 +5986,11 @@
           "en": "Knows useful plants",
           "ru": "Знает полезные растения"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "agriculture"
+      ]
     },
     {
       "hobby": "Колекціонування комах",
@@ -5358,7 +6018,11 @@
           "en": "Knows about edible insects",
           "ru": "Знает о съедобных насекомых"
         }
-      }
+      },
+      "capabilityTags": [
+        "biology",
+        "food_safety"
+      ]
     },
     {
       "hobby": "Фехтування",
@@ -5386,7 +6050,12 @@
           "en": "Can fight with a blade",
           "ru": "Умеет сражаться клинком"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "endurance",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Метання ножів",
@@ -5414,7 +6083,11 @@
           "en": "Throws knives accurately",
           "ru": "Метко бросает ножи"
         }
-      }
+      },
+      "capabilityTags": [
+        "combat",
+        "precision_work"
+      ]
     },
     {
       "hobby": "Ведення щоденника",
@@ -5442,7 +6115,10 @@
           "en": "Records everything for history",
           "ru": "Записывает все для истории"
         }
-      }
+      },
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "hobby": "Колекціонування сірників",
@@ -5470,7 +6146,11 @@
           "en": "Can always start a fire",
           "ru": "Всегда может разжечь огонь"
         }
-      }
+      },
+      "capabilityTags": [
+        "fire_control",
+        "survival_skills"
+      ]
     },
     {
       "hobby": "Граючи в шахи сам із собою",
@@ -5498,7 +6178,8 @@
           "en": "Always wins and loses",
           "ru": "Всегда выигрывает и проигрывает"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Імітація звуків тварин",
@@ -5526,7 +6207,11 @@
           "en": "Attracts or scares away animals",
           "ru": "Привлекает или отпугивает животных"
         }
-      }
+      },
+      "capabilityTags": [
+        "hunting",
+        "scouting"
+      ]
     },
     {
       "hobby": "Вивчення мови дельфінів",
@@ -5554,7 +6239,8 @@
           "en": "Useless without an ocean",
           "ru": "Бесполезен без океана"
         }
-      }
+      },
+      "capabilityTags": []
     },
     {
       "hobby": "Читання засекречених документів",
@@ -5582,7 +6268,10 @@
           "en": "Knows state secrets",
           "ru": "Знает государственные секреты"
         }
-      }
+      },
+      "capabilityTags": [
+        "investigation"
+      ]
     },
     {
       "hobby": "Виживання в урбан-середовищі",
@@ -5610,7 +6299,12 @@
           "en": "Navigates abandoned buildings",
           "ru": "Ориентируется в заброшенных зданиях"
         }
-      }
+      },
+      "capabilityTags": [
+        "survival_skills",
+        "navigation",
+        "scouting"
+      ]
     }
   ]
 }

@@ -15,6 +15,16 @@ namespace Bunker.Models
         public ThreatOperationBonusState OperationBonuses { get; set; } = new();
         public ThreatMiniGameState MiniGame { get; set; } = new();
         public ThreatResolutionState Resolution { get; set; } = new();
+        public ThreatPlanChoiceState PlanChoice { get; set; } = new();
+    }
+
+    public class ThreatPlanChoiceState
+    {
+        public string SelectedPlanId { get; set; } = "";
+        public bool IsLocked { get; set; }
+        public int? RandomModifier { get; set; }
+        public string Outcome { get; set; } = "";
+        public int? ResolvedAtRound { get; set; }
     }
 
     public class ThreatSecretSupportDropState

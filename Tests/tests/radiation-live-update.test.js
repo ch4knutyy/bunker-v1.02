@@ -45,8 +45,8 @@ test('live merge replaces private player state and refreshes public snapshots', 
 });
 
 test('card and table render every condition while the table respects reveal state', () => {
-  assert.match(client, /additionalConditionEffects\.map\(effect =>[\s\S]*additional-condition-item/);
-  assert.match(client, /conditions\.map\(name => `<span>\+ \$\{escapeHtml\(name\)\}<\/span>`\)\.join\(''\)/);
+  assert.match(client, /additionalConditionEffects\.map\(effect =>[\s\S]*renderAdditionalPhysicalCondition\(effect\)/);
+  assert.match(client, /renderAdditionalPhysicalCondition\(effect, '\+ '\)/);
   const tableCell = method(client, 'renderTableCell');
   assert.match(tableCell, /if \(revealed\)/);
   assert.ok(tableCell.indexOf("renderAdditionalPhysicalConditionsForTable(player)") > tableCell.indexOf('if (revealed)'));

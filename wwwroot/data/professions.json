@@ -1,6 +1,6 @@
 {
   "_i18n_meta": {
-    "status": "professions_full_complete",
+    "status": "professions_capability_tags_audited",
     "source_file": "professions.json",
     "records_total": 204,
     "records_translated_en_ru": 204,
@@ -17,7 +17,11 @@
       "bonus"
     ],
     "note_uk": "Оригінальні поля залишені без змін. Повний переклад англійською та російською доданий у _i18n для всіх професій.",
-    "fallback_rule": "Якщо selected language value порожній/null, використовувати uk."
+    "fallback_rule": "Якщо selected language value порожній/null, використовувати uk.",
+    "capability_tags_audited_records": 204,
+    "capability_tag_dictionary": "threat_mechanics_tag_dictionary_v2",
+    "capability_tag_rule_uk": "Теги описують лише явні навички професії. Предмети з поля items не додають професійну компетенцію автоматично. Широкі теги не використовуються для суто суміжних, мемних або фантастичних професій.",
+    "capability_tier_rule_uk": "Рівні strong/related/support визначає конкретна загроза. capabilityTags не означають автоматичний успіх операції."
   },
   "professions": [
     {
@@ -235,7 +239,9 @@
       },
       "id": "agronomist",
       "capabilityTags": [
-        "agriculture"
+        "agriculture",
+        "biology",
+        "resource_management"
       ]
     },
     {
@@ -308,7 +314,6 @@
         "engineering_general",
         "generator_repair",
         "mechanical_repair",
-        "structural_repair",
         "technical_diagnostics",
         "welding"
       ]
@@ -452,10 +457,8 @@
       "id": "plumber",
       "capabilityTags": [
         "engineering_general",
-        "logistics",
         "plumbing_repair",
-        "technical_diagnostics",
-        "water_purification"
+        "technical_diagnostics"
       ]
     },
     {
@@ -600,7 +603,8 @@
       "capabilityTags": [
         "food_preparation",
         "food_preservation",
-        "food_safety"
+        "food_safety",
+        "rationing"
       ]
     },
     {
@@ -671,7 +675,6 @@
       "id": "builder",
       "capabilityTags": [
         "construction",
-        "engineering_general",
         "physical_strength",
         "structural_repair"
       ]
@@ -816,6 +819,7 @@
       "capabilityTags": [
         "chemistry",
         "pharmacology",
+        "toxicology",
         "water_purification"
       ]
     },
@@ -960,7 +964,6 @@
       "id": "radio_technician",
       "capabilityTags": [
         "electronics_repair",
-        "engineering_general",
         "radio_communications",
         "technical_diagnostics"
       ]
@@ -1031,7 +1034,11 @@
         }
       },
       "id": "geologist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "navigation",
+        "resource_management",
+        "scouting"
+      ]
     },
     {
       "profession": "Столяр",
@@ -1101,7 +1108,7 @@
       "id": "carpenter",
       "capabilityTags": [
         "construction",
-        "engineering_general",
+        "precision_work",
         "structural_repair"
       ]
     },
@@ -1172,9 +1179,8 @@
       },
       "id": "electronics_technician",
       "capabilityTags": [
+        "computer_systems",
         "electronics_repair",
-        "engineering_general",
-        "logistics",
         "technical_diagnostics"
       ]
     },
@@ -1244,7 +1250,9 @@
         }
       },
       "id": "physicist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Педіатр",
@@ -1316,7 +1324,6 @@
         "crisis_support",
         "medical_diagnostics",
         "medical_general",
-        "negotiation",
         "psychology"
       ]
     },
@@ -1387,7 +1394,6 @@
       },
       "id": "metalworker",
       "capabilityTags": [
-        "engineering_general",
         "mechanical_repair",
         "structural_repair",
         "welding"
@@ -1460,9 +1466,9 @@
       },
       "id": "pharmacist",
       "capabilityTags": [
-        "first_aid",
         "medical_general",
-        "pharmacology"
+        "pharmacology",
+        "toxicology"
       ]
     },
     {
@@ -1532,7 +1538,6 @@
       },
       "id": "lathe_operator",
       "capabilityTags": [
-        "engineering_general",
         "mechanical_repair",
         "precision_work"
       ]
@@ -1604,7 +1609,8 @@
       },
       "id": "beekeeper",
       "capabilityTags": [
-        "agriculture"
+        "agriculture",
+        "biology"
       ]
     },
     {
@@ -1674,7 +1680,8 @@
       },
       "id": "gardener",
       "capabilityTags": [
-        "agriculture"
+        "agriculture",
+        "biology"
       ]
     },
     {
@@ -1746,8 +1753,6 @@
       "capabilityTags": [
         "agriculture",
         "biology",
-        "engineering_general",
-        "technical_diagnostics",
         "veterinary"
       ]
     },
@@ -1818,9 +1823,7 @@
       },
       "id": "programmer",
       "capabilityTags": [
-        "computer_systems",
-        "engineering_general",
-        "hacking"
+        "computer_systems"
       ]
     },
     {
@@ -1890,7 +1893,6 @@
       },
       "id": "electric_welder",
       "capabilityTags": [
-        "engineering_general",
         "structural_repair",
         "welding"
       ]
@@ -1962,7 +1964,6 @@
       },
       "id": "seamstress",
       "capabilityTags": [
-        "engineering_general",
         "precision_work"
       ]
     },
@@ -2034,6 +2035,7 @@
       "id": "air_conditioning_technician",
       "capabilityTags": [
         "engineering_general",
+        "mechanical_repair",
         "technical_diagnostics",
         "ventilation_repair"
       ]
@@ -2177,7 +2179,8 @@
       "id": "butcher",
       "capabilityTags": [
         "food_preparation",
-        "food_preservation"
+        "food_preservation",
+        "food_safety"
       ]
     },
     {
@@ -2248,7 +2251,6 @@
       "id": "woodworker",
       "capabilityTags": [
         "construction",
-        "engineering_general",
         "structural_repair"
       ]
     },
@@ -2318,7 +2320,9 @@
         }
       },
       "id": "potter",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Ковальс",
@@ -2387,8 +2391,9 @@
       },
       "id": "blacksmith",
       "capabilityTags": [
-        "engineering_general",
+        "mechanical_repair",
         "physical_strength",
+        "precision_work",
         "structural_repair",
         "welding"
       ]
@@ -2460,6 +2465,7 @@
       },
       "id": "obstetrician_gynecologist",
       "capabilityTags": [
+        "crisis_support",
         "medical_diagnostics",
         "medical_general",
         "surgery"
@@ -2606,7 +2612,8 @@
       "id": "electrician",
       "capabilityTags": [
         "electrical_repair",
-        "engineering_general"
+        "generator_repair",
+        "technical_diagnostics"
       ]
     },
     {
@@ -2677,6 +2684,7 @@
       "id": "fisherman",
       "capabilityTags": [
         "hunting",
+        "navigation",
         "survival_skills"
       ]
     },
@@ -2820,7 +2828,9 @@
       },
       "id": "winemaker",
       "capabilityTags": [
-        "food_preservation"
+        "chemistry",
+        "food_preservation",
+        "food_safety"
       ]
     },
     {
@@ -2890,7 +2900,9 @@
       },
       "id": "brewer",
       "capabilityTags": [
-        "food_preservation"
+        "chemistry",
+        "food_preservation",
+        "food_safety"
       ]
     },
     {
@@ -2960,7 +2972,7 @@
       },
       "id": "optician",
       "capabilityTags": [
-        "engineering_general",
+        "medical_diagnostics",
         "precision_work"
       ]
     },
@@ -3031,7 +3043,7 @@
       },
       "id": "shoemaker",
       "capabilityTags": [
-        "engineering_general"
+        "precision_work"
       ]
     },
     {
@@ -3101,6 +3113,8 @@
       },
       "id": "hydrologist",
       "capabilityTags": [
+        "resource_management",
+        "scouting",
         "water_purification"
       ]
     },
@@ -3170,7 +3184,10 @@
         }
       },
       "id": "meteorologist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "navigation",
+        "scouting"
+      ]
     },
     {
       "profession": "Картограф",
@@ -3310,8 +3327,8 @@
       },
       "id": "truck_driver",
       "capabilityTags": [
-        "engineering_general",
         "logistics",
+        "mechanical_repair",
         "navigation",
         "resource_management"
       ]
@@ -3383,9 +3400,9 @@
       },
       "id": "diesel_mechanic",
       "capabilityTags": [
-        "engineering_general",
         "generator_repair",
-        "mechanical_repair"
+        "mechanical_repair",
+        "technical_diagnostics"
       ]
     },
     {
@@ -3454,7 +3471,9 @@
         }
       },
       "id": "massage_therapist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Фітнес-тренер",
@@ -3523,6 +3542,7 @@
       },
       "id": "fitness_trainer",
       "capabilityTags": [
+        "endurance",
         "physical_strength"
       ]
     },
@@ -3594,7 +3614,8 @@
       "id": "dietitian",
       "capabilityTags": [
         "food_safety",
-        "rationing"
+        "rationing",
+        "resource_management"
       ]
     },
     {
@@ -3663,7 +3684,10 @@
         }
       },
       "id": "physics_teacher",
-      "capabilityTags": []
+      "capabilityTags": [
+        "organization",
+        "technical_diagnostics"
+      ]
     },
     {
       "profession": "Учитель хімії",
@@ -3732,7 +3756,8 @@
       },
       "id": "chemistry_teacher",
       "capabilityTags": [
-        "chemistry"
+        "chemistry",
+        "organization"
       ]
     },
     {
@@ -3872,6 +3897,7 @@
       },
       "id": "archivist",
       "capabilityTags": [
+        "investigation",
         "organization"
       ]
     },
@@ -3942,7 +3968,7 @@
       },
       "id": "jeweler",
       "capabilityTags": [
-        "engineering_general",
+        "mechanical_repair",
         "precision_work"
       ]
     },
@@ -4013,8 +4039,6 @@
       },
       "id": "watchmaker",
       "capabilityTags": [
-        "engineering_general",
-        "generator_repair",
         "mechanical_repair",
         "precision_work",
         "technical_diagnostics"
@@ -4089,7 +4113,8 @@
       "capabilityTags": [
         "food_safety",
         "negotiation",
-        "organization"
+        "organization",
+        "resource_management"
       ]
     },
     {
@@ -4303,6 +4328,7 @@
       },
       "id": "florist",
       "capabilityTags": [
+        "agriculture",
         "biology"
       ]
     },
@@ -4452,6 +4478,7 @@
         "access_control",
         "combat",
         "crowd_control",
+        "investigation",
         "security"
       ]
     },
@@ -4523,7 +4550,8 @@
       "id": "sniper",
       "capabilityTags": [
         "combat",
-        "precision_work"
+        "precision_work",
+        "scouting"
       ]
     },
     {
@@ -4593,7 +4621,9 @@
       },
       "id": "bomb_disposal_specialist",
       "capabilityTags": [
-        "security"
+        "precision_work",
+        "security",
+        "technical_diagnostics"
       ]
     },
     {
@@ -4663,6 +4693,7 @@
       },
       "id": "firefighter",
       "capabilityTags": [
+        "crisis_support",
         "endurance",
         "fire_control",
         "first_aid",
@@ -4812,6 +4843,7 @@
       "id": "bodyguard",
       "capabilityTags": [
         "access_control",
+        "combat",
         "crowd_control",
         "security"
       ]
@@ -4884,6 +4916,8 @@
       "id": "secret_agent",
       "capabilityTags": [
         "access_control",
+        "investigation",
+        "negotiation",
         "scouting",
         "security"
       ]
@@ -5028,7 +5062,8 @@
       "id": "judge",
       "capabilityTags": [
         "leadership",
-        "negotiation"
+        "negotiation",
+        "organization"
       ]
     },
     {
@@ -5098,6 +5133,7 @@
       },
       "id": "lawyer",
       "capabilityTags": [
+        "investigation",
         "negotiation"
       ]
     },
@@ -5313,7 +5349,9 @@
       },
       "id": "virologist",
       "capabilityTags": [
+        "biology",
         "epidemiology",
+        "medical_diagnostics",
         "microbiology",
         "quarantine_management"
       ]
@@ -5385,6 +5423,9 @@
       },
       "id": "toxicologist",
       "capabilityTags": [
+        "chemistry",
+        "medical_diagnostics",
+        "pharmacology",
         "toxicology"
       ]
     },
@@ -5455,15 +5496,12 @@
       },
       "id": "military_medic",
       "capabilityTags": [
-        "access_control",
         "combat",
-        "crowd_control",
+        "crisis_support",
         "endurance",
         "first_aid",
-        "leadership",
         "medical_general",
         "precision_work",
-        "security",
         "surgery",
         "survival_skills"
       ]
@@ -5535,6 +5573,8 @@
       },
       "id": "survival_instructor",
       "capabilityTags": [
+        "navigation",
+        "scouting",
         "survival_skills"
       ]
     },
@@ -5606,7 +5646,8 @@
       "id": "submarine_captain",
       "capabilityTags": [
         "leadership",
-        "navigation"
+        "navigation",
+        "organization"
       ]
     },
     {
@@ -5676,9 +5717,11 @@
       },
       "id": "astronaut",
       "capabilityTags": [
+        "crisis_support",
         "endurance",
         "navigation",
-        "survival_skills"
+        "survival_skills",
+        "technical_diagnostics"
       ]
     },
     {
@@ -5748,8 +5791,10 @@
       },
       "id": "saboteur",
       "capabilityTags": [
+        "access_control",
         "combat",
-        "survival_skills"
+        "precision_work",
+        "scouting"
       ]
     },
     {
@@ -5890,7 +5935,8 @@
       "id": "hitman",
       "capabilityTags": [
         "combat",
-        "toxicology"
+        "precision_work",
+        "scouting"
       ]
     },
     {
@@ -5960,7 +6006,9 @@
       },
       "id": "thief",
       "capabilityTags": [
-        "hacking"
+        "access_control",
+        "precision_work",
+        "scouting"
       ]
     },
     {
@@ -6102,7 +6150,8 @@
       },
       "id": "con_artist",
       "capabilityTags": [
-        "negotiation"
+        "negotiation",
+        "psychology"
       ]
     },
     {
@@ -6171,7 +6220,12 @@
         }
       },
       "id": "smuggler",
-      "capabilityTags": []
+      "capabilityTags": [
+        "logistics",
+        "negotiation",
+        "resource_management",
+        "scouting"
+      ]
     },
     {
       "profession": "Піроман",
@@ -6378,7 +6432,7 @@
       },
       "id": "cannibal",
       "capabilityTags": [
-        "food_safety",
+        "food_preparation",
         "survival_skills"
       ]
     },
@@ -6449,6 +6503,9 @@
       },
       "id": "revolutionary",
       "capabilityTags": [
+        "crowd_control",
+        "leadership",
+        "negotiation",
         "organization"
       ]
     },
@@ -6654,7 +6711,9 @@
         }
       },
       "id": "meme_creator",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Геймер-професіонал",
@@ -6790,9 +6849,7 @@
         }
       },
       "id": "streamer",
-      "capabilityTags": [
-        "computer_systems"
-      ]
+      "capabilityTags": []
     },
     {
       "profession": "Інтернет-тролль",
@@ -6860,9 +6917,7 @@
         }
       },
       "id": "internet_troll",
-      "capabilityTags": [
-        "toxicology"
-      ]
+      "capabilityTags": []
     },
     {
       "profession": "Криптоінвестор",
@@ -7204,7 +7259,9 @@
         }
       },
       "id": "stripper",
-      "capabilityTags": []
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "profession": "Еротичний масажист",
@@ -7272,7 +7329,9 @@
         }
       },
       "id": "erotic_massage_therapist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Порноактор",
@@ -7410,7 +7469,9 @@
         }
       },
       "id": "porn_actress",
-      "capabilityTags": []
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "profession": "Ескорт",
@@ -7478,7 +7539,9 @@
         }
       },
       "id": "escort",
-      "capabilityTags": []
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Гей-ескорт",
@@ -7546,7 +7609,9 @@
         }
       },
       "id": "gay_escort",
-      "capabilityTags": []
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Сутенер",
@@ -7687,7 +7752,8 @@
       "id": "brothel_owner",
       "capabilityTags": [
         "negotiation",
-        "organization"
+        "organization",
+        "resource_management"
       ]
     },
     {
@@ -7757,11 +7823,9 @@
       },
       "id": "bdsm_mistress",
       "capabilityTags": [
-        "crisis_support",
-        "engineering_general",
+        "leadership",
         "negotiation",
-        "psychology",
-        "technical_diagnostics"
+        "psychology"
       ]
     },
     {
@@ -7972,7 +8036,9 @@
         }
       },
       "id": "erotic_photographer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Організатор оргій",
@@ -8041,7 +8107,7 @@
       },
       "id": "orgy_organizer",
       "capabilityTags": [
-        "leadership",
+        "negotiation",
         "organization"
       ]
     },
@@ -8179,7 +8245,9 @@
         }
       },
       "id": "strip_club_dancer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "endurance"
+      ]
     },
     {
       "profession": "Продюсер дорослого кіно",
@@ -8248,6 +8316,7 @@
       },
       "id": "adult_film_producer",
       "capabilityTags": [
+        "leadership",
         "organization"
       ]
     },
@@ -8317,7 +8386,9 @@
         }
       },
       "id": "elite_sex_worker",
-      "capabilityTags": []
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Проститутка вулична",
@@ -8386,6 +8457,7 @@
       },
       "id": "street_prostitute",
       "capabilityTags": [
+        "negotiation",
         "survival_skills"
       ]
     },
@@ -8455,7 +8527,10 @@
         }
       },
       "id": "aphrodisiac_maker",
-      "capabilityTags": []
+      "capabilityTags": [
+        "chemistry",
+        "pharmacology"
+      ]
     },
     {
       "profession": "Тантра-майстер",
@@ -8523,7 +8598,9 @@
         }
       },
       "id": "tantra_master",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Художник-сюрреаліст",
@@ -8592,9 +8669,7 @@
       },
       "id": "surrealist_artist",
       "capabilityTags": [
-        "crisis_support",
-        "negotiation",
-        "psychology"
+        "crisis_support"
       ]
     },
     {
@@ -8663,7 +8738,9 @@
         }
       },
       "id": "musician",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Співак",
@@ -8731,7 +8808,9 @@
         }
       },
       "id": "singer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Актор театру",
@@ -8799,7 +8878,9 @@
         }
       },
       "id": "theater_actor",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Режисер",
@@ -8938,7 +9019,9 @@
         }
       },
       "id": "writer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Поет",
@@ -9006,7 +9089,9 @@
         }
       },
       "id": "poet",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Скульптор",
@@ -9074,7 +9159,9 @@
         }
       },
       "id": "sculptor",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Фотограф",
@@ -9142,7 +9229,10 @@
         }
       },
       "id": "photographer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "investigation",
+        "precision_work"
+      ]
     },
     {
       "profession": "Дизайнер інтер'єрів",
@@ -9280,7 +9370,9 @@
         }
       },
       "id": "fashion_designer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Графічний дизайнер",
@@ -9348,7 +9440,9 @@
         }
       },
       "id": "graphic_designer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Аніматор",
@@ -9416,7 +9510,10 @@
         }
       },
       "id": "entertainer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support",
+        "organization"
+      ]
     },
     {
       "profession": "Клоун",
@@ -9484,7 +9581,9 @@
         }
       },
       "id": "clown",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Фокусник",
@@ -9552,7 +9651,10 @@
         }
       },
       "id": "magician",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support",
+        "precision_work"
+      ]
     },
     {
       "profession": "Жонглер",
@@ -9621,7 +9723,8 @@
       },
       "id": "juggler",
       "capabilityTags": [
-        "organization"
+        "crisis_support",
+        "precision_work"
       ]
     },
     {
@@ -9690,7 +9793,9 @@
         }
       },
       "id": "calligrapher",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Татуювальник",
@@ -9828,7 +9933,10 @@
         }
       },
       "id": "hairdresser",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support",
+        "precision_work"
+      ]
     },
     {
       "profession": "Візажист",
@@ -9896,7 +10004,9 @@
         }
       },
       "id": "makeup_artist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Стиліст",
@@ -10032,7 +10142,9 @@
         }
       },
       "id": "flutist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Барабанщик",
@@ -10100,7 +10212,9 @@
         }
       },
       "id": "drummer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Скрипаль",
@@ -10168,7 +10282,9 @@
         }
       },
       "id": "violinist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Диджей",
@@ -10236,7 +10352,10 @@
         }
       },
       "id": "dj",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support",
+        "organization"
+      ]
     },
     {
       "profession": "Радіоведучий",
@@ -10374,7 +10493,9 @@
         }
       },
       "id": "sports_commentator",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Журналіст",
@@ -10442,7 +10563,11 @@
         }
       },
       "id": "journalist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "investigation",
+        "negotiation",
+        "organization"
+      ]
     },
     {
       "profession": "Історик",
@@ -10510,7 +10635,10 @@
         }
       },
       "id": "historian",
-      "capabilityTags": []
+      "capabilityTags": [
+        "investigation",
+        "organization"
+      ]
     },
     {
       "profession": "Філософ",
@@ -10647,7 +10775,8 @@
       },
       "id": "mortgage_broker",
       "capabilityTags": [
-        "negotiation"
+        "negotiation",
+        "resource_management"
       ]
     },
     {
@@ -10716,7 +10845,9 @@
         }
       },
       "id": "pastry_chef",
-      "capabilityTags": []
+      "capabilityTags": [
+        "food_preparation"
+      ]
     },
     {
       "profession": "Бариста",
@@ -10784,7 +10915,9 @@
         }
       },
       "id": "barista",
-      "capabilityTags": []
+      "capabilityTags": [
+        "food_preparation"
+      ]
     },
     {
       "profession": "Сомельє",
@@ -10852,7 +10985,9 @@
         }
       },
       "id": "sommelier",
-      "capabilityTags": []
+      "capabilityTags": [
+        "food_safety"
+      ]
     },
     {
       "profession": "Кулінарний критик",
@@ -10920,7 +11055,9 @@
         }
       },
       "id": "food_critic",
-      "capabilityTags": []
+      "capabilityTags": [
+        "food_safety"
+      ]
     },
     {
       "profession": "Шеф-кухар",
@@ -10992,7 +11129,8 @@
         "food_preparation",
         "food_preservation",
         "food_safety",
-        "logistics"
+        "organization",
+        "resource_management"
       ]
     },
     {
@@ -11061,7 +11199,12 @@
         }
       },
       "id": "restaurateur",
-      "capabilityTags": []
+      "capabilityTags": [
+        "food_safety",
+        "negotiation",
+        "organization",
+        "resource_management"
+      ]
     },
     {
       "profession": "Археолог",
@@ -11129,7 +11272,12 @@
         }
       },
       "id": "archaeologist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "investigation",
+        "navigation",
+        "precision_work",
+        "scouting"
+      ]
     },
     {
       "profession": "Етнограф",
@@ -11197,7 +11345,10 @@
         }
       },
       "id": "ethnographer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "investigation",
+        "negotiation"
+      ]
     },
     {
       "profession": "Лінгвіст",
@@ -11265,7 +11416,9 @@
         }
       },
       "id": "linguist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "negotiation"
+      ]
     },
     {
       "profession": "Соціолог",
@@ -11333,7 +11486,11 @@
         }
       },
       "id": "sociologist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "investigation",
+        "organization",
+        "psychology"
+      ]
     },
     {
       "profession": "Антрополог",
@@ -11402,6 +11559,8 @@
       },
       "id": "anthropologist",
       "capabilityTags": [
+        "biology",
+        "investigation",
         "psychology"
       ]
     },
@@ -11471,7 +11630,10 @@
         }
       },
       "id": "animal_trainer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "biology",
+        "veterinary"
+      ]
     },
     {
       "profession": "Йог",
@@ -11539,7 +11701,10 @@
         }
       },
       "id": "yogi",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support",
+        "endurance"
+      ]
     },
     {
       "profession": "Інструктор з йоги",
@@ -11608,7 +11773,9 @@
       },
       "id": "yoga_instructor",
       "capabilityTags": [
-        "psychology"
+        "crisis_support",
+        "endurance",
+        "organization"
       ]
     },
     {
@@ -11677,7 +11844,10 @@
         }
       },
       "id": "food_quality_inspector",
-      "capabilityTags": []
+      "capabilityTags": [
+        "food_safety",
+        "investigation"
+      ]
     },
     {
       "profession": "Критик мемів",
@@ -11813,7 +11983,9 @@
         }
       },
       "id": "professional_hugger",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Дегустатор корму для собак",
@@ -11882,7 +12054,7 @@
       },
       "id": "dog_food_taster",
       "capabilityTags": [
-        "endurance"
+        "food_safety"
       ]
     },
     {
@@ -12155,9 +12327,7 @@
         }
       },
       "id": "conspiracy_theory_expert",
-      "capabilityTags": [
-        "toxicology"
-      ]
+      "capabilityTags": []
     },
     {
       "profession": "Тренер голубів",
@@ -12225,7 +12395,10 @@
         }
       },
       "id": "pigeon_trainer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "biology",
+        "veterinary"
+      ]
     },
     {
       "profession": "Ворожка на кавовій гущі",
@@ -12361,7 +12534,10 @@
         }
       },
       "id": "hypnotist",
-      "capabilityTags": []
+      "capabilityTags": [
+        "negotiation",
+        "psychology"
+      ]
     },
     {
       "profession": "Читач думок",
@@ -12566,10 +12742,7 @@
       },
       "id": "ghost_hunter",
       "capabilityTags": [
-        "endurance",
-        "hunting",
-        "scouting",
-        "survival_skills"
+        "scouting"
       ]
     },
     {
@@ -12639,6 +12812,7 @@
       },
       "id": "ufologist",
       "capabilityTags": [
+        "investigation",
         "scouting"
       ]
     },
@@ -12844,7 +13018,9 @@
         }
       },
       "id": "sock_designer",
-      "capabilityTags": []
+      "capabilityTags": [
+        "precision_work"
+      ]
     },
     {
       "profession": "Консультант з вибору шпалер",
@@ -12912,7 +13088,9 @@
         }
       },
       "id": "wallpaper_selection_consultant",
-      "capabilityTags": []
+      "capabilityTags": [
+        "organization"
+      ]
     },
     {
       "profession": "Нюхач парфумів",
@@ -13252,7 +13430,9 @@
         }
       },
       "id": "mime",
-      "capabilityTags": []
+      "capabilityTags": [
+        "crisis_support"
+      ]
     },
     {
       "profession": "Колекціонер відчуттів",
@@ -13598,6 +13778,7 @@
       },
       "id": "spoon_playing_teacher",
       "capabilityTags": [
+        "crisis_support",
         "organization"
       ]
     },
@@ -13803,9 +13984,7 @@
         }
       },
       "id": "fire_mage",
-      "capabilityTags": [
-        "fire_control"
-      ]
+      "capabilityTags": []
     },
     {
       "profession": "Некромант",
@@ -13941,9 +14120,7 @@
         }
       },
       "id": "alchemist",
-      "capabilityTags": [
-        "chemistry"
-      ]
+      "capabilityTags": []
     },
     {
       "profession": "Драконовод",
@@ -14215,9 +14392,7 @@
         }
       },
       "id": "werewolf",
-      "capabilityTags": [
-        "physical_strength"
-      ]
+      "capabilityTags": []
     },
     {
       "profession": "Вампір",
@@ -14285,9 +14460,7 @@
         }
       },
       "id": "vampire",
-      "capabilityTags": [
-        "physical_strength"
-      ]
+      "capabilityTags": []
     }
   ],
   "_threat_tagging_meta": {
