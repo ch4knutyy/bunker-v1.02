@@ -259,6 +259,12 @@ public sealed class RoomSnapshotService
                 restored.DisconnectedAt = current.DisconnectedAt;
                 room.Players[connectionKey] = restored;
             }
+            foreach (var player in room.Players.Values.Where(player => room.IrreversibleOmniscientPlayerIds.Contains(GetStableTopologyId(player))))
+            {
+                player.IsSpectatorGm = true;
+                player.HasSeenOmniscientState = true;
+                RoomService.RemoveGameplayParticipationReferences(room, player);
+            }
         }
     }
 
@@ -325,6 +331,7 @@ public sealed class RoomSnapshotService
             return (false, "snapshot_fingerprint_invalid");
         if (!snapshot.PlayerTopologyIds.SetEquals(GetTopologyIds(room))) return (false, "player_topology_changed");
         if (!string.Equals(snapshot.HostTopologyPlayerId, GetCurrentHostPlayerId(room), StringComparison.OrdinalIgnoreCase)) return (false, "host_topology_changed");
+        if (room.IrreversibleOmniscientPlayerIds.Any(id => snapshot.State.PlayersByStableId.TryGetValue(id, out var player) && !player.IsSpectatorGm)) return (false, "omniscient_boundary_irreversible");
         if (snapshot.RestoreStatus == RoomSnapshotRestoreStatus.Restored) return (false, "snapshot_already_restored");
         return (true, null);
     }

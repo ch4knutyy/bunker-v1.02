@@ -312,9 +312,8 @@ namespace Bunker.Hubs
 				totalVoters = voting.EligibleVoters.Count,
 				totalVotes = GetVotingProperty("totalVotes"),
 				allVoted = GetVotingProperty("allVoted"),
-				candidates = RoomService.GetPlayersSnapshot(room)
+				candidates = RoomService.GetGameplayPlayersSnapshot(room)
 					.Select(entry => entry.Value)
-					.Where(p => !p.IsEliminated)
 					.Select(p => new
 					{
 						connectionId = p.ConnectionId,
@@ -346,7 +345,7 @@ namespace Bunker.Hubs
 		{
 			var existingPlayers = room == null
 				? Enumerable.Empty<Player>()
-				: RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value);
+				: RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value);
 			var player = _generator.Generate(playerName, existingPlayers);
 			player.ConnectionId = Context.ConnectionId;
 			player.StablePlayerId = stablePlayerId ?? "";
@@ -355,6 +354,7 @@ namespace Bunker.Hubs
 
 		private void EnsurePlayerHasGeneratedData(Player player)
 		{
+			if (player.IsSpectatorGm) return;
 			var generated = HasCompleteCharacterData(player) ? null : _generator.Generate(player.Name);
 
 			if (!HasPersonality(player)) player.Personality = generated!.Personality;
@@ -493,6 +493,9 @@ namespace Bunker.Hubs
 						: new List<PlayerConditionEffect>(),
 					fact = p.Fact,
 					isEliminated = p.IsEliminated,
+					isSpectatorGm = p.IsSpectatorGm,
+					publicRole = p.IsSpectatorGm ? "spectator_gm" : "player",
+					publicRoleLabel = p.IsSpectatorGm ? "GM-спостерігач" : null,
 					eliminatedAtRound = p.EliminatedAtRound,
 					eliminatedByVote = p.EliminatedByVote,
 					canRevealAllAfterElimination = p.CanRevealAllAfterElimination,
@@ -540,7 +543,7 @@ namespace Bunker.Hubs
             }
 
             // Рандомізація номерів місць гравців
-            var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+            var playersSnapshot = RoomService.GetGameplayPlayersSnapshot(room);
             var seatNumbers = Enumerable.Range(1, playersSnapshot.Count).ToList();
             // Fisher-Yates shuffle
             for (int i = seatNumbers.Count - 1; i > 0; i--)
@@ -573,6 +576,7 @@ namespace Bunker.Hubs
                         name = p.Name ?? "Unknown",
                         connectionId = string.IsNullOrWhiteSpace(p.ConnectionId) ? entry.Key : p.ConnectionId,
                         isEliminated = p.IsEliminated,
+                        isSpectatorGm = p.IsSpectatorGm,
                         eliminatedAtRound = p.EliminatedAtRound,
                         eliminatedByVote = p.EliminatedByVote,
                         canRevealAllAfterElimination = p.CanRevealAllAfterElimination,

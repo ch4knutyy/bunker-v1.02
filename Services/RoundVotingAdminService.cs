@@ -64,7 +64,7 @@ public static class RoundVotingAdminService
 
     public static void ResetReadiness(Room room)
     {
-        foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value).Where(player => !player.IsEliminated))
+        foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
             room.VotingReadyResponses.Remove(RoomService.GetPlayerKey(player));
     }
 

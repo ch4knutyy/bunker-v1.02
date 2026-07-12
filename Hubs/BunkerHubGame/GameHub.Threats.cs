@@ -91,7 +91,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player) ||
+                !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -127,7 +128,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player) ||
+                !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -174,7 +176,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player) ||
+                !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -295,7 +298,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var voter))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var voter) ||
+                !RoomService.IsGameplayParticipant(voter))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -309,7 +313,7 @@ namespace Bunker.Hubs
             }
 
             var voterId = RoomService.GetPlayerKey(voter);
-            if (!_roomService.TryResolvePlayer(context.Room, targetPlayerId, out _, out var target) || target.IsEliminated)
+            if (!_roomService.TryResolvePlayer(context.Room, targetPlayerId, out _, out var target) || !RoomService.IsGameplayParticipant(target))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Недійсний кандидат");
                 return;
@@ -420,7 +424,7 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (!_roomService.TryResolvePlayer(context.Room, playerId, out _, out var player) || player.IsEliminated)
+            if (!_roomService.TryResolvePlayer(context.Room, playerId, out _, out var player) || !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
                 return;
@@ -601,7 +605,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player) ||
+                !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -666,7 +671,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out _))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player) ||
+                !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -906,7 +912,8 @@ namespace Bunker.Hubs
         {
             var context = GetCurrentThreatContext();
             if (context.Room == null || string.IsNullOrWhiteSpace(context.RoomId) ||
-                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player))
+                !_roomService.TryResolvePlayer(context.Room, Context.ConnectionId, out _, out var player) ||
+                !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
                 return;
@@ -1253,13 +1260,13 @@ namespace Bunker.Hubs
 
         private IEnumerable<KeyValuePair<string, Player>> GetActiveThreatPlayers(Room room) =>
             RoomService.GetPlayersSnapshot(room)
-                .Where(entry => entry.Value != null && !entry.Value.IsEliminated && entry.Value.IsConnected)
+                .Where(entry => RoomService.IsGameplayParticipant(entry.Value) && entry.Value.IsConnected)
                 .OrderBy(entry => entry.Value.SeatNumber == 0 ? int.MaxValue : entry.Value.SeatNumber)
                 .ThenBy(entry => RoomService.GetPlayerKey(entry.Value), StringComparer.OrdinalIgnoreCase);
 
         private static List<KeyValuePair<string, Player>> GetThreatScalingPlayers(Room room) =>
             RoomService.GetPlayersSnapshot(room)
-                .Where(entry => entry.Value != null && !entry.Value.IsEliminated)
+                .Where(entry => RoomService.IsGameplayParticipant(entry.Value))
                 .OrderBy(entry => entry.Value.SeatNumber == 0 ? int.MaxValue : entry.Value.SeatNumber)
                 .ThenBy(entry => RoomService.GetPlayerKey(entry.Value), StringComparer.OrdinalIgnoreCase)
                 .ToList();

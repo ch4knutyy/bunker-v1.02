@@ -51,10 +51,7 @@ namespace Bunker.Hubs
             };
 
             var playersSnapshot = RoomService.GetPlayersSnapshot(room);
-            var activePlayers = playersSnapshot
-                .Select(entry => entry.Value)
-                .Where(p => !p.IsEliminated)
-                .ToList();
+            var activePlayers = RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value).ToList();
 
             // Додаємо всіх не елімінованих гравців як eligible voters
             foreach (var player in activePlayers)
@@ -153,14 +150,14 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (!voting.EligibleVoters.Contains(voterId))
+            if (!RoomService.IsGameplayParticipant(voterPlayer) || !voting.EligibleVoters.Contains(voterId))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Ви не можете голосувати");
                 return;
             }
 
             if (!_roomService.TryResolvePlayer(room, targetConnectionId, out var targetCurrentConnectionId, out var targetPlayer) ||
-                targetPlayer.IsEliminated)
+                !RoomService.IsGameplayParticipant(targetPlayer))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Недійсний кандидат");
                 return;

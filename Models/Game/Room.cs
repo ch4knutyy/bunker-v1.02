@@ -36,6 +36,8 @@ namespace Bunker.Models
     public class Room
     {
         public GmMode GmMode { get; set; } = GmMode.PlayerHost;
+        public HashSet<string> IrreversibleOmniscientPlayerIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> ProcessedOmniscientCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public bool IsPaused { get; set; }
         public string? PauseReason { get; set; }
         public DateTimeOffset? PausedAtUtc { get; set; }
@@ -174,16 +176,17 @@ namespace Bunker.Models
         /// Кількість гравців
         /// </summary>
         public int PlayerCount => Players?.Count ?? 0;
+        public int GameplayPlayerCount => Players?.Values.Count(player => player != null && !player.IsEliminated && !player.IsSpectatorGm) ?? 0;
         
         /// <summary>
         /// Чи можна приєднатися
         /// </summary>
-        public bool CanJoin => State == RoomState.Lobby && PlayerCount < MaxPlayers;
+        public bool CanJoin => State == RoomState.Lobby && GameplayPlayerCount < MaxPlayers;
         
         /// <summary>
         /// Чи можна почати гру
         /// </summary>
-        public bool CanStart => State == RoomState.Lobby && PlayerCount >= MinPlayers;
+        public bool CanStart => State == RoomState.Lobby && GameplayPlayerCount >= MinPlayers;
         
         /// <summary>
         /// Перевірити чи є гравець хостом
@@ -209,7 +212,8 @@ namespace Bunker.Models
                 id = Id ?? "",
                 name = string.IsNullOrWhiteSpace(Name) ? "Кімната" : Name,
                 hasPassword = HasPassword,
-                playerCount = PlayerCount,
+                playerCount = GameplayPlayerCount,
+                spectatorGmCount = Players?.Values.Count(player => player?.IsSpectatorGm == true) ?? 0,
                 maxPlayers = MaxPlayers,
                 hostName = HostName ?? "",
                 state = State.ToString(),

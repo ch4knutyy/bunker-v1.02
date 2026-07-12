@@ -35,9 +35,7 @@ namespace Bunker.Hubs
             room.CurrentRoundReveals ??= new();
             room.RoundDiceRolls ??= new();
 
-            var activePlayers = RoomService.GetPlayersSnapshot(room)
-                .Where(entry => entry.Value != null && !entry.Value.IsEliminated)
-                .ToList();
+            var activePlayers = RoomService.GetGameplayPlayersSnapshot(room).ToList();
 
             var revealedPlayers = activePlayers
                 .Where(entry => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value)))
@@ -129,8 +127,7 @@ namespace Bunker.Hubs
         {
             room.CurrentRoundReveals ??= new();
 
-            var activePlayers = RoomService.GetPlayersSnapshot(room)
-                .Where(entry => entry.Value != null && !entry.Value.IsEliminated)
+            var activePlayers = RoomService.GetGameplayPlayersSnapshot(room)
                 .Select(entry => entry.Value)
                 .ToList();
 

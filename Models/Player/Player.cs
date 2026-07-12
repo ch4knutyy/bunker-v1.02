@@ -14,6 +14,8 @@ namespace Bunker.Models
         // Поточний статус SignalR-з'єднання. Гравця не видаляємо одразу після refresh.
         public bool IsConnected { get; set; } = true;
         public DateTime? DisconnectedAt { get; set; }
+        public bool IsSpectatorGm { get; set; }
+        public bool HasSeenOmniscientState { get; set; }
 
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();

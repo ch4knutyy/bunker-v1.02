@@ -77,11 +77,10 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'dotnet run',
+    command: 'dotnet run --project Bunker.csproj --no-restore',
     url: 'https://localhost:7283',
     reuseExistingServer: !process.env.CI,
     ignoreHTTPSErrors: true,
     timeout: 120 * 1000,
   },
 });
-

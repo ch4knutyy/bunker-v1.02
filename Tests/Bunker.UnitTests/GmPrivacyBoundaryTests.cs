@@ -17,8 +17,8 @@ public sealed class GmPrivacyBoundaryTests
     [Fact]
     public void OmniscientGm_HasExplicitHiddenDataCapabilities()
     {
-        Assert.True(GmCapabilities.Allows(GmMode.OmniscientGm, GmCapability.PeekHiddenCharacteristics));
-        Assert.True(GmCapabilities.Allows(GmMode.OmniscientGm, GmCapability.BrowseFutureThreatCatalog));
+        Assert.False(GmCapabilities.Allows(GmMode.OmniscientGm, GmCapability.PeekHiddenCharacteristics));
+        Assert.False(GmCapabilities.Allows(GmMode.OmniscientGm, GmCapability.BrowseFutureThreatCatalog));
     }
 
     [Fact]

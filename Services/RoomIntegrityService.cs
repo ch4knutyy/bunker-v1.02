@@ -104,7 +104,7 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
         {
             var current = roomService.GetPlayerByAnyId(room, room.CurrentTurnPlayerId);
             if (current == null) Add("current_turn_player_missing", RoomIntegritySeverity.Error);
-            else if (current.IsEliminated || !current.IsConnected) Add("current_turn_player_inactive", RoomIntegritySeverity.Error, false, current);
+            else if (!RoomService.IsGameplayParticipant(current) || !current.IsConnected) Add("current_turn_player_inactive", RoomIntegritySeverity.Error, false, current);
         }
 
         var minRound = room.State is RoomState.Lobby or RoomState.Waiting ? 0 : 1;
@@ -113,7 +113,7 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
         if (!room.IsPaused && (room.PausedAtUtc != null || !string.IsNullOrWhiteSpace(room.PauseReason) || !string.IsNullOrWhiteSpace(room.PausedByPlayerId))) Add("pause_metadata_stale", RoomIntegritySeverity.Warning);
 
         foreach (var key in room.VotingReadyResponses.Keys.Where(key => !validIds.Contains(key))) Add("ready_player_missing", RoomIntegritySeverity.Warning, true);
-        foreach (var key in room.VotingReadyResponses.Keys.Where(key => validIds.Contains(key) && roomService.GetPlayerByAnyId(room, key)?.IsEliminated == true)) Add("ready_player_inactive", RoomIntegritySeverity.Warning);
+        foreach (var key in room.VotingReadyResponses.Keys.Where(key => validIds.Contains(key) && !RoomService.IsGameplayParticipant(roomService.GetPlayerByAnyId(room, key)))) Add("ready_player_inactive", RoomIntegritySeverity.Warning);
         AddVotingIssues(room, validIds, issues, language);
         AddThreatIssues(room, validIds, issues, language);
 

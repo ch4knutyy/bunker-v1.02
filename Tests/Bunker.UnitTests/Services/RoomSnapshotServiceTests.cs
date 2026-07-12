@@ -128,6 +128,27 @@ public sealed class RoomSnapshotServiceTests
     }
 
     [Fact]
+    public void OmniscientBoundary_CannotBeUndoneByPreEntrySnapshot()
+    {
+        var context = CreateContext();
+        var beforeEntry = context.Snapshots.CreateSnapshot(context.Room, "host-player", "before omniscient entry");
+
+        context.Room.IrreversibleOmniscientPlayerIds.Add(context.Host.StablePlayerId);
+        context.Host.IsSpectatorGm = true;
+        context.Host.HasSeenOmniscientState = true;
+        context.RoomService.RemoveGameplayParticipation(context.Room, context.Host);
+
+        var preview = context.Snapshots.PreviewRestore(context.Room, beforeEntry.SnapshotId);
+        var restore = context.Snapshots.RestoreSnapshot(context.Room, beforeEntry.SnapshotId, "host-player", "blocked restore");
+
+        Assert.False(preview.CanRestore);
+        Assert.Equal("omniscient_boundary_irreversible", preview.BlockedReason);
+        Assert.False(restore.Success);
+        Assert.Equal("omniscient_boundary_irreversible", restore.ErrorCode);
+        Assert.True(context.Host.IsSpectatorGm);
+    }
+
+    [Fact]
     public void IntegrityFailure_RollsBackToSafetySnapshot()
     {
         var context = CreateContext();
