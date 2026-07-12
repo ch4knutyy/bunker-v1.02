@@ -230,9 +230,11 @@
                         <button class="btn-gm-action" onclick="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
                         <button class="btn-gm-action" onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
                     </div>
-                    <div class="gm-threat-danger-zone">
-                        <button class="btn-gm-action btn-danger" onclick="gmRestartThreat()">Перезапустити стан загрози</button>
-                        <button class="btn-gm-action btn-danger" onclick="gmCancelThreat()">Скасувати без наслідків</button>
+                    <div class="gm-threat-danger-zone" id="gmThreatEmergencyBlock">
+                        <strong data-gm-i18n="gmThreatEmergency">Аварійне керування</strong>
+                        <button id="gmThreatResync" class="btn-gm-action" data-gm-i18n="gmThreatResync" onclick="gmResyncThreatRoom()">Оновити стан загрози</button>
+                        <button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" onclick="gmRestartThreat()">Перезапустити спробу</button>
+                        <button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" onclick="gmCancelThreat()">Скасувати загрозу</button>
                     </div>
                     <p id="gmThreatCommandResult" class="gm-round-hint"></p>
                 </div>

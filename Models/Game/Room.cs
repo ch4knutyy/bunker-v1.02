@@ -125,6 +125,8 @@ namespace Bunker.Models
         public ThreatInteractionState? ThreatState { get; set; }
 
         public HashSet<string> ProcessedGmThreatCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        [System.Text.Json.Serialization.JsonIgnore]
+        public object ThreatSyncRoot { get; } = new();
         public HashSet<string> ProcessedGmPlayerCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>

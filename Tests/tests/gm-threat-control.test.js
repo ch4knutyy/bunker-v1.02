@@ -8,13 +8,19 @@ const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.GM
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
 
 test('every GM threat command resolves the caller room through host authorization', () => {
-  for (const method of ['GMGenerateRandomRareThreat', 'GMGenerateTextThreat', 'GMSelectThreat', 'GMCancelCurrentThreat', 'GMRestartCurrentThreat', 'GMResyncThreatRoom']) {
+  for (const method of ['GMGenerateRandomRareThreat', 'GMGenerateTextThreat', 'GMSelectThreat']) {
     const start = hub.indexOf(`public async Task ${method}`);
     const next = hub.indexOf('public async Task ', start + 20);
     const body = hub.slice(start, next < 0 ? undefined : next);
     assert.match(body, /TryGetHostRoom/);
   }
+  for (const method of ['GMCancelCurrentThreat', 'GMRestartCurrentThreat', 'GMResyncThreatRoom']) {
+    const start = hub.indexOf(`public async Task ${method}`);
+    const next = hub.indexOf('public async Task ', start + 20);
+    assert.match(hub.slice(start, next < 0 ? undefined : next), /GetThreatRecoveryRoom/);
+  }
   assert.match(hub, /TryGetHostRoom[\s\S]*IsCallerHost\(\)/);
+  assert.match(hub, /GetThreatRecoveryRoom[\s\S]*GmCapability\.ManagePublicGameState/);
 });
 
 test('rare generation uses only validated explicit specials', () => {
@@ -39,7 +45,7 @@ test('GM DTO contains public threat metadata but no hidden interaction data', ()
   const start = hub.indexOf('private object BuildGMThreatControlData');
   const body = hub.slice(start, hub.indexOf('private bool IsAvailableSpecialThreat', start));
   assert.match(body, /currentThreat/);
-  assert.match(body, /threats = _gameData\.Threats/);
+  assert.match(body, /threats = canBrowseFutureThreatCatalog \? _gameData\.Threats/);
   for (const hidden of ['TagsSnapshot', 'CorrectAnswers', 'InternalScore', 'RandomModifier', 'DisplayName']) assert.ok(!body.includes(hidden));
 });
 
