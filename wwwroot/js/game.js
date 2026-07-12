@@ -48,6 +48,10 @@ connection.start()
     let bunkerCapacityPending = false;
     let gmRoundCommandPending = false;
     let gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };
+    let gmDiagnosticsData = null;
+    let gmAuditData = { entries: [] };
+    let gmAutoFixPreview = null;
+    let gmDiagnosticsPending = false;
     let currentGameTimer = null;
     let gameTimerClockAnchor = null;
     let gameTimerCommandPending = false;
@@ -369,6 +373,25 @@ connection.start()
         ,gmRoundCurrentState: "Текущее состояние", gmRoundMainActions: "Основные действия", gmStatusPaused: "Игра приостановлена", gmStatusRunning: "Игра продолжается", gmManualRoundHeading: "Ручная установка раунда", gmManualRoundHint: "Переход возможен только вперёд; часть состояния текущего раунда будет очищена.", gmPreviewRound: "Preview / подтвердить", gmReadinessHeading: "Сброс готовности", gmReadinessHint: "Очищает текущие отметки готовности после подтверждения."
         ,gmTimerMinutes: "Минуты", gmTimerSeconds: "Секунды", gmTimerPurpose: "Назначение", gmTimerName: "Название"
         ,gmGameTimer: "Серверный таймер", gmTimerLabel: "Название таймера", gmTimerStart: "Старт", gmTimerRestart: "Перезапустить", gmTimerSet: "Установить", gmTimerStop: "Остановить", gmTimerExpired: "Время вышло", gmTimerStopped: "Остановлен", timerPurposeRound: "Раунд", timerPurposeVoting: "Голосование", timerPurposeThreat: "Угроза", timerPurposeCustom: "Другое"
+    });
+
+    Object.assign(uiTranslations.uk, {
+        gmRunDiagnostics: "Перевірити кімнату", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Застосувати безпечні виправлення",
+        gmIssueFilter: "Фільтр issues", gmAll: "Усі", gmAuditLog: "Журнал GM-дій і загроз", gmAuditSearch: "Пошук за action або summary",
+        gmRefreshAudit: "Оновити журнал", gmHealthy: "Справна", gmWarning: "Попередження", gmError: "Помилка", gmNoIssues: "Проблем не виявлено",
+        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безпечних виправлень немає", gmAutoFixConfirm: "Застосувати лише previewed безпечні виправлення?"
+    });
+    Object.assign(uiTranslations.en, {
+        gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
+        gmIssueFilter: "Issue filter", gmAll: "All", gmAuditLog: "GM and threat audit log", gmAuditSearch: "Search action or summary",
+        gmRefreshAudit: "Refresh log", gmHealthy: "Healthy", gmWarning: "Warning", gmError: "Error", gmNoIssues: "No issues found",
+        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "No safe fixes available", gmAutoFixConfirm: "Apply only the previewed safe fixes?"
+    });
+    Object.assign(uiTranslations.ru, {
+        gmRunDiagnostics: "Проверить комнату", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Применить безопасные исправления",
+        gmIssueFilter: "Фильтр issues", gmAll: "Все", gmAuditLog: "Журнал GM-действий и угроз", gmAuditSearch: "Поиск по action или summary",
+        gmRefreshAudit: "Обновить журнал", gmHealthy: "Исправна", gmWarning: "Предупреждение", gmError: "Ошибка", gmNoIssues: "Проблем не обнаружено",
+        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безопасных исправлений нет", gmAutoFixConfirm: "Применить только previewed безопасные исправления?"
     });
 
     function getCurrentLanguage() {
@@ -3331,6 +3354,11 @@ function registerSignalREvents() {
             setBunkerCapacityPending(false);
         }
         if (gmRoundCommandPending) finishGmRoundCommand(localizeServerMessage(message));
+        if (gmDiagnosticsPending) {
+            setGmDiagnosticsPending(false);
+            const feedback = document.getElementById('gmDiagnosticsFeedback');
+            if (feedback) feedback.textContent = localizeServerMessage(message);
+        }
         if (gameTimerCommandPending) {
             gameTimerCommandPending = false;
             const feedback = document.getElementById('gmTimerFeedback');
@@ -3694,6 +3722,46 @@ function registerSignalREvents() {
         renderCurrentGameUI();
         markGMServerUpdate();
         markGMServerUpdate();
+    });
+
+    connection.off("RoomDiagnosticsUpdated");
+    connection.on("RoomDiagnosticsUpdated", function (data) {
+        gmDiagnosticsData = {
+            isHealthy: data.isHealthy ?? data.IsHealthy ?? false,
+            checkedAtUtc: data.checkedAtUtc || data.CheckedAtUtc,
+            errorCount: data.errorCount ?? data.ErrorCount ?? 0,
+            warningCount: data.warningCount ?? data.WarningCount ?? 0,
+            infoCount: data.infoCount ?? data.InfoCount ?? 0,
+            issues: data.issues || data.Issues || [],
+            serverTimestampUtc: data.serverTimestampUtc || data.ServerTimestampUtc
+        };
+        gmAutoFixPreview = null;
+        gmDiagnosticsPending = false;
+        setGmDiagnosticsPending(false);
+        renderRoomDiagnostics();
+        markGMServerUpdate();
+    });
+
+    connection.off("RoomAutoFixPreviewed");
+    connection.on("RoomAutoFixPreviewed", function (data) {
+        gmAutoFixPreview = {
+            changes: data.changes || data.Changes || [],
+            changeCount: data.changeCount ?? data.ChangeCount ?? 0,
+            hasChanges: data.hasChanges ?? data.HasChanges ?? false
+        };
+        setGmDiagnosticsPending(false);
+        const feedback = document.getElementById('gmDiagnosticsFeedback');
+        if (feedback) feedback.textContent = gmAutoFixPreview.hasChanges
+            ? `${gmAutoFixPreview.changeCount} safe fix(es)` : t('gmNoAutoFix');
+        const apply = document.getElementById('gmApplyAutoFix');
+        if (apply) apply.disabled = !gmAutoFixPreview.hasChanges;
+    });
+
+    connection.off("GmAuditLogUpdated");
+    connection.on("GmAuditLogUpdated", function (data) {
+        gmAuditData = { entries: data.entries || data.Entries || [] };
+        setGmDiagnosticsPending(false);
+        renderUnifiedGmAudit();
     });
 
     connection.off("GMThreatControlData");
@@ -5658,8 +5726,46 @@ function removeBunkerSupplies(months) {
             connection.invoke("GetAllPlayersData").catch(err => console.error(err));
             connection.invoke("GetGMThreatControlData").catch(err => console.error(err));
             connection.invoke("ResyncVotingState").catch(err => console.error(err));
+            connection.invoke("RunRoomIntegrityCheck", getCurrentLanguage()).catch(err => console.error(err));
+            connection.invoke("GetGmAuditLog").catch(err => console.error(err));
             renderGMPanelState();
         }
+    }
+
+    function setGmDiagnosticsPending(pending) {
+        gmDiagnosticsPending = pending;
+        document.querySelectorAll('.gm-diagnostics-command').forEach(button => {
+            button.disabled = pending || (button.id === 'gmApplyAutoFix' && !gmAutoFixPreview?.hasChanges);
+        });
+    }
+
+    function diagnosticsCommand(method, args = []) {
+        if (gmDiagnosticsPending) return;
+        setGmDiagnosticsPending(true);
+        const feedback = document.getElementById('gmDiagnosticsFeedback');
+        if (feedback) feedback.textContent = '';
+        connection.invoke(method, ...args).catch(error => {
+            setGmDiagnosticsPending(false);
+            if (feedback) feedback.textContent = error?.message || t('unavailableNow');
+        });
+    }
+
+    function runRoomIntegrityCheck() {
+        diagnosticsCommand('RunRoomIntegrityCheck', [getCurrentLanguage()]);
+    }
+
+    function previewRoomAutoFix() {
+        gmAutoFixPreview = null;
+        diagnosticsCommand('PreviewRoomAutoFix', [getCurrentLanguage()]);
+    }
+
+    function applyRoomAutoFix() {
+        if (gmDiagnosticsPending || !gmAutoFixPreview?.hasChanges || !confirm(t('gmAutoFixConfirm'))) return;
+        diagnosticsCommand('ApplyRoomAutoFix', [gmRoundCommandId(), true, getCurrentLanguage()]);
+    }
+
+    function refreshGmAudit() {
+        diagnosticsCommand('GetGmAuditLog');
     }
 
     function gmRoundCommandId() {
@@ -5834,18 +5940,13 @@ function removeBunkerSupplies(months) {
             ['Готовність', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? activePlayers.length}`],
             ['Поточна загроза', threatName], ['Interaction status', interactionStatus]
         ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('');
-        const diagnostics = document.getElementById('gmDiagnosticsSummary');
-        if (diagnostics) diagnostics.innerHTML = [
-            ['Останнє серверне оновлення', gmLastServerUpdateAt ? gmLastServerUpdateAt.toLocaleTimeString() : '—'],
-            ['Підключені активні', connectedPlayers.length],
-            ['Незавершений interaction', currentThreat && !currentThreatState?.resolution?.effectsApplied ? 'Так' : 'Ні']
-        ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(label)}</span><strong class="gm-status-badge">${escapeHtml(value)}</strong></div>`).join('');
+        renderRoomDiagnostics();
         const error = document.getElementById('gmLastCommandError');
         if (error) {
             error.textContent = gmLastCommandError;
             error.style.display = gmLastCommandError ? 'block' : 'none';
         }
-        renderGMThreatAudit();
+        renderUnifiedGmAudit();
     }
 
     function renderGMThreatControl() {
@@ -5884,13 +5985,75 @@ function removeBunkerSupplies(months) {
         if (abort) abort.style.display = canRecover ? '' : 'none';
         if (forceSuccess) forceSuccess.style.display = canForce ? '' : 'none';
         if (forceFailure) forceFailure.style.display = canForce ? '' : 'none';
-        renderGMThreatAudit();
+        renderUnifiedGmAudit();
     }
 
     function renderGMThreatAudit() {
+        renderUnifiedGmAudit();
+    }
+
+    function renderRoomDiagnostics() {
+        const summary = document.getElementById('gmDiagnosticsSummary');
+        const issuesList = document.getElementById('gmDiagnosticsIssues');
+        if (!summary || !issuesList) return;
+        if (!gmDiagnosticsData) {
+            summary.innerHTML = `<div class="gm-status-card"><span>${escapeHtml(t('gmDiagnostics'))}</span><strong>—</strong></div>`;
+            issuesList.innerHTML = '';
+            return;
+        }
+        const status = gmDiagnosticsData.errorCount > 0 ? 'error' : gmDiagnosticsData.warningCount > 0 ? 'warning' : 'healthy';
+        const statusLabel = t(status === 'error' ? 'gmError' : status === 'warning' ? 'gmWarning' : 'gmHealthy');
+        const checked = gmDiagnosticsData.checkedAtUtc ? new Date(gmDiagnosticsData.checkedAtUtc) : null;
+        summary.innerHTML = [
+            [t('status'), statusLabel],
+            [t('gmRunDiagnostics'), checked && !Number.isNaN(checked.getTime()) ? checked.toLocaleString() : '—'],
+            ['Errors', gmDiagnosticsData.errorCount], ['Warnings', gmDiagnosticsData.warningCount], ['Info', gmDiagnosticsData.infoCount]
+        ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(label)}</span><strong class="gm-status-badge">${escapeHtml(value)}</strong></div>`).join('');
+        const severityFilter = document.getElementById('gmIssueSeverity')?.value || 'all';
+        const issues = gmDiagnosticsData.issues.filter(issue => {
+            const severity = (issue.severity || issue.Severity || '').toLowerCase();
+            return severityFilter === 'all' || severity === severityFilter;
+        });
+        issuesList.innerHTML = issues.length ? issues.map(issue => {
+            const severity = (issue.severity || issue.Severity || 'info').toLowerCase();
+            const message = issue.message || issue.Message || '';
+            const playerName = issue.affectedPlayerName || issue.AffectedPlayerName || '';
+            const canFix = issue.canAutoFix ?? issue.CanAutoFix ?? false;
+            return `<div class="gm-diagnostic-issue">
+                <span class="gm-diagnostic-severity ${escapeHtml(severity)}">${escapeHtml(severity)}</span>
+                <span>${escapeHtml(message)}${playerName ? ` · ${escapeHtml(playerName)}` : ''}</span>
+                ${canFix ? `<span class="gm-diagnostic-autofix">${escapeHtml(t('gmAutoFixAvailable'))}</span>` : ''}
+            </div>`;
+        }).join('') : `<p class="gm-threat-audit-empty">${escapeHtml(t('gmNoIssues'))}</p>`;
+    }
+
+    function renderUnifiedGmAudit() {
         const list = document.getElementById('gmThreatAuditList');
         if (!list) return;
-        const events = Array.isArray(gmThreatControlData.auditLog) ? gmThreatControlData.auditLog.slice(0, 20) : [];
+        const general = (Array.isArray(gmAuditData.entries) ? gmAuditData.entries : []).map(entry => ({
+            source: 'gm',
+            time: entry.occurredAtUtc || entry.OccurredAtUtc,
+            action: entry.actionType || entry.ActionType || '',
+            result: (entry.result || entry.Result || '').toLowerCase(),
+            target: entry.targetPlayerId || entry.TargetPlayerId || '',
+            summary: entry.summary || entry.Summary || '',
+            errorCode: entry.errorCode || entry.ErrorCode || ''
+        }));
+        const threat = (Array.isArray(gmThreatControlData.auditLog) ? gmThreatControlData.auditLog : []).map(entry => ({
+            source: 'threat',
+            time: entry.timestampUtc || entry.TimestampUtc,
+            action: `threat_${entry.eventType || entry.EventType || ''}`,
+            result: 'success',
+            target: entry.threatId || entry.ThreatId || '',
+            summary: `${entry.threatName || entry.ThreatName || entry.threatId || entry.ThreatId || ''} · ${t('gmThreatRound')} ${entry.round ?? entry.Round ?? 0}`,
+            threatType: entry.eventType || entry.EventType || ''
+        }));
+        const query = (document.getElementById('gmAuditSearch')?.value || '').trim().toLowerCase();
+        const resultFilter = document.getElementById('gmAuditResult')?.value || 'all';
+        const events = [...general, ...threat]
+            .filter(entry => (resultFilter === 'all' || entry.result === resultFilter) &&
+                (!query || `${entry.action} ${entry.summary} ${entry.target}`.toLowerCase().includes(query)))
+            .sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0)).slice(0, 50);
         if (!events.length) {
             list.innerHTML = `<p class="gm-threat-audit-empty">${escapeHtml(t('gmThreatHistoryEmpty'))}</p>`;
             return;
@@ -5904,18 +6067,17 @@ function removeBunkerSupplies(months) {
         };
         const locale = { uk: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }[getCurrentLanguage()] || 'uk-UA';
         list.innerHTML = events.map(entry => {
-            const type = entry.eventType || entry.EventType || '';
-            const name = entry.threatName || entry.ThreatName || entry.threatId || entry.ThreatId || '';
-            const round = entry.round ?? entry.Round ?? 0;
-            const rawTime = entry.timestampUtc || entry.TimestampUtc;
+            const type = entry.threatType || '';
+            const rawTime = entry.time;
             const parsedTime = rawTime ? new Date(rawTime) : null;
             const time = parsedTime && !Number.isNaN(parsedTime.getTime())
                 ? parsedTime.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                 : '';
-            return `<div class="gm-threat-audit-entry">
-                <time>${escapeHtml(time)}</time>
-                <div><strong>${escapeHtml(t(eventKeys[type] || type))}</strong><span>${escapeHtml(name)} · ${escapeHtml(t('gmThreatRound'))} ${escapeHtml(round)}</span></div>
-            </div>`;
+            const title = entry.source === 'threat' ? t(eventKeys[type] || type) : entry.action;
+            return `<details class="gm-threat-audit-entry">
+                <summary><time>${escapeHtml(time)}</time><strong>${escapeHtml(title)}</strong><span class="gm-audit-result ${escapeHtml(entry.result)}">${escapeHtml(entry.result)}</span></summary>
+                <div><span>${escapeHtml(entry.summary)}</span>${entry.target ? `<span>${escapeHtml(t('target'))}: ${escapeHtml(entry.target)}</span>` : ''}${entry.errorCode ? `<span>${escapeHtml(entry.errorCode)}</span>` : ''}</div>
+            </details>`;
         }).join('');
     }
 

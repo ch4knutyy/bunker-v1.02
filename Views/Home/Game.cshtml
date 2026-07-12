@@ -250,10 +250,6 @@
                         <button id="gmThreatForceSuccess" class="btn-gm-action gm-force-success" data-gm-i18n="gmThreatForceSuccess" onclick="requestGMThreatForcePreview('success')">Примусовий успіх</button>
                         <button id="gmThreatForceFailure" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatForceFailure" onclick="requestGMThreatForcePreview('failure')">Примусовий провал</button>
                     </div>
-                    <details id="gmThreatAudit" class="gm-threat-audit">
-                        <summary data-gm-i18n="gmThreatHistory">Історія загроз</summary>
-                        <div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
-                    </details>
                     <p id="gmThreatCommandResult" class="gm-round-hint"></p>
                 </div>
 
@@ -447,10 +443,35 @@
                 </div>
 
                 <div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="diagnostics" style="display: none;">
-                    <h4 class="gm-section-title">Діагностика</h4>
+                    <h4 class="gm-section-title" data-gm-i18n="gmDiagnostics">Діагностика</h4>
                     <div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
                     <p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
-                    <button type="button" class="btn-gm-action" onclick="gmResyncThreatRoom()">Безпечна синхронізація</button>
+                    <div class="gm-diagnostics-actions">
+                        <button id="gmRunDiagnostics" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRunDiagnostics" onclick="runRoomIntegrityCheck()">Перевірити кімнату</button>
+                        <button id="gmPreviewAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmPreviewAutoFix" onclick="previewRoomAutoFix()">Preview auto-fix</button>
+                        <button id="gmApplyAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmApplyAutoFix" onclick="applyRoomAutoFix()" disabled>Застосувати безпечні виправлення</button>
+                    </div>
+                    <p id="gmDiagnosticsFeedback" class="gm-round-hint" aria-live="polite"></p>
+                    <div class="gm-diagnostics-toolbar">
+                        <label for="gmIssueSeverity" data-gm-i18n="gmIssueFilter">Фільтр issues</label>
+                        <select id="gmIssueSeverity" class="input-field" onchange="renderRoomDiagnostics()">
+                            <option value="all" data-gm-i18n="gmAll">Усі</option>
+                            <option value="error">Error</option><option value="warning">Warning</option><option value="info">Info</option>
+                        </select>
+                    </div>
+                    <div id="gmDiagnosticsIssues" class="gm-diagnostics-list" aria-live="polite"></div>
+                    <details id="gmThreatAudit" class="gm-threat-audit" open>
+                        <summary data-gm-i18n="gmAuditLog">GM audit log</summary>
+                        <div class="gm-diagnostics-toolbar">
+                            <input id="gmAuditSearch" class="input-field" type="search" data-gm-i18n-placeholder="gmAuditSearch" placeholder="Пошук action" oninput="renderUnifiedGmAudit()" />
+                            <select id="gmAuditResult" class="input-field" onchange="renderUnifiedGmAudit()">
+                                <option value="all" data-gm-i18n="gmAll">Усі</option>
+                                <option value="success">Success</option><option value="rejected">Rejected</option><option value="failed">Failed</option>
+                            </select>
+                            <button type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRefreshAudit" onclick="refreshGmAudit()">Оновити журнал</button>
+                        </div>
+                        <div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
+                    </details>
                 </div>
             </div>
         </div>
