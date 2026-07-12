@@ -141,6 +141,41 @@ public sealed class GlobalContentDraftService
         }
     }
 
+    public GlobalContentCommitPackage PrepareCommit(string id, string actor)
+    {
+        lock (_sync)
+        {
+            Cleanup(); var state = Owned(id, actor);
+            if (state.Metadata.Status != GlobalContentDraftStatus.Validated) throw new GlobalContentRequestException("draft_not_validated");
+            if (HasConflict(state)) { state.Metadata = state.Metadata with { Status = GlobalContentDraftStatus.Conflict, ValidationSummary = "base_content_changed" }; Audit("commit_rejected", state.Metadata, actor, "", "base_content_changed"); throw new GlobalContentRequestException("base_content_changed"); }
+            var issues = ValidateEntries(state.Metadata.Category, state.Entries);
+            if (issues.Any(x => x.Severity == GlobalContentIssueSeverity.Error)) throw new GlobalContentRequestException("draft_validation_failed");
+            if (Fingerprint(state.Entries) != state.Metadata.DraftFingerprint) throw new GlobalContentRequestException("draft_fingerprint_mismatch");
+            var diff = Diff(state).ToList();
+            Audit("commit_started", state.Metadata, actor, "", "started");
+            return new(state.Metadata, state.Entries.OrderBy(x => x.Key).Select(x => x.Value.ToJsonString()).ToList(), diff);
+        }
+    }
+
+    public GlobalContentDraftDto MarkCommitted(string id, string actor, long version, string fingerprint)
+    {
+        lock (_sync)
+        {
+            var state = Owned(id, actor);
+            state.Metadata = state.Metadata with { Status = GlobalContentDraftStatus.Committed, UpdatedAtUtc = _time.GetUtcNow(), CommittedVersion = version, CommittedFingerprint = fingerprint, ValidationSummary = "committed" };
+            Audit("commit_succeeded", state.Metadata, actor, "", "success"); return state.Metadata;
+        }
+    }
+
+    public void RecordExternalAudit(string action, string draftId, string category, string actor, string result)
+    {
+        lock (_sync)
+        {
+            var metadata = _drafts.TryGetValue(draftId, out var state) ? state.Metadata : new GlobalContentDraftDto(draftId, category, "", "", _time.GetUtcNow(), actor, _time.GetUtcNow(), _time.GetUtcNow(), GlobalContentDraftStatus.Invalid, "", 0, result);
+            Audit(action, metadata, actor, "", result);
+        }
+    }
+
     private bool CreateEntry(DraftState state, GlobalContentDraftCommandDto command)
     {
         if (state.Entries.ContainsKey(command.EntryId)) throw new GlobalContentRequestException("duplicate_id");
@@ -234,7 +269,7 @@ public sealed class GlobalContentDraftService
             else if (!JsonNode.DeepEquals(state.BaseEntries[id], state.Entries[id])) yield return new(id, "updated", state.BaseEntries[id].Select(x => x.Key).Union(state.Entries[id].Select(x => x.Key)).Where(x => !JsonNode.DeepEquals(state.BaseEntries[id][x], state.Entries[id][x])).Order().ToList());
     }
     private void Cleanup() { var now = _time.GetUtcNow(); foreach (var state in _drafts.Values.Where(x => x.Metadata.Status is not (GlobalContentDraftStatus.Discarded or GlobalContentDraftStatus.Expired) && x.Metadata.ExpiresAtUtc <= now)) { state.Entries.Clear(); state.BaseEntries.Clear(); state.Metadata = state.Metadata with { Status = GlobalContentDraftStatus.Expired, EntryCount = 0, ValidationSummary = "expired" }; } }
-    private static bool IsActive(DraftState state) => state.Metadata.Status is not (GlobalContentDraftStatus.Discarded or GlobalContentDraftStatus.Expired);
+    private static bool IsActive(DraftState state) => state.Metadata.Status is not (GlobalContentDraftStatus.Discarded or GlobalContentDraftStatus.Expired or GlobalContentDraftStatus.Committed);
     private DraftState Owned(string id, string actor) { var state = OwnedIncludingDiscarded(id, actor); if (state.Metadata.Status is GlobalContentDraftStatus.Discarded or GlobalContentDraftStatus.Expired) throw new GlobalContentRequestException("draft_inactive"); return state; }
     private DraftState OwnedIncludingDiscarded(string id, string actor) { if (!_drafts.TryGetValue(id, out var state) || state.Metadata.CreatedByPlayerId != actor) throw new GlobalContentRequestException("draft_not_found"); return state; }
     private void Audit(string action, GlobalContentDraftDto draft, string actor, string entry, string result) { _audit.Add(new(++_sequence, _time.GetUtcNow(), action, draft.DraftId, draft.Category, actor, entry, result)); if (_audit.Count > 500) _audit.RemoveAt(0); }
@@ -262,3 +297,8 @@ public sealed class GlobalContentDraftService
         };
     }
 }
+
+public sealed record GlobalContentCommitPackage(
+    GlobalContentDraftDto Draft,
+    IReadOnlyList<string> Entries,
+    IReadOnlyList<GlobalContentDraftDiffEntryDto> Diff);

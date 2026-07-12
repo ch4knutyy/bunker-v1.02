@@ -95,6 +95,30 @@ public partial class GameHub
         return Task.FromResult(_globalContentDrafts.GetAudit());
     }
 
+    public Task<GlobalContentCommitResultDto> CommitGlobalContentDraft(string draftId, string commandId)
+    {
+        var room = DemandGlobalContentAccess(); var actor = GetGmActorId(room); ConsumeGlobalContentMutation(actor);
+        return Task.FromResult(SafeRequest(() => _globalContentCommits.Commit(draftId, actor, commandId)));
+    }
+
+    public Task<IReadOnlyList<GlobalContentBackupDto>> GetGlobalContentBackups(string category)
+    {
+        DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(_globalContentCommits.GetBackups(category));
+    }
+
+    public Task<GlobalContentRollbackPreviewDto> PreviewGlobalContentRollback(string category, string backupId)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(SafeRequest(() => _globalContentCommits.PreviewRollback(category, backupId, GetGmActorId(room))));
+    }
+
+    public Task<GlobalContentCommitResultDto> RollbackGlobalContent(string category, string backupId, string previewToken, bool confirmation, string commandId)
+    {
+        var room = DemandGlobalContentAccess(); var actor = GetGmActorId(room); ConsumeGlobalContentMutation(actor);
+        return Task.FromResult(SafeRequest(() => _globalContentCommits.Rollback(category, backupId, previewToken, confirmation, actor, commandId)));
+    }
+
     private Room DemandGlobalContentAccess()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);

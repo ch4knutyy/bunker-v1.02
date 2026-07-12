@@ -26,10 +26,11 @@ namespace Bunker.Hubs
         private readonly GlobalContentCatalogService _globalContentCatalog;
         private readonly GlobalContentAccessPolicy _globalContentAccess;
         private readonly GlobalContentDraftService _globalContentDrafts;
+        private readonly GlobalContentCommitService _globalContentCommits;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -48,6 +49,7 @@ namespace Bunker.Hubs
                 new FallbackDevelopmentEnvironment(),
                 Microsoft.Extensions.Options.Options.Create(new GlobalContentCatalogOptions()));
             _globalContentDrafts = globalContentDrafts ?? new GlobalContentDraftService(_globalContentCatalog, TimeProvider.System);
+            _globalContentCommits = globalContentCommits ?? new GlobalContentCommitService(_globalContentCatalog, _globalContentDrafts, Path.Combine(Directory.GetCurrentDirectory(), ".global-content-backups"));
             _logger = logger;
         }
 
