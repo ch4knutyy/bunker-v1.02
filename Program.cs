@@ -22,6 +22,7 @@ builder.Services.AddHostedService<GameTimerExpiryService>();
 builder.Services.AddSingleton<SpyRoomService>();
 builder.Services.AddSingleton<ScenarioImageService>();
 builder.Services.AddSingleton<ThreatScalingService>();
+builder.Services.AddSingleton<ThreatAuditService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 

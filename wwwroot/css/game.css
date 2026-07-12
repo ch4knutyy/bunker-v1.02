@@ -1283,6 +1283,15 @@
 
 .gm-threat-current { margin-bottom: .65rem; padding: .65rem; border-radius: 8px; background: rgba(255,255,255,.05); }
 .gm-threat-danger-zone { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid rgba(231,76,60,.45); }
+.gm-threat-audit { margin-top: .8rem; border-top: 1px solid rgba(255,255,255,.12); padding-top: .7rem; }
+.gm-threat-audit summary { cursor: pointer; font-weight: 700; }
+.gm-threat-audit-list { display: grid; gap: .45rem; margin-top: .6rem; max-width: 100%; }
+.gm-threat-audit-entry { display: grid; grid-template-columns: 5.5rem minmax(0,1fr); gap: .55rem; padding: .5rem; border-radius: 7px; background: rgba(255,255,255,.045); }
+.gm-threat-audit-entry time { font-variant-numeric: tabular-nums; opacity: .72; }
+.gm-threat-audit-entry div { min-width: 0; overflow-wrap: anywhere; }
+.gm-threat-audit-entry strong, .gm-threat-audit-entry span { display: block; }
+.gm-threat-audit-entry span, .gm-threat-audit-empty { opacity: .78; }
+@media (max-width: 520px) { .gm-threat-audit-entry { grid-template-columns: 1fr; } }
 .btn-gm-action.btn-danger { background: rgba(192,57,43,.85); }
 .gm-tabs { display: flex; gap: .35rem; overflow-x: auto; padding: .65rem 1rem; border-bottom: 1px solid var(--color-border); }
 .gm-tab { flex: 0 0 auto; padding: .55rem .75rem; border: 1px solid var(--color-border); border-radius: 8px; background: rgba(255,255,255,.04); color: var(--color-text-secondary); cursor: pointer; }
