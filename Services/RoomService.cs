@@ -567,6 +567,9 @@ namespace Bunker.Services
                 .ToList();
         }
 
+        public IReadOnlyList<Room> GetActiveRoomsSnapshot() =>
+            _rooms.Values.Where(room => room != null).ToList();
+
         /// <summary>
         /// Отримати гравця в кімнаті
         /// </summary>

@@ -45,6 +45,9 @@ connection.start()
     let bunkerCapacityPending = false;
     let gmRoundCommandPending = false;
     let gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };
+    let currentGameTimer = null;
+    let gameTimerClockAnchor = null;
+    let gameTimerCommandPending = false;
     let activeGMTab = 'state';
     let gmLastServerUpdateAt = null;
     let gmLastCommandError = '';
@@ -170,6 +173,7 @@ connection.start()
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
         ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
         ,gmPauseReason: "Причина паузи", gmPause: "Пауза", gmResume: "Продовжити", gmManualRound: "Номер раунду", gmSetRound: "Встановити", gmResetReadiness: "Скинути готовність", gmVotingRecovery: "Відновлення голосування", gmClearVotes: "Очистити голоси", gmVotingResync: "Синхронізувати", gmRemoveVote: "Видалити голос voter", gmUnavailableRecovery: "Недоступні recovery controls", gmStageUnavailable: "Reopen/skip потребує transition helper", gmTimerUnavailable: "Round/voting timer відсутній"
+        ,gmGameTimer: "Серверний таймер", gmTimerLabel: "Назва таймера", gmTimerStart: "Старт", gmTimerRestart: "Перезапустити", gmTimerSet: "Встановити", gmTimerStop: "Зупинити", gmTimerExpired: "Час вийшов", gmTimerStopped: "Зупинено", timerPurposeRound: "Раунд", timerPurposeVoting: "Голосування", timerPurposeThreat: "Загроза", timerPurposeCustom: "Інше"
     });
     Object.assign(uiTranslations.en, {
         useSpecialCard: "Use card",
@@ -253,6 +257,7 @@ connection.start()
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
         ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
         ,gmPauseReason: "Pause reason", gmPause: "Pause", gmResume: "Resume", gmManualRound: "Round number", gmSetRound: "Set", gmResetReadiness: "Reset readiness", gmVotingRecovery: "Voting recovery", gmClearVotes: "Clear votes", gmVotingResync: "Resync", gmRemoveVote: "Remove voter vote", gmUnavailableRecovery: "Unavailable recovery controls", gmStageUnavailable: "Reopen/skip requires a transition helper", gmTimerUnavailable: "Round/voting timer is unavailable"
+        ,gmGameTimer: "Server timer", gmTimerLabel: "Timer label", gmTimerStart: "Start", gmTimerRestart: "Restart", gmTimerSet: "Set", gmTimerStop: "Stop", gmTimerExpired: "Time is up", gmTimerStopped: "Stopped", timerPurposeRound: "Round", timerPurposeVoting: "Voting", timerPurposeThreat: "Threat", timerPurposeCustom: "Custom"
     });
     Object.assign(uiTranslations.ru, {
         useSpecialCard: "Использовать карту",
@@ -336,6 +341,7 @@ connection.start()
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
         ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
         ,gmPauseReason: "Причина паузы", gmPause: "Пауза", gmResume: "Продолжить", gmManualRound: "Номер раунда", gmSetRound: "Установить", gmResetReadiness: "Сбросить готовность", gmVotingRecovery: "Восстановление голосования", gmClearVotes: "Очистить голоса", gmVotingResync: "Синхронизировать", gmRemoveVote: "Удалить голос voter", gmUnavailableRecovery: "Недоступные recovery controls", gmStageUnavailable: "Reopen/skip требует transition helper", gmTimerUnavailable: "Round/voting timer отсутствует"
+        ,gmGameTimer: "Серверный таймер", gmTimerLabel: "Название таймера", gmTimerStart: "Старт", gmTimerRestart: "Перезапустить", gmTimerSet: "Установить", gmTimerStop: "Остановить", gmTimerExpired: "Время вышло", gmTimerStopped: "Остановлен", timerPurposeRound: "Раунд", timerPurposeVoting: "Голосование", timerPurposeThreat: "Угроза", timerPurposeCustom: "Другое"
     });
 
     function getCurrentLanguage() {
@@ -382,6 +388,7 @@ connection.start()
             isPaused: source.isPaused ?? source.IsPaused ?? false,
             pauseReason: source.pauseReason || source.PauseReason || null,
             pausedAtUtc: source.pausedAtUtc || source.PausedAtUtc || null,
+            gameTimer: normalizeGameTimer(source.gameTimer || source.GameTimer || null),
             activePlayerCount: source.activePlayerCount ?? source.ActivePlayerCount ?? 0,
             revealedCount: source.revealedCount ?? source.RevealedCount ?? 0,
             allPlayersRevealed: source.allPlayersRevealed ?? source.AllPlayersRevealed ?? false,
@@ -420,11 +427,74 @@ connection.start()
         }
         currentThreat = normalized.threat || (normalized.threatRevealed ? currentThreat : null);
         currentThreatState = normalized.threatState || currentThreatState;
+        if (normalized.gameTimer) syncGameTimer(normalized.gameTimer);
         updateRoundStatusUI();
         renderThreatPanel(currentThreat);
         updateReadyCheckUI();
         updateSpecialCardsUI();
     }
+
+    function normalizeGameTimer(source) {
+        if (!source) return null;
+        return {
+            status: source.status || source.Status || 'Stopped',
+            purpose: source.purpose || source.Purpose || 'Round',
+            label: source.label || source.Label || '',
+            durationSeconds: source.durationSeconds ?? source.DurationSeconds ?? 300,
+            deadlineUtc: source.deadlineUtc || source.DeadlineUtc || null,
+            remainingSeconds: Math.max(0, source.remainingSeconds ?? source.RemainingSeconds ?? 0),
+            serverTimestampUtc: source.serverTimestampUtc || source.ServerTimestampUtc || new Date().toISOString(),
+            updatedAtUtc: source.updatedAtUtc || source.UpdatedAtUtc || null
+        };
+    }
+
+    function syncGameTimer(source) {
+        currentGameTimer = normalizeGameTimer(source);
+        if (!currentGameTimer) return;
+        gameTimerClockAnchor = {
+            serverMs: Date.parse(currentGameTimer.serverTimestampUtc),
+            performanceMs: performance.now(),
+            deadlineMs: currentGameTimer.deadlineUtc ? Date.parse(currentGameTimer.deadlineUtc) : null
+        };
+        const minutes = document.getElementById('gmTimerMinutes');
+        const seconds = document.getElementById('gmTimerSeconds');
+        if (minutes && seconds && !gameTimerCommandPending) {
+            minutes.value = Math.floor(currentGameTimer.remainingSeconds / 60);
+            seconds.value = currentGameTimer.remainingSeconds % 60;
+        }
+        renderGameTimer();
+    }
+
+    function getGameTimerRemaining() {
+        if (!currentGameTimer) return 0;
+        if (currentGameTimer.status.toLowerCase() !== 'running' || !gameTimerClockAnchor?.deadlineMs) {
+            return Math.max(0, currentGameTimer.remainingSeconds);
+        }
+        const serverNow = gameTimerClockAnchor.serverMs + (performance.now() - gameTimerClockAnchor.performanceMs);
+        return Math.max(0, Math.ceil((gameTimerClockAnchor.deadlineMs - serverNow) / 1000));
+    }
+
+    function renderGameTimer() {
+        if (!currentGameTimer) return;
+        const remaining = getGameTimerRemaining();
+        const value = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
+        const effectiveStatus = currentGameTimer.status.toLowerCase() === 'running' && remaining === 0 ? 'Expired' : currentGameTimer.status;
+        const statusKey = effectiveStatus.toLowerCase() === 'expired' ? 'gmTimerExpired' :
+            effectiveStatus.toLowerCase() === 'paused' ? 'gmPause' :
+            effectiveStatus.toLowerCase() === 'stopped' ? 'gmTimerStopped' : effectiveStatus;
+        setText('#publicGameTimerValue', value);
+        setText('#publicGameTimerStatus', t(statusKey));
+        setText('#publicGameTimerLabel', currentGameTimer.label || t(`timerPurpose${currentGameTimer.purpose}`));
+        const status = currentGameTimer.status.toLowerCase();
+        const setDisabled = (id, disabled) => { const element = document.getElementById(id); if (element) element.disabled = gameTimerCommandPending || disabled; };
+        setDisabled('gmTimerStart', false);
+        setDisabled('gmTimerPause', status !== 'running');
+        setDisabled('gmTimerResume', status !== 'paused');
+        setDisabled('gmTimerRestart', !currentGameTimer.durationSeconds);
+        setDisabled('gmTimerStop', status === 'stopped');
+    }
+
+    window.setInterval(renderGameTimer, 250);
 
     function getCurrentRoundNumber() {
         return currentRoundState?.currentRound || currentRoom?.currentRound || currentRoom?.CurrentRound || 0;
@@ -3222,6 +3292,12 @@ function registerSignalREvents() {
             setBunkerCapacityPending(false);
         }
         if (gmRoundCommandPending) finishGmRoundCommand(localizeServerMessage(message));
+        if (gameTimerCommandPending) {
+            gameTimerCommandPending = false;
+            const feedback = document.getElementById('gmTimerFeedback');
+            if (feedback) feedback.textContent = localizeServerMessage(message);
+            renderGameTimer();
+        }
     });
 
     // ==================== SESSION RESTORE HANDLERS ====================
@@ -3433,6 +3509,16 @@ function registerSignalREvents() {
         finishGmRoundCommand(currentRoundState.isPaused ? t('gmPause') : t('gmResume'));
         renderCurrentGameUI();
         if (gmRoundCommandPending) finishGmRoundCommand('');
+    });
+
+    connection.off("GameTimerUpdated");
+    connection.on("GameTimerUpdated", function (data) {
+        syncGameTimer(data);
+        gameTimerCommandPending = false;
+        document.querySelectorAll('.gm-timer-command').forEach(button => button.disabled = false);
+        const feedback = document.getElementById('gmTimerFeedback');
+        if (feedback) feedback.textContent = data.status || data.Status || '';
+        renderGameTimer();
     });
 
     connection.off("RoundChangePreview");
@@ -5570,6 +5656,59 @@ function removeBunkerSupplies(months) {
         connection.invoke('ResyncVotingState').catch(handleGmRoundCommandError);
     }
 
+    function gameTimerDurationValue() {
+        const minutes = Number(document.getElementById('gmTimerMinutes')?.value || 0);
+        const seconds = Number(document.getElementById('gmTimerSeconds')?.value || 0);
+        if (!Number.isInteger(minutes) || !Number.isInteger(seconds) || minutes < 0 || minutes > 120 || seconds < 0 || seconds > 59) return null;
+        const total = minutes * 60 + seconds;
+        return total >= 10 && total <= 7200 ? String(total) : null;
+    }
+
+    function gameTimerCommandId() {
+        return globalThis.crypto?.randomUUID?.() || `gm-timer-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function invokeGameTimerCommand(method, args = []) {
+        if (gameTimerCommandPending) return;
+        gameTimerCommandPending = true;
+        document.querySelectorAll('.gm-timer-command').forEach(button => button.disabled = true);
+        const feedback = document.getElementById('gmTimerFeedback');
+        if (feedback) feedback.textContent = '';
+        connection.invoke(method, ...args, gameTimerCommandId()).catch(error => {
+            gameTimerCommandPending = false;
+            if (feedback) feedback.textContent = error?.message || t('unavailableNow');
+            renderGameTimer();
+        });
+    }
+
+    function startGameTimer() {
+        const duration = gameTimerDurationValue();
+        if (!duration) { const feedback = document.getElementById('gmTimerFeedback'); if (feedback) feedback.textContent = '10..7200'; return; }
+        invokeGameTimerCommand('StartGameTimer', [duration, document.getElementById('gmTimerPurpose')?.value || 'Round', document.getElementById('gmTimerLabel')?.value || '']);
+    }
+
+    function setGameTimer() {
+        const duration = gameTimerDurationValue();
+        if (!duration) { const feedback = document.getElementById('gmTimerFeedback'); if (feedback) feedback.textContent = '10..7200'; return; }
+        invokeGameTimerCommand('SetGameTimer', [duration]);
+    }
+
+    function adjustGameTimer(delta) { invokeGameTimerCommand('AdjustGameTimer', [delta]); }
+
+    function restartGameTimer() {
+        if (currentGameTimer?.status?.toLowerCase() === 'running' && !confirm(t('gmTimerRestart'))) return;
+        invokeGameTimerCommand('RestartGameTimer');
+    }
+
+    function stopGameTimer() {
+        if (currentGameTimer?.status?.toLowerCase() !== 'stopped' && !confirm(t('gmTimerStop'))) return;
+        invokeGameTimerCommand('StopGameTimer');
+    }
+
+    function handleGameTimerKeydown(event) {
+        if (event.key === 'Enter') { event.preventDefault(); startGameTimer(); }
+    }
+
     function renderGmVotingAdmin() {
         const select = document.getElementById('gmRemoveVoterSelect');
         if (select) select.innerHTML = `<option value="">—</option>` + gmVotingAdminState.eligibleVoters.map(voter => {
@@ -5606,6 +5745,9 @@ function removeBunkerSupplies(months) {
     function renderGMPanelState() {
         document.querySelectorAll('[data-gm-i18n]').forEach(element => {
             element.textContent = t(element.dataset.gmI18n);
+        });
+        document.querySelectorAll('[data-gm-i18n-placeholder]').forEach(element => {
+            element.placeholder = t(element.dataset.gmI18nPlaceholder);
         });
         const round = getCurrentRoundNumber();
         const capacityInput = document.getElementById('gmBunkerCapacity');

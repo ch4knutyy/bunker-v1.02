@@ -1089,7 +1089,11 @@ namespace Bunker.Hubs
             var hostId = _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var host)
                 ? RoomService.GetPlayerKey(host) : null;
             RoundVotingAdminService.SetPaused(room, paused, cleanReason, hostId, DateTimeOffset.UtcNow);
+            var timerChanged = paused
+                ? _gameTimerService.Pause(room, byGamePause: true)
+                : _gameTimerService.Resume(room, onlyIfPausedByGame: true);
             await Clients.Group(room.Id).SendAsync("GamePauseUpdated", BuildPauseState(room));
+            if (timerChanged) await BroadcastGameTimer(room);
             await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
         }
 
@@ -1114,6 +1118,98 @@ namespace Bunker.Hubs
                 clears = new[] { "currentRoundReveals", "votingReadyResponses" },
                 preserves = new[] { "characteristics", "threatEffects", "bunker" }
             });
+        }
+
+        public async Task StartGameTimer(string? durationValue, string? purpose, string? label, string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            if (!GameTimerService.TryParseDuration(durationValue, out var seconds) || !GameTimerService.TryParsePurpose(purpose, out var parsedPurpose))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тривалість має бути цілим числом 10..7200 секунд");
+                return;
+            }
+            _gameTimerService.Start(room, seconds, parsedPurpose, label);
+            if (room.IsPaused) _gameTimerService.Pause(room, byGamePause: true);
+            await BroadcastGameTimer(room);
+        }
+
+        public async Task PauseGameTimer(string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            if (!_gameTimerService.Pause(room)) { await Clients.Caller.SendAsync("ReceiveError", "Таймер не запущено"); return; }
+            await BroadcastGameTimer(room);
+        }
+
+        public async Task ResumeGameTimer(string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            if (room.IsPaused) { await Clients.Caller.SendAsync("ReceiveError", "Спочатку продовжіть гру"); return; }
+            if (!_gameTimerService.Resume(room)) { await Clients.Caller.SendAsync("ReceiveError", "Таймер не перебуває на паузі"); return; }
+            await BroadcastGameTimer(room);
+        }
+
+        public async Task RestartGameTimer(string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            if (!_gameTimerService.Restart(room)) { await Clients.Caller.SendAsync("ReceiveError", "Немає коректної тривалості для restart"); return; }
+            if (room.IsPaused) _gameTimerService.Pause(room, byGamePause: true);
+            await BroadcastGameTimer(room);
+        }
+
+        public async Task SetGameTimer(string? durationValue, string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            if (!GameTimerService.TryParseDuration(durationValue, out var seconds))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Тривалість має бути цілим числом 10..7200 секунд");
+                return;
+            }
+            _gameTimerService.Set(room, seconds);
+            await BroadcastGameTimer(room);
+        }
+
+        public async Task AdjustGameTimer(int deltaSeconds, string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            if (!_gameTimerService.Adjust(room, deltaSeconds))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Після зміни час має залишатися в межах 0..7200 секунд");
+                return;
+            }
+            await BroadcastGameTimer(room);
+        }
+
+        public async Task StopGameTimer(string commandId)
+        {
+            if (await GetTimerHostRoom(commandId) is not { } room) return;
+            _gameTimerService.Stop(room);
+            await BroadcastGameTimer(room);
+        }
+
+        private async Task<Room?> GetTimerHostRoom(string? commandId)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для керування таймером");
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(commandId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Некоректний command id");
+                return null;
+            }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("GameTimerUpdated", _gameTimerService.GetDto(room));
+                return null;
+            }
+            return room;
+        }
+
+        private async Task BroadcastGameTimer(Room room)
+        {
+            await Clients.Group(room.Id).SendAsync("GameTimerUpdated", _gameTimerService.GetDto(room));
         }
 
         public async Task SetRoundNumber(string? roundValue, string? commandId = null)
