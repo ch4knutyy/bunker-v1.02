@@ -504,6 +504,25 @@
                 </div>
             </div>
         </div>
+        <section id="globalContentCatalog" class="global-content-catalog" style="display: none;" aria-labelledby="globalContentCatalogTitle">
+            <h3 id="globalContentCatalogTitle" data-gm-i18n="globalCatalogTitle">Global Content Catalog</h3>
+            <p class="global-catalog-warning" data-gm-i18n="globalCatalogDevelopmentWarning">Development-only, read-only catalog. Production access is disabled.</p>
+            <p data-gm-i18n="globalCatalogReadOnly">Read-only: saving, deleting, committing and rollback are unavailable.</p>
+            <div class="global-catalog-toolbar">
+                <label for="globalCatalogCategory" data-gm-i18n="globalCatalogCategory">Category</label>
+                <select id="globalCatalogCategory" class="input-field" onchange="loadGlobalContentPage(1)"></select>
+                <label for="globalCatalogSearch" data-gm-i18n="globalCatalogSearch">Search</label>
+                <input id="globalCatalogSearch" class="input-field" type="search" maxlength="100" oninput="scheduleGlobalContentSearch()" />
+            </div>
+            <div id="globalCatalogMetadata" class="global-catalog-metadata" aria-live="polite"></div>
+            <div id="globalCatalogEntries" class="global-catalog-entries" aria-live="polite"></div>
+            <div class="global-catalog-pagination">
+                <button id="globalCatalogPrevious" type="button" class="btn-secondary" data-gm-i18n="globalCatalogPrevious" onclick="changeGlobalContentPage(-1)">Previous</button>
+                <span id="globalCatalogPage">1</span>
+                <button id="globalCatalogNext" type="button" class="btn-secondary" data-gm-i18n="globalCatalogNext" onclick="changeGlobalContentPage(1)">Next</button>
+            </div>
+            <pre id="globalCatalogDetails" class="global-catalog-details" aria-live="polite"></pre>
+        </section>
         <div id="roomLobby">
             <h3 class="section-title">Гравці в кімнаті: <span id="roomPlayerCount">0/12</span></h3>
             <div id="roomPlayersList" class="room-players-grid"></div>

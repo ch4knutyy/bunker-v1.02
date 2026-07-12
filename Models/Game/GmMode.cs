@@ -8,7 +8,8 @@ public enum GmCapability
     ManagePlayersWithoutHiddenData,
     ManagePublicGameState,
     PeekHiddenCharacteristics,
-    BrowseFutureThreatCatalog
+    BrowseFutureThreatCatalog,
+    ManageGlobalContent
 }
 
 public static class GmCapabilities
@@ -20,6 +21,7 @@ public static class GmCapabilities
         GmCapability.ManagePublicGameState => true,
         GmCapability.PeekHiddenCharacteristics => mode == GmMode.OmniscientGm,
         GmCapability.BrowseFutureThreatCatalog => mode == GmMode.OmniscientGm,
+        GmCapability.ManageGlobalContent => mode == GmMode.TechnicalGm,
         _ => false
     };
 }
