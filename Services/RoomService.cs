@@ -62,7 +62,7 @@ namespace Bunker.Services
 
             var playersSnapshot = GetPlayersSnapshot(room, "JoinRoom", cleanupInvalid: true);
 
-            if (room.State != RoomState.Lobby || playersSnapshot.Count >= room.MaxPlayers)
+            if (room.State != RoomState.Lobby || GetGameplayPlayersSnapshot(room).Count >= room.MaxPlayers)
             {
                 return (false, room.State != RoomState.Lobby ? "Гра вже почалась" : "Кімната заповнена", null);
             }
@@ -82,6 +82,12 @@ namespace Bunker.Services
 
             AddOrUpdatePlayer(room, connectionId, player);
             _playerToRoom[connectionId] = roomId;
+            if (room.IrreversibleOmniscientPlayerIds.Contains(GetPlayerKey(player)))
+            {
+                player.IsSpectatorGm = true;
+                player.HasSeenOmniscientState = true;
+                CleanupPlayerReferences(room, connectionId, GetPlayerKey(player));
+            }
 
             if (room.HostConnectionId == connectionId && string.IsNullOrWhiteSpace(room.HostPlayerId))
             {
@@ -147,7 +153,7 @@ namespace Bunker.Services
         {
             newHost = null;
             if (!TryResolvePlayer(room, targetConnectionId, out var currentConnectionId, out var player) ||
-                !player.IsConnected || player.IsEliminated)
+                !player.IsConnected || !IsGameplayParticipant(player))
             {
                 return false;
             }
@@ -231,6 +237,16 @@ namespace Bunker.Services
             if (threat.MiniGame.LeaderPlayerId == playerId || threat.MiniGame.LeaderPlayerId == connectionId)
                 threat.MiniGame.LeaderPlayerId = "";
         }
+
+        public static bool IsGameplayParticipant(Player? player) => player != null && !player.IsEliminated && !player.IsSpectatorGm;
+
+        public static IReadOnlyList<KeyValuePair<string, Player>> GetGameplayPlayersSnapshot(Room room) =>
+            GetPlayersSnapshot(room).Where(entry => IsGameplayParticipant(entry.Value)).ToList();
+
+        public void RemoveGameplayParticipation(Room room, Player player) =>
+            CleanupPlayerReferences(room, player.ConnectionId, GetPlayerKey(player));
+        public static void RemoveGameplayParticipationReferences(Room room, Player player) =>
+            CleanupPlayerReferences(room, player.ConnectionId, GetPlayerKey(player));
 
         /// <summary>
         /// Покинути поточну кімнату (helper)
@@ -737,6 +753,12 @@ namespace Bunker.Services
 			player.IsConnected = true;
 			player.DisconnectedAt = null;
 			var playerKey = GetPlayerKey(player);
+			if (room.IrreversibleOmniscientPlayerIds.Contains(playerKey))
+			{
+				player.IsSpectatorGm = true;
+				player.HasSeenOmniscientState = true;
+				CleanupPlayerReferences(room, oldConnectionId, playerKey);
+			}
 
 			AddOrUpdatePlayer(room, newConnectionId, player);
 			_playerToRoom[newConnectionId] = roomId;

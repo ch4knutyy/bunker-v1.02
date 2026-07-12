@@ -40,6 +40,7 @@ namespace Bunker.Hubs
                     IsHost = room.IsHost(player),
                     IsConnected = player.IsConnected,
                     IsEliminated = player.IsEliminated,
+                    IsSpectatorGm = player.IsSpectatorGm,
                     EliminatedAtRound = player.EliminatedAtRound,
                     EliminatedByVote = player.EliminatedByVote,
                     CanRevealAllAfterElimination = player.CanRevealAllAfterElimination,
@@ -662,9 +663,7 @@ namespace Bunker.Hubs
                 return;
             }
 
-            foreach (var player in RoomService.GetPlayersSnapshot(room)
-                         .Select(entry => entry.Value)
-                         .Where(player => !player.IsEliminated))
+            foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
             {
                 room.VotingReadyResponses[RoomService.GetPlayerKey(player)] = "ready";
             }
@@ -1395,7 +1394,7 @@ namespace Bunker.Hubs
                 await SendPlayerHostControlData(room);
                 return;
             }
-            if (!player.IsConnected || player.IsEliminated)
+            if (!player.IsConnected || !RoomService.IsGameplayParticipant(player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
                 return;

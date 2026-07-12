@@ -34,6 +34,9 @@ builder.Services.AddSingleton<GlobalContentCatalogService>();
 builder.Services.AddSingleton<GlobalContentDraftService>();
 builder.Services.AddSingleton<GlobalContentCommitService>();
 builder.Services.AddSingleton<StableIdMigrationService>();
+builder.Services.Configure<OmniscientGmOptions>(builder.Configuration.GetSection(OmniscientGmOptions.SectionName));
+builder.Services.AddSingleton<OmniscientGmAccessPolicy>();
+builder.Services.AddSingleton<OmniscientGmRoleService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 

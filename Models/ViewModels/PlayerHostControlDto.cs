@@ -10,6 +10,7 @@ public sealed class PlayerHostControlDto
     public bool IsHost { get; init; }
     public bool IsConnected { get; init; }
     public bool IsEliminated { get; init; }
+    public bool IsSpectatorGm { get; init; }
     public int? EliminatedAtRound { get; init; }
     public bool EliminatedByVote { get; init; }
     public bool CanRevealAllAfterElimination { get; init; }

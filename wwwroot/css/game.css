@@ -1094,6 +1094,11 @@
     margin-left: 0.3rem;
 }
 
+.room-player-spectator-gm {
+    border-color: rgba(155, 89, 182, .65);
+    background: rgba(155, 89, 182, .08);
+}
+
 .round-status-panel {
     align-items: center;
     justify-content: space-between;

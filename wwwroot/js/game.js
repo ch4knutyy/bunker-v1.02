@@ -58,6 +58,8 @@ connection.start()
     let gmRoomLocalEditorData = { bunkerFields: [], apocalypseFields: [], players: [] };
     let gmRoomLocalEditPreview = null;
     let gmRoomLocalEditorPending = false;
+    let omniscientPreview = null;
+    let omniscientCommandPending = false;
     let globalCatalogAllowed = false;
     let globalCatalogMetadata = [];
     let globalCatalogPage = 1;
@@ -409,6 +411,7 @@ connection.start()
         ,globalDraftsTitle: "Чернетки", globalDraftCreate: "Створити чернетку", globalDraftApply: "Застосувати до чернетки", globalDraftValidate: "Валідувати", globalDraftPreview: "Preview diff", globalDraftDiscard: "Відкинути"
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Зміни набудуть чинності після перезапуску застосунку.", globalBackupsTitle: "Резервні копії", globalBackupsRefresh: "Оновити backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
         ,globalMigrationTitle: "Потрібна stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Застосувати migration"
+        ,omniscientModeTitle: "Режим GM-спостерігача", omniscientModeWarning: "Незворотно для цієї кімнати: GM перестане бути учасником гри.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview наслідків", omniscientEnter: "Увійти незворотно", omniscientPublicBadge: "GM-спостерігач"
     });
     Object.assign(uiTranslations.en, {
         globalCatalogTitle: "Global Content Catalog", globalCatalogDevelopmentWarning: "Development only: read-only catalog. Production access is disabled.",
@@ -417,6 +420,7 @@ connection.start()
         ,globalDraftsTitle: "Drafts", globalDraftCreate: "Create draft", globalDraftApply: "Apply to draft", globalDraftValidate: "Validate", globalDraftPreview: "Preview diff", globalDraftDiscard: "Discard"
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Changes take effect after application restart.", globalBackupsTitle: "Backups", globalBackupsRefresh: "Refresh backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
         ,globalMigrationTitle: "Stable-ID migration required", globalMigrationPreview: "Preview migration", globalMigrationApply: "Apply migration"
+        ,omniscientModeTitle: "Spectator GM mode", omniscientModeWarning: "Irreversible in this room: the GM stops participating in gameplay.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview consequences", omniscientEnter: "Enter irreversibly", omniscientPublicBadge: "Spectator GM"
     });
     Object.assign(uiTranslations.ru, {
         globalCatalogTitle: "Глобальный каталог контента", globalCatalogDevelopmentWarning: "Только Development: read-only каталог. В Production доступ отключён.",
@@ -425,6 +429,7 @@ connection.start()
         ,globalDraftsTitle: "Черновики", globalDraftCreate: "Создать черновик", globalDraftApply: "Применить к черновику", globalDraftValidate: "Проверить", globalDraftPreview: "Preview diff", globalDraftDiscard: "Отбросить"
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Изменения вступят в силу после перезапуска приложения.", globalBackupsTitle: "Резервные копии", globalBackupsRefresh: "Обновить backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
         ,globalMigrationTitle: "Требуется stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Применить migration"
+        ,omniscientModeTitle: "Режим GM-наблюдателя", omniscientModeWarning: "Необратимо для этой комнаты: GM перестанет участвовать в игре.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview последствий", omniscientEnter: "Войти необратимо", omniscientPublicBadge: "GM-наблюдатель"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -2478,6 +2483,8 @@ connection.start()
             stablePlayerId: player.stablePlayerId ?? player.StablePlayerId ?? "",
             isHost: player.isHost ?? player.IsHost ?? false,
             isEliminated: player.isEliminated ?? player.IsEliminated ?? false,
+            isSpectatorGm: player.isSpectatorGm ?? player.IsSpectatorGm ?? false,
+            publicRole: player.publicRole ?? player.PublicRole ?? 'player',
             eliminatedAtRound: player.eliminatedAtRound ?? player.EliminatedAtRound ?? null,
             eliminatedByVote: !!(player.eliminatedByVote ?? player.EliminatedByVote),
             canRevealAllAfterElimination: !!(player.canRevealAllAfterElimination ?? player.CanRevealAllAfterElimination),
@@ -2629,6 +2636,8 @@ function registerSignalREvents() {
                 connectionId: connId,
                 stablePlayerId: p.stablePlayerId || p.StablePlayerId || "",
                 isHost: p.isHost ?? p.IsHost ?? false,
+                isSpectatorGm: !!(p.isSpectatorGm ?? p.IsSpectatorGm),
+                publicRole: p.publicRole || p.PublicRole || '',
                 revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
                 revealedData: revealedValues.revealedData,
                 fact: normalizeFactFromPlayer({ ...p, fact: revealedSources.fact || p.fact || p.Fact, revealedData: revealedValues.revealedData, revealedTooltips: revealedValues.revealedTooltips }),
@@ -2715,6 +2724,8 @@ function registerSignalREvents() {
                 connectionId: connId,
                 stablePlayerId: p.stablePlayerId || p.StablePlayerId || "",
                 isHost: p.isHost ?? p.IsHost ?? false,
+                isSpectatorGm: !!(p.isSpectatorGm ?? p.IsSpectatorGm),
+                publicRole: p.publicRole || p.PublicRole || '',
                 revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
                 fact: normalizeFactFromPlayer({ ...p, fact: revealedSources.fact || p.fact || p.Fact, revealedData: revealedValues.revealedData, revealedTooltips: revealedValues.revealedTooltips }),
                 revealedData: revealedValues.revealedData,
@@ -3472,6 +3483,8 @@ function registerSignalREvents() {
                 connectionId: connId,
                 stablePlayerId: p.stablePlayerId || p.StablePlayerId || "",
                 isHost: p.isHost ?? p.IsHost ?? false,
+                isSpectatorGm: !!(p.isSpectatorGm ?? p.IsSpectatorGm),
+                publicRole: p.publicRole || p.PublicRole || '',
                 revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
                 revealedData: revealedData,
                 revealedSources: revealedSources,
@@ -5821,6 +5834,24 @@ function removeBunkerSupplies(months) {
 
     // ==================== GAME MASTER FUNCTIONS ====================
 
+    function setOmniscientPending(pending) {
+        omniscientCommandPending = pending;
+        document.querySelectorAll('.omniscient-command').forEach(button => button.disabled = pending || (button.id === 'omniscientEnterButton' && !omniscientPreview?.canApply && !omniscientPreview?.CanApply));
+    }
+    async function previewEnterOmniscientGm() {
+        if (omniscientCommandPending) return; setOmniscientPending(true); const output = document.getElementById('omniscientPreviewResult');
+        try { const key = document.getElementById('omniscientBootstrapKey')?.value || ''; omniscientPreview = await connection.invoke('PreviewEnterOmniscientGm', key); if (output) output.textContent = JSON.stringify(omniscientPreview, null, 2); }
+        catch (error) { omniscientPreview = null; if (output) output.textContent = error?.message || t('unavailableNow'); }
+        finally { setOmniscientPending(false); }
+    }
+    async function enterOmniscientGm() {
+        if (omniscientCommandPending || !(omniscientPreview?.canApply ?? omniscientPreview?.CanApply) || !confirm('Enter spectator GM mode?') || !confirm('This cannot be undone in this room. Confirm again.')) return;
+        setOmniscientPending(true); const output = document.getElementById('omniscientPreviewResult');
+        try { const key = document.getElementById('omniscientBootstrapKey')?.value || ''; await connection.invoke('EnterOmniscientGm', key, crypto.randomUUID(), true); omniscientPreview = null; if (output) output.textContent = t('omniscientPublicBadge'); }
+        catch (error) { if (output) output.textContent = error?.message || t('unavailableNow'); }
+        finally { setOmniscientPending(false); }
+    }
+
     async function refreshGlobalContentCatalogAccess() {
         const panel = document.getElementById('globalContentCatalog');
         if (!panel) return;
@@ -7143,11 +7174,13 @@ function removeBunkerSupplies(months) {
         container.innerHTML = players.map((p, i) => {
             var seatLabel = p.seatNumber ? '#' + p.seatNumber : '#' + (i + 1);
             const isEliminated = p.isEliminated || p.IsEliminated || false;
+            const isSpectatorGm = p.isSpectatorGm || p.IsSpectatorGm || false;
             
             let cardClasses = ['room-player-card'];
             if (p.connectionId === myConnectionId) cardClasses.push('my-player');
             if (p.isHost) cardClasses.push('host-player');
             if (isEliminated) cardClasses.push('room-player-eliminated');
+            if (isSpectatorGm) cardClasses.push('room-player-spectator-gm');
             
             return `
             <div class="${cardClasses.join(' ')}">
@@ -7156,8 +7189,12 @@ function removeBunkerSupplies(months) {
                 ${p.isHost ? `<span class="host-badge">${t('host')}</span>` : ''}
                 ${p.connectionId === myConnectionId ? `<span class="you-badge">${t('you')}</span>` : ''}
                 ${isEliminated ? `<span class="eliminated-badge-small">${t('eliminated')}</span>` : ''}
+                ${isSpectatorGm ? `<span class="host-badge">${t('omniscientPublicBadge')}</span>` : ''}
             </div>`;
         }).join('');
+        const spectator = players.find(p => p.isSpectatorGm || p.IsSpectatorGm);
+        const banner = document.getElementById('omniscientGmBanner');
+        if (banner) { banner.style.display = spectator ? 'block' : 'none'; banner.textContent = spectator ? `${t('omniscientPublicBadge')}: ${spectator.name}. ${getCurrentLanguage() === 'en' ? 'Does not participate in gameplay or voting.' : getCurrentLanguage() === 'ru' ? 'Не участвует в игре и голосовании.' : 'Не бере участі у грі та голосуванні.'}` : ''; }
     }
 
     function toCamelCase(str) {
@@ -7201,7 +7238,7 @@ function removeBunkerSupplies(months) {
 
     function getSpecialCardTargets() {
         return Object.values(roomPlayers || {})
-            .filter(player => player && !(player.isEliminated || player.IsEliminated))
+            .filter(player => player && !(player.isEliminated || player.IsEliminated) && !(player.isSpectatorGm || player.IsSpectatorGm))
             .filter(player => !isMyPlayerRef(player.connectionId || player.ConnectionId, player.stablePlayerId || player.StablePlayerId))
             .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
     }
@@ -7449,11 +7486,13 @@ function removeBunkerSupplies(months) {
             var seatLabel = player.seatNumber ? '#' + player.seatNumber : '#' + (index + 1);
             const isMe = player.connectionId === myConnectionId;
             const isEliminated = player.isEliminated || player.IsEliminated || false;
+            const isSpectatorGm = player.isSpectatorGm || player.IsSpectatorGm || false;
             
             // Build CSS classes
             let rowClasses = [];
             if (isMe) rowClasses.push('my-player-row');
             if (isEliminated) rowClasses.push('player-eliminated');
+            if (isSpectatorGm) rowClasses.push('room-player-spectator-gm');
             
             // Eliminated badge
             const eliminatedBadge = isEliminated
@@ -7473,6 +7512,7 @@ function removeBunkerSupplies(months) {
                     ${player.isHost ? `<span class="host-badge-small">${t('host')}</span>` : ''}
                     ${eliminatedBadge}
                     ${immunityBadge}
+                    ${isSpectatorGm ? `<span class="host-badge-small">${t('omniscientPublicBadge')}</span>` : ''}
                 </td>
                 <td>${renderTableCell(player, 'personality')}</td>
                 <td>${renderTableCell(player, 'body')}</td>
@@ -7489,7 +7529,7 @@ function removeBunkerSupplies(months) {
             }).join('');
         
         // Count non-eliminated players for bunker capacity display
-        const activePlayers = players.filter(p => !(p.isEliminated || p.IsEliminated));
+        const activePlayers = players.filter(p => !(p.isEliminated || p.IsEliminated) && !(p.isSpectatorGm || p.IsSpectatorGm));
         document.getElementById('playerCount').textContent = `${activePlayers.length}/${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
     }
 
