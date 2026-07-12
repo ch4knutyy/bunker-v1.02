@@ -2856,3 +2856,16 @@
         grid-template-columns: 1fr;
     }
 }
+.global-content-catalog {
+    margin: 1.25rem 0;
+    padding: 1rem;
+    border: 1px solid rgba(255, 193, 7, .45);
+    border-radius: 12px;
+    background: rgba(20, 24, 31, .96);
+}
+.global-catalog-warning { color: #ffc107; }
+.global-catalog-toolbar, .global-catalog-pagination, .global-catalog-metadata { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+.global-catalog-entries { display: grid; gap: .5rem; margin: 1rem 0; }
+.global-catalog-entry { padding: .65rem; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+.global-catalog-badge { padding: .35rem .55rem; border-radius: 999px; background: rgba(255,255,255,.08); }
+.global-catalog-details { max-height: 20rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -58,6 +58,12 @@ connection.start()
     let gmRoomLocalEditorData = { bunkerFields: [], apocalypseFields: [], players: [] };
     let gmRoomLocalEditPreview = null;
     let gmRoomLocalEditorPending = false;
+    let globalCatalogAllowed = false;
+    let globalCatalogMetadata = [];
+    let globalCatalogPage = 1;
+    let globalCatalogTotal = 0;
+    let globalCatalogSearchTimer = null;
+    let globalCatalogAccessRoomId = null;
     let currentGameTimer = null;
     let gameTimerClockAnchor = null;
     let gameTimerCommandPending = false;
@@ -390,6 +396,22 @@ connection.start()
         gmRefreshSnapshots: "Оновити snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "Контрольних точок ще немає", gmSnapshotConfirm: "Відновити стан кімнати з цієї контрольної точки?",
         gmSnapshotActiveConfirm: "Активна гра буде повернута до попереднього стану. Підтвердити ще раз?", gmSnapshotBlocked: "Restore заблоковано", gmSnapshotChanges: "Змінені категорії",
         gmRoomLocalEditor: "Редактор поточної кімнати", gmRoomLocalWarning: "Зміни діють лише в цій кімнаті й не змінюють глобальні дані.", gmCurrentPublicValue: "Поточне публічне значення", gmNewPublicValue: "Нове публічне значення", gmEditorApply: "Застосувати"
+    });
+
+    Object.assign(uiTranslations.uk, {
+        globalCatalogTitle: "Глобальний каталог контенту", globalCatalogDevelopmentWarning: "Лише Development: read-only каталог. У Production доступ вимкнено.",
+        globalCatalogReadOnly: "Тільки перегляд: збереження, видалення, commit і rollback недоступні.", globalCatalogCategory: "Категорія", globalCatalogSearch: "Пошук",
+        globalCatalogPrevious: "Назад", globalCatalogNext: "Далі", globalCatalogSchema: "Схема", globalCatalogStableIds: "Стабільні ID", globalCatalogLocalization: "Локалізація"
+    });
+    Object.assign(uiTranslations.en, {
+        globalCatalogTitle: "Global Content Catalog", globalCatalogDevelopmentWarning: "Development only: read-only catalog. Production access is disabled.",
+        globalCatalogReadOnly: "Read-only: save, delete, commit and rollback are unavailable.", globalCatalogCategory: "Category", globalCatalogSearch: "Search",
+        globalCatalogPrevious: "Previous", globalCatalogNext: "Next", globalCatalogSchema: "Schema", globalCatalogStableIds: "Stable IDs", globalCatalogLocalization: "Localization"
+    });
+    Object.assign(uiTranslations.ru, {
+        globalCatalogTitle: "Глобальный каталог контента", globalCatalogDevelopmentWarning: "Только Development: read-only каталог. В Production доступ отключён.",
+        globalCatalogReadOnly: "Только просмотр: сохранение, удаление, commit и rollback недоступны.", globalCatalogCategory: "Категория", globalCatalogSearch: "Поиск",
+        globalCatalogPrevious: "Назад", globalCatalogNext: "Далее", globalCatalogSchema: "Схема", globalCatalogStableIds: "Стабильные ID", globalCatalogLocalization: "Локализация"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -5786,6 +5808,117 @@ function removeBunkerSupplies(months) {
 
     // ==================== GAME MASTER FUNCTIONS ====================
 
+    async function refreshGlobalContentCatalogAccess() {
+        const panel = document.getElementById('globalContentCatalog');
+        if (!panel) return;
+        const roomId = currentRoom?.id || currentRoom?.Id || null;
+        if (!isHost || !roomId) {
+            panel.style.display = 'none';
+            globalCatalogAllowed = false;
+            globalCatalogAccessRoomId = null;
+            return;
+        }
+        if (globalCatalogAccessRoomId === roomId) return;
+        globalCatalogAccessRoomId = roomId;
+        try {
+            const access = await connection.invoke('GetGlobalContentCatalogAccess');
+            globalCatalogAllowed = access?.allowed === true || access?.Allowed === true;
+            panel.style.display = globalCatalogAllowed ? 'block' : 'none';
+            if (globalCatalogAllowed) await loadGlobalContentCategories();
+        } catch {
+            globalCatalogAllowed = false;
+            panel.style.display = 'none';
+        }
+    }
+
+    async function loadGlobalContentCategories() {
+        if (!globalCatalogAllowed) return;
+        try {
+            globalCatalogMetadata = await connection.invoke('GetGlobalContentCategories') || [];
+            const selector = document.getElementById('globalCatalogCategory');
+            if (!selector) return;
+            selector.replaceChildren(...globalCatalogMetadata.map(metadata => {
+                const option = document.createElement('option');
+                option.value = metadata.category || metadata.Category;
+                option.textContent = option.value;
+                return option;
+            }));
+            await loadGlobalContentPage(1);
+        } catch (error) {
+            renderGlobalCatalogError(error);
+        }
+    }
+
+    async function loadGlobalContentPage(page) {
+        if (!globalCatalogAllowed) return;
+        const category = document.getElementById('globalCatalogCategory')?.value;
+        if (!category) return;
+        const search = document.getElementById('globalCatalogSearch')?.value || '';
+        try {
+            const data = await connection.invoke('GetGlobalContentEntries', category, page, 25, search);
+            globalCatalogPage = data.page ?? data.Page ?? 1;
+            globalCatalogTotal = data.totalEntries ?? data.TotalEntries ?? 0;
+            renderGlobalContentPage(data);
+        } catch (error) {
+            renderGlobalCatalogError(error);
+        }
+    }
+
+    function renderGlobalContentPage(data) {
+        const metadata = data.metadata || data.Metadata || {};
+        const metadataPanel = document.getElementById('globalCatalogMetadata');
+        if (metadataPanel) {
+            metadataPanel.replaceChildren();
+            const values = [
+                `${metadata.category || metadata.Category}: ${metadata.entryCount ?? metadata.EntryCount ?? 0}`,
+                `${t('globalCatalogSchema')}: ${metadata.schemaStatus || metadata.SchemaStatus}`,
+                `${t('globalCatalogStableIds')}: ${metadata.stableIdStatus || metadata.StableIdStatus}`,
+                `${t('globalCatalogLocalization')}: ${metadata.localizationStatus || metadata.LocalizationStatus}`
+            ];
+            values.forEach(value => { const badge = document.createElement('span'); badge.className = 'global-catalog-badge'; badge.textContent = value; metadataPanel.appendChild(badge); });
+        }
+        const entriesPanel = document.getElementById('globalCatalogEntries');
+        if (entriesPanel) {
+            entriesPanel.replaceChildren();
+            (data.entries || data.Entries || []).forEach(entry => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'global-catalog-entry';
+                button.textContent = `${entry.displayName || entry.DisplayName} ${entry.summary || entry.Summary || ''}`.trim();
+                const stableId = entry.stableId || entry.StableId;
+                button.disabled = !stableId;
+                if (stableId) button.addEventListener('click', () => loadGlobalContentEntry(stableId));
+                entriesPanel.appendChild(button);
+            });
+        }
+        const pageLabel = document.getElementById('globalCatalogPage');
+        if (pageLabel) pageLabel.textContent = `${globalCatalogPage} · ${globalCatalogTotal}`;
+        const previous = document.getElementById('globalCatalogPrevious');
+        const next = document.getElementById('globalCatalogNext');
+        if (previous) previous.disabled = globalCatalogPage <= 1;
+        if (next) next.disabled = globalCatalogPage * 25 >= globalCatalogTotal;
+    }
+
+    async function loadGlobalContentEntry(stableId) {
+        const category = document.getElementById('globalCatalogCategory')?.value;
+        if (!globalCatalogAllowed || !category) return;
+        try {
+            const entry = await connection.invoke('GetGlobalContentEntry', category, stableId);
+            const details = document.getElementById('globalCatalogDetails');
+            if (details) details.textContent = Object.entries(entry.fields || entry.Fields || {}).map(([key, value]) => `${key}: ${value}`).join('\n');
+        } catch (error) { renderGlobalCatalogError(error); }
+    }
+
+    function changeGlobalContentPage(delta) { loadGlobalContentPage(Math.max(1, globalCatalogPage + delta)); }
+    function scheduleGlobalContentSearch() {
+        clearTimeout(globalCatalogSearchTimer);
+        globalCatalogSearchTimer = setTimeout(() => loadGlobalContentPage(1), 250);
+    }
+    function renderGlobalCatalogError(error) {
+        const details = document.getElementById('globalCatalogDetails');
+        if (details) details.textContent = error?.message || t('unavailableNow');
+    }
+
     function toggleGMPanel() {
         const panel = document.getElementById('gmPanel');
         const isVisible = panel.style.display !== 'none';
@@ -6856,6 +6989,7 @@ function removeBunkerSupplies(months) {
         
         // Оновлюємо GM секції якщо гра почалась
         updateGMSections();
+        refreshGlobalContentCatalogAccess();
         
         renderRoomPlayers();
         

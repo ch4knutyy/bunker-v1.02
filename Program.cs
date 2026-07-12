@@ -1,5 +1,6 @@
 ﻿using Bunker.Hubs;
 using Bunker.Hubs.GameHunSpy;
+using Bunker.Models;
 using Bunker.Services;
 using Bunker.Services.Threats;
 
@@ -27,6 +28,9 @@ builder.Services.AddSingleton<GmAuditService>();
 builder.Services.AddSingleton<RoomIntegrityService>();
 builder.Services.AddSingleton<RoomSnapshotService>();
 builder.Services.AddSingleton<RoomLocalEditorService>();
+builder.Services.Configure<GlobalContentCatalogOptions>(builder.Configuration.GetSection(GlobalContentCatalogOptions.SectionName));
+builder.Services.AddSingleton<GlobalContentAccessPolicy>();
+builder.Services.AddSingleton<GlobalContentCatalogService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 

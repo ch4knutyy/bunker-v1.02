@@ -11,6 +11,7 @@ public sealed class GmPrivacyBoundaryTests
         Assert.True(GmCapabilities.Allows(GmMode.PlayerHost, GmCapability.ViewPlayerControls));
         Assert.False(GmCapabilities.Allows(GmMode.PlayerHost, GmCapability.PeekHiddenCharacteristics));
         Assert.False(GmCapabilities.Allows(GmMode.PlayerHost, GmCapability.BrowseFutureThreatCatalog));
+        Assert.False(GmCapabilities.Allows(GmMode.PlayerHost, GmCapability.ManageGlobalContent));
     }
 
     [Fact]
