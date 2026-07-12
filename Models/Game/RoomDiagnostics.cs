@@ -40,8 +40,11 @@ public sealed class GmAuditEntry
     public GmAuditResult Result { get; init; }
     public string Summary { get; init; } = "";
     public string? CommandId { get; init; }
-    public string? RelatedSnapshotId { get; init; }
-    public bool CanUndo { get; init; }
+    public string? RelatedSnapshotId { get; set; }
+    public bool CanUndo { get; set; }
+    public bool WasUndone { get; set; }
+    public DateTimeOffset? UndoneAtUtc { get; set; }
+    public long? UndoAuditEntryId { get; set; }
     public string? ErrorCode { get; init; }
 }
 
@@ -56,4 +59,7 @@ public sealed record GmAuditEntryDto(
     string? CommandId,
     string? RelatedSnapshotId,
     bool CanUndo,
+    bool WasUndone,
+    DateTimeOffset? UndoneAtUtc,
+    long? UndoAuditEntryId,
     string? ErrorCode);

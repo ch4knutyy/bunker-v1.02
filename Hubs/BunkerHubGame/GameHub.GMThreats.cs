@@ -148,6 +148,8 @@ public partial class GameHub
     {
         if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
+        if (GMThreatStateMutator.CanReset(room))
+            _ = CreateMutationSnapshot(room, GetThreatActorId(room) ?? "unknown", "threat_cancel", commandId, "Before threat cancel");
         var aborted = false;
         lock (room.ThreatSyncRoot)
         {
@@ -160,12 +162,15 @@ public partial class GameHub
             return;
         }
         await SyncThreatRoom(room, "Загрозу скасовано ведучим");
+        await SendRoomSnapshots(room, Clients.Client(room.HostConnectionId));
     }
 
     public async Task GMRestartCurrentThreat(string commandId)
     {
         if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
+        if (GMThreatStateMutator.CanReset(room))
+            _ = CreateMutationSnapshot(room, GetThreatActorId(room) ?? "unknown", "threat_restart", commandId, "Before threat restart");
         var restarted = false;
         lock (room.ThreatSyncRoot)
         {
@@ -179,6 +184,7 @@ public partial class GameHub
         }
         EnsureRadiationThreatState(room);
         await SyncThreatRoom(room, "Поточний прогрес спроби очищено");
+        await SendRoomSnapshots(room, Clients.Client(room.HostConnectionId));
     }
 
     public async Task GMResyncThreatRoom(string commandId)
@@ -320,6 +326,7 @@ public partial class GameHub
     private async Task ReplaceThreatForGM(Room room, ThreatData source, string commandId, string message)
     {
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
+        _ = CreateMutationSnapshot(room, GetThreatActorId(room) ?? "unknown", "threat_replace", commandId, "Before threat replacement");
         lock (room.ThreatSyncRoot)
         {
             GMThreatStateMutator.Replace(room, CloneThreatData(source), IsExplicitSpecialThreat(source) ? "collecting_contributions" : "revealed");
@@ -327,6 +334,7 @@ public partial class GameHub
             _threatAudit.Append(room, ThreatAuditEventType.Revealed, GetThreatActorId(room), commandId);
         }
         await SyncThreatRoom(room, message);
+        await SendRoomSnapshots(room, Clients.Client(room.HostConnectionId));
     }
 
     private string? GetThreatActorId(Room room) =>

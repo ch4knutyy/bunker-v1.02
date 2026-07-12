@@ -52,6 +52,9 @@ connection.start()
     let gmAuditData = { entries: [] };
     let gmAutoFixPreview = null;
     let gmDiagnosticsPending = false;
+    let gmSnapshotsData = [];
+    let gmSnapshotRestorePreview = null;
+    let gmSnapshotCommandPending = false;
     let currentGameTimer = null;
     let gameTimerClockAnchor = null;
     let gameTimerCommandPending = false;
@@ -379,19 +382,28 @@ connection.start()
         gmRunDiagnostics: "Перевірити кімнату", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Застосувати безпечні виправлення",
         gmIssueFilter: "Фільтр issues", gmAll: "Усі", gmAuditLog: "Журнал GM-дій і загроз", gmAuditSearch: "Пошук за action або summary",
         gmRefreshAudit: "Оновити журнал", gmHealthy: "Справна", gmWarning: "Попередження", gmError: "Помилка", gmNoIssues: "Проблем не виявлено",
-        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безпечних виправлень немає", gmAutoFixConfirm: "Застосувати лише previewed безпечні виправлення?"
+        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безпечних виправлень немає", gmAutoFixConfirm: "Застосувати лише previewed безпечні виправлення?",
+        gmSnapshotsTitle: "Контрольні точки / Undo", gmSnapshotReason: "Назва контрольної точки", gmCreateSnapshot: "Створити контрольну точку", gmUndoLastAction: "Скасувати останню GM-дію",
+        gmRefreshSnapshots: "Оновити snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "Контрольних точок ще немає", gmSnapshotConfirm: "Відновити стан кімнати з цієї контрольної точки?",
+        gmSnapshotActiveConfirm: "Активна гра буде повернута до попереднього стану. Підтвердити ще раз?", gmSnapshotBlocked: "Restore заблоковано", gmSnapshotChanges: "Змінені категорії"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
         gmIssueFilter: "Issue filter", gmAll: "All", gmAuditLog: "GM and threat audit log", gmAuditSearch: "Search action or summary",
         gmRefreshAudit: "Refresh log", gmHealthy: "Healthy", gmWarning: "Warning", gmError: "Error", gmNoIssues: "No issues found",
-        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "No safe fixes available", gmAutoFixConfirm: "Apply only the previewed safe fixes?"
+        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "No safe fixes available", gmAutoFixConfirm: "Apply only the previewed safe fixes?",
+        gmSnapshotsTitle: "Snapshots / Undo", gmSnapshotReason: "Checkpoint label", gmCreateSnapshot: "Create checkpoint", gmUndoLastAction: "Undo last GM action",
+        gmRefreshSnapshots: "Refresh snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "No checkpoints yet", gmSnapshotConfirm: "Restore the room from this checkpoint?",
+        gmSnapshotActiveConfirm: "The active game will return to an earlier state. Confirm again?", gmSnapshotBlocked: "Restore blocked", gmSnapshotChanges: "Changed categories"
     });
     Object.assign(uiTranslations.ru, {
         gmRunDiagnostics: "Проверить комнату", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Применить безопасные исправления",
         gmIssueFilter: "Фильтр issues", gmAll: "Все", gmAuditLog: "Журнал GM-действий и угроз", gmAuditSearch: "Поиск по action или summary",
         gmRefreshAudit: "Обновить журнал", gmHealthy: "Исправна", gmWarning: "Предупреждение", gmError: "Ошибка", gmNoIssues: "Проблем не обнаружено",
-        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безопасных исправлений нет", gmAutoFixConfirm: "Применить только previewed безопасные исправления?"
+        gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безопасных исправлений нет", gmAutoFixConfirm: "Применить только previewed безопасные исправления?",
+        gmSnapshotsTitle: "Контрольные точки / Undo", gmSnapshotReason: "Название контрольной точки", gmCreateSnapshot: "Создать контрольную точку", gmUndoLastAction: "Отменить последнее GM-действие",
+        gmRefreshSnapshots: "Обновить snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "Контрольных точек пока нет", gmSnapshotConfirm: "Восстановить комнату из этой контрольной точки?",
+        gmSnapshotActiveConfirm: "Активная игра вернётся к предыдущему состоянию. Подтвердить ещё раз?", gmSnapshotBlocked: "Restore заблокирован", gmSnapshotChanges: "Изменённые категории"
     });
 
     function getCurrentLanguage() {
@@ -3309,6 +3321,7 @@ function registerSignalREvents() {
         if (result) result.textContent = action;
         gmLastCommandError = '';
         gmPlayerCommandPending = false;
+        setGmSnapshotPending(false);
         document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
         const playerResult = document.getElementById('gmPlayerCommandResult');
         if (playerResult) playerResult.textContent = action;
@@ -3357,6 +3370,11 @@ function registerSignalREvents() {
         if (gmDiagnosticsPending) {
             setGmDiagnosticsPending(false);
             const feedback = document.getElementById('gmDiagnosticsFeedback');
+            if (feedback) feedback.textContent = localizeServerMessage(message);
+        }
+        if (gmSnapshotCommandPending) {
+            setGmSnapshotPending(false);
+            const feedback = document.getElementById('gmSnapshotFeedback');
             if (feedback) feedback.textContent = localizeServerMessage(message);
         }
         if (gameTimerCommandPending) {
@@ -3755,6 +3773,25 @@ function registerSignalREvents() {
             ? `${gmAutoFixPreview.changeCount} safe fix(es)` : t('gmNoAutoFix');
         const apply = document.getElementById('gmApplyAutoFix');
         if (apply) apply.disabled = !gmAutoFixPreview.hasChanges;
+    });
+
+    connection.off("RoomSnapshotsUpdated");
+    connection.on("RoomSnapshotsUpdated", function (data) {
+        gmSnapshotsData = data.snapshots || data.Snapshots || [];
+        setGmSnapshotPending(false);
+        renderRoomSnapshots();
+    });
+
+    connection.off("RoomSnapshotRestorePreviewed");
+    connection.on("RoomSnapshotRestorePreviewed", function (data) {
+        gmSnapshotRestorePreview = {
+            snapshot: data.snapshot || data.Snapshot || null,
+            canRestore: data.canRestore ?? data.CanRestore ?? false,
+            blockedReason: data.blockedReason || data.BlockedReason || '',
+            changes: data.changes || data.Changes || []
+        };
+        setGmSnapshotPending(false);
+        renderRoomSnapshots();
     });
 
     connection.off("GmAuditLogUpdated");
@@ -5728,6 +5765,7 @@ function removeBunkerSupplies(months) {
             connection.invoke("ResyncVotingState").catch(err => console.error(err));
             connection.invoke("RunRoomIntegrityCheck", getCurrentLanguage()).catch(err => console.error(err));
             connection.invoke("GetGmAuditLog").catch(err => console.error(err));
+            connection.invoke("GetRoomSnapshots").catch(err => console.error(err));
             renderGMPanelState();
         }
     }
@@ -5766,6 +5804,51 @@ function removeBunkerSupplies(months) {
 
     function refreshGmAudit() {
         diagnosticsCommand('GetGmAuditLog');
+    }
+
+    function setGmSnapshotPending(pending) {
+        gmSnapshotCommandPending = pending;
+        document.querySelectorAll('.gm-snapshot-command').forEach(button => button.disabled = pending);
+        document.querySelectorAll('[data-snapshot-action]').forEach(button => button.disabled = pending || button.dataset.snapshotBlocked === 'true');
+    }
+
+    function invokeSnapshotCommand(method, args = []) {
+        if (gmSnapshotCommandPending) return;
+        setGmSnapshotPending(true);
+        const feedback = document.getElementById('gmSnapshotFeedback');
+        if (feedback) feedback.textContent = '';
+        connection.invoke(method, ...args).catch(error => {
+            setGmSnapshotPending(false);
+            if (feedback) feedback.textContent = error?.message || t('unavailableNow');
+        });
+    }
+
+    function refreshRoomSnapshots() {
+        invokeSnapshotCommand('GetRoomSnapshots');
+    }
+
+    function createManualRoomSnapshot() {
+        const reason = (document.getElementById('gmSnapshotReason')?.value || '').trim().slice(0, 120);
+        invokeSnapshotCommand('CreateManualRoomSnapshot', [reason, gmRoundCommandId()]);
+    }
+
+    function previewRoomSnapshot(snapshotId) {
+        gmSnapshotRestorePreview = null;
+        invokeSnapshotCommand('PreviewRoomSnapshotRestore', [snapshotId]);
+    }
+
+    function restoreRoomSnapshot(snapshotId) {
+        const previewId = gmSnapshotRestorePreview?.snapshot?.snapshotId || gmSnapshotRestorePreview?.snapshot?.SnapshotId;
+        if (gmSnapshotCommandPending || previewId !== snapshotId || !gmSnapshotRestorePreview?.canRestore) return;
+        if (!confirm(t('gmSnapshotConfirm'))) return;
+        const active = String(currentRoundState?.roomState || currentRoom?.state || '').toLowerCase() === 'playing';
+        if (active && !confirm(t('gmSnapshotActiveConfirm'))) return;
+        invokeSnapshotCommand('RestoreRoomSnapshot', [snapshotId, gmRoundCommandId(), true, active]);
+    }
+
+    function undoLastGmAction() {
+        if (gmSnapshotCommandPending || !confirm(t('gmUndoLastAction'))) return;
+        invokeSnapshotCommand('UndoLastGmAction', [gmRoundCommandId()]);
     }
 
     function gmRoundCommandId() {
@@ -5946,6 +6029,7 @@ function removeBunkerSupplies(months) {
             error.textContent = gmLastCommandError;
             error.style.display = gmLastCommandError ? 'block' : 'none';
         }
+        renderRoomSnapshots();
         renderUnifiedGmAudit();
     }
 
@@ -6027,6 +6111,47 @@ function removeBunkerSupplies(months) {
         }).join('') : `<p class="gm-threat-audit-empty">${escapeHtml(t('gmNoIssues'))}</p>`;
     }
 
+    function renderRoomSnapshots() {
+        const list = document.getElementById('gmSnapshotsList');
+        const previewBox = document.getElementById('gmSnapshotPreview');
+        if (!list || !previewBox) return;
+        const snapshots = Array.isArray(gmSnapshotsData) ? gmSnapshotsData.slice(0, 20) : [];
+        if (!snapshots.length) list.innerHTML = `<p class="gm-threat-audit-empty">${escapeHtml(t('gmSnapshotEmpty'))}</p>`;
+        else list.innerHTML = snapshots.map(snapshot => {
+            const id = snapshot.snapshotId || snapshot.SnapshotId || '';
+            const reason = snapshot.reason || snapshot.Reason || '';
+            const action = snapshot.relatedActionType || snapshot.RelatedActionType || '';
+            const round = snapshot.roundNumber ?? snapshot.RoundNumber ?? 0;
+            const phase = snapshot.phase || snapshot.Phase || '';
+            const status = (snapshot.restoreStatus || snapshot.RestoreStatus || 'blocked').toLowerCase();
+            const blocked = snapshot.blockedReason || snapshot.BlockedReason || '';
+            const dateValue = snapshot.createdAtUtc || snapshot.CreatedAtUtc;
+            const date = dateValue ? new Date(dateValue) : null;
+            const time = date && !Number.isNaN(date.getTime()) ? date.toLocaleString() : '';
+            const selectedPreviewId = gmSnapshotRestorePreview?.snapshot?.snapshotId || gmSnapshotRestorePreview?.snapshot?.SnapshotId;
+            const canRestore = status === 'restorable' && gmSnapshotRestorePreview?.canRestore && selectedPreviewId === id;
+            return `<article class="gm-snapshot-entry">
+                <header><strong>${escapeHtml(reason)}</strong><span class="gm-snapshot-badge ${escapeHtml(status)}">${escapeHtml(status)}</span></header>
+                <p>${escapeHtml(time)} · ${escapeHtml(action || 'manual_snapshot')} · ${escapeHtml(t('round'))} ${escapeHtml(round)} / ${escapeHtml(phase)}</p>
+                ${blocked ? `<p>${escapeHtml(t('gmSnapshotBlocked'))}: ${escapeHtml(blocked)}</p>` : ''}
+                <div class="gm-snapshot-actions">
+                    <button type="button" class="btn-gm-action" data-snapshot-action onclick="previewRoomSnapshot('${escapeHtml(id)}')">${escapeHtml(t('gmSnapshotPreview'))}</button>
+                    <button type="button" class="btn-gm-action" data-snapshot-action data-snapshot-blocked="${canRestore ? 'false' : 'true'}" onclick="restoreRoomSnapshot('${escapeHtml(id)}')" ${canRestore ? '' : 'disabled'}>${escapeHtml(t('gmSnapshotRestore'))}</button>
+                </div>
+            </article>`;
+        }).join('');
+
+        if (!gmSnapshotRestorePreview) previewBox.innerHTML = '';
+        else {
+            const changes = gmSnapshotRestorePreview.changes.map(change => {
+                const category = change.category || change.Category || '';
+                const count = change.changedCount ?? change.ChangedCount ?? 0;
+                return `${category}: ${count}`;
+            });
+            previewBox.innerHTML = `<strong>${escapeHtml(t('gmSnapshotChanges'))}</strong><p>${escapeHtml(changes.join(' · ') || '0')}</p>${gmSnapshotRestorePreview.blockedReason ? `<p>${escapeHtml(t('gmSnapshotBlocked'))}: ${escapeHtml(gmSnapshotRestorePreview.blockedReason)}</p>` : ''}`;
+        }
+    }
+
     function renderUnifiedGmAudit() {
         const list = document.getElementById('gmThreatAuditList');
         if (!list) return;
@@ -6037,7 +6162,9 @@ function removeBunkerSupplies(months) {
             result: (entry.result || entry.Result || '').toLowerCase(),
             target: entry.targetPlayerId || entry.TargetPlayerId || '',
             summary: entry.summary || entry.Summary || '',
-            errorCode: entry.errorCode || entry.ErrorCode || ''
+            errorCode: entry.errorCode || entry.ErrorCode || '',
+            canUndo: entry.canUndo ?? entry.CanUndo ?? false,
+            wasUndone: entry.wasUndone ?? entry.WasUndone ?? false
         }));
         const threat = (Array.isArray(gmThreatControlData.auditLog) ? gmThreatControlData.auditLog : []).map(entry => ({
             source: 'threat',
@@ -6074,9 +6201,10 @@ function removeBunkerSupplies(months) {
                 ? parsedTime.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                 : '';
             const title = entry.source === 'threat' ? t(eventKeys[type] || type) : entry.action;
+            const undoState = entry.wasUndone ? ' · undone' : entry.canUndo ? ' · undo available' : '';
             return `<details class="gm-threat-audit-entry">
                 <summary><time>${escapeHtml(time)}</time><strong>${escapeHtml(title)}</strong><span class="gm-audit-result ${escapeHtml(entry.result)}">${escapeHtml(entry.result)}</span></summary>
-                <div><span>${escapeHtml(entry.summary)}</span>${entry.target ? `<span>${escapeHtml(t('target'))}: ${escapeHtml(entry.target)}</span>` : ''}${entry.errorCode ? `<span>${escapeHtml(entry.errorCode)}</span>` : ''}</div>
+                <div><span>${escapeHtml(entry.summary + undoState)}</span>${entry.target ? `<span>${escapeHtml(t('target'))}: ${escapeHtml(entry.target)}</span>` : ''}${entry.errorCode ? `<span>${escapeHtml(entry.errorCode)}</span>` : ''}</div>
             </details>`;
         }).join('');
     }

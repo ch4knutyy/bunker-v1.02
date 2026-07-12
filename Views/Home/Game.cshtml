@@ -460,6 +460,18 @@
                         </select>
                     </div>
                     <div id="gmDiagnosticsIssues" class="gm-diagnostics-list" aria-live="polite"></div>
+                    <details id="gmSnapshotsSection" class="gm-threat-audit">
+                        <summary data-gm-i18n="gmSnapshotsTitle">Snapshots / Undo</summary>
+                        <div class="gm-diagnostics-toolbar">
+                            <input id="gmSnapshotReason" class="input-field" maxlength="120" data-gm-i18n-placeholder="gmSnapshotReason" placeholder="Назва контрольної точки" />
+                            <button id="gmCreateSnapshot" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmCreateSnapshot" onclick="createManualRoomSnapshot()">Створити контрольну точку</button>
+                            <button id="gmUndoLastAction" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Скасувати останню GM-дію</button>
+                            <button type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmRefreshSnapshots" onclick="refreshRoomSnapshots()">Оновити snapshots</button>
+                        </div>
+                        <p id="gmSnapshotFeedback" class="gm-round-hint" aria-live="polite"></p>
+                        <div id="gmSnapshotPreview" class="gm-snapshot-preview" aria-live="polite"></div>
+                        <div id="gmSnapshotsList" class="gm-snapshots-list" aria-live="polite"></div>
+                    </details>
                     <details id="gmThreatAudit" class="gm-threat-audit" open>
                         <summary data-gm-i18n="gmAuditLog">GM audit log</summary>
                         <div class="gm-diagnostics-toolbar">
