@@ -13,9 +13,40 @@ namespace Bunker.UnitTests.Services.Threats;
 public class GameHubForceOutcomePipelineTests
 {
     [Fact]
+    public void NormalMiniGameFailureUsesCanonicalFinalizerAndPreservesExistingHealthState()
+    {
+        var (hub, room, player, miniGame) = CreateRadiationHubAndRoom();
+        player.PhysicalHealth.Name = "Синдром Дауна";
+        player.AdditionalConditionEffects.Add(new PlayerConditionEffect
+        {
+            Id = "existing", ConditionId = "physical_301", Name = "Опік (середня форма)", SeverityCode = "medium"
+        });
+        var publicState = miniGame.Start(room, room.ThreatState!, "p1", "uk");
+        Assert.NotNull(publicState.CurrentQuestion);
+        var answer = miniGame.SubmitAnswer(room, room.ThreatState!, "p1", publicState.CurrentQuestion!.QuestionId, "definitely_wrong", "uk");
+        Assert.Equal("completed", answer.PublicState!.Status);
+        Assert.Equal("failed", answer.PublicState.ResultStatus);
+        Assert.False(room.ThreatState!.Resolution.EffectsApplied);
+
+        Assert.True(InvokeNormalFinalize(hub, room));
+
+        Assert.Equal("Синдром Дауна", player.PhysicalHealth.Name);
+        Assert.Contains(player.AdditionalConditionEffects, effect => effect.ConditionId == "physical_301");
+        var radiation = Assert.Single(player.AdditionalConditionEffects, effect => effect.ConditionId == "physical_152");
+        Assert.Equal("hard", radiation.SeverityCode);
+        Assert.True(room.ThreatState.Resolution.EffectsApplied);
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType == ThreatAuditEventType.CompletedFailure));
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType == ThreatAuditEventType.EffectsApplied));
+
+        Assert.True(InvokeNormalFinalize(hub, room));
+        Assert.Single(player.AdditionalConditionEffects, effect => effect.ConditionId == "physical_152");
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType == ThreatAuditEventType.CompletedFailure));
+    }
+
+    [Fact]
     public void RadiationForceFailureUsesCanonicalEffectPipelineExactlyOnce()
     {
-        var (hub, room, player) = CreateRadiationHubAndRoom();
+        var (hub, room, player, _) = CreateRadiationHubAndRoom();
         var timer = room.GameTimer.RemainingSecondsWhenPaused;
 
         Assert.True(InvokeForce(hub, room, "failure", "force-failure"));
@@ -38,7 +69,7 @@ public class GameHubForceOutcomePipelineTests
     [Fact]
     public void RadiationForceSuccessUsesCanonicalSuccessFinalizationWithoutFailureEffect()
     {
-        var (hub, room, player) = CreateRadiationHubAndRoom();
+        var (hub, room, player, _) = CreateRadiationHubAndRoom();
 
         Assert.True(InvokeForce(hub, room, "success", "force-success"));
 
@@ -59,7 +90,14 @@ public class GameHubForceOutcomePipelineTests
         return Assert.IsType<bool>(method.Invoke(hub, args));
     }
 
-    private static (GameHub Hub, Room Room, Player Player) CreateRadiationHubAndRoom()
+    private static bool InvokeNormalFinalize(GameHub hub, Room room)
+    {
+        var method = typeof(GameHub).GetMethod("FinalizeRadiationOperationLocked", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(method);
+        return Assert.IsType<bool>(method.Invoke(hub, [room, room.ThreatState!]));
+    }
+
+    private static (GameHub Hub, Room Room, Player Player, RadiationLeakMiniGameService MiniGame) CreateRadiationHubAndRoom()
     {
         var root = FindContentRoot();
         var environment = new TestEnvironment(root);
@@ -91,12 +129,18 @@ public class GameHubForceOutcomePipelineTests
                 ThreatStatus = "mini_game_active",
                 ThreatRevealedRound = 3,
                 ParticipantPlayerIds = ["p1"],
-                MiniGame = new ThreatMiniGameState { ThreatId = "radiation_leak", Status = "active" }
+                VolunteerSelection = new ThreatVolunteerSelectionState { SelectedPlayerId = "p1" },
+                OperationScaling = new ThreatOperationScalingState
+                {
+                    IsCalculated = true, BaseTaskCount = 1, PlayableTaskCount = 1, RequiredTasksForSuccess = 1,
+                    AllowedErrors = 0, TaskTimeSeconds = 60, HintTokens = 0
+                },
+                MiniGame = new ThreatMiniGameState { ThreatId = "radiation_leak", Status = "not_started" }
             },
             GameTimer = new GameTimerState { RemainingSecondsWhenPaused = 41 }
         };
         room.Players["c1"] = player;
-        return (hub, room, player);
+        return (hub, room, player, miniGame);
     }
 
     private static string FindContentRoot()

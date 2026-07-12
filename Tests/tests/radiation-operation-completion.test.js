@@ -15,15 +15,29 @@ test('all completion paths converge on the idempotent finalizer', () => {
   assert.match(hub, /CheckThreatMiniGameTimeout[\s\S]*FinalizeRadiationOperationAsync/);
   assert.match(hub, /ResolveCurrentThreat[\s\S]*FinalizeRadiationOperationAsync/);
   assert.match(service, /errors > threatState\.OperationScaling\.AllowedErrors/);
+  assert.match(hub, /IsRadiationMiniGameTerminalStatus/);
+  assert.ok((hub.match(/IsRadiationMiniGameTerminalStatus\(/g) || []).length >= 7);
+});
+
+test('normal and forced failure share FinalizeRadiationOperationLocked', () => {
+  const normal = hub.match(/private async Task FinalizeRadiationOperationAsync[\s\S]*?private bool FinalizeRadiationOperationLocked/)?.[0] || '';
+  const forced = hub.match(/private bool ForceFinalizeThreatLocked[\s\S]*?private async Task NotifyReturnedThreatItems/)?.[0] || '';
+  assert.match(normal, /FinalizeRadiationOperationLocked/);
+  assert.match(forced, /FinalizeRadiationOperationLocked/);
+  const canonical = hub.match(/private bool FinalizeRadiationOperationLocked[\s\S]*?private bool ForceFinalizeThreatLocked/)?.[0] || '';
+  assert.match(canonical, /ApplyRadiationFailure\(room, threatState\)/);
+  assert.ok(canonical.indexOf('ApplyRadiationFailure(room, threatState)') < canonical.indexOf('Resolution.EffectsApplied = true'));
+  assert.ok(canonical.indexOf('Resolution.EffectsApplied = true') < canonical.indexOf('threatState.ThreatStatus = outcome'));
 });
 
 test('effects are applied before EffectsApplied and final snapshots', () => {
-  const start = hub.indexOf('private async Task FinalizeRadiationOperationAsync');
-  const body = hub.slice(start, hub.indexOf('private async Task NotifyReturnedThreatItems', start));
-  assert.ok(body.indexOf('ApplyRadiationFailure(room, threatState)') < body.indexOf('Resolution.EffectsApplied = true'));
-  assert.ok(body.indexOf('Resolution.EffectsApplied = true') < body.indexOf('miniGame.GetPublicState'));
-  assert.ok(body.indexOf('miniGame.GetPublicState') < body.indexOf('SendAsync("ThreatMiniGameUpdated"'));
-  assert.ok(body.indexOf('SendAsync("ThreatMiniGameUpdated"') < body.indexOf('BroadcastThreatState'));
+  const asyncBody = hub.match(/private async Task FinalizeRadiationOperationAsync[\s\S]*?private bool FinalizeRadiationOperationLocked/)?.[0] || '';
+  const canonical = hub.match(/private bool FinalizeRadiationOperationLocked[\s\S]*?private bool ForceFinalizeThreatLocked/)?.[0] || '';
+  assert.ok(canonical.indexOf('ApplyRadiationFailure(room, threatState)') < canonical.indexOf('Resolution.EffectsApplied = true'));
+  assert.ok(canonical.indexOf('Resolution.EffectsApplied = true') < canonical.indexOf('threatState.ThreatStatus = outcome'));
+  assert.ok(asyncBody.indexOf('FinalizeRadiationOperationLocked') < asyncBody.indexOf('miniGame.GetPublicState'));
+  assert.ok(asyncBody.indexOf('miniGame.GetPublicState') < asyncBody.indexOf('SendAsync("ThreatMiniGameUpdated"'));
+  assert.ok(asyncBody.indexOf('SendAsync("ThreatMiniGameUpdated"') < asyncBody.indexOf('BroadcastThreatState'));
 });
 
 test('final payload carries status, outcome, score, and refreshed players', () => {

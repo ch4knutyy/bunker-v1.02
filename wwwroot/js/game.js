@@ -182,6 +182,8 @@ connection.start()
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
         ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
         ,gmPauseReason: "Причина паузи", gmPause: "Пауза", gmResume: "Продовжити", gmManualRound: "Номер раунду", gmSetRound: "Встановити", gmResetReadiness: "Скинути готовність", gmVotingRecovery: "Відновлення голосування", gmClearVotes: "Очистити голоси", gmVotingResync: "Синхронізувати", gmRemoveVote: "Видалити голос voter", gmUnavailableRecovery: "Недоступні recovery controls", gmStageUnavailable: "Reopen/skip потребує transition helper", gmTimerUnavailable: "Round/voting timer відсутній"
+        ,gmRoundCurrentState: "Поточний стан", gmRoundMainActions: "Основні дії", gmStatusPaused: "Гру призупинено", gmStatusRunning: "Гра триває", gmManualRoundHeading: "Ручне встановлення раунду", gmManualRoundHint: "Перехід можливий лише вперед; частину стану поточного раунду буде очищено.", gmPreviewRound: "Preview / підтвердити", gmReadinessHeading: "Скидання готовності", gmReadinessHint: "Очищає поточні позначки готовності після підтвердження."
+        ,gmTimerMinutes: "Хвилини", gmTimerSeconds: "Секунди", gmTimerPurpose: "Призначення", gmTimerName: "Назва"
         ,gmGameTimer: "Серверний таймер", gmTimerLabel: "Назва таймера", gmTimerStart: "Старт", gmTimerRestart: "Перезапустити", gmTimerSet: "Встановити", gmTimerStop: "Зупинити", gmTimerExpired: "Час вийшов", gmTimerStopped: "Зупинено", timerPurposeRound: "Раунд", timerPurposeVoting: "Голосування", timerPurposeThreat: "Загроза", timerPurposeCustom: "Інше"
     });
     Object.assign(uiTranslations.en, {
@@ -272,6 +274,8 @@ connection.start()
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
         ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
         ,gmPauseReason: "Pause reason", gmPause: "Pause", gmResume: "Resume", gmManualRound: "Round number", gmSetRound: "Set", gmResetReadiness: "Reset readiness", gmVotingRecovery: "Voting recovery", gmClearVotes: "Clear votes", gmVotingResync: "Resync", gmRemoveVote: "Remove voter vote", gmUnavailableRecovery: "Unavailable recovery controls", gmStageUnavailable: "Reopen/skip requires a transition helper", gmTimerUnavailable: "Round/voting timer is unavailable"
+        ,gmRoundCurrentState: "Current state", gmRoundMainActions: "Primary actions", gmStatusPaused: "Game paused", gmStatusRunning: "Game running", gmManualRoundHeading: "Set round manually", gmManualRoundHint: "Only forward transitions are allowed; part of the current round state will be cleared.", gmPreviewRound: "Preview / confirm", gmReadinessHeading: "Reset readiness", gmReadinessHint: "Clears the current readiness marks after confirmation."
+        ,gmTimerMinutes: "Minutes", gmTimerSeconds: "Seconds", gmTimerPurpose: "Purpose", gmTimerName: "Name"
         ,gmGameTimer: "Server timer", gmTimerLabel: "Timer label", gmTimerStart: "Start", gmTimerRestart: "Restart", gmTimerSet: "Set", gmTimerStop: "Stop", gmTimerExpired: "Time is up", gmTimerStopped: "Stopped", timerPurposeRound: "Round", timerPurposeVoting: "Voting", timerPurposeThreat: "Threat", timerPurposeCustom: "Custom"
     });
     Object.assign(uiTranslations.ru, {
@@ -362,6 +366,8 @@ connection.start()
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
         ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
         ,gmPauseReason: "Причина паузы", gmPause: "Пауза", gmResume: "Продолжить", gmManualRound: "Номер раунда", gmSetRound: "Установить", gmResetReadiness: "Сбросить готовность", gmVotingRecovery: "Восстановление голосования", gmClearVotes: "Очистить голоса", gmVotingResync: "Синхронизировать", gmRemoveVote: "Удалить голос voter", gmUnavailableRecovery: "Недоступные recovery controls", gmStageUnavailable: "Reopen/skip требует transition helper", gmTimerUnavailable: "Round/voting timer отсутствует"
+        ,gmRoundCurrentState: "Текущее состояние", gmRoundMainActions: "Основные действия", gmStatusPaused: "Игра приостановлена", gmStatusRunning: "Игра продолжается", gmManualRoundHeading: "Ручная установка раунда", gmManualRoundHint: "Переход возможен только вперёд; часть состояния текущего раунда будет очищена.", gmPreviewRound: "Preview / подтвердить", gmReadinessHeading: "Сброс готовности", gmReadinessHint: "Очищает текущие отметки готовности после подтверждения."
+        ,gmTimerMinutes: "Минуты", gmTimerSeconds: "Секунды", gmTimerPurpose: "Назначение", gmTimerName: "Название"
         ,gmGameTimer: "Серверный таймер", gmTimerLabel: "Название таймера", gmTimerStart: "Старт", gmTimerRestart: "Перезапустить", gmTimerSet: "Установить", gmTimerStop: "Остановить", gmTimerExpired: "Время вышло", gmTimerStopped: "Остановлен", timerPurposeRound: "Раунд", timerPurposeVoting: "Голосование", timerPurposeThreat: "Угроза", timerPurposeCustom: "Другое"
     });
 
@@ -786,7 +792,13 @@ connection.start()
         setText('#gmCurrentPhase', getPhaseLabel(phase));
         setText('#gmRoundProgress', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? 0} відкрили`);
         const pauseBadge = document.getElementById('gmPauseBadge');
-        if (pauseBadge) pauseBadge.textContent = currentRoundState?.isPaused ? t('gmPause') : t('gmResume');
+        if (pauseBadge) pauseBadge.textContent = currentRoundState?.isPaused ? t('gmStatusPaused') : t('gmStatusRunning');
+        const pauseReasonSummary = document.getElementById('gmPauseReasonSummary');
+        if (pauseReasonSummary) {
+            const pauseReason = currentRoundState?.isPaused ? (currentRoundState.pauseReason || '') : '';
+            pauseReasonSummary.textContent = pauseReason;
+            pauseReasonSummary.style.display = pauseReason ? '' : 'none';
+        }
         const manualRound = document.getElementById('gmManualRound');
         if (manualRound && document.activeElement !== manualRound) manualRound.value = round || 1;
         const diceRoll = currentRoundState?.diceRoll || null;

@@ -36,3 +36,24 @@ test('client round commands prevent double submit and render only voter names', 
   const render = client.match(/function renderGmVotingAdmin[\s\S]*?\n    }/)?.[0] || '';
   assert.doesNotMatch(render, /targetId|targetName/);
 });
+
+test('round controls are grouped without changing existing command handlers', () => {
+  for (const id of ['gmRoundStateHeading', 'gmRoundMainHeading', 'gmManualRoundHeading', 'gmReadinessHeading', 'gmTimerHeading']) {
+    assert.match(view, new RegExp(`id="${id}"`));
+  }
+  assert.match(view, /onclick="setGamePause\(true\)"/);
+  assert.match(view, /onclick="setGamePause\(false\)"/);
+  assert.match(view, /onclick="previewManualRoundChange\(\)"/);
+  assert.match(view, /onclick="resetRoundReadiness\(\)"/);
+  assert.match(view, /onclick="startGameTimer\(\)"/);
+  assert.match(client, /if \(gmRoundCommandPending\) return/);
+});
+
+test('round labels are localized and pause reason is rendered from server state', () => {
+  for (const key of ['gmRoundCurrentState', 'gmRoundMainActions', 'gmManualRoundHint', 'gmReadinessHint', 'gmTimerMinutes']) {
+    assert.equal((client.match(new RegExp(key, 'g')) || []).length >= 3, true, `missing localized ${key}`);
+  }
+  assert.match(client, /currentRoundState\.pauseReason/);
+  assert.match(client, /gmStatusPaused/);
+  assert.match(client, /gmStatusRunning/);
+});
