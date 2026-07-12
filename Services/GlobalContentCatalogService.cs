@@ -89,6 +89,14 @@ public sealed class GlobalContentCatalogService
         return new(read.Definition.Slug, stableId, DisplayName(entry), SafeFields(entry));
     }
 
+    public GlobalContentDraftSource ReadDraftSource(string category)
+    {
+        var read = Read(category);
+        if (read.Metadata.SchemaStatus is not ("Valid") && !read.Metadata.SchemaStatus.StartsWith("ValidDuplicateNames:", StringComparison.Ordinal))
+            throw new GlobalContentRequestException("category_schema_invalid");
+        return new(read.Metadata, read.Entries.Select(x => x.GetRawText()).ToList());
+    }
+
     private CatalogRead Read(string category)
     {
         var definition = Resolve(category);
@@ -209,3 +217,5 @@ public sealed class GlobalContentRequestException(string code) : Exception(code)
 {
     public string Code { get; } = code;
 }
+
+public sealed record GlobalContentDraftSource(GlobalContentMetadataDto Metadata, IReadOnlyList<string> Entries);

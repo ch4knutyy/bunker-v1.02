@@ -522,6 +522,26 @@
                 <button id="globalCatalogNext" type="button" class="btn-secondary" data-gm-i18n="globalCatalogNext" onclick="changeGlobalContentPage(1)">Next</button>
             </div>
             <pre id="globalCatalogDetails" class="global-catalog-details" aria-live="polite"></pre>
+            <section id="globalCatalogDrafts" class="global-catalog-drafts">
+                <h4 data-gm-i18n="globalDraftsTitle">Drafts</h4>
+                <button id="globalDraftCreate" type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftCreate" onclick="createGlobalContentDraft()">Create draft</button>
+                <div id="globalDraftBlocked" class="global-catalog-warning" aria-live="polite"></div>
+                <select id="globalDraftSelect" class="input-field" onchange="renderGlobalDraftState()"></select>
+                <div id="globalDraftStatus" class="global-catalog-metadata"></div>
+                <div class="global-catalog-toolbar">
+                    <select id="globalDraftOperation" class="input-field"><option value="CreateEntry">Create</option><option value="UpdateEntry">Update</option><option value="DeleteEntry">Delete</option></select>
+                    <input id="globalDraftEntryId" class="input-field" maxlength="100" placeholder="Entry ID" />
+                    <input id="globalDraftName" class="input-field" maxlength="500" placeholder="Name" />
+                    <input id="globalDraftDescription" class="input-field" maxlength="2000" placeholder="Description" />
+                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftApply" onclick="applyGlobalDraftCommand()">Apply to draft</button>
+                </div>
+                <div class="global-catalog-toolbar">
+                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftValidate" onclick="validateGlobalDraft()">Validate</button>
+                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftPreview" onclick="previewGlobalDraftDiff()">Preview diff</button>
+                    <button type="button" class="btn-danger global-draft-command" data-gm-i18n="globalDraftDiscard" onclick="discardGlobalDraft()">Discard</button>
+                </div>
+                <pre id="globalDraftResult" class="global-catalog-details" aria-live="polite"></pre>
+            </section>
         </section>
         <div id="roomLobby">
             <h3 class="section-title">Гравці в кімнаті: <span id="roomPlayerCount">0/12</span></h3>

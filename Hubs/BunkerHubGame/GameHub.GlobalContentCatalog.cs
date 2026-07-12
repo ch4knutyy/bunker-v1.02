@@ -46,13 +46,68 @@ public partial class GameHub
         return Task.FromResult(SafeRequest(() => _globalContentCatalog.GetEntry(category, stableId)));
     }
 
-    private void DemandGlobalContentAccess()
+    public Task<IReadOnlyList<GlobalContentDraftDto>> GetGlobalContentDrafts()
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(_globalContentDrafts.GetDrafts(GetGmActorId(room)));
+    }
+
+    public Task<GlobalContentDraftDto> GetGlobalContentDraft(string draftId)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(SafeRequest(() => _globalContentDrafts.GetDraft(draftId, GetGmActorId(room))));
+    }
+
+    public Task<GlobalContentDraftDto> CreateGlobalContentDraft(string category, string commandId)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentMutation(GetGmActorId(room));
+        return Task.FromResult(SafeRequest(() => _globalContentDrafts.Create(category, GetGmActorId(room), commandId)));
+    }
+
+    public Task<GlobalContentDraftDto> ApplyGlobalContentDraftCommand(GlobalContentDraftCommandDto command)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentMutation(GetGmActorId(room));
+        return Task.FromResult(SafeRequest(() => _globalContentDrafts.Apply(command, GetGmActorId(room))));
+    }
+
+    public Task<GlobalContentDraftValidationDto> ValidateGlobalContentDraft(string draftId)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentMutation(GetGmActorId(room));
+        return Task.FromResult(SafeRequest(() => _globalContentDrafts.Validate(draftId, GetGmActorId(room))));
+    }
+
+    public Task<GlobalContentDraftDiffDto> PreviewGlobalContentDraftDiff(string draftId, int page = 1, int pageSize = 100)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(SafeRequest(() => _globalContentDrafts.Preview(draftId, GetGmActorId(room), page, pageSize)));
+    }
+
+    public Task<GlobalContentDraftDto> DiscardGlobalContentDraft(string draftId, string commandId)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentMutation(GetGmActorId(room));
+        if (string.IsNullOrWhiteSpace(commandId)) throw new HubException("invalid_command_id");
+        return Task.FromResult(SafeRequest(() => _globalContentDrafts.Discard(draftId, GetGmActorId(room))));
+    }
+
+    public Task<IReadOnlyList<GlobalContentDraftAuditDto>> GetGlobalContentDraftAudit()
+    {
+        DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(_globalContentDrafts.GetAudit());
+    }
+
+    private Room DemandGlobalContentAccess()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
         if (room == null || !IsCallerHost() ||
             !GmCapabilities.Allows(room.GmMode, GmCapability.ManageGlobalContent) ||
             !_globalContentAccess.CanAccess(room.GmMode))
             throw new HubException("global_content_access_denied");
+        return room;
+    }
+
+    private void ConsumeGlobalContentMutation(string actor)
+    {
+        if (!_globalContentDrafts.TryConsumeMutation(actor)) throw new HubException("global_content_mutation_rate_limited");
     }
 
     private void ConsumeGlobalContentRead()

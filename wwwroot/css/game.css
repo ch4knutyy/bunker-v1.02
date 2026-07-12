@@ -2869,3 +2869,4 @@
 .global-catalog-entry { padding: .65rem; text-align: left; white-space: normal; overflow-wrap: anywhere; }
 .global-catalog-badge { padding: .35rem .55rem; border-radius: 999px; background: rgba(255,255,255,.08); }
 .global-catalog-details { max-height: 20rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.global-catalog-drafts { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.12); }
