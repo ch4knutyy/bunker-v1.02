@@ -130,6 +130,11 @@ namespace Bunker.Models
         [System.Text.Json.Serialization.JsonIgnore]
         public object ThreatSyncRoot { get; } = new();
         public HashSet<string> ProcessedGmPlayerCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> ProcessedRoomIntegrityCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public List<GmAuditEntry> GmAuditLog { get; set; } = new();
+        public long NextGmAuditSequenceId { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public object GmAuditSyncRoot { get; } = new();
 
         /// <summary>
         /// Відповіді гравців на перевірку готовності до голосування.

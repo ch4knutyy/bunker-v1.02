@@ -176,6 +176,22 @@ namespace Bunker.Services
             return new(true, fixedMapping, fixedMapping ? "Застаріле mapping очищено" : "Застаріле mapping знайдено");
         }
 
+        public IReadOnlyDictionary<string, string> GetConnectionMappingsSnapshot(string roomId) =>
+            _playerToRoom
+                .Where(entry => string.Equals(entry.Value, roomId, StringComparison.OrdinalIgnoreCase))
+                .ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.OrdinalIgnoreCase);
+
+        public bool RemoveStaleConnectionMapping(Room room, string connectionId)
+        {
+            if (string.IsNullOrWhiteSpace(connectionId) ||
+                !_playerToRoom.TryGetValue(connectionId, out var mappedRoomId) ||
+                !string.Equals(mappedRoomId, room.Id, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            var hasPlayer = room.Players != null && room.Players.TryGetValue(connectionId, out var player) && player != null;
+            return !hasPlayer && _playerToRoom.TryRemove(connectionId, out _);
+        }
+
         private static void CleanupPlayerReferences(Room room, string connectionId, string playerId)
         {
             if (room.CurrentTurnPlayerId == connectionId || room.CurrentTurnPlayerId == playerId)

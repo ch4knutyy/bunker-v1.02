@@ -417,6 +417,8 @@ namespace Bunker.Hubs
             if (!RememberPlayerCommand(room, commandId)) { await SendVotingAdminState(Clients.Caller, room); return; }
             RoundVotingAdminService.ClearVotes(room.CurrentVoting);
             await SendVotingAdminState(Clients.Group(room.Id), room);
+            await AppendGmAudit(room, GetGmActorId(room), "voting_clear_votes", GmAuditResult.Success,
+                "Current votes were cleared.", commandId: commandId);
         }
 
         public async Task RemoveCurrentVote(string voterPlayerId, string? commandId = null)
@@ -432,6 +434,8 @@ namespace Bunker.Hubs
             if (!RememberPlayerCommand(room, commandId)) { await SendVotingAdminState(Clients.Caller, room); return; }
             RoundVotingAdminService.RemoveVote(room.CurrentVoting, RoomService.GetPlayerKey(voter));
             await SendVotingAdminState(Clients.Group(room.Id), room);
+            await AppendGmAudit(room, GetGmActorId(room), "voting_remove_vote", GmAuditResult.Success,
+                "One current vote was removed.", GetSafeAuditPlayerId(voter), commandId);
         }
 
         public async Task ResyncVotingState()
@@ -443,6 +447,8 @@ namespace Bunker.Hubs
                 return;
             }
             await SendVotingAdminState(Clients.Caller, room);
+            await AppendGmAudit(room, GetGmActorId(room), "voting_resync", GmAuditResult.Success,
+                "Voting public state was resynchronized.");
         }
 
         private Task SendVotingAdminState(IClientProxy client, Room room) =>
