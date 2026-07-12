@@ -6,6 +6,47 @@ namespace Bunker.UnitTests.Services;
 
 public sealed class RoundVotingAdminServiceTests
 {
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void VotingIsBlockedBeforeThirdRound(int round)
+    {
+        var result = RoundVotingAdminService.CanStartVoting(PlayableRoom(round, GamePhase.PreVotingReadyCheck));
+        Assert.False(result.Allowed);
+        Assert.Equal("round_not_completed", result.Code);
+    }
+
+    [Theory]
+    [InlineData(3, GamePhase.ExtraInventory)]
+    [InlineData(3, GamePhase.PreVotingReadyCheck)]
+    [InlineData(4, GamePhase.PreVotingReadyCheck)]
+    public void VotingIsAllowedAfterNormalThirdRoundAndLater(int round, GamePhase phase) =>
+        Assert.True(RoundVotingAdminService.CanStartVoting(PlayableRoom(round, phase)).Allowed);
+
+    [Fact]
+    public void PauseAndExistingVotingRemainBlocked()
+    {
+        var room = PlayableRoom(3, GamePhase.ExtraInventory);
+        room.IsPaused = true;
+        Assert.Equal("game_paused", RoundVotingAdminService.CanStartVoting(room).Code);
+
+        room.IsPaused = false;
+        room.CurrentVoting = ActiveVoting();
+        Assert.Equal("voting_already_started", RoundVotingAdminService.CanStartVoting(room).Code);
+        room.CurrentVoting.State = VotingState.Completed;
+        Assert.False(RoundVotingAdminService.CanStartVoting(room).Allowed);
+    }
+
+    [Fact]
+    public void UnresolvedInteractiveThreatRemainsBlocked()
+    {
+        var result = RoundVotingAdminService.CanStartVoting(
+            PlayableRoom(3, GamePhase.ExtraInventory),
+            hasUnresolvedBlockingThreat: true);
+        Assert.False(result.Allowed);
+        Assert.Equal("threat_not_resolved", result.Code);
+    }
+
     [Fact]
     public void PausePersistsWithoutChangingRoundVotingOrThreat()
     {
@@ -120,4 +161,10 @@ public sealed class RoundVotingAdminServiceTests
     }
 
     private static VotingSession ActiveVoting() => new() { State = VotingState.Active };
+    private static Room PlayableRoom(int round, GamePhase phase) => new()
+    {
+        State = RoomState.Playing,
+        CurrentRound = round,
+        CurrentPhase = phase
+    };
 }

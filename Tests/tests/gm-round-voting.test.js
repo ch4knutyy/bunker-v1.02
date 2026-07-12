@@ -7,6 +7,18 @@ const voting = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Voting.cs', 'utf8');
 const gameActions = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GameActions.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const helpers = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Helpers.cs', 'utf8');
+const service = fs.readFileSync('Services/RoundVotingAdminService.cs', 'utf8');
+
+test('voting availability has one server rule and live public state', () => {
+  assert.match(service, /CanStartVoting\(Room room,/);
+  assert.match(service, /GamePhase\.ExtraInventory or GamePhase\.PreVotingReadyCheck/);
+  assert.match(voting, /GetVotingStartAvailability\(room\)/);
+  assert.match(helpers, /RoundVotingAdminService\.CanStartVoting\(room, hasUnresolvedBlockingThreat\)/);
+  assert.match(helpers, /canStartVoting = votingAvailability\.Allowed/);
+  assert.match(client, /currentRoundState\?\.canStartVoting === true/);
+  assert.doesNotMatch(client.match(/function canStartVotingNow\(\)[\s\S]*?\n    }/)?.[0] || '', /CurrentRound|PreVotingReadyCheck|currentVoting/);
+});
 
 test('round recovery commands require public-state capability and idempotency', () => {
   for (const method of ['SetGamePaused', 'SetRoundNumber', 'ResetRoundReadiness']) assert.match(gm, new RegExp(`Task ${method}\\(`));

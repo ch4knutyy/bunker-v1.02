@@ -37,27 +37,10 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (room.State != RoomState.Playing)
+            var availability = GetVotingStartAvailability(room);
+            if (!availability.Allowed)
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Гра не почалась");
-                return;
-            }
-
-            if (room.CurrentRound < 3)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Голосування доступне тільки після завершення 3 раунду");
-                return;
-            }
-
-            if (room.CurrentPhase != GamePhase.PreVotingReadyCheck)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Спершу завершіть 3 раунд і запустіть готовність до голосування");
-                return;
-            }
-
-            if (room.CurrentVoting != null && room.CurrentVoting.State == VotingState.Active)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Голосування вже триває");
+                await Clients.Caller.SendAsync("ReceiveError", availability.Message, availability.Code);
                 return;
             }
 
