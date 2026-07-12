@@ -11,7 +11,7 @@ const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 test('catalog is read-only, allowlisted and capability guarded', () => {
   assert.match(hub, /GmCapability\.ManageGlobalContent/);
   assert.match(hub, /_globalContentAccess\.CanAccess/);
-  assert.doesNotMatch(hub + service, /File\.(Write|Move|Delete|Copy)|CreateDraft|Commit|Rollback/);
+  assert.doesNotMatch(service, /File\.(Write|Move|Delete|Copy)/);
   assert.match(service, /ReadOnlyDictionary<GlobalContentCategory/);
   assert.doesNotMatch(hub, /filesystem|filePath|relativeFile/i);
 });
@@ -30,7 +30,7 @@ test('read-only UI stays hidden until server capability response', () => {
   assert.match(view, /id="globalContentCatalog"[^>]*display: none/);
   assert.match(client, /globalCatalogAllowed = access\?\.allowed === true/);
   assert.match(client, /panel\.style\.display = globalCatalogAllowed \? 'block' : 'none'/);
-  assert.doesNotMatch(catalog, />\s*(Save|Commit|Rollback|Зберегти)\s*</i);
+  assert.doesNotMatch(catalog, /Save to file|Hot reload/i);
   for (const key of ['globalCatalogTitle', 'globalCatalogReadOnly', 'globalCatalogCategory', 'globalCatalogSearch']) {
     assert.equal((client.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `missing localization ${key}`);
   }

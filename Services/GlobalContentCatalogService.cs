@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Bunker.Models;
 
 namespace Bunker.Services;
@@ -95,6 +96,50 @@ public sealed class GlobalContentCatalogService
         if (read.Metadata.SchemaStatus is not ("Valid") && !read.Metadata.SchemaStatus.StartsWith("ValidDuplicateNames:", StringComparison.Ordinal))
             throw new GlobalContentRequestException("category_schema_invalid");
         return new(read.Metadata, read.Entries.Select(x => x.GetRawText()).ToList());
+    }
+
+    internal string GetCanonicalPath(string category) => ResolvePath(Resolve(category));
+    internal byte[] ReadCanonicalBytes(string category) => File.ReadAllBytes(GetCanonicalPath(category));
+
+    internal byte[] BuildCanonicalBytes(string category, IReadOnlyList<string> entries)
+    {
+        var definition = Resolve(category);
+        var current = JsonNode.Parse(File.ReadAllText(ResolvePath(definition))) ?? throw new GlobalContentRequestException("invalid_json");
+        var array = new JsonArray(entries.Select(x => JsonNode.Parse(x)).ToArray());
+        JsonNode output;
+        if (definition.RootProperty == null) output = array;
+        else
+        {
+            var root = current.AsObject(); root[definition.RootProperty] = array; output = root;
+        }
+        return new UTF8Encoding(false).GetBytes(output.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    internal GlobalContentBinaryValidation ValidateCanonicalBytes(string category, byte[] bytes)
+    {
+        if (bytes.Length > MaximumFileBytes) return new(false, "file_too_large", 0, "");
+        try
+        {
+            var definition = Resolve(category);
+            var text = new UTF8Encoding(false, true).GetString(bytes);
+            using var document = JsonDocument.Parse(text, new JsonDocumentOptions { MaxDepth = 64 });
+            if (!TryGetEntries(document.RootElement, definition.RootProperty, out var source)) return new(false, "unexpected_root", 0, "");
+            var entries = source.EnumerateArray().ToList();
+            var ids = entries.Select(x => GetString(x, "id")).ToList();
+            if (entries.Any(x => x.ValueKind != JsonValueKind.Object) || ids.Any(string.IsNullOrWhiteSpace)) return new(false, "schema_invalid", entries.Count, "");
+            if (ids.GroupBy(x => x, StringComparer.Ordinal).Any(x => x.Count() > 1)) return new(false, "duplicate_ids", entries.Count, "");
+            return new(true, "valid", entries.Count, Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
+        }
+        catch (DecoderFallbackException) { return new(false, "invalid_utf8", 0, ""); }
+        catch (JsonException) { return new(false, "invalid_json", 0, ""); }
+    }
+
+    internal IReadOnlyDictionary<string, JsonObject> ExtractCanonicalEntries(string category, byte[] bytes)
+    {
+        var definition = Resolve(category);
+        var root = JsonNode.Parse(bytes) ?? throw new GlobalContentRequestException("invalid_json");
+        var array = definition.RootProperty == null ? root.AsArray() : root[definition.RootProperty]?.AsArray() ?? throw new GlobalContentRequestException("unexpected_root");
+        return array.Select(x => x!.AsObject()).ToDictionary(x => x["id"]!.ToString(), x => (JsonObject)x.DeepClone(), StringComparer.Ordinal);
     }
 
     private CatalogRead Read(string category)
@@ -219,3 +264,4 @@ public sealed class GlobalContentRequestException(string code) : Exception(code)
 }
 
 public sealed record GlobalContentDraftSource(GlobalContentMetadataDto Metadata, IReadOnlyList<string> Entries);
+internal sealed record GlobalContentBinaryValidation(bool IsValid, string Status, int EntryCount, string Fingerprint);

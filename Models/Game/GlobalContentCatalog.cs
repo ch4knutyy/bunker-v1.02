@@ -58,7 +58,7 @@ public sealed class GlobalContentCatalogOptions
     public string DevelopmentBootstrapKey { get; set; } = string.Empty;
 }
 
-public enum GlobalContentDraftStatus { Draft, Validated, Invalid, Conflict, Expired, Discarded }
+public enum GlobalContentDraftStatus { Draft, Validated, Invalid, Conflict, Expired, Discarded, Committed }
 public enum GlobalContentDraftCommandType { CreateEntry, UpdateEntry, DeleteEntry }
 public enum GlobalContentIssueSeverity { Info, Warning, Error }
 
@@ -66,7 +66,7 @@ public sealed record GlobalContentDraftDto(
     string DraftId, string Category, string BaseVersion, string BaseFingerprint,
     DateTimeOffset CreatedAtUtc, string CreatedByPlayerId, DateTimeOffset UpdatedAtUtc,
     DateTimeOffset ExpiresAtUtc, GlobalContentDraftStatus Status, string DraftFingerprint,
-    int EntryCount, string ValidationSummary);
+    int EntryCount, string ValidationSummary, long? CommittedVersion = null, string? CommittedFingerprint = null);
 public sealed record GlobalContentDraftCommandDto(
     string DraftId, string Category, GlobalContentDraftCommandType Type, string EntryId,
     IReadOnlyDictionary<string, JsonElement>? Fields, bool ConfirmDelete, string CommandId);
@@ -84,3 +84,16 @@ public sealed record GlobalContentDraftDiffDto(
 public sealed record GlobalContentDraftAuditDto(
     long Sequence, DateTimeOffset TimestampUtc, string Action, string DraftId,
     string Category, string ActorId, string EntryId, string Result);
+public sealed record GlobalContentCommitResultDto(
+    bool Succeeded, string Code, string DraftId, string Category,
+    long OldVersion, long NewVersion, string OldFingerprint, string NewFingerprint,
+    string BackupId, int AddedCount, int UpdatedCount, int DeletedCount, string RuntimeActivation);
+public sealed record GlobalContentBackupDto(
+    string BackupId, string Category, long SourceVersion, string SourceFingerprint,
+    DateTimeOffset CreatedAtUtc, string ActorId, string Reason, string RelatedDraftId,
+    long FileSize, string ValidationStatus);
+public sealed record GlobalContentRollbackPreviewDto(
+    string PreviewToken, string Category, string BackupId, long CurrentVersion,
+    string CurrentFingerprint, long BackupVersion, string BackupFingerprint,
+    int AddedCount, int UpdatedCount, int DeletedCount, IReadOnlyList<GlobalContentDraftDiffEntryDto> Entries,
+    string ValidationSummary, bool CanRollback, bool HasConflict);

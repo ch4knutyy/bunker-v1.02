@@ -539,8 +539,16 @@
                     <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftValidate" onclick="validateGlobalDraft()">Validate</button>
                     <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftPreview" onclick="previewGlobalDraftDiff()">Preview diff</button>
                     <button type="button" class="btn-danger global-draft-command" data-gm-i18n="globalDraftDiscard" onclick="discardGlobalDraft()">Discard</button>
+                    <button id="globalDraftCommit" type="button" class="btn-success global-draft-command" data-gm-i18n="globalDraftCommit" onclick="commitGlobalDraft()" disabled>Commit</button>
                 </div>
                 <pre id="globalDraftResult" class="global-catalog-details" aria-live="polite"></pre>
+                <p class="global-catalog-warning" data-gm-i18n="globalRuntimeRestart">Changes take effect after application restart.</p>
+                <h4 data-gm-i18n="globalBackupsTitle">Backups</h4>
+                <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalBackupsRefresh" onclick="loadGlobalContentBackups()">Refresh backups</button>
+                <select id="globalBackupSelect" class="input-field"></select>
+                <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalRollbackPreview" onclick="previewGlobalRollback()">Preview rollback</button>
+                <button id="globalRollbackExecute" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalRollbackExecute" onclick="executeGlobalRollback()" disabled>Rollback</button>
+                <pre id="globalRollbackResult" class="global-catalog-details" aria-live="polite"></pre>
             </section>
         </section>
         <div id="roomLobby">
