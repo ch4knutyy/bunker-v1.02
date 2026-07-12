@@ -1357,6 +1357,16 @@
 .gm-diagnostic-autofix { font-size: .75rem; opacity: .82; }
 .gm-audit-result { display: inline-block !important; width: fit-content; border-radius: 999px; padding: .1rem .4rem; font-size: .72rem; }
 @media (max-width: 520px) { .gm-diagnostic-issue { grid-template-columns: 1fr; } }
+.gm-snapshots-list { display: grid; gap: .55rem; margin-top: .65rem; }
+.gm-snapshot-entry { padding: .6rem; border-radius: 8px; background: rgba(255,255,255,.045); }
+.gm-snapshot-entry header { display: flex; flex-wrap: wrap; gap: .45rem; justify-content: space-between; }
+.gm-snapshot-entry p { margin: .35rem 0; overflow-wrap: anywhere; }
+.gm-snapshot-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+.gm-snapshot-badge { border-radius: 999px; padding: .1rem .45rem; font-size: .75rem; background: rgba(52,152,219,.18); }
+.gm-snapshot-badge.blocked { background: rgba(231,76,60,.22); }
+.gm-snapshot-badge.restored { background: rgba(46,204,113,.18); }
+.gm-snapshot-preview { padding: .55rem; border-left: 3px solid rgba(52,152,219,.7); overflow-wrap: anywhere; }
+.gm-snapshot-preview:empty { display: none; }
 
 .gm-round-summary {
     display: grid;

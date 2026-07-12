@@ -415,10 +415,12 @@ namespace Bunker.Hubs
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await SendVotingAdminState(Clients.Caller, room); return; }
+            var clearVotesSnapshot = room.CurrentVoting.Votes.Count > 0
+                ? CreateMutationSnapshot(room, GetGmActorId(room), "voting_clear_votes", commandId, "Before clearing current votes") : null;
             RoundVotingAdminService.ClearVotes(room.CurrentVoting);
             await SendVotingAdminState(Clients.Group(room.Id), room);
             await AppendGmAudit(room, GetGmActorId(room), "voting_clear_votes", GmAuditResult.Success,
-                "Current votes were cleared.", commandId: commandId);
+                "Current votes were cleared.", commandId: commandId, snapshot: clearVotesSnapshot);
         }
 
         public async Task RemoveCurrentVote(string voterPlayerId, string? commandId = null)
@@ -432,10 +434,13 @@ namespace Bunker.Hubs
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await SendVotingAdminState(Clients.Caller, room); return; }
-            RoundVotingAdminService.RemoveVote(room.CurrentVoting, RoomService.GetPlayerKey(voter));
+            var voterId = RoomService.GetPlayerKey(voter);
+            var removeVoteSnapshot = room.CurrentVoting.Votes.ContainsKey(voterId)
+                ? CreateMutationSnapshot(room, GetGmActorId(room), "voting_remove_vote", commandId, "Before removing current vote") : null;
+            RoundVotingAdminService.RemoveVote(room.CurrentVoting, voterId);
             await SendVotingAdminState(Clients.Group(room.Id), room);
             await AppendGmAudit(room, GetGmActorId(room), "voting_remove_vote", GmAuditResult.Success,
-                "One current vote was removed.", GetSafeAuditPlayerId(voter), commandId);
+                "One current vote was removed.", GetSafeAuditPlayerId(voter), commandId, snapshot: removeVoteSnapshot);
         }
 
         public async Task ResyncVotingState()

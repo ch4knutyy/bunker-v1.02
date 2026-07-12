@@ -18,7 +18,9 @@ public sealed class GmAuditService(TimeProvider timeProvider)
         string summary,
         string? targetPlayerId = null,
         string? commandId = null,
-        string? errorCode = null)
+        string? errorCode = null,
+        string? relatedSnapshotId = null,
+        bool canUndo = false)
     {
         lock (room.GmAuditSyncRoot)
         {
@@ -35,8 +37,8 @@ public sealed class GmAuditService(TimeProvider timeProvider)
                 Result = result,
                 Summary = safeSummary,
                 CommandId = string.IsNullOrWhiteSpace(commandId) ? null : SafeId(commandId),
-                RelatedSnapshotId = null,
-                CanUndo = false,
+                RelatedSnapshotId = string.IsNullOrWhiteSpace(relatedSnapshotId) ? null : SafeId(relatedSnapshotId),
+                CanUndo = canUndo && result == GmAuditResult.Success && !string.IsNullOrWhiteSpace(relatedSnapshotId),
                 ErrorCode = safeError
             };
             room.GmAuditLog.Add(entry);
@@ -53,13 +55,42 @@ public sealed class GmAuditService(TimeProvider timeProvider)
                 .Take(Math.Clamp(take, 1, 50)).Select(ToDto).ToList();
     }
 
+    public GmAuditEntry? GetLatestSuccessful(Room room)
+    {
+        lock (room.GmAuditSyncRoot)
+            return room.GmAuditLog.LastOrDefault(entry => entry.Result == GmAuditResult.Success);
+    }
+
+    public bool MarkUndone(Room room, long originalEntryId, long undoAuditEntryId)
+    {
+        lock (room.GmAuditSyncRoot)
+        {
+            var original = room.GmAuditLog.FirstOrDefault(entry => entry.Id == originalEntryId);
+            if (original == null || original.WasUndone) return false;
+            original.WasUndone = true;
+            original.CanUndo = false;
+            original.UndoneAtUtc = timeProvider.GetUtcNow();
+            original.UndoAuditEntryId = undoAuditEntryId;
+            return true;
+        }
+    }
+
+    public void DisableUndoForSnapshot(Room room, string snapshotId)
+    {
+        lock (room.GmAuditSyncRoot)
+            foreach (var entry in room.GmAuditLog.Where(entry =>
+                         string.Equals(entry.RelatedSnapshotId, snapshotId, StringComparison.OrdinalIgnoreCase)))
+                entry.CanUndo = false;
+    }
+
     private static GmAuditEntryDto ToDto(GmAuditEntry entry)
     {
         var result = entry.Result.ToString().ToLowerInvariant();
         if (!AllowedResults.Contains(result)) result = "failed";
         return new(entry.Id, entry.OccurredAtUtc, entry.ActorPlayerId, entry.ActionType,
             entry.TargetPlayerId, result, entry.Summary, entry.CommandId,
-            entry.RelatedSnapshotId, false, entry.ErrorCode);
+            entry.RelatedSnapshotId, entry.CanUndo && !entry.WasUndone, entry.WasUndone,
+            entry.UndoneAtUtc, entry.UndoAuditEntryId, entry.ErrorCode);
     }
 
     private static string SafeId(string value) => SafeText(value, 80);

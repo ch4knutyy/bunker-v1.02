@@ -135,6 +135,13 @@ namespace Bunker.Models
         public long NextGmAuditSequenceId { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
         public object GmAuditSyncRoot { get; } = new();
+        [System.Text.Json.Serialization.JsonIgnore]
+        public List<RoomSnapshot> SnapshotHistory { get; set; } = new();
+        public HashSet<string> ProcessedSnapshotCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Dictionary<string, RoomSnapshotRestoreResult> SnapshotCommandResults { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        [System.Text.Json.Serialization.JsonIgnore]
+        public object SnapshotSyncRoot { get; } = new();
 
         /// <summary>
         /// Відповіді гравців на перевірку готовності до голосування.

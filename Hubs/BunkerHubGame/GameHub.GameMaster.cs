@@ -761,6 +761,8 @@ namespace Bunker.Hubs
                 return;
             }
 
+            var capacitySnapshot = room.Bunker.Capacity == newCapacity ? null :
+                CreateMutationSnapshot(room, GetGmActorId(room), "bunker_capacity", null, "Before bunker capacity change");
             room.Bunker.Capacity = newCapacity;
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
@@ -771,7 +773,7 @@ namespace Bunker.Hubs
             });
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "bunker_capacity", capacity = newCapacity });
             await AppendGmAudit(room, GetGmActorId(room), "bunker_capacity", GmAuditResult.Success,
-                $"Bunker capacity was set to {newCapacity}.");
+                $"Bunker capacity was set to {newCapacity}.", snapshot: capacitySnapshot);
 
             _logger.LogInformation($"GM змінив кількість слотів бункера на {newCapacity} в кімнаті {room.Name}");
         }
@@ -1030,6 +1032,7 @@ namespace Bunker.Hubs
                 return;
             }
 
+            var eliminateSnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "player_eliminate", null, "Before player elimination");
             player.IsEliminated = true;
             player.EliminatedAtRound = room.CurrentRound;
             player.EliminatedByVote = false;
@@ -1048,7 +1051,7 @@ namespace Bunker.Hubs
             });
             await SendPlayerHostControlData(room);
             await AppendGmAudit(room, GetGmActorId(room), "player_eliminate", GmAuditResult.Success,
-                "Player was eliminated by GM.", GetSafeAuditPlayerId(player));
+                "Player was eliminated by GM.", GetSafeAuditPlayerId(player), snapshot: eliminateSnapshot);
 
             _logger.LogInformation($"Гравець {player.Name} елімінований");
         }
@@ -1071,6 +1074,7 @@ namespace Bunker.Hubs
                 return;
             }
 
+            var restorePlayerSnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "player_restore", null, "Before player restore");
             player.IsEliminated = false;
             player.EliminatedAtRound = null;
             player.EliminatedByVote = false;
@@ -1087,7 +1091,7 @@ namespace Bunker.Hubs
             });
             await SendPlayerHostControlData(room);
             await AppendGmAudit(room, GetGmActorId(room), "player_restore", GmAuditResult.Success,
-                "Player was restored by GM.", GetSafeAuditPlayerId(player));
+                "Player was restored by GM.", GetSafeAuditPlayerId(player), snapshot: restorePlayerSnapshot);
 
             _logger.LogInformation($"Гравець {player.Name} повернутий в гру");
         }
@@ -1104,6 +1108,7 @@ namespace Bunker.Hubs
             var cleanReason = SanitizePauseReason(reason);
             var hostId = _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var host)
                 ? RoomService.GetPlayerKey(host) : null;
+            var pauseSnapshot = CreateMutationSnapshot(room, hostId ?? "unknown", paused ? "pause_game" : "resume_game", commandId, "Before pause state change");
             RoundVotingAdminService.SetPaused(room, paused, cleanReason, hostId, DateTimeOffset.UtcNow);
             var timerChanged = paused
                 ? _gameTimerService.Pause(room, byGamePause: true)
@@ -1112,7 +1117,7 @@ namespace Bunker.Hubs
             if (timerChanged) await BroadcastGameTimer(room);
             await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
             await AppendGmAudit(room, hostId ?? "unknown", paused ? "pause_game" : "resume_game", GmAuditResult.Success,
-                paused ? "Game was paused." : "Game was resumed.", commandId: commandId);
+                paused ? "Game was paused." : "Game was resumed.", commandId: commandId, snapshot: pauseSnapshot);
         }
 
         public async Task PreviewRoundChange(string? roundValue)
@@ -1240,6 +1245,8 @@ namespace Bunker.Hubs
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room)); return; }
+            var roundSnapshot = targetRound >= room.CurrentRound && room.CurrentVoting?.State != VotingState.Active
+                ? CreateMutationSnapshot(room, GetGmActorId(room), "round_change", commandId, "Before manual round change") : null;
             if (!RoundVotingAdminService.TrySetRound(room, targetRound, out var error))
             {
                 await AppendGmAudit(room, GetGmActorId(room), "round_change", GmAuditResult.Rejected,
@@ -1251,7 +1258,7 @@ namespace Bunker.Hubs
             await Clients.Group(room.Id).SendAsync("RoundStateUpdated", state);
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "round_set", round = targetRound });
             await AppendGmAudit(room, GetGmActorId(room), "round_change", GmAuditResult.Success,
-                $"Round was advanced to {targetRound}.", commandId: commandId);
+                $"Round was advanced to {targetRound}.", commandId: commandId, snapshot: roundSnapshot);
         }
 
         public async Task ResetRoundReadiness(string? commandId = null)
@@ -1263,12 +1270,14 @@ namespace Bunker.Hubs
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room)); return; }
+            var readinessSnapshot = room.VotingReadyResponses.Count > 0
+                ? CreateMutationSnapshot(room, GetGmActorId(room), "readiness_reset", commandId, "Before readiness reset") : null;
             RoundVotingAdminService.ResetReadiness(room);
             var state = BuildRoundState(room);
             await Clients.Group(room.Id).SendAsync("RoundStateUpdated", state);
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "readiness_reset" });
             await AppendGmAudit(room, GetGmActorId(room), "readiness_reset", GmAuditResult.Success,
-                "Round readiness was reset.", commandId: commandId);
+                "Round readiness was reset.", commandId: commandId, snapshot: readinessSnapshot);
         }
 
         private static object BuildPauseState(Room room) => new
@@ -1310,6 +1319,8 @@ namespace Bunker.Hubs
                 return;
             }
 
+            var kickSnapshot = CreateMutationSnapshot(callerRoom, GetGmActorId(callerRoom), "player_kick", commandId, "Before player kick");
+
             await Clients.Client(targetConnectionId).SendAsync("PlayerKicked", new { message = "Вас виключено хостом із кімнати" });
             var result = _roomService.LeaveRoom(targetConnectionId);
             if (!result.success)
@@ -1323,7 +1334,7 @@ namespace Bunker.Hubs
             await SendPlayerHostControlData(callerRoom);
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "kick", playerName = player.Name });
             await AppendGmAudit(callerRoom, GetGmActorId(callerRoom), "player_kick", GmAuditResult.Success,
-                "Player was removed from the room.", GetSafeAuditPlayerId(player), commandId);
+                "Player was removed from the room.", GetSafeAuditPlayerId(player), commandId, snapshot: kickSnapshot, allowUndo: false);
         }
 
         public async Task HideRevealedCharacteristic(string targetPlayerId, string characteristicName, string? commandId = null)
@@ -1335,6 +1346,12 @@ namespace Bunker.Hubs
             }
             if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
             characteristicName = NormalizeCharacteristicName(characteristicName);
+            if (!GmPlayerStateMutator.CanHideCharacteristic(characteristicName))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Невідома характеристика");
+                return;
+            }
+            var hideSnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "characteristic_hide", commandId, "Before hiding a revealed characteristic");
             if (!TrySetCharacteristicHidden(player, characteristicName))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Невідома характеристика");
@@ -1347,7 +1364,7 @@ namespace Bunker.Hubs
             await SendPlayerHostControlData(room);
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "hide", playerName = player.Name, characteristicName });
             await AppendGmAudit(room, GetGmActorId(room), "characteristic_hide", GmAuditResult.Success,
-                "A revealed characteristic was hidden.", GetSafeAuditPlayerId(player), commandId);
+                "A revealed characteristic was hidden.", GetSafeAuditPlayerId(player), commandId, snapshot: hideSnapshot);
         }
 
         public async Task ResyncPlayer(string targetPlayerId, string? commandId = null)
@@ -1378,8 +1395,14 @@ namespace Bunker.Hubs
                 await SendPlayerHostControlData(room);
                 return;
             }
+            if (!player.IsConnected || player.IsEliminated)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
+                return;
+            }
             var oldHostConnectionId = Context.ConnectionId;
             var oldHostPlayerId = GetGmActorId(room);
+            var transferSnapshot = CreateMutationSnapshot(room, oldHostPlayerId, "host_transfer", commandId, "Before host transfer");
             if (!_roomService.TransferHost(room, connectionId, out _))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
@@ -1396,7 +1419,7 @@ namespace Bunker.Hubs
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "transfer_host", playerName = player.Name });
             await SendPublicPlayersUpdate(room);
             await AppendGmAudit(room, oldHostPlayerId, "host_transfer", GmAuditResult.Success,
-                "Host role was transferred.", GetSafeAuditPlayerId(player), commandId);
+                "Host role was transferred.", GetSafeAuditPlayerId(player), commandId, snapshot: transferSnapshot, allowUndo: false);
         }
 
         public async Task InspectStalePlayerConnection(string targetConnectionId, bool fix = false)
@@ -1423,15 +1446,17 @@ namespace Bunker.Hubs
             }
             if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
             var normalized = NormalizeSeverityCode(severityCode);
-            if (normalized == null || !GmPlayerStateMutator.ChangeConditionSeverity(player, conditionId, normalized, SeverityLabel(normalized)))
+            if (normalized == null || !player.AdditionalConditionEffects.Any(item => item.Id == conditionId || item.ConditionId == conditionId))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Стан або рівень тяжкості не знайдено");
                 return;
             }
+            var severitySnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "condition_severity_repair", commandId, "Before condition severity repair");
+            GmPlayerStateMutator.ChangeConditionSeverity(player, conditionId, normalized, SeverityLabel(normalized));
             _roomService.UpdatePlayer(connectionId, player);
             await BroadcastConditionRepair(room, connectionId, player);
             await AppendGmAudit(room, GetGmActorId(room), "condition_severity_repair", GmAuditResult.Success,
-                "Additional physical condition severity was repaired.", GetSafeAuditPlayerId(player), commandId);
+                "Additional physical condition severity was repaired.", GetSafeAuditPlayerId(player), commandId, snapshot: severitySnapshot);
         }
 
         public async Task RemoveAdditionalCondition(string targetPlayerId, string conditionId, string? commandId = null)
@@ -1442,15 +1467,17 @@ namespace Bunker.Hubs
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
-            if (!GmPlayerStateMutator.RemoveCondition(player, conditionId))
+            if (!player.AdditionalConditionEffects.Any(item => item.Id == conditionId || item.ConditionId == conditionId))
             {
                 await SendPlayerHostControlData(room);
                 return;
             }
+            var conditionRemoveSnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "condition_remove", commandId, "Before condition removal");
+            GmPlayerStateMutator.RemoveCondition(player, conditionId);
             _roomService.UpdatePlayer(connectionId, player);
             await BroadcastConditionRepair(room, connectionId, player);
             await AppendGmAudit(room, GetGmActorId(room), "condition_remove", GmAuditResult.Success,
-                "Additional physical condition was removed.", GetSafeAuditPlayerId(player), commandId);
+                "Additional physical condition was removed.", GetSafeAuditPlayerId(player), commandId, snapshot: conditionRemoveSnapshot);
         }
 
         private async Task BroadcastConditionRepair(Room room, string connectionId, Player player)
