@@ -169,6 +169,8 @@ connection.start()
         resolved_safely: "Загрозу повністю усунено",
         resolved_with_casualty: "Загрозу усунено з наслідками",
         failed: "Операція провалена"
+        ,aborted: "Загрозу скасовано ведучим"
+        ,gmThreatEmergency: "Аварійне керування", gmThreatResync: "Оновити стан загрози", gmThreatReset: "Перезапустити спробу", gmThreatAbort: "Скасувати загрозу"
         ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
         ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
@@ -253,6 +255,8 @@ connection.start()
         resolved_safely: "Resolved safely",
         resolved_with_casualty: "Resolved with consequences",
         failed: "Failed"
+        ,aborted: "Threat aborted by host"
+        ,gmThreatEmergency: "Emergency controls", gmThreatResync: "Refresh threat state", gmThreatReset: "Restart attempt", gmThreatAbort: "Abort threat"
         ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
         ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
@@ -337,6 +341,8 @@ connection.start()
         resolved_safely: "Безопасно завершено",
         resolved_with_casualty: "Завершено с последствиями",
         failed: "Провалено"
+        ,aborted: "Угроза отменена ведущим"
+        ,gmThreatEmergency: "Аварийное управление", gmThreatResync: "Обновить состояние угрозы", gmThreatReset: "Перезапустить попытку", gmThreatAbort: "Отменить угрозу"
         ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
         ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
@@ -990,9 +996,10 @@ connection.start()
 
     function renderAirFilterPlanChoice(state) {
         const choice = state.planChoice || {};
+        const isTerminal = ['aborted', 'resolved_safely', 'resolved_with_casualty', 'failed', 'completed', 'success', 'failure'].includes(state.threatStatus);
         const guide = choice.solutionGuide || {};
         const leaderId = state.volunteerSelection?.selectedPlayerId || '';
-        const canChoose = !choice.isLocked && (isCurrentPlayerId(leaderId) || isHost);
+        const canChoose = !choice.isLocked && !isTerminal && (isCurrentPlayerId(leaderId) || isHost);
         const commonNeeds = guide.commonNeeds || guide.CommonNeeds || [];
         const guideHtml = guide && (guide.title || guide.Title) ? `
             <section class="plan-choice-guide">
@@ -1026,7 +1033,7 @@ connection.start()
                 ${canChoose ? `<button type="button" class="char-btn" onclick="selectThreatPlan('${escapeHtml(id)}')">${escapeHtml(planChoiceLabel(selected ? 'change' : 'choose'))}</button>` : ''}
             </article>`;
         }).join('');
-        const discussionControls = !choice.isLocked ? `<section class="plan-choice-contributions">
+        const discussionControls = !choice.isLocked && !isTerminal ? `<section class="plan-choice-contributions">
             <h3>${escapeHtml(t('team'))}</h3>
             ${renderThreatParticipantsList(state)}
             <div class="threat-operation-actions">
@@ -1040,7 +1047,7 @@ connection.start()
                 <button type="button" class="char-btn" onclick="useHobbyForThreat()">${escapeHtml(t('useHobby'))}</button>
             </div>
         </section>` : '';
-        return `<section class="plan-choice-panel">${guideHtml}${discussionControls}<div class="plan-choice-grid">${plansHtml}</div>${isHost && choice.selectedPlanId && !choice.isLocked ? `<button type="button" class="char-btn public-use" onclick="resolveCurrentThreat()">${escapeHtml(planChoiceLabel('start'))}</button>` : ''}</section>`;
+        return `<section class="plan-choice-panel">${guideHtml}${discussionControls}<div class="plan-choice-grid">${plansHtml}</div>${isHost && choice.selectedPlanId && !choice.isLocked && !isTerminal ? `<button type="button" class="char-btn public-use" onclick="resolveCurrentThreat()">${escapeHtml(planChoiceLabel('start'))}</button>` : ''}</section>`;
     }
 
     function getThreatStatusLabel(status) {
@@ -1201,7 +1208,7 @@ connection.start()
         const question = miniGame.currentQuestion || null;
         const leaderId = miniGame.leaderPlayerId || state?.volunteerSelection?.selectedPlayerId || '';
         const amLeader = isCurrentPlayerId(leaderId);
-        const isFinal = ['resolved_safely', 'resolved_with_casualty', 'failed'].includes(status);
+        const isFinal = ['resolved_safely', 'resolved_with_casualty', 'failed', 'aborted'].includes(status);
         const canStart = isHost && leaderId && !isFinal && status !== 'active';
         const score = miniGame.score || {};
         const metrics = getThreatOperationMetrics(state);
@@ -5789,7 +5796,7 @@ function removeBunkerSupplies(months) {
         if (current) {
             const threat = gmThreatControlData.currentThreat;
             current.textContent = threat
-                ? `${threat.name || threat.Name} — ${threat.status || threat.Status || '—'}`
+                ? `${threat.name || threat.Name} — ${getThreatStatusLabel(threat.status || threat.Status || '—')}`
                 : 'Поточна загроза відсутня';
         }
         if (select) {
@@ -5803,6 +5810,15 @@ function removeBunkerSupplies(months) {
             }).join('');
             if ([...select.options].some(option => option.value === previous)) select.value = previous;
         }
+        const currentThreat = gmThreatControlData.currentThreat;
+        const canRecover = currentThreat?.canRecoverAttempt ?? currentThreat?.CanRecoverAttempt ?? false;
+        const hasThreat = !!currentThreat;
+        const resync = document.getElementById('gmThreatResync');
+        const reset = document.getElementById('gmThreatReset');
+        const abort = document.getElementById('gmThreatAbort');
+        if (resync) resync.style.display = hasThreat ? '' : 'none';
+        if (reset) reset.style.display = canRecover ? '' : 'none';
+        if (abort) abort.style.display = canRecover ? '' : 'none';
     }
 
     function filterGMThreatOptions() {
@@ -5849,15 +5865,28 @@ function removeBunkerSupplies(months) {
         if (id) invokeGMThreatCommand('GMSelectThreat', [id, gmThreatCommandId()], 'Замінити поточну загрозу обраною?');
     }
     function gmCancelThreat() {
-        invokeGMThreatCommand('GMCancelCurrentThreat', [gmThreatCommandId()], 'Скасувати поточну загрозу без наслідків?');
+        invokeGMThreatEmergency('GMCancelCurrentThreat', 'Загрозу буде завершено без застосування нових наслідків. Уже застосовані наслідки залишаться.');
     }
     function gmRestartThreat() {
-        invokeGMThreatCommand('GMRestartCurrentThreat', [gmThreatCommandId()], 'Перезапустити interaction state поточної загрози?');
+        invokeGMThreatEmergency('GMRestartCurrentThreat', 'Поточний прогрес спроби буде очищено. Уже застосовані наслідки не буде скасовано.');
     }
     function gmResyncThreatRoom() {
+        invokeGMThreatEmergency('GMResyncThreatRoom');
+    }
+
+    function invokeGMThreatEmergency(method, confirmationMessage) {
         if (gmThreatCommandPending) return;
+        if (confirmationMessage && !confirm(confirmationMessage)) return;
         gmThreatCommandPending = true;
-        connection.invoke('GMResyncThreatRoom').finally(() => gmThreatCommandPending = false);
+        document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = true);
+        connection.invoke(method, gmThreatCommandId()).catch(error => {
+            const result = document.getElementById('gmThreatCommandResult');
+            if (result) result.textContent = error?.message || t('unavailableNow');
+        }).finally(() => {
+            gmThreatCommandPending = false;
+            document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = false);
+            renderGMThreatControl();
+        });
     }
 
     function updateGMPlayerSelect() {

@@ -59,33 +59,52 @@ public partial class GameHub
         await ReplaceThreatForGM(room, threat, commandId, "Обрану загрозу запущено");
     }
 
-    public async Task GMCancelCurrentThreat(string commandId, bool confirmed)
+    public async Task GMCancelCurrentThreat(string commandId)
     {
-        if (!TryGetHostRoom(out var room) || !await CanRunThreatReplacement(room, commandId, confirmed)) return;
+        if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
-        GMThreatStateMutator.Cancel(room);
-        await SyncThreatRoom(room, "Поточну загрозу скасовано без наслідків");
-    }
-
-    public async Task GMRestartCurrentThreat(string commandId, bool confirmed)
-    {
-        if (!TryGetHostRoom(out var room) || room.CurrentThreat == null) return;
-        if (room.ThreatState?.Resolution.EffectsApplied == true)
+        if (!GMThreatStateMutator.Abort(room))
         {
-            await Clients.Caller.SendAsync("ReceiveError", "Не можна перезапустити загрозу з уже застосованими наслідками");
+            await Clients.Caller.SendAsync("ReceiveError", "Скасувати можна лише активну незавершену загрозу");
             return;
         }
-        if (!await CanRunThreatReplacement(room, commandId, confirmed)) return;
-        if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
-        GMThreatStateMutator.Restart(room);
-        EnsureRadiationThreatState(room);
-        await SyncThreatRoom(room, "Стан поточної загрози перезапущено");
+        await SyncThreatRoom(room, "Загрозу скасовано ведучим");
     }
 
-    public async Task GMResyncThreatRoom()
+    public async Task GMRestartCurrentThreat(string commandId)
     {
-        if (!TryGetHostRoom(out var room)) return;
+        if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
+        if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
+        if (!GMThreatStateMutator.Restart(room))
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Перезапустити можна лише активну незавершену загрозу");
+            return;
+        }
+        EnsureRadiationThreatState(room);
+        await SyncThreatRoom(room, "Поточний прогрес спроби очищено");
+    }
+
+    public async Task GMResyncThreatRoom(string commandId)
+    {
+        if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
+        if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
         await SyncThreatRoom(room, "Кімнату синхронізовано");
+    }
+
+    private async Task<Room?> GetThreatRecoveryRoom(string? commandId)
+    {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+        if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для аварійного керування загрозою");
+            return null;
+        }
+        if (string.IsNullOrWhiteSpace(commandId))
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Некоректний ідентифікатор GM-команди");
+            return null;
+        }
+        return room;
     }
 
     private bool TryGetHostRoom(out Room room)
@@ -147,7 +166,8 @@ public partial class GameHub
             room.CurrentThreat.Name,
             type = GetThreatControlType(room.CurrentThreat),
             status = room.ThreatState?.ThreatStatus ?? "none",
-            effectsApplied = room.ThreatState?.Resolution.EffectsApplied ?? false
+            effectsApplied = room.ThreatState?.Resolution.EffectsApplied ?? false,
+            canRecoverAttempt = GMThreatStateMutator.CanReset(room)
         },
         threats = canBrowseFutureThreatCatalog ? _gameData.Threats.Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
             .Select(item => new { item.Id, item.Name, type = GetThreatControlType(item), available = !IsExplicitSpecialThreat(item) || IsAvailableSpecialThreat(item) })

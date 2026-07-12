@@ -556,7 +556,7 @@ namespace Bunker.Hubs
 
             var room = context.Room;
             var threatState = EnsureRadiationThreatState(room);
-            if (!IsRadiationThreatActive(room, threatState) || threatState.Resolution.EffectsApplied)
+            if (!IsRadiationThreatActive(room, threatState) || threatState.Resolution.EffectsApplied || IsTerminalThreatStatus(threatState.ThreatStatus))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Операція загрози недоступна");
                 return;
@@ -601,6 +601,11 @@ namespace Bunker.Hubs
 
             var room = context.Room;
             var threatState = EnsureRadiationThreatState(room);
+            if (IsTerminalThreatStatus(threatState.ThreatStatus))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Спробу загрози завершено");
+                return;
+            }
             if (!_threatMiniGames.TryGet(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, out var miniGame))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Для цієї загрози немає мінігри");
@@ -662,6 +667,11 @@ namespace Bunker.Hubs
 
             var room = context.Room;
             var threatState = EnsureRadiationThreatState(room);
+            if (IsTerminalThreatStatus(threatState.ThreatStatus))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "Спробу загрози завершено");
+                return;
+            }
             if (!_threatMiniGames.TryGet(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, out var miniGame))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Для цієї загрози немає мінігри");
@@ -695,6 +705,7 @@ namespace Bunker.Hubs
             }
 
             var threatState = EnsureRadiationThreatState(context.Room);
+            if (IsTerminalThreatStatus(threatState.ThreatStatus)) return;
             if (!_threatMiniGames.TryGet(RadiationLeakThreatId, out var miniGame))
             {
                 return;
@@ -1120,7 +1131,11 @@ namespace Bunker.Hubs
             room.IsThreatRevealed &&
             string.Equals(room.CurrentThreat?.Id ?? threatState.CurrentThreatId, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
             IsPlanChoiceMechanics(room.CurrentThreat?.Mechanics) &&
+            !IsTerminalThreatStatus(threatState.ThreatStatus) &&
             !threatState.PlanChoice.IsLocked;
+
+        private static bool IsTerminalThreatStatus(string? status) => status is
+            "aborted" or "resolved_safely" or "resolved_with_casualty" or "failed" or "completed" or "success" or "failure";
 
         private static bool IsPlanChoiceMechanics(JsonElement? mechanics) =>
             mechanics is { ValueKind: JsonValueKind.Object } value &&

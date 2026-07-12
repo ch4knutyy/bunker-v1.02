@@ -24,23 +24,49 @@ public static class GMThreatStateMutator
         };
     }
 
-    public static void Cancel(Room room)
+    public static bool Abort(Room room)
     {
-        room.CurrentThreat = null;
-        room.ThreatState = null;
-        room.IsThreatRevealed = false;
-        room.ThreatRevealedAtRound = null;
+        lock (room.ThreatSyncRoot)
+        {
+            if (!CanReset(room)) return false;
+            var previous = room.ThreatState!;
+            var terminal = new ThreatInteractionState
+            {
+                CurrentThreatId = room.CurrentThreat!.Id,
+                ThreatStatus = "aborted",
+                ThreatRevealedRound = room.ThreatRevealedAtRound ?? room.CurrentRound,
+                Resolution = previous.Resolution
+            };
+            terminal.Resolution.CompletedAtRound ??= room.CurrentRound;
+            if (!terminal.Resolution.PublicResults.Contains("Загрозу скасовано ведучим."))
+                terminal.Resolution.PublicResults.Add("Загрозу скасовано ведучим.");
+            terminal.MiniGame.Status = "aborted";
+            terminal.MiniGame.ResultStatus = "aborted";
+            terminal.MiniGame.Outcome = "aborted";
+            terminal.MiniGame.CompletedAtUtc = DateTimeOffset.UtcNow;
+            room.ThreatState = terminal;
+            room.IsThreatRevealed = true;
+            return true;
+        }
     }
 
     public static bool Restart(Room room)
     {
-        if (room.CurrentThreat == null || room.ThreatState?.Resolution.EffectsApplied == true) return false;
-        room.ThreatState = new ThreatInteractionState
+        lock (room.ThreatSyncRoot)
         {
-            CurrentThreatId = room.CurrentThreat.Id,
-            ThreatStatus = room.IsThreatRevealed ? "collecting_contributions" : "hidden",
-            ThreatRevealedRound = room.ThreatRevealedAtRound
-        };
-        return true;
+            if (!CanReset(room)) return false;
+            room.ThreatState = new ThreatInteractionState
+            {
+                CurrentThreatId = room.CurrentThreat!.Id,
+                ThreatStatus = room.IsThreatRevealed ? "collecting_contributions" : "hidden",
+                ThreatRevealedRound = room.ThreatRevealedAtRound ?? room.CurrentRound
+            };
+            return true;
+        }
     }
+
+    public static bool CanReset(Room room) =>
+        room.CurrentThreat != null && room.ThreatState != null &&
+        !room.ThreatState.Resolution.EffectsApplied &&
+        room.ThreatState.ThreatStatus is not ("aborted" or "resolved_safely" or "resolved_with_casualty" or "failed" or "completed" or "success" or "failure");
 }
