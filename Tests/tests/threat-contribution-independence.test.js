@@ -2,8 +2,8 @@ const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 
-const root = path.resolve(__dirname, "..");
-const threatsPath = path.join(root, "Hubs", "GameHub", "GameHub.Threats.cs");
+const root = path.resolve(__dirname, "..", "..");
+const threatsPath = path.join(root, "Hubs", "BunkerHubGame", "GameHub.Threats.cs");
 const statePath = path.join(root, "Models", "Game", "ThreatInteractionState.cs");
 
 const threatsSource = fs.readFileSync(threatsPath, "utf8");
@@ -81,14 +81,14 @@ for (const field of [
 
 assert(addContribution.includes("SubmittedRound = room.CurrentRound"), "Contribution must store submitted round");
 assert(addContribution.includes("ReservedForThreatId"), "Contribution must reserve the item for a threat");
-assert(addContribution.includes("ItemInstanceId = sourceType == \"personal_inventory\" ? sourceId : \"\""), "Item contribution must store item instance id");
+assert(addContribution.includes('ItemInstanceId = sourceType is "personal_inventory" or "profession_item" ? sourceId : ""'), "Item contribution must store item instance id");
 assert(withdrawContribution.includes("RemoveAll"), "Withdrawal must release the reserved contribution");
 assert(consumeItems.includes("Status = \"consumed\""), "Consumed threat items must leave active reservation state");
 
 assert(
   buildPublicState.includes("revealedAfterResolution = threatState.Resolution.EffectsApplied") &&
-    buildPublicState.includes("new { c.DisplayName }"),
-  "Public item names may be revealed only after threat resolution",
+    buildPublicState.includes("threatState.OperationBonuses.PublicExplanations"),
+  "Public explanations may be revealed only after threat resolution",
 );
 
 assert(

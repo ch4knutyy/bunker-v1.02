@@ -40,7 +40,7 @@ test('host previews force failure and force success without reload', async ({ br
     await room.host.locator('#gmThreatForceConfirm').click();
     await expect(room.host.locator('#gmThreatCurrent')).toContainText(/усунено|успіх|resolved/i, { timeout: 15000 });
     await expect(room.host.locator('#gmThreatAuditList')).toContainText(/примусово.*успіх|forced success/i);
-    await expect(room.host.locator('#gmThreatAuditList .gm-threat-audit-entry')).toHaveCount(8);
+    await expect(room.host.locator('#gmThreatAuditList .gm-threat-audit-entry')).toHaveCount(7);
   } finally {
     await room.close();
   }

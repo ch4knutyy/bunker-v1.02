@@ -762,6 +762,7 @@ namespace Bunker.Hubs
 
             if (!threatState.Resolution.EffectsApplied)
             {
+                var materialEffectsApplied = false;
                 var resultStatus = threatState.MiniGame.ResultStatus;
                 var volunteerId = threatState.VolunteerSelection.SelectedPlayerId;
                 var volunteerProtected = !string.IsNullOrWhiteSpace(volunteerId) &&
@@ -781,12 +782,13 @@ namespace Bunker.Hubs
 
                 if (outcome == "resolved_with_casualty")
                 {
-                    ApplyRadiationConditionToParticipants(room, threatState, "medium");
+                    materialEffectsApplied = ApplyRadiationConditionToParticipants(room, threatState, "medium");
                     threatState.Resolution.PublicResults.Add("Операцію завершено, але учасник отримав радіаційний наслідок.");
                 }
                 else if (outcome == "failed")
                 {
                     ApplyRadiationFailure(room, threatState);
+                    materialEffectsApplied = true;
                     threatState.Resolution.PublicResults.Add("Операцію провалено. Радіаційний наслідок застосовано.");
                 }
                 else
@@ -794,8 +796,8 @@ namespace Bunker.Hubs
                     threatState.Resolution.PublicResults.Add("Операцію завершено без помітних втрат.");
                 }
 
-                ConsumeAcceptedThreatItems(room, threatState, threatState.Resolution.WasSuccessful);
-                GrantThreatVoteImmunityIfNeeded(room, threatState);
+                materialEffectsApplied |= ConsumeAcceptedThreatItems(room, threatState, threatState.Resolution.WasSuccessful);
+                materialEffectsApplied |= GrantThreatVoteImmunityIfNeeded(room, threatState);
                 threatState.Resolution.EffectsApplied = true;
                 threatState.MiniGame.Outcome = outcome;
                 threatState.MiniGame.Status = outcome;
@@ -805,7 +807,8 @@ namespace Bunker.Hubs
                     room,
                     outcome == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
                     deduplicateTransition: true);
-                _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, deduplicateTransition: true);
+                if (materialEffectsApplied)
+                    _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, deduplicateTransition: true);
             }
 
             if (threatState.Resolution.EffectsApplied &&
@@ -872,7 +875,8 @@ namespace Bunker.Hubs
             if (!state.Resolution.PublicResults.Contains(success ? "Загрозу примусово завершено успіхом." : "Загрозу примусово завершено провалом."))
                 state.Resolution.PublicResults.Add(success ? "Загрозу примусово завершено успіхом." : "Загрозу примусово завершено провалом.");
             _threatAudit.Append(room, success ? ThreatAuditEventType.CompletedSuccess : ThreatAuditEventType.CompletedFailure, actorPlayerId, deduplicateTransition: true);
-            _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, actorPlayerId, deduplicateTransition: true);
+            if (!success)
+                _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, actorPlayerId, deduplicateTransition: true);
             return true;
         }
 
@@ -1360,14 +1364,15 @@ namespace Bunker.Hubs
             state.Resolution.SelectedApproachId = state.PlanChoice.SelectedPlanId;
             state.Resolution.WasSuccessful = outcome != "failure";
             state.Resolution.CompletedAtRound = room.CurrentRound;
-            ApplyAirFilterPlanEffects(room, state, plan, outcome);
+            var materialEffectsApplied = ApplyAirFilterPlanEffects(room, state, plan, outcome);
             state.Resolution.EffectsApplied = true;
             _threatAudit.Append(
                 room,
                 state.ThreatStatus == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
                 actorPlayerId,
                 deduplicateTransition: true);
-            _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, actorPlayerId, deduplicateTransition: true);
+            if (state.ThreatStatus == "failed" || materialEffectsApplied)
+                _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, actorPlayerId, deduplicateTransition: true);
             return true;
         }
 
@@ -1415,16 +1420,17 @@ namespace Bunker.Hubs
                 Count("bunker_facility", facilityTags), protectedPlayers);
         }
 
-        private void ApplyAirFilterPlanEffects(Room room, ThreatInteractionState state, JsonElement plan, string outcome)
+        private bool ApplyAirFilterPlanEffects(Room room, ThreatInteractionState state, JsonElement plan, string outcome)
         {
             var effectsKey = outcome == "safe_success" ? "onSafeSuccess" : outcome == "success_with_consequence" ? "onSuccessWithConsequence" : "onFailure";
-            if (!plan.TryGetProperty("effects", out var effects) || !effects.TryGetProperty(effectsKey, out var list) || list.ValueKind != JsonValueKind.Array) return;
+            if (!plan.TryGetProperty("effects", out var effects) || !effects.TryGetProperty(effectsKey, out var list) || list.ValueKind != JsonValueKind.Array) return false;
+            var materialEffectsApplied = false;
             if (list.EnumerateArray().Any(effect => GetJsonString(effect, "", "type") == "consume_contributed_items"))
             {
                 state.OperationBonuses.UsefulContributionIds = state.Contributions
                     .Where(item => IsActiveThreatContribution(item) && item.SourceType == "personal_inventory")
                     .Select(item => item.ContributionId).ToList();
-                ConsumeAcceptedThreatItems(room, state, success: true);
+                materialEffectsApplied |= ConsumeAcceptedThreatItems(room, state, success: true);
             }
             foreach (var effect in list.EnumerateArray().Where(effect => GetJsonString(effect, "", "type") == "add_physical_condition"))
             {
@@ -1435,8 +1441,10 @@ namespace Bunker.Hubs
                 var targets = target == "all_active_players"
                     ? GetActiveThreatPlayers(room).Select(entry => RoomService.GetPlayerKey(entry.Value)).ToList()
                     : GetThreatParticipantIds(state).Where(id => !IsPlanChoiceParticipantProtected(state, plan, id)).Take(1).ToList();
-                foreach (var playerId in targets) ApplyAirFilterPhysicalCondition(room, playerId, conditionId, severity, mergeRule);
+                foreach (var playerId in targets)
+                    materialEffectsApplied |= ApplyAirFilterPhysicalCondition(room, playerId, conditionId, severity, mergeRule);
             }
+            return materialEffectsApplied;
         }
 
         private static bool IsPlanChoiceParticipantProtected(ThreatInteractionState state, JsonElement plan, string playerId)
@@ -1445,26 +1453,27 @@ namespace Bunker.Hubs
             return state.Contributions.Any(c => IsActiveThreatContribution(c) && c.OwnerPlayerId == playerId && c.TagsSnapshot.Any(tag => tags.Contains(tag, StringComparer.OrdinalIgnoreCase)));
         }
 
-        private void ApplyAirFilterPhysicalCondition(Room room, string playerId, string effectConditionId, string severityCode, string mergeRule)
+        private bool ApplyAirFilterPhysicalCondition(Room room, string playerId, string effectConditionId, string severityCode, string mergeRule)
         {
             var player = _roomService.GetPlayerByAnyId(room, playerId);
-            if (player == null) return;
+            if (player == null) return false;
             var conditionId = effectConditionId is "toxic_air_exposure" or "respiratory_poisoning" ? "physical_301" : effectConditionId;
             var existing = player.AdditionalConditionEffects.FirstOrDefault(item => string.Equals(item.ConditionId, conditionId, StringComparison.OrdinalIgnoreCase));
             var condition = _gameData.PhysicalConditions.FirstOrDefault(item => string.Equals(item.Id, conditionId, StringComparison.OrdinalIgnoreCase));
-            if (condition == null) return;
+            if (condition == null) return false;
             if (existing != null)
             {
-                if (!string.Equals(mergeRule, "increaseExistingSeverityByOne", StringComparison.OrdinalIgnoreCase)) return;
+                if (!string.Equals(mergeRule, "increaseExistingSeverityByOne", StringComparison.OrdinalIgnoreCase)) return false;
                 var nextCode = existing.SeverityCode.ToLowerInvariant() switch
                 {
                     "light" => "medium", "medium" => "hard", "hard" => "veryHard", "veryhard" => "critical", _ => existing.SeverityCode
                 };
+                if (string.Equals(nextCode, existing.SeverityCode, StringComparison.OrdinalIgnoreCase)) return false;
                 var nextLevel = SeverityHelper.GetSeverityLevelFromCode(nextCode);
                 existing.SeverityCode = nextCode;
                 existing.SeverityLevel = SeverityHelper.GetSeverityName(nextLevel, "uk");
                 existing.Name = SeverityHelper.FormatNameWithSeverity(existing.BaseName, nextLevel, "uk");
-                return;
+                return true;
             }
             var level = SeverityHelper.GetSeverityLevelFromCode(severityCode);
             player.AdditionalConditionEffects.Add(new PlayerConditionEffect
@@ -1476,6 +1485,7 @@ namespace Bunker.Hubs
             });
             var entry = RoomService.GetPlayersSnapshot(room).FirstOrDefault(item => ReferenceEquals(item.Value, player));
             if (!string.IsNullOrWhiteSpace(entry.Key)) _roomService.UpdatePlayer(entry.Key, player);
+            return true;
         }
 
         private static bool TryGetPlanElement(JsonElement? mechanics, string planId, out JsonElement plan)
@@ -1902,8 +1912,9 @@ namespace Bunker.Hubs
             };
         }
 
-        private void ApplyRadiationConditionToParticipants(Room room, ThreatInteractionState threatState, string baseSeverityCode)
+        private bool ApplyRadiationConditionToParticipants(Room room, ThreatInteractionState threatState, string baseSeverityCode)
         {
+            var applied = false;
             var participantIds = GetThreatParticipantIds(threatState);
             if (participantIds.Count == 0 && !string.IsNullOrWhiteSpace(threatState.VolunteerSelection.SelectedPlayerId))
             {
@@ -1922,23 +1933,24 @@ namespace Bunker.Hubs
                     continue;
                 }
 
-                ApplyRadiationCondition(room, participantId, GetMitigatedRadiationSeverity(baseSeverityCode, threatState));
+                applied |= ApplyRadiationCondition(room, participantId, GetMitigatedRadiationSeverity(baseSeverityCode, threatState));
             }
+            return applied;
         }
 
-        private void ApplyRadiationCondition(Room room, string playerId, string severityCode)
+        private bool ApplyRadiationCondition(Room room, string playerId, string severityCode)
         {
             if (string.IsNullOrWhiteSpace(playerId))
             {
-                return;
+                return false;
             }
 
             var player = _roomService.GetPlayerByAnyId(room, playerId);
-            if (player == null) return;
+            if (player == null) return false;
             if (player.AdditionalConditionEffects.Any(effect =>
                     string.Equals(effect.ConditionId, RadiationConsequenceFactory.RadiationConditionId, StringComparison.OrdinalIgnoreCase)))
             {
-                return;
+                return false;
             }
 
             var condition = _gameData.PhysicalConditions.FirstOrDefault(item =>
@@ -1956,7 +1968,7 @@ namespace Bunker.Hubs
                     room.Id,
                     playerId,
                     "physical_152");
-                return;
+                return false;
             }
 
             var playerEntry = RoomService.GetPlayersSnapshot(room).FirstOrDefault(entry =>
@@ -1965,16 +1977,17 @@ namespace Bunker.Hubs
             {
                 _roomService.UpdatePlayer(playerEntry.Key, player);
             }
+            return true;
         }
 
-        private void ApplyRadiationFailure(Room room, ThreatInteractionState threatState)
+        private bool ApplyRadiationFailure(Room room, ThreatInteractionState threatState)
         {
-            ApplyRadiationConditionToParticipants(room, threatState, "hard");
+            return ApplyRadiationConditionToParticipants(room, threatState, "hard");
         }
 
-        private void ApplyRadiationFailure(Room room)
+        private bool ApplyRadiationFailure(Room room)
         {
-            ApplyRadiationFailure(room, EnsureRadiationThreatState(room));
+            return ApplyRadiationFailure(room, EnsureRadiationThreatState(room));
         }
 
         private static string GetLocalizedConditionName(Models.GameData.PhysicalConditionData? condition, string language)
@@ -2057,14 +2070,15 @@ namespace Bunker.Hubs
             return result;
         }
 
-        private void ConsumeAcceptedThreatItems(Room room, ThreatInteractionState threatState, bool success)
+        private bool ConsumeAcceptedThreatItems(Room room, ThreatInteractionState threatState, bool success)
         {
             if (string.Equals(threatState.CurrentThreatId, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase))
             {
-                return;
+                return false;
             }
 
-            if (!success) return;
+            if (!success) return false;
+            var consumed = false;
 
             foreach (var contribution in threatState.Contributions.Where(c =>
                          IsActiveThreatContribution(c) &&
@@ -2088,25 +2102,33 @@ namespace Bunker.Hubs
                     owner.Inventory.Items.Remove(item);
                     contribution.IsConsumed = true;
                     contribution.Status = "consumed";
+                    consumed = true;
                 }
             }
+            return consumed;
         }
 
-        private void GrantThreatVoteImmunityIfNeeded(Room room, ThreatInteractionState threatState)
+        private bool GrantThreatVoteImmunityIfNeeded(Room room, ThreatInteractionState threatState)
         {
             if (threatState.VolunteerSelection.SelectionReason != "group_vote" ||
                 string.IsNullOrWhiteSpace(threatState.VolunteerSelection.SelectedPlayerId))
             {
-                return;
+                return false;
             }
 
             var player = _roomService.GetPlayerByAnyId(room, threatState.VolunteerSelection.SelectedPlayerId);
-            if (player == null) return;
+            if (player == null) return false;
+
+            var changed = !player.EliminationVoteImmunity.IsActive ||
+                !string.Equals(player.EliminationVoteImmunity.SourceThreatId, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase) ||
+                player.EliminationVoteImmunity.GrantedAtRound != room.CurrentRound ||
+                player.EliminationVoteImmunity.RemainingUses != 1;
 
             player.EliminationVoteImmunity.IsActive = true;
             player.EliminationVoteImmunity.SourceThreatId = RadiationLeakThreatId;
             player.EliminationVoteImmunity.GrantedAtRound = room.CurrentRound;
             player.EliminationVoteImmunity.RemainingUses = 1;
+            return changed;
         }
     }
 }
