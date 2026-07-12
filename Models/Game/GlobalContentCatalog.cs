@@ -97,3 +97,19 @@ public sealed record GlobalContentRollbackPreviewDto(
     string CurrentFingerprint, long BackupVersion, string BackupFingerprint,
     int AddedCount, int UpdatedCount, int DeletedCount, IReadOnlyList<GlobalContentDraftDiffEntryDto> Entries,
     string ValidationSummary, bool CanRollback, bool HasConflict);
+public sealed record StableIdMigrationMappingDto(string CanonicalName, string StableId, string Status);
+public sealed record StableIdMigrationPreviewDto(
+    string Category, string SourceVersion, string SourceFingerprint, int TotalEntries,
+    int MissingIdCount, int PreservedIdCount, int DuplicateNameCount, int CollisionCount,
+    int InvalidEntryCount, GlobalContentEditableReadiness ResultingReadiness,
+    IReadOnlyList<StableIdMigrationMappingDto> Mapping, int Page, int PageSize,
+    string PreviewToken, DateTimeOffset ExpiresAtUtc, bool CanApply, string ExternalReferenceStatus);
+public sealed record StableIdMigrationResultDto(
+    bool Succeeded, string Code, string MigrationId, string Category, int GeneratedCount,
+    int PreservedCount, long NewVersion, string NewFingerprint, string BackupId,
+    string ManifestId, string RuntimeActivation);
+public sealed record StableIdMigrationManifestDto(
+    string MigrationId, string AlgorithmVersion, string Category, string SourceVersion,
+    string SourceFingerprint, long ResultingVersion, string ResultingFingerprint,
+    DateTimeOffset TimestampUtc, string ActorId, int EntryCount,
+    IReadOnlyList<StableIdMigrationMappingDto> Mapping);

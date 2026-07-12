@@ -67,6 +67,7 @@ connection.start()
     let globalDrafts = [];
     let globalDraftPending = false;
     let globalRollbackPreview = null;
+    let globalMigrationPreview = null;
     let currentGameTimer = null;
     let gameTimerClockAnchor = null;
     let gameTimerCommandPending = false;
@@ -407,6 +408,7 @@ connection.start()
         globalCatalogPrevious: "Назад", globalCatalogNext: "Далі", globalCatalogSchema: "Схема", globalCatalogStableIds: "Стабільні ID", globalCatalogLocalization: "Локалізація"
         ,globalDraftsTitle: "Чернетки", globalDraftCreate: "Створити чернетку", globalDraftApply: "Застосувати до чернетки", globalDraftValidate: "Валідувати", globalDraftPreview: "Preview diff", globalDraftDiscard: "Відкинути"
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Зміни набудуть чинності після перезапуску застосунку.", globalBackupsTitle: "Резервні копії", globalBackupsRefresh: "Оновити backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
+        ,globalMigrationTitle: "Потрібна stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Застосувати migration"
     });
     Object.assign(uiTranslations.en, {
         globalCatalogTitle: "Global Content Catalog", globalCatalogDevelopmentWarning: "Development only: read-only catalog. Production access is disabled.",
@@ -414,6 +416,7 @@ connection.start()
         globalCatalogPrevious: "Previous", globalCatalogNext: "Next", globalCatalogSchema: "Schema", globalCatalogStableIds: "Stable IDs", globalCatalogLocalization: "Localization"
         ,globalDraftsTitle: "Drafts", globalDraftCreate: "Create draft", globalDraftApply: "Apply to draft", globalDraftValidate: "Validate", globalDraftPreview: "Preview diff", globalDraftDiscard: "Discard"
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Changes take effect after application restart.", globalBackupsTitle: "Backups", globalBackupsRefresh: "Refresh backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
+        ,globalMigrationTitle: "Stable-ID migration required", globalMigrationPreview: "Preview migration", globalMigrationApply: "Apply migration"
     });
     Object.assign(uiTranslations.ru, {
         globalCatalogTitle: "Глобальный каталог контента", globalCatalogDevelopmentWarning: "Только Development: read-only каталог. В Production доступ отключён.",
@@ -421,6 +424,7 @@ connection.start()
         globalCatalogPrevious: "Назад", globalCatalogNext: "Далее", globalCatalogSchema: "Схема", globalCatalogStableIds: "Стабильные ID", globalCatalogLocalization: "Локализация"
         ,globalDraftsTitle: "Черновики", globalDraftCreate: "Создать черновик", globalDraftApply: "Применить к черновику", globalDraftValidate: "Проверить", globalDraftPreview: "Preview diff", globalDraftDiscard: "Отбросить"
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Изменения вступят в силу после перезапуска приложения.", globalBackupsTitle: "Резервные копии", globalBackupsRefresh: "Обновить backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
+        ,globalMigrationTitle: "Требуется stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Применить migration"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -5935,6 +5939,8 @@ function removeBunkerSupplies(months) {
         if (!pending) {
             const execute = document.getElementById('globalRollbackExecute');
             if (execute) execute.disabled = !(globalRollbackPreview?.canRollback ?? globalRollbackPreview?.CanRollback);
+            const migrationApply = document.getElementById('globalMigrationApply');
+            if (migrationApply) migrationApply.disabled = !(globalMigrationPreview?.canApply ?? globalMigrationPreview?.CanApply);
             renderGlobalDraftState();
         }
     }
@@ -5953,6 +5959,7 @@ function removeBunkerSupplies(months) {
         const category = document.getElementById('globalCatalogCategory')?.value; const blocked = ['hobbies','character_traits'].includes(category); const warning = document.getElementById('globalDraftBlocked');
         if (warning) warning.textContent = blocked ? 'BlockedMissingStableIds' : '';
         const create = document.getElementById('globalDraftCreate'); if (create) create.disabled = globalDraftPending || blocked;
+        const migration = document.getElementById('globalStableIdMigration'); if (migration) migration.style.display = blocked ? 'block' : 'none';
         const commit = document.getElementById('globalDraftCommit'); if (commit) commit.disabled = globalDraftPending || !draft || (draft.status || draft.Status) !== 'Validated';
     }
     async function runGlobalDraftCommand(action) {
@@ -5995,6 +6002,20 @@ function removeBunkerSupplies(months) {
         if (!globalRollbackPreview || globalDraftPending || !confirm('Rollback global content?') || !confirm('Confirm destructive rollback again.')) return;
         const category = globalRollbackPreview.category || globalRollbackPreview.Category; const backupId = globalRollbackPreview.backupId || globalRollbackPreview.BackupId; const token = globalRollbackPreview.previewToken || globalRollbackPreview.PreviewToken;
         await runGlobalDraftCommand(() => connection.invoke('RollbackGlobalContent', category, backupId, token, true, crypto.randomUUID())); globalRollbackPreview = null; await loadGlobalContentBackups();
+    }
+    async function previewStableIdMigration() {
+        if (globalDraftPending) return; const category = document.getElementById('globalCatalogCategory')?.value; if (!['hobbies','character_traits'].includes(category)) return;
+        setGlobalDraftPending(true); const output = document.getElementById('globalMigrationResult');
+        try { globalMigrationPreview = await connection.invoke('PreviewStableIdMigration', category, 1, 100); if (output) output.textContent = JSON.stringify(globalMigrationPreview, null, 2); const apply = document.getElementById('globalMigrationApply'); if (apply) apply.disabled = !(globalMigrationPreview.canApply ?? globalMigrationPreview.CanApply); }
+        catch (error) { if (output) output.textContent = error?.message || t('unavailableNow'); }
+        finally { setGlobalDraftPending(false); const apply = document.getElementById('globalMigrationApply'); if (apply) apply.disabled = !(globalMigrationPreview?.canApply ?? globalMigrationPreview?.CanApply); }
+    }
+    async function applyStableIdMigration() {
+        if (!globalMigrationPreview || globalDraftPending || !confirm('Apply stable IDs to canonical JSON?') || !confirm('Only missing id fields will be added. Confirm again.')) return;
+        const category = globalMigrationPreview.category || globalMigrationPreview.Category; const token = globalMigrationPreview.previewToken || globalMigrationPreview.PreviewToken; const output = document.getElementById('globalMigrationResult'); setGlobalDraftPending(true);
+        try { const result = await connection.invoke('ApplyStableIdMigration', category, token, true, crypto.randomUUID()); if (output) output.textContent = JSON.stringify(result, null, 2); globalMigrationPreview = null; await loadGlobalContentCategories(); await loadGlobalContentBackups(); }
+        catch (error) { if (output) output.textContent = error?.message || t('unavailableNow'); }
+        finally { setGlobalDraftPending(false); }
     }
 
     function toggleGMPanel() {

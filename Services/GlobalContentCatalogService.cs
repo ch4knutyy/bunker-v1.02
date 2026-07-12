@@ -115,7 +115,7 @@ public sealed class GlobalContentCatalogService
         return new UTF8Encoding(false).GetBytes(output.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
     }
 
-    internal GlobalContentBinaryValidation ValidateCanonicalBytes(string category, byte[] bytes)
+    internal GlobalContentBinaryValidation ValidateCanonicalBytes(string category, byte[] bytes, bool requireStableIds = true)
     {
         if (bytes.Length > MaximumFileBytes) return new(false, "file_too_large", 0, "");
         try
@@ -126,8 +126,9 @@ public sealed class GlobalContentCatalogService
             if (!TryGetEntries(document.RootElement, definition.RootProperty, out var source)) return new(false, "unexpected_root", 0, "");
             var entries = source.EnumerateArray().ToList();
             var ids = entries.Select(x => GetString(x, "id")).ToList();
-            if (entries.Any(x => x.ValueKind != JsonValueKind.Object) || ids.Any(string.IsNullOrWhiteSpace)) return new(false, "schema_invalid", entries.Count, "");
-            if (ids.GroupBy(x => x, StringComparer.Ordinal).Any(x => x.Count() > 1)) return new(false, "duplicate_ids", entries.Count, "");
+            if (entries.Any(x => x.ValueKind != JsonValueKind.Object)) return new(false, "schema_invalid", entries.Count, "");
+            if (requireStableIds && ids.Any(string.IsNullOrWhiteSpace)) return new(false, "schema_invalid", entries.Count, "");
+            if (ids.Where(x => !string.IsNullOrWhiteSpace(x)).GroupBy(x => x, StringComparer.Ordinal).Any(x => x.Count() > 1)) return new(false, "duplicate_ids", entries.Count, "");
             return new(true, "valid", entries.Count, Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
         }
         catch (DecoderFallbackException) { return new(false, "invalid_utf8", 0, ""); }
@@ -139,7 +140,22 @@ public sealed class GlobalContentCatalogService
         var definition = Resolve(category);
         var root = JsonNode.Parse(bytes) ?? throw new GlobalContentRequestException("invalid_json");
         var array = definition.RootProperty == null ? root.AsArray() : root[definition.RootProperty]?.AsArray() ?? throw new GlobalContentRequestException("unexpected_root");
-        return array.Select(x => x!.AsObject()).ToDictionary(x => x["id"]!.ToString(), x => (JsonObject)x.DeepClone(), StringComparer.Ordinal);
+        var result = new Dictionary<string, JsonObject>(StringComparer.Ordinal); var index = 0;
+        foreach (var item in array) { var entry = item!.AsObject(); var key = entry["id"]?.ToString(); key = string.IsNullOrWhiteSpace(key) ? "legacy:" + (entry["hobby"]?.ToString() ?? entry["trait"]?.ToString() ?? index.ToString(System.Globalization.CultureInfo.InvariantCulture)) : key; result[key] = (JsonObject)entry.DeepClone(); index++; }
+        return result;
+    }
+
+    internal string AuditExternalReferences(string category)
+    {
+        var indexKeys = category == "hobbies" ? new[] { "hobbyIndex", "hobby_index" } : new[] { "traitIndex", "trait_index" };
+        var idKeys = category == "hobbies" ? new[] { "hobbyId", "hobby_id" } : new[] { "traitId", "trait_id" };
+        foreach (var definition in Definitions.Values.Where(x => !string.Equals(x.Slug, category, StringComparison.OrdinalIgnoreCase)))
+        {
+            var path = ResolvePath(definition); if (!File.Exists(path)) continue; var text = File.ReadAllText(path);
+            if (indexKeys.Any(key => text.Contains($"\"{key}\"", StringComparison.OrdinalIgnoreCase))) return "blocked_index_references";
+            if (idKeys.Any(key => text.Contains($"\"{key}\"", StringComparison.OrdinalIgnoreCase))) return "stable_id_references_present";
+        }
+        return "name_references_compatible";
     }
 
     private CatalogRead Read(string category)
@@ -180,7 +196,7 @@ public sealed class GlobalContentCatalogService
             var stableStatus = missingIds > 0 ? $"Missing:{missingIds}" : duplicateIds > 0 ? $"Duplicates:{duplicateIds}" : "ValidUniqueDeterministic";
             var readiness = !schemaValid ? GlobalContentEditableReadiness.BlockedSchemaUnknown :
                 missingIds > 0 || duplicateIds > 0 ? GlobalContentEditableReadiness.BlockedMissingStableIds :
-                GlobalContentEditableReadiness.ReadOnly;
+                GlobalContentEditableReadiness.Ready;
             var localization = GetLocalizationStatus(entries);
             var metadata = new GlobalContentMetadataDto(definition.Slug, entries.Count, fingerprint[..12], fingerprint,
                 info.LastWriteTimeUtc, schemaStatus, stableStatus, localization, readiness);

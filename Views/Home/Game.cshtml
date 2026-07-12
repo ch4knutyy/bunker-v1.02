@@ -549,6 +549,12 @@
                 <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalRollbackPreview" onclick="previewGlobalRollback()">Preview rollback</button>
                 <button id="globalRollbackExecute" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalRollbackExecute" onclick="executeGlobalRollback()" disabled>Rollback</button>
                 <pre id="globalRollbackResult" class="global-catalog-details" aria-live="polite"></pre>
+                <section id="globalStableIdMigration" class="global-catalog-drafts" style="display: none;">
+                    <h4 data-gm-i18n="globalMigrationTitle">Stable-ID migration required</h4>
+                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalMigrationPreview" onclick="previewStableIdMigration()">Preview migration</button>
+                    <button id="globalMigrationApply" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalMigrationApply" onclick="applyStableIdMigration()" disabled>Apply migration</button>
+                    <pre id="globalMigrationResult" class="global-catalog-details" aria-live="polite"></pre>
+                </section>
             </section>
         </section>
         <div id="roomLobby">

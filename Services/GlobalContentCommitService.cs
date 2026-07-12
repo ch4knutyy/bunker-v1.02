@@ -18,6 +18,7 @@ public sealed class GlobalContentCommitService
     private readonly Dictionary<string, long> _versions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, GlobalContentCommitResultDto> _commands = new(StringComparer.Ordinal);
     private readonly Dictionary<string, RollbackPreviewState> _rollbackPreviews = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, GlobalContentCommitResultDto> _migrationCommands = new(StringComparer.Ordinal);
     private readonly GlobalContentCommitFaults _faults;
 
     private sealed record BackupState(GlobalContentBackupDto Metadata, string InternalFile);
@@ -88,8 +89,8 @@ public sealed class GlobalContentCommitService
         lock (CategoryLocks.GetOrAdd(category, _ => new object()))
         {
             var backup = FindBackup(category, backupId); var backupBytes = File.ReadAllBytes(backup.InternalFile);
-            var valid = _catalog.ValidateCanonicalBytes(category, backupBytes); if (!valid.IsValid) throw new GlobalContentRequestException("backup_invalid");
-            var currentBytes = _catalog.ReadCanonicalBytes(category); var current = _catalog.ValidateCanonicalBytes(category, currentBytes);
+            var valid = _catalog.ValidateCanonicalBytes(category, backupBytes, requireStableIds: false); if (!valid.IsValid) throw new GlobalContentRequestException("backup_invalid");
+            var currentBytes = _catalog.ReadCanonicalBytes(category); var current = _catalog.ValidateCanonicalBytes(category, currentBytes, requireStableIds: false);
             var diffs = Diff(_catalog.ExtractCanonicalEntries(category, currentBytes), _catalog.ExtractCanonicalEntries(category, backupBytes));
             var token = Guid.NewGuid().ToString("N");
             var preview = new GlobalContentRollbackPreviewDto(token, category, backupId, CurrentVersion(category), current.Fingerprint, backup.Metadata.SourceVersion, backup.Metadata.SourceFingerprint,
@@ -105,21 +106,48 @@ public sealed class GlobalContentCommitService
         lock (CategoryLocks.GetOrAdd(category, _ => new object()))
         {
             if (!_rollbackPreviews.TryGetValue(previewToken, out var state) || state.ActorId != actor || state.Preview.Category != category || state.Preview.BackupId != backupId) throw new GlobalContentRequestException("rollback_preview_required");
-            var currentBytes = _catalog.ReadCanonicalBytes(category); var current = _catalog.ValidateCanonicalBytes(category, currentBytes);
+            var currentBytes = _catalog.ReadCanonicalBytes(category); var current = _catalog.ValidateCanonicalBytes(category, currentBytes, requireStableIds: false);
             if (current.Fingerprint != state.Preview.CurrentFingerprint) throw new GlobalContentRequestException("rollback_preview_stale");
-            var selected = FindBackup(category, backupId); var selectedBytes = File.ReadAllBytes(selected.InternalFile); var selectedValidation = _catalog.ValidateCanonicalBytes(category, selectedBytes);
+            var selected = FindBackup(category, backupId); var selectedBytes = File.ReadAllBytes(selected.InternalFile); var selectedValidation = _catalog.ValidateCanonicalBytes(category, selectedBytes, requireStableIds: false);
             if (!selectedValidation.IsValid || selectedValidation.Fingerprint != selected.Metadata.SourceFingerprint) throw new GlobalContentRequestException("backup_integrity_failed");
             var oldVersion = CurrentVersion(category); var safety = CreateBackup(category, oldVersion, current.Fingerprint, currentBytes, actor, "before_manual_rollback", "");
             try
             {
                 RestoreBackupAtomic(category, selected);
-                var restored = _catalog.ValidateCanonicalBytes(category, _catalog.ReadCanonicalBytes(category)); if (!restored.IsValid || restored.Fingerprint != selectedValidation.Fingerprint) { RestoreBackupAtomic(category, safety); throw new GlobalContentRequestException("rollback_validation_failed_restored"); }
+                var restored = _catalog.ValidateCanonicalBytes(category, _catalog.ReadCanonicalBytes(category), requireStableIds: false); if (!restored.IsValid || restored.Fingerprint != selectedValidation.Fingerprint) { RestoreBackupAtomic(category, safety); throw new GlobalContentRequestException("rollback_validation_failed_restored"); }
                 var version = NextVersion(category); var result = new GlobalContentCommitResultDto(true, "rolled_back", "", category, oldVersion, version, Short(current.Fingerprint), Short(restored.Fingerprint), safety.Metadata.BackupId, state.Preview.AddedCount, state.Preview.UpdatedCount, state.Preview.DeletedCount, "restart_required");
                 _drafts.RecordExternalAudit("manual_rollback_succeeded", "", category, actor, "success"); lock (_commands) _commands[commandId] = result; return result;
             }
             catch (GlobalContentRequestException) { _drafts.RecordExternalAudit("manual_rollback_failed", "", category, actor, "failed"); throw; }
         }
     }
+
+    public GlobalContentCommitResultDto CommitStableIdMigration(string category, IReadOnlyList<string> entries, string expectedVersion, string expectedFingerprint, string actor, string migrationId, int generatedCount, int preservedCount, string commandId)
+    {
+        ValidateCommand(commandId); lock (_migrationCommands) if (_migrationCommands.TryGetValue(commandId, out var replay)) return replay;
+        lock (CategoryLocks.GetOrAdd(category, _ => new object()))
+        {
+            var current = _catalog.GetMetadata(category); if (current.FileVersion != expectedVersion || current.Fingerprint != expectedFingerprint) throw new GlobalContentRequestException("base_content_changed");
+            var bytes = _catalog.BuildCanonicalBytes(category, entries); var validation = _catalog.ValidateCanonicalBytes(category, bytes); if (!validation.IsValid) throw new GlobalContentRequestException("migration_content_invalid");
+            var canonical = _catalog.GetCanonicalPath(category); var oldBytes = _catalog.ReadCanonicalBytes(category); var oldVersion = CurrentVersion(category);
+            var backup = CreateBackup(category, oldVersion, current.Fingerprint, oldBytes, actor, "before_stable_id_migration", migrationId); var temp = TempPath(canonical);
+            try
+            {
+                WriteAndFlush(temp, bytes); if (_faults.FailBeforeReplace) throw new IOException("injected_before_replace");
+                var tempValidation = _catalog.ValidateCanonicalBytes(category, File.ReadAllBytes(temp)); if (!tempValidation.IsValid) throw new InvalidDataException("temp_validation_failed");
+                AtomicReplace(temp, canonical); if (_faults.CorruptAfterReplace) File.WriteAllText(canonical, "invalid");
+                var post = _catalog.ValidateCanonicalBytes(category, _catalog.ReadCanonicalBytes(category));
+                if (!post.IsValid || post.EntryCount != validation.EntryCount || post.Fingerprint != validation.Fingerprint) { RestoreBackupAtomic(category, backup); _drafts.RecordExternalAudit("automatic_rollback", migrationId, category, actor, "migration_post_write_validation_failed"); throw new GlobalContentRequestException("post_write_validation_failed_rolled_back"); }
+                var version = NextVersion(category); var result = new GlobalContentCommitResultDto(true, "migrated", migrationId, category, oldVersion, version, Short(current.Fingerprint), Short(post.Fingerprint), backup.Metadata.BackupId, generatedCount, preservedCount, 0, "restart_required");
+                _drafts.RecordExternalAudit("stable_id_migration_succeeded", migrationId, category, actor, "success"); lock (_migrationCommands) _migrationCommands[commandId] = result; return result;
+            }
+            catch (GlobalContentRequestException) { throw; }
+            catch { _drafts.RecordExternalAudit("stable_id_migration_failed", migrationId, category, actor, "failed"); throw new GlobalContentRequestException("migration_failed"); }
+            finally { TryDelete(temp); }
+        }
+    }
+
+    internal string MigrationMetadataRoot => Path.Combine(_backupRoot, ".migrations");
 
     private BackupState CreateBackup(string category, long version, string fingerprint, byte[] bytes, string actor, string reason, string draftId)
     {
@@ -132,7 +160,7 @@ public sealed class GlobalContentCommitService
         foreach (var stale in list.OrderByDescending(x => x.Metadata.CreatedAtUtc).Skip(MaximumBackupsPerCategory).ToList()) { TryDelete(stale.InternalFile); TryDelete(Path.ChangeExtension(stale.InternalFile, ".meta.json")); list.Remove(stale); }
         return state;
     }
-    private void RestoreBackupAtomic(string category, BackupState backup) { var canonical = _catalog.GetCanonicalPath(category); var temp = TempPath(canonical); try { WriteAndFlush(temp, File.ReadAllBytes(backup.InternalFile)); var validation = _catalog.ValidateCanonicalBytes(category, File.ReadAllBytes(temp)); if (!validation.IsValid) throw new GlobalContentRequestException("backup_invalid"); AtomicReplace(temp, canonical); } finally { TryDelete(temp); } }
+    private void RestoreBackupAtomic(string category, BackupState backup) { var canonical = _catalog.GetCanonicalPath(category); var temp = TempPath(canonical); try { WriteAndFlush(temp, File.ReadAllBytes(backup.InternalFile)); var validation = _catalog.ValidateCanonicalBytes(category, File.ReadAllBytes(temp), requireStableIds: false); if (!validation.IsValid) throw new GlobalContentRequestException("backup_invalid"); AtomicReplace(temp, canonical); } finally { TryDelete(temp); } }
     private static void AtomicReplace(string temp, string canonical) => File.Replace(temp, canonical, null, true);
     private static void WriteAndFlush(string path, byte[] bytes) { using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, FileOptions.WriteThrough); stream.Write(bytes); stream.Flush(flushToDisk: true); }
     private static string TempPath(string canonical) => Path.Combine(Path.GetDirectoryName(canonical)!, "." + Path.GetFileName(canonical) + "." + Guid.NewGuid().ToString("N") + ".tmp");

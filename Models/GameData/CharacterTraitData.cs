@@ -5,6 +5,9 @@ namespace Bunker.Models.GameData
 {
     public class CharacterTraitData
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("trait")]
         public string Trait { get; set; } = "";
         
