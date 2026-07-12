@@ -1367,6 +1367,9 @@
 .gm-snapshot-badge.restored { background: rgba(46,204,113,.18); }
 .gm-snapshot-preview { padding: .55rem; border-left: 3px solid rgba(52,152,219,.7); overflow-wrap: anywhere; }
 .gm-snapshot-preview:empty { display: none; }
+.gm-editor-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; margin-top: .65rem; }
+.gm-editor-grid textarea { grid-column: 1 / -1; resize: vertical; }
+@media (max-width: 620px) { .gm-editor-grid { grid-template-columns: 1fr; } .gm-editor-grid textarea { grid-column: auto; } }
 
 .gm-round-summary {
     display: grid;

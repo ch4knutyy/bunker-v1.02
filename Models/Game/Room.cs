@@ -142,6 +142,7 @@ namespace Bunker.Models
         public Dictionary<string, RoomSnapshotRestoreResult> SnapshotCommandResults { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         [System.Text.Json.Serialization.JsonIgnore]
         public object SnapshotSyncRoot { get; } = new();
+        public HashSet<string> ProcessedRoomEditorCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Відповіді гравців на перевірку готовності до голосування.

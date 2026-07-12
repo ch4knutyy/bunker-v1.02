@@ -472,6 +472,23 @@
                         <div id="gmSnapshotPreview" class="gm-snapshot-preview" aria-live="polite"></div>
                         <div id="gmSnapshotsList" class="gm-snapshots-list" aria-live="polite"></div>
                     </details>
+                    <details id="gmRoomLocalEditor" class="gm-threat-audit">
+                        <summary data-gm-i18n="gmRoomLocalEditor">Редактор поточної кімнати</summary>
+                        <p data-gm-i18n="gmRoomLocalWarning">Зміни діють лише в цій кімнаті.</p>
+                        <div class="gm-editor-grid">
+                            <select id="gmEditorCategory" class="input-field" onchange="renderRoomLocalEditor()"><option value="bunker">Bunker</option><option value="apocalypse">Apocalypse</option><option value="player">Player</option></select>
+                            <select id="gmEditorPlayer" class="input-field" onchange="renderRoomLocalEditor()"></select>
+                            <select id="gmEditorField" class="input-field" onchange="syncRoomLocalEditorField()"></select>
+                            <input id="gmEditorCurrent" class="input-field" readonly data-gm-i18n-placeholder="gmCurrentPublicValue" placeholder="Поточне публічне значення" />
+                            <textarea id="gmEditorValue" class="input-field" rows="3" data-gm-i18n-placeholder="gmNewPublicValue" placeholder="Нове значення"></textarea>
+                        </div>
+                        <div class="gm-diagnostics-actions">
+                            <button id="gmEditorPreviewButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmSnapshotPreview" onclick="previewRoomLocalEdit()">Preview</button>
+                            <button id="gmEditorApplyButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmEditorApply" onclick="applyRoomLocalEdit()" disabled>Застосувати</button>
+                            <button class="btn-gm-action gm-editor-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Undo</button>
+                        </div>
+                        <p id="gmEditorFeedback" class="gm-round-hint" aria-live="polite"></p>
+                    </details>
                     <details id="gmThreatAudit" class="gm-threat-audit" open>
                         <summary data-gm-i18n="gmAuditLog">GM audit log</summary>
                         <div class="gm-diagnostics-toolbar">
