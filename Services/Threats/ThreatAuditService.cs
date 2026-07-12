@@ -89,6 +89,8 @@ public sealed class ThreatAuditService(TimeProvider timeProvider)
         ThreatAuditEventType.AttemptStarted => "attempt_started",
         ThreatAuditEventType.AttemptReset => "attempt_reset",
         ThreatAuditEventType.Aborted => "aborted",
+        ThreatAuditEventType.ForcedSuccess => "forced_success",
+        ThreatAuditEventType.ForcedFailure => "forced_failure",
         ThreatAuditEventType.CompletedSuccess => "completed_success",
         ThreatAuditEventType.CompletedFailure => "completed_failure",
         ThreatAuditEventType.EffectsApplied => "effects_applied",

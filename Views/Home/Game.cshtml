@@ -235,6 +235,8 @@
                         <button id="gmThreatResync" class="btn-gm-action" data-gm-i18n="gmThreatResync" onclick="gmResyncThreatRoom()">Оновити стан загрози</button>
                         <button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" onclick="gmRestartThreat()">Перезапустити спробу</button>
                         <button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" onclick="gmCancelThreat()">Скасувати загрозу</button>
+                        <button id="gmThreatForceSuccess" class="btn-gm-action gm-force-success" data-gm-i18n="gmThreatForceSuccess" onclick="requestGMThreatForcePreview('success')">Примусовий успіх</button>
+                        <button id="gmThreatForceFailure" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatForceFailure" onclick="requestGMThreatForcePreview('failure')">Примусовий провал</button>
                     </div>
                     <details id="gmThreatAudit" class="gm-threat-audit">
                         <summary data-gm-i18n="gmThreatHistory">Історія загроз</summary>
@@ -578,6 +580,19 @@
                     <p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="gmThreatForceModal" class="modal gm-threat-force-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="gmThreatForceTitle">
+    <div class="modal-content">
+        <h3 id="gmThreatForceTitle" data-gm-i18n="gmThreatForcePreviewTitle">Підтвердження примусового завершення</h3>
+        <div id="gmThreatForcePreviewContent"></div>
+        <p id="gmThreatForceError" class="gm-threat-force-error" aria-live="polite"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" data-gm-i18n="cancel" onclick="closeGMThreatForceModal()">Скасувати</button>
+            <button type="button" id="gmThreatForceRefresh" class="btn-secondary" data-gm-i18n="gmThreatForceRefresh" onclick="refreshGMThreatForcePreview()" style="display: none;">Оновити preview</button>
+            <button type="button" id="gmThreatForceConfirm" class="btn-primary" data-gm-i18n="confirm" onclick="confirmGMThreatForce()">Підтвердити</button>
         </div>
     </div>
 </div>

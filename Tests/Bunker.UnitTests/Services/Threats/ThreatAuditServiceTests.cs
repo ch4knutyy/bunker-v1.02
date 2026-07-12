@@ -73,6 +73,23 @@ public class ThreatAuditServiceTests
         Assert.Equal(2, room.ThreatAuditLog.Count(entry => entry.EventType == ThreatAuditEventType.AttemptStarted));
     }
 
+    [Theory]
+    [InlineData(ThreatAuditEventType.ForcedSuccess, "resolved_safely")]
+    [InlineData(ThreatAuditEventType.ForcedFailure, "failed")]
+    public void ForcedOutcomeAuditIsIdempotentAndKeepsCanonicalOutcome(ThreatAuditEventType eventType, string outcome)
+    {
+        var service = new ThreatAuditService(new FakeTimeProvider(Start));
+        var room = RoomWithThreat();
+        var metadata = new Dictionary<string, string> { ["outcome"] = outcome };
+
+        Assert.True(service.Append(room, eventType, "gm-1", "force-command", metadata));
+        Assert.False(service.Append(room, eventType, "gm-1", "force-command", metadata));
+
+        var entry = Assert.Single(room.ThreatAuditLog);
+        Assert.Equal(outcome, entry.Metadata["outcome"]);
+        Assert.Equal("gm-1", entry.ActorPlayerId);
+    }
+
     [Fact]
     public void AbortDoesNotInventEffectsAppliedEvent()
     {

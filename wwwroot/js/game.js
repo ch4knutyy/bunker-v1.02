@@ -41,6 +41,9 @@ connection.start()
     let selectedPlayerForGM = null;
     let gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
     let gmThreatCommandPending = false;
+    let gmThreatForcePending = false;
+    let gmThreatForcePreview = null;
+    let gmThreatForceRequestedOutcome = '';
     let gmPlayerCommandPending = false;
     let bunkerCapacityPending = false;
     let gmRoundCommandPending = false;
@@ -173,6 +176,8 @@ connection.start()
         ,gmThreatEmergency: "Аварійне керування", gmThreatResync: "Оновити стан загрози", gmThreatReset: "Перезапустити спробу", gmThreatAbort: "Скасувати загрозу"
         ,gmThreatHistory: "Історія загроз", gmThreatHistoryEmpty: "Подій загроз ще немає"
         ,gmThreatEventRevealed: "Загрозу відкрито", gmThreatEventAttemptStarted: "Спробу розпочато", gmThreatEventAttemptReset: "Спробу перезапущено", gmThreatEventAborted: "Загрозу скасовано", gmThreatEventCompletedSuccess: "Загрозу завершено успішно", gmThreatEventCompletedFailure: "Загрозу завершено невдало", gmThreatEventEffectsApplied: "Наслідки застосовано", gmThreatRound: "Раунд"
+        ,gmThreatForceSuccess: "Примусовий успіх", gmThreatForceFailure: "Примусовий провал", gmThreatForcePreviewTitle: "Підтвердження примусового завершення", gmThreatForceRefresh: "Оновити preview", gmThreatForceOutcome: "Результат", gmThreatForceEffects: "Наслідки", gmThreatForceScope: "Обсяг", gmThreatForceAffected: "Потенційно зачеплені гравці", gmThreatForceWillApply: "будуть застосовані", gmThreatForceWillNotApply: "не застосовуватимуться", gmThreatForceStale: "Стан загрози змінився. Оновіть preview."
+        ,gmThreatEventForcedSuccess: "GM примусово встановив успіх", gmThreatEventForcedFailure: "GM примусово встановив провал"
         ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
         ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
@@ -261,6 +266,8 @@ connection.start()
         ,gmThreatEmergency: "Emergency controls", gmThreatResync: "Refresh threat state", gmThreatReset: "Restart attempt", gmThreatAbort: "Abort threat"
         ,gmThreatHistory: "Threat history", gmThreatHistoryEmpty: "No threat events yet"
         ,gmThreatEventRevealed: "Threat revealed", gmThreatEventAttemptStarted: "Attempt started", gmThreatEventAttemptReset: "Attempt restarted", gmThreatEventAborted: "Threat aborted", gmThreatEventCompletedSuccess: "Threat completed successfully", gmThreatEventCompletedFailure: "Threat completed unsuccessfully", gmThreatEventEffectsApplied: "Effects applied", gmThreatRound: "Round"
+        ,gmThreatForceSuccess: "Force success", gmThreatForceFailure: "Force failure", gmThreatForcePreviewTitle: "Confirm forced completion", gmThreatForceRefresh: "Refresh preview", gmThreatForceOutcome: "Outcome", gmThreatForceEffects: "Effects", gmThreatForceScope: "Scope", gmThreatForceAffected: "Potentially affected players", gmThreatForceWillApply: "will be applied", gmThreatForceWillNotApply: "will not be applied", gmThreatForceStale: "The threat state changed. Refresh the preview."
+        ,gmThreatEventForcedSuccess: "GM forced success", gmThreatEventForcedFailure: "GM forced failure"
         ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
         ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
@@ -349,6 +356,8 @@ connection.start()
         ,gmThreatEmergency: "Аварийное управление", gmThreatResync: "Обновить состояние угрозы", gmThreatReset: "Перезапустить попытку", gmThreatAbort: "Отменить угрозу"
         ,gmThreatHistory: "История угроз", gmThreatHistoryEmpty: "Событий угроз пока нет"
         ,gmThreatEventRevealed: "Угроза раскрыта", gmThreatEventAttemptStarted: "Попытка начата", gmThreatEventAttemptReset: "Попытка перезапущена", gmThreatEventAborted: "Угроза отменена", gmThreatEventCompletedSuccess: "Угроза завершена успешно", gmThreatEventCompletedFailure: "Угроза завершена неудачно", gmThreatEventEffectsApplied: "Последствия применены", gmThreatRound: "Раунд"
+        ,gmThreatForceSuccess: "Принудительный успех", gmThreatForceFailure: "Принудительный провал", gmThreatForcePreviewTitle: "Подтверждение принудительного завершения", gmThreatForceRefresh: "Обновить preview", gmThreatForceOutcome: "Результат", gmThreatForceEffects: "Последствия", gmThreatForceScope: "Объём", gmThreatForceAffected: "Потенциально затронутые игроки", gmThreatForceWillApply: "будут применены", gmThreatForceWillNotApply: "не будут применяться", gmThreatForceStale: "Состояние угрозы изменилось. Обновите preview."
+        ,gmThreatEventForcedSuccess: "GM принудительно установил успех", gmThreatEventForcedFailure: "GM принудительно установил провал"
         ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
         ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
@@ -3291,6 +3300,11 @@ function registerSignalREvents() {
             gmLastCommandError = localizeServerMessage(message);
             renderGMPanelState();
         }
+        if (gmThreatForcePending) {
+            setGMThreatForcePending(false);
+            const forceError = document.getElementById('gmThreatForceError');
+            if (forceError) forceError.textContent = localizeServerMessage(message);
+        }
         if (gmPlayerCommandPending) {
             gmPlayerCommandPending = false;
             document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
@@ -3678,8 +3692,34 @@ function registerSignalREvents() {
             auditLog: data.auditLog || data.AuditLog || [],
             canBrowseFutureThreatCatalog: data.canBrowseFutureThreatCatalog ?? data.CanBrowseFutureThreatCatalog ?? false
         };
+        if (!(gmThreatControlData.currentThreat?.canForceOutcome ?? gmThreatControlData.currentThreat?.CanForceOutcome ?? false)) {
+            setGMThreatForcePending(false);
+            closeGMThreatForceModal();
+        }
         renderGMThreatControl();
         markGMServerUpdate();
+    });
+
+    connection.off("GMThreatForcePreview");
+    connection.on("GMThreatForcePreview", function (data) {
+        gmThreatForcePreview = data;
+        gmThreatForceRequestedOutcome = data.requestedOutcome || data.RequestedOutcome || '';
+        setGMThreatForcePending(false);
+        renderGMThreatForcePreview();
+        const modal = document.getElementById('gmThreatForceModal');
+        if (modal) modal.style.display = 'flex';
+    });
+
+    connection.off("GMThreatForceRejected");
+    connection.on("GMThreatForceRejected", function (data) {
+        setGMThreatForcePending(false);
+        gmThreatForcePreview = null;
+        const error = document.getElementById('gmThreatForceError');
+        if (error) error.textContent = t('gmThreatForceStale');
+        const refresh = document.getElementById('gmThreatForceRefresh');
+        if (refresh) refresh.style.display = '';
+        const confirmButton = document.getElementById('gmThreatForceConfirm');
+        if (confirmButton) confirmButton.disabled = true;
     });
 
     function mergeThreatPlayerSnapshots(data) {
@@ -5820,13 +5860,18 @@ function removeBunkerSupplies(months) {
         }
         const currentThreat = gmThreatControlData.currentThreat;
         const canRecover = currentThreat?.canRecoverAttempt ?? currentThreat?.CanRecoverAttempt ?? false;
+        const canForce = currentThreat?.canForceOutcome ?? currentThreat?.CanForceOutcome ?? false;
         const hasThreat = !!currentThreat;
         const resync = document.getElementById('gmThreatResync');
         const reset = document.getElementById('gmThreatReset');
         const abort = document.getElementById('gmThreatAbort');
+        const forceSuccess = document.getElementById('gmThreatForceSuccess');
+        const forceFailure = document.getElementById('gmThreatForceFailure');
         if (resync) resync.style.display = hasThreat ? '' : 'none';
         if (reset) reset.style.display = canRecover ? '' : 'none';
         if (abort) abort.style.display = canRecover ? '' : 'none';
+        if (forceSuccess) forceSuccess.style.display = canForce ? '' : 'none';
+        if (forceFailure) forceFailure.style.display = canForce ? '' : 'none';
         renderGMThreatAudit();
     }
 
@@ -5841,6 +5886,7 @@ function removeBunkerSupplies(months) {
         const eventKeys = {
             revealed: 'gmThreatEventRevealed', attempt_started: 'gmThreatEventAttemptStarted',
             attempt_reset: 'gmThreatEventAttemptReset', aborted: 'gmThreatEventAborted',
+            forced_success: 'gmThreatEventForcedSuccess', forced_failure: 'gmThreatEventForcedFailure',
             completed_success: 'gmThreatEventCompletedSuccess', completed_failure: 'gmThreatEventCompletedFailure',
             effects_applied: 'gmThreatEventEffectsApplied'
         };
@@ -5912,6 +5958,81 @@ function removeBunkerSupplies(months) {
     }
     function gmResyncThreatRoom() {
         invokeGMThreatEmergency('GMResyncThreatRoom');
+    }
+
+    function setGMThreatForcePending(pending) {
+        gmThreatForcePending = pending;
+        document.querySelectorAll('#gmThreatEmergencyBlock button, #gmThreatForceModal button').forEach(button => {
+            button.disabled = pending;
+        });
+        if (!pending) {
+            const confirmButton = document.getElementById('gmThreatForceConfirm');
+            if (confirmButton) confirmButton.disabled = !gmThreatForcePreview;
+        }
+    }
+
+    function requestGMThreatForcePreview(outcome) {
+        if (gmThreatForcePending || !['success', 'failure'].includes(outcome)) return;
+        gmThreatForceRequestedOutcome = outcome;
+        gmThreatForcePreview = null;
+        const error = document.getElementById('gmThreatForceError');
+        if (error) error.textContent = '';
+        const refresh = document.getElementById('gmThreatForceRefresh');
+        if (refresh) refresh.style.display = 'none';
+        setGMThreatForcePending(true);
+        connection.invoke('GMPreviewForceThreat', outcome, getCurrentLanguage()).catch(err => {
+            if (error) error.textContent = err?.message || t('unavailableNow');
+            setGMThreatForcePending(false);
+        });
+    }
+
+    function refreshGMThreatForcePreview() {
+        if (gmThreatForceRequestedOutcome) requestGMThreatForcePreview(gmThreatForceRequestedOutcome);
+    }
+
+    function renderGMThreatForcePreview() {
+        const preview = gmThreatForcePreview;
+        const content = document.getElementById('gmThreatForcePreviewContent');
+        if (!content || !preview) return;
+        const value = key => preview[key] ?? preview[key[0].toUpperCase() + key.slice(1)];
+        const outcome = value('requestedOutcome');
+        const effects = !!value('effectsWillBeApplied');
+        content.innerHTML = `<div class="gm-threat-force-preview">
+            <strong>${escapeHtml(value('threatName') || value('threatId') || '')}</strong>
+            <dl>
+                <div><dt>${escapeHtml(t('gmThreatForceOutcome'))}</dt><dd>${escapeHtml(t(outcome === 'success' ? 'gmThreatForceSuccess' : 'gmThreatForceFailure'))}</dd></div>
+                <div><dt>${escapeHtml(t('gmThreatForceEffects'))}</dt><dd>${escapeHtml(t(effects ? 'gmThreatForceWillApply' : 'gmThreatForceWillNotApply'))}</dd></div>
+                <div><dt>${escapeHtml(t('gmThreatForceScope'))}</dt><dd>${escapeHtml(value('consequenceScope') || '')}</dd></div>
+                <div><dt>${escapeHtml(t('gmThreatForceAffected'))}</dt><dd>${escapeHtml(value('potentiallyAffectedPlayers') ?? 0)}</dd></div>
+            </dl>
+            <p>${escapeHtml(value('description') || '')}</p>
+            <p class="gm-threat-force-warning">${escapeHtml(value('irreversibleWarning') || '')}</p>
+        </div>`;
+        const error = document.getElementById('gmThreatForceError');
+        if (error) error.textContent = '';
+        const refresh = document.getElementById('gmThreatForceRefresh');
+        if (refresh) refresh.style.display = 'none';
+        setGMThreatForcePending(false);
+    }
+
+    function confirmGMThreatForce() {
+        if (gmThreatForcePending || !gmThreatForcePreview) return;
+        const fingerprint = gmThreatForcePreview.fingerprint || gmThreatForcePreview.Fingerprint;
+        if (!fingerprint) return;
+        setGMThreatForcePending(true);
+        connection.invoke('GMConfirmForceThreat', gmThreatForceRequestedOutcome, fingerprint, gmThreatCommandId(), getCurrentLanguage())
+            .catch(err => {
+                const error = document.getElementById('gmThreatForceError');
+                if (error) error.textContent = err?.message || t('unavailableNow');
+                setGMThreatForcePending(false);
+            });
+    }
+
+    function closeGMThreatForceModal() {
+        if (gmThreatForcePending) return;
+        const modal = document.getElementById('gmThreatForceModal');
+        if (modal) modal.style.display = 'none';
+        gmThreatForcePreview = null;
     }
 
     function invokeGMThreatEmergency(method, confirmationMessage) {

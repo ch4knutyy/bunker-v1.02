@@ -6,6 +6,8 @@ public enum ThreatAuditEventType
     AttemptStarted,
     AttemptReset,
     Aborted,
+    ForcedSuccess,
+    ForcedFailure,
     CompletedSuccess,
     CompletedFailure,
     EffectsApplied
