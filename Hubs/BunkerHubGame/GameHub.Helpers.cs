@@ -66,6 +66,7 @@ namespace Bunker.Hubs
             var currentDiceRoll = room.RoundDiceRolls.TryGetValue(room.CurrentRound, out var diceRoll)
                 ? diceRoll
                 : null;
+            var votingAvailability = GetVotingStartAvailability(room);
 
             return new
             {
@@ -79,6 +80,8 @@ namespace Bunker.Hubs
                 activePlayerCount = activePlayers.Count,
                 revealedCount = revealedPlayers.Count,
                 allPlayersRevealed,
+                canStartVoting = votingAvailability.Allowed,
+                votingStartBlockedCode = votingAvailability.Allowed ? null : votingAvailability.Code,
                 revealedPlayers,
                 threatRevealed = room.IsThreatRevealed,
                 threatRevealedAtRound = room.ThreatRevealedAtRound,
@@ -167,6 +170,14 @@ namespace Bunker.Hubs
                 _random.Next,
                 safeFallback);
             return CloneThreatData(selected);
+        }
+
+        private RoundVotingAdminService.VotingStartAvailability GetVotingStartAvailability(Room room)
+        {
+            var threatState = EnsureRadiationThreatState(room);
+            var hasUnresolvedBlockingThreat = IsRadiationThreatActive(room, threatState) &&
+                !threatState.Resolution.EffectsApplied;
+            return RoundVotingAdminService.CanStartVoting(room, hasUnresolvedBlockingThreat);
         }
 
         private static Bunker.Models.GameData.ThreatData CloneThreatData(Bunker.Models.GameData.ThreatData source)

@@ -5,6 +5,26 @@ namespace Bunker.Services;
 
 public static class RoundVotingAdminService
 {
+    public sealed record VotingStartAvailability(bool Allowed, string Code, string Message);
+
+    public static VotingStartAvailability CanStartVoting(Room room, bool hasUnresolvedBlockingThreat = false)
+    {
+        if (room.IsPaused)
+            return new(false, "game_paused", "Голосування недоступне, поки гра на паузі");
+        if (room.State != RoomState.Playing)
+            return new(false, "room_not_playing", "Голосування доступне тільки під час гри");
+        if (room.CurrentRound < 3)
+            return new(false, "round_not_completed", "Голосування доступне тільки після завершення 3 раунду");
+        if (hasUnresolvedBlockingThreat)
+            return new(false, "threat_not_resolved", "Спершу завершіть інтерактивну загрозу");
+        if (room.CurrentPhase is not (GamePhase.ExtraInventory or GamePhase.PreVotingReadyCheck))
+            return new(false, "invalid_phase", "Спершу завершіть поточний раунд");
+        if (room.CurrentVoting?.State is VotingState.Active or VotingState.Completed)
+            return new(false, "voting_already_started", "Голосування вже розпочато");
+
+        return new(true, "available", "Голосування доступне");
+    }
+
     public static void SetPaused(Room room, bool paused, string? reason, string? playerId, DateTimeOffset now)
     {
         room.IsPaused = paused;

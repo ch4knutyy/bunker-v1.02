@@ -460,6 +460,8 @@ connection.start()
             activePlayerCount: source.activePlayerCount ?? source.ActivePlayerCount ?? 0,
             revealedCount: source.revealedCount ?? source.RevealedCount ?? 0,
             allPlayersRevealed: source.allPlayersRevealed ?? source.AllPlayersRevealed ?? false,
+            canStartVoting: source.canStartVoting ?? source.CanStartVoting ?? false,
+            votingStartBlockedCode: source.votingStartBlockedCode || source.VotingStartBlockedCode || null,
             threatRevealed,
             threatRevealedAtRound: source.threatRevealedAtRound ?? source.ThreatRevealedAtRound ?? null,
             threat: threatRevealed ? (source.threat || source.Threat || null) : null,
@@ -792,11 +794,7 @@ connection.start()
     }
 
     function canStartVotingNow() {
-        return isHost &&
-            currentRoom?.state === "Playing" &&
-            getCurrentRoundNumber() >= 3 &&
-            getCurrentPhase() === "PreVotingReadyCheck" &&
-            !(currentVoting && ["Active", "Completed"].includes(currentVoting.state || currentVoting.State));
+        return isHost && currentRoundState?.canStartVoting === true;
     }
 
     function getRoomStateLabel() {
@@ -882,7 +880,8 @@ connection.start()
 
         const gmStartVotingBtn = document.getElementById('gmStartVotingBtn');
         if (gmStartVotingBtn) {
-            gmStartVotingBtn.style.display = canStartVotingNow() ? 'inline-flex' : 'none';
+            gmStartVotingBtn.style.display = isHost && shouldShow ? 'inline-flex' : 'none';
+            gmStartVotingBtn.disabled = !canStartVotingNow();
         }
 
         const hint = document.getElementById('gmVotingLockedHint');
@@ -893,9 +892,7 @@ connection.start()
                 hint.textContent = 'Голосування відкриється після завершення 3 раунду.';
             } else if (phase === "RoundReveal") {
                 hint.textContent = 'Завершіть 3 раунд після reveal усіх активних гравців.';
-            } else if (phase === "ExtraInventory") {
-                hint.textContent = 'Загрозу відкрито, інвентар видано. Запитайте, чи всі готові.';
-            } else if (phase === "PreVotingReadyCheck") {
+            } else if (canStartVotingNow()) {
                 hint.textContent = 'Можна починати голосування.';
             } else if (phase === "Voting" || phase === "VotingResults") {
                 hint.textContent = getPhaseLabel(phase);
