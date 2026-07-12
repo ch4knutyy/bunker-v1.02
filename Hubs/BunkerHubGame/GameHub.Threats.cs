@@ -581,13 +581,13 @@ namespace Bunker.Hubs
                 AddThreatParticipant(threatState, leaderId);
                 EnsureThreatScalingSnapshot(room, threatState, leaderId);
                 publicState = miniGame.Start(room, threatState, leaderId, NormalizeThreatLanguage(language));
-                if (!string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                if (!IsRadiationMiniGameTerminalStatus(publicState.Status))
                 {
                     threatState.ThreatStatus = "mini_game_active";
                     _threatAudit.Append(room, ThreatAuditEventType.AttemptStarted, GetThreatActorId(room), deduplicateTransition: true);
                 }
             }
-            if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            if (IsRadiationMiniGameTerminalStatus(publicState.Status))
             {
                 await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
                 return;
@@ -620,8 +620,7 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (threatState.Resolution.EffectsApplied ||
-                threatState.MiniGame.Status is "resolved_safely" or "resolved_with_casualty" or "failed")
+            if (threatState.Resolution.EffectsApplied || IsRadiationMiniGameTerminalStatus(threatState.MiniGame.Status))
             {
                 await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
                 return;
@@ -640,7 +639,7 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", result.Error);
                 if (result.PublicState != null)
                 {
-                    if (string.Equals(result.PublicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                    if (IsRadiationMiniGameTerminalStatus(result.PublicState.Status))
                     {
                         await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
                         return;
@@ -652,7 +651,7 @@ namespace Bunker.Hubs
             }
 
             var publicState = result.PublicState ?? miniGame.GetPublicState(threatState, NormalizeThreatLanguage(language));
-            if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            if (IsRadiationMiniGameTerminalStatus(publicState.Status))
             {
                 await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
                 await NotifyReturnedThreatItems(room, context.RoomId, threatState);
@@ -694,7 +693,7 @@ namespace Bunker.Hubs
 
             if (result.PublicState != null)
             {
-                if (string.Equals(result.PublicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                if (IsRadiationMiniGameTerminalStatus(result.PublicState.Status))
                 {
                     await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
                     return;
@@ -720,7 +719,7 @@ namespace Bunker.Hubs
             }
 
             var publicState = miniGame.GetPublicState(threatState, NormalizeThreatLanguage(language));
-            if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase) ||
+            if (IsRadiationMiniGameTerminalStatus(publicState.Status) ||
                 threatState.Resolution.EffectsApplied)
             {
                 await FinalizeRadiationOperationAsync(
@@ -774,10 +773,6 @@ namespace Bunker.Hubs
                             ? "resolved_with_casualty"
                             : "failed";
 
-                threatState.MiniGame.Outcome = outcome;
-                threatState.MiniGame.Status = outcome;
-                threatState.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
-                threatState.ThreatStatus = outcome;
                 threatState.Resolution.SelectedApproachId = "contain_radiation";
                 threatState.Resolution.CompletedAtRound = room.CurrentRound;
                 threatState.Resolution.WasSuccessful = outcome != "failed";
@@ -802,6 +797,10 @@ namespace Bunker.Hubs
                 ConsumeAcceptedThreatItems(room, threatState, threatState.Resolution.WasSuccessful);
                 GrantThreatVoteImmunityIfNeeded(room, threatState);
                 threatState.Resolution.EffectsApplied = true;
+                threatState.MiniGame.Outcome = outcome;
+                threatState.MiniGame.Status = outcome;
+                threatState.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
+                threatState.ThreatStatus = outcome;
                 _threatAudit.Append(
                     room,
                     outcome == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
@@ -1216,6 +1215,9 @@ namespace Bunker.Hubs
 
         private static bool IsTerminalThreatStatus(string? status) => status is
             "aborted" or "resolved_safely" or "resolved_with_casualty" or "failed" or "completed" or "success" or "failure";
+
+        private static bool IsRadiationMiniGameTerminalStatus(string? status) => status?.Trim().ToLowerInvariant() is
+            "completed" or "resolved_safely" or "resolved_with_casualty" or "failed";
 
         private static bool IsPlanChoiceMechanics(JsonElement? mechanics) =>
             mechanics is { ValueKind: JsonValueKind.Object } value &&

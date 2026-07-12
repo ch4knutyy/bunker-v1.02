@@ -145,61 +145,63 @@
 
                 <div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="round" style="display: none;">
                     <h4 class="gm-section-title">Керування раундом</h4>
-                    <div class="gm-round-summary">
-                        <span id="gmCurrentRound">Раунд 1</span>
-                        <strong id="gmCurrentPhase">Розкриття характеристик</strong>
-                        <small id="gmRoundProgress">0/0 відкрили</small>
-                        <small id="gmDiceResult" class="gm-dice-result" style="display: none;"></small>
-                        <span id="gmPauseBadge" class="gm-status-badge">Активна</span>
-                    </div>
-                    <div class="gm-round-admin-card">
-                        <label class="gm-label" data-gm-i18n="gmPauseReason">Причина паузи</label>
+                    <section class="gm-round-control-block gm-round-state-block" aria-labelledby="gmRoundStateHeading">
+                        <h5 id="gmRoundStateHeading" data-gm-i18n="gmRoundCurrentState">Поточний стан</h5>
+                        <div class="gm-round-summary">
+                            <span id="gmCurrentRound">Раунд 1</span>
+                            <strong id="gmCurrentPhase">Розкриття характеристик</strong>
+                            <small id="gmRoundProgress">0/0 відкрили</small>
+                            <small id="gmDiceResult" class="gm-dice-result" style="display: none;"></small>
+                            <span id="gmPauseBadge" class="gm-status-badge">Гра триває</span>
+                            <small id="gmPauseReasonSummary" class="gm-pause-reason-summary" style="display: none;"></small>
+                        </div>
+                    </section>
+                    <section class="gm-round-control-block" aria-labelledby="gmRoundMainHeading">
+                        <h5 id="gmRoundMainHeading" data-gm-i18n="gmRoundMainActions">Основні дії</h5>
+                        <label class="gm-label" for="gmPauseReason" data-gm-i18n="gmPauseReason">Причина паузи</label>
                         <input id="gmPauseReason" class="gm-select" maxlength="160" />
                         <div class="gm-round-actions">
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmPause" onclick="setGamePause(true)">Пауза</button>
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmResume" onclick="setGamePause(false)">Продовжити</button>
+                            <button class="btn-gm-action gm-round-command gm-action-secondary" data-gm-i18n="gmPause" onclick="setGamePause(true)">Пауза</button>
+                            <button class="btn-gm-action gm-round-command gm-action-secondary" data-gm-i18n="gmResume" onclick="setGamePause(false)">Продовжити</button>
                         </div>
-                    </div>
-                    <div class="gm-round-admin-card">
-                        <label class="gm-label" data-gm-i18n="gmManualRound">Номер раунду</label>
-                        <div class="gm-round-actions">
-                            <input id="gmManualRound" class="gm-select" type="number" min="1" max="99" step="1" />
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmSetRound" onclick="previewManualRoundChange()">Встановити</button>
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmResetReadiness" onclick="resetRoundReadiness()">Скинути готовність</button>
+                        <div class="gm-round-actions gm-round-main-actions">
+                            <button id="rollDiceBtn" class="btn-gm-action" onclick="rollRoundDice()" disabled>Кинути кубик</button>
+                            <button id="endRoundBtn" class="btn-gm-action gm-action-primary" onclick="endRound()" disabled>Раунд закінчено</button>
+                            <button id="startReadyCheckBtn" class="btn-gm-action" onclick="markAllPlayersReady()" disabled>Всі готові</button>
+                            <button id="gmStartVotingBtn" class="btn-gm-action" onclick="startVoting()" style="display: none;">Почати голосування</button>
                         </div>
-                    </div>
-                    <div class="gm-round-actions">
-                        <button id="rollDiceBtn" class="btn-gm-action" onclick="rollRoundDice()" disabled>Кинути кубик</button>
-                        <button id="endRoundBtn" class="btn-gm-action" onclick="endRound()" disabled>Раунд закінчено</button>
-                        <button id="startReadyCheckBtn" class="btn-gm-action" onclick="markAllPlayersReady()" disabled>Всі готові</button>
-                        <button id="gmStartVotingBtn" class="btn-gm-action" onclick="startVoting()" style="display: none;">Почати голосування</button>
-                    </div>
-                    <p id="gmVotingLockedHint" class="gm-round-hint">Голосування відкриється після завершення 3 раунду.</p>
-                    <div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
-                    <div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
-                    <div class="gm-voting-admin-card">
-                        <h5 data-gm-i18n="gmVotingRecovery">Відновлення голосування</h5>
-                        <div class="gm-round-actions">
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmClearVotes" onclick="clearCurrentVotes()">Очистити голоси</button>
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmVotingResync" onclick="resyncVotingAdmin()">Синхронізувати</button>
+                        <p id="gmVotingLockedHint" class="gm-round-hint">Голосування відкриється після завершення 3 раунду.</p>
+                        <div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
+                        <div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
+                    </section>
+                    <section class="gm-round-control-block" aria-labelledby="gmManualRoundHeading">
+                        <h5 id="gmManualRoundHeading" data-gm-i18n="gmManualRoundHeading">Ручне встановлення раунду</h5>
+                        <p class="gm-round-hint" data-gm-i18n="gmManualRoundHint">Перехід можливий лише вперед; частину стану поточного раунду буде очищено.</p>
+                        <div class="gm-round-form-row">
+                            <label class="gm-field" for="gmManualRound"><span data-gm-i18n="gmManualRound">Номер раунду</span>
+                                <input id="gmManualRound" class="gm-select" type="number" min="1" max="99" step="1" />
+                            </label>
+                            <button class="btn-gm-action gm-round-command gm-action-primary" data-gm-i18n="gmPreviewRound" onclick="previewManualRoundChange()">Preview / підтвердити</button>
                         </div>
-                        <select id="gmRemoveVoterSelect" class="gm-select"></select>
-                        <button class="btn-gm-action gm-round-command" data-gm-i18n="gmRemoveVote" onclick="removeSelectedVote()">Видалити голос voter</button>
-                        <div id="gmNonVotersList" class="gm-ready-status-list"></div>
-                    </div>
-                    <div class="gm-round-admin-card" id="gmGameTimerCard">
-                        <h5 data-gm-i18n="gmGameTimer">Серверний таймер</h5>
-                        <div class="gm-round-actions">
-                            <input id="gmTimerMinutes" class="gm-select" type="number" min="0" max="120" step="1" value="5" aria-label="Minutes" />
-                            <input id="gmTimerSeconds" class="gm-select" type="number" min="0" max="59" step="1" value="0" aria-label="Seconds" onkeydown="handleGameTimerKeydown(event)" />
-                            <select id="gmTimerPurpose" class="gm-select">
+                    </section>
+                    <section class="gm-round-control-block gm-round-danger-zone" aria-labelledby="gmReadinessHeading">
+                        <h5 id="gmReadinessHeading" data-gm-i18n="gmReadinessHeading">Скидання готовності</h5>
+                        <p class="gm-round-hint" data-gm-i18n="gmReadinessHint">Очищає поточні позначки готовності після підтвердження.</p>
+                        <button class="btn-gm-action btn-danger gm-round-command" data-gm-i18n="gmResetReadiness" onclick="resetRoundReadiness()">Скинути готовність</button>
+                    </section>
+                    <section class="gm-round-control-block gm-timer-block" id="gmGameTimerCard" aria-labelledby="gmTimerHeading">
+                        <h5 id="gmTimerHeading" data-gm-i18n="gmGameTimer">Серверний таймер</h5>
+                        <div class="gm-timer-fields">
+                            <label class="gm-field" for="gmTimerMinutes"><span data-gm-i18n="gmTimerMinutes">Хвилини</span><input id="gmTimerMinutes" class="gm-select" type="number" min="0" max="120" step="1" value="5" /></label>
+                            <label class="gm-field" for="gmTimerSeconds"><span data-gm-i18n="gmTimerSeconds">Секунди</span><input id="gmTimerSeconds" class="gm-select" type="number" min="0" max="59" step="1" value="0" onkeydown="handleGameTimerKeydown(event)" /></label>
+                            <label class="gm-field" for="gmTimerPurpose"><span data-gm-i18n="gmTimerPurpose">Призначення</span><select id="gmTimerPurpose" class="gm-select">
                                 <option value="Round">Round</option><option value="Voting">Voting</option>
                                 <option value="Threat">Threat</option><option value="Custom">Custom</option>
-                            </select>
-                            <input id="gmTimerLabel" class="gm-select" maxlength="80" data-gm-i18n-placeholder="gmTimerLabel" placeholder="Label" />
+                            </select></label>
+                            <label class="gm-field" for="gmTimerLabel"><span data-gm-i18n="gmTimerName">Назва</span><input id="gmTimerLabel" class="gm-select" maxlength="80" data-gm-i18n-placeholder="gmTimerLabel" placeholder="Label" /></label>
                         </div>
                         <div class="gm-round-actions">
-                            <button id="gmTimerStart" class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerStart" onclick="startGameTimer()">Старт</button>
+                            <button id="gmTimerStart" class="btn-gm-action gm-timer-command gm-action-primary" data-gm-i18n="gmTimerStart" onclick="startGameTimer()">Старт</button>
                             <button id="gmTimerPause" class="btn-gm-action gm-timer-command" data-gm-i18n="gmPause" onclick="invokeGameTimerCommand('PauseGameTimer')">Пауза</button>
                             <button id="gmTimerResume" class="btn-gm-action gm-timer-command" data-gm-i18n="gmResume" onclick="invokeGameTimerCommand('ResumeGameTimer')">Продовжити</button>
                             <button id="gmTimerRestart" class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerRestart" onclick="restartGameTimer()">Перезапустити</button>
@@ -209,6 +211,16 @@
                             <button id="gmTimerStop" class="btn-gm-action btn-danger gm-timer-command" data-gm-i18n="gmTimerStop" onclick="stopGameTimer()">Зупинити</button>
                         </div>
                         <p id="gmTimerFeedback" class="gm-round-hint" aria-live="polite"></p>
+                    </section>
+                    <div class="gm-voting-admin-card">
+                        <h5 data-gm-i18n="gmVotingRecovery">Відновлення голосування</h5>
+                        <div class="gm-round-actions">
+                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmClearVotes" onclick="clearCurrentVotes()">Очистити голоси</button>
+                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmVotingResync" onclick="resyncVotingAdmin()">Синхронізувати</button>
+                        </div>
+                        <select id="gmRemoveVoterSelect" class="gm-select"></select>
+                        <button class="btn-gm-action gm-round-command" data-gm-i18n="gmRemoveVote" onclick="removeSelectedVote()">Видалити голос voter</button>
+                        <div id="gmNonVotersList" class="gm-ready-status-list"></div>
                     </div>
                     <details class="gm-player-danger">
                         <summary data-gm-i18n="gmUnavailableRecovery">Недоступні recovery controls</summary>
