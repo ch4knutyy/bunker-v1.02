@@ -17,10 +17,11 @@ namespace Bunker.Hubs
         private readonly ThreatScalingService _threatScaling;
         private readonly ThreatMiniGameRegistry _threatMiniGames;
         private readonly GameTimerService _gameTimerService;
+        private readonly ThreatAuditService _threatAudit;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ILogger<GameHub> logger)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger)
         {
             _generator = generator;
             _roomService = roomService;
@@ -29,6 +30,7 @@ namespace Bunker.Hubs
             _threatScaling = threatScaling;
             _threatMiniGames = threatMiniGames;
             _gameTimerService = gameTimerService;
+            _threatAudit = threatAudit;
             _logger = logger;
         }
     }

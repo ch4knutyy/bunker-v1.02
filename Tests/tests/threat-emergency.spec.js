@@ -16,6 +16,9 @@ test('host can reset, abort and resync one canonical threat attempt', async ({ b
     await expect(room.host.locator('#gmThreatReset')).toBeVisible();
     await expect(room.host.locator('#gmThreatAbort')).toBeVisible();
     await expect(room.guest.locator('#gmThreatEmergencyBlock')).toBeHidden();
+    await room.host.locator('#gmThreatAudit summary').click();
+    await expect(room.host.locator('#gmThreatAuditList .gm-threat-audit-entry')).toHaveCount(1);
+    await expect(room.guest.locator('#gmThreatAudit')).toBeHidden();
 
     await room.host.locator('#gmThreatReset').dblclick();
     await expect(room.host.locator('#gmThreatCommandResult')).toContainText(/очищено|cleared|очищен/i, { timeout: 15000 });
@@ -26,8 +29,10 @@ test('host can reset, abort and resync one canonical threat attempt', async ({ b
     await expect(room.host.locator('#gmThreatAbort')).toBeHidden();
     await expect(room.host.locator('#gmThreatResync')).toBeVisible();
 
+    const auditCountBeforeResync = await room.host.locator('#gmThreatAuditList .gm-threat-audit-entry').count();
     await room.host.locator('#gmThreatResync').click();
     await expect(room.host.locator('#gmThreatCurrent')).toContainText(/скасовано|aborted|отменена/i);
+    await expect(room.host.locator('#gmThreatAuditList .gm-threat-audit-entry')).toHaveCount(auditCountBeforeResync);
   } finally {
     await room.close();
   }

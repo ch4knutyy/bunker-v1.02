@@ -1,5 +1,6 @@
 using Bunker.Models;
 using Bunker.Models.GameData;
+using Bunker.Services;
 using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 
@@ -63,7 +64,13 @@ public partial class GameHub
     {
         if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
-        if (!GMThreatStateMutator.Abort(room))
+        var aborted = false;
+        lock (room.ThreatSyncRoot)
+        {
+            aborted = GMThreatStateMutator.Abort(room);
+            if (aborted) _threatAudit.Append(room, ThreatAuditEventType.Aborted, GetThreatActorId(room), commandId);
+        }
+        if (!aborted)
         {
             await Clients.Caller.SendAsync("ReceiveError", "Скасувати можна лише активну незавершену загрозу");
             return;
@@ -75,7 +82,13 @@ public partial class GameHub
     {
         if (await GetThreatRecoveryRoom(commandId) is not { } room) return;
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
-        if (!GMThreatStateMutator.Restart(room))
+        var restarted = false;
+        lock (room.ThreatSyncRoot)
+        {
+            restarted = GMThreatStateMutator.Restart(room);
+            if (restarted) _threatAudit.Append(room, ThreatAuditEventType.AttemptReset, GetThreatActorId(room), commandId);
+        }
+        if (!restarted)
         {
             await Clients.Caller.SendAsync("ReceiveError", "Перезапустити можна лише активну незавершену загрозу");
             return;
@@ -133,10 +146,19 @@ public partial class GameHub
     private async Task ReplaceThreatForGM(Room room, ThreatData source, string commandId, string message)
     {
         if (!TryRememberThreatCommand(room, commandId)) { await SyncThreatRoom(room); return; }
-        GMThreatStateMutator.Replace(room, CloneThreatData(source), IsExplicitSpecialThreat(source) ? "collecting_contributions" : "revealed");
-        EnsureRadiationThreatState(room);
+        lock (room.ThreatSyncRoot)
+        {
+            GMThreatStateMutator.Replace(room, CloneThreatData(source), IsExplicitSpecialThreat(source) ? "collecting_contributions" : "revealed");
+            EnsureRadiationThreatState(room);
+            _threatAudit.Append(room, ThreatAuditEventType.Revealed, GetThreatActorId(room), commandId);
+        }
         await SyncThreatRoom(room, message);
     }
+
+    private string? GetThreatActorId(Room room) =>
+        _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player)
+            ? RoomService.GetPlayerKey(player)
+            : null;
 
     private bool TryRememberThreatCommand(Room room, string commandId)
     {
@@ -169,6 +191,7 @@ public partial class GameHub
             effectsApplied = room.ThreatState?.Resolution.EffectsApplied ?? false,
             canRecoverAttempt = GMThreatStateMutator.CanReset(room)
         },
+        auditLog = _threatAudit.GetRecent(room),
         threats = canBrowseFutureThreatCatalog ? _gameData.Threats.Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
             .Select(item => new { item.Id, item.Name, type = GetThreatControlType(item), available = !IsExplicitSpecialThreat(item) || IsAvailableSpecialThreat(item) })
             .OrderBy(item => item.Name).ToList() : []

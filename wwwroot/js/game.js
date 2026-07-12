@@ -39,7 +39,7 @@ connection.start()
     let roomPlayers = {}; // connectionId -> player info
     let gmPlayersData = {}; // Повні дані гравців для GM
     let selectedPlayerForGM = null;
-    let gmThreatControlData = { threats: [], currentThreat: null };
+    let gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
     let gmThreatCommandPending = false;
     let gmPlayerCommandPending = false;
     let bunkerCapacityPending = false;
@@ -171,6 +171,8 @@ connection.start()
         failed: "Операція провалена"
         ,aborted: "Загрозу скасовано ведучим"
         ,gmThreatEmergency: "Аварійне керування", gmThreatResync: "Оновити стан загрози", gmThreatReset: "Перезапустити спробу", gmThreatAbort: "Скасувати загрозу"
+        ,gmThreatHistory: "Історія загроз", gmThreatHistoryEmpty: "Подій загроз ще немає"
+        ,gmThreatEventRevealed: "Загрозу відкрито", gmThreatEventAttemptStarted: "Спробу розпочато", gmThreatEventAttemptReset: "Спробу перезапущено", gmThreatEventAborted: "Загрозу скасовано", gmThreatEventCompletedSuccess: "Загрозу завершено успішно", gmThreatEventCompletedFailure: "Загрозу завершено невдало", gmThreatEventEffectsApplied: "Наслідки застосовано", gmThreatRound: "Раунд"
         ,gmGameState: "Стан гри", gmRoundControl: "Керування раундом", gmThreatControl: "Керування загрозою", gmContent: "Контент", gmDiagnostics: "Діагностика"
         ,gmPlayerSecondaryActions: "Додаткові дії", gmResyncPlayer: "Синхронізувати гравця", gmInspectConnection: "Перевірити connection", gmTransferHost: "Передати host", gmHideCharacteristic: "Сховати розкриту характеристику", gmHide: "Сховати", gmDangerousActions: "Небезпечні дії", gmKickPlayer: "Виключити з кімнати"
         ,gmBunkerCapacityLabel: "Місткість бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Місткість збережено", gmCapacityInvalid: "Введіть ціле число від 1 до 99"
@@ -257,6 +259,8 @@ connection.start()
         failed: "Failed"
         ,aborted: "Threat aborted by host"
         ,gmThreatEmergency: "Emergency controls", gmThreatResync: "Refresh threat state", gmThreatReset: "Restart attempt", gmThreatAbort: "Abort threat"
+        ,gmThreatHistory: "Threat history", gmThreatHistoryEmpty: "No threat events yet"
+        ,gmThreatEventRevealed: "Threat revealed", gmThreatEventAttemptStarted: "Attempt started", gmThreatEventAttemptReset: "Attempt restarted", gmThreatEventAborted: "Threat aborted", gmThreatEventCompletedSuccess: "Threat completed successfully", gmThreatEventCompletedFailure: "Threat completed unsuccessfully", gmThreatEventEffectsApplied: "Effects applied", gmThreatRound: "Round"
         ,gmGameState: "Game state", gmRoundControl: "Round control", gmThreatControl: "Threat control", gmContent: "Content", gmDiagnostics: "Diagnostics"
         ,gmPlayerSecondaryActions: "Additional actions", gmResyncPlayer: "Resync player", gmInspectConnection: "Inspect connection", gmTransferHost: "Transfer host", gmHideCharacteristic: "Hide revealed characteristic", gmHide: "Hide", gmDangerousActions: "Dangerous actions", gmKickPlayer: "Kick from room"
         ,gmBunkerCapacityLabel: "Bunker capacity", gmCapacitySubmit: "OK", gmCapacitySaved: "Capacity saved", gmCapacityInvalid: "Enter an integer from 1 to 99"
@@ -343,6 +347,8 @@ connection.start()
         failed: "Провалено"
         ,aborted: "Угроза отменена ведущим"
         ,gmThreatEmergency: "Аварийное управление", gmThreatResync: "Обновить состояние угрозы", gmThreatReset: "Перезапустить попытку", gmThreatAbort: "Отменить угрозу"
+        ,gmThreatHistory: "История угроз", gmThreatHistoryEmpty: "Событий угроз пока нет"
+        ,gmThreatEventRevealed: "Угроза раскрыта", gmThreatEventAttemptStarted: "Попытка начата", gmThreatEventAttemptReset: "Попытка перезапущена", gmThreatEventAborted: "Угроза отменена", gmThreatEventCompletedSuccess: "Угроза завершена успешно", gmThreatEventCompletedFailure: "Угроза завершена неудачно", gmThreatEventEffectsApplied: "Последствия применены", gmThreatRound: "Раунд"
         ,gmGameState: "Состояние игры", gmRoundControl: "Управление раундом", gmThreatControl: "Управление угрозой", gmContent: "Контент", gmDiagnostics: "Диагностика"
         ,gmPlayerSecondaryActions: "Дополнительные действия", gmResyncPlayer: "Синхронизировать игрока", gmInspectConnection: "Проверить connection", gmTransferHost: "Передать host", gmHideCharacteristic: "Скрыть открытую характеристику", gmHide: "Скрыть", gmDangerousActions: "Опасные действия", gmKickPlayer: "Исключить из комнаты"
         ,gmBunkerCapacityLabel: "Вместимость бункера", gmCapacitySubmit: "ОК", gmCapacitySaved: "Вместимость сохранена", gmCapacityInvalid: "Введите целое число от 1 до 99"
@@ -3669,6 +3675,7 @@ function registerSignalREvents() {
         gmThreatControlData = {
             threats: data.threats || data.Threats || [],
             currentThreat: data.currentThreat || data.CurrentThreat || null,
+            auditLog: data.auditLog || data.AuditLog || [],
             canBrowseFutureThreatCatalog: data.canBrowseFutureThreatCatalog ?? data.CanBrowseFutureThreatCatalog ?? false
         };
         renderGMThreatControl();
@@ -5786,6 +5793,7 @@ function removeBunkerSupplies(months) {
             error.textContent = gmLastCommandError;
             error.style.display = gmLastCommandError ? 'block' : 'none';
         }
+        renderGMThreatAudit();
     }
 
     function renderGMThreatControl() {
@@ -5819,6 +5827,38 @@ function removeBunkerSupplies(months) {
         if (resync) resync.style.display = hasThreat ? '' : 'none';
         if (reset) reset.style.display = canRecover ? '' : 'none';
         if (abort) abort.style.display = canRecover ? '' : 'none';
+        renderGMThreatAudit();
+    }
+
+    function renderGMThreatAudit() {
+        const list = document.getElementById('gmThreatAuditList');
+        if (!list) return;
+        const events = Array.isArray(gmThreatControlData.auditLog) ? gmThreatControlData.auditLog.slice(0, 20) : [];
+        if (!events.length) {
+            list.innerHTML = `<p class="gm-threat-audit-empty">${escapeHtml(t('gmThreatHistoryEmpty'))}</p>`;
+            return;
+        }
+        const eventKeys = {
+            revealed: 'gmThreatEventRevealed', attempt_started: 'gmThreatEventAttemptStarted',
+            attempt_reset: 'gmThreatEventAttemptReset', aborted: 'gmThreatEventAborted',
+            completed_success: 'gmThreatEventCompletedSuccess', completed_failure: 'gmThreatEventCompletedFailure',
+            effects_applied: 'gmThreatEventEffectsApplied'
+        };
+        const locale = { uk: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }[getCurrentLanguage()] || 'uk-UA';
+        list.innerHTML = events.map(entry => {
+            const type = entry.eventType || entry.EventType || '';
+            const name = entry.threatName || entry.ThreatName || entry.threatId || entry.ThreatId || '';
+            const round = entry.round ?? entry.Round ?? 0;
+            const rawTime = entry.timestampUtc || entry.TimestampUtc;
+            const parsedTime = rawTime ? new Date(rawTime) : null;
+            const time = parsedTime && !Number.isNaN(parsedTime.getTime())
+                ? parsedTime.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                : '';
+            return `<div class="gm-threat-audit-entry">
+                <time>${escapeHtml(time)}</time>
+                <div><strong>${escapeHtml(t(eventKeys[type] || type))}</strong><span>${escapeHtml(name)} · ${escapeHtml(t('gmThreatRound'))} ${escapeHtml(round)}</span></div>
+            </div>`;
+        }).join('');
     }
 
     function filterGMThreatOptions() {

@@ -450,11 +450,17 @@ namespace Bunker.Hubs
             if (completedRound == 3)
             {
                 room.VotingReadyResponses.Clear();
-                room.CurrentThreat ??= DrawThreatForRound(room, completedRound);
-                room.IsThreatRevealed = true;
-                room.ThreatRevealedAtRound = completedRound;
-                EnsureRadiationThreatState(room);
-                room.CurrentPhase = GamePhase.Threat;
+                lock (room.ThreatSyncRoot)
+                {
+                    var newlyRevealed = room.CurrentThreat == null;
+                    room.CurrentThreat ??= DrawThreatForRound(room, completedRound);
+                    room.IsThreatRevealed = true;
+                    room.ThreatRevealedAtRound = completedRound;
+                    EnsureRadiationThreatState(room);
+                    room.CurrentPhase = GamePhase.Threat;
+                    if (newlyRevealed)
+                        _threatAudit.Append(room, ThreatAuditEventType.Revealed, deduplicateTransition: true);
+                }
 
                 var threatState = BuildRoundState(room);
                 await Clients.Group(roomId).SendAsync("ThreatRevealed", new
@@ -464,6 +470,8 @@ namespace Bunker.Hubs
                     roundState = threatState
                 });
                 await Clients.Group(roomId).SendAsync("RoundStateUpdated", threatState);
+                if (!string.IsNullOrWhiteSpace(room.HostConnectionId))
+                    await Clients.Client(room.HostConnectionId).SendAsync("GMThreatControlData", BuildGMThreatControlData(room));
 
                 var additionalInventory = GrantAdditionalInventoryAfterRound3(room);
                 room.CurrentPhase = GamePhase.ExtraInventory;

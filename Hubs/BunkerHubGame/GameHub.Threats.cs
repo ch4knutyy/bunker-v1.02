@@ -575,16 +575,24 @@ namespace Bunker.Hubs
                 return;
             }
 
-            AddThreatParticipant(threatState, leaderId);
-            EnsureThreatScalingSnapshot(room, threatState, leaderId);
-            var publicState = miniGame.Start(room, threatState, leaderId, NormalizeThreatLanguage(language));
+            ThreatMiniGamePublicState publicState;
+            lock (room.ThreatSyncRoot)
+            {
+                AddThreatParticipant(threatState, leaderId);
+                EnsureThreatScalingSnapshot(room, threatState, leaderId);
+                publicState = miniGame.Start(room, threatState, leaderId, NormalizeThreatLanguage(language));
+                if (!string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    threatState.ThreatStatus = "mini_game_active";
+                    _threatAudit.Append(room, ThreatAuditEventType.AttemptStarted, GetThreatActorId(room), deduplicateTransition: true);
+                }
+            }
             if (string.Equals(publicState.Status, "completed", StringComparison.OrdinalIgnoreCase))
             {
                 await FinalizeRadiationOperationAsync(room, context.RoomId, threatState, miniGame, NormalizeThreatLanguage(language));
                 return;
             }
 
-            threatState.ThreatStatus = "mini_game_active";
             await Clients.Group(context.RoomId).SendAsync("ThreatMiniGameStarted", publicState);
             await BroadcastThreatState(room, context.RoomId);
         }
@@ -741,8 +749,10 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (!threatState.Resolution.EffectsApplied)
+            lock (room.ThreatSyncRoot)
             {
+              if (!threatState.Resolution.EffectsApplied)
+              {
                 var resultStatus = threatState.MiniGame.ResultStatus;
                 var volunteerId = threatState.VolunteerSelection.SelectedPlayerId;
                 var volunteerProtected = !string.IsNullOrWhiteSpace(volunteerId) &&
@@ -782,14 +792,20 @@ namespace Bunker.Hubs
                 ConsumeAcceptedThreatItems(room, threatState, threatState.Resolution.WasSuccessful);
                 GrantThreatVoteImmunityIfNeeded(room, threatState);
                 threatState.Resolution.EffectsApplied = true;
-            }
+                _threatAudit.Append(
+                    room,
+                    outcome == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
+                    deduplicateTransition: true);
+                _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, deduplicateTransition: true);
+              }
 
-            if (threatState.Resolution.EffectsApplied &&
+              if (threatState.Resolution.EffectsApplied &&
                 threatState.ThreatStatus is "resolved_safely" or "resolved_with_casualty" or "failed")
-            {
+              {
                 threatState.MiniGame.Outcome = threatState.ThreatStatus;
                 threatState.MiniGame.Status = threatState.ThreatStatus;
                 threatState.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
+              }
             }
 
             var finalState = miniGame.GetPublicState(threatState, language);
@@ -1243,9 +1259,12 @@ namespace Bunker.Hubs
                 return;
             }
 
-            state.PlanChoice.IsLocked = true;
-            state.ThreatStatus = "resolving";
-            state.PlanChoice.RandomModifier ??= _random.Next(
+            lock (room.ThreatSyncRoot)
+            {
+              state.PlanChoice.IsLocked = true;
+              state.ThreatStatus = "resolving";
+              _threatAudit.Append(room, ThreatAuditEventType.AttemptStarted, GetThreatActorId(room), deduplicateTransition: true);
+              state.PlanChoice.RandomModifier ??= _random.Next(
                 GetJsonInt(room.CurrentThreat?.Mechanics, -8, "planChoice", "scoring", "randomModifier", "min"),
                 GetJsonInt(room.CurrentThreat?.Mechanics, 8, "planChoice", "scoring", "randomModifier", "max") + 1);
             var request = BuildPlanChoiceScoreRequest(room, state, plan);
@@ -1263,6 +1282,13 @@ namespace Bunker.Hubs
             state.Resolution.CompletedAtRound = room.CurrentRound;
             ApplyAirFilterPlanEffects(room, state, plan, result.Outcome);
             state.Resolution.EffectsApplied = true;
+            _threatAudit.Append(
+                room,
+                state.ThreatStatus == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
+                GetThreatActorId(room),
+                deduplicateTransition: true);
+              _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, GetThreatActorId(room), deduplicateTransition: true);
+            }
             await BroadcastThreatState(room, roomId);
         }
 
@@ -1688,6 +1714,11 @@ namespace Bunker.Hubs
                 });
             }
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            if (!string.IsNullOrWhiteSpace(room.HostConnectionId) &&
+                GmCapabilities.Allows(room.GmMode, GmCapability.ManagePublicGameState))
+            {
+                await Clients.Client(room.HostConnectionId).SendAsync("GMThreatControlData", BuildGMThreatControlData(room));
+            }
         }
 
         private static bool HasAny(IEnumerable<string>? values, IEnumerable<string> expected)

@@ -236,6 +236,10 @@
                         <button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" onclick="gmRestartThreat()">Перезапустити спробу</button>
                         <button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" onclick="gmCancelThreat()">Скасувати загрозу</button>
                     </div>
+                    <details id="gmThreatAudit" class="gm-threat-audit">
+                        <summary data-gm-i18n="gmThreatHistory">Історія загроз</summary>
+                        <div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
+                    </details>
                     <p id="gmThreatCommandResult" class="gm-round-hint"></p>
                 </div>
 
