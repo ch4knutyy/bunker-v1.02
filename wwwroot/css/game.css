@@ -1283,6 +1283,17 @@
 
 .gm-threat-current { margin-bottom: .65rem; padding: .65rem; border-radius: 8px; background: rgba(255,255,255,.05); }
 .gm-threat-danger-zone { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid rgba(231,76,60,.45); }
+.gm-force-success { background: rgba(39, 174, 96, .85); }
+.gm-threat-force-modal .modal-content { width: min(94vw, 620px); max-height: 90vh; overflow-y: auto; }
+.gm-threat-force-preview { display: grid; gap: .7rem; overflow-wrap: anywhere; }
+.gm-threat-force-preview > strong { font-size: 1.08rem; }
+.gm-threat-force-preview dl { display: grid; gap: .45rem; margin: 0; }
+.gm-threat-force-preview dl div { display: grid; grid-template-columns: minmax(8rem, .8fr) minmax(0, 1.2fr); gap: .6rem; padding: .45rem; border-radius: 7px; background: rgba(255,255,255,.045); }
+.gm-threat-force-preview dt { opacity: .76; }
+.gm-threat-force-preview dd { margin: 0; font-weight: 600; }
+.gm-threat-force-warning, .gm-threat-force-error { color: #f6c85f; }
+.gm-threat-force-error:empty { display: none; }
+@media (max-width: 520px) { .gm-threat-force-preview dl div { grid-template-columns: 1fr; } }
 .gm-threat-audit { margin-top: .8rem; border-top: 1px solid rgba(255,255,255,.12); padding-top: .7rem; }
 .gm-threat-audit summary { cursor: pointer; font-weight: 700; }
 .gm-threat-audit-list { display: grid; gap: .45rem; margin-top: .6rem; max-width: 100%; }

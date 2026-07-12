@@ -8,6 +8,90 @@ namespace Bunker.Hubs;
 
 public partial class GameHub
 {
+    public async Task GMPreviewForceThreat(string requestedOutcome, string? language = null)
+    {
+        if (GetForceThreatRoom() is not { } room)
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для примусового завершення загрози");
+            return;
+        }
+        if (!TryNormalizeForceOutcome(requestedOutcome, out var outcome))
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Некоректний примусовий результат загрози");
+            return;
+        }
+
+        GMThreatForcePreviewDto? preview;
+        lock (room.ThreatSyncRoot)
+        {
+            preview = GMThreatStateMutator.CanForceOutcome(room)
+                ? BuildForceThreatPreview(room, outcome, NormalizeThreatLanguage(language))
+                : null;
+        }
+        if (preview == null)
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Примусово завершити можна лише активну незавершену загрозу");
+            return;
+        }
+        await Clients.Caller.SendAsync("GMThreatForcePreview", preview);
+    }
+
+    public async Task GMConfirmForceThreat(string requestedOutcome, string previewFingerprint, string commandId, string? language = null)
+    {
+        if (GetForceThreatRoom() is not { } room)
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для примусового завершення загрози");
+            return;
+        }
+        if (!TryNormalizeForceOutcome(requestedOutcome, out var outcome) ||
+            string.IsNullOrWhiteSpace(previewFingerprint) || string.IsNullOrWhiteSpace(commandId))
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Некоректні дані підтвердження примусового завершення");
+            return;
+        }
+
+        var duplicate = false;
+        var stale = false;
+        var terminal = false;
+        var applied = false;
+        ThreatMiniGamePublicState? miniGamePublicState = null;
+        lock (room.ThreatSyncRoot)
+        {
+            lock (room.ProcessedGmThreatCommandIds)
+                duplicate = room.ProcessedGmThreatCommandIds.Contains(commandId);
+
+            if (!duplicate && !GMThreatStateMutator.CanForceOutcome(room))
+                terminal = true;
+            else if (!duplicate)
+            {
+                var currentPreview = BuildForceThreatPreview(room, outcome, NormalizeThreatLanguage(language));
+                stale = !string.Equals(currentPreview.Fingerprint, previewFingerprint, StringComparison.Ordinal);
+                if (!stale && TryRememberThreatCommand(room, commandId))
+                    applied = ForceFinalizeThreatLocked(room, outcome, GetThreatActorId(room), commandId, out miniGamePublicState);
+            }
+        }
+
+        if (duplicate)
+        {
+            await SyncThreatRoom(room);
+            return;
+        }
+        if (stale)
+        {
+            await Clients.Caller.SendAsync("GMThreatForceRejected", new { code = "stale_preview", message = "Стан загрози змінився. Створіть preview повторно." });
+            return;
+        }
+        if (terminal || !applied)
+        {
+            await Clients.Caller.SendAsync("ReceiveError", "Загроза вже завершена або має зафіксований результат");
+            return;
+        }
+
+        if (miniGamePublicState != null)
+            await Clients.Group(room.Id).SendAsync("ThreatMiniGameUpdated", miniGamePublicState);
+        await SyncThreatRoom(room, outcome == "success" ? "Загрозу примусово завершено успіхом" : "Загрозу примусово завершено провалом");
+    }
+
     public async Task GetGMThreatControlData()
     {
         if (!TryGetHostRoom(out var room)) return;
@@ -120,6 +204,96 @@ public partial class GameHub
         return room;
     }
 
+    private Room? GetForceThreatRoom()
+    {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+        return room != null &&
+            _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) &&
+            room.IsHost(player) &&
+            HasGmCapability(room, GmCapability.ManagePublicGameState)
+                ? room
+                : null;
+    }
+
+    private static bool TryNormalizeForceOutcome(string? value, out string outcome)
+    {
+        outcome = value?.Trim().ToLowerInvariant() ?? "";
+        return outcome is "success" or "failure";
+    }
+
+    private GMThreatForcePreviewDto BuildForceThreatPreview(Room room, string outcome, string language)
+    {
+        var threat = room.CurrentThreat!;
+        var state = room.ThreatState!;
+        var isFailure = outcome == "failure";
+        var effectsWillBeApplied = false;
+        var affectedPlayers = 0;
+
+        if (string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase))
+        {
+            effectsWillBeApplied = true;
+            if (isFailure)
+            {
+                var participantIds = GetThreatParticipantIds(state);
+                if (participantIds.Count == 0 && !string.IsNullOrWhiteSpace(state.VolunteerSelection.SelectedPlayerId))
+                    participantIds.Add(state.VolunteerSelection.SelectedPlayerId);
+                affectedPlayers = participantIds.Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Count(id => !state.OperationBonuses.ProtectedPlayerIds.Contains(id, StringComparer.OrdinalIgnoreCase));
+            }
+        }
+        else if (string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
+            TryGetForcedPlanElement(threat.Mechanics, state.PlanChoice.SelectedPlanId, out var plan))
+        {
+            var effectsKey = isFailure ? "onFailure" : "onSafeSuccess";
+            if (plan.TryGetProperty("effects", out var effects) && effects.TryGetProperty(effectsKey, out var list) && list.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                effectsWillBeApplied = list.EnumerateArray().Any(effect => GetJsonString(effect, "", "type") != "resolve_threat");
+                affectedPlayers = list.EnumerateArray().Any(effect => GetJsonString(effect, "", "target") == "all_active_players")
+                    ? GetActiveThreatPlayers(room).Count()
+                    : list.EnumerateArray().Any(effect => GetJsonString(effect, "", "type") == "add_physical_condition") ? 1 : 0;
+            }
+        }
+
+        var localized = language switch
+        {
+            "en" => isFailure
+                ? ("The threat will be forcibly completed as a failure. Standard failure effects may be applied and cannot be rolled back automatically.", "Effects already applied cannot be rolled back automatically.")
+                : ("The threat will be forcibly completed successfully. The unfinished attempt will be closed.", "Effects already applied cannot be rolled back automatically."),
+            "ru" => isFailure
+                ? ("Угроза будет принудительно завершена провалом. Стандартные последствия провала могут быть применены и не могут быть автоматически отменены.", "Уже применённые последствия нельзя автоматически откатить.")
+                : ("Угроза будет принудительно завершена успехом. Незавершённая попытка будет закрыта.", "Уже применённые последствия нельзя автоматически откатить."),
+            _ => isFailure
+                ? ("Загрозу буде примусово завершено провалом. Стандартні наслідки провалу можуть бути застосовані й не можуть бути автоматично відкочені.", "Уже застосовані наслідки не можна автоматично відкотити.")
+                : ("Загрозу буде примусово завершено успіхом. Незавершена спроба буде закрита.", "Уже застосовані наслідки не можна автоматично відкотити.")
+        };
+        var scope = language switch
+        {
+            "en" => effectsWillBeApplied ? "Current threat effects pipeline" : "Threat state only",
+            "ru" => effectsWillBeApplied ? "Текущий механизм последствий угрозы" : "Только состояние угрозы",
+            _ => effectsWillBeApplied ? "Чинний механізм наслідків загрози" : "Лише стан загрози"
+        };
+        return new GMThreatForcePreviewDto(
+            threat.Id,
+            GetLocalizedThreatName(threat, language),
+            room.CurrentRound,
+            outcome,
+            effectsWillBeApplied,
+            scope,
+            affectedPlayers,
+            localized.Item1,
+            localized.Item2,
+            GMThreatStateMutator.BuildForcePreviewFingerprint(room, outcome));
+    }
+
+    private static string GetLocalizedThreatName(ThreatData threat, string language)
+    {
+        if (threat.I18n != null && threat.I18n.TryGetValue(language, out var localized) &&
+            localized.ValueKind == System.Text.Json.JsonValueKind.Object && localized.TryGetProperty("name", out var name) &&
+            name.ValueKind == System.Text.Json.JsonValueKind.String && !string.IsNullOrWhiteSpace(name.GetString()))
+            return name.GetString()!;
+        return threat.Name;
+    }
+
     private bool TryGetHostRoom(out Room room)
     {
         room = _roomService.GetPlayerRoom(Context.ConnectionId)!;
@@ -189,7 +363,8 @@ public partial class GameHub
             type = GetThreatControlType(room.CurrentThreat),
             status = room.ThreatState?.ThreatStatus ?? "none",
             effectsApplied = room.ThreatState?.Resolution.EffectsApplied ?? false,
-            canRecoverAttempt = GMThreatStateMutator.CanReset(room)
+            canRecoverAttempt = GMThreatStateMutator.CanReset(room),
+            canForceOutcome = GMThreatStateMutator.CanForceOutcome(room)
         },
         auditLog = _threatAudit.GetRecent(room),
         threats = canBrowseFutureThreatCatalog ? _gameData.Threats.Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))

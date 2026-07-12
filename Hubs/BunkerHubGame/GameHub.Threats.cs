@@ -743,16 +743,26 @@ namespace Bunker.Hubs
             IThreatMiniGameService miniGame,
             string language)
         {
-            var isFinalStatus = threatState.MiniGame.Status is "resolved_safely" or "resolved_with_casualty" or "failed";
-            if (!isFinalStatus && !string.Equals(threatState.MiniGame.Status, "completed", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
+            bool finalized;
             lock (room.ThreatSyncRoot)
             {
-              if (!threatState.Resolution.EffectsApplied)
-              {
+                finalized = FinalizeRadiationOperationLocked(room, threatState);
+            }
+            if (!finalized) return;
+
+            var finalState = miniGame.GetPublicState(threatState, language);
+            await Clients.Group(roomId).SendAsync("ThreatMiniGameUpdated", finalState);
+            await BroadcastThreatState(room, roomId);
+        }
+
+        private bool FinalizeRadiationOperationLocked(Room room, ThreatInteractionState threatState)
+        {
+            var isFinalStatus = threatState.MiniGame.Status is "resolved_safely" or "resolved_with_casualty" or "failed";
+            if (!isFinalStatus && !string.Equals(threatState.MiniGame.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (!threatState.Resolution.EffectsApplied)
+            {
                 var resultStatus = threatState.MiniGame.ResultStatus;
                 var volunteerId = threatState.VolunteerSelection.SelectedPlayerId;
                 var volunteerProtected = !string.IsNullOrWhiteSpace(volunteerId) &&
@@ -797,20 +807,74 @@ namespace Bunker.Hubs
                     outcome == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
                     deduplicateTransition: true);
                 _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, deduplicateTransition: true);
-              }
+            }
 
-              if (threatState.Resolution.EffectsApplied &&
+            if (threatState.Resolution.EffectsApplied &&
                 threatState.ThreatStatus is "resolved_safely" or "resolved_with_casualty" or "failed")
-              {
+            {
                 threatState.MiniGame.Outcome = threatState.ThreatStatus;
                 threatState.MiniGame.Status = threatState.ThreatStatus;
                 threatState.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
-              }
+            }
+            return true;
+        }
+
+        private bool ForceFinalizeThreatLocked(
+            Room room,
+            string requestedOutcome,
+            string? actorPlayerId,
+            string commandId,
+            out ThreatMiniGamePublicState? miniGamePublicState)
+        {
+            miniGamePublicState = null;
+            if (!GMThreatStateMutator.CanForceOutcome(room) || room.ThreatState == null || room.CurrentThreat == null)
+                return false;
+
+            var state = room.ThreatState;
+            var success = string.Equals(requestedOutcome, "success", StringComparison.OrdinalIgnoreCase);
+            _threatAudit.Append(
+                room,
+                success ? ThreatAuditEventType.ForcedSuccess : ThreatAuditEventType.ForcedFailure,
+                actorPlayerId,
+                commandId,
+                new Dictionary<string, string> { ["outcome"] = success ? "resolved_safely" : "failed" });
+
+            if (string.Equals(room.CurrentThreat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase) &&
+                _threatMiniGames.TryGet(RadiationLeakThreatId, out var miniGame))
+            {
+                foreach (var question in state.MiniGame.Questions.Where(question => question.AnsweredAtUtc == null))
+                {
+                    question.QuestionStartedAtUtc = null;
+                    question.QuestionDeadlineUtc = null;
+                }
+                state.MiniGame.Status = "completed";
+                state.MiniGame.ResultStatus = success ? "perfect_success" : "failed";
+                state.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
+                if (!FinalizeRadiationOperationLocked(room, state)) return false;
+                miniGamePublicState = miniGame.GetPublicState(state, "uk");
+                return true;
             }
 
-            var finalState = miniGame.GetPublicState(threatState, language);
-            await Clients.Group(roomId).SendAsync("ThreatMiniGameUpdated", finalState);
-            await BroadcastThreatState(room, roomId);
+            if (string.Equals(room.CurrentThreat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
+                TryGetForcedPlanElement(room.CurrentThreat.Mechanics, state.PlanChoice.SelectedPlanId, out var plan))
+            {
+                state.PlanChoice.SelectedPlanId = GetJsonString(plan, "", "id");
+                return FinalizeAirFilterOutcomeLocked(room, state, plan, success ? "safe_success" : "failure", actorPlayerId);
+            }
+
+            state.ThreatStatus = success ? "resolved_safely" : "failed";
+            state.MiniGame.Status = state.ThreatStatus;
+            state.MiniGame.Outcome = state.ThreatStatus;
+            state.MiniGame.ResultStatus = success ? "success" : "failed";
+            state.MiniGame.CompletedAtUtc ??= DateTimeOffset.UtcNow;
+            state.Resolution.WasSuccessful = success;
+            state.Resolution.CompletedAtRound = room.CurrentRound;
+            state.Resolution.EffectsApplied = true;
+            if (!state.Resolution.PublicResults.Contains(success ? "Загрозу примусово завершено успіхом." : "Загрозу примусово завершено провалом."))
+                state.Resolution.PublicResults.Add(success ? "Загрозу примусово завершено успіхом." : "Загрозу примусово завершено провалом.");
+            _threatAudit.Append(room, success ? ThreatAuditEventType.CompletedSuccess : ThreatAuditEventType.CompletedFailure, actorPlayerId, deduplicateTransition: true);
+            _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, actorPlayerId, deduplicateTransition: true);
+            return true;
         }
 
         private async Task NotifyReturnedThreatItems(Room room, string roomId, ThreatInteractionState threatState)
@@ -1269,27 +1333,40 @@ namespace Bunker.Hubs
                 GetJsonInt(room.CurrentThreat?.Mechanics, 8, "planChoice", "scoring", "randomModifier", "max") + 1);
             var request = BuildPlanChoiceScoreRequest(room, state, plan);
             var result = new PlanChoiceScoringService().Score(request, state.PlanChoice.RandomModifier.Value);
-            state.PlanChoice.Outcome = result.Outcome;
+              FinalizeAirFilterOutcomeLocked(room, state, plan, result.Outcome, GetThreatActorId(room));
+            }
+            await BroadcastThreatState(room, roomId);
+        }
+
+        private bool FinalizeAirFilterOutcomeLocked(
+            Room room,
+            ThreatInteractionState state,
+            JsonElement plan,
+            string outcome,
+            string? actorPlayerId = null)
+        {
+            if (state.Resolution.EffectsApplied) return false;
+            state.PlanChoice.IsLocked = true;
+            state.PlanChoice.Outcome = outcome;
             state.PlanChoice.ResolvedAtRound = room.CurrentRound;
-            state.ThreatStatus = result.Outcome switch
+            state.ThreatStatus = outcome switch
             {
                 "safe_success" => "resolved_safely",
                 "success_with_consequence" => "resolved_with_casualty",
                 _ => "failed"
             };
             state.Resolution.SelectedApproachId = state.PlanChoice.SelectedPlanId;
-            state.Resolution.WasSuccessful = result.Outcome != "failure";
+            state.Resolution.WasSuccessful = outcome != "failure";
             state.Resolution.CompletedAtRound = room.CurrentRound;
-            ApplyAirFilterPlanEffects(room, state, plan, result.Outcome);
+            ApplyAirFilterPlanEffects(room, state, plan, outcome);
             state.Resolution.EffectsApplied = true;
             _threatAudit.Append(
                 room,
                 state.ThreatStatus == "failed" ? ThreatAuditEventType.CompletedFailure : ThreatAuditEventType.CompletedSuccess,
-                GetThreatActorId(room),
+                actorPlayerId,
                 deduplicateTransition: true);
-              _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, GetThreatActorId(room), deduplicateTransition: true);
-            }
-            await BroadcastThreatState(room, roomId);
+            _threatAudit.Append(room, ThreatAuditEventType.EffectsApplied, actorPlayerId, deduplicateTransition: true);
+            return true;
         }
 
         private PlanChoiceScoreRequest BuildPlanChoiceScoreRequest(Room room, ThreatInteractionState state, JsonElement plan)
@@ -1405,6 +1482,23 @@ namespace Bunker.Hubs
             if (!IsPlanChoiceMechanics(mechanics) || !mechanics!.Value.GetProperty("planChoice").TryGetProperty("plans", out var plans)) return false;
             foreach (var candidate in plans.EnumerateArray())
                 if (string.Equals(GetJsonString(candidate, "", "id"), planId, StringComparison.OrdinalIgnoreCase)) { plan = candidate; return true; }
+            return false;
+        }
+
+        private static bool TryGetForcedPlanElement(JsonElement? mechanics, string? selectedPlanId, out JsonElement plan)
+        {
+            if (!string.IsNullOrWhiteSpace(selectedPlanId) && TryGetPlanElement(mechanics, selectedPlanId, out plan))
+                return true;
+            plan = default;
+            if (!IsPlanChoiceMechanics(mechanics) ||
+                !mechanics!.Value.GetProperty("planChoice").TryGetProperty("plans", out var plans) ||
+                plans.ValueKind != JsonValueKind.Array)
+                return false;
+            foreach (var candidate in plans.EnumerateArray())
+            {
+                plan = candidate;
+                return true;
+            }
             return false;
         }
 
