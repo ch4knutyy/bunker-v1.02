@@ -119,6 +119,18 @@ public partial class GameHub
         return Task.FromResult(SafeRequest(() => _globalContentCommits.Rollback(category, backupId, previewToken, confirmation, actor, commandId)));
     }
 
+    public Task<StableIdMigrationPreviewDto> PreviewStableIdMigration(string category, int page = 1, int pageSize = 100)
+    {
+        var room = DemandGlobalContentAccess(); ConsumeGlobalContentRead();
+        return Task.FromResult(SafeRequest(() => _stableIdMigrations.Preview(category, GetGmActorId(room), page, pageSize)));
+    }
+
+    public Task<StableIdMigrationResultDto> ApplyStableIdMigration(string category, string previewToken, bool confirmation, string commandId)
+    {
+        var room = DemandGlobalContentAccess(); var actor = GetGmActorId(room); ConsumeGlobalContentMutation(actor);
+        return Task.FromResult(SafeRequest(() => _stableIdMigrations.Apply(category, previewToken, confirmation, actor, commandId)));
+    }
+
     private Room DemandGlobalContentAccess()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);

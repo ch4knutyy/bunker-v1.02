@@ -5,6 +5,9 @@ namespace Bunker.Models.GameData
 {
     public class HobbyData
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("hobby")]
         public string Hobby { get; set; } = "";
         

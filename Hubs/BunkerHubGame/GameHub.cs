@@ -27,10 +27,11 @@ namespace Bunker.Hubs
         private readonly GlobalContentAccessPolicy _globalContentAccess;
         private readonly GlobalContentDraftService _globalContentDrafts;
         private readonly GlobalContentCommitService _globalContentCommits;
+        private readonly StableIdMigrationService _stableIdMigrations;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, StableIdMigrationService? stableIdMigrations = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -50,6 +51,7 @@ namespace Bunker.Hubs
                 Microsoft.Extensions.Options.Options.Create(new GlobalContentCatalogOptions()));
             _globalContentDrafts = globalContentDrafts ?? new GlobalContentDraftService(_globalContentCatalog, TimeProvider.System);
             _globalContentCommits = globalContentCommits ?? new GlobalContentCommitService(_globalContentCatalog, _globalContentDrafts, Path.Combine(Directory.GetCurrentDirectory(), ".global-content-backups"));
+            _stableIdMigrations = stableIdMigrations ?? new StableIdMigrationService(_globalContentCatalog, _globalContentCommits, _globalContentDrafts, TimeProvider.System);
             _logger = logger;
         }
 

@@ -10,6 +10,7 @@ test('PlayerHost never sees the Development-only global catalog', async ({ brows
     await expect(room.host.locator('#globalCatalogDrafts')).toBeHidden();
     await expect(room.host.locator('#globalDraftCommit')).toBeHidden();
     await expect(room.host.locator('#globalRollbackExecute')).toBeHidden();
+    await expect(room.host.locator('#globalStableIdMigration')).toBeHidden();
     await expect(room.guest.locator('#globalContentCatalog')).toBeHidden();
     await room.host.reload();
     await expect(room.host.locator('#globalContentCatalog')).toBeHidden();

@@ -26,7 +26,7 @@ public sealed class GlobalContentDraftService
     }
 
     private static readonly HashSet<string> Editable = new(StringComparer.OrdinalIgnoreCase)
-    { "professions", "mental_conditions", "physical_health", "phobias", "facts", "special_cards", "apocalypses", "bunkers", "items", "threats" };
+    { "professions", "hobbies", "mental_conditions", "physical_health", "phobias", "character_traits", "facts", "special_cards", "apocalypses", "bunkers", "items", "threats" };
     private static readonly HashSet<string> Blocked = new(StringComparer.OrdinalIgnoreCase) { "hobbies", "character_traits" };
     private static readonly IReadOnlyDictionary<string, HashSet<string>> Fields = BuildFields();
 
@@ -67,8 +67,9 @@ public sealed class GlobalContentDraftService
             if (!Editable.Contains(category)) throw new GlobalContentRequestException(Blocked.Contains(category) ? "category_missing_stable_ids" : "unsupported_category");
             if (_drafts.Values.Count(IsActive) >= MaximumActiveDrafts) throw new GlobalContentRequestException("draft_limit");
             if (_drafts.Values.Count(x => IsActive(x) && x.Metadata.CreatedByPlayerId == actor) >= MaximumActorDrafts) throw new GlobalContentRequestException("actor_draft_limit");
+            var catalogMetadata = _catalog.GetMetadata(category);
+            if (catalogMetadata.StableIdStatus != "ValidUniqueDeterministic") throw new GlobalContentRequestException("category_missing_stable_ids");
             var source = _catalog.ReadDraftSource(category);
-            if (source.Metadata.StableIdStatus != "ValidUniqueDeterministic") throw new GlobalContentRequestException("category_missing_stable_ids");
             var entries = ParseEntries(source.Entries);
             var now = _time.GetUtcNow(); var id = Guid.NewGuid().ToString("N");
             var metadata = new GlobalContentDraftDto(id, category, source.Metadata.FileVersion, source.Metadata.Fingerprint,
@@ -277,7 +278,7 @@ public sealed class GlobalContentDraftService
     private static Dictionary<string, JsonObject> Clone(Dictionary<string, JsonObject> source) => source.ToDictionary(x => x.Key, x => (JsonObject)x.Value.DeepClone(), StringComparer.Ordinal);
     private static string Fingerprint(Dictionary<string, JsonObject> entries) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(entries.OrderBy(x => x.Key))))).ToLowerInvariant();
     private static string Summary(IEnumerable<GlobalContentValidationIssueDto> issues) { var list = issues.ToList(); return $"errors:{list.Count(x => x.Severity == GlobalContentIssueSeverity.Error)};warnings:{list.Count(x => x.Severity == GlobalContentIssueSeverity.Warning)};info:{list.Count(x => x.Severity == GlobalContentIssueSeverity.Info)}"; }
-    private static string CanonicalName(JsonObject entry) => new[] { "name", "profession", "item", "fact" }.Select(x => entry[x]?.ToString()).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "";
+    private static string CanonicalName(JsonObject entry) => new[] { "name", "profession", "hobby", "trait", "item", "fact" }.Select(x => entry[x]?.ToString()).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "";
     private static bool Unsafe(string value) => value.Any(char.IsControl) || value.Contains("<script", StringComparison.OrdinalIgnoreCase) || value.Contains("javascript:", StringComparison.OrdinalIgnoreCase);
     private static void ValidateEntryId(string id) { if (string.IsNullOrWhiteSpace(id) || id.Length > 100 || !id.All(x => char.IsLetterOrDigit(x) || x is '_' or '-')) throw new GlobalContentRequestException("invalid_entry_id"); }
     private static void ValidateCommandId(string id) { if (string.IsNullOrWhiteSpace(id) || id.Length > 100) throw new GlobalContentRequestException("invalid_command_id"); }
@@ -286,7 +287,8 @@ public sealed class GlobalContentDraftService
         HashSet<string> Set(params string[] values) => new(values, StringComparer.Ordinal);
         return new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
         {
-            ["professions"] = Set("profession","type","skills","items","bonus","_i18n","capabilityTags"),
+            ["professions"] = Set("profession","type","skills","items","bonus","_i18n","capabilityTags"), ["hobbies"] = Set("hobby","type","item","bonus","_i18n","capabilityTags"),
+            ["character_traits"] = Set("trait","type","_i18n"),
             ["mental_conditions"] = Set("category","hasSeverity","localization"), ["physical_health"] = Set("hasSeverity","localization"),
             ["phobias"] = Set("name","description","bunkerEffect","_i18n"), ["facts"] = Set("source","type","category","fact","description","_i18n"),
             ["special_cards"] = Set("name","description","isSecret","isOneTimeUse","phase","effectType","requiresTarget","_i18n"),
