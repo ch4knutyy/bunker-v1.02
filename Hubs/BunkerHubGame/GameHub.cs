@@ -21,10 +21,11 @@ namespace Bunker.Hubs
         private readonly RoomIntegrityService _roomIntegrity;
         private readonly GmAuditService _gmAudit;
         private readonly RoomSnapshotService _roomSnapshots;
+        private readonly RoomLocalEditorService _roomLocalEditor;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -37,6 +38,7 @@ namespace Bunker.Hubs
             _roomIntegrity = roomIntegrity ?? new RoomIntegrityService(roomService, gameData, TimeProvider.System);
             _gmAudit = gmAudit ?? new GmAuditService(TimeProvider.System);
             _roomSnapshots = roomSnapshots ?? new RoomSnapshotService(_roomIntegrity, _gmAudit, TimeProvider.System);
+            _roomLocalEditor = roomLocalEditor ?? new RoomLocalEditorService(TimeProvider.System);
             _logger = logger;
         }
     }

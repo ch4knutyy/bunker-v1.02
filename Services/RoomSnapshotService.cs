@@ -174,6 +174,7 @@ public sealed class RoomSnapshotService
         var state = new RoomSnapshotState
         {
             State = room.State,
+            HostDisplayName = room.HostName,
             CurrentRound = room.CurrentRound,
             CurrentPhase = room.CurrentPhase,
             CurrentTurnPlayerId = NormalizePlayerReference(room, room.CurrentTurnPlayerId),
@@ -221,6 +222,7 @@ public sealed class RoomSnapshotService
     {
         var state = Clone(source)!;
         room.State = state.State;
+        room.HostName = state.HostDisplayName;
         room.CurrentRound = state.CurrentRound;
         room.CurrentPhase = state.CurrentPhase;
         room.CurrentTurnPlayerId = state.CurrentTurnPlayerId;

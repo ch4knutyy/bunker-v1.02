@@ -55,6 +55,9 @@ connection.start()
     let gmSnapshotsData = [];
     let gmSnapshotRestorePreview = null;
     let gmSnapshotCommandPending = false;
+    let gmRoomLocalEditorData = { bunkerFields: [], apocalypseFields: [], players: [] };
+    let gmRoomLocalEditPreview = null;
+    let gmRoomLocalEditorPending = false;
     let currentGameTimer = null;
     let gameTimerClockAnchor = null;
     let gameTimerCommandPending = false;
@@ -385,7 +388,8 @@ connection.start()
         gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безпечних виправлень немає", gmAutoFixConfirm: "Застосувати лише previewed безпечні виправлення?",
         gmSnapshotsTitle: "Контрольні точки / Undo", gmSnapshotReason: "Назва контрольної точки", gmCreateSnapshot: "Створити контрольну точку", gmUndoLastAction: "Скасувати останню GM-дію",
         gmRefreshSnapshots: "Оновити snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "Контрольних точок ще немає", gmSnapshotConfirm: "Відновити стан кімнати з цієї контрольної точки?",
-        gmSnapshotActiveConfirm: "Активна гра буде повернута до попереднього стану. Підтвердити ще раз?", gmSnapshotBlocked: "Restore заблоковано", gmSnapshotChanges: "Змінені категорії"
+        gmSnapshotActiveConfirm: "Активна гра буде повернута до попереднього стану. Підтвердити ще раз?", gmSnapshotBlocked: "Restore заблоковано", gmSnapshotChanges: "Змінені категорії",
+        gmRoomLocalEditor: "Редактор поточної кімнати", gmRoomLocalWarning: "Зміни діють лише в цій кімнаті й не змінюють глобальні дані.", gmCurrentPublicValue: "Поточне публічне значення", gmNewPublicValue: "Нове публічне значення", gmEditorApply: "Застосувати"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -394,7 +398,8 @@ connection.start()
         gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "No safe fixes available", gmAutoFixConfirm: "Apply only the previewed safe fixes?",
         gmSnapshotsTitle: "Snapshots / Undo", gmSnapshotReason: "Checkpoint label", gmCreateSnapshot: "Create checkpoint", gmUndoLastAction: "Undo last GM action",
         gmRefreshSnapshots: "Refresh snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "No checkpoints yet", gmSnapshotConfirm: "Restore the room from this checkpoint?",
-        gmSnapshotActiveConfirm: "The active game will return to an earlier state. Confirm again?", gmSnapshotBlocked: "Restore blocked", gmSnapshotChanges: "Changed categories"
+        gmSnapshotActiveConfirm: "The active game will return to an earlier state. Confirm again?", gmSnapshotBlocked: "Restore blocked", gmSnapshotChanges: "Changed categories",
+        gmRoomLocalEditor: "Current room editor", gmRoomLocalWarning: "Changes apply only to this room and do not modify global data.", gmCurrentPublicValue: "Current public value", gmNewPublicValue: "New public value", gmEditorApply: "Apply"
     });
     Object.assign(uiTranslations.ru, {
         gmRunDiagnostics: "Проверить комнату", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Применить безопасные исправления",
@@ -403,7 +408,8 @@ connection.start()
         gmAutoFixAvailable: "Auto-fix available", gmNoAutoFix: "Безопасных исправлений нет", gmAutoFixConfirm: "Применить только previewed безопасные исправления?",
         gmSnapshotsTitle: "Контрольные точки / Undo", gmSnapshotReason: "Название контрольной точки", gmCreateSnapshot: "Создать контрольную точку", gmUndoLastAction: "Отменить последнее GM-действие",
         gmRefreshSnapshots: "Обновить snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "Контрольных точек пока нет", gmSnapshotConfirm: "Восстановить комнату из этой контрольной точки?",
-        gmSnapshotActiveConfirm: "Активная игра вернётся к предыдущему состоянию. Подтвердить ещё раз?", gmSnapshotBlocked: "Restore заблокирован", gmSnapshotChanges: "Изменённые категории"
+        gmSnapshotActiveConfirm: "Активная игра вернётся к предыдущему состоянию. Подтвердить ещё раз?", gmSnapshotBlocked: "Restore заблокирован", gmSnapshotChanges: "Изменённые категории",
+        gmRoomLocalEditor: "Редактор текущей комнаты", gmRoomLocalWarning: "Изменения действуют только в этой комнате и не меняют глобальные данные.", gmCurrentPublicValue: "Текущее публичное значение", gmNewPublicValue: "Новое публичное значение", gmEditorApply: "Применить"
     });
 
     function getCurrentLanguage() {
@@ -3377,6 +3383,11 @@ function registerSignalREvents() {
             const feedback = document.getElementById('gmSnapshotFeedback');
             if (feedback) feedback.textContent = localizeServerMessage(message);
         }
+        if (gmRoomLocalEditorPending) {
+            setRoomLocalEditorPending(false);
+            const feedback = document.getElementById('gmEditorFeedback');
+            if (feedback) feedback.textContent = localizeServerMessage(message);
+        }
         if (gameTimerCommandPending) {
             gameTimerCommandPending = false;
             const feedback = document.getElementById('gmTimerFeedback');
@@ -3792,6 +3803,31 @@ function registerSignalREvents() {
         };
         setGmSnapshotPending(false);
         renderRoomSnapshots();
+    });
+
+    connection.off("RoomLocalEditorUpdated");
+    connection.on("RoomLocalEditorUpdated", function (data) {
+        gmRoomLocalEditorData = {
+            bunkerFields: data.bunkerFields || data.BunkerFields || [],
+            apocalypseFields: data.apocalypseFields || data.ApocalypseFields || [],
+            players: data.players || data.Players || []
+        };
+        setRoomLocalEditorPending(false);
+        renderRoomLocalEditor();
+    });
+
+    connection.off("RoomLocalEditPreviewed");
+    connection.on("RoomLocalEditPreviewed", function (data) {
+        gmRoomLocalEditPreview = {
+            category: data.category || data.Category || '', targetPlayerId: data.targetPlayerId || data.TargetPlayerId || null,
+            fieldId: data.fieldId || data.FieldId || '', sanitizedProposedValue: data.sanitizedProposedValue || data.SanitizedProposedValue || '',
+            canApply: data.canApply ?? data.CanApply ?? false, warning: data.warning || data.Warning || ''
+        };
+        setRoomLocalEditorPending(false);
+        const feedback = document.getElementById('gmEditorFeedback');
+        if (feedback) feedback.textContent = gmRoomLocalEditPreview.canApply ? gmRoomLocalEditPreview.sanitizedProposedValue : gmRoomLocalEditPreview.warning;
+        const apply = document.getElementById('gmEditorApplyButton');
+        if (apply) apply.disabled = !gmRoomLocalEditPreview.canApply;
     });
 
     connection.off("GmAuditLogUpdated");
@@ -5766,6 +5802,7 @@ function removeBunkerSupplies(months) {
             connection.invoke("RunRoomIntegrityCheck", getCurrentLanguage()).catch(err => console.error(err));
             connection.invoke("GetGmAuditLog").catch(err => console.error(err));
             connection.invoke("GetRoomSnapshots").catch(err => console.error(err));
+            connection.invoke("GetRoomLocalEditorData").catch(err => console.error(err));
             renderGMPanelState();
         }
     }
@@ -5849,6 +5886,67 @@ function removeBunkerSupplies(months) {
     function undoLastGmAction() {
         if (gmSnapshotCommandPending || !confirm(t('gmUndoLastAction'))) return;
         invokeSnapshotCommand('UndoLastGmAction', [gmRoundCommandId()]);
+    }
+
+    function setRoomLocalEditorPending(pending) {
+        gmRoomLocalEditorPending = pending;
+        document.querySelectorAll('.gm-editor-command').forEach(button => button.disabled = pending || (button.id === 'gmEditorApplyButton' && !gmRoomLocalEditPreview?.canApply));
+    }
+
+    function currentRoomLocalEditorSelection() {
+        return {
+            category: document.getElementById('gmEditorCategory')?.value || 'bunker',
+            target: document.getElementById('gmEditorPlayer')?.value || null,
+            field: document.getElementById('gmEditorField')?.value || '',
+            value: document.getElementById('gmEditorValue')?.value || ''
+        };
+    }
+
+    function previewRoomLocalEdit() {
+        if (gmRoomLocalEditorPending) return;
+        const selection = currentRoomLocalEditorSelection();
+        setRoomLocalEditorPending(true);
+        connection.invoke('PreviewRoomLocalEdit', selection.category, selection.target, selection.field, selection.value).catch(error => {
+            setRoomLocalEditorPending(false);
+            const feedback = document.getElementById('gmEditorFeedback'); if (feedback) feedback.textContent = error?.message || t('unavailableNow');
+        });
+    }
+
+    function applyRoomLocalEdit() {
+        const selection = currentRoomLocalEditorSelection();
+        if (gmRoomLocalEditorPending || !gmRoomLocalEditPreview?.canApply || gmRoomLocalEditPreview.fieldId !== selection.field || !confirm(t('gmEditorApply'))) return;
+        setRoomLocalEditorPending(true);
+        connection.invoke('ApplyRoomLocalEdit', selection.category, selection.target, selection.field, selection.value, gmRoundCommandId()).catch(error => {
+            setRoomLocalEditorPending(false);
+            const feedback = document.getElementById('gmEditorFeedback'); if (feedback) feedback.textContent = error?.message || t('unavailableNow');
+        });
+    }
+
+    function renderRoomLocalEditor() {
+        const category = document.getElementById('gmEditorCategory');
+        const players = document.getElementById('gmEditorPlayer');
+        const fields = document.getElementById('gmEditorField');
+        if (!category || !players || !fields) return;
+        const previousPlayer = players.value, previousField = fields.value;
+        players.innerHTML = gmRoomLocalEditorData.players.map(player => `<option value="${escapeHtml(player.playerId || player.PlayerId)}">${escapeHtml(player.name || player.Name)}</option>`).join('');
+        if ([...players.options].some(option => option.value === previousPlayer)) players.value = previousPlayer;
+        players.style.display = category.value === 'player' ? '' : 'none';
+        const player = gmRoomLocalEditorData.players.find(item => (item.playerId || item.PlayerId) === players.value);
+        const available = category.value === 'bunker' ? gmRoomLocalEditorData.bunkerFields : category.value === 'apocalypse' ? gmRoomLocalEditorData.apocalypseFields : (player?.fields || player?.Fields || []);
+        fields.innerHTML = available.map(field => `<option value="${escapeHtml(field.fieldId || field.FieldId)}">${escapeHtml(field.label || field.Label)}</option>`).join('');
+        if ([...fields.options].some(option => option.value === previousField)) fields.value = previousField;
+        gmRoomLocalEditPreview = null;
+        syncRoomLocalEditorField();
+    }
+
+    function syncRoomLocalEditorField() {
+        const selection = currentRoomLocalEditorSelection();
+        const player = gmRoomLocalEditorData.players.find(item => (item.playerId || item.PlayerId) === selection.target);
+        const available = selection.category === 'bunker' ? gmRoomLocalEditorData.bunkerFields : selection.category === 'apocalypse' ? gmRoomLocalEditorData.apocalypseFields : (player?.fields || player?.Fields || []);
+        const field = available.find(item => (item.fieldId || item.FieldId) === selection.field);
+        const current = document.getElementById('gmEditorCurrent'); if (current) current.value = field?.currentPublicValue || field?.CurrentPublicValue || '';
+        const value = document.getElementById('gmEditorValue'); if (value) { value.value = ''; value.maxLength = field?.maxLength || field?.MaxLength || 80; }
+        const apply = document.getElementById('gmEditorApplyButton'); if (apply) apply.disabled = true;
     }
 
     function gmRoundCommandId() {

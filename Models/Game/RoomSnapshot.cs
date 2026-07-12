@@ -29,6 +29,7 @@ public sealed class RoomSnapshot
 public sealed class RoomSnapshotState
 {
     public RoomState State { get; set; }
+    public string HostDisplayName { get; set; } = "";
     public int CurrentRound { get; set; }
     public GamePhase CurrentPhase { get; set; }
     public string? CurrentTurnPlayerId { get; set; }

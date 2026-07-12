@@ -26,6 +26,7 @@ builder.Services.AddSingleton<ThreatAuditService>();
 builder.Services.AddSingleton<GmAuditService>();
 builder.Services.AddSingleton<RoomIntegrityService>();
 builder.Services.AddSingleton<RoomSnapshotService>();
+builder.Services.AddSingleton<RoomLocalEditorService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 
