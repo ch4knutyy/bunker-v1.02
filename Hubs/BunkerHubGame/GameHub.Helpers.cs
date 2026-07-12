@@ -75,6 +75,7 @@ namespace Bunker.Hubs
                 isPaused = room.IsPaused,
                 pauseReason = room.PauseReason,
                 pausedAtUtc = room.PausedAtUtc,
+                gameTimer = _gameTimerService.GetDto(room),
                 activePlayerCount = activePlayers.Count,
                 revealedCount = revealedPlayers.Count,
                 allPlayersRevealed,

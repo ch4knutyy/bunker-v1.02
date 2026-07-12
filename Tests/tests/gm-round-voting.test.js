@@ -23,10 +23,11 @@ test('voting admin payload never exposes target values', () => {
   assert.match(voting, /GetTiedCandidateIds\(voting\)/);
 });
 
-test('stage and timer controls are disabled without fake server methods', () => {
+test('stage controls stay disabled while canonical timer controls are available', () => {
   assert.match(view, /gmStageUnavailable[^>]*>[^<]*Reopen\/skip/);
-  assert.match(view, /gmTimerUnavailable[^>]*>[^<]*Round\/voting timer/);
-  assert.doesNotMatch(gm + voting, /Task (ReopenCurrentStage|SkipCurrentStage|RestartRoundTimer|AddRoundTime)/);
+  assert.doesNotMatch(gm + voting, /Task (ReopenCurrentStage|SkipCurrentStage)/);
+  assert.match(view, /id="gmGameTimerCard"/);
+  assert.match(gm, /Task StartGameTimer\(/);
 });
 
 test('client round commands prevent double submit and render only voter names', () => {

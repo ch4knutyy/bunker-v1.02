@@ -66,6 +66,11 @@
                 <span id="roundStatusProgress">0/0 відкрили</span>
                 <span id="roundDiceResult" class="round-dice-result" style="display: none;"></span>
             </div>
+            <div id="publicGameTimer" class="public-game-timer">
+                <strong id="publicGameTimerValue">05:00</strong>
+                <span id="publicGameTimerStatus">Зупинено</span>
+                <small id="publicGameTimerLabel"></small>
+            </div>
         </div>
 
         <!-- Voting Panel -->
@@ -182,10 +187,32 @@
                         <button class="btn-gm-action gm-round-command" data-gm-i18n="gmRemoveVote" onclick="removeSelectedVote()">Видалити голос voter</button>
                         <div id="gmNonVotersList" class="gm-ready-status-list"></div>
                     </div>
+                    <div class="gm-round-admin-card" id="gmGameTimerCard">
+                        <h5 data-gm-i18n="gmGameTimer">Серверний таймер</h5>
+                        <div class="gm-round-actions">
+                            <input id="gmTimerMinutes" class="gm-select" type="number" min="0" max="120" step="1" value="5" aria-label="Minutes" />
+                            <input id="gmTimerSeconds" class="gm-select" type="number" min="0" max="59" step="1" value="0" aria-label="Seconds" onkeydown="handleGameTimerKeydown(event)" />
+                            <select id="gmTimerPurpose" class="gm-select">
+                                <option value="Round">Round</option><option value="Voting">Voting</option>
+                                <option value="Threat">Threat</option><option value="Custom">Custom</option>
+                            </select>
+                            <input id="gmTimerLabel" class="gm-select" maxlength="80" data-gm-i18n-placeholder="gmTimerLabel" placeholder="Label" />
+                        </div>
+                        <div class="gm-round-actions">
+                            <button id="gmTimerStart" class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerStart" onclick="startGameTimer()">Старт</button>
+                            <button id="gmTimerPause" class="btn-gm-action gm-timer-command" data-gm-i18n="gmPause" onclick="invokeGameTimerCommand('PauseGameTimer')">Пауза</button>
+                            <button id="gmTimerResume" class="btn-gm-action gm-timer-command" data-gm-i18n="gmResume" onclick="invokeGameTimerCommand('ResumeGameTimer')">Продовжити</button>
+                            <button id="gmTimerRestart" class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerRestart" onclick="restartGameTimer()">Перезапустити</button>
+                            <button class="btn-gm-action gm-timer-command" onclick="adjustGameTimer(30)">+30 сек</button>
+                            <button class="btn-gm-action gm-timer-command" onclick="adjustGameTimer(-30)">−30 сек</button>
+                            <button class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerSet" onclick="setGameTimer()">Встановити</button>
+                            <button id="gmTimerStop" class="btn-gm-action btn-danger gm-timer-command" data-gm-i18n="gmTimerStop" onclick="stopGameTimer()">Зупинити</button>
+                        </div>
+                        <p id="gmTimerFeedback" class="gm-round-hint" aria-live="polite"></p>
+                    </div>
                     <details class="gm-player-danger">
                         <summary data-gm-i18n="gmUnavailableRecovery">Недоступні recovery controls</summary>
                         <button class="btn-gm-action" disabled data-gm-i18n="gmStageUnavailable">Reopen/skip потребує transition helper</button>
-                        <button class="btn-gm-action" disabled data-gm-i18n="gmTimerUnavailable">Round/voting timer відсутній</button>
                     </details>
                     <p id="gmRoundCommandResult" class="gm-round-hint" aria-live="polite"></p>
                 </div>
