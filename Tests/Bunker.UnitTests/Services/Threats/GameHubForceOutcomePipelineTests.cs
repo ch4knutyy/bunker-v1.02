@@ -44,6 +44,25 @@ public class GameHubForceOutcomePipelineTests
     }
 
     [Fact]
+    public void TimeoutFailureUsesTheSameCanonicalEffectExactlyOnce()
+    {
+        var (hub, room, player, miniGame) = CreateRadiationHubAndRoom();
+        var started = miniGame.Start(room, room.ThreatState!, "p1", "uk");
+        room.ThreatState!.MiniGame.Questions[0].QuestionDeadlineUtc = DateTimeOffset.UtcNow.AddSeconds(-1);
+
+        var timedOut = miniGame.SubmitAnswer(room, room.ThreatState, "p1", started.CurrentQuestion!.QuestionId, "definitely_wrong", "uk");
+        Assert.Equal("completed", timedOut.PublicState!.Status);
+        Assert.Equal("failed", timedOut.PublicState.ResultStatus);
+        Assert.True(InvokeNormalFinalize(hub, room));
+        Assert.Single(player.AdditionalConditionEffects, effect => effect.ConditionId == "physical_152");
+
+        Assert.True(InvokeNormalFinalize(hub, room));
+        Assert.Single(player.AdditionalConditionEffects, effect => effect.ConditionId == "physical_152");
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType == ThreatAuditEventType.CompletedFailure));
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType == ThreatAuditEventType.EffectsApplied));
+    }
+
+    [Fact]
     public void RadiationForceFailureUsesCanonicalEffectPipelineExactlyOnce()
     {
         var (hub, room, player, _) = CreateRadiationHubAndRoom();
@@ -78,8 +97,38 @@ public class GameHubForceOutcomePipelineTests
         Assert.True(room.ThreatState.Resolution.WasSuccessful);
         Assert.True(room.ThreatState.Resolution.EffectsApplied);
         Assert.Equal(
+            [ThreatAuditEventType.ForcedSuccess, ThreatAuditEventType.CompletedSuccess],
+            room.ThreatAuditLog.Select(entry => entry.EventType));
+    }
+
+    [Fact]
+    public void RadiationSuccessAuditsEffectsOnlyWhenVoteImmunityActuallyChanges()
+    {
+        var (hub, room, _, _) = CreateRadiationHubAndRoom();
+        room.ThreatState!.VolunteerSelection.SelectionReason = "group_vote";
+
+        Assert.True(InvokeForce(hub, room, "success", "force-success-with-effect"));
+
+        Assert.Equal(
             [ThreatAuditEventType.ForcedSuccess, ThreatAuditEventType.CompletedSuccess, ThreatAuditEventType.EffectsApplied],
             room.ThreatAuditLog.Select(entry => entry.EventType));
+    }
+
+    [Fact]
+    public void ConcurrentForcedTerminalOutcomesCommitOnlyOneResult()
+    {
+        var (hub, room, player, _) = CreateRadiationHubAndRoom();
+        var results = new bool[2];
+
+        Parallel.Invoke(
+            () => { lock (room.ThreatSyncRoot) results[0] = InvokeForce(hub, room, "success", "race-success"); },
+            () => { lock (room.ThreatSyncRoot) results[1] = InvokeForce(hub, room, "failure", "race-failure"); });
+
+        Assert.Single(results, result => result);
+        Assert.Contains(room.ThreatState!.ThreatStatus, new[] { "resolved_safely", "failed" });
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType is ThreatAuditEventType.ForcedSuccess or ThreatAuditEventType.ForcedFailure));
+        Assert.Equal(1, room.ThreatAuditLog.Count(entry => entry.EventType is ThreatAuditEventType.CompletedSuccess or ThreatAuditEventType.CompletedFailure));
+        Assert.InRange(player.AdditionalConditionEffects.Count(effect => effect.ConditionId == "physical_152"), 0, 1);
     }
 
     private static bool InvokeForce(GameHub hub, Room room, string outcome, string commandId)

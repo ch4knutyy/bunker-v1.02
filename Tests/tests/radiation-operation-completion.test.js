@@ -30,6 +30,12 @@ test('normal and forced failure share FinalizeRadiationOperationLocked', () => {
   assert.ok(canonical.indexOf('Resolution.EffectsApplied = true') < canonical.indexOf('threatState.ThreatStatus = outcome'));
 });
 
+test('success audit records EffectsApplied only for a material success effect', () => {
+  const canonical = hub.match(/private bool FinalizeRadiationOperationLocked[\s\S]*?private bool ForceFinalizeThreatLocked/)?.[0] || '';
+  assert.match(canonical, /materialEffectsApplied/);
+  assert.match(canonical, /if \(materialEffectsApplied\)[\s\S]*ThreatAuditEventType\.EffectsApplied/);
+});
+
 test('effects are applied before EffectsApplied and final snapshots', () => {
   const asyncBody = hub.match(/private async Task FinalizeRadiationOperationAsync[\s\S]*?private bool FinalizeRadiationOperationLocked/)?.[0] || '';
   const canonical = hub.match(/private bool FinalizeRadiationOperationLocked[\s\S]*?private bool ForceFinalizeThreatLocked/)?.[0] || '';
