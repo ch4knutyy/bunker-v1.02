@@ -30,7 +30,7 @@ test('read-only UI stays hidden until server capability response', () => {
   assert.match(view, /id="globalContentCatalog"[^>]*display: none/);
   assert.match(client, /globalCatalogAllowed = access\?\.allowed === true/);
   assert.match(client, /panel\.style\.display = globalCatalogAllowed \? 'block' : 'none'/);
-  assert.doesNotMatch(catalog, />\s*(Save|Delete|Commit|Rollback|Зберегти|Видалити)\s*</i);
+  assert.doesNotMatch(catalog, />\s*(Save|Commit|Rollback|Зберегти)\s*</i);
   for (const key of ['globalCatalogTitle', 'globalCatalogReadOnly', 'globalCatalogCategory', 'globalCatalogSearch']) {
     assert.equal((client.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `missing localization ${key}`);
   }

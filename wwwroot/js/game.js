@@ -64,6 +64,8 @@ connection.start()
     let globalCatalogTotal = 0;
     let globalCatalogSearchTimer = null;
     let globalCatalogAccessRoomId = null;
+    let globalDrafts = [];
+    let globalDraftPending = false;
     let currentGameTimer = null;
     let gameTimerClockAnchor = null;
     let gameTimerCommandPending = false;
@@ -402,16 +404,19 @@ connection.start()
         globalCatalogTitle: "Глобальний каталог контенту", globalCatalogDevelopmentWarning: "Лише Development: read-only каталог. У Production доступ вимкнено.",
         globalCatalogReadOnly: "Тільки перегляд: збереження, видалення, commit і rollback недоступні.", globalCatalogCategory: "Категорія", globalCatalogSearch: "Пошук",
         globalCatalogPrevious: "Назад", globalCatalogNext: "Далі", globalCatalogSchema: "Схема", globalCatalogStableIds: "Стабільні ID", globalCatalogLocalization: "Локалізація"
+        ,globalDraftsTitle: "Чернетки", globalDraftCreate: "Створити чернетку", globalDraftApply: "Застосувати до чернетки", globalDraftValidate: "Валідувати", globalDraftPreview: "Preview diff", globalDraftDiscard: "Відкинути"
     });
     Object.assign(uiTranslations.en, {
         globalCatalogTitle: "Global Content Catalog", globalCatalogDevelopmentWarning: "Development only: read-only catalog. Production access is disabled.",
         globalCatalogReadOnly: "Read-only: save, delete, commit and rollback are unavailable.", globalCatalogCategory: "Category", globalCatalogSearch: "Search",
         globalCatalogPrevious: "Previous", globalCatalogNext: "Next", globalCatalogSchema: "Schema", globalCatalogStableIds: "Stable IDs", globalCatalogLocalization: "Localization"
+        ,globalDraftsTitle: "Drafts", globalDraftCreate: "Create draft", globalDraftApply: "Apply to draft", globalDraftValidate: "Validate", globalDraftPreview: "Preview diff", globalDraftDiscard: "Discard"
     });
     Object.assign(uiTranslations.ru, {
         globalCatalogTitle: "Глобальный каталог контента", globalCatalogDevelopmentWarning: "Только Development: read-only каталог. В Production доступ отключён.",
         globalCatalogReadOnly: "Только просмотр: сохранение, удаление, commit и rollback недоступны.", globalCatalogCategory: "Категория", globalCatalogSearch: "Поиск",
         globalCatalogPrevious: "Назад", globalCatalogNext: "Далее", globalCatalogSchema: "Схема", globalCatalogStableIds: "Стабильные ID", globalCatalogLocalization: "Локализация"
+        ,globalDraftsTitle: "Черновики", globalDraftCreate: "Создать черновик", globalDraftApply: "Применить к черновику", globalDraftValidate: "Проверить", globalDraftPreview: "Preview diff", globalDraftDiscard: "Отбросить"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -5844,6 +5849,7 @@ function removeBunkerSupplies(months) {
                 return option;
             }));
             await loadGlobalContentPage(1);
+            await loadGlobalContentDrafts();
         } catch (error) {
             renderGlobalCatalogError(error);
         }
@@ -5918,6 +5924,43 @@ function removeBunkerSupplies(months) {
         const details = document.getElementById('globalCatalogDetails');
         if (details) details.textContent = error?.message || t('unavailableNow');
     }
+
+    function setGlobalDraftPending(pending) {
+        globalDraftPending = pending;
+        document.querySelectorAll('.global-draft-command').forEach(button => button.disabled = pending);
+    }
+    function selectedGlobalDraftId() { return document.getElementById('globalDraftSelect')?.value || ''; }
+    async function loadGlobalContentDrafts() {
+        if (!globalCatalogAllowed) return;
+        globalDrafts = await connection.invoke('GetGlobalContentDrafts');
+        const select = document.getElementById('globalDraftSelect'); if (!select) return;
+        const selected = select.value; select.replaceChildren(...globalDrafts.map(draft => { const option = document.createElement('option'); option.value = draft.draftId || draft.DraftId; option.textContent = `${draft.category || draft.Category} · ${draft.status || draft.Status}`; return option; }));
+        if (globalDrafts.some(draft => (draft.draftId || draft.DraftId) === selected)) select.value = selected;
+        renderGlobalDraftState();
+    }
+    function renderGlobalDraftState() {
+        const id = selectedGlobalDraftId(); const draft = globalDrafts.find(x => (x.draftId || x.DraftId) === id); const status = document.getElementById('globalDraftStatus');
+        if (status) status.textContent = draft ? `${draft.status || draft.Status} · ${draft.entryCount ?? draft.EntryCount} · ${draft.expiresAtUtc || draft.ExpiresAtUtc}` : '';
+        const category = document.getElementById('globalCatalogCategory')?.value; const blocked = ['hobbies','character_traits'].includes(category); const warning = document.getElementById('globalDraftBlocked');
+        if (warning) warning.textContent = blocked ? 'BlockedMissingStableIds' : '';
+        const create = document.getElementById('globalDraftCreate'); if (create) create.disabled = globalDraftPending || blocked;
+    }
+    async function runGlobalDraftCommand(action) {
+        if (globalDraftPending) return; setGlobalDraftPending(true); const result = document.getElementById('globalDraftResult');
+        try { const value = await action(); if (result) result.textContent = JSON.stringify(value, null, 2); await loadGlobalContentDrafts(); }
+        catch (error) { if (result) result.textContent = error?.message || t('unavailableNow'); }
+        finally { setGlobalDraftPending(false); renderGlobalDraftState(); }
+    }
+    function createGlobalContentDraft() { const category = document.getElementById('globalCatalogCategory')?.value; if (category) runGlobalDraftCommand(() => connection.invoke('CreateGlobalContentDraft', category, crypto.randomUUID())); }
+    function applyGlobalDraftCommand() {
+        const draftId = selectedGlobalDraftId(); const category = globalDrafts.find(x => (x.draftId || x.DraftId) === draftId)?.category; const type = document.getElementById('globalDraftOperation')?.value; const entryId = document.getElementById('globalDraftEntryId')?.value.trim();
+        if (!draftId || !entryId) return; const fields = {}; const name = document.getElementById('globalDraftName')?.value.trim(); const description = document.getElementById('globalDraftDescription')?.value.trim(); const nameField = category === 'professions' ? 'profession' : category === 'items' ? 'item' : category === 'facts' ? 'fact' : 'name'; if (name) fields[nameField] = name; if (description) fields.description = description;
+        const deleting = type === 'DeleteEntry'; if (deleting && !confirm('Delete entry from draft?')) return;
+        runGlobalDraftCommand(() => connection.invoke('ApplyGlobalContentDraftCommand', { draftId, category, type, entryId, fields: deleting ? null : fields, confirmDelete: deleting, commandId: crypto.randomUUID() }));
+    }
+    function validateGlobalDraft() { const id = selectedGlobalDraftId(); if (id) runGlobalDraftCommand(() => connection.invoke('ValidateGlobalContentDraft', id)); }
+    function previewGlobalDraftDiff() { const id = selectedGlobalDraftId(); if (id) runGlobalDraftCommand(() => connection.invoke('PreviewGlobalContentDraftDiff', id, 1, 100)); }
+    function discardGlobalDraft() { const id = selectedGlobalDraftId(); if (id && confirm('Discard draft?')) runGlobalDraftCommand(() => connection.invoke('DiscardGlobalContentDraft', id, crypto.randomUUID())); }
 
     function toggleGMPanel() {
         const panel = document.getElementById('gmPanel');

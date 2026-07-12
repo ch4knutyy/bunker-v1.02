@@ -31,6 +31,7 @@ builder.Services.AddSingleton<RoomLocalEditorService>();
 builder.Services.Configure<GlobalContentCatalogOptions>(builder.Configuration.GetSection(GlobalContentCatalogOptions.SectionName));
 builder.Services.AddSingleton<GlobalContentAccessPolicy>();
 builder.Services.AddSingleton<GlobalContentCatalogService>();
+builder.Services.AddSingleton<GlobalContentDraftService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 
