@@ -21,5 +21,6 @@ test('preview apply authorization and audit expose no hidden state', () => {
 
 test('UI has double confirmation and public spectator marker only', () => {
   assert.match(client, /This cannot be undone in this room/); assert.match(client, /omniscientCommandPending/); assert.match(client, /omniscientPublicBadge/);
-  assert.doesNotMatch(client, /renderHiddenGameState|omniscientHidden/);
+  const publicMarker = client.slice(client.indexOf('function renderRoomPlayers'), client.indexOf('function toCamelCase'));
+  assert.doesNotMatch(publicMarker, /omniscientHiddenState|SecretVotes|Inventory/);
 });

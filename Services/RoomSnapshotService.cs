@@ -263,6 +263,7 @@ public sealed class RoomSnapshotService
             {
                 player.IsSpectatorGm = true;
                 player.HasSeenOmniscientState = true;
+                player.GmRole = GmMode.OmniscientGm;
                 RoomService.RemoveGameplayParticipationReferences(room, player);
             }
         }

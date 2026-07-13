@@ -223,6 +223,7 @@ public partial class GameHub
         await SendPlayerHostControlData(room);
         if (room.Bunker != null) await Clients.Group(room.Id).SendAsync("BunkerChanged", new { bunker = room.Bunker.ToClientInfo() });
         if (room.Apocalypse != null) await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
+        await BroadcastOmniscientStateToAuthorizedSpectators(room);
     }
 
     private async Task SendPostRestoreState(Room room)

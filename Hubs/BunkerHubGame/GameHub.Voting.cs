@@ -204,6 +204,8 @@ namespace Bunker.Hubs
                 await EndVotingInternal(room, roomId);
             }
 
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
+
             _logger.LogInformation($"Гравець {voterName} проголосував у кімнаті {room.Name}");
         }
 
@@ -401,6 +403,7 @@ namespace Bunker.Hubs
             await SendVotingAdminState(Clients.Group(room.Id), room);
             await AppendGmAudit(room, GetGmActorId(room), "voting_clear_votes", GmAuditResult.Success,
                 "Current votes were cleared.", commandId: commandId, snapshot: clearVotesSnapshot);
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         public async Task RemoveCurrentVote(string voterPlayerId, string? commandId = null)
@@ -421,6 +424,7 @@ namespace Bunker.Hubs
             await SendVotingAdminState(Clients.Group(room.Id), room);
             await AppendGmAudit(room, GetGmActorId(room), "voting_remove_vote", GmAuditResult.Success,
                 "One current vote was removed.", GetSafeAuditPlayerId(voter), commandId, snapshot: removeVoteSnapshot);
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         public async Task ResyncVotingState()

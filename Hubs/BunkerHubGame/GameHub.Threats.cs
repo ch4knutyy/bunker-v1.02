@@ -1832,6 +1832,7 @@ namespace Bunker.Hubs
             {
                 await Clients.Client(room.HostConnectionId).SendAsync("GMThreatControlData", BuildGMThreatControlData(room));
             }
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         private static bool HasAny(IEnumerable<string>? values, IEnumerable<string> expected)

@@ -19,7 +19,7 @@ public sealed class OmniscientGmRoleService(RoomService rooms)
     {
         var id = RoomService.GetPlayerKey(player);
         room.IrreversibleOmniscientPlayerIds.Add(id);
-        player.IsSpectatorGm = true; player.HasSeenOmniscientState = true;
+        player.IsSpectatorGm = true; player.HasSeenOmniscientState = true; player.GmRole = GmMode.OmniscientGm;
         rooms.RemoveGameplayParticipation(room, player);
         room.GmMode = GmMode.OmniscientGm;
         return PublicState(room, player);

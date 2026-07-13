@@ -86,6 +86,7 @@ namespace Bunker.Services
             {
                 player.IsSpectatorGm = true;
                 player.HasSeenOmniscientState = true;
+                player.GmRole = GmMode.OmniscientGm;
                 CleanupPlayerReferences(room, connectionId, GetPlayerKey(player));
             }
 
@@ -757,6 +758,7 @@ namespace Bunker.Services
 			{
 				player.IsSpectatorGm = true;
 				player.HasSeenOmniscientState = true;
+				player.GmRole = GmMode.OmniscientGm;
 				CleanupPlayerReferences(room, oldConnectionId, playerKey);
 			}
 

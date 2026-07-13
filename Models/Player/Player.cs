@@ -16,6 +16,7 @@ namespace Bunker.Models
         public DateTime? DisconnectedAt { get; set; }
         public bool IsSpectatorGm { get; set; }
         public bool HasSeenOmniscientState { get; set; }
+        public GmMode GmRole { get; set; } = GmMode.PlayerHost;
 
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();

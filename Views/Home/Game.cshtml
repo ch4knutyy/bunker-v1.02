@@ -138,11 +138,25 @@
                 <button type="button" class="gm-tab" data-gm-tab-button="threat" data-gm-i18n="gmThreatControl" onclick="switchGMTab('threat')">Керування загрозою</button>
                 <button type="button" class="gm-tab" data-gm-tab-button="content" data-gm-i18n="gmContent" onclick="switchGMTab('content')">Контент</button>
                 <button type="button" class="gm-tab" data-gm-tab-button="diagnostics" data-gm-i18n="gmDiagnostics" onclick="switchGMTab('diagnostics')">Діагностика</button>
+                <button id="omniscientHiddenTab" type="button" class="gm-tab" data-gm-tab-button="omniscient" data-gm-i18n="omniscientHiddenTitle" onclick="switchGMTab('omniscient')" style="display:none;">Всезнаючий GM</button>
             </nav>
             <div class="gm-panel-content">
                 <div class="gm-section" id="gmGameStateSection" data-gm-tab="state">
                     <h4 class="gm-section-title">Стан гри</h4>
                     <div id="gmGameStateSummary" class="gm-status-grid"></div>
+                </div>
+
+                <div class="gm-section" id="omniscientHiddenSection" data-gm-tab="omniscient" style="display:none;">
+                    <h4 data-gm-i18n="omniscientHiddenTitle">Всезнаючий GM</h4>
+                    <p class="global-catalog-warning" data-gm-i18n="omniscientReadOnlyNotice">Спостерігач — не бере участі у грі. Read-only.</p>
+                    <div class="gm-diagnostics-toolbar">
+                        <input id="omniscientHiddenSearch" class="input-field" type="search" maxlength="100" data-gm-i18n-placeholder="omniscientHiddenSearch" placeholder="Пошук гравця або характеристики" oninput="renderOmniscientHiddenState()" />
+                        <button type="button" class="btn-gm-action" data-gm-i18n="omniscientRefresh" onclick="resyncOmniscientHiddenState()">Оновити</button>
+                    </div>
+                    <p id="omniscientHiddenStatus" aria-live="polite"></p>
+                    <div id="omniscientRoomSummary" class="gm-status-grid"></div>
+                    <div id="omniscientSecretVotes" class="gm-threat-audit"></div>
+                    <div id="omniscientHiddenPlayers" class="gm-diagnostics-list"></div>
                 </div>
 
                 <div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="round" style="display: none;">
