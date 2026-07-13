@@ -21,11 +21,12 @@ namespace Bunker.Hubs
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
             return room != null &&
                 _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) &&
-                room.IsHost(player);
+                (room.IsHost(player) || (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value)));
         }
 
         private bool HasGmCapability(Room room, GmCapability capability) =>
-            IsCallerHost() && GmCapabilities.Allows(room.GmMode, capability);
+            (IsCallerHost() && GmCapabilities.Allows(room.GmMode, capability)) ||
+            (_activeDirectorCapability != null && _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) && IsAuthorizedDirector(player, _activeDirectorCapability.Value));
 
         private List<PlayerHostControlDto> BuildPlayerHostControlData(Room room) =>
             RoomService.GetPlayersSnapshot(room).Select(entry =>

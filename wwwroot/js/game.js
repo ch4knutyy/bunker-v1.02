@@ -62,6 +62,8 @@ connection.start()
     let omniscientCommandPending = false;
     let omniscientHiddenState = null;
     let omniscientHiddenStateVersion = 0;
+    let directorPreview = null;
+    let directorCommandPending = false;
     let globalCatalogAllowed = false;
     let globalCatalogMetadata = [];
     let globalCatalogPage = 1;
@@ -415,6 +417,7 @@ connection.start()
         ,globalMigrationTitle: "Потрібна stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Застосувати migration"
         ,omniscientModeTitle: "Режим GM-спостерігача", omniscientModeWarning: "Незворотно для цієї кімнати: GM перестане бути учасником гри.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview наслідків", omniscientEnter: "Увійти незворотно", omniscientPublicBadge: "GM-спостерігач"
         ,omniscientHiddenTitle: "Всезнаючий GM", omniscientReadOnlyNotice: "Спостерігач — не бере участі у грі. Лише перегляд.", omniscientHiddenSearch: "Пошук гравця або характеристики", omniscientRefresh: "Оновити", omniscientHiddenPending: "Оновлення прихованого стану…", omniscientHiddenError: "Прихований стан недоступний", omniscientSecretVotes: "Таємні голоси"
+        ,directorControlsTitle: "Director controls", directorControlsWarning: "Preview і підтвердження обов’язкові. Threat force не можна скасувати через undo.", directorOption: "Опція / severity / номер раунду", directorPreview: "Preview дії", directorApply: "Застосувати"
     });
     Object.assign(uiTranslations.en, {
         globalCatalogTitle: "Global Content Catalog", globalCatalogDevelopmentWarning: "Development only: read-only catalog. Production access is disabled.",
@@ -425,6 +428,7 @@ connection.start()
         ,globalMigrationTitle: "Stable-ID migration required", globalMigrationPreview: "Preview migration", globalMigrationApply: "Apply migration"
         ,omniscientModeTitle: "Spectator GM mode", omniscientModeWarning: "Irreversible in this room: the GM stops participating in gameplay.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview consequences", omniscientEnter: "Enter irreversibly", omniscientPublicBadge: "Spectator GM"
         ,omniscientHiddenTitle: "Omniscient GM", omniscientReadOnlyNotice: "Observer — does not participate in gameplay. Read-only.", omniscientHiddenSearch: "Search player or characteristic", omniscientRefresh: "Refresh", omniscientHiddenPending: "Refreshing hidden state…", omniscientHiddenError: "Hidden state unavailable", omniscientSecretVotes: "Secret votes"
+        ,directorControlsTitle: "Director controls", directorControlsWarning: "Preview and confirmation are required. Threat force cannot be undone.", directorOption: "Option / severity / round number", directorPreview: "Preview action", directorApply: "Apply"
     });
     Object.assign(uiTranslations.ru, {
         globalCatalogTitle: "Глобальный каталог контента", globalCatalogDevelopmentWarning: "Только Development: read-only каталог. В Production доступ отключён.",
@@ -435,6 +439,7 @@ connection.start()
         ,globalMigrationTitle: "Требуется stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Применить migration"
         ,omniscientModeTitle: "Режим GM-наблюдателя", omniscientModeWarning: "Необратимо для этой комнаты: GM перестанет участвовать в игре.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview последствий", omniscientEnter: "Войти необратимо", omniscientPublicBadge: "GM-наблюдатель"
         ,omniscientHiddenTitle: "Всезнающий GM", omniscientReadOnlyNotice: "Наблюдатель — не участвует в игре. Только просмотр.", omniscientHiddenSearch: "Поиск игрока или характеристики", omniscientRefresh: "Обновить", omniscientHiddenPending: "Обновление скрытого состояния…", omniscientHiddenError: "Скрытое состояние недоступно", omniscientSecretVotes: "Тайные голоса"
+        ,directorControlsTitle: "Director controls", directorControlsWarning: "Preview и подтверждение обязательны. Threat force нельзя отменить через undo.", directorOption: "Опция / severity / номер раунда", directorPreview: "Preview действия", directorApply: "Применить"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -5873,6 +5878,8 @@ function removeBunkerSupplies(months) {
     function clearOmniscientHiddenState() {
         omniscientHiddenState = null;
         omniscientHiddenStateVersion = 0;
+        directorPreview = null;
+        directorCommandPending = false;
         const tab = document.getElementById('omniscientHiddenTab');
         const section = document.getElementById('omniscientHiddenSection');
         if (tab) tab.style.display = 'none';
@@ -5885,6 +5892,56 @@ function removeBunkerSupplies(months) {
         if (status) status.textContent = t('omniscientHiddenPending');
         try { await connection.invoke('ResyncOmniscientState'); }
         catch (_) { clearOmniscientHiddenState(); if (status) status.textContent = t('omniscientHiddenError'); }
+    }
+
+    function buildDirectorRequest() {
+        return {
+            actionType: document.getElementById('directorAction')?.value || '',
+            targetPlayerId: document.getElementById('directorTargetPlayer')?.value || null,
+            category: document.getElementById('directorCategory')?.value || null,
+            option: document.getElementById('directorOption')?.value || null
+        };
+    }
+    function syncDirectorControls() {
+        directorPreview = null; const apply = document.getElementById('directorApplyButton'); if (apply) apply.disabled = true;
+        const labels = {
+            uk: { reveal:'Розкрити характеристику', hide:'Приховати характеристику', reveal_all:'Розкрити все', hide_all:'Приховати все', eliminate:'Елімінувати', restore:'Відновити', condition_severity:'Змінити тяжкість стану', condition_remove:'Видалити стан', pause:'Пауза', resume:'Продовжити', round_forward:'Раунд уперед', reset_readiness:'Скинути готовність', clear_votes:'Очистити голоси', remove_vote:'Видалити голос', voting_resync:'Синхронізувати голосування', threat_force_success:'Force success загрози', threat_force_failure:'Force failure загрози', threat_cancel:'Скасувати загрозу', threat_restart:'Перезапустити загрозу', threat_resync:'Синхронізувати загрозу' },
+            en: { reveal:'Reveal characteristic', hide:'Hide characteristic', reveal_all:'Reveal all', hide_all:'Hide all', eliminate:'Eliminate', restore:'Restore', condition_severity:'Change condition severity', condition_remove:'Remove condition', pause:'Pause', resume:'Resume', round_forward:'Forward round', reset_readiness:'Reset readiness', clear_votes:'Clear votes', remove_vote:'Remove vote', voting_resync:'Voting resync', threat_force_success:'Force threat success', threat_force_failure:'Force threat failure', threat_cancel:'Cancel threat', threat_restart:'Restart threat', threat_resync:'Threat resync' },
+            ru: { reveal:'Раскрыть характеристику', hide:'Скрыть характеристику', reveal_all:'Раскрыть всё', hide_all:'Скрыть всё', eliminate:'Исключить', restore:'Восстановить', condition_severity:'Изменить тяжесть состояния', condition_remove:'Удалить состояние', pause:'Пауза', resume:'Продолжить', round_forward:'Раунд вперёд', reset_readiness:'Сбросить готовность', clear_votes:'Очистить голоса', remove_vote:'Удалить голос', voting_resync:'Синхронизировать голосование', threat_force_success:'Force success угрозы', threat_force_failure:'Force failure угрозы', threat_cancel:'Отменить угрозу', threat_restart:'Перезапустить угрозу', threat_resync:'Синхронизировать угрозу' }
+        }[getCurrentLanguage()] || {};
+        document.querySelectorAll('#directorAction option').forEach(option => { if (labels[option.value]) option.textContent = labels[option.value]; });
+        const action = document.getElementById('directorAction')?.value || '';
+        const category = document.getElementById('directorCategory');
+        if (category) {
+            const previous = category.value;
+            if (action === 'condition_severity' || action === 'condition_remove') {
+                const get = (object, camel, pascal) => object?.[camel] ?? object?.[pascal];
+                const targetId = document.getElementById('directorTargetPlayer')?.value;
+                const player = (get(omniscientHiddenState, 'players', 'Players') || []).find(item => get(item, 'playerId', 'PlayerId') === targetId);
+                const conditions = get(player, 'additionalPhysicalConditions', 'AdditionalPhysicalConditions') || [];
+                category.innerHTML = conditions.map(item => `<option value="${escapeHtml(String(get(item, 'conditionId', 'ConditionId') || ''))}">${escapeHtml(String(get(item, 'name', 'Name') || ''))}</option>`).join('');
+            } else if (action === 'reveal' || action === 'hide') {
+                const characteristics = ['Personality','Body','Profession','PhysicalHealth','MentalHealth','Hobby','CharacterTrait','Phobia','Inventory','Fact','SpecialCard'];
+                category.innerHTML = characteristics.map(key => `<option value="${key}">${escapeHtml(t(key) || key)}</option>`).join('');
+            }
+            if ([...category.options].some(option => option.value === previous)) category.value = previous;
+        }
+    }
+    function setDirectorPending(pending) { directorCommandPending = pending; document.querySelectorAll('.director-command').forEach(button => button.disabled = pending || (button.id === 'directorApplyButton' && !directorPreview?.canApply)); }
+    async function previewDirectorAction() {
+        if (directorCommandPending) return; setDirectorPending(true); const output = document.getElementById('directorPreviewResult');
+        try { directorPreview = await connection.invoke('PreviewDirectorAction', buildDirectorRequest()); if (output) output.textContent = JSON.stringify(directorPreview, null, 2); }
+        catch (error) { directorPreview = null; if (output) output.textContent = error?.message || t('unavailableNow'); }
+        finally { setDirectorPending(false); }
+    }
+    async function applyDirectorAction() {
+        if (directorCommandPending || !directorPreview?.canApply) return;
+        const irreversible = !!directorPreview.irreversibleWarning;
+        if (!confirm('Apply director action?') || (irreversible && !confirm('Undo unavailable. Confirm irreversible threat action.'))) return;
+        setDirectorPending(true); const output = document.getElementById('directorPreviewResult');
+        try { const result = await connection.invoke('ApplyDirectorAction', buildDirectorRequest(), directorPreview.previewToken, directorPreview.currentStateVersion, crypto.randomUUID(), true); directorPreview = null; if (output) output.textContent = result?.applied ? 'Applied' : 'No change'; }
+        catch (error) { directorPreview = null; if (output) output.textContent = error?.message || t('unavailableNow'); }
+        finally { setDirectorPending(false); }
     }
 
     function renderOmniscientHiddenState() {
@@ -5900,6 +5957,9 @@ function removeBunkerSupplies(months) {
         ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value ?? '—'))}</strong></div>`).join('');
         const query = (document.getElementById('omniscientHiddenSearch')?.value || '').trim().toLocaleLowerCase();
         const players = get(state, 'players', 'Players') || [];
+        const targetSelect = document.getElementById('directorTargetPlayer');
+        if (targetSelect) { const selected = targetSelect.value; targetSelect.innerHTML = players.filter(player => !get(player, 'isSpectatorGm', 'IsSpectatorGm')).map(player => `<option value="${escapeHtml(String(get(player, 'playerId', 'PlayerId') || ''))}">${escapeHtml(String(get(player, 'displayName', 'DisplayName') || ''))}</option>`).join(''); if ([...targetSelect.options].some(option => option.value === selected)) targetSelect.value = selected; }
+        syncDirectorControls();
         const target = document.getElementById('omniscientHiddenPlayers');
         if (target) target.innerHTML = players.filter(player => {
             const searchable = `${get(player, 'displayName', 'DisplayName')} ${(get(player, 'characteristics', 'Characteristics') || []).map(c => `${get(c, 'key', 'Key')} ${get(c, 'value', 'Value')}`).join(' ')}`.toLocaleLowerCase();
