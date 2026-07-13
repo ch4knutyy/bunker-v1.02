@@ -154,7 +154,7 @@ namespace Bunker.Services
         {
             newHost = null;
             if (!TryResolvePlayer(room, targetConnectionId, out var currentConnectionId, out var player) ||
-                !player.IsConnected || !IsGameplayParticipant(player))
+                !player.IsConnected)
             {
                 return false;
             }
@@ -239,7 +239,8 @@ namespace Bunker.Services
                 threat.MiniGame.LeaderPlayerId = "";
         }
 
-        public static bool IsGameplayParticipant(Player? player) => player != null && !player.IsEliminated && !player.IsSpectatorGm;
+        public static bool IsGameplayParticipant(Player? player) => player != null && !player.IsEliminated && !player.IsSpectatorGm &&
+            !player.IsLobbySpectator && player.GmRole != GmMode.TechnicalGm;
 
         public static IReadOnlyList<KeyValuePair<string, Player>> GetGameplayPlayersSnapshot(Room room) =>
             GetPlayersSnapshot(room).Where(entry => IsGameplayParticipant(entry.Value)).ToList();
@@ -290,10 +291,10 @@ namespace Bunker.Services
 				return (false, "Тільки хост може почати гру", null);
 			}
 
-			var playersSnapshot = GetPlayersSnapshot(room, "StartGame", cleanupInvalid: true);
+            var playersSnapshot = GetGameplayPlayersSnapshot(room);
 
 			// Перевірка: мінімум гравців
-			if (playersSnapshot.Count < 2)
+            if (playersSnapshot.Count < 2)
 			{
 				return (false, "Недостатньо гравців для початку", null);
 			}

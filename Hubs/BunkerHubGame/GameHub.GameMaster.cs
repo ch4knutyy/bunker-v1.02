@@ -1398,7 +1398,7 @@ namespace Bunker.Hubs
                 await SendPlayerHostControlData(room);
                 return;
             }
-            if (!player.IsConnected || !RoomService.IsGameplayParticipant(player))
+            if (!player.IsConnected)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
                 return;
@@ -1423,6 +1423,7 @@ namespace Bunker.Hubs
             await SendPublicPlayersUpdate(room);
             await AppendGmAudit(room, oldHostPlayerId, "host_transfer", GmAuditResult.Success,
                 "Host role was transferred.", GetSafeAuditPlayerId(player), commandId, snapshot: transferSnapshot, allowUndo: false);
+            await BroadcastLobbyState(room);
         }
 
         public async Task InspectStalePlayerConnection(string targetConnectionId, bool fix = false)

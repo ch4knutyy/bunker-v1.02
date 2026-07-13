@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,6 +8,7 @@
     <DefaultItemExcludes>
       $(DefaultItemExcludes);Tests/Bunker.UnitTests/**
     </DefaultItemExcludes>
+    <UserSecretsId>52d1ee71-b750-4e32-bcbf-089b6e3892bc</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

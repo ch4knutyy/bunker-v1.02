@@ -604,10 +604,30 @@
             </section>
         </section>
         <div id="roomLobby">
-            <h3 class="section-title">Гравці в кімнаті: <span id="roomPlayerCount">0/12</span></h3>
-            <div id="roomPlayersList" class="room-players-grid"></div>
+            <header class="lobby-intro">
+                <div><h2 data-lobby-i18n="lobbyTitle">Лобі кімнати</h2><p id="lobbyRoomCode" class="lobby-room-code"></p></div>
+                <p data-lobby-i18n="lobbyHint">Оберіть ролі, підтвердьте готовність і почніть гру.</p>
+                <strong id="lobbyMemberCapacity"></strong>
+            </header>
+            <section id="canonicalLobbyPanel" class="lobby-shell">
+                <div id="lobbySummary" class="gm-status-grid"></div>
+                <section class="lobby-members-section"><h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3>
+                <div id="lobbyMembers" class="gm-diagnostics-list"></div>
+                </section>
+                <section id="lobbyStartSection" class="lobby-start-card">
+                    <h3 data-lobby-i18n="lobbyStartTitle">Готовність до старту</h3>
+                    <div class="lobby-start-metrics"><span id="lobbyReadyProgress"></span><span id="lobbyGameplayProgress"></span></div>
+                    <div id="lobbyBlockers" class="lobby-blockers" role="status"></div>
+                    <div class="lobby-start-actions">
+                        <button id="lobbyStartPreviewButton" type="button" class="btn-secondary lobby-host-command" onclick="previewLobbyStart()" style="display:none;" data-lobby-i18n="lobbyCheckReadiness">Перевірити готовність</button>
+                        <button id="lobbyStartPrimaryButton" type="button" class="btn-success lobby-host-command" onclick="startGame()" style="display:none;" data-lobby-i18n="startGame">Почати гру</button>
+                    </div>
+                    <div id="lobbyStartPreview" class="lobby-preview-summary" aria-live="polite"></div>
+                </section>
+            </section>
             <p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
         </div>
+        <div id="roomPlayersList" class="room-players-grid" style="display:none;"></div>
 
         <!-- My Player Characteristics Section (тільки для власника) -->
         <div id="myPlayerSection" style="display:none;">

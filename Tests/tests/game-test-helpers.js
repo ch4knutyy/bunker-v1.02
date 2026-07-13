@@ -25,9 +25,10 @@ async function createRoom(page, playerName, roomName, options = {}) {
 
 	await page.getByTestId('create-room-btn').click();
 
-	const playersList = page.locator('#roomPlayersList');
+	const playersList = page.locator('#lobbyMembers');
 	await expect(playersList).toContainText(playerName, { timeout: 15000 });
-	await expect(page.locator('#myPlayerSection')).toBeVisible({ timeout: 15000 });
+	await expect(page.locator('#roomLobby')).toBeVisible({ timeout: 15000 });
+	await expect(page.locator('#myPlayerSection')).toBeHidden();
 
 	return playersList;
 }
@@ -50,8 +51,9 @@ async function joinRoom(page, playerName, roomName) {
 		name: /Приєднатися|Присоединиться|Join/i,
 	}).click();
 
-	await expect(page.locator('#roomPlayersList')).toContainText(playerName, { timeout: 15000 });
-	await expect(page.locator('#myPlayerSection')).toBeVisible({ timeout: 15000 });
+	await expect(page.locator('#lobbyMembers')).toContainText(playerName, { timeout: 15000 });
+	await expect(page.locator('#roomLobby')).toBeVisible({ timeout: 15000 });
+	await expect(page.locator('#myPlayerSection')).toBeHidden();
 }
 
 async function createTwoPlayerRoom(browser, roomName) {
@@ -68,8 +70,8 @@ async function createTwoPlayerRoom(browser, roomName) {
 	await createRoom(host, 'P1', roomName, { maxPlayers: 6 });
 	await joinRoom(guest, 'P2', roomName);
 
-	await expect(host.locator('#roomPlayersList')).toContainText('P2', { timeout: 15000 });
-	await expect(guest.locator('#roomPlayersList')).toContainText('P1', { timeout: 15000 });
+	await expect(host.locator('#lobbyMembers')).toContainText('P2', { timeout: 15000 });
+	await expect(guest.locator('#lobbyMembers')).toContainText('P1', { timeout: 15000 });
 
 	return {
 		host,
