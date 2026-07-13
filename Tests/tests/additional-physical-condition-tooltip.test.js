@@ -11,7 +11,8 @@ const css = fs.readFileSync(path.join(root, 'wwwroot', 'css', 'tooltip.css'), 'u
 function method(source, name) {
   const start = source.indexOf(`function ${name}(`);
   assert.notEqual(start, -1, `missing ${name}`);
-  const open = source.indexOf('{', start);
+	const signatureEnd = source.indexOf(')', start);
+	const open = source.indexOf('{', signatureEnd);
   let depth = 0;
   for (let i = open; i < source.length; i += 1) {
     if (source[i] === '{') depth += 1;
@@ -21,23 +22,28 @@ function method(source, name) {
 }
 
 function buildTooltip(effect, lang) {
-  const source = method(game, 'buildAdditionalPhysicalConditionTooltip');
+	const sharedSource = method(game, 'buildSharedHealthTooltip');
+	const source = method(game, 'buildAdditionalPhysicalConditionTooltip');
   const labels = {
     uk: 'важка форма',
     ru: 'тяжёлая форма',
     en: 'severe'
   };
-  const factory = new Function(
-    'getCurrentLanguage', 'getLocalization', 'cleanTooltipText', 'getConditionSeverityLabel', 'escapeHtml',
-    `${source}; return buildAdditionalPhysicalConditionTooltip;`
-  );
-  const fn = factory(
-    () => lang,
-    value => value.localization,
-    value => String(value || '').trim(),
-    (_value, language) => labels[language],
-    value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  );
+	const factory = new Function(
+		'getCurrentLanguage', 'getLocalization', 'getLocalizedValue', 'cleanTooltipText', 'getConditionSeverityLabel',
+		'getLocalizedHealthDescription', 'getLocalizedByFields', 'escapeHtml',
+		`${sharedSource}; ${source}; return buildAdditionalPhysicalConditionTooltip;`
+	);
+	const fn = factory(
+		() => lang,
+		value => value.localization,
+		(value, field) => value.localization?.[lang]?.[field] || value[field] || '',
+		value => String(value || '').trim(),
+		(_value, language) => labels[language],
+		value => value.description || '',
+		(_value, _fields, fallback) => fallback,
+		value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+	);
   return fn(effect, lang);
 }
 
