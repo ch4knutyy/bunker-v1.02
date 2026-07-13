@@ -68,6 +68,9 @@ let lobbyState = null;
 let lobbyStartPreview = null;
 let lobbyCommandPending = false;
 const pendingCharacteristicReveals = new Set();
+const pendingSpecialCardUses = new Set();
+const specialCardSelectionState = new Map();
+let renderedSpecialCardKeys = [];
 let globalCatalogAllowed = false;
 let globalCatalogMetadata = [];
 let globalCatalogPage = 1;
@@ -162,6 +165,10 @@ Object.assign(uiTranslations.uk, {
 	usePublicly: "Використати публічно",
 	activeUntilRoundEnd: "Активна до кінця раунду",
 	effectEnded: "Ефект завершено",
+	specialPending: "Виконується…", specialAvailableNow: "Доступна зараз", specialTargetRequired: "Потрібно обрати ціль",
+	specialStageBeforeVoting: "Перед голосуванням", specialStageDiscussion: "Під час обговорення", specialStageLabel: "Етап", specialEffectLabel: "Ефект",
+	specialChooseCharacteristic: "Оберіть характеристику", specialCharacteristicLabel: "Характеристика", specialNotIssued: "Спеціальну карту не видано",
+	specialVariantReveal: "Розкриття", specialVariantProtect: "Захист", specialVariantSteal: "Перехоплення", specialVariantSwap: "Обмін", specialVariantReroll: "Перегенерація", specialVariantChange: "Зміна", specialVariantGlobal: "Глобальний ефект", specialVariantThreat: "Загроза", specialVariantInventory: "Спорядження", specialVariantNeutral: "Особлива дія",
 	notUsed: "Не використана",
 	used: "Використана",
 	youHaveBeenEliminated: "Ви вибули з гри",
@@ -255,6 +262,10 @@ Object.assign(uiTranslations.en, {
 	usePublicly: "Use publicly",
 	activeUntilRoundEnd: "Active until end of round",
 	effectEnded: "Effect ended",
+	specialPending: "Processing…", specialAvailableNow: "Available now", specialTargetRequired: "Choose a target",
+	specialStageBeforeVoting: "Before voting", specialStageDiscussion: "During discussion", specialStageLabel: "Stage", specialEffectLabel: "Effect",
+	specialChooseCharacteristic: "Choose a characteristic", specialCharacteristicLabel: "Characteristic", specialNotIssued: "No special card assigned",
+	specialVariantReveal: "Reveal", specialVariantProtect: "Protection", specialVariantSteal: "Interception", specialVariantSwap: "Swap", specialVariantReroll: "Reroll", specialVariantChange: "Change", specialVariantGlobal: "Global effect", specialVariantThreat: "Threat", specialVariantInventory: "Equipment", specialVariantNeutral: "Special action",
 	notUsed: "Not used",
 	used: "Used",
 	youHaveBeenEliminated: "You have been eliminated",
@@ -347,6 +358,10 @@ Object.assign(uiTranslations.ru, {
 	usePublicly: "Использовать публично",
 	activeUntilRoundEnd: "Активна до конца раунда",
 	effectEnded: "Эффект завершён",
+	specialPending: "Выполняется…", specialAvailableNow: "Доступна сейчас", specialTargetRequired: "Нужно выбрать цель",
+	specialStageBeforeVoting: "Перед голосованием", specialStageDiscussion: "Во время обсуждения", specialStageLabel: "Этап", specialEffectLabel: "Эффект",
+	specialChooseCharacteristic: "Выберите характеристику", specialCharacteristicLabel: "Характеристика", specialNotIssued: "Специальная карта не выдана",
+	specialVariantReveal: "Раскрытие", specialVariantProtect: "Защита", specialVariantSteal: "Перехват", specialVariantSwap: "Обмен", specialVariantReroll: "Перегенерация", specialVariantChange: "Изменение", specialVariantGlobal: "Глобальный эффект", specialVariantThreat: "Угроза", specialVariantInventory: "Снаряжение", specialVariantNeutral: "Особое действие",
 	notUsed: "Не использована",
 	used: "Использована",
 	youHaveBeenEliminated: "Вы выбыли из игры",
@@ -513,6 +528,28 @@ Object.assign(uiTranslations.ru, {
 	gmRefreshSnapshots: "Обновить snapshots", gmSnapshotPreview: "Preview", gmSnapshotRestore: "Restore", gmSnapshotEmpty: "Контрольных точек пока нет", gmSnapshotConfirm: "Восстановить комнату из этой контрольной точки?",
 	gmSnapshotActiveConfirm: "Активная игра вернётся к предыдущему состоянию. Подтвердить ещё раз?", gmSnapshotBlocked: "Restore заблокирован", gmSnapshotChanges: "Изменённые категории",
 	gmRoomLocalEditor: "Редактор текущей комнаты", gmRoomLocalWarning: "Изменения действуют только в этой комнате и не меняют глобальные данные.", gmCurrentPublicValue: "Текущее публичное значение", gmNewPublicValue: "Новое публичное значение", gmEditorApply: "Применить"
+});
+
+Object.assign(uiTranslations.uk, {
+	apocBadge: "Апокаліпсис", apocDanger: "Небезпека", apocMainThreats: "Основні загрози",
+	apocSurvivalRequirements: "Потрібно для виживання", apocConsequences: "Наслідки / Особливості світу",
+	apocScenarioBrief: "Сценарій виживання", apocOpenImage: "Відкрити зображення сценарію",
+	dangerLow: "Низька", dangerMedium: "Середня", dangerHigh: "Висока",
+	dangerVeryHigh: "Дуже висока", dangerCritical: "Критична", dangerUnknown: "Невідомо"
+});
+Object.assign(uiTranslations.en, {
+	apocBadge: "Apocalypse", apocDanger: "Danger", apocMainThreats: "Main threats",
+	apocSurvivalRequirements: "Required for survival", apocConsequences: "Consequences / World conditions",
+	apocScenarioBrief: "Survival scenario", apocOpenImage: "Open scenario image",
+	dangerLow: "Low", dangerMedium: "Medium", dangerHigh: "High",
+	dangerVeryHigh: "Very high", dangerCritical: "Critical", dangerUnknown: "Unknown"
+});
+Object.assign(uiTranslations.ru, {
+	apocBadge: "Апокалипсис", apocDanger: "Опасность", apocMainThreats: "Основные угрозы",
+	apocSurvivalRequirements: "Нужно для выживания", apocConsequences: "Последствия / Особенности мира",
+	apocScenarioBrief: "Сценарий выживания", apocOpenImage: "Открыть изображение сценария",
+	dangerLow: "Низкая", dangerMedium: "Средняя", dangerHigh: "Высокая",
+	dangerVeryHigh: "Очень высокая", dangerCritical: "Критическая", dangerUnknown: "Неизвестно"
 });
 
 function getCurrentLanguage() {
@@ -2428,6 +2465,9 @@ function normalizeSpecialCard(source) {
 		id: src.id ?? src.Id ?? src.cardId ?? src.CardId ?? "",
 		name: src.name ?? src.Name ?? src.cardName ?? src.CardName ?? "",
 		description: src.description ?? src.Description ?? "",
+		category: src.category ?? src.Category ?? "",
+		tags: Array.isArray(src.tags ?? src.Tags) ? (src.tags ?? src.Tags) : [],
+		targetType: src.targetType ?? src.TargetType ?? "",
 		isSecret: src.isSecret ?? src.IsSecret ?? true,
 		isOneTimeUse: src.isOneTimeUse ?? src.IsOneTimeUse ?? true,
 		phase: src.phase ?? src.Phase ?? "beforeVoting",
@@ -3016,20 +3056,9 @@ function registerSignalREvents() {
 		}
 		applyRoundState(data.roundState || data.RoundState);
 
-		// Normalize apocalypse (handle both camelCase and PascalCase)
+		// Keep the complete canonical snapshot. The renderer localizes and normalizes it on every render.
 		const apocalypse = data.apocalypse || data.Apocalypse;
-		currentApocalypse = apocalypse ? {
-			id: apocalypse.id || apocalypse.Id,
-			name: apocalypse.name || apocalypse.Name || 'Невідомо',
-			description: apocalypse.description || apocalypse.Description || '',
-			severity: apocalypse.severity || apocalypse.Severity || 'medium',
-			survivalChance: apocalypse.survivalChance ?? apocalypse.SurvivalChance ?? 50,
-			duration: apocalypse.duration || apocalypse.Duration || '',
-			threats: apocalypse.threats || apocalypse.Threats || [],
-			requirements: apocalypse.requirements || apocalypse.Requirements || [],
-			imageUrl: apocalypse.imageUrl || apocalypse.ImageUrl || null,
-			_i18n: getI18n(apocalypse)
-		} : null;
+		currentApocalypse = apocalypse || null;
 		console.log("[GameStarted] Normalized apocalypse:", currentApocalypse);
 
 		// Normalize bunker (handle both camelCase and PascalCase)
@@ -3133,8 +3162,8 @@ function registerSignalREvents() {
 		const currentRound = data.currentRound || data.CurrentRound || getCurrentRoundNumber() || 1;
 		addEventMessage(`Гра почалась! Раунд ${currentRound}`);
 
-		if (currentApocalypse && currentApocalypse.name) {
-			addEventMessage(`<span class="event-apocalypse">☢️ Апокаліпсис:</span> ${currentApocalypse.name}`);
+		if (currentApocalypse) {
+			addEventMessage(`<span class="event-apocalypse">☢️ ${escapeHtml(t('apocalypse'))}:</span> ${escapeHtml(getLocalizedValue(currentApocalypse, 'name'))}`);
 		}
 
 		if (currentBunker && currentBunker.name) {
@@ -3293,6 +3322,7 @@ function registerSignalREvents() {
 		if (myPlayerData) {
 			myPlayerData.specialCards = normalizeSpecialCards(cards, card);
 			myPlayerData.specialCard = myPlayerData.specialCards[0] || normalizeSpecialCard(card);
+			myPlayerData.specialCards.filter(item => item.isUsed || item.isActive || item.isEffectActive).forEach(item => pendingSpecialCardUses.delete(item.id));
 			if (data.inventory || data.Inventory) {
 				myPlayerData.inventory = normalizeInventoryData(data.inventory || data.Inventory);
 			}
@@ -3831,9 +3861,10 @@ function registerSignalREvents() {
 	connection.off("ApocalypseChanged");
 	connection.on("ApocalypseChanged", function (data) {
 		console.log("Apocalypse changed:", data);
-		currentApocalypse = data.apocalypse;
-		renderApocalypse(data.apocalypse);
-		addEventMessage(`<span class="event-apocalypse">☢️ Новий апокаліпсис:</span> ${data.apocalypse.name}`);
+		const apocalypse = data.apocalypse || data.Apocalypse || data;
+		currentApocalypse = apocalypse;
+		renderApocalypse(currentApocalypse);
+		addEventMessage(`<span class="event-apocalypse">☢️ ${escapeHtml(t('apocalypse'))}:</span> ${escapeHtml(getLocalizedValue(apocalypse, 'name'))}`);
 	});
 
 	// Ігрова подія від GM
@@ -4272,8 +4303,10 @@ function registerSignalREvents() {
 	connection.off("ApocalypseImageUpdated");
 	connection.on("ApocalypseImageUpdated", function (data) {
 		console.log("[ApocalypseImageUpdated]", data);
-		if (currentApocalypse && currentApocalypse.id === data.apocalypseId) {
-			currentApocalypse.imageUrl = data.imageUrl;
+		if (currentApocalypse && (currentApocalypse.id || currentApocalypse.Id) === (data.apocalypseId || data.ApocalypseId)) {
+			const imageUrl = data.imageUrl || data.ImageUrl || null;
+			currentApocalypse.imageUrl = imageUrl;
+			if ('ImageUrl' in currentApocalypse) currentApocalypse.ImageUrl = imageUrl;
 			renderApocalypse(currentApocalypse);
 			addEventMessage(`<span class="event-image">🖼️</span> Зображення апокаліпсису оновлено`);
 		}
@@ -4306,8 +4339,9 @@ function registerSignalREvents() {
 	connection.off("ApocalypseImageRemoved");
 	connection.on("ApocalypseImageRemoved", function (data) {
 		console.log("[ApocalypseImageRemoved]", data);
-		if (currentApocalypse && currentApocalypse.id === data.apocalypseId) {
+		if (currentApocalypse && (currentApocalypse.id || currentApocalypse.Id) === (data.apocalypseId || data.ApocalypseId)) {
 			currentApocalypse.imageUrl = null;
+			if ('ImageUrl' in currentApocalypse) currentApocalypse.ImageUrl = null;
 			renderApocalypse(currentApocalypse);
 			addEventMessage(`<span class="event-image">🗑️</span> Зображення апокаліпсису видалено`);
 		}
@@ -5412,85 +5446,173 @@ async function reveal(characteristicName) {
 
 // ==================== APOCALYPSE & BUNKER FUNCTIONS ====================
 
+const apocalypseIconSvgRegistry = Object.freeze({
+	nuclear: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="7"/><path d="M29 25 18 7A28 28 0 0 1 46 7L35 25a10 10 0 0 0-6 0ZM38 31h21a28 28 0 0 1-14 24L35 38a10 10 0 0 0 3-7ZM29 38 19 55A28 28 0 0 1 5 31h21a10 10 0 0 0 3 7Z"/></svg>',
+	biological: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="6"/><path d="M32 26c-8-14-24-9-24 5h17M38 32c16 0 19 16 7 23l-8-15M29 38c-8 14-24 8-24-6h17" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="32" cy="32" r="4"/></svg>',
+	climate: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 37h40a11 11 0 0 0-4-21 16 16 0 0 0-30 7A8 8 0 0 0 9 37Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m18 46-4 8m18-8-4 8m18-8-4 8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',
+	cosmic: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="31" cy="32" r="16" fill="none" stroke="currentColor" stroke-width="4"/><path d="M7 42c9 7 29 4 43-7 7-6 9-11 6-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="49" cy="10" r="3"/></svg>',
+	ai: '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="14" width="36" height="36" rx="6" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 25h16v14H24zM6 24h8M6 40h8M50 24h8M50 40h8M24 6v8M40 6v8M24 50v8M40 50v8" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	alien: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7c15 0 23 10 19 25-3 13-12 24-19 25-7-1-16-12-19-25C9 17 17 7 32 7Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M18 27c7-3 11 1 12 9-7 1-11-2-12-9Zm28 0c-7-3-11 1-12 9 7 1 11-2 12-9ZM26 46h12" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+	fungal: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M13 32C15 16 25 8 36 9c12 1 19 10 20 23H13Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M27 32c2 8 1 15-4 22h21c-5-7-6-14-4-22" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="25" cy="23" r="2"/><circle cx="39" cy="18" r="2"/><circle cx="47" cy="26" r="2"/></svg>',
+	zombie: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 48c-5-6-8-13-8-21C10 14 20 6 32 6s22 8 22 21c0 8-3 15-8 21v8H18v-8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m20 28 9 5-9 4m24-9-9 5 9 4M28 45h8M25 56v-7m14 7v-7" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	mystical: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M5 32s10-17 27-17 27 17 27 17-10 17-27 17S5 32 5 32Z" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 4v7M8 9l6 6m42-6-6 6M32 53v7" stroke="currentColor" stroke-width="3"/></svg>',
+	anomaly: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m32 5 8 17 19 2-14 13 4 19-17-9-17 9 4-19L5 24l19-2 8-17Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m25 20 14 24M40 18 23 45" stroke="currentColor" stroke-width="3"/></svg>',
+	collapse: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 57h46M15 57V13h19v44M34 24h15v33M21 21h7m-7 10h7m-7 10h7m19-9-8 8 7 6-9 11" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 55H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
+});
+
+function normalizeApocalypseMetadataValue(value) {
+	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+function resolveApocalypseVisualVariant(model) {
+	const metadata = [
+		...(Array.isArray(model?.tags) ? model.tags : []),
+		model?.category, model?.type, model?.classification, model?.imageCategory, model?.imageType
+	].map(normalizeApocalypseMetadataValue).filter(Boolean).join(' ');
+	const rules = [
+		['nuclear', /nuclear|radiation|atomic|fallout/],
+		['fungal', /fungal|fungus|spore|mushroom/],
+		['zombie', /zombie|undead/],
+		['biological', /biological|biohazard|infection|virus|pandemic|parasite|toxic_contamination/],
+		['climate', /weather_climate|climate|winter_cold|heat_fire|volcanic_ash|storm|flood|drought|ice/],
+		['cosmic', /cosmic|space|asteroid|meteor|solar|planetary/],
+		['ai', /ai_machines|artificial_intelligence|technology|nanotech|cyber|robot|machine/],
+		['alien', /alien|extraterrestrial|ufo|unknown_signal/],
+		['mystical', /mystical|occult|magic|supernatural|rune/],
+		['anomaly', /anomaly_reality|anomaly|reality_distortion|dimensional/],
+		['collapse', /structural_damage|social_conflict|collapse|industrial|infrastructure/]
+	];
+	return rules.find(([, pattern]) => pattern.test(metadata))?.[0] || 'generic';
+}
+
+function normalizeLocalScenarioImageUrl(value) {
+	const url = String(value ?? '').trim().replace(/\\/g, '/');
+	if (!url || /^(?:https?:)?\/\//i.test(url) || /^[a-z][a-z0-9+.-]*:/i.test(url) || url.includes('..')) return '';
+	return url.startsWith('/') ? url : `/${url.replace(/^\.\//, '')}`;
+}
+
+function getApocalypseDangerKey(value) {
+	const normalized = normalizeApocalypseMetadataValue(value);
+	if (['low', 'minor'].includes(normalized)) return 'low';
+	if (['medium', 'moderate'].includes(normalized)) return 'medium';
+	if (['high', 'severe'].includes(normalized)) return 'high';
+	if (['very_high', 'veryhigh'].includes(normalized)) return 'very-high';
+	if (['critical', 'extreme', 'catastrophic'].includes(normalized)) return 'critical';
+	return 'unknown';
+}
+
+function getApocalypseDangerLabel(key) {
+	return t({ low: 'dangerLow', medium: 'dangerMedium', high: 'dangerHigh', 'very-high': 'dangerVeryHigh', critical: 'dangerCritical' }[key] || 'dangerUnknown');
+}
+
+function buildApocalypseScenarioModel(source) {
+	if (!source) return null;
+	const rawTags = source.tags || source.Tags || [];
+	const dangerLevel = source.dangerLevel ?? source.DangerLevel ?? source.severity ?? source.Severity ?? '';
+	const model = {
+		id: source.id || source.Id || '',
+		name: getLocalizedValue(source, 'name') || t('unknown'),
+		shortDescription: getLocalizedByFields(source, ['shortDescription', 'subtitle', 'description']),
+		description: getLocalizedValue(source, 'description'),
+		dangerLevel,
+		survivalChance: source.survivalChance ?? source.SurvivalChance ?? '',
+		duration: getLocalizedValue(source, 'duration') || '',
+		threats: getLocalizedArray(source, 'threats'),
+		requirements: getLocalizedArray(source, 'requirements'),
+		consequences: getLocalizedArray(source, 'consequences'),
+		imageUrl: normalizeLocalScenarioImageUrl(source.imageUrl || source.ImageUrl || source.uploadedImagePath || source.UploadedImagePath),
+		tags: Array.isArray(rawTags) ? rawTags : [],
+		category: source.category || source.Category || '',
+		type: source.type || source.Type || '',
+		classification: source.classification || source.Classification || '',
+		imageCategory: source.imageCategory || source.ImageCategory || '',
+		imageType: source.imageType || source.ImageType || ''
+	};
+	model.visualVariant = resolveApocalypseVisualVariant(model);
+	model.dangerKey = getApocalypseDangerKey(dangerLevel);
+	return model;
+}
+
+function renderApocalypseIcon(variant) {
+	return apocalypseIconSvgRegistry[variant] || apocalypseIconSvgRegistry.generic;
+}
+
+function renderApocalypseContentSection(kind, title, items) {
+	if (!Array.isArray(items) || !items.length) return '';
+	return `<section class="apocalypse-content-card content-${kind}" aria-labelledby="apoc-${kind}-title">
+		<h5 id="apoc-${kind}-title" class="apocalypse-content-title"><span aria-hidden="true"></span>${escapeHtml(title)}</h5>
+		<ul>${items.map(item => `<li><span aria-hidden="true"></span><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
+	</section>`;
+}
+
+function renderApocalypseScenario(model) {
+	if (!model) return `<p class="apocalypse-empty">${escapeHtml(t('unknown'))}</p>`;
+	const variant = model.visualVariant || resolveApocalypseVisualVariant(model);
+	const survivalValue = model.survivalChance === '' || model.survivalChance == null
+		? t('unknown')
+		: `${escapeHtml(model.survivalChance)}${typeof model.survivalChance === 'number' || /^\d+(?:[.,]\d+)?$/.test(String(model.survivalChance)) ? '%' : ''}`;
+	const durationValue = model.duration || t('unknown');
+	const heroImage = model.imageUrl
+		? `<div class="apocalypse-hero-media" aria-hidden="true">
+			<img class="apocalypse-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleApocalypseHeroImageError(this)">
+		</div>`
+		: '';
+	const imageButton = model.imageUrl
+		? `<button type="button" class="apocalypse-open-image" onclick="openCurrentApocalypseImage()">${escapeHtml(t('apocOpenImage'))}</button>`
+		: '';
+	const hostControls = isHost ? `<div class="scenario-image-controls apocalypse-image-controls">
+		<input type="file" id="apocalypseImageInput" accept="image/*" hidden onchange="uploadApocalypseImage(this)">
+		<button type="button" class="btn-scenario-image" onclick="document.getElementById('apocalypseImageInput').click()">${escapeHtml(t('uploadImage'))}</button>
+		<button type="button" class="btn-scenario-image btn-generate" onclick="generateApocalypsePrompt()">${escapeHtml(t('generatePrompt'))}</button>
+		${model.imageUrl ? `<button type="button" class="btn-scenario-image btn-remove" onclick="removeApocalypseImage()">${escapeHtml(t('remove'))}</button>` : ''}
+	</div>` : '';
+	const details = model.description && model.description !== model.shortDescription
+		? `<p class="apocalypse-footer-description">${escapeHtml(model.description)}</p>` : '';
+
+	return `<article class="apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
+		<header class="apocalypse-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
+			${heroImage}
+			<div class="apocalypse-hero-overlay" aria-hidden="true"></div>
+			<div class="apocalypse-hero-pattern" aria-hidden="true"></div>
+			<div class="apocalypse-theme-mark">${renderApocalypseIcon(variant)}</div>
+			<div class="apocalypse-hero-content apocalypse-hero-copy">
+				<span class="apocalypse-badge">${escapeHtml(t('apocBadge'))}</span>
+				<h4 id="apocalypse-scenario-title" class="apocalypse-title">${escapeHtml(model.name)}</h4>
+				${model.shortDescription ? `<p class="apocalypse-subtitle">${escapeHtml(model.shortDescription)}</p>` : ''}
+			</div>
+		</header>
+		<section class="apocalypse-metrics" aria-label="${escapeHtml(t('apocBadge'))}">
+			<div class="apocalypse-metric metric-danger" data-danger="${model.dangerKey}"><span class="apocalypse-metric-label">${escapeHtml(t('apocDanger'))}</span><strong>${escapeHtml(getApocalypseDangerLabel(model.dangerKey))}</strong></div>
+			<div class="apocalypse-metric metric-survival"><span class="apocalypse-metric-label">${escapeHtml(t('survivalChance'))}</span><strong>${survivalValue}</strong></div>
+			<div class="apocalypse-metric metric-duration"><span class="apocalypse-metric-label">${escapeHtml(t('duration'))}</span><strong>${escapeHtml(durationValue)}</strong></div>
+		</section>
+		<div class="apocalypse-content-grid">
+			${renderApocalypseContentSection('threats', t('apocMainThreats'), model.threats)}
+			${renderApocalypseContentSection('requirements', t('apocSurvivalRequirements'), model.requirements)}
+			${renderApocalypseContentSection('consequences', t('apocConsequences'), model.consequences)}
+		</div>
+		<footer class="apocalypse-footer"><div><span class="apocalypse-footer-kicker">${escapeHtml(t('apocScenarioBrief'))}</span>${details}</div><div class="apocalypse-footer-actions">${imageButton}${hostControls}</div></footer>
+	</article>`;
+}
+
 function renderApocalypse(apocalypse) {
 	const container = document.getElementById('apocalypseContent');
 	if (!container) return;
+	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse));
+}
 
-	if (!apocalypse) {
-		container.innerHTML = `<p>${t('unknown')}</p>`;
-		return;
-	}
-	const apocalypseName = getLocalizedValue(apocalypse, 'name') || t('unknown');
-	const apocalypseDescription = getLocalizedValue(apocalypse, 'description');
-	const apocalypseDuration = getLocalizedValue(apocalypse, 'duration') || apocalypse.duration || apocalypse.Duration || '';
-	const apocalypseThreats = getLocalizedArray(apocalypse, 'threats');
-	const apocalypseRequirements = getLocalizedArray(apocalypse, 'requirements');
+function handleApocalypseHeroImageError(image) {
+	const hero = image?.closest?.('.apocalypse-hero');
+	if (!hero) return;
+	hero.classList.remove('has-image');
+	hero.classList.add('no-image');
+	image.closest('.apocalypse-hero-media')?.remove();
+}
 
-	const severityColors = {
-		'low': '#27ae60',
-		'medium': '#f39c12',
-		'high': '#e74c3c',
-		'extreme': '#8e44ad'
-	};
-
-	const severityLabels = {
-		uk: { low: 'Низька', medium: 'Середня', high: 'Висока', extreme: 'Екстремальна' },
-		en: { low: 'Low', medium: 'Medium', high: 'High', extreme: 'Extreme' },
-		ru: { low: 'Низкая', medium: 'Средняя', high: 'Высокая', extreme: 'Экстремальная' }
-	};
-
-	// Перевіряємо наявність зображення
-	const imageUrl = apocalypse.imageUrl || apocalypse.ImageUrl;
-	const imageSection = imageUrl ? `
-            <div class="scenario-image-container">
-                <img src="${imageUrl}" alt="${escapeHtml(apocalypseName)}" class="scenario-image" onclick="openImageModal('${imageUrl}', '${escapeHtml(apocalypseName)}')" />
-            </div>
-        ` : '';
-
-	// Контроли хоста для зображення
-	const hostControls = isHost ? `
-            <div class="scenario-image-controls">
-                <input type="file" id="apocalypseImageInput" accept="image/*" style="display: none;" onchange="uploadApocalypseImage(this)" />
-                <button class="btn-scenario-image" onclick="document.getElementById('apocalypseImageInput').click()">
-                    ${t('uploadImage')}
-                </button>
-                <button class="btn-scenario-image btn-generate" onclick="generateApocalypsePrompt()">
-                    ${t('generatePrompt')}
-                </button>
-                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeApocalypseImage()">${t('remove')}</button>` : ''}
-            </div>
-        ` : '';
-
-	container.innerHTML = `
-            <h4 class="apocalypse-name">${escapeHtml(apocalypseName)}</h4>
-            <p class="apocalypse-desc">${escapeHtml(apocalypseDescription)}</p>
-            ${imageSection}
-            ${hostControls}
-            <div class="apocalypse-stats">
-                <div class="stat-item">
-                    <span class="stat-label">${t('threatLevel')}:</span>
-                    <span class="stat-value" style="color: ${severityColors[apocalypse.severity]}">${severityLabels[getCurrentLanguage()]?.[apocalypse.severity] || apocalypse.severity}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">${t('survivalChance')}:</span>
-                    <span class="stat-value">${apocalypse.survivalChance}%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">${t('duration')}:</span>
-                    <span class="stat-value">${escapeHtml(apocalypseDuration)}</span>
-                </div>
-            </div>
-            <div class="apocalypse-lists">
-                <div class="list-section">
-                    <span class="list-title">${t('threats')}</span>
-                    <ul>${apocalypseThreats.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
-                </div>
-                <div class="list-section">
-                    <span class="list-title">${t('requirements')}</span>
-                    <ul>${apocalypseRequirements.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
-                </div>
-            </div>
-        `;
+function openCurrentApocalypseImage() {
+	const model = buildApocalypseScenarioModel(currentApocalypse);
+	if (model?.imageUrl) openImageModal(model.imageUrl, model.name);
 }
 
 // ==================== VOTING FUNCTIONS ====================
@@ -7556,6 +7678,76 @@ function isMyPlayerRef(connectionId, stableId) {
 		(!!stableId && !!myStable && stableId === myStable);
 }
 
+const specialCardIconSvgRegistry = Object.freeze({
+	star:'<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
+	eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+	shield:'<path d="M12 2 4 5v6c0 5 3 9 8 11 5-2 8-6 8-11V5l-8-3Z"/><path d="m8 12 3 3 5-6"/>',
+	hand:'<path d="M6 12V7a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v6-4a2 2 0 0 1 4 0v7c0 5-3 8-8 8-4 0-7-2-8-6l-1-4a2 2 0 0 1 4-1l1 1Z"/>',
+	swap:'<path d="m7 7 3-3-3-3M10 4H5a3 3 0 0 0-3 3v3M17 17l-3 3 3 3M14 20h5a3 3 0 0 0 3-3v-3"/><path d="M5 14h14M19 10H5"/>',
+	dice:'<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/>',
+	refresh:'<path d="M20 7V3l-3 3a8 8 0 1 0 2 9M4 17v4l3-3"/>',
+	globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+	warning:'<path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5M12 18h.01"/>',
+	backpack:'<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
+	briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
+	heart:'<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
+	brain:'<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>'
+});
+
+function renderSpecialCardIcon(iconKey) {
+	const body = specialCardIconSvgRegistry[iconKey] || specialCardIconSvgRegistry.star;
+	return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+}
+
+function resolveSpecialCardVisualVariant(model) {
+	const tags = Array.isArray(model?.tags) ? model.tags : [];
+	const metadata = [model?.category, model?.effectType, model?.targetType, ...tags].filter(Boolean).join(' ').toLowerCase();
+	if (/threat|hazard|danger/.test(metadata)) return 'threat';
+	if (/protect|shield|heal|immun/.test(metadata)) return 'protect';
+	if (/steal|destroy|sabotage|block/.test(metadata)) return 'steal';
+	if (/swap|exchange|trade/.test(metadata)) return 'swap';
+	if (/reroll|regenerat|randomize|refresh/.test(metadata)) return 'reroll';
+	if (/global|all[_\s-]?players|neighbors|force.*all/.test(metadata)) return 'global';
+	if (/inventory|item|equipment|loadout/.test(metadata)) return 'inventory';
+	if (/reveal|peek|expos|inspect/.test(metadata)) return 'reveal';
+	if (/change|copy|hide|give|double|modify/.test(metadata)) return 'change';
+	return 'neutral';
+}
+
+function resolveSpecialCardIconKey(model, visualVariant = resolveSpecialCardVisualVariant(model)) {
+	const effectType = String(model?.effectType || '').toLowerCase();
+	if (/mental|brain/.test(effectType)) return 'brain';
+	if (/physical|health|heal/.test(effectType)) return 'heart';
+	if (/profession/.test(effectType)) return 'briefcase';
+	if (/inventory|item/.test(effectType) && !['steal', 'swap'].includes(visualVariant)) return 'backpack';
+	return { reveal:'eye', protect:'shield', steal:'hand', swap:'swap', reroll:'dice', change:'refresh', global:'globe', threat:'warning', inventory:'backpack', neutral:'star' }[visualVariant] || 'star';
+}
+
+function getSpecialCardVariantLabel(variant) {
+	const key = { reveal:'specialVariantReveal', protect:'specialVariantProtect', steal:'specialVariantSteal', swap:'specialVariantSwap', reroll:'specialVariantReroll', change:'specialVariantChange', global:'specialVariantGlobal', threat:'specialVariantThreat', inventory:'specialVariantInventory', neutral:'specialVariantNeutral' }[variant] || 'specialVariantNeutral';
+	return t(key);
+}
+
+function getSpecialCardStageLabel(phase) {
+	return phase === 'beforeVoting' ? t('specialStageBeforeVoting') : phase === 'discussion' ? t('specialStageDiscussion') : '';
+}
+
+function canUseSpecialCardNow(card) {
+	const phase = getCurrentPhase();
+	return currentRoom?.state === 'Playing' &&
+		(card.phase === 'beforeVoting'
+			? phase === 'PreVotingReadyCheck'
+			: card.phase === 'discussion' && ['RoundReveal', 'RoundEnded', 'Threat', 'ExtraInventory', 'PreVotingReadyCheck', 'VotingResults'].includes(phase));
+}
+
+function getSpecialCardSelectionKey(card, cardIndex) {
+	return card?.id || `card-${cardIndex}`;
+}
+
+function getSpecialCardTargetRef(player) {
+	return player?.stablePlayerId || player?.StablePlayerId || player?.connectionId || player?.ConnectionId || '';
+}
+
 function getSpecialCardStatusLabel(status) {
 	const labels = {
 		hidden: t('hidden'),
@@ -7585,93 +7777,136 @@ function getSpecialCardTargets() {
 		.sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
 }
 
-function renderSpecialCardControls(card, cardIndex = 0) {
+function rememberSpecialCardSelection(cardIndex = 0, rerender = true, keyOverride = '') {
+	const cards = normalizeSpecialCards(myPlayerData?.specialCards, myPlayerData?.specialCard);
+	const card = cards[cardIndex];
+	const selectionKey = keyOverride || renderedSpecialCardKeys[cardIndex] || getSpecialCardSelectionKey(card, cardIndex);
+	if (!selectionKey) return;
+	const targets = getSpecialCardTargets();
+	const targetSelect = document.getElementById(`specialCardTargetSelect-${cardIndex}`);
+	const characteristicSelect = document.getElementById(`specialCardCharacteristicSelect-${cardIndex}`);
+	const targetIndex = targetSelect?.value === '' ? -1 : Number(targetSelect?.value);
+	const selectedTarget = Number.isInteger(targetIndex) ? targets[targetIndex] : null;
+	specialCardSelectionState.set(selectionKey, {
+		targetRef: getSpecialCardTargetRef(selectedTarget),
+		characteristic: characteristicSelect?.value || ''
+	});
+	if (rerender) renderMySpecialCards(myPlayerData);
+}
+
+function captureSpecialCardSelections() {
+	renderedSpecialCardKeys.forEach((key, index) => {
+		if (document.getElementById(`specialCardTargetSelect-${index}`) || document.getElementById(`specialCardCharacteristicSelect-${index}`)) {
+			rememberSpecialCardSelection(index, false, key);
+		}
+	});
+}
+
+function resolveSpecialCardTooltipContent(card, model) {
+	const extra = cleanTooltipText(card.privateResult || card.effectResult || card.publicResult || '');
+	if (!extra) return '';
+	const normalized = extra.toLocaleLowerCase();
+	const duplicates = [model.name, model.effect, model.statusLabel, model.targetLabel]
+		.map(value => cleanTooltipText(value || '').toLocaleLowerCase()).filter(Boolean);
+	return duplicates.includes(normalized) || /^(unknown|невідомо|неизвестно)$/i.test(extra) ? '' : extra;
+}
+
+function buildSpecialCardModel(card, cardIndex = 0) {
 	const normalized = normalizeSpecialCard(card);
-	if (!normalized.id || normalized.id === 'no_special_card') {
-		return '<p class="special-card-note">Спеціальна карта не видана.</p>';
-	}
+	const visualVariant = resolveSpecialCardVisualVariant(normalized);
+	const isPending = pendingSpecialCardUses.has(getSpecialCardSelectionKey(normalized, cardIndex));
+	const isActive = normalized.isEffectActive || normalized.isActive || normalized.status === 'active';
+	const isUsed = normalized.isUsed || !!normalized.usedAtRound || normalized.status === 'used';
+	const status = isPending ? 'pending' : isActive ? 'active' : isUsed ? (normalized.effectDuration === 'untilRoundEnd' ? 'ended' : 'used') : 'hand';
+	const isAvailable = !isPending && !isActive && !isUsed && canUseSpecialCardNow(normalized);
+	const selection = specialCardSelectionState.get(getSpecialCardSelectionKey(normalized, cardIndex)) || {};
+	const selectedTarget = getSpecialCardTargets().find(player => getSpecialCardTargetRef(player) === selection.targetRef);
+	const model = {
+		id: normalized.id,
+		name: getSpecialCardName(normalized),
+		category: getSpecialCardVariantLabel(visualVariant),
+		description: '',
+		effect: getSpecialCardDescription(normalized),
+		iconKey: resolveSpecialCardIconKey(normalized, visualVariant),
+		targetType: normalized.requiresTarget ? 'player' : '',
+		targetLabel: normalized.requiresTarget ? (selectedTarget?.name || selectedTarget?.Name || normalized.targetPlayerName || t('specialTargetRequired')) : '',
+		stageRestriction: getSpecialCardStageLabel(normalized.phase),
+		isAvailable,
+		isPending,
+		isUsed,
+		isUnavailable: !isPending && !isActive && !isUsed && !isAvailable,
+		canUse: isAvailable,
+		actionLabel: isPending ? t('specialPending') : t('useSpecialCard'),
+		statusLabel: isPending ? t('specialPending') : isAvailable ? t('specialAvailableNow') : getSpecialCardStatusLabel(status),
+		visualVariant,
+		status,
+		isActive,
+		isSecret: normalized.isSecret,
+		privacyLabel: getSpecialCardPrivacyLabel(normalized),
+		privacyClass: getSpecialCardPrivacyClass(normalized),
+		cardIndex,
+		source: normalized
+	};
+	model.tooltip = resolveSpecialCardTooltipContent(normalized, model);
+	return model;
+}
 
-	if (normalized.isEffectActive || normalized.isActive || normalized.status === 'active') {
-		const target = normalized.targetPlayerName ? ` проти ${escapeHtml(normalized.targetPlayerName)}` : '';
-		const note = normalized.effectDuration === 'untilRoundEnd'
-			? t('activeUntilRoundEnd')
-			: `Карта активована${target}. Ефект спрацює в цьому голосуванні.`;
-		return `<p class="special-card-note active">${note}</p>`;
-	}
-
-	if (normalized.isUsed || normalized.status === 'used') {
-		return `<p class="special-card-note used">${t('cardWasUsed')}</p>`;
-	}
-
-	const phase = getCurrentPhase();
-	const canUseNow = currentRoom?.state === 'Playing' &&
-		(normalized.phase === 'beforeVoting'
-			? phase === 'PreVotingReadyCheck'
-			: normalized.phase === 'discussion' &&
-			['RoundReveal', 'RoundEnded', 'Threat', 'ExtraInventory', 'PreVotingReadyCheck', 'VotingResults'].includes(phase));
-	if (!canUseNow) {
-		return `<button type="button" class="char-btn special-card-use-btn" disabled aria-disabled="true">${t('unavailableNow')}</button>`;
+function renderSpecialCardControls(card, cardIndex = 0, model = buildSpecialCardModel(card, cardIndex)) {
+	const normalized = normalizeSpecialCard(card);
+	if (!normalized.id || normalized.id === 'no_special_card') return `<p class="special-card-note">${t('specialNotIssued')}</p>`;
+	if (model.isPending) return `<button type="button" class="special-card-use-btn is-pending" disabled aria-disabled="true">${t('specialPending')}</button>`;
+	if (model.isActive) return `<p class="special-card-note active">${t('activeUntilRoundEnd')}</p>`;
+	if (model.isUsed) return `<p class="special-card-note used">${t('cardWasUsed')}</p>`;
+	if (model.isUnavailable) {
+		return `<p class="special-card-note unavailable">${t('unavailableNow')} · ${escapeHtml(model.stageRestriction)}</p><button type="button" class="special-card-use-btn" disabled aria-disabled="true">${t('unavailableNow')}</button>`;
 	}
 
 	const targets = getSpecialCardTargets();
+	const selection = specialCardSelectionState.get(getSpecialCardSelectionKey(normalized, cardIndex)) || {};
 	const targetSelectId = `specialCardTargetSelect-${cardIndex}`;
 	const characteristicSelectId = `specialCardCharacteristicSelect-${cardIndex}`;
-	const needsCharacteristicSelect = [
-		'swapSelectedCharacteristicWithTarget',
-		'rerollTargetSelectedCharacteristic'
-	].includes(normalized.effectType);
+	const needsCharacteristicSelect = ['swapSelectedCharacteristicWithTarget', 'rerollTargetSelectedCharacteristic'].includes(normalized.effectType);
 	const characteristicOptions = [
-		['Profession', 'Професія'],
-		['PersonalInfo', 'Особистість'],
-		['Body', 'Статура'],
-		['PhysicalHealth', 'Фізичне здоровʼя'],
-		['MentalHealth', 'Психічне здоровʼя'],
-		['Hobby', 'Хобі'],
-		['CharacterTrait', 'Риса характеру'],
-		['Fact', 'Факт']
+		['Profession', t('profession')], ['PersonalInfo', t('personality')], ['Body', t('body')], ['PhysicalHealth', t('physicalHealth')],
+		['MentalHealth', t('mentalHealth')], ['Hobby', t('hobby')], ['CharacterTrait', t('characterTrait')], ['Fact', t('fact')]
 	];
-	const targetSelect = normalized.requiresTarget
-		? `<select id="${targetSelectId}" class="special-card-target-select" aria-label="${t('target')}">
-                <option value="">${t('choosePlayer')}</option>
-                ${targets.map(player => {
-			const connectionId = player.connectionId || player.ConnectionId || '';
+	const selectedTargetIndex = targets.findIndex(player => getSpecialCardTargetRef(player) === selection.targetRef);
+	const targetSelect = normalized.requiresTarget ? `<label class="special-card-target-block" for="${targetSelectId}"><span>${t('target')}</span><select id="${targetSelectId}" class="special-card-target-select" aria-label="${t('target')}" onchange="rememberSpecialCardSelection(${cardIndex})">
+		<option value="">${t('choosePlayer')}</option>
+		${targets.map((player, index) => {
 			const seat = player.seatNumber || player.SeatNumber || 0;
 			const name = player.name || player.Name || t('unknown');
-			return `<option value="${escapeHtml(connectionId)}">${seat ? `#${seat} ` : ''}${escapeHtml(name)}</option>`;
+			return `<option value="${index}"${index === selectedTargetIndex ? ' selected' : ''}>${seat ? `#${seat} ` : ''}${escapeHtml(name)}</option>`;
 		}).join('')}
-            </select>`
-		: '';
-	const characteristicSelect = needsCharacteristicSelect
-		? `<select id="${characteristicSelectId}" class="special-card-target-select" aria-label="Характеристика">
-                <option value="">Оберіть характеристику</option>
-                ${characteristicOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}
-            </select>`
-		: '';
-	if (normalized.requiresTarget && targets.length === 0) {
-		return `<button type="button" class="char-btn special-card-use-btn" disabled aria-disabled="true">${t('noAvailableTarget')}</button>`;
-	}
+	</select></label>` : '';
+	const characteristicSelect = needsCharacteristicSelect ? `<label class="special-card-target-block" for="${characteristicSelectId}"><span>${t('specialCharacteristicLabel')}</span><select id="${characteristicSelectId}" class="special-card-target-select" aria-label="${t('specialCharacteristicLabel')}" onchange="rememberSpecialCardSelection(${cardIndex})">
+		<option value="">${t('specialChooseCharacteristic')}</option>
+		${characteristicOptions.map(([value, label]) => `<option value="${value}"${selection.characteristic === value ? ' selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+	</select></label>` : '';
+	if (normalized.requiresTarget && targets.length === 0) return `<button type="button" class="special-card-use-btn" disabled aria-disabled="true">${t('noAvailableTarget')}</button>`;
 
+	const targetReady = !normalized.requiresTarget || selectedTargetIndex >= 0;
+	const characteristicReady = !needsCharacteristicSelect || !!selection.characteristic;
+	const disabled = !(targetReady && characteristicReady);
+	const disabledMarkup = disabled ? ' disabled aria-disabled="true"' : '';
 	const useButtons = normalized.isSecret
-		? `
-                <button type="button" class="char-btn special-card-use-btn" data-testid="special-card-use-silent" onclick="useSpecialCardFromCard(${cardIndex}, 'silent')">${t('useSecretly')}</button>
-                <button type="button" class="char-btn special-card-use-btn public-use" data-testid="special-card-use-public" onclick="useSpecialCardFromCard(${cardIndex}, 'public')">${t('usePublicly')}</button>
-            `
-		: `<button type="button" class="char-btn special-card-use-btn" data-testid="special-card-use" onclick="useSpecialCardFromCard(${cardIndex}, 'public')">${t('useSpecialCard')}</button>`;
+		? `<button type="button" class="special-card-use-btn" data-testid="special-card-use-silent" onclick="useSpecialCardFromCard(${cardIndex}, 'silent')"${disabledMarkup}>${t('useSecretly')}</button><button type="button" class="special-card-use-btn public-use" data-testid="special-card-use-public" onclick="useSpecialCardFromCard(${cardIndex}, 'public')"${disabledMarkup}>${t('usePublicly')}</button>`
+		: `<button type="button" class="special-card-use-btn" data-testid="special-card-use" onclick="useSpecialCardFromCard(${cardIndex}, 'public')"${disabledMarkup}>${t('useSpecialCard')}</button>`;
 
-	return `
-            <div class="special-card-controls">
-                ${targetSelect}
-                ${characteristicSelect}
-                <div class="special-card-use-actions">${useButtons}</div>
-            </div>
-        `;
+	return `<div class="special-card-controls">${targetSelect}${characteristicSelect}<div class="special-card-use-actions">${useButtons}</div></div>`;
 }
 
 function useSpecialCardFromCard(cardIndex = 0, useMode = null) {
 	const cards = normalizeSpecialCards(myPlayerData?.specialCards, myPlayerData?.specialCard);
 	const card = cards[cardIndex] || normalizeSpecialCard(myPlayerData?.specialCard);
+	const pendingKey = getSpecialCardSelectionKey(card, cardIndex);
+	if (pendingSpecialCardUses.has(pendingKey)) return;
+	rememberSpecialCardSelection(cardIndex, false);
+	const targets = getSpecialCardTargets();
 	const select = document.getElementById(`specialCardTargetSelect-${cardIndex}`);
-	const targetConnectionId = select ? select.value : null;
+	const targetIndex = select?.value === '' ? -1 : Number(select?.value);
+	const selectedTarget = Number.isInteger(targetIndex) ? targets[targetIndex] : null;
+	const targetConnectionId = selectedTarget?.connectionId || selectedTarget?.ConnectionId || null;
 	const characteristicSelect = document.getElementById(`specialCardCharacteristicSelect-${cardIndex}`);
 	const selectedCharacteristic = characteristicSelect ? characteristicSelect.value : null;
 	const needsCharacteristicSelect = [
@@ -7689,8 +7924,39 @@ function useSpecialCardFromCard(cardIndex = 0, useMode = null) {
 	}
 
 	const resolvedUseMode = card.isSecret ? (useMode || 'silent') : 'public';
+	pendingSpecialCardUses.add(pendingKey);
+	renderMySpecialCards(myPlayerData);
 	connection.invoke("UseSpecialCardById", card.id, targetConnectionId || null, resolvedUseMode, selectedCharacteristic || null)
-		.catch(err => console.error("UseSpecialCard error:", err));
+		.catch(err => {
+			console.error("UseSpecialCard error:", err);
+			addEventMessage(t('unavailableNow'));
+		})
+		.finally(() => {
+			pendingSpecialCardUses.delete(pendingKey);
+			renderMySpecialCards(myPlayerData);
+		});
+}
+
+function renderSpecialCard(model) {
+	const tooltipId = `special-card-tooltip-${model.cardIndex}`;
+	const tooltip = model.tooltip ? `<span class="characteristic-with-tooltip special-card-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(t('cardTooltipLabel'))}" aria-controls="${tooltipId}" aria-expanded="false">?</button><span class="tooltip-content" id="${tooltipId}" role="tooltip">${escapeHtml(model.tooltip)}</span></span>` : '';
+	const metaRows = [
+		model.targetType ? { label:t('target'), value:model.targetLabel } : null,
+		model.stageRestriction ? { label:t('specialStageLabel'), value:model.stageRestriction } : null
+	].filter(Boolean).map(row => `<div class="special-card-meta-row"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.value)}</strong></div>`).join('');
+	return `<article class="my-special-card special-card-shell variant-${model.visualVariant} state-${model.status}" data-testid="my-special-card">
+		${tooltip}
+		<header class="special-card-header">
+			<div class="special-card-icon-zone">${renderSpecialCardIcon(model.iconKey)}</div>
+			<div class="special-card-heading"><span class="special-card-category">${escapeHtml(model.category)}</span><h3 class="special-card-title">${escapeHtml(model.name)}</h3></div>
+			<span class="special-card-status ${model.status}">${escapeHtml(model.statusLabel)}</span>
+		</header>
+		<div class="special-card-divider"><span></span><i></i><span></span></div>
+		<section class="special-card-effect"><span>${escapeHtml(t('specialEffectLabel'))}</span><p>${escapeHtml(model.effect || t('noData'))}</p></section>
+		${metaRows ? `<div class="special-card-meta">${metaRows}</div>` : ''}
+		<span class="special-card-privacy ${model.privacyClass}">${escapeHtml(model.privacyLabel)}</span>
+		<footer class="special-card-footer">${renderSpecialCardControls(model.source, model.cardIndex, model)}</footer>
+	</article>`;
 }
 
 function renderMySpecialCards(player) {
@@ -7698,33 +7964,16 @@ function renderMySpecialCards(player) {
 	const container = document.getElementById('mySpecialCardsList');
 	if (!section || !container) return;
 
+	captureSpecialCardSelections();
 	const cards = normalizeSpecialCards(player?.specialCards || player?.SpecialCards, player?.specialCard || player?.SpecialCard);
 	if (cards.length === 0) {
 		container.innerHTML = `<p class="special-cards-empty">${t('noData')}</p>`;
 		return;
 	}
 
-	container.innerHTML = cards.map((card, index) => {
-		const status = card.isEffectActive || card.isActive
-			? 'active'
-			: card.isUsed || card.usedAtRound
-				? (card.effectDuration === 'untilRoundEnd' ? 'ended' : 'used')
-				: 'hand';
-
-		return `
-                <article class="my-special-card ${status}">
-                    <div class="my-special-card-header">
-                        <strong>${escapeHtml(getSpecialCardName(card))}</strong>
-                        <span class="special-card-status ${status}">${getSpecialCardStatusLabel(status)}</span>
-                    </div>
-                    <span class="special-card-privacy ${getSpecialCardPrivacyClass(card)}">${getSpecialCardPrivacyLabel(card)}</span>
-                    <p>${escapeHtml(getSpecialCardDescription(card))}</p>
-                    <div class="my-special-card-actions">
-                        ${renderSpecialCardControls(card, index)}
-                    </div>
-                </article>
-            `;
-	}).join('');
+	container.innerHTML = cards.map((card, index) => renderSpecialCard(buildSpecialCardModel(card, index))).join('');
+	renderedSpecialCardKeys = cards.map((card, index) => getSpecialCardSelectionKey(card, index));
+	window.reinitTooltips?.();
 }
 
 function buildSpecialCardRows() {
