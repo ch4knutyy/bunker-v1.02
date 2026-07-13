@@ -3,6 +3,7 @@
 
     let portal = null;
     let activeTrigger = null;
+    let focusOpenedAt = 0;
 
     function ensurePortal() {
         if (portal?.isConnected) return portal;
@@ -73,7 +74,10 @@
     });
     document.addEventListener('focusin', event => {
         const trigger = triggerFromEvent(event);
-        if (trigger) show(trigger);
+        if (trigger) {
+            show(trigger);
+            focusOpenedAt = Date.now();
+        }
     });
     document.addEventListener('focusout', event => {
         const trigger = triggerFromEvent(event);
@@ -87,7 +91,8 @@
         }
         event.preventDefault();
         event.stopPropagation();
-        if (activeTrigger === trigger) hide(trigger); else show(trigger);
+        if (activeTrigger === trigger && Date.now() - focusOpenedAt >= 250) hide(trigger); else show(trigger);
+        focusOpenedAt = 0;
     }, true);
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') hide();
@@ -97,6 +102,7 @@
 
     window.reinitTooltips = function () {
         ensurePortal();
+        if (activeTrigger && !activeTrigger.isConnected) hide();
         document.querySelectorAll('.tooltip-trigger').forEach(trigger => {
             if (!trigger.hasAttribute('tabindex')) trigger.tabIndex = 0;
             if (!trigger.hasAttribute('role')) trigger.setAttribute('role', 'button');

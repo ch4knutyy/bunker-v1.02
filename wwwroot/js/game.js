@@ -67,6 +67,7 @@ let directorCommandPending = false;
 let lobbyState = null;
 let lobbyStartPreview = null;
 let lobbyCommandPending = false;
+const pendingCharacteristicReveals = new Set();
 let globalCatalogAllowed = false;
 let globalCatalogMetadata = [];
 let globalCatalogPage = 1;
@@ -445,6 +446,19 @@ Object.assign(uiTranslations.ru, {
 	lobbyStartTitle: 'Готовность к старту', lobbyTransferHost: 'Передать хост', lobbyHostBadge: 'Хост', lobbyRoomCode: 'Код комнаты', lobbyCopyLink: 'Скопировать ссылку', lobbyGmPanel: 'GM-панель', lobbyLeave: 'Выйти из комнаты', lobbyReadyProgress: 'Готовы', lobbyGameplayProgress: 'Активные игроки', lobbyMinimum: 'минимум', lobbyRoleLabel: 'Роль',
 	lobbyRolePlayerHelp: 'Получает персонажа, голосует и участвует в угрозах.', lobbyRoleSpectatorHelp: 'Не получает персонажа, не голосует и не занимает место среди активных игроков.', lobbyRoleTechnicalHelp: 'Помогает управлять техническим состоянием комнаты без доступа к скрытым характеристикам.', lobbyRoleOmniscientHelp: 'Наблюдает за игрой, видит скрытое состояние и не участвует как игрок.',
 	lobbyBlockMinimum: 'Для старта нужны как минимум 2 активных игрока.', lobbyBlockReady: 'Не все подключённые участники подтвердили готовность.', lobbyBlockRole: 'Один или несколько участников имеют несовместимую роль.', lobbyBlockVoting: 'Нельзя начать игру во время активного голосования.', lobbyBlockThreat: 'Нельзя начать игру во время активной угрозы.', lobbyBlockHost: 'Начать игру может только текущий хост.', lobbyBlockFallback: 'Игру пока нельзя начать. Обновите состояние лобби.', lobbyPreviewReady: 'Проверка завершена: комната готова к старту.', lobbyPreviewBlocked: 'Проверка завершена: устраните препятствия ниже.'
+});
+
+Object.assign(uiTranslations.uk, {
+	cardExperience:'Досвід', cardAdditionalItem:'Додатково має', cardSeverity:'Тяжкість', cardTooltipLabel:'Пояснення характеристики',
+	cardPrivateTooltip:'Це ваша приватна характеристика. Її можна розкрити іншим гравцям.', cardRevealPending:'Розкриваємо…', cardRevealed:'Розкрито', cardChildfree:'Чайлдфрі'
+});
+Object.assign(uiTranslations.en, {
+	cardExperience:'Experience', cardAdditionalItem:'Also has', cardSeverity:'Severity', cardTooltipLabel:'Characteristic details',
+	cardPrivateTooltip:'This is your private characteristic. You can reveal it to the other players.', cardRevealPending:'Revealing…', cardRevealed:'Revealed', cardChildfree:'Childfree'
+});
+Object.assign(uiTranslations.ru, {
+	cardExperience:'Опыт', cardAdditionalItem:'Дополнительно имеет', cardSeverity:'Тяжесть', cardTooltipLabel:'Описание характеристики',
+	cardPrivateTooltip:'Это ваша приватная характеристика. Её можно раскрыть другим игрокам.', cardRevealPending:'Раскрываем…', cardRevealed:'Раскрыто', cardChildfree:'Чайлдфри'
 });
 
 Object.assign(uiTranslations.uk, {
@@ -2523,6 +2537,11 @@ function normalizePlayer(player) {
 			severityCode: source.severityCode ?? source.SeverityCode ?? null,
 			allowsSeverity: source.allowsSeverity ?? source.AllowsSeverity ?? null,
 			tags: source.tags ?? source.Tags ?? [],
+			experienceYears: source.experienceYears ?? source.ExperienceYears ?? source.experience ?? source.Experience ?? source.years ?? source.Years ?? null,
+			duration: source.duration ?? source.Duration ?? null,
+			item: source.item ?? source.Item ?? null,
+			bonus: source.bonus ?? source.Bonus ?? null,
+			relatedItem: source.relatedItem ?? source.RelatedItem ?? source.item ?? source.Item ?? source.additionalItem ?? source.AdditionalItem ?? source.equipment ?? source.Equipment ?? source.hobbyItem ?? source.HobbyItem ?? source.tool ?? source.Tool ?? source.set ?? source.Set ?? source.selectedItem ?? source.SelectedItem ?? null,
 			_i18n: getI18n(source),
 			localization: getLocalization(source)
 		};
@@ -2575,6 +2594,7 @@ function normalizePlayer(player) {
 				experienceYears: src.experienceYears ?? src.ExperienceYears ?? 0,
 				selectedItem: src.selectedItem ?? src.SelectedItem ?? null,
 				selectedItemIndex: src.selectedItemIndex ?? src.SelectedItemIndex ?? null,
+				capabilityTags: src.capabilityTags ?? src.CapabilityTags ?? src.tags ?? src.Tags ?? [],
 				professionItem,
 				_i18n: getI18n(src)
 			};
@@ -2918,6 +2938,7 @@ function registerSignalREvents() {
 		}
 
 		myPlayerData = normalizedPlayer;
+		pendingCharacteristicReveals.clear();
 
 		tryRenderRunningGameState();
 
@@ -3128,8 +3149,9 @@ function registerSignalREvents() {
 	connection.on("CharacteristicRevealed", function (info) {
 		console.log("Characteristic revealed:", info);
 		applyRoundState(info.roundState || info.RoundState);
-		const characteristicKey = normalizeCharacteristicKey(info.characteristicKey);
+		const characteristicKey = normalizeCharacteristicKey(info.characteristicKey || info.CharacteristicKey || '');
 		const charKey = normalizeCharacteristicKey(toCamelCase(characteristicKey));
+		pendingCharacteristicReveals.delete(characteristicKey);
 
 		if (roomPlayers[info.connectionId]) {
 			if (!roomPlayers[info.connectionId].revealed) {
@@ -3193,10 +3215,6 @@ function registerSignalREvents() {
 		}
 
 		updatePlayersTable();
-		// Реініціалізуємо tooltip після оновлення DOM
-		if (typeof initMobileTooltips === 'function') {
-			setTimeout(initMobileTooltips, 100);
-		}
 		addEventMessage(`<span class="event-player">${info.playerName}</span> розкрив: <span class="revealed-label">${info.data.label}</span>`);
 	});
 
@@ -3318,7 +3336,9 @@ function registerSignalREvents() {
 	connection.off("CharacteristicHidden");
 	connection.on("CharacteristicHidden", function (data) {
 		const connectionId = data.connectionId || data.ConnectionId;
-		const charKey = normalizeCharacteristicKey(toCamelCase(data.characteristicKey || data.CharacteristicKey || ''));
+		const hiddenCharacteristic = data.characteristicKey || data.CharacteristicKey || '';
+		const charKey = normalizeCharacteristicKey(toCamelCase(hiddenCharacteristic));
+		pendingCharacteristicReveals.delete(hiddenCharacteristic);
 		const player = roomPlayers[connectionId];
 		if (player) {
 			if (player.revealed) player.revealed[charKey] = false;
@@ -5370,15 +5390,24 @@ function leaveRoom() {
 }
 
 
-function reveal(characteristicName) {
+async function reveal(characteristicName) {
+	if (pendingCharacteristicReveals.has(characteristicName)) return;
 	if (!canRevealThisRound()) {
 		const reason = getRevealBlockedReason();
 		if (reason) addEventMessage(`Помилка: ${reason}`);
 		return;
 	}
 
-	connection.invoke("RevealCharacteristic", characteristicName)
-		.catch(err => console.error("RevealCharacteristic error:", err));
+	pendingCharacteristicReveals.add(characteristicName);
+	renderMyPlayerCards(myPlayerData);
+	try {
+		await connection.invoke("RevealCharacteristic", characteristicName);
+	} catch (err) {
+		pendingCharacteristicReveals.delete(characteristicName);
+		renderMyPlayerCards(myPlayerData);
+		console.error("RevealCharacteristic error:", err);
+		addEventMessage(`Помилка: ${localizeServerMessage(err?.message || '')}`);
+	}
 }
 
 // ==================== APOCALYPSE & BUNKER FUNCTIONS ====================
@@ -7882,28 +7911,36 @@ function formatAdditionalPhysicalCondition(effect) {
 	});
 }
 
-function buildAdditionalPhysicalConditionTooltip(effect, lang = getCurrentLanguage()) {
-	if (!effect) return '';
-	const localization = getLocalization(effect) || {};
+function buildSharedHealthTooltip(source, options = {}) {
+	if (!source) return '';
+	const lang = options.lang || getCurrentLanguage();
+	const localization = getLocalization(source) || {};
 	const localized = localization[lang] || localization.uk || null;
-	const name = cleanTooltipText(
-		localized?.name || localized?.Name || effect.baseName || effect.BaseName || ''
-	);
-	const severity = cleanTooltipText(getConditionSeverityLabel(effect, lang));
-	const severityCode = effect.severityCode || effect.SeverityCode || '';
+	const name = cleanTooltipText(localized?.name || localized?.Name || getLocalizedValue(source, 'name') || source.baseName || source.BaseName || source.name || source.Name || '');
+	const severity = cleanTooltipText(getConditionSeverityLabel(source, lang));
+	const severityCode = source.severityCode || source.SeverityCode || '';
 	const descriptions = localized?.descriptions || localized?.Descriptions || {};
 	const localizedDescription = descriptions[severityCode] || localized?.description || localized?.Description || '';
-	const description = cleanTooltipText(localized
-		? localizedDescription
-		: effect.description || effect.Description || effect.tooltip || effect.Tooltip || '');
+	const hasRequestedLocalization = Boolean(localization && Object.prototype.hasOwnProperty.call(localization, lang));
+	const fallbackDescription = hasRequestedLocalization
+		? ''
+		: getLocalizedHealthDescription(source, lang) || source.description || source.Description || source.tooltip || source.Tooltip || '';
+	const description = cleanTooltipText(localizedDescription || fallbackDescription);
+	const effect = cleanTooltipText(getLocalizedByFields(source, ['gameEffect', 'bunkerEffect', 'ефект_у_грі'], source.gameEffect || source.GameEffect || source.bunkerEffect || source.BunkerEffect || ''));
 	const validName = /^(невідомо|неизвестно|unknown)$/i.test(name) ? '' : name;
-	if (!validName && !severity && !description) return '';
+	const explanatory = [description, effect].filter(value => value && value.toLocaleLowerCase() !== validName.toLocaleLowerCase());
+	if (options.requireExplanation && explanatory.length === 0) return '';
+	if (!validName && !severity && explanatory.length === 0) return '';
 
 	return [
 		validName ? `<span class="tooltip-medical-name">${escapeHtml(validName)}</span>` : '',
 		severity ? `<span class="tooltip-medical-severity">${escapeHtml(severity.charAt(0).toUpperCase() + severity.slice(1))}</span>` : '',
-		description ? `<span class="tooltip-medical-description">${escapeHtml(description)}</span>` : ''
+		...explanatory.map(value => `<span class="tooltip-medical-description">${escapeHtml(value)}</span>`)
 	].filter(Boolean).join('');
+}
+
+function buildAdditionalPhysicalConditionTooltip(effect, lang = getCurrentLanguage()) {
+	return buildSharedHealthTooltip(effect, { lang, requireExplanation: false });
 }
 
 function renderAdditionalPhysicalCondition(effect, prefix = '') {
@@ -7941,6 +7978,210 @@ function getTooltipTypeClass(charKey) {
 	return typeClasses[charKey] || '';
 }
 
+const characteristicIconRegistry = Object.freeze({
+	personality: 'user', body: 'body', profession: 'briefcase', physicalHealth: 'heart', mentalHealth: 'brain',
+	hobby: 'star', characterTrait: 'mask', phobia: 'eye', inventory: 'backpack', fact: 'document'
+});
+
+const professionIconRegistry = Object.freeze({
+	violin: 'violin', string_instrument: 'violin', guitar: 'guitar', music: 'music', medical: 'medical', medicine: 'medical', healthcare: 'medical',
+	engineering: 'engineering', engineer: 'engineering', military: 'shield', agriculture: 'wheat', transport: 'steeringWheel', science: 'flask',
+	technology: 'cpu', education: 'book', construction: 'hammer', law: 'scales', food: 'utensils', restaurant: 'cloche', hospitality: 'cloche',
+	food_service: 'cloche', service: 'serviceBell', chef: 'chefHat', waiter: 'serviceBell', generic: 'briefcase'
+});
+
+const characteristicIconSvgRegistry = Object.freeze({
+	user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-5 3.5-7 8-7s7.2 2 8 7"/>',
+	body:'<path d="M8 3h8l2 6-3 12H9L6 9l2-6Z"/><path d="M8 8h8M9 14h6"/>',
+	briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 12h18M10 12v2h4v-2"/>',
+	violin:'<path d="M15 3c-2 1-2 4-1 6l-4 4c-2-1-5-1-6 1s1 6 4 6c2 0 3-2 3-4l4-4c2 1 5 0 5-2 0-3-3-5-5-4"/><path d="m16 8 5-5M18 5l2 2"/>',
+	guitar:'<path d="m15 3 6 6-3 3-2-2-5 5c1 3-2 6-5 5s-3-5-1-7 4-2 6-1l5-5-2-2 1-3Z"/>',
+	music:'<path d="M9 18V5l11-2v13M9 8l11-2"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+	medical:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z"/>',
+	engineering:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+	shield:'<path d="M12 2 20 5v6c0 5-3 9-8 11-5-2-8-6-8-11V5l8-3Z"/>',
+	wheat:'<path d="M12 22V6M12 10C7 9 6 6 6 4c4 0 6 2 6 6ZM12 15c-5-1-6-4-6-6 4 0 6 2 6 6ZM12 10c5-1 6-4 6-6-4 0-6 2-6 6ZM12 15c5-1 6-4 6-6-4 0-6 2-6 6Z"/>',
+	steeringWheel:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3 11h18M12 14v7M10 10 6 6M14 10l4-4"/>',
+	flask:'<path d="M9 2h6M10 2v6l-6 11c-.5 1 .2 2 1.5 2h13c1.3 0 2-1 1.5-2L14 8V2M7 15h10"/>',
+	cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v5M15 1v5M9 18v5M15 18v5M1 9h5M18 9h5M1 15h5M18 15h5"/>',
+	book:'<path d="M3 4h7c2 0 2 2 2 2v15s0-2-2-2H3V4Zm18 0h-7c-2 0-2 2-2 2v15s0-2 2-2h7V4Z"/>',
+	hammer:'<path d="m4 20 9-9M10 4l3-2 7 7-2 3-8-8ZM2 18l4 4"/>',
+	scales:'<path d="M12 3v18M6 21h12M4 7h16M7 7 3 14h8L7 7Zm10 0-4 7h8l-4-7Z"/>',
+	utensils:'<path d="M6 2v8M3 2v5c0 2 6 2 6 0V2M6 10v12M16 2v20M16 2c5 3 5 9 0 11"/>',
+	cloche:'<path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 7V5M9 5h6"/>',
+	serviceBell:'<path d="M4 17h16M6 17c0-5 2-8 6-8s6 3 6 8M12 9V7M9 7h6M3 20h18"/>',
+	chefHat:'<path d="M7 11a4 4 0 1 1 2-7 4 4 0 0 1 7 0 4 4 0 1 1 2 7v9H6v-9M9 15v5M15 15v5"/>',
+	heart:'<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
+	brain:'<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>',
+	star:'<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
+	mask:'<path d="M3 5c6-3 12-3 18 0v7c0 6-5 10-9 10S3 18 3 12V5Z"/><path d="M6 10c2-2 4-2 5 0M13 10c2-2 4-2 5 0M9 16c2 1 4 1 6 0"/>',
+	eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+	backpack:'<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
+	document:'<path d="M6 2h9l4 4v16H6V2Z"/><path d="M14 2v5h5M9 12h7M9 16h7"/>'
+	,lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>'
+});
+
+function normalizeProfessionIconTags(profession) {
+	const raw = profession?.capabilityTags || profession?.CapabilityTags || profession?.tags || profession?.Tags || [];
+	return (Array.isArray(raw) ? raw : [raw]).map(tag => String(tag).trim().toLowerCase().replace(/[\s-]+/g, '_')).filter(Boolean);
+}
+
+function resolveProfessionIconKey(profession) {
+	const tags = normalizeProfessionIconTags(profession);
+	const priority = ['violin','string_instrument','guitar','chef','waiter','restaurant','food_service','hospitality','service','music','medical','medicine','healthcare','engineering','engineer','military','agriculture','transport','science','technology','education','construction','law','food'];
+	const match = priority.find(tag => tags.includes(tag));
+	return professionIconRegistry[match] || professionIconRegistry.generic;
+}
+
+function renderCharacteristicIcon(iconKey) {
+	const body = characteristicIconSvgRegistry[iconKey] || characteristicIconSvgRegistry.briefcase;
+	return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+}
+
+function nonEmptyCardDetail(label, value) {
+	return value !== null && value !== undefined && String(value).trim() !== '' ? { label, value: String(value) } : null;
+}
+
+function formatHobbyExperience(value, lang = getCurrentLanguage()) {
+	if (value === null || value === undefined) return '';
+	const text = String(value).trim();
+	if (!text) return '';
+	const numericText = text.replace(',', '.');
+	const numericValue = typeof value === 'number' || /^\d+(?:[.,]\d+)?$/.test(text) ? Number(numericText) : Number.NaN;
+	if (!Number.isFinite(numericValue)) return text;
+	if (numericValue <= 0) return '';
+
+	const language = ['uk', 'ru', 'en'].includes(lang) ? lang : 'uk';
+	const locale = language === 'uk' ? 'uk-UA' : language === 'ru' ? 'ru-RU' : 'en-US';
+	const plural = new Intl.PluralRules(locale).select(numericValue);
+	const labels = {
+		uk: { one:'рік', few:'роки', many:'років', other:'року' },
+		ru: { one:'год', few:'года', many:'лет', other:'года' },
+		en: { one:'year', few:'years', many:'years', other:'years' }
+	};
+	const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(numericValue);
+	return `${number} ${labels[language][plural] || labels[language].other}`;
+}
+
+function formatHobbyRelatedItem(value) {
+	if (value === null || value === undefined) return '';
+	if (typeof value !== 'object') return String(value).trim();
+	return cleanTooltipText(getLocalizedValue(value, 'item') || getLocalizedValue(value, 'name') || value.item || value.Item || value.name || value.Name || '');
+}
+
+function buildHobbyCardDetails(hobby) {
+	const experienceRaw = hobby?.experienceYears ?? hobby?.experience ?? hobby?.years ?? hobby?.duration;
+	const localizedItem = getLocalizedValue(hobby, 'item') || getLocalizedValue(hobby, 'relatedItem') || getLocalizedValue(hobby, 'additionalItem') || getLocalizedValue(hobby, 'equipment');
+	const itemRaw = localizedItem || hobby?.relatedItem || hobby?.item || hobby?.additionalItem || hobby?.equipment || '';
+	const experience = formatHobbyExperience(experienceRaw);
+	const item = formatHobbyRelatedItem(itemRaw);
+	return {
+		experience,
+		item,
+		details: [
+			nonEmptyCardDetail(t('cardExperience'), experience),
+			nonEmptyCardDetail(t('cardAdditionalItem'), item)
+		].filter(Boolean)
+	};
+}
+
+function resolveHobbyCardTooltip(hobby, item = '') {
+	const explanation = cleanTooltipText(getLocalizedByFields(hobby, ['description', 'gameEffect', 'bunkerEffect', 'bonus'], hobby?.description || hobby?.gameEffect || hobby?.bunkerEffect || hobby?.bonus || ''));
+	if (explanation) return explanation;
+	const tooltip = cleanTooltipText(hobby?.tooltip || '');
+	if (!tooltip) return '';
+	const normalizedTooltip = tooltip.toLocaleLowerCase().replace(/[.!]+$/g, '').trim();
+	const normalizedItem = cleanTooltipText(item).toLocaleLowerCase();
+	const generatedItemOnly = /^(отримує бонусом|получает бонусом|gets as (?:a )?bonus)\s*:/i.test(normalizedTooltip)
+		&& normalizedItem && normalizedTooltip.includes(normalizedItem);
+	return generatedItemOnly ? '' : tooltip;
+}
+
+function normalizeVariantMetadata(source) {
+	const raw = source?.tags || source?.Tags || source?.capabilityTags || source?.CapabilityTags || [];
+	return (Array.isArray(raw) ? raw : [raw]).map(value => String(value).trim().toLowerCase().replace(/[\s-]+/g, '_')).filter(Boolean);
+}
+
+function normalizeCharacteristicSeverity(source) {
+	const raw = [source?.severityCode, source?.SeverityCode, source?.severityLevel, source?.SeverityLevel, source?.severity, source?.Severity]
+		.filter(value => value !== null && value !== undefined).join(' ').toLowerCase();
+	if (!raw || /\b(none|stable|stabil|без\s*(нічого|форм)|стабіль|стабил)\b/u.test(raw)) return 'stable';
+	if (/critical|критич/u.test(raw)) return 'critical';
+	if (/very[_\s-]*(hard|heavy|severe)|дуже\s*важ|очень\s*(тяж|тяжел)/u.test(raw)) return 'very-heavy';
+	if (/\b(hard|heavy|severe)\b|важк|тяж[её]л/u.test(raw)) return 'heavy';
+	if (/\b(medium|moderate)\b|середн|средн/u.test(raw)) return 'medium';
+	if (/\b(light|mild)\b|легк|л[её]гк/u.test(raw)) return 'light';
+	return 'stable';
+}
+
+function resolveCharacteristicVisualVariant(model) {
+	const tags = normalizeVariantMetadata(model.variantSource);
+	const severity = normalizeCharacteristicSeverity(model.variantSource);
+	if (tags.includes('critical')) return 'critical';
+	if (severity === 'critical') return 'critical';
+	if (severity === 'very-heavy') return 'severe-dark';
+	if (tags.includes('severe')) return 'severe';
+	if (severity === 'heavy') return 'severe';
+	if (severity === 'medium') return 'warning';
+	if (severity === 'light') return 'warning-soft';
+	if (tags.some(tag => ['dark','violent','criminal','dangerous','disturbing','horror'].includes(tag))) return 'dark';
+	if (tags.some(tag => ['positive','supportive','beneficial','healing'].includes(tag))) return 'positive';
+	return 'neutral';
+}
+
+function resolveCharacteristicTooltipContent(model) {
+	if (model.tooltipHtml && String(model.tooltipHtml).trim()) return { html: String(model.tooltipHtml) };
+	const content = cleanTooltipText(model.tooltip || '').trim();
+	if (!content) return null;
+	const normalized = content.toLocaleLowerCase();
+	const genericPrivacy = [t('cardPrivateTooltip'), 'це ваша приватна характеристика', 'this is your private characteristic', 'это ваша приватная характеристика']
+		.map(value => String(value || '').trim().toLocaleLowerCase()).filter(Boolean);
+	if (genericPrivacy.some(value => normalized === value || normalized.startsWith(value))) return null;
+	const duplicates = [model.value, model.categoryLabel, ...(model.details || []).flatMap(detail => detail ? [detail.label, detail.value] : [])]
+		.map(value => cleanTooltipText(value || '').trim().toLocaleLowerCase()).filter(Boolean);
+	if (duplicates.includes(normalized)) return null;
+	return { text: content };
+}
+
+function buildHealthCardPresentation(condition) {
+	const display = getConditionDisplayName(condition) || getLocalizedValue(condition, 'name') || condition?.name || '';
+	const severity = conditionShouldShowSeverity(condition) ? getConditionSeverityLabel(condition, getCurrentLanguage()) : '';
+	if (!severity) return { value: display, severity: '' };
+	const suffix = ` (${severity})`;
+	if (display.toLocaleLowerCase().endsWith(suffix.toLocaleLowerCase())) {
+		return { value: display.slice(0, -suffix.length), severity };
+	}
+	if (display.toLocaleLowerCase().includes(severity.toLocaleLowerCase())) return { value: display, severity: '' };
+	return { value: display, severity };
+}
+
+function renderCharacteristicCard(model) {
+	const details = (model.details || []).filter(Boolean).slice(0, 4);
+	const tooltipId = `characteristic-tooltip-${model.type.toLowerCase()}`;
+	const tooltipContent = resolveCharacteristicTooltipContent({ ...model, details });
+	const visualVariant = resolveCharacteristicVisualVariant(model);
+	const visualFamily = model.visualFamily || 'neutral';
+	const pending = pendingCharacteristicReveals.has(model.revealAction);
+	const blockedReason = model.canReveal && !model.isRevealed ? getRevealBlockedReason() : '';
+	const disabled = pending || !!blockedReason;
+	const detailRows = details.map(detail => `<div class="char-row vault-card-detail"><span class="char-label">${escapeHtml(detail.label)}</span><span class="char-value">${escapeHtml(detail.value)}</span></div>`).join('');
+	const action = model.isRevealed
+		? `<span class="status-revealed vault-card-status">${t('cardRevealed')}</span>`
+		: `<button type="button" class="char-btn locked vault-card-reveal${disabled ? ' disabled' : ''}" data-characteristic="${escapeHtml(model.type)}" onclick="reveal('${model.revealAction}')" ${disabled ? 'disabled aria-disabled="true"' : ''}${blockedReason ? ` aria-label="${escapeHtml(blockedReason)}"` : ''}><span class="vault-lock-icon">${renderCharacteristicIcon('lock')}</span>${pending ? t('cardRevealPending') : t('reveal')}</button>`;
+	const tooltipMarkup = tooltipContent
+		? `<span class="characteristic-with-tooltip vault-card-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(t('cardTooltipLabel'))}" aria-controls="${tooltipId}" aria-expanded="false">?</button><span id="${tooltipId}" class="tooltip-content">${tooltipContent.html || escapeHtml(tooltipContent.text)}</span></span>`
+		: '';
+
+	return `<article class="char-card player-card vault-characteristic-card variant-${visualVariant} family-${visualFamily} ${model.isRevealed ? 'card-revealed' : ''}" data-characteristic-type="${escapeHtml(model.type)}">
+		<header class="vault-card-header${tooltipContent ? ' has-tooltip' : ''}"><div class="vault-card-icon">${renderCharacteristicIcon(model.iconKey)}</div><span class="char-card-title vault-card-category">${escapeHtml(model.categoryLabel)}</span>${tooltipMarkup}</header>
+		<div class="vault-card-value ${model.type === 'Fact' ? 'is-long' : ''}">${escapeHtml(model.value)}</div>
+		<div class="vault-card-separator"><span></span><i aria-hidden="true"></i><span></span></div>
+		${detailRows ? `<div class="vault-card-details">${detailRows}</div>` : ''}
+		${model.supplementalHtml || ''}
+		<footer class="vault-card-footer">${action}</footer>
+	</article>`;
+}
+
 // Рендер карток моїх характеристик
 function renderMyPlayerCards(player) {
 	const container = document.getElementById("myPlayerCards");
@@ -7956,7 +8197,6 @@ function renderMyPlayerCards(player) {
 	}
 
 	const revealed = normalizeRevealedState(player.revealed || player.Revealed || {});
-	const selfPlayer = roomPlayers?.[myConnectionId] || {};
 	const personality = player.personality || {};
 	const body = player.body || {};
 	const profession = player.profession || {};
@@ -7966,139 +8206,32 @@ function renderMyPlayerCards(player) {
 	const characterTrait = player.characterTrait || {};
 	const phobia = player.phobia || {};
 	const inventory = player.inventory || {};
-	const fact = normalizeFactFromPlayer({
-		...selfPlayer,
-		...player,
-		fact: player.fact || player.Fact || selfPlayer.fact || selfPlayer.Fact
-	});
-	const factName = getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact');
-	const factTooltip = buildLocalizedTooltip(fact, 'fact') || cleanTooltipText(fact.tooltip || fact.description || '');
-	const professionName = getProfessionDisplayName(profession);
-	const physicalHealthName = getConditionDisplayName(physicalHealth) || physicalHealth.name || 'Здоровий';
-	const mentalHealthName = getConditionDisplayName(mentalHealth) || mentalHealth.name || 'Стабільний';
+	const fact = normalizeFactFromPlayer(player);
+	const professionItem = profession.professionItem || player.professionItem || {};
+	const localizedProfessionItem = getLocalizedValue(professionItem, 'item') || getLocalizedValue(professionItem, 'name') || professionItem.name || professionItem.Name || profession.selectedItem || '';
 	const additionalConditionEffects = player.additionalPhysicalConditions || player.additionalConditionEffects || [];
-	const additionalConditionsHtml = additionalConditionEffects.length
-		? `<div class="additional-conditions">
-                    <span class="char-label">${escapeHtml(t('additionalConditions'))}:</span>
-                    ${additionalConditionEffects.map(effect => {
-			return renderAdditionalPhysicalCondition(effect);
-		}).filter(Boolean).join('')}
-               </div>`
-		: '';
-	const hobbyName = getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || 'Немає хобі';
-	const traitName = getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || 'Невизначений';
-	const phobiaName = getLocalizedValue(phobia, 'name') || getLocalizedValue(phobia, 'phobia') || phobia.name || 'Немає фобій';
-	const inventoryItems = inventory.items && inventory.items.length > 0
-		? inventory.items.map(i => getLocalizedValue(i, 'item') || getLocalizedValue(i, 'name') || i.name || i.Name || '').filter(Boolean).join(', ')
-		: t('empty');
-	const eliminationPanel = renderEliminatedRevealAllPanel(player);
+	const additionalConditionsHtml = additionalConditionEffects.length ? `<div class="additional-conditions"><span class="char-label">${escapeHtml(t('additionalConditions'))}</span>${additionalConditionEffects.map(effect => renderAdditionalPhysicalCondition(effect)).filter(Boolean).join('')}</div>` : '';
+	const inventorySourceItems = inventory.items || [];
+	const inventoryItems = inventorySourceItems.map(item => getLocalizedValue(item, 'item') || getLocalizedValue(item, 'name') || item.name || item.Name || '').filter(Boolean);
+	const inventoryTooltip = [...new Set(inventorySourceItems.map(item => getLocalizedValue(item, 'description') || item.description || item.Description || item.effect || item.Effect || '').filter(Boolean))].join('. ');
+	const physicalPresentation = buildHealthCardPresentation(physicalHealth);
+	const mentalPresentation = buildHealthCardPresentation(mentalHealth);
+	const hobbyCardDetails = buildHobbyCardDetails(hobby);
+	const models = [
+		{ type:'Personality', categoryLabel:t('personality'), value:`${personality.age} ${t('years')}`, iconKey:characteristicIconRegistry.personality, details:[nonEmptyCardDetail(t('sex'), `${personality.sex || ''}${personality.isChildfree ? ` · ${t('cardChildfree')}` : ''}`), nonEmptyCardDetail(t('orientation'), personality.sexOrientation)], tooltip:'', isRevealed:revealed.personality, canReveal:true, revealAction:'Personality' },
+		{ type:'Body', categoryLabel:t('body'), value:body.bodyType || t('body'), iconKey:characteristicIconRegistry.body, details:[nonEmptyCardDetail(t('height'), body.height ? `${body.height} см` : ''), nonEmptyCardDetail(t('weight'), body.weight ? `${body.weight} кг` : '')], tooltip:'', isRevealed:revealed.body, canReveal:true, revealAction:'Body' },
+		{ type:'Profession', categoryLabel:t('profession'), value:getLocalizedValue(profession, 'profession') || getLocalizedValue(profession, 'name') || profession.name || t('profession'), iconKey:resolveProfessionIconKey(profession), details:[nonEmptyCardDetail(t('cardExperience'), Number(profession.experienceYears) > 0 ? `${profession.experienceYears} ${t('years')}` : ''), nonEmptyCardDetail(t('cardAdditionalItem'), localizedProfessionItem)], tooltip:profession.tooltip, variantSource:profession, isRevealed:revealed.profession, canReveal:true, revealAction:'Profession' },
+		{ type:'PhysicalHealth', categoryLabel:t('physicalHealth'), value:physicalPresentation.value || t('physicalHealth'), iconKey:characteristicIconRegistry.physicalHealth, details:[nonEmptyCardDetail(t('cardSeverity'), physicalPresentation.severity)], tooltipHtml:buildSharedHealthTooltip(physicalHealth, { requireExplanation:true }), variantSource:physicalHealth, visualFamily:'medical', isRevealed:revealed.physicalHealth, canReveal:true, revealAction:'PhysicalHealth', supplementalHtml:additionalConditionsHtml },
+		{ type:'MentalHealth', categoryLabel:t('mentalHealth'), value:mentalPresentation.value || t('mentalHealth'), iconKey:characteristicIconRegistry.mentalHealth, details:[nonEmptyCardDetail(t('cardSeverity'), mentalPresentation.severity)], tooltipHtml:buildSharedHealthTooltip(mentalHealth, { requireExplanation:true }), variantSource:mentalHealth, visualFamily:'mental', isRevealed:revealed.mentalHealth, canReveal:true, revealAction:'MentalHealth' },
+		{ type:'Hobby', categoryLabel:t('hobby'), value:getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || t('hobby'), iconKey:characteristicIconRegistry.hobby, details:hobbyCardDetails.details, tooltip:resolveHobbyCardTooltip(hobby, hobbyCardDetails.item), variantSource:hobby, isRevealed:revealed.hobby, canReveal:true, revealAction:'Hobby' },
+		{ type:'CharacterTrait', categoryLabel:t('characterTrait'), value:getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || t('characterTrait'), iconKey:characteristicIconRegistry.characterTrait, details:[], tooltip:characterTrait.description || characterTrait.gameEffect || characterTrait.bunkerEffect || characterTrait.tooltip, variantSource:characterTrait, isRevealed:revealed.characterTrait, canReveal:true, revealAction:'CharacterTrait' },
+		{ type:'Phobia', categoryLabel:t('phobia'), value:getLocalizedValue(phobia, 'phobia') || getLocalizedValue(phobia, 'name') || phobia.name || t('phobia'), iconKey:characteristicIconRegistry.phobia, details:[], tooltip:getLocalizedValue(phobia, 'description') || phobia.description || phobia.gameEffect || phobia.tooltip, variantSource:phobia, isRevealed:revealed.phobia, canReveal:true, revealAction:'Phobia' },
+		{ type:'Inventory', categoryLabel:t('inventory'), value:inventoryItems.join(', ') || t('empty'), iconKey:characteristicIconRegistry.inventory, details:[], tooltip:inventoryTooltip, variantSource:inventory, isRevealed:revealed.inventory, canReveal:true, revealAction:'Inventory' },
+		{ type:'Fact', categoryLabel:t('fact'), value:getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey:characteristicIconRegistry.fact, details:[], tooltip:fact.description || fact.tooltip || '', variantSource:fact, isRevealed:revealed.fact || revealed.Fact, canReveal:true, revealAction:'Fact' }
+	];
 
-	function createTooltipHtml(text, typeClass) {
-		if (!text) return '';
-		return `<span class="tooltip-trigger ${typeClass}" title="">!</span><div class="tooltip-content">${text}</div>`;
-	}
-
-	function charWithTooltip(name, tooltip, typeClass) {
-		const cleanTooltip = cleanTooltipText(tooltip);
-		if (!cleanTooltip) return name;
-		return `<span class="characteristic-with-tooltip"><span>${name}</span>${createTooltipHtml(cleanTooltip, typeClass)}</span>`;
-	}
-
-	function revealControl(characteristicName, isRevealed) {
-		if (isRevealed) {
-			return `<span class="status-revealed">${t('revealed')}</span>`;
-		}
-
-		const disabledReason = getRevealBlockedReason();
-		const disabled = disabledReason ? ' disabled aria-disabled="true"' : '';
-		const disabledClass = disabledReason ? ' disabled' : '';
-		const title = disabledReason ? ` title="${escapeHtml(disabledReason)}"` : '';
-		return `<button class="char-btn locked${disabledClass}" onclick="reveal('${characteristicName}')"${disabled}${title}>${t('reveal')}</button>`;
-	}
-
-	container.innerHTML = `
-            ${eliminationPanel}
-            <!-- Особистість -->
-            <div class="char-card ${revealed.personality ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('personality')}</h3>
-                <div class="char-row"><span class="char-label">${t('age')}:</span><span class="char-value">${personality.age ?? '?'} ${t('years')}</span></div>
-                <div class="char-row"><span class="char-label">${t('sex')}:</span><span class="char-value">${personality.sex || t('unknown')}${personality.isChildfree ? " (чайлдфрі)" : ""}</span></div>
-                <div class="char-row"><span class="char-label">${t('orientation')}:</span><span class="char-value">${personality.sexOrientation || t('unknown')}</span></div>
-                <div class="char-row">${revealControl('Personality', revealed.personality)}</div>
-            </div>
-
-            <!-- Статура -->
-            <div class="char-card ${revealed.body ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('body')}</h3>
-                <div class="char-row"><span class="char-label">${t('height')}:</span><span class="char-value">${body.height ?? '?'} см</span></div>
-                <div class="char-row"><span class="char-label">${t('weight')}:</span><span class="char-value">${body.weight ?? '?'} кг</span></div>
-                <div class="char-row"><span class="char-label">${t('bodyType')}:</span><span class="char-value">${body.bodyType || t('unknown')}</span></div>
-                <div class="char-row">${revealControl('Body', revealed.body)}</div>
-            </div>
-
-            <!-- Професія -->
-            <div class="char-card ${revealed.profession ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('profession')}</h3>
-                <div class="char-row"><span class="char-label">${t('name')}:</span><span class="char-value">${charWithTooltip(professionName, profession.tooltip, 'profession')}</span></div>
-                <div class="char-row"><span class="char-label">Досвід:</span><span class="char-value">${profession.experienceYears || 0} ${t('years')}</span></div>
-                <div class="char-row">${revealControl('Profession', revealed.profession)}</div>
-            </div>
-
-            <!-- Фізичне здоров'я -->
-            <div class="char-card ${revealed.physicalHealth ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('physicalHealth')}</h3>
-                <div class="char-row"><span class="char-label">${t('state')}:</span><span class="char-value">${charWithTooltip(physicalHealthName, buildLocalizedTooltip(physicalHealth, 'physicalHealth') || physicalHealth.tooltip, 'physical')}</span></div>
-                ${additionalConditionsHtml}
-                <div class="char-row">${revealControl('PhysicalHealth', revealed.physicalHealth)}</div>
-            </div>
-
-            <!-- Психічне здоров'я -->
-            <div class="char-card ${revealed.mentalHealth ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('mentalHealth')}</h3>
-                <div class="char-row"><span class="char-label">${t('state')}:</span><span class="char-value">${charWithTooltip(mentalHealthName, buildLocalizedTooltip(mentalHealth, 'mentalHealth') || mentalHealth.tooltip, 'mental')}</span></div>
-                <div class="char-row">${revealControl('MentalHealth', revealed.mentalHealth)}</div>
-            </div>
-
-            <!-- Хобі -->
-            <div class="char-card ${revealed.hobby ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('hobby')}</h3>
-                <div class="char-row"><span class="char-label">${t('activity')}:</span><span class="char-value">${charWithTooltip(hobbyName, hobby.tooltip, 'hobby')}</span></div>
-                <div class="char-row">${revealControl('Hobby', revealed.hobby)}</div>
-            </div>
-
-            <!-- Риса характеру -->
-            <div class="char-card ${revealed.characterTrait ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('characterTrait')}</h3>
-                <div class="char-row"><span class="char-label">${t('trait')}:</span><span class="char-value">${traitName}</span></div>
-                <div class="char-row">${revealControl('CharacterTrait', revealed.characterTrait)}</div>
-            </div>
-
-            <!-- Фобія -->
-            <div class="char-card ${revealed.phobia ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('phobia')}</h3>
-                <div class="char-row"><span class="char-label">${t('fear')}:</span><span class="char-value">${charWithTooltip(phobiaName, getLocalizedValue(phobia, 'description') || phobia.tooltip, 'phobia')}</span></div>
-                <div class="char-row">${revealControl('Phobia', revealed.phobia)}</div>
-            </div>
-
-            <!-- Інвентар -->
-            <div class="char-card ${revealed.inventory ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('inventory')}</h3>
-                <div class="char-row"><span class="char-label">${t('items')}:</span><span class="char-value">${inventoryItems}</span></div>
-                <div class="char-row">${revealControl('Inventory', revealed.inventory)}</div>
-            </div>
-
-            <!-- Факт -->
-            <div class="char-card ${revealed.fact || revealed.Fact ? 'card-revealed' : ''}">
-                <h3 class="char-card-title">${t('fact')}</h3>
-             <div class="char-row">
-                    <span class="char-label">${t('fact')}:</span>
-                    <span class="char-value">${charWithTooltip(factName, factTooltip, 'fact')}</span>
-                </div>
-             <div class="char-row">
-                    ${revealControl('Fact', revealed.fact || revealed.Fact)}
-                </div>
-        </div>
-        `;
+	container.innerHTML = `${renderEliminatedRevealAllPanel(player)}${models.map(renderCharacteristicCard).join('')}`;
+	window.reinitTooltips?.();
 
 }
 

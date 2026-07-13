@@ -995,7 +995,396 @@
     cursor: not-allowed;
     filter: grayscale(35%);
 }
-.player-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+.player-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    margin-top: 1rem;
+    min-width: 0;
+}
+
+.vault-characteristic-card {
+    --card-accent: #d6aa52;
+    --card-accent-strong: #f0cd79;
+    --card-accent-soft: rgba(214, 170, 82, 0.13);
+    --card-border: rgba(214, 170, 82, 0.76);
+    --card-inner-border: rgba(239, 198, 111, 0.42);
+    --card-glow: rgba(214, 170, 82, 0.16);
+    --card-surface: linear-gradient(155deg, rgba(25, 24, 23, 0.99), rgba(7, 8, 10, 0.995));
+    --card-surface-overlay: radial-gradient(circle at 50% -5%, rgba(214, 170, 82, 0.12), transparent 48%);
+    --card-pattern: linear-gradient(transparent, transparent);
+    --card-divider: rgba(224, 181, 92, 0.72);
+    --card-button-border: rgba(214, 170, 82, 0.72);
+    --card-button-text: #e8c574;
+    --card-button-surface: linear-gradient(180deg, rgba(22, 20, 17, 0.92), rgba(6, 7, 9, 0.96));
+    --card-detail-border: rgba(238, 216, 169, 0.12);
+    --card-detail-label: #c2b9a8;
+    --card-medallion-border: rgba(224, 181, 92, 0.62);
+    --card-medallion-surface: linear-gradient(145deg, rgba(214, 170, 82, 0.16), rgba(8, 9, 11, 0.78));
+    --card-category-tracking: 0.1em;
+    --card-value-tracking: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 415px;
+    padding: clamp(1.15rem, 2.2vw, 1.65rem);
+    overflow: visible;
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    background: var(--card-pattern), var(--card-surface-overlay), var(--card-surface);
+    box-shadow: inset 0 0 22px rgba(255, 236, 192, 0.025), 0 16px 38px rgba(0, 0, 0, 0.38), 0 0 22px var(--card-glow);
+    isolation: isolate;
+    overflow-wrap: anywhere;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.vault-characteristic-card::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    z-index: 1;
+    border: 1px solid var(--card-inner-border);
+    border-radius: 18px;
+    pointer-events: none;
+}
+
+.vault-characteristic-card:hover,
+.vault-characteristic-card:focus-within {
+    border-color: var(--card-accent-strong);
+    box-shadow: inset 0 0 24px var(--card-accent-soft), 0 18px 42px rgba(0, 0, 0, 0.42), 0 0 26px var(--card-glow);
+    transform: translateY(-2px);
+}
+
+/* Type identity: one shell, ten members of the same deck. */
+.vault-characteristic-card[data-characteristic-type="Personality"] {
+    --card-accent:#d7b36d; --card-accent-strong:#f1d69c; --card-accent-soft:rgba(215,179,109,.14);
+    --card-border:rgba(208,170,97,.78); --card-inner-border:rgba(236,207,151,.42); --card-glow:rgba(194,151,74,.17);
+    --card-pattern:repeating-linear-gradient(90deg,transparent 0 31px,rgba(240,215,165,.025) 32px 33px),radial-gradient(ellipse at 50% 18%,rgba(231,204,151,.055),transparent 34%);
+    --card-divider:rgba(218,179,103,.72); --card-button-border:rgba(208,170,97,.72); --card-button-text:#e7c989;
+    --card-medallion-border:rgba(226,192,127,.64); --card-medallion-surface:linear-gradient(145deg,rgba(221,185,114,.19),rgba(10,10,11,.84));
+    --card-detail-label:#c8beac;
+}
+
+.vault-characteristic-card[data-characteristic-type="Body"] {
+    --card-accent:#b7aa8b; --card-accent-strong:#d7ccb3; --card-accent-soft:rgba(160,151,130,.14);
+    --card-border:rgba(167,151,117,.78); --card-inner-border:rgba(198,187,160,.44); --card-glow:rgba(137,126,105,.17);
+    --card-pattern:repeating-linear-gradient(0deg,transparent 0 23px,rgba(190,184,166,.028) 24px 25px),repeating-linear-gradient(90deg,transparent 0 23px,rgba(190,184,166,.025) 24px 25px);
+    --card-divider:rgba(177,160,125,.76); --card-button-border:rgba(166,151,119,.74); --card-button-text:#cec09f;
+    --card-medallion-border:rgba(190,178,149,.7); --card-medallion-surface:linear-gradient(145deg,rgba(166,156,132,.2),rgba(7,9,11,.88));
+    --card-detail-label:#bdb9ae; --card-category-tracking:.085em;
+}
+
+.vault-characteristic-card[data-characteristic-type="Profession"] {
+    --card-accent:#dfa93f; --card-accent-strong:#ffd27a; --card-accent-soft:rgba(223,169,63,.18);
+    --card-border:rgba(220,163,52,.88); --card-inner-border:rgba(245,196,101,.54); --card-glow:rgba(211,143,32,.23);
+    --card-pattern:linear-gradient(135deg,transparent 0 47%,rgba(242,193,92,.035) 48% 49%,transparent 50%),radial-gradient(circle at 50% 16%,rgba(240,190,85,.075),transparent 32%);
+    --card-divider:rgba(226,167,53,.86); --card-button-border:rgba(222,163,49,.84); --card-button-text:#f1c568;
+    --card-medallion-border:rgba(238,181,67,.82); --card-medallion-surface:linear-gradient(145deg,rgba(224,165,49,.27),rgba(10,8,5,.9));
+    --card-detail-border:rgba(237,196,115,.15); --card-detail-label:#d1c2a5; --card-category-tracking:.13em;
+}
+
+.vault-characteristic-card[data-characteristic-type="PhysicalHealth"] {
+    --card-accent:#76aa8c; --card-accent-strong:#a5cfb4; --card-accent-soft:rgba(75,139,101,.17);
+    --card-border:rgba(92,151,115,.78); --card-inner-border:rgba(126,183,147,.46); --card-glow:rgba(47,117,75,.2);
+    --card-pattern:repeating-linear-gradient(90deg,transparent 0 27px,rgba(103,174,131,.035) 28px 29px,transparent 30px 43px),linear-gradient(176deg,transparent 0 48%,rgba(112,183,139,.035) 49% 50%,transparent 51%);
+    --card-divider:rgba(91,157,117,.78); --card-button-border:rgba(83,146,108,.76); --card-button-text:#99c9aa;
+    --card-medallion-border:rgba(107,169,131,.74); --card-medallion-surface:linear-gradient(145deg,rgba(72,139,98,.24),rgba(5,10,8,.9));
+    --card-detail-label:#b6c6bb;
+}
+
+.vault-characteristic-card[data-characteristic-type="MentalHealth"] {
+    --card-accent:#9272b0; --card-accent-strong:#b99bd0; --card-accent-soft:rgba(100,65,134,.2);
+    --card-border:rgba(116,83,145,.82); --card-inner-border:rgba(151,112,178,.5); --card-glow:rgba(70,38,102,.24);
+    --card-pattern:repeating-radial-gradient(circle at 50% 18%,transparent 0 25px,rgba(151,109,178,.03) 26px 27px,transparent 28px 43px);
+    --card-divider:rgba(125,88,154,.82); --card-button-border:rgba(116,78,146,.8); --card-button-text:#b995cf;
+    --card-medallion-border:rgba(143,100,170,.78); --card-medallion-surface:linear-gradient(145deg,rgba(100,57,129,.3),rgba(6,4,9,.92));
+    --card-detail-label:#c2b1ca; --card-category-tracking:.075em; --card-value-tracking:-.006em;
+}
+
+.vault-characteristic-card[data-characteristic-type="Hobby"] {
+    --card-accent:#c98b5b; --card-accent-strong:#e4b17f; --card-accent-soft:rgba(165,94,54,.18);
+    --card-border:rgba(184,117,70,.8); --card-inner-border:rgba(211,151,105,.46); --card-glow:rgba(142,72,37,.2);
+    --card-pattern:repeating-linear-gradient(45deg,transparent 0 18px,rgba(202,134,84,.03) 19px 20px),repeating-linear-gradient(-45deg,transparent 0 27px,rgba(76,147,135,.022) 28px 29px);
+    --card-divider:rgba(192,123,74,.8); --card-button-border:rgba(181,111,67,.78); --card-button-text:#dfaa7a;
+    --card-medallion-border:rgba(203,133,82,.76); --card-medallion-surface:linear-gradient(145deg,rgba(173,99,57,.25),rgba(6,10,10,.9));
+    --card-detail-label:#ccb8a8; --card-category-tracking:.09em;
+}
+
+.vault-characteristic-card[data-characteristic-type="CharacterTrait"] {
+    --card-accent:#b77966; --card-accent-strong:#d9a08c; --card-accent-soft:rgba(129,57,48,.2);
+    --card-border:rgba(156,78,66,.82); --card-inner-border:rgba(190,112,96,.5); --card-glow:rgba(108,38,34,.23);
+    --card-pattern:radial-gradient(ellipse at 35% 19%,rgba(186,116,96,.04),transparent 22%),radial-gradient(ellipse at 65% 19%,rgba(186,116,96,.04),transparent 22%),repeating-linear-gradient(120deg,transparent 0 31px,rgba(170,93,77,.025) 32px 33px);
+    --card-divider:rgba(168,89,73,.82); --card-button-border:rgba(156,76,64,.8); --card-button-text:#d39482;
+    --card-medallion-border:rgba(183,99,82,.78); --card-medallion-surface:linear-gradient(145deg,rgba(137,55,47,.29),rgba(8,5,6,.92));
+    --card-detail-label:#c9ada7; --card-category-tracking:.115em;
+}
+
+.vault-characteristic-card[data-characteristic-type="Phobia"] {
+    --card-accent:#b49a6b; --card-accent-strong:#d2bd91; --card-accent-soft:rgba(148,120,69,.16);
+    --card-border:rgba(158,133,88,.8); --card-inner-border:rgba(193,166,115,.54); --card-glow:rgba(113,88,45,.2);
+    --card-pattern:repeating-radial-gradient(ellipse at 50% 19%,transparent 0 22px,rgba(196,167,112,.032) 23px 24px,transparent 25px 39px),linear-gradient(90deg,transparent 49%,rgba(192,160,101,.025) 50%,transparent 51%);
+    --card-divider:rgba(167,137,84,.82); --card-button-border:rgba(156,128,80,.8); --card-button-text:#ceb27b;
+    --card-medallion-border:rgba(179,148,92,.8); --card-medallion-surface:linear-gradient(145deg,rgba(139,108,58,.22),rgba(7,7,8,.94));
+    --card-detail-label:#c1b9aa; --card-category-tracking:.07em; --card-value-tracking:-.008em;
+}
+
+.vault-characteristic-card[data-characteristic-type="Inventory"] {
+    --card-accent:#a89758; --card-accent-strong:#cabb78; --card-accent-soft:rgba(126,116,63,.18);
+    --card-border:rgba(141,130,76,.82); --card-inner-border:rgba(175,164,103,.5); --card-glow:rgba(96,87,40,.21);
+    --card-pattern:repeating-linear-gradient(0deg,transparent 0 15px,rgba(167,154,89,.026) 16px 17px),repeating-linear-gradient(90deg,transparent 0 15px,rgba(167,154,89,.026) 16px 17px),linear-gradient(135deg,transparent 49%,rgba(104,96,52,.025) 50%,transparent 51%);
+    --card-divider:rgba(153,140,77,.84); --card-button-border:rgba(143,130,72,.82); --card-button-text:#c6b574;
+    --card-medallion-border:rgba(163,150,87,.78); --card-medallion-surface:linear-gradient(145deg,rgba(119,109,57,.26),rgba(7,8,5,.94));
+    --card-detail-label:#beb9a5; --card-category-tracking:.1em;
+}
+
+.vault-characteristic-card[data-characteristic-type="Fact"] {
+    --card-accent:#c6a66a; --card-accent-strong:#e3c993; --card-accent-soft:rgba(170,133,69,.17);
+    --card-border:rgba(181,145,78,.84); --card-inner-border:rgba(216,181,115,.52); --card-glow:rgba(137,99,37,.22);
+    --card-pattern:repeating-linear-gradient(0deg,transparent 0 27px,rgba(222,193,137,.028) 28px 29px),linear-gradient(120deg,transparent 0 72%,rgba(215,176,104,.035) 73% 74%,transparent 75%);
+    --card-divider:rgba(193,154,82,.84); --card-button-border:rgba(181,141,74,.82); --card-button-text:#ddbd80;
+    --card-medallion-border:rgba(207,166,91,.8); --card-medallion-surface:linear-gradient(145deg,rgba(168,127,57,.25),rgba(7,6,5,.94));
+    --card-detail-label:#c8bca4; --card-category-tracking:.125em; --card-value-tracking:-.01em;
+}
+
+.vault-characteristic-card.variant-positive {
+    --card-accent:#68bda8; --card-accent-strong:#91d8c7; --card-accent-soft:rgba(72,150,132,.14);
+    --card-border:rgba(89,178,157,.68); --card-inner-border:rgba(121,205,184,.38); --card-glow:rgba(72,150,132,.16);
+    --card-divider:rgba(89,178,157,.64); --card-button-border:rgba(89,178,157,.62); --card-button-text:#8fd3c2;
+}
+.vault-characteristic-card.variant-warning-soft {
+    --card-accent:#d3a352; --card-accent-strong:#e7c078; --card-accent-soft:rgba(173,119,38,.16);
+    --card-border:rgba(202,151,65,.72); --card-inner-border:rgba(225,179,99,.4); --card-glow:rgba(169,112,33,.18);
+    --card-surface:linear-gradient(155deg,#211a10,#09090a); --card-surface-overlay:radial-gradient(circle at 50% -5%,rgba(189,130,42,.17),transparent 50%);
+    --card-divider:rgba(211,155,66,.72); --card-button-border:rgba(202,151,65,.7); --card-button-text:#e0b566; --card-button-surface:linear-gradient(180deg,rgba(44,31,13,.9),rgba(8,7,7,.97)); --card-detail-label:#cbbd9e;
+}
+.vault-characteristic-card.variant-warning {
+    --card-accent:#c77d3d; --card-accent-strong:#e09b55; --card-accent-soft:rgba(159,77,27,.2);
+    --card-border:rgba(184,98,43,.8); --card-inner-border:rgba(218,130,66,.5); --card-glow:rgba(150,68,25,.22);
+    --card-surface:linear-gradient(155deg,#24140d,#090708); --card-surface-overlay:radial-gradient(circle at 50% -5%,rgba(174,75,27,.21),transparent 50%);
+    --card-divider:rgba(198,105,48,.82); --card-button-border:rgba(190,96,43,.8); --card-button-text:#e29a59; --card-button-surface:linear-gradient(180deg,rgba(48,23,10,.92),rgba(8,6,7,.98)); --card-detail-label:#cfb095;
+    --card-medallion-border:rgba(211,117,56,.7); --card-medallion-surface:linear-gradient(145deg,rgba(173,77,28,.22),rgba(8,8,9,.82));
+}
+.vault-characteristic-card.variant-severe {
+    --card-accent:#c05c49; --card-accent-strong:#dc7862; --card-accent-soft:rgba(139,42,31,.24);
+    --card-border:rgba(159,61,49,.86); --card-inner-border:rgba(205,86,68,.56); --card-glow:rgba(130,31,25,.28);
+    --card-surface:linear-gradient(155deg,#29100f,#090608 72%); --card-surface-overlay:radial-gradient(circle at 50% -4%,rgba(162,43,34,.26),transparent 52%);
+    --card-divider:rgba(188,70,55,.88); --card-button-border:rgba(175,65,51,.86); --card-button-text:#db7a68; --card-button-surface:linear-gradient(180deg,rgba(45,13,11,.94),rgba(7,5,6,.98)); --card-detail-label:#d0aaa0;
+    --card-medallion-border:rgba(205,79,62,.76); --card-medallion-surface:linear-gradient(145deg,rgba(157,48,37,.3),rgba(11,7,8,.88));
+}
+.vault-characteristic-card.variant-severe-dark {
+    --card-accent:#a93f42; --card-accent-strong:#cd595b; --card-accent-soft:rgba(107,15,25,.28);
+    --card-border:rgba(133,35,42,.9); --card-inner-border:rgba(181,54,60,.62); --card-glow:rgba(91,12,22,.31);
+    --card-surface:linear-gradient(155deg,#180708,#030304 78%); --card-surface-overlay:radial-gradient(circle at 50% -4%,rgba(128,20,28,.3),transparent 54%);
+    --card-divider:rgba(154,43,49,.9); --card-button-border:rgba(145,39,46,.88); --card-button-text:#cf6668; --card-button-surface:linear-gradient(180deg,rgba(32,6,10,.96),rgba(3,3,4,.99)); --card-detail-label:#cda3a1;
+    --card-medallion-border:rgba(174,49,55,.8); --card-medallion-surface:linear-gradient(145deg,rgba(116,19,27,.34),rgba(4,4,5,.94));
+}
+.vault-characteristic-card.variant-critical {
+    --card-accent:#b33742; --card-accent-strong:#e05b63; --card-accent-soft:rgba(117,7,22,.34);
+    --card-border:rgba(151,30,43,.96); --card-inner-border:rgba(213,57,69,.72); --card-glow:rgba(113,5,19,.38);
+    --card-surface:linear-gradient(155deg,#180306,#010102 80%); --card-surface-overlay:repeating-linear-gradient(116deg,transparent 0 13px,rgba(184,43,53,.045) 14px 15px),radial-gradient(circle at 50% -3%,rgba(158,15,32,.36),transparent 55%);
+    --card-divider:rgba(192,43,54,.96); --card-button-border:rgba(190,42,54,.94); --card-button-text:#ed7379; --card-button-surface:linear-gradient(180deg,rgba(42,4,10,.98),rgba(1,1,2,.995)); --card-detail-label:#d3a3a5;
+    --card-medallion-border:rgba(221,63,73,.9); --card-medallion-surface:linear-gradient(145deg,rgba(150,18,33,.4),rgba(2,2,3,.96));
+}
+.vault-characteristic-card.variant-dark {
+    --card-accent:#99444f; --card-accent-strong:#c25d69; --card-accent-soft:rgba(78,12,28,.26);
+    --card-border:rgba(105,38,50,.9); --card-inner-border:rgba(147,55,67,.58); --card-glow:rgba(66,8,22,.3);
+    --card-surface:linear-gradient(155deg,#111012,#030304 80%); --card-surface-overlay:repeating-linear-gradient(125deg,transparent 0 17px,rgba(156,58,72,.04) 18px 19px),radial-gradient(circle at 50% -4%,rgba(91,19,38,.28),transparent 54%);
+    --card-divider:rgba(127,44,57,.86); --card-button-border:rgba(119,41,54,.86); --card-button-text:#c86b75; --card-button-surface:linear-gradient(180deg,rgba(24,6,12,.96),rgba(2,2,3,.995)); --card-detail-label:#c0a3aa;
+    --card-medallion-border:rgba(132,46,59,.76); --card-medallion-surface:linear-gradient(145deg,rgba(60,11,25,.36),rgba(2,2,3,.96));
+}
+.vault-characteristic-card.family-mental.variant-warning-soft { --card-accent:#a586c8; --card-accent-strong:#c0a4dc; --card-border:rgba(128,98,169,.72); --card-inner-border:rgba(166,130,202,.44); --card-glow:rgba(83,50,127,.2); --card-divider:rgba(137,102,179,.72); --card-button-border:rgba(128,91,170,.7); --card-button-text:#bea0da; }
+.vault-characteristic-card.family-mental.variant-warning { --card-accent:#8b68b2; --card-accent-strong:#ab87cf; --card-border:rgba(108,75,150,.82); --card-inner-border:rgba(146,103,185,.52); --card-glow:rgba(66,35,105,.24); --card-divider:rgba(115,77,158,.84); --card-button-border:rgba(105,68,149,.82); --card-button-text:#b18bd0; }
+.vault-characteristic-card.family-mental.variant-severe {
+    --card-accent:#8c5aa0; --card-accent-strong:#b17ac3; --card-accent-soft:rgba(73,27,91,.28);
+    --card-border:rgba(105,61,124,.9); --card-inner-border:rgba(151,91,169,.62); --card-glow:rgba(55,18,72,.32);
+    --card-surface:linear-gradient(155deg,#1d1024,#050307 76%); --card-surface-overlay:repeating-linear-gradient(132deg,transparent 0 19px,rgba(137,77,158,.035) 20px 21px),radial-gradient(circle at 50% -4%,rgba(89,40,108,.32),transparent 54%);
+    --card-divider:rgba(125,71,145,.9); --card-button-border:rgba(118,62,137,.88); --card-button-text:#bd83ca; --card-button-surface:linear-gradient(180deg,rgba(31,12,38,.96),rgba(4,3,6,.99)); --card-detail-label:#c5adc9;
+    --card-medallion-border:rgba(146,80,164,.82); --card-medallion-surface:linear-gradient(145deg,rgba(81,30,98,.38),rgba(5,3,7,.94));
+}
+.vault-characteristic-card.family-mental.variant-severe-dark {
+    --card-accent:#704078; --card-accent-strong:#96569e; --card-accent-soft:rgba(48,10,59,.3);
+    --card-border:rgba(75,34,85,.92); --card-inner-border:rgba(116,53,127,.64); --card-glow:rgba(34,5,44,.34);
+    --card-surface:linear-gradient(155deg,#0e0513,#010102 82%); --card-surface-overlay:radial-gradient(circle at 50% -3%,rgba(61,17,74,.34),transparent 56%);
+    --card-divider:rgba(91,40,101,.9); --card-button-border:rgba(88,36,99,.9); --card-button-text:#a969ae; --card-button-surface:linear-gradient(180deg,rgba(22,5,28,.97),rgba(1,1,2,.995)); --card-detail-label:#c0a2c3;
+    --card-medallion-border:rgba(114,49,125,.84); --card-medallion-surface:linear-gradient(145deg,rgba(54,12,66,.4),rgba(1,1,2,.98));
+}
+.vault-characteristic-card.family-mental.variant-critical {
+    --card-accent:#794681; --card-accent-strong:#a463aa; --card-accent-soft:rgba(53,12,65,.34);
+    --card-border:rgba(82,39,92,.96); --card-inner-border:rgba(132,66,143,.7); --card-glow:rgba(39,7,49,.38);
+    --card-surface:linear-gradient(155deg,#110617,#010102 82%); --card-surface-overlay:repeating-linear-gradient(128deg,transparent 0 15px,rgba(118,58,131,.045) 16px 17px),radial-gradient(circle at 50% -3%,rgba(73,24,88,.38),transparent 56%);
+    --card-divider:rgba(102,49,113,.94); --card-button-border:rgba(100,45,111,.94); --card-button-text:#b675bb; --card-button-surface:linear-gradient(180deg,rgba(27,5,34,.99),rgba(1,1,2,.998)); --card-detail-label:#c7a7ca;
+    --card-medallion-border:rgba(130,61,141,.9); --card-medallion-surface:linear-gradient(145deg,rgba(70,20,82,.44),rgba(1,1,2,.98));
+}
+
+.vault-card-header {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 94px;
+    padding-inline: 0;
+    text-align: center;
+}
+.vault-card-header.has-tooltip { padding-inline: 0; }
+
+.vault-card-icon {
+    display: grid;
+    place-items: center;
+    width: 66px;
+    height: 66px;
+    margin-bottom: 0.75rem;
+    color: var(--card-accent);
+    border: 1px solid var(--card-medallion-border);
+    border-radius: 50%;
+    background: var(--card-medallion-surface);
+    box-shadow: inset 0 0 20px var(--card-accent-soft), 0 0 20px var(--card-glow);
+}
+
+.vault-card-icon svg { width: 34px; height: 34px; }
+.vault-card-category {
+    margin: 0;
+    color: var(--card-accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: var(--card-category-tracking);
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.vault-characteristic-card .vault-card-tooltip {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 3;
+}
+
+.vault-card-tooltip .tooltip-trigger {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--card-accent);
+    border: 1px solid var(--card-inner-border);
+    background: rgba(8, 9, 11, 0.88);
+    box-shadow: none;
+    font-size: 0.9rem;
+    cursor: help;
+}
+.vault-card-tooltip .tooltip-trigger:focus-visible { outline: 2px solid var(--card-accent-strong); outline-offset: 3px; }
+
+.vault-card-value {
+    display: grid;
+    place-items: center;
+    min-height: 78px;
+    padding: 0.7rem 0.2rem;
+    color: #f7f3e9;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+    font-weight: 700;
+    letter-spacing: var(--card-value-tracking);
+    line-height: 1.14;
+    text-align: center;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.vault-card-value.is-long { font-size: clamp(1.15rem, 1.85vw, 1.65rem); line-height: 1.28; }
+.vault-characteristic-card.variant-dark .vault-card-value { letter-spacing: min(var(--card-value-tracking), -0.012em); }
+.vault-characteristic-card[data-characteristic-type="Profession"] .vault-card-category { font-weight: 850; }
+.vault-characteristic-card[data-characteristic-type="Fact"] .vault-card-value { font-size: clamp(1.28rem, 2.05vw, 1.85rem); }
+.vault-card-separator { display: flex; align-items: center; gap: 0.65rem; margin: 0.1rem 0 1rem; }
+.vault-card-separator span { height: 1px; flex: 1; background: linear-gradient(90deg, transparent, var(--card-divider) 78%); }
+.vault-card-separator span:last-child { transform: scaleX(-1); }
+.vault-card-separator i { width: 7px; height: 7px; border: 1px solid var(--card-accent-strong); background:var(--card-accent-soft); box-shadow:0 0 10px var(--card-glow); transform: rotate(45deg); }
+
+.vault-card-details {
+    display: grid;
+    gap: 0;
+    margin-bottom: 1rem;
+    border-top: 1px solid var(--card-detail-border);
+}
+
+.vault-card-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 0.8rem;
+    padding: 0.68rem 0;
+    border-bottom: 1px solid var(--card-detail-border);
+}
+
+.vault-card-detail .char-label { color: var(--card-detail-label); font-size: 0.78rem; line-height: 1.35; }
+.vault-card-detail .char-value { min-width: 0; color: #f1ebdf; font-size: 0.86rem; font-weight: 650; line-height: 1.35; text-align: right; overflow-wrap: anywhere; }
+.vault-characteristic-card .additional-conditions { display: grid; gap: 0.45rem; margin-bottom: 1rem; color: #ece7dc; }
+.vault-characteristic-card .additional-condition-item { display: flex; width: 100%; justify-content: space-between; overflow-wrap: anywhere; }
+.vault-card-footer { display: flex; margin-top: auto; padding-top: 1rem; }
+.vault-card-reveal,
+.vault-card-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+}
+
+.vault-card-reveal {
+    gap: .55rem;
+    border: 1px solid var(--card-button-border);
+    color: var(--card-button-text);
+    background: var(--card-button-surface);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.04), 0 6px 18px var(--card-glow);
+}
+.vault-card-reveal:hover:not(:disabled) { color:#fff7e8; border-color:var(--card-accent-strong); background:linear-gradient(180deg,var(--card-accent-soft),rgba(5,6,8,.96)); box-shadow:inset 0 1px rgba(255,255,255,.06),0 0 18px var(--card-glow); }
+.vault-card-reveal:focus-visible { outline:2px solid var(--card-accent-strong); outline-offset:3px; }
+.vault-card-reveal:disabled { opacity:.58; filter:saturate(.62); cursor:not-allowed; }
+.vault-card-reveal.locked::before { content:none; }
+.vault-lock-icon { display:inline-grid; width:18px; height:18px; }
+.vault-lock-icon svg { width:18px; height:18px; }
+.vault-card-status { color: #7ee2a5; border: 1px solid rgba(80, 200, 126, 0.35); background: rgba(35, 130, 75, 0.12); }
+.vault-characteristic-card.card-revealed { border-color:color-mix(in srgb,var(--card-border) 76%,#65bc85) !important; background:var(--card-pattern),var(--card-surface-overlay),var(--card-surface) !important; box-shadow:inset 0 0 0 1px rgba(92,190,128,.08),0 16px 38px rgba(0,0,0,.36),0 0 18px var(--card-glow); }
+.eliminated-reveal-panel { grid-column: 1 / -1; }
+
+.my-special-card {
+    border-color: rgba(216, 168, 70, 0.4);
+    border-radius: 20px;
+    background: linear-gradient(155deg, rgba(18, 18, 20, 0.97), rgba(8, 9, 11, 0.98));
+}
+
+@media (max-width: 1050px) {
+    .player-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vault-characteristic-card { min-height: 400px; }
+}
+
+@media (max-width: 620px) {
+    .player-cards-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+    .vault-characteristic-card { min-height: 340px; width: 100%; padding: 1.1rem; border-radius: 20px; }
+    .vault-characteristic-card .vault-card-tooltip { top:12px; right:12px; }
+    .vault-card-tooltip .tooltip-trigger { width: 44px; height: 44px; }
+    .vault-card-header.has-tooltip { padding-inline: 0; }
+    .vault-card-detail { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+    .vault-characteristic-card[data-characteristic-type] { --card-pattern: linear-gradient(transparent, transparent); }
+}
+
+@keyframes vault-critical-pulse {
+    0%, 100% { opacity: .72; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .vault-characteristic-card.variant-critical::before { animation: vault-critical-pulse 3.8s ease-in-out infinite; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vault-characteristic-card,
+    .vault-card-tooltip .tooltip-trigger { transition: none; }
+    .vault-characteristic-card:hover,
+    .vault-characteristic-card:focus-within { transform: none; }
+    .vault-characteristic-card.variant-critical::before { animation: none; }
+}
 .event-room { color: var(--color-gold); font-weight: 600; }
 .event-error { color: #e74c3c; }
 
