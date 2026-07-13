@@ -84,8 +84,11 @@ namespace Bunker.Hubs
         private Task SendPersonalPlayerSnapshot(string connectionId, Player player, string reason) =>
             Clients.Client(connectionId).SendAsync("PlayerStateResynced", new { player, reason });
 
-        private async Task SendPublicPlayersUpdate(Room room) =>
+        private async Task SendPublicPlayersUpdate(Room room)
+        {
             await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
+        }
 
         private async Task<bool> RejectPausedPlayerAction(Room room)
         {
@@ -1732,6 +1735,7 @@ namespace Bunker.Hubs
             }
 
             await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         #endregion

@@ -16,4 +16,7 @@ public sealed class OmniscientGmAccessPolicy(IHostEnvironment environment, IOpti
     }
     public bool CanEnter(GmMode mode, string? bootstrapKey) =>
         GmCapabilities.Allows(mode, GmCapability.EnterOmniscientGm) || CanBootstrap(bootstrapKey);
+    public bool CanViewHidden(Player player, GmCapability capability) =>
+        FeatureEnabled && player.IsSpectatorGm && player.GmRole == GmMode.OmniscientGm &&
+        GmCapabilities.Allows(player.GmRole, capability);
 }

@@ -6,6 +6,7 @@ namespace Bunker.Hubs;
 
 public partial class GameHub
 {
+    private readonly Dictionary<string, Queue<DateTimeOffset>> _omniscientRequestWindows = new(StringComparer.Ordinal);
     public Task<OmniscientGmPreviewDto> PreviewEnterOmniscientGm(string bootstrapKey)
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
@@ -36,6 +37,7 @@ public partial class GameHub
         await SendPublicPlayersUpdate(room);
         await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
         await SendPlayerHostControlData(room);
+        await SendPrivateOmniscientState(room, player);
     }
 
     public Task<OmniscientGmStateDto> GetOmniscientGmState()
@@ -48,4 +50,75 @@ public partial class GameHub
 
     private Task SendOmniscientState(Room room, Player player) =>
         Clients.Caller.SendAsync("OmniscientGmStateUpdated", OmniscientGmRoleService.PublicState(room, player));
+
+    public async Task<OmniscientRoomStateDto> GetOmniscientRoomState()
+    {
+        Room room; Player player;
+        try { (room, player) = RequireOmniscientCaller(GmCapability.ViewHiddenRoomState); }
+        catch (HubException) { await AuditRejectedOmniscientRequest(); throw; }
+        EnsureOmniscientRateLimit();
+        var dto = BuildOmniscientHiddenState(room, player);
+        await AppendGmAudit(room, RoomService.GetPlayerKey(player), "omniscient_hidden_state_requested", GmAuditResult.Success,
+            "Omniscient hidden state access granted.", allowUndo: false);
+        return dto;
+    }
+
+    public async Task ResyncOmniscientState()
+    {
+        Room room; Player player;
+        try { (room, player) = RequireOmniscientCaller(GmCapability.ViewHiddenRoomState); }
+        catch (HubException) { await AuditRejectedOmniscientRequest(); throw; }
+        EnsureOmniscientRateLimit();
+        await SendPrivateOmniscientState(room, player);
+    }
+
+    private (Room Room, Player Player) RequireOmniscientCaller(GmCapability capability)
+    {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+        if (room == null || !_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) ||
+            string.IsNullOrWhiteSpace(player.StablePlayerId) ||
+            !room.IrreversibleOmniscientPlayerIds.Contains(player.StablePlayerId) ||
+            !_omniscientAccess.CanViewHidden(player, capability))
+            throw new HubException("omniscient_hidden_access_denied");
+        return (room, player);
+    }
+
+    private async Task AuditRejectedOmniscientRequest()
+    {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+        if (room != null && _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player))
+            await AppendGmAudit(room, RoomService.GetPlayerKey(player), "omniscient_hidden_state_requested", GmAuditResult.Rejected,
+                "Omniscient hidden state access rejected.", errorCode: "not_authorized", allowUndo: false);
+    }
+
+    private void EnsureOmniscientRateLimit()
+    {
+        var now = DateTimeOffset.UtcNow;
+        lock (_omniscientRequestWindows)
+        {
+            if (!_omniscientRequestWindows.TryGetValue(Context.ConnectionId, out var requests))
+                _omniscientRequestWindows[Context.ConnectionId] = requests = new();
+            while (requests.Count > 0 && now - requests.Peek() > TimeSpan.FromSeconds(5)) requests.Dequeue();
+            if (requests.Count >= 12) throw new HubException("omniscient_rate_limited");
+            requests.Enqueue(now);
+        }
+    }
+
+    private OmniscientRoomStateDto BuildOmniscientHiddenState(Room room, Player player) =>
+        _omniscientHiddenState.Build(room, _omniscientAccess.CanViewHidden(player, GmCapability.ViewSecretVotes));
+
+    private Task SendPrivateOmniscientState(Room room, Player player) =>
+        Clients.Client(player.ConnectionId).SendAsync("OmniscientHiddenStateUpdated", BuildOmniscientHiddenState(room, player));
+
+    private async Task BroadcastOmniscientStateToAuthorizedSpectators(Room room)
+    {
+        foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
+        {
+            if (string.IsNullOrWhiteSpace(player.ConnectionId) || !player.IsConnected ||
+                !room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(player)) ||
+                !_omniscientAccess.CanViewHidden(player, GmCapability.ViewHiddenRoomState) ||
+                !string.Equals(_roomService.GetPlayerRoomId(player.ConnectionId), room.Id, StringComparison.OrdinalIgnoreCase)) continue;
+            await SendPrivateOmniscientState(room, player);
+        }
+    }
 }

@@ -145,6 +145,7 @@ namespace Bunker.Hubs
 					revealed = player.Revealed,
 					fact = player.Fact
 				});
+				await BroadcastOmniscientStateToAuthorizedSpectators(room);
 
 				// Оновлюємо список кімнат
 				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
@@ -186,6 +187,7 @@ namespace Bunker.Hubs
                     newHostConnectionId = newHostConnectionId,
                     newHostName = newHostName
                 });
+                await BroadcastOmniscientStateToAuthorizedSpectators(room);
             }
 
             // Оновлюємо список кімнат
@@ -283,6 +285,7 @@ namespace Bunker.Hubs
 				stablePlayerId = RoomService.GetPlayerKey(player),
 				isHost = wasHost
 			});
+			await BroadcastOmniscientStateToAuthorizedSpectators(room);
 		}
 
 		private object? BuildVotingReconnectInfo(Room room, Player player)

@@ -93,5 +93,6 @@ public partial class GameHub
                     data = GetRevealedDataForCharacteristic(player, characteristic)
                 });
         }
+        await BroadcastOmniscientStateToAuthorizedSpectators(room);
     }
 }

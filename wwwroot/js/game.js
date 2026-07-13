@@ -60,6 +60,8 @@ connection.start()
     let gmRoomLocalEditorPending = false;
     let omniscientPreview = null;
     let omniscientCommandPending = false;
+    let omniscientHiddenState = null;
+    let omniscientHiddenStateVersion = 0;
     let globalCatalogAllowed = false;
     let globalCatalogMetadata = [];
     let globalCatalogPage = 1;
@@ -412,6 +414,7 @@ connection.start()
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Зміни набудуть чинності після перезапуску застосунку.", globalBackupsTitle: "Резервні копії", globalBackupsRefresh: "Оновити backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
         ,globalMigrationTitle: "Потрібна stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Застосувати migration"
         ,omniscientModeTitle: "Режим GM-спостерігача", omniscientModeWarning: "Незворотно для цієї кімнати: GM перестане бути учасником гри.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview наслідків", omniscientEnter: "Увійти незворотно", omniscientPublicBadge: "GM-спостерігач"
+        ,omniscientHiddenTitle: "Всезнаючий GM", omniscientReadOnlyNotice: "Спостерігач — не бере участі у грі. Лише перегляд.", omniscientHiddenSearch: "Пошук гравця або характеристики", omniscientRefresh: "Оновити", omniscientHiddenPending: "Оновлення прихованого стану…", omniscientHiddenError: "Прихований стан недоступний", omniscientSecretVotes: "Таємні голоси"
     });
     Object.assign(uiTranslations.en, {
         globalCatalogTitle: "Global Content Catalog", globalCatalogDevelopmentWarning: "Development only: read-only catalog. Production access is disabled.",
@@ -421,6 +424,7 @@ connection.start()
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Changes take effect after application restart.", globalBackupsTitle: "Backups", globalBackupsRefresh: "Refresh backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
         ,globalMigrationTitle: "Stable-ID migration required", globalMigrationPreview: "Preview migration", globalMigrationApply: "Apply migration"
         ,omniscientModeTitle: "Spectator GM mode", omniscientModeWarning: "Irreversible in this room: the GM stops participating in gameplay.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview consequences", omniscientEnter: "Enter irreversibly", omniscientPublicBadge: "Spectator GM"
+        ,omniscientHiddenTitle: "Omniscient GM", omniscientReadOnlyNotice: "Observer — does not participate in gameplay. Read-only.", omniscientHiddenSearch: "Search player or characteristic", omniscientRefresh: "Refresh", omniscientHiddenPending: "Refreshing hidden state…", omniscientHiddenError: "Hidden state unavailable", omniscientSecretVotes: "Secret votes"
     });
     Object.assign(uiTranslations.ru, {
         globalCatalogTitle: "Глобальный каталог контента", globalCatalogDevelopmentWarning: "Только Development: read-only каталог. В Production доступ отключён.",
@@ -430,6 +434,7 @@ connection.start()
         ,globalDraftCommit: "Commit", globalRuntimeRestart: "Изменения вступят в силу после перезапуска приложения.", globalBackupsTitle: "Резервные копии", globalBackupsRefresh: "Обновить backups", globalRollbackPreview: "Preview rollback", globalRollbackExecute: "Rollback"
         ,globalMigrationTitle: "Требуется stable-ID migration", globalMigrationPreview: "Preview migration", globalMigrationApply: "Применить migration"
         ,omniscientModeTitle: "Режим GM-наблюдателя", omniscientModeWarning: "Необратимо для этой комнаты: GM перестанет участвовать в игре.", omniscientBootstrapKey: "Development bootstrap key", omniscientPreview: "Preview последствий", omniscientEnter: "Войти необратимо", omniscientPublicBadge: "GM-наблюдатель"
+        ,omniscientHiddenTitle: "Всезнающий GM", omniscientReadOnlyNotice: "Наблюдатель — не участвует в игре. Только просмотр.", omniscientHiddenSearch: "Поиск игрока или характеристики", omniscientRefresh: "Обновить", omniscientHiddenPending: "Обновление скрытого состояния…", omniscientHiddenError: "Скрытое состояние недоступно", omniscientSecretVotes: "Тайные голоса"
     });
     Object.assign(uiTranslations.en, {
         gmRunDiagnostics: "Check room", gmPreviewAutoFix: "Preview auto-fix", gmApplyAutoFix: "Apply safe fixes",
@@ -1740,6 +1745,7 @@ connection.start()
     }
 
     function resetClientGameStateForNewRoom() {
+        clearOmniscientHiddenState();
         currentRoom = null;
         myPlayerData = null;
         isHost = false;
@@ -2810,6 +2816,17 @@ function registerSignalREvents() {
         roomPlayers = next;
         renderCurrentGameUI();
         updateGMPlayerSelect();
+        const me = Object.values(roomPlayers).find(p => isMyPlayerRef(p.connectionId, p.stablePlayerId));
+        if (me && !(me.isSpectatorGm || me.IsSpectatorGm)) clearOmniscientHiddenState();
+    });
+
+    connection.off("OmniscientHiddenStateUpdated");
+    connection.on("OmniscientHiddenStateUpdated", function (state) {
+        const version = Number(state?.stateVersion ?? state?.StateVersion ?? 0);
+        if (!version || version <= omniscientHiddenStateVersion) return;
+        omniscientHiddenStateVersion = version;
+        omniscientHiddenState = state;
+        renderOmniscientHiddenState();
     });
 
     connection.off("PlayerStateResynced");
@@ -2854,6 +2871,7 @@ function registerSignalREvents() {
     connection.off("RoomLeft");    
     connection.on("RoomLeft", function () {
         console.log("Left room");
+        clearOmniscientHiddenState();
         currentRoom = null;
         myPlayerData = null;
         isHost = false;
@@ -5852,6 +5870,58 @@ function removeBunkerSupplies(months) {
         finally { setOmniscientPending(false); }
     }
 
+    function clearOmniscientHiddenState() {
+        omniscientHiddenState = null;
+        omniscientHiddenStateVersion = 0;
+        const tab = document.getElementById('omniscientHiddenTab');
+        const section = document.getElementById('omniscientHiddenSection');
+        if (tab) tab.style.display = 'none';
+        if (section) section.style.display = 'none';
+        ['omniscientRoomSummary', 'omniscientSecretVotes', 'omniscientHiddenPlayers'].forEach(id => { const element = document.getElementById(id); if (element) element.replaceChildren(); });
+    }
+
+    async function resyncOmniscientHiddenState() {
+        const status = document.getElementById('omniscientHiddenStatus');
+        if (status) status.textContent = t('omniscientHiddenPending');
+        try { await connection.invoke('ResyncOmniscientState'); }
+        catch (_) { clearOmniscientHiddenState(); if (status) status.textContent = t('omniscientHiddenError'); }
+    }
+
+    function renderOmniscientHiddenState() {
+        const state = omniscientHiddenState; if (!state) return;
+        const get = (object, camel, pascal) => object?.[camel] ?? object?.[pascal];
+        const tab = document.getElementById('omniscientHiddenTab'); if (tab) tab.style.display = '';
+        const status = document.getElementById('omniscientHiddenStatus'); if (status) status.textContent = `${get(state, 'updatedAtUtc', 'UpdatedAtUtc') || ''}`;
+        const summary = document.getElementById('omniscientRoomSummary');
+        if (summary) summary.innerHTML = [
+            ['Round', get(state, 'round', 'Round')], ['Phase', get(state, 'phase', 'Phase')],
+            ['Players', get(state, 'activeGameplayPlayerCount', 'ActiveGameplayPlayerCount')],
+            ['Threat', get(get(state, 'currentThreat', 'CurrentThreat'), 'title', 'Title') || '—']
+        ].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value ?? '—'))}</strong></div>`).join('');
+        const query = (document.getElementById('omniscientHiddenSearch')?.value || '').trim().toLocaleLowerCase();
+        const players = get(state, 'players', 'Players') || [];
+        const target = document.getElementById('omniscientHiddenPlayers');
+        if (target) target.innerHTML = players.filter(player => {
+            const searchable = `${get(player, 'displayName', 'DisplayName')} ${(get(player, 'characteristics', 'Characteristics') || []).map(c => `${get(c, 'key', 'Key')} ${get(c, 'value', 'Value')}`).join(' ')}`.toLocaleLowerCase();
+            return !query || searchable.includes(query);
+        }).map(player => {
+            const characteristics = get(player, 'characteristics', 'Characteristics') || [];
+            const inventory = get(player, 'inventory', 'Inventory') || [];
+            const cards = get(player, 'specialCards', 'SpecialCards') || [];
+            const conditions = get(player, 'additionalPhysicalConditions', 'AdditionalPhysicalConditions') || [];
+            const rows = characteristics.map(c => { const key = String(get(c, 'key', 'Key') || ''); return `<li><strong>${escapeHtml(t(key) || key)}</strong> <span class="gm-status-badge">${get(c, 'isRevealed', 'IsRevealed') ? t('revealed') : t('hidden')}</span><br>${escapeHtml(String(get(c, 'value', 'Value') || ''))}${get(c, 'description', 'Description') ? `<br><small>${escapeHtml(String(get(c, 'description', 'Description')))}</small>` : ''}</li>`; }).join('');
+            return `<details class="gm-threat-audit"><summary>${escapeHtml(String(get(player, 'displayName', 'DisplayName') || ''))} · ${get(player, 'isEliminated', 'IsEliminated') ? 'eliminated' : get(player, 'isSpectatorGm', 'IsSpectatorGm') ? 'spectator' : 'active'}</summary>
+                <ul>${rows}</ul>
+                <details><summary>${t('inventory')} (${inventory.length})</summary><ul>${inventory.map(i => `<li>${escapeHtml(String(get(i, 'name', 'Name') || ''))} — ${escapeHtml(String(get(i, 'description', 'Description') || ''))}</li>`).join('')}</ul></details>
+                <details><summary>${t('specialCards')} (${cards.length})</summary><ul>${cards.map(c => `<li>${escapeHtml(String(get(c, 'name', 'Name') || ''))} — ${escapeHtml(String(get(c, 'description', 'Description') || ''))}</li>`).join('')}</ul></details>
+                <details><summary>Additional conditions (${conditions.length})</summary><ul>${conditions.map(c => `<li>${escapeHtml(String(get(c, 'name', 'Name') || ''))} ${escapeHtml(String(get(c, 'severityLevel', 'SeverityLevel') || ''))}</li>`).join('')}</ul></details>
+            </details>`;
+        }).join('');
+        const voting = get(state, 'currentVoting', 'CurrentVoting'); const votes = get(voting, 'secretVotes', 'SecretVotes');
+        const votesTarget = document.getElementById('omniscientSecretVotes');
+        if (votesTarget) { votesTarget.style.display = Array.isArray(votes) ? '' : 'none'; votesTarget.innerHTML = Array.isArray(votes) ? `<h5>${t('omniscientSecretVotes')}</h5><ul>${votes.map(v => `<li>${escapeHtml(String(get(v, 'voterName', 'VoterName') || ''))} → ${escapeHtml(String(get(v, 'candidateName', 'CandidateName') || ''))}</li>`).join('')}</ul>` : ''; }
+    }
+
     async function refreshGlobalContentCatalogAccess() {
         const panel = document.getElementById('globalContentCatalog');
         if (!panel) return;
@@ -6334,7 +6404,7 @@ function removeBunkerSupplies(months) {
     }
 
     function switchGMTab(tab) {
-        activeGMTab = ['state', 'round', 'threat', 'content', 'diagnostics'].includes(tab) ? tab : 'state';
+        activeGMTab = ['state', 'round', 'threat', 'content', 'diagnostics', 'omniscient'].includes(tab) ? tab : 'state';
         renderGMTabsVisibility();
         renderGMPanelState();
     }
@@ -6343,6 +6413,7 @@ function removeBunkerSupplies(months) {
         document.querySelectorAll('[data-gm-tab]').forEach(section => {
             const active = section.dataset.gmTab === activeGMTab;
             if (section.id === 'gmPlayerInfo') section.style.display = active && selectedPlayerForGM ? 'block' : 'none';
+            else if (section.dataset.gmTab === 'omniscient') section.style.display = active && !!omniscientHiddenState ? 'block' : 'none';
             else section.style.display = active && isHost ? 'block' : 'none';
         });
         document.querySelectorAll('[data-gm-tab-button]').forEach(button => {
@@ -7087,7 +7158,7 @@ function removeBunkerSupplies(months) {
         // Показуємо кнопку GM панелі хосту ЗАВЖДИ (і в лобі, і під час гри)
         const gmPanelBtn = document.getElementById('gmPanelBtn');
         if (gmPanelBtn) {
-            if (isHost) {
+            if (isHost || !!omniscientHiddenState) {
                 gmPanelBtn.style.display = 'inline-block';
                 console.log("[updateRoomUI] GM Panel button shown for host");
             } else {

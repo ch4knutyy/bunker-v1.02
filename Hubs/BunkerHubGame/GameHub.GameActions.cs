@@ -116,6 +116,7 @@ namespace Bunker.Hubs
             });
 
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         /// <summary>
@@ -170,6 +171,7 @@ namespace Bunker.Hubs
                 roundState
             });
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         /// <summary>
@@ -257,6 +259,7 @@ namespace Bunker.Hubs
             });
 
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 
         private object? GetRevealedDataForCharacteristic(Player player, string characteristicName)
