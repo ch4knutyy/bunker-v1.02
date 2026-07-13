@@ -156,6 +156,28 @@
                     <p id="omniscientHiddenStatus" aria-live="polite"></p>
                     <div id="omniscientRoomSummary" class="gm-status-grid"></div>
                     <div id="omniscientSecretVotes" class="gm-threat-audit"></div>
+                    <details id="omniscientDirectorControls" class="gm-threat-audit">
+                        <summary data-gm-i18n="directorControlsTitle">Director controls</summary>
+                        <p class="global-catalog-warning" data-gm-i18n="directorControlsWarning">Preview і підтвердження обов’язкові.</p>
+                        <div class="gm-editor-grid">
+                            <select id="directorTargetPlayer" class="input-field" onchange="syncDirectorControls()"></select>
+                            <select id="directorAction" class="input-field" onchange="syncDirectorControls()">
+                                <option value="reveal">Reveal characteristic</option><option value="hide">Hide characteristic</option>
+                                <option value="reveal_all">Reveal all</option><option value="hide_all">Hide all</option>
+                                <option value="eliminate">Eliminate</option><option value="restore">Restore</option>
+                                <option value="condition_severity">Condition severity</option><option value="condition_remove">Remove condition</option>
+                                <option value="pause">Pause</option><option value="resume">Resume</option><option value="round_forward">Forward round</option>
+                                <option value="reset_readiness">Reset readiness</option><option value="clear_votes">Clear votes</option><option value="remove_vote">Remove vote</option><option value="voting_resync">Voting resync</option>
+                                <option value="threat_force_success">Force threat success</option><option value="threat_force_failure">Force threat failure</option>
+                                <option value="threat_cancel">Cancel threat</option><option value="threat_restart">Restart threat</option><option value="threat_resync">Threat resync</option>
+                            </select>
+                            <select id="directorCategory" class="input-field"><option>Profession</option><option>PhysicalHealth</option><option>MentalHealth</option><option>Hobby</option><option>CharacterTrait</option><option>Phobia</option><option>Inventory</option><option>Fact</option><option>SpecialCard</option></select>
+                            <input id="directorOption" class="input-field" maxlength="80" data-gm-i18n-placeholder="directorOption" placeholder="Option / severity / round" />
+                        </div>
+                        <button id="directorPreviewButton" class="btn-gm-action director-command" data-gm-i18n="directorPreview" onclick="previewDirectorAction()">Preview</button>
+                        <button id="directorApplyButton" class="btn-danger director-command" data-gm-i18n="directorApply" onclick="applyDirectorAction()" disabled>Apply</button>
+                        <pre id="directorPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
+                    </details>
                     <div id="omniscientHiddenPlayers" class="gm-diagnostics-list"></div>
                 </div>
 

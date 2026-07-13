@@ -215,7 +215,7 @@ public partial class GameHub
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
         return room != null &&
             _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) &&
-            room.IsHost(player) &&
+            (room.IsHost(player) || (_activeDirectorCapability == GmCapability.UseDirectorThreatControls && IsAuthorizedDirector(player, GmCapability.UseDirectorThreatControls))) &&
             HasGmCapability(room, GmCapability.ManagePublicGameState)
                 ? room
                 : null;

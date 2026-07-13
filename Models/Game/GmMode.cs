@@ -15,6 +15,9 @@ public enum GmCapability
     ViewHiddenPlayerState,
     ViewHiddenRoomState,
     ViewSecretVotes,
+    UseDirectorPlayerControls,
+    UseDirectorRoundControls,
+    UseDirectorThreatControls,
     ManageOmniscientGmMode
 }
 
@@ -33,6 +36,9 @@ public static class GmCapabilities
         GmCapability.ViewHiddenPlayerState => mode == GmMode.OmniscientGm,
         GmCapability.ViewHiddenRoomState => mode == GmMode.OmniscientGm,
         GmCapability.ViewSecretVotes => mode == GmMode.OmniscientGm,
+        GmCapability.UseDirectorPlayerControls => mode == GmMode.OmniscientGm,
+        GmCapability.UseDirectorRoundControls => mode == GmMode.OmniscientGm,
+        GmCapability.UseDirectorThreatControls => mode == GmMode.OmniscientGm,
         GmCapability.ManageOmniscientGmMode => mode == GmMode.OmniscientGm,
         _ => false
     };
