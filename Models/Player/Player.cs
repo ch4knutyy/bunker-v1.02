@@ -17,6 +17,8 @@ namespace Bunker.Models
         public bool IsSpectatorGm { get; set; }
         public bool HasSeenOmniscientState { get; set; }
         public GmMode GmRole { get; set; } = GmMode.PlayerHost;
+        public bool IsLobbySpectator { get; set; }
+        public bool IsLobbyReady { get; set; }
 
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();

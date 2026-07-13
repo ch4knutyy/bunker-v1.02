@@ -332,6 +332,11 @@ public sealed class RoomSnapshotService
             return (false, "snapshot_fingerprint_invalid");
         if (!snapshot.PlayerTopologyIds.SetEquals(GetTopologyIds(room))) return (false, "player_topology_changed");
         if (!string.Equals(snapshot.HostTopologyPlayerId, GetCurrentHostPlayerId(room), StringComparison.OrdinalIgnoreCase)) return (false, "host_topology_changed");
+        if (room.State != RoomState.Lobby && snapshot.State.State == RoomState.Lobby) return (false, "running_to_lobby_forbidden");
+        if (room.State != RoomState.Lobby && RoomService.GetPlayersSnapshot(room).Any(entry =>
+            snapshot.State.PlayersByStableId.TryGetValue(RoomService.GetPlayerKey(entry.Value), out var saved) &&
+            (saved.IsLobbySpectator != entry.Value.IsLobbySpectator || saved.GmRole != entry.Value.GmRole || saved.IsSpectatorGm != entry.Value.IsSpectatorGm)))
+            return (false, "lobby_role_boundary_changed");
         if (room.IrreversibleOmniscientPlayerIds.Any(id => snapshot.State.PlayersByStableId.TryGetValue(id, out var player) && !player.IsSpectatorGm)) return (false, "omniscient_boundary_irreversible");
         if (snapshot.RestoreStatus == RoomSnapshotRestoreStatus.Restored) return (false, "snapshot_already_restored");
         return (true, null);

@@ -62,6 +62,7 @@ namespace Bunker.Hubs
 					players = BuildRoomPlayersPayload(joinedRoom),
 					roundState = BuildRoundState(joinedRoom)
 				});
+				await BroadcastLobbyState(joinedRoom);
 
 				// Оновлюємо список кімнат
 				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
@@ -102,7 +103,7 @@ namespace Bunker.Hubs
 
 					if (rejoinSuccess && rejoinRoom != null && rejoinPlayer != null)
 					{
-						EnsurePlayerHasGeneratedData(rejoinPlayer);
+						EnsurePlayerHasGeneratedData(rejoinPlayer, rejoinRoom);
 						await SendRejoinSuccess(roomId, rejoinRoom, rejoinPlayer, wasHost);
 						return;
 					}
@@ -146,6 +147,7 @@ namespace Bunker.Hubs
 					fact = player.Fact
 				});
 				await BroadcastOmniscientStateToAuthorizedSpectators(room);
+				await BroadcastLobbyState(room);
 
 				// Оновлюємо список кімнат
 				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
@@ -188,6 +190,7 @@ namespace Bunker.Hubs
                     newHostName = newHostName
                 });
                 await BroadcastOmniscientStateToAuthorizedSpectators(room);
+                await BroadcastLobbyState(room);
             }
 
             // Оновлюємо список кімнат
@@ -255,7 +258,7 @@ namespace Bunker.Hubs
 
 		private async Task SendRejoinSuccess(string roomId, Room room, Player player, bool wasHost)
 		{
-			EnsurePlayerHasGeneratedData(player);
+			EnsurePlayerHasGeneratedData(player, room);
 			RemoveCorruptedAdditionalConditions(room, player);
 
 			// Оновлюємо URL зображень з кешу
@@ -286,6 +289,7 @@ namespace Bunker.Hubs
 				isHost = wasHost
 			});
 			await BroadcastOmniscientStateToAuthorizedSpectators(room);
+			await BroadcastLobbyState(room);
 		}
 
 		private object? BuildVotingReconnectInfo(Room room, Player player)
@@ -346,18 +350,12 @@ namespace Bunker.Hubs
 
 		private Player CreateGeneratedPlayer(string playerName, string? stablePlayerId, Room? room = null)
 		{
-			var existingPlayers = room == null
-				? Enumerable.Empty<Player>()
-				: RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value);
-			var player = _generator.Generate(playerName, existingPlayers);
-			player.ConnectionId = Context.ConnectionId;
-			player.StablePlayerId = stablePlayerId ?? "";
-			return player;
+			return new Player { Name = playerName, ConnectionId = Context.ConnectionId, StablePlayerId = stablePlayerId ?? "" };
 		}
 
-		private void EnsurePlayerHasGeneratedData(Player player)
+		private void EnsurePlayerHasGeneratedData(Player player, Room? room = null)
 		{
-			if (player.IsSpectatorGm) return;
+			if (player.IsSpectatorGm || player.IsLobbySpectator || player.GmRole == GmMode.TechnicalGm || room?.State == RoomState.Lobby) return;
 			var generated = HasCompleteCharacterData(player) ? null : _generator.Generate(player.Name);
 
 			if (!HasPersonality(player)) player.Personality = generated!.Personality;
@@ -473,7 +471,6 @@ namespace Bunker.Hubs
 
 			foreach (var player in playersSnapshot.Select(entry => entry.Value))
 			{
-				EnsurePlayerHasGeneratedData(player);
 				RemoveCorruptedAdditionalConditions(room, player);
 			}
 
@@ -513,32 +510,27 @@ namespace Bunker.Hubs
 		/// <summary>
 		/// Почати гру (тільки хост)
 		/// </summary>
-		public async Task StartGame()
+		public Task StartGame() => Clients.Caller.SendAsync("ReceiveError", "lobby_preview_required");
+
+		private void PrepareLobbyGameplayCharacters(Room room)
+		{
+			foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
+				EnsurePlayerHasGeneratedData(player);
+		}
+
+		private async Task CompleteLobbyStart(Room room)
         {
-            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            if (roomId == null)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Ви не в кімнаті");
-                return;
-            }
-
-            var (success, error, room) = _roomService.StartGame(roomId, Context.ConnectionId);
-
-            if (!success || room == null)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", error ?? "Помилка старту гри");
-                return;
-            }
+            var roomId = room.Id;
 
             // Генеруємо апокаліпсис та бункер
-            if (_gameData.Apocalypses.Count > 0)
+            if (room.Apocalypse == null && _gameData.Apocalypses.Count > 0)
             {
                 room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
                 // Оновлюємо URL зображення з кешу
                 _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
             }
             
-            if (_gameData.Bunkers.Count > 0)
+            if (room.Bunker == null && _gameData.Bunkers.Count > 0)
             {
                 room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
                 // Оновлюємо URL зображення з кешу
@@ -560,8 +552,35 @@ namespace Bunker.Hubs
                 p.SeatNumber = seatNumbers[seatIdx++];
             }
 
-            // Відправляємо всім в кімнаті сигнал про початок гри
+            // Canonical lobby -> running handoff. The lifecycle is public first;
+            // personal character state is then delivered only to verified current
+            // gameplay connections, followed by fresh public/authority state.
+            await BroadcastLobbyState(room);
+
+            foreach (var entry in RoomService.GetGameplayPlayersSnapshot(room))
+            {
+                var player = entry.Value;
+                var currentConnectionId = _roomService.GetCurrentConnectionId(room, RoomService.GetPlayerKey(player));
+                if (string.IsNullOrWhiteSpace(currentConnectionId) ||
+                    !string.Equals(_roomService.GetPlayerRoomId(currentConnectionId), roomId, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                await SendPersonalPlayerSnapshot(currentConnectionId, player, "lobby_game_started");
+            }
+
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
+            await Clients.Group(roomId).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
+
             var roundState = BuildRoundState(room);
+            await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            if (room.Bunker != null)
+                await Clients.Group(roomId).SendAsync("BunkerChanged", new { bunker = room.Bunker.ToClientInfo() });
+            if (room.Apocalypse != null)
+                await Clients.Group(roomId).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
+            await SendPlayerHostControlData(room);
+
+            // Compatibility aggregate for existing clients; it is built only after
+            // every canonical state mutation and granular refresh above.
             await Clients.Group(roomId).SendAsync("GameStarted", new
             {
                 roomState = room.State.ToString(),

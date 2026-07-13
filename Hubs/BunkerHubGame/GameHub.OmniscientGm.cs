@@ -38,6 +38,7 @@ public partial class GameHub
         await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
         await SendPlayerHostControlData(room);
         await SendPrivateOmniscientState(room, player);
+        await BroadcastLobbyState(room);
     }
 
     public Task<OmniscientGmStateDto> GetOmniscientGmState()

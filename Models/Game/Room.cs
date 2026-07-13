@@ -38,6 +38,7 @@ namespace Bunker.Models
         public GmMode GmMode { get; set; } = GmMode.PlayerHost;
         public HashSet<string> IrreversibleOmniscientPlayerIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public HashSet<string> ProcessedOmniscientCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> ProcessedLobbyCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public bool IsPaused { get; set; }
         public string? PauseReason { get; set; }
         public DateTimeOffset? PausedAtUtc { get; set; }
@@ -176,7 +177,7 @@ namespace Bunker.Models
         /// Кількість гравців
         /// </summary>
         public int PlayerCount => Players?.Count ?? 0;
-        public int GameplayPlayerCount => Players?.Values.Count(player => player != null && !player.IsEliminated && !player.IsSpectatorGm) ?? 0;
+        public int GameplayPlayerCount => Players?.Values.Count(player => player != null && !player.IsEliminated && !player.IsSpectatorGm && !player.IsLobbySpectator && player.GmRole != GmMode.TechnicalGm) ?? 0;
         
         /// <summary>
         /// Чи можна приєднатися
