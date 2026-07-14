@@ -537,20 +537,8 @@ namespace Bunker.Hubs
                 _imageService.UpdateBunkerImageUrl(room.Bunker);
             }
 
-            // Рандомізація номерів місць гравців
+            // Canonical seats are assigned atomically by RoomService.StartGame.
             var playersSnapshot = RoomService.GetGameplayPlayersSnapshot(room);
-            var seatNumbers = Enumerable.Range(1, playersSnapshot.Count).ToList();
-            // Fisher-Yates shuffle
-            for (int i = seatNumbers.Count - 1; i > 0; i--)
-            {
-                int j = _random.Next(i + 1);
-                (seatNumbers[i], seatNumbers[j]) = (seatNumbers[j], seatNumbers[i]);
-            }
-            int seatIdx = 0;
-            foreach (var p in playersSnapshot.Select(entry => entry.Value))
-            {
-                p.SeatNumber = seatNumbers[seatIdx++];
-            }
 
             // Canonical lobby -> running handoff. The lifecycle is public first;
             // personal character state is then delivered only to verified current

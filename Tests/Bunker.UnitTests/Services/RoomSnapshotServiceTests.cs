@@ -43,6 +43,24 @@ public sealed class RoomSnapshotServiceTests
     }
 
     [Fact]
+    public void SnapshotRestorePreservesCanonicalSeatNumbers()
+    {
+        var context = CreateContext();
+        context.Room.State = RoomState.Playing;
+        context.Room.CurrentRound = 1;
+        context.Room.CurrentPhase = GamePhase.RoundReveal;
+        context.Host.SeatNumber = 2;
+        context.Target.SeatNumber = 1;
+        var snapshot = context.Snapshots.CreateSnapshot(context.Room, "host-player", "canonical seats");
+        context.Host.SeatNumber = 1;
+        context.Target.SeatNumber = 2;
+
+        Assert.True(context.Snapshots.RestoreSnapshot(context.Room, snapshot.SnapshotId, "host-player", "restore-seats").Success);
+        Assert.Equal(2, context.Room.Players[context.Host.ConnectionId].SeatNumber);
+        Assert.Equal(1, context.Room.Players[context.Target.ConnectionId].SeatNumber);
+    }
+
+    [Fact]
     public void Snapshot_DoesNotSerializeRuntimeOrHistories()
     {
         var context = CreateContext();

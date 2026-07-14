@@ -278,32 +278,38 @@ namespace Bunker.Services
 		/// <summary>
 		/// Почати гру в кімнаті
 		/// </summary>
-		public (bool success, string? error, Room? room) StartGame(string roomId, string connectionId)
+		public (bool success, string? error, Room? room) StartGame(string roomId, string connectionId, Func<int, int>? nextRandom = null)
 		{
 			if (!_rooms.TryGetValue(roomId, out var room))
 			{
 				return (false, "Кімнату не знайдено", null);
 			}
 
-			// Перевірка: тільки хост може стартувати
-			if (room.HostConnectionId != connectionId)
+			lock (room.Players)
 			{
-				return (false, "Тільки хост може почати гру", null);
-			}
+				// The validated lobby transition and canonical seat assignment share one lock.
+				// The complete permutation is prepared before any room/player mutation.
+				if (room.HostConnectionId != connectionId)
+					return (false, "Тільки хост може почати гру", null);
 
-            var playersSnapshot = GetGameplayPlayersSnapshot(room);
+				var playersSnapshot = GetGameplayPlayersSnapshot(room);
+				if (playersSnapshot.Count < 2)
+					return (false, "Недостатньо гравців для початку", null);
+				if (room.State != RoomState.Lobby)
+					return (false, "Гра вже запущена", null);
 
-			// Перевірка: мінімум гравців
-            if (playersSnapshot.Count < 2)
-			{
-				return (false, "Недостатньо гравців для початку", null);
-			}
+				var random = nextRandom ?? Random.Shared.Next;
+				var randomizedPlayers = playersSnapshot.Select(entry => entry.Value).ToList();
+				for (var index = randomizedPlayers.Count - 1; index > 0; index--)
+				{
+					var swapIndex = random(index + 1);
+					if (swapIndex < 0 || swapIndex > index)
+						throw new ArgumentOutOfRangeException(nameof(nextRandom), "Seat RNG returned an invalid index.");
+					(randomizedPlayers[index], randomizedPlayers[swapIndex]) = (randomizedPlayers[swapIndex], randomizedPlayers[index]);
+				}
 
-			// Якщо вже запущена (room starts in Lobby state)
-			if (room.State != RoomState.Lobby)
-			{
-				return (false, "Гра вже запущена", null);
-			}
+				for (var index = 0; index < randomizedPlayers.Count; index++)
+					randomizedPlayers[index].SeatNumber = index + 1;
 
 			// Старт гри
 			room.State = RoomState.Playing;
@@ -358,6 +364,7 @@ namespace Bunker.Services
 					specialCard.PublicDescription = null;
 					specialCard.PublicResult = null;
 				}
+			}
 			}
 
 			_logger.LogInformation("Гра в кімнаті {RoomId} розпочата", roomId);

@@ -16,7 +16,7 @@ test('director preview applies canonical reveal and live-resyncs public and priv
     await expect(room.host.locator('#directorPreviewResult')).not.toContainText('Hidden profession');
     await room.host.locator('#directorApplyButton').click();
     await expect(room.host.locator('#directorPreviewResult')).toContainText('Applied', { timeout: 15000 });
-    await expect(room.guest.locator('#playersTableBody')).toContainText('P2', { timeout: 15000 });
+    await expect(room.guest.locator('.player-dossier-card').filter({ hasText: 'P2' })).toBeVisible({ timeout: 15000 });
     const p2 = room.host.locator('#omniscientHiddenPlayers details.gm-threat-audit').filter({ hasText: 'P2' });
     await p2.locator(':scope > summary').click();
     await expect(p2.locator('li').filter({ hasText: /profession|профес/i }).first()).toContainText(/Відкрито|Revealed|Открыто/i, { timeout: 15000 });

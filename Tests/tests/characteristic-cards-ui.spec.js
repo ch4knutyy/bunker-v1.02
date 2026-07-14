@@ -41,7 +41,7 @@ test('desktop cards render, reveal live and survive reconnect', async ({ browser
     await expect(room.host.locator('[data-characteristic-type="Hobby"] .vault-card-details')).toContainText('6 років');
     await expect(room.host.locator('[data-characteristic-type="Hobby"] .vault-card-details')).toContainText('Гончарний круг');
     await expect(room.host.locator('[data-characteristic-type="Hobby"] .tooltip-trigger')).toHaveCount(0);
-    await expect(room.guest.locator('#playersTableBody')).not.toContainText('Гончарний круг');
+    await expect(room.guest.locator('#publicPlayerOverview')).not.toContainText('Гончарний круг');
     await expect(room.host.locator('[data-characteristic-type="Personality"] .tooltip-trigger')).toHaveCount(0);
     const identityPatterns = await room.host.locator('#myPlayerCards .vault-characteristic-card').evaluateAll(cards => cards.map(card => ({
       type: card.dataset.characteristicType,
@@ -69,7 +69,9 @@ test('desktop cards render, reveal live and survive reconnect', async ({ browser
     await profession.locator('.vault-card-reveal').click();
     await expect(profession.locator('.status-revealed')).toContainText(/Розкрито|Revealed|Открыто/, { timeout: 15000 });
     const value = (await profession.locator('.vault-card-value').innerText()).trim();
-    await expect(room.guest.locator('#playersTableBody')).toContainText(value, { timeout: 15000 });
+    await room.guest.locator('[data-player-view="single"]').click();
+    await room.guest.locator('#publicPlayerSelector .player-selector-item').filter({ hasText: 'P1' }).click();
+    await expect(room.guest.locator('#selectedPlayerPanel')).toContainText(value, { timeout: 15000 });
     await room.host.reload();
     await expect(room.host.locator('[data-characteristic-type="Profession"] .status-revealed')).toBeVisible({ timeout: 15000 });
     await expect(room.host.locator('[data-characteristic-type="Hobby"] .vault-card-detail')).toHaveCount(1);

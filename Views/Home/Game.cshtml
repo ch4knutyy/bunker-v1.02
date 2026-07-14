@@ -6,8 +6,8 @@
 <link rel="stylesheet" href="/css/tooltip.css" />
 <link rel="stylesheet" href="/css/game.css" />
 
-<div class="game-container">
-    <div class="top-bar">
+<div class="game-container site-game-shell">
+    <div class="top-bar site-titlebar">
         <h1 class="page-title">Vault Judgment</h1>
     </div>
 
@@ -15,8 +15,8 @@
     <div id="lobbySection">
         <div class="lobby-container">
             <!-- Створення кімнати -->
-            <div class="create-room-panel">
-                <h2 class="section-title">Створити кімнату</h2>
+            <div class="create-room-panel site-panel">
+                <h2 class="section-title site-section-heading">Створити кімнату</h2>
                 <div class="create-room-form">
                     <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" data-testid="player-name-input" />
                     <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." data-testid="room-name-input" />
@@ -30,8 +30,8 @@
             </div>
 
             <!-- Список кімнат -->
-            <div class="rooms-list-panel">
-                <h2 class="section-title">Доступні кімнати</h2>
+            <div class="rooms-list-panel site-panel">
+                <h2 class="section-title site-section-heading">Доступні кімнати</h2>
                 <div id="roomsList" class="rooms-list">
                     <p class="no-rooms">Завантаження кімнат...</p>
                 </div>
@@ -41,13 +41,13 @@
 
     <!-- Room Section (в кімнаті / лобі) -->
     <div id="roomSection" style="display: none;">
-        <div class="room-header">
-            <div class="room-info">
+        <div class="room-header site-command-bar">
+            <div class="room-info site-command-identity">
                 <h2 class="room-name" id="currentRoomName">Кімната</h2>
                 <span class="room-id" id="currentRoomId">ID: ---</span>
                 <span class="room-state" id="currentRoomState">Лобі</span>
             </div>
-            <div class="room-actions">
+            <div class="room-actions site-command-actions">
                 <button id="copyInviteLinkBtn" class="btn-secondary" type="button" data-testid="copy-invite-link-btn" onclick="copyInviteLink()">Посилання</button>
                 <button id="gmPanelBtn" class="btn-gm" onclick="toggleGMPanel()" style="display: none;">🎮 GM Панель</button>
                 <button id="startVotingBtn" class="btn-vote" onclick="startVoting()" style="display: none;">🗳️ Голосування</button>
@@ -58,17 +58,17 @@
 
         <div id="omniscientGmBanner" class="global-catalog-warning" style="display: none;" role="status"></div>
 
-        <div id="roundStatusPanel" class="round-status-panel" style="display: none;">
-            <div class="round-status-main">
+        <div id="roundStatusPanel" class="round-status-panel site-round-hud" style="display: none;">
+            <div class="round-status-main site-hud-module module-round">
                 <span class="round-status-label">Поточний раунд</span>
                 <strong id="roundStatusNumber">Раунд 1</strong>
             </div>
-            <div class="round-status-details">
+            <div class="round-status-details site-hud-module module-phase">
                 <span id="roundStatusPhase">Розкриття характеристик</span>
                 <span id="roundStatusProgress">0/0 відкрили</span>
                 <span id="roundDiceResult" class="round-dice-result" style="display: none;"></span>
             </div>
-            <div id="publicGameTimer" class="public-game-timer">
+            <div id="publicGameTimer" class="public-game-timer site-hud-module module-timer">
                 <strong id="publicGameTimerValue">05:00</strong>
                 <span id="publicGameTimerStatus">Зупинено</span>
                 <small id="publicGameTimerLabel"></small>
@@ -76,7 +76,7 @@
         </div>
 
         <!-- Voting Panel -->
-        <div id="votingPanel" class="voting-panel" style="display: none;">
+        <div id="votingPanel" class="voting-panel site-panel" style="display: none;">
             <div class="voting-header">
                 <h3>🗳️ Голосування (Раунд <span id="votingRound">1</span>)</h3>
                 <div class="voting-progress">
@@ -102,7 +102,7 @@
         </div>
 
         <!-- Voting Results Panel (для хоста) -->
-        <div id="votingResultsPanel" class="voting-results-panel" style="display: none;">
+        <div id="votingResultsPanel" class="voting-results-panel site-panel" style="display: none;">
             <div class="voting-results-header">
                 <h3>📊 Результати голосування</h3>
             </div>
@@ -114,7 +114,7 @@
             </div>
         </div>
 
-        <div id="readyCheckPanel" class="ready-check-panel" style="display: none;">
+        <div id="readyCheckPanel" class="ready-check-panel site-panel" style="display: none;">
             <div class="ready-check-header">
                 <strong>Всі готові до голосування?</strong>
                 <span id="readyCheckSummary">Очікуємо відповіді гравців</span>
@@ -604,17 +604,17 @@
             </section>
         </section>
         <div id="roomLobby">
-            <header class="lobby-intro">
+            <header class="lobby-intro site-panel">
                 <div><h2 data-lobby-i18n="lobbyTitle">Лобі кімнати</h2><p id="lobbyRoomCode" class="lobby-room-code"></p></div>
                 <p data-lobby-i18n="lobbyHint">Оберіть ролі, підтвердьте готовність і почніть гру.</p>
                 <strong id="lobbyMemberCapacity"></strong>
             </header>
             <section id="canonicalLobbyPanel" class="lobby-shell">
                 <div id="lobbySummary" class="gm-status-grid"></div>
-                <section class="lobby-members-section"><h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3>
+                <section class="lobby-members-section site-panel"><h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3>
                 <div id="lobbyMembers" class="gm-diagnostics-list"></div>
                 </section>
-                <section id="lobbyStartSection" class="lobby-start-card">
+                <section id="lobbyStartSection" class="lobby-start-card site-panel">
                     <h3 data-lobby-i18n="lobbyStartTitle">Готовність до старту</h3>
                     <div class="lobby-start-metrics"><span id="lobbyReadyProgress"></span><span id="lobbyGameplayProgress"></span></div>
                     <div id="lobbyBlockers" class="lobby-blockers" role="status"></div>
@@ -627,91 +627,96 @@
             </section>
             <p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
         </div>
-        <div id="roomPlayersList" class="room-players-grid" style="display:none;"></div>
+        <div id="roomPlayersList" class="room-players-grid site-player-status-row" style="display:none;"></div>
 
         <!-- My Player Characteristics Section (тільки для власника) -->
-        <div id="myPlayerSection" style="display:none;">
-            <h2 class="section-title">Мої характеристики (бачу тільки я)</h2>
+        <div id="myPlayerSection" class="site-major-section" style="display:none;">
+            <h2 class="section-title site-section-heading">Мої характеристики (бачу тільки я)</h2>
             <div id="myPlayerCards" class="player-cards-grid"></div>
             <section id="mySpecialCardsSection" class="my-special-cards-section">
-                <h2 class="section-title">Мої спеціальні карти</h2>
+                <h2 class="section-title site-section-heading">Мої спеціальні карти</h2>
                 <div id="mySpecialCardsList" class="my-special-cards-list"></div>
             </section>
         </div>
 
         <!-- Players Table Section (під час гри) -->
-        <div id="gameSection" style="display: none;">
-            <!-- Section Header for Apocalypse & Bunker -->
-            <div class="scenario-section-header">
-                <div class="section-header-line"></div>
-                <h2 class="section-header-title">🎭 Бункер та Апокаліпсис</h2>
-                <div class="section-header-line"></div>
-            </div>
-            
-            <!-- Apocalypse & Bunker Info -->
-            <div class="game-info-panels">
-                <div class="apocalypse-panel" id="apocalypsePanel">
-                    <h3 class="panel-title apocalypse-panel-title">Апокаліпсис</h3>
-                    <div class="panel-content" id="apocalypseContent">
-                        <p>Завантаження...</p>
-                    </div>
+        <div id="gameSection" class="site-major-section" style="display: none;">
+            <section class="scenario-immersive-section" aria-labelledby="scenarioSectionTitle">
+                <!-- Section Header for Apocalypse & Bunker -->
+                <div class="scenario-section-header site-section-heading">
+                    <div class="section-header-line"></div>
+                    <h2 class="section-header-title" id="scenarioSectionTitle">🎭 Бункер та Апокаліпсис</h2>
+                    <div class="section-header-line"></div>
                 </div>
-                <div class="bunker-panel" id="bunkerPanel">
-                    <h3 class="panel-title">🏠 Бункер</h3>
-                    <div class="panel-content" id="bunkerContent">
-                        <p>Завантаження...</p>
+
+                <!-- Apocalypse, Bunker & Threat Info -->
+                <div class="game-info-panels scenario-immersive-grid">
+                    <div class="apocalypse-panel scenario-immersive-panel" id="apocalypsePanel">
+                        <h3 class="panel-title apocalypse-panel-title">Апокаліпсис</h3>
+                        <div class="panel-content" id="apocalypseContent">
+                            <p>Завантаження...</p>
+                        </div>
                     </div>
-                </div>
-                <div id="threatPanel" class="threat-panel">
-                    <h3 class="panel-title">⚠️ Загроза</h3>
-                    <div class="panel-content">
-                        <div id="threatImageContainer" class="scenario-image-container" style="display: none;"></div>
-                        <h4 id="threatName" class="threat-name">Невідомо</h4>
-                        <p id="threatDescription" class="threat-description">Загроза ще не розкрита.</p>
-                        <div id="threatStats" class="threat-stats" style="display: none;">
-                            <div class="stat-item">
-                                <span class="stat-label">Рівень</span>
-                                <strong id="threatSeverity" class="stat-value"></strong>
-                            </div>
+                    <div class="bunker-panel scenario-immersive-panel" id="bunkerPanel">
+                        <h3 class="panel-title bunker-panel-title">Бункер</h3>
+                        <div class="panel-content" id="bunkerContent">
+                            <p>Завантаження...</p>
+                        </div>
+                    </div>
+                    <div id="threatPanel" class="threat-panel scenario-immersive-panel">
+                        <h3 class="panel-title threat-panel-title">Загроза</h3>
+                        <div class="panel-content" id="threatContent">
+                            <article class="scenario-immersive-shell threat-scenario-shell is-sealed" aria-labelledby="threat-hidden-title">
+                                <div class="threat-sealed-pattern" aria-hidden="true"></div>
+                                <div class="threat-sealed-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 28v-8c0-8 4-13 11-13s11 5 11 13v8M32 38v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+                                </div>
+                                <div class="threat-sealed-copy">
+                                    <span class="threat-badge">Загроза</span>
+                                    <h4 id="threat-hidden-title" class="threat-title">Невідомо</h4>
+                                    <p class="threat-description">Загроза ще не розкрита.</p>
+                                </div>
+                            </article>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
             
-            <h2 class="section-title">
+            <h2 class="section-title site-section-heading">
                 Гравці в бункері: <span class="bunker-count" id="playerCount">0/6</span>
             </h2>
 
-            <div style="overflow-x: auto;">
-                <table class="players-table" id="playersTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">№</th>
-                            <th style="min-width: 150px;">Ім'я гравця</th>
-                            <th style="min-width: 200px;">Особистість</th>
-                            <th style="min-width: 200px;">Статура</th>
-                            <th style="min-width: 180px;">Професія</th>
-                            <th style="min-width: 180px;">Фізичне здоров'я</th>
-                            <th style="min-width: 180px;">Психічне здоров'я</th>
-                            <th style="min-width: 180px;">Хобі</th>
-                            <th style="min-width: 180px;">Риса характеру</th>
-                            <th style="min-width: 180px;">Фобія</th>
-                            <th style="min-width: 180px;">Інвентар</th>
-                            <th style="min-width: 200px;">Факт</th>
-                        </tr>
-                    </thead>
-                    <tbody id="playersTableBody">
-                        <tr>
-                            <td colspan="12" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
-                                Очікування гравців...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div id="publicPlayerOverview" class="player-overview-section" aria-labelledby="publicPlayerOverviewTitle">
+                <div class="comparison-toolbar">
+                    <div class="view-mode-toggle" role="group" aria-label="Режим перегляду">
+                        <button type="button" class="view-mode-button is-active" data-player-view="all" aria-pressed="true">Усі гравці</button>
+                        <button type="button" class="view-mode-button" data-player-view="single" aria-pressed="false">Один гравець</button>
+                    </div>
+                    <label class="comparison-sort-field" for="playerComparisonSort">
+                        <span>Сортування</span>
+                        <select id="playerComparisonSort">
+                            <option value="seat">За номером</option>
+                            <option value="name">За ім’ям</option>
+                            <option value="revealed-desc">Більше розкрито</option>
+                            <option value="revealed-asc">Менше розкрито</option>
+                        </select>
+                    </label>
+                </div>
+                <h3 id="publicPlayerOverviewTitle" class="visually-hidden">Гравці</h3>
+                <section id="allPlayersComparison" class="player-comparison-shell" aria-live="polite">
+                    <div id="playerDossierGrid" class="player-dossier-grid"></div>
+                </section>
+                <div id="singlePlayerOverview" class="player-overview-shell" hidden>
+                    <aside class="player-selector-panel" aria-labelledby="publicPlayerOverviewTitle">
+                        <h3 class="player-selector-title">Гравці</h3>
+                        <div id="publicPlayerSelector" class="player-selector" role="listbox" aria-label="Гравці"></div>
+                    </aside>
+                    <section id="selectedPlayerPanel" class="selected-player-panel" aria-live="polite"></section>
+                </div>
             </div>
 
             <div id="specialCardsSection" class="special-cards-section" style="display: none;">
-                <h2 class="section-title">Розкриті спеціальні карти</h2>
+                <h2 class="section-title site-section-heading">Розкриті спеціальні карти</h2>
                 <div class="special-cards-table-wrap">
                     <table class="special-cards-table" data-testid="special-cards-table">
                         <thead>
@@ -732,9 +737,9 @@
     </div>
 
     <!-- Events Section (покращена) -->
-    <div class="events-section-wrapper">
-        <div class="events-section-main">
-            <h2 class="section-title">Ігрові події</h2>
+    <div class="events-section-wrapper site-major-section">
+        <div class="events-section-main site-panel">
+            <h2 class="section-title site-section-heading">Ігрові події</h2>
             
             <!-- Поточна подія -->
             <div id="currentEventPanel" class="current-event-panel" style="display: none;">

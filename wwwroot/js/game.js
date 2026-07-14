@@ -37,6 +37,9 @@ let myPlayerData = null;
 let myConnectionId = null;
 let isHost = false;
 let roomPlayers = {}; // connectionId -> player info
+let selectedPublicPlayerSeat = null;
+let publicPlayerViewMode = 'all';
+let publicPlayerSortMode = 'seat';
 let gmPlayersData = {}; // Повні дані гравців для GM
 let selectedPlayerForGM = null;
 let gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
@@ -551,6 +554,75 @@ Object.assign(uiTranslations.ru, {
 	dangerLow: "Низкая", dangerMedium: "Средняя", dangerHigh: "Высокая",
 	dangerVeryHigh: "Очень высокая", dangerCritical: "Критическая", dangerUnknown: "Неизвестно"
 });
+Object.assign(uiTranslations.uk, {
+	bunkerBadge: "Бункер", bunkerRooms: "Приміщення", bunkerResources: "Ресурси", bunkerProblems: "Проблеми",
+	bunkerFacilityRecord: "Технічний паспорт укриття", bunkerOpenImage: "Відкрити зображення бункера", bunkerMonths: "міс.",
+	conditionExcellent: "Відмінний", conditionGood: "Хороший", conditionStable: "Стабільний", conditionWorn: "Зношений",
+	conditionDamaged: "Пошкоджений", conditionPoor: "Поганий", conditionCritical: "Критичний", conditionUnknown: "Невідомо"
+});
+Object.assign(uiTranslations.en, {
+	bunkerBadge: "Bunker", bunkerRooms: "Rooms", bunkerResources: "Resources", bunkerProblems: "Problems",
+	bunkerFacilityRecord: "Shelter technical record", bunkerOpenImage: "Open bunker image", bunkerMonths: "mo.",
+	conditionExcellent: "Excellent", conditionGood: "Good", conditionStable: "Stable", conditionWorn: "Worn",
+	conditionDamaged: "Damaged", conditionPoor: "Poor", conditionCritical: "Critical", conditionUnknown: "Unknown"
+});
+Object.assign(uiTranslations.ru, {
+	bunkerBadge: "Бункер", bunkerRooms: "Помещения", bunkerResources: "Ресурсы", bunkerProblems: "Проблемы",
+	bunkerFacilityRecord: "Технический паспорт убежища", bunkerOpenImage: "Открыть изображение бункера", bunkerMonths: "мес.",
+	conditionExcellent: "Отличный", conditionGood: "Хороший", conditionStable: "Стабильный", conditionWorn: "Изношенный",
+	conditionDamaged: "Повреждённый", conditionPoor: "Плохой", conditionCritical: "Критический", conditionUnknown: "Неизвестно"
+});
+Object.assign(uiTranslations.uk, {
+	threatIncidentStatus: "Стан інциденту", threatMode: "Режим", threatActiveOperation: "Активна операція",
+	threatRecommendations: "Рекомендації", threatWhatHappens: "Що відбувається", threatIncidentReport: "Оперативне зведення",
+	threatOpenImage: "Відкрити зображення загрози", threatSeverityLow: "Низька", threatSeverityMedium: "Середня",
+	threatSeverityHigh: "Висока", threatSeverityVeryHigh: "Дуже висока", threatSeverityCritical: "Критична", threatSeverityUnknown: "Не визначено",
+	threatStatusPending: "Очікує дій", threatStatusActive: "Операція триває", threatStatusSuccess: "Завершено успішно",
+	threatStatusConsequences: "Завершено з наслідками", threatStatusFailure: "Провал", threatStatusCancelled: "Скасовано",
+	threatStatusTimeout: "Час вичерпано", threatStatusUnknown: "Стан не визначено"
+});
+Object.assign(uiTranslations.en, {
+	threatIncidentStatus: "Incident status", threatMode: "Mode", threatActiveOperation: "Active operation",
+	threatRecommendations: "Recommendations", threatWhatHappens: "What is happening", threatIncidentReport: "Incident report",
+	threatOpenImage: "Open threat image", threatSeverityLow: "Low", threatSeverityMedium: "Medium",
+	threatSeverityHigh: "High", threatSeverityVeryHigh: "Very high", threatSeverityCritical: "Critical", threatSeverityUnknown: "Not specified",
+	threatStatusPending: "Awaiting action", threatStatusActive: "Operation active", threatStatusSuccess: "Completed successfully",
+	threatStatusConsequences: "Completed with consequences", threatStatusFailure: "Failure", threatStatusCancelled: "Cancelled",
+	threatStatusTimeout: "Time expired", threatStatusUnknown: "Status unavailable"
+});
+Object.assign(uiTranslations.ru, {
+	threatIncidentStatus: "Состояние инцидента", threatMode: "Режим", threatActiveOperation: "Активная операция",
+	threatRecommendations: "Рекомендации", threatWhatHappens: "Что происходит", threatIncidentReport: "Оперативная сводка",
+	threatOpenImage: "Открыть изображение угрозы", threatSeverityLow: "Низкая", threatSeverityMedium: "Средняя",
+	threatSeverityHigh: "Высокая", threatSeverityVeryHigh: "Очень высокая", threatSeverityCritical: "Критическая", threatSeverityUnknown: "Не определено",
+	threatStatusPending: "Ожидает действий", threatStatusActive: "Операция продолжается", threatStatusSuccess: "Успешно завершено",
+	threatStatusConsequences: "Завершено с последствиями", threatStatusFailure: "Провал", threatStatusCancelled: "Отменено",
+	threatStatusTimeout: "Время истекло", threatStatusUnknown: "Состояние не определено"
+});
+Object.assign(uiTranslations.uk, {
+	playerOverviewTitle: "Гравці", playerLabel: "Гравець", notRevealed: "Не розкрито",
+	revealedProgress: "Розкрито {shown} із {total}", previousPlayer: "Попередній гравець", nextPlayer: "Наступний гравець",
+	noAvailablePlayers: "Немає доступних гравців", activePlayer: "Активний гравець", playerActive: "У грі",
+	playerOnline: "У мережі", playerOffline: "Не в мережі", specialNextOrder: "Наступний", specialPreviousOrder: "Попередній",
+	allPlayersView: "Усі гравці", singlePlayerView: "Один гравець", playerViewMode: "Режим перегляду", comparisonSort: "Сортування",
+	sortBySeat: "За номером", sortByName: "За ім’ям", sortMostRevealed: "Більше розкрито", sortLeastRevealed: "Менше розкрито"
+});
+Object.assign(uiTranslations.en, {
+	playerOverviewTitle: "Players", playerLabel: "Player", notRevealed: "Not revealed",
+	revealedProgress: "Revealed {shown} of {total}", previousPlayer: "Previous player", nextPlayer: "Next player",
+	noAvailablePlayers: "No available players", activePlayer: "Active player", playerActive: "Active",
+	playerOnline: "Online", playerOffline: "Offline", specialNextOrder: "Next", specialPreviousOrder: "Previous",
+	allPlayersView: "All players", singlePlayerView: "One player", playerViewMode: "View mode", comparisonSort: "Sort",
+	sortBySeat: "By number", sortByName: "By name", sortMostRevealed: "Most revealed", sortLeastRevealed: "Least revealed"
+});
+Object.assign(uiTranslations.ru, {
+	playerOverviewTitle: "Игроки", playerLabel: "Игрок", notRevealed: "Не раскрыто",
+	revealedProgress: "Раскрыто {shown} из {total}", previousPlayer: "Предыдущий игрок", nextPlayer: "Следующий игрок",
+	noAvailablePlayers: "Нет доступных игроков", activePlayer: "Активный игрок", playerActive: "В игре",
+	playerOnline: "В сети", playerOffline: "Не в сети", specialNextOrder: "Следующий", specialPreviousOrder: "Предыдущий",
+	allPlayersView: "Все игроки", singlePlayerView: "Один игрок", playerViewMode: "Режим просмотра", comparisonSort: "Сортировка",
+	sortBySeat: "По номеру", sortByName: "По имени", sortMostRevealed: "Больше раскрыто", sortLeastRevealed: "Меньше раскрыто"
+});
 
 function getCurrentLanguage() {
 	const lang = localStorage.getItem("language") || "uk";
@@ -597,6 +669,9 @@ function normalizeRoundState(source) {
 		pauseReason: source.pauseReason || source.PauseReason || null,
 		pausedAtUtc: source.pausedAtUtc || source.PausedAtUtc || null,
 		gameTimer: normalizeGameTimer(source.gameTimer || source.GameTimer || null),
+		activePlayerSeatNumber: source.activePlayerSeatNumber ?? source.ActivePlayerSeatNumber ?? source.currentPlayerSeatNumber ?? source.CurrentPlayerSeatNumber ?? source.turnPlayerSeatNumber ?? source.TurnPlayerSeatNumber ?? 0,
+		activePlayerConnectionId: source.activePlayerConnectionId || source.ActivePlayerConnectionId || source.currentPlayerConnectionId || source.CurrentPlayerConnectionId || source.turnPlayerConnectionId || source.TurnPlayerConnectionId || "",
+		activePlayerStableId: source.activePlayerStableId || source.ActivePlayerStableId || source.currentPlayerStableId || source.CurrentPlayerStableId || source.turnPlayerStableId || source.TurnPlayerStableId || "",
 		activePlayerCount: source.activePlayerCount ?? source.ActivePlayerCount ?? 0,
 		revealedCount: source.revealedCount ?? source.RevealedCount ?? 0,
 		allPlayersRevealed: source.allPlayersRevealed ?? source.AllPlayersRevealed ?? false,
@@ -695,6 +770,14 @@ function renderGameTimer() {
 	setText('#publicGameTimerValue', value);
 	setText('#publicGameTimerStatus', t(statusKey));
 	setText('#publicGameTimerLabel', currentGameTimer.label || t(`timerPurpose${currentGameTimer.purpose}`));
+	const publicTimer = document.getElementById('publicGameTimer');
+	if (publicTimer) {
+		publicTimer.classList.remove('timer-running', 'timer-paused', 'timer-expired', 'timer-stopped');
+		const timerState = ['running', 'paused', 'expired', 'stopped'].includes(effectiveStatus.toLowerCase())
+			? effectiveStatus.toLowerCase()
+			: 'stopped';
+		publicTimer.classList.add(`timer-${timerState}`);
+	}
 	const status = currentGameTimer.status.toLowerCase();
 	const setDisabled = (id, disabled) => { const element = document.getElementById(id); if (element) element.disabled = gameTimerCommandPending || disabled; };
 	setDisabled('gmTimerStart', false);
@@ -960,7 +1043,9 @@ function updateRoundStatusUI() {
 	const panel = document.getElementById('roundStatusPanel');
 
 	if (panel) {
-		panel.style.display = shouldShow ? 'flex' : 'none';
+		panel.style.display = shouldShow ? 'grid' : 'none';
+		panel.classList.toggle('is-paused', shouldShow && currentRoundState?.isPaused === true);
+		panel.classList.toggle('is-running', shouldShow && currentRoundState?.isPaused !== true);
 	}
 
 	const roundText = round > 0 ? `Раунд ${round}` : 'Раунд -';
@@ -1047,105 +1132,182 @@ function updateRoundStatusUI() {
 	}
 }
 
+const threatIconSvgRegistry = Object.freeze({
+	radiation: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="7" fill="currentColor"/><path d="M27 22 19 8A28 28 0 0 1 31 5v16m6 1 8-14a28 28 0 0 1 9 9L40 25m1 12h16a28 28 0 0 1-5 13L38 41M27 42l-8 14a28 28 0 0 1-10-9l14-8" fill="none" stroke="currentColor" stroke-width="5"/></svg>',
+	air: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="5" fill="currentColor"/><path d="M32 27c-2-11 5-18 15-16 3 10-3 18-15 16Zm5 8c11-2 18 5 16 15-10 3-18-3-16-15Zm-10 2c2 11-5 18-15 16-3-10 3-18 15-16Zm-2-10C14 29 7 22 9 12c10-3 18 3 16 15Z" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+	fire: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M35 5c4 12-7 15-3 26 4-7 10-10 15-15 8 11 10 20 5 30-4 9-12 13-21 13S14 55 10 47C4 34 14 23 27 11c0 9 2 13 8 17" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	flood: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 22c7 0 7 5 14 5s7-5 14-5 7 5 14 5 7-5 10-5M7 35c7 0 7 5 14 5s7-5 14-5 7 5 14 5 7-5 10-5M7 48c7 0 7 5 14 5s7-5 14-5 7 5 14 5 7-5 10-5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',
+	structural: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56V13h48v43M8 56h48M31 13l-6 14 10 6-8 23M18 24h9m10 0h10M16 41h9m14 0h9" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	contamination: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 7h16M28 7v17L14 50c-2 4 1 7 5 7h26c4 0 7-3 5-7L36 24V7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M20 43c8-5 16 5 25-1" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="28" cy="48" r="2" fill="currentColor"/></svg>',
+	medical: '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="13" width="46" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="4"/><path d="M27 22h10v10h10v10H37v10H27V42H17V32h10V22Z" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	biological: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 25V8m-6 19L11 18m14 16L9 39m20 0L18 54m20-15 10 15m-9-20 16 5m-16-12 14-9" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="8" r="4"/><circle cx="11" cy="18" r="4"/><circle cx="9" cy="39" r="4"/><circle cx="18" cy="54" r="4"/><circle cx="48" cy="54" r="4"/><circle cx="55" cy="39" r="4"/><circle cx="53" cy="18" r="4"/></svg>',
+	security: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 53 14v16c0 13-8 23-21 28C19 53 11 43 11 30V14l21-8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 33h20M32 23v20" stroke="currentColor" stroke-width="4"/></svg>',
+	power: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M36 5 15 36h15l-3 23 22-34H34l2-20Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>',
+	environmental: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M13 42h35c7 0 11-4 11-10s-5-10-11-10c-2-9-9-15-18-15-10 0-18 7-19 18-6 1-9 5-9 9 0 5 4 8 11 8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m20 49-4 8m17-8-4 8m17-8-4 8" stroke="currentColor" stroke-width="4"/></svg>',
+	chemical: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M22 8h20M27 8v18L13 51c-2 4 1 7 5 7h28c4 0 7-3 5-7L37 26V8" fill="none" stroke="currentColor" stroke-width="4"/><path d="M19 44h27" stroke="currentColor" stroke-width="4"/></svg>',
+	anomaly: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m32 5 9 18 18 9-18 9-9 18-9-18-18-9 18-9 9-18Z" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="7" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 56H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 23v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
+});
+
+function normalizeThreatMetadataValue(value) {
+	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+function resolveThreatVisualVariant(model) {
+	const id = normalizeThreatMetadataValue(model?.id);
+	if (id === 'radiation_leak') return 'radiation';
+	if (id === 'air_filter_failure') return 'air';
+	const metadata = [model?.type, model?.category, model?.classification, ...(Array.isArray(model?.tags) ? model.tags : [])]
+		.map(normalizeThreatMetadataValue).filter(Boolean).join(' ');
+	const rules = [
+		['radiation', /radiation|nuclear|radioactive/],
+		['air', /(^|_)(air|oxygen|filtration|ventilation)(_|$)|air_system/],
+		['fire', /fire|flame|heat|smoke|combust/],
+		['flood', /flood|water|pressure|leak|sewage/],
+		['structural', /structural|crack|collapse|support|infrastructure/],
+		['chemical', /chemical|toxic_gas|acid|reagent/],
+		['contamination', /contamination|hazard|poison|waste|toxic/],
+		['medical', /medical|health|injury|hospital/],
+		['biological', /biological|biohazard|infection|virus|bacteria|fungal|parasite/],
+		['security', /security|breach|intruder|attack|lockdown|access/],
+		['power', /power|generator|electric|battery|grid|energy/],
+		['environmental', /environmental|weather|storm|climate|temperature|cold|wind/],
+		['anomaly', /anomaly|unknown_signal|distortion|paranormal|reality/]
+	];
+	return rules.find(([, pattern]) => pattern.test(metadata))?.[0] || 'generic';
+}
+
+function resolveThreatSeverity(value) {
+	const normalized = normalizeThreatMetadataValue(value);
+	const groups = [
+		['low', 'low', /^(low|minor|низький|низкая|низкий)$/],
+		['medium', 'warning', /^(medium|moderate|середній|середня|средний|средняя)$/],
+		['high', 'severe', /^(high|severe|високий|висока|высокий|высокая)$/],
+		['veryHigh', 'severe-dark', /^(very_high|veryhigh|дуже_високий|дуже_висока|очень_высокий|очень_высокая)$/],
+		['critical', 'critical', /^(critical|extreme|критичний|критична|критический|критическая)$/]
+	];
+	const match = groups.find(([, , pattern]) => pattern.test(normalized));
+	return match ? { key: match[0], semantic: match[1] } : { key: 'unknown', semantic: 'neutral' };
+}
+
+function getThreatSeverityLabel(key) {
+	return t({ low: 'threatSeverityLow', medium: 'threatSeverityMedium', high: 'threatSeverityHigh', veryHigh: 'threatSeverityVeryHigh', critical: 'threatSeverityCritical' }[key] || 'threatSeverityUnknown');
+}
+
+function resolveThreatStatusPresentation(status) {
+	const normalized = normalizeThreatMetadataValue(status);
+	if (['active', 'mini_game_active', 'minigameactive'].includes(normalized)) return { semantic: 'running', label: t('threatStatusActive') };
+	if (['preparing', 'ready', 'not_started', 'notstarted', 'collecting_contributions', 'collectingcontributions', 'revealed', 'pending'].includes(normalized)) return { semantic: 'pending', label: t('threatStatusPending') };
+	if (['resolved_safely', 'resolvedsafely', 'success', 'completed'].includes(normalized)) return { semantic: 'success', label: t('threatStatusSuccess') };
+	if (['resolved_with_casualty', 'resolvedwithcasualty'].includes(normalized)) return { semantic: 'consequence', label: t('threatStatusConsequences') };
+	if (['timeout', 'timed_out', 'timedout', 'expired'].includes(normalized)) return { semantic: 'failure', label: t('threatStatusTimeout') };
+	if (['failed', 'failure'].includes(normalized)) return { semantic: 'failure', label: t('threatStatusFailure') };
+	if (['aborted', 'cancelled', 'canceled'].includes(normalized)) return { semantic: 'cancelled', label: t('threatStatusCancelled') };
+	return { semantic: 'neutral', label: t('threatStatusUnknown') };
+}
+
+function buildThreatScenarioModel(source, isRevealed) {
+	if (!isRevealed || !source) return { isRevealed: false };
+	const id = source.id || source.Id || currentThreatState?.currentThreatId || '';
+	const normalizedId = String(id).toLowerCase();
+	const stateStatus = normalizedId === 'radiation_leak'
+		? getRadiationOperationStatus(currentThreatState)
+		: currentThreatState?.threatStatus || 'revealed';
+	const tags = source.tags || source.Tags || [];
+	const recommendations = getLocalizedArray(source, 'recommendations');
+	const model = {
+		id,
+		type: source.type || source.Type || source.category || source.Category || '',
+		name: getLocalizedValue(source, 'name') || t('unknown'),
+		shortDescription: getLocalizedByFields(source, ['shortDescription', 'summary', 'description']),
+		description: getLocalizedValue(source, 'description'),
+		severity: source.severity || source.Severity || '',
+		status: stateStatus,
+		isRevealed: true,
+		isInteractive: normalizedId === 'radiation_leak' || normalizedId === 'air_filter_failure' || !!currentThreatState?.planChoice?.plans?.length,
+		imageUrl: normalizeLocalScenarioImageUrl(source.imageUrl || source.ImageUrl || source.uploadedImagePath || source.UploadedImagePath || source.imagePath || source.ImagePath),
+		tags: Array.isArray(tags) ? tags : [],
+		consequences: getLocalizedArray(source, 'consequences'),
+		recommendations: recommendations.length ? recommendations : getLocalizedArray(source, 'requirements'),
+		visualVariant: '',
+		interactiveState: currentThreatState
+	};
+	model.visualVariant = resolveThreatVisualVariant(model);
+	return model;
+}
+
+function renderThreatIcon(variant) {
+	return threatIconSvgRegistry[variant] || threatIconSvgRegistry.generic;
+}
+
+function renderHiddenThreatScenario() {
+	return `<article class="scenario-immersive-shell threat-scenario-shell is-sealed" aria-labelledby="threat-hidden-title">
+		<div class="threat-sealed-pattern" aria-hidden="true"></div>
+		<div class="threat-sealed-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 28v-8c0-8 4-13 11-13s11 5 11 13v8M32 38v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></div>
+		<div class="threat-sealed-copy"><span class="threat-badge">${escapeHtml(t('threat'))}</span><h4 id="threat-hidden-title" class="threat-title">${escapeHtml(t('unknown'))}</h4><p class="threat-description">${escapeHtml(t('threatUnknownDescription'))}</p></div>
+	</article>`;
+}
+
+function renderThreatContentSection(kind, title, items) {
+	if (!Array.isArray(items) || !items.length) return '';
+	return `<section class="threat-content-card content-${kind}" aria-labelledby="threat-${kind}-title"><h5 id="threat-${kind}-title">${escapeHtml(title)}</h5><ul>${items.map(item => `<li><span aria-hidden="true"></span><span>${escapeHtml(item)}</span></li>`).join('')}</ul></section>`;
+}
+
+function renderThreatScenario(model) {
+	if (!model?.isRevealed) return renderHiddenThreatScenario();
+	const variant = threatIconSvgRegistry[model.visualVariant] ? model.visualVariant : resolveThreatVisualVariant(model);
+	const severity = resolveThreatSeverity(model.severity);
+	const status = resolveThreatStatusPresentation(model.status);
+	const media = model.imageUrl ? `<div class="threat-hero-media" aria-hidden="true"><img class="threat-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleThreatHeroImageError(this)"></div>` : '';
+	const detailDescription = model.description && model.description !== model.shortDescription
+		? `<section class="threat-content-card content-description" aria-labelledby="threat-description-title"><h5 id="threat-description-title">${escapeHtml(t('threatWhatHappens'))}</h5><p>${escapeHtml(model.description)}</p></section>` : '';
+	const interactive = model.isInteractive ? renderThreatInteractionPanel(model) : '';
+	const footerControls = isHost ? `<input type="file" id="threatImageInput" accept="image/*" hidden onchange="uploadThreatImage(this)"><button type="button" class="btn-scenario-image" onclick="document.getElementById('threatImageInput').click()">${escapeHtml(t('uploadImage'))}</button><button type="button" class="btn-scenario-image btn-generate" onclick="generateThreatPrompt()">${escapeHtml(t('generatePrompt'))}</button>${model.imageUrl ? `<button type="button" class="btn-scenario-image" onclick="openCurrentThreatImage()">${escapeHtml(t('threatOpenImage'))}</button><button type="button" class="btn-scenario-image btn-remove" onclick="removeThreatImage()">${escapeHtml(t('remove'))}</button>` : ''}` : '';
+
+	return `<article class="scenario-immersive-shell threat-scenario-shell variant-${variant} severity-${severity.semantic}" aria-labelledby="threat-scenario-title">
+		<header class="scenario-immersive-hero threat-hero ${model.imageUrl ? 'has-image' : 'no-image'}">${media}<div class="threat-hero-overlay" aria-hidden="true"></div><div class="threat-hero-pattern" aria-hidden="true"></div>
+			<div class="threat-medallion" aria-hidden="true"><span>${renderThreatIcon(variant)}</span></div>
+			<div class="threat-hero-content"><span class="threat-badge">${escapeHtml(t('threat'))}</span><h4 id="threat-scenario-title" class="threat-title">${escapeHtml(model.name)}</h4>${model.shortDescription ? `<p class="threat-description">${escapeHtml(model.shortDescription)}</p>` : ''}</div>
+		</header>
+		<section class="threat-status-row" aria-label="${escapeHtml(t('threatIncidentStatus'))}"><div class="threat-status-item"><span>${escapeHtml(t('severity'))}</span><strong>${escapeHtml(getThreatSeverityLabel(severity.key))}</strong></div><div class="threat-status-item status-${status.semantic}"><span>${escapeHtml(t('status'))}</span><strong>${escapeHtml(status.label)}</strong></div>${model.isInteractive ? `<div class="threat-status-item is-interactive"><span>${escapeHtml(t('threatMode'))}</span><strong>${escapeHtml(t('threatActiveOperation'))}</strong></div>` : ''}</section>
+		<div class="threat-content-grid">${detailDescription}${renderThreatContentSection('consequences', t('consequences'), model.consequences)}${renderThreatContentSection('recommendations', t('threatRecommendations'), model.recommendations)}</div>
+		${interactive ? `<section class="threat-interactive-zone state-${status.semantic}" aria-label="${escapeHtml(t('threatActiveOperation'))}">${interactive}</section>` : ''}
+		${footerControls ? `<footer class="threat-footer"><span>${escapeHtml(t('threatIncidentReport'))}</span><div class="threat-footer-actions">${footerControls}</div></footer>` : ''}
+	</article>`;
+}
+
 function renderThreatPanel(threat) {
 	const panel = document.getElementById('threatPanel');
-	if (!panel) return;
-
+	const content = panel?.querySelector('.panel-content');
+	if (!panel || !content) return;
 	const isRevealed = !!currentRoundState?.threatRevealed && !!threat;
-	const content = panel.querySelector('.panel-content');
-	if (!content) return;
+	content.innerHTML = renderThreatScenario(buildThreatScenarioModel(threat, isRevealed));
+	panel.classList.toggle('threat-unknown', !isRevealed);
+}
 
-	if (!isRevealed) {
-		content.innerHTML = `
-                <h4 class="threat-name">${escapeHtml(t('unknown'))}</h4>
-                <p class="threat-description">${escapeHtml(t('threatUnknownDescription'))}</p>
-            `;
-		panel.classList.add('threat-unknown');
-		return;
-	}
+function handleThreatHeroImageError(image) {
+	const hero = image?.closest?.('.threat-hero');
+	if (!hero) return;
+	hero.classList.remove('has-image');
+	hero.classList.add('no-image');
+	image.closest('.threat-hero-media')?.remove();
+}
 
-	const name = getLocalizedValue(threat, 'name') || threat.name || threat.Name || t('unknown');
-	const description = getLocalizedValue(threat, 'description') || threat.description || threat.Description || '';
-	const severity = threat.severity || threat.Severity || '';
-	const category = threat.category || threat.Category || '';
-	const round = threat.revealRound || threat.RevealRound || threat.round || threat.Round || '';
-	const imageUrl = threat.imageUrl || threat.ImageUrl || threat.uploadedImagePath || threat.UploadedImagePath || threat.imagePath || threat.ImagePath || '';
-	const requirements = getLocalizedArray(threat, 'requirements');
-	const risks = getLocalizedArray(threat, 'risks');
-	const consequences = getLocalizedArray(threat, 'consequences');
-
-	const imageSection = imageUrl ? `
-            <div class="scenario-image-container">
-                <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" class="scenario-image" onclick="openImageModal(this.src, this.alt)" />
-            </div>
-        ` : '';
-
-	const hostControls = isHost ? `
-            <div class="scenario-image-controls">
-                <input type="file" id="threatImageInput" accept="image/*" style="display: none;" onchange="uploadThreatImage(this)" />
-                <button class="btn-scenario-image" onclick="document.getElementById('threatImageInput').click()">
-                    ${t('uploadImage')}
-                </button>
-                <button class="btn-scenario-image btn-generate" onclick="generateThreatPrompt()">
-                    ${t('generatePrompt')}
-                </button>
-                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeThreatImage()">${t('remove')}</button>` : ''}
-            </div>
-        ` : '';
-
-	const metaItems = [
-		severity ? { label: t('severity'), value: severity } : null,
-		category ? { label: t('category'), value: category } : null,
-		round ? { label: t('round'), value: round } : null
-	].filter(Boolean);
-	const metaHtml = metaItems.length ? `
-            <div class="threat-stats">
-                ${metaItems.map(item => `
-                    <div class="stat-item">
-                        <span class="stat-label">${escapeHtml(item.label)}:</span>
-                        <span class="stat-value">${escapeHtml(item.value)}</span>
-                    </div>
-                `).join('')}
-            </div>
-        ` : '';
-
-	const listSections = [
-		{ title: t('requirements'), items: requirements },
-		{ title: t('risks'), items: risks },
-		{ title: t('consequences'), items: consequences }
-	].filter(section => section.items.length > 0);
-	const listsHtml = listSections.length ? `
-            <div class="threat-lists">
-                ${listSections.map(section => `
-                    <div class="list-section threat-list-section">
-                        <span class="list-title">${escapeHtml(section.title)}</span>
-                        <ul>${section.items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
-                    </div>
-                `).join('')}
-            </div>
-        ` : '';
-
-	content.innerHTML = `
-            <h4 class="threat-name">${escapeHtml(name)}</h4>
-            <p class="threat-description">${escapeHtml(description)}</p>
-            ${imageSection}
-            ${hostControls}
-            ${metaHtml}
-            ${listsHtml}
-            ${renderThreatInteractionPanel(threat)}
-        `;
-	panel.classList.remove('threat-unknown');
+function openCurrentThreatImage() {
+	const model = buildThreatScenarioModel(currentThreat, !!currentRoundState?.threatRevealed);
+	if (model?.imageUrl) openImageModal(model.imageUrl, model.name);
 }
 
 function renderThreatInteractionPanel(threat) {
-	const threatId = (threat?.id || threat?.Id || currentThreatState?.currentThreatId || '').toLowerCase();
-	if (!currentThreatState) return '';
-	if (threatId === 'air_filter_failure' && currentThreatState.planChoice?.plans?.length) {
-		return renderAirFilterPlanChoice(currentThreatState);
+	const threatId = String(threat?.id || currentThreatState?.currentThreatId || '').toLowerCase();
+	const interactionState = threat?.interactiveState || currentThreatState;
+	if (!interactionState) return '';
+	if (threatId === 'air_filter_failure' && interactionState.planChoice?.plans?.length) {
+		return renderAirFilterPlanChoice(interactionState);
 	}
 	if (threatId !== 'radiation_leak') return '';
 
-	const state = currentThreatState;
+	const state = interactionState;
 	const aggregates = state.operationAggregates || {};
 	const status = getRadiationOperationStatus(state);
 	const statusLabel = getThreatStatusLabel(status);
@@ -1157,7 +1319,7 @@ function renderThreatInteractionPanel(threat) {
                 <div class="threat-operation-card-main">
                     <div>
                         <span class="threat-operation-kicker">${escapeHtml(t('radiationOperation'))}</span>
-                        <strong>${escapeHtml(getLocalizedValue(threat, 'name') || threat.name || threat.Name || 'radiation_leak')}</strong>
+						<strong>${escapeHtml(threat?.name || t('unknown'))}</strong>
                     </div>
                     <button type="button" class="char-btn public-use" onclick="openThreatOperationModal()">${escapeHtml(t('openOperation'))}</button>
                 </div>
@@ -1256,7 +1418,7 @@ function renderAirFilterPlanChoice(state) {
 }
 
 function getThreatStatusLabel(status) {
-	return t(status || 'notStarted') || status || t('notStarted');
+	return resolveThreatStatusPresentation(status).label;
 }
 
 function getRadiationOperationStatus(state) {
@@ -1304,7 +1466,7 @@ function renderThreatOperationModal() {
                 <button type="button" class="modal-close" onclick="closeThreatOperationModal()">&times;</button>
                 <div class="threat-operation-header">
                     <span>${escapeHtml(t('radiationOperation'))}</span>
-                    <h3>${escapeHtml(t('operation'))}: radiation_leak</h3>
+					<h3>${escapeHtml(t('operation'))}: ${escapeHtml(getLocalizedValue(currentThreat, 'name') || t('threat'))}</h3>
                 </div>
                 <div class="threat-operation-overview">
                     <span>${escapeHtml(t('playersInRoom'))}: <strong>${escapeHtml(playersCount)}</strong></span>
@@ -1796,12 +1958,6 @@ function applyStaticTranslations() {
 		roomLobbyTitle.innerHTML = `${t('players')} ${t('room')}: <span id="roomPlayerCount">${count}</span>`;
 	}
 
-	const headers = document.querySelectorAll('#playersTable thead th');
-	const headerLabels = ['№', `${t('name')} ${t('players')}`, t('personality'), t('body'), t('profession'), t('physicalHealth'), t('mentalHealth'), t('hobby'), t('characterTrait'), t('phobia'), t('inventory'), t('fact')];
-	headers.forEach((th, index) => {
-		if (headerLabels[index]) th.textContent = headerLabels[index];
-	});
-
 	const specialCardHeaders = document.querySelectorAll('#specialCardsSection thead th');
 	const specialCardHeaderLabels = ['№', t('players'), t('specialCard'), `${t('description')} / ${t('effect')}`, t('target'), t('status')];
 	specialCardHeaders.forEach((th, index) => {
@@ -1833,7 +1989,7 @@ function renderCurrentGameUI() {
 	if (currentBunker && typeof renderBunker === "function") renderBunker(currentBunker);
 	if (typeof renderThreatPanel === "function") renderThreatPanel(currentThreat);
 	if (typeof updateRoundStatusUI === "function") updateRoundStatusUI();
-	if (typeof updatePlayersTable === "function") updatePlayersTable();
+	if (typeof renderPublicPlayerOverview === "function") renderPublicPlayerOverview();
 	if (typeof updateSpecialCardsUI === "function") updateSpecialCardsUI();
 	if (typeof updateGMPlayerSelect === "function") updateGMPlayerSelect();
 	if (selectedPlayerForGM && typeof loadPlayerDataForGM === "function") loadPlayerDataForGM();
@@ -1846,6 +2002,7 @@ function resetClientGameStateForNewRoom() {
 	myPlayerData = null;
 	isHost = false;
 	roomPlayers = {};
+	selectedPublicPlayerSeat = null;
 	gmPlayersData = {};
 	selectedPlayerForGM = null;
 	pendingJoinRoomId = null;
@@ -1858,7 +2015,7 @@ function resetClientGameStateForNewRoom() {
 	myVote = null;
 	if (typeof gmRevealedChars !== "undefined") gmRevealedChars = {};
 
-	['myPlayerCards', 'playersTableBody', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent', 'specialCardsTableBody', 'gmSpecialCardsList'].forEach(id => {
+	['myPlayerCards', 'publicPlayerSelector', 'selectedPlayerPanel', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent', 'specialCardsTableBody', 'gmSpecialCardsList'].forEach(id => {
 		const el = document.getElementById(id);
 		if (el) el.innerHTML = '';
 	});
@@ -3061,23 +3218,9 @@ function registerSignalREvents() {
 		currentApocalypse = apocalypse || null;
 		console.log("[GameStarted] Normalized apocalypse:", currentApocalypse);
 
-		// Normalize bunker (handle both camelCase and PascalCase)
+		// Keep the complete canonical bunker snapshot; the renderer normalizes it per language.
 		const bunker = data.bunker || data.Bunker;
-		currentBunker = bunker ? {
-			id: bunker.id || bunker.Id,
-			name: bunker.name || bunker.Name || 'Невідомо',
-			description: bunker.description || bunker.Description || '',
-			capacity: bunker.capacity ?? bunker.Capacity ?? 6,
-			location: bunker.location || bunker.Location || '',
-			suppliesMonths: bunker.suppliesMonths ?? bunker.SuppliesMonths ?? 12,
-			facilities: bunker.facilities || bunker.Facilities || [],
-			resources: bunker.resources || bunker.Resources || [],
-			threatAssets: bunker.threatAssets || bunker.ThreatAssets || { resources: [], facilities: [] },
-			problems: bunker.problems || bunker.Problems || [],
-			condition: bunker.condition || bunker.Condition || 'good',
-			imageUrl: bunker.imageUrl || bunker.ImageUrl || null,
-			_i18n: getI18n(bunker)
-		} : null;
+		currentBunker = bunker || null;
 		console.log("[GameStarted] Normalized bunker:", currentBunker);
 
 		// Update players with seat numbers
@@ -3140,11 +3283,11 @@ function registerSignalREvents() {
 		updateGMSections();
 
 		// Update bunker capacity display
-		if (isHost && currentBunker) {
-			currentBunkerCapacity = currentBunker.capacity;
+		if (currentBunker) {
+			currentBunkerCapacity = getBunkerCapacityValue(currentBunker, currentBunkerCapacity);
 			const gmBunkerCapacity = document.getElementById('gmBunkerCapacity');
-			if (gmBunkerCapacity) {
-				gmBunkerCapacity.value = currentBunker.capacity;
+			if (isHost && gmBunkerCapacity) {
+				gmBunkerCapacity.value = currentBunkerCapacity;
 			}
 		}
 
@@ -3166,8 +3309,8 @@ function registerSignalREvents() {
 			addEventMessage(`<span class="event-apocalypse">☢️ ${escapeHtml(t('apocalypse'))}:</span> ${escapeHtml(getLocalizedValue(currentApocalypse, 'name'))}`);
 		}
 
-		if (currentBunker && currentBunker.name) {
-			addEventMessage(`<span class="event-bunker">🏠 Бункер:</span> ${currentBunker.name}`);
+		if (currentBunker) {
+			addEventMessage(`<span class="event-bunker">🏠 ${escapeHtml(t('bunker'))}:</span> ${escapeHtml(getLocalizedValue(currentBunker, 'name'))}`);
 		}
 
 		console.log("=== GAME STARTED END ===");
@@ -3243,7 +3386,7 @@ function registerSignalREvents() {
 			renderCurrentGameUI();
 		}
 
-		updatePlayersTable();
+		renderPublicPlayerOverview();
 		addEventMessage(`<span class="event-player">${info.playerName}</span> розкрив: <span class="revealed-label">${info.data.label}</span>`);
 	});
 
@@ -3408,7 +3551,7 @@ function registerSignalREvents() {
 			}
 		}
 
-		updatePlayersTable();
+		renderPublicPlayerOverview();
 		updateSpecialCardsUI();
 		addEventMessage(`<span class="event-gm">GM</span> змінив характеристику <span class="event-player">${info.playerName}</span>`);
 	});
@@ -3459,7 +3602,7 @@ function registerSignalREvents() {
 			myPlayerData.hasRevealedAllAfterElimination = !!(info.hasRevealedAllAfterElimination ?? info.HasRevealedAllAfterElimination);
 		}
 		renderCurrentGameUI();
-		updatePlayersTable();
+		renderPublicPlayerOverview();
 		updateGMPlayerSelect();
 		addEventMessage(`<span class="event-eliminate">❌ ${info.playerName}</span> елімінований!`);
 	});
@@ -3479,7 +3622,7 @@ function registerSignalREvents() {
 			myPlayerData.hasRevealedAllAfterElimination = false;
 		}
 		renderCurrentGameUI();
-		updatePlayersTable();
+		renderPublicPlayerOverview();
 		updateGMPlayerSelect();
 		addEventMessage(`<span class="event-restore">✅ ${info.playerName}</span> повернено в гру!`);
 	});
@@ -3791,15 +3934,21 @@ function registerSignalREvents() {
 	connection.off("BunkerCapacityUpdated");
 	connection.on("BunkerCapacityUpdated", function (data) {
 		console.log("Bunker capacity updated:", data);
-		if (currentBunker) currentBunker.capacity = data.capacity;
-		currentBunkerCapacity = data.capacity;
+		const bunker = data.bunker || data.Bunker;
+		const capacity = data.capacity ?? data.Capacity ?? getBunkerCapacityValue(bunker, currentBunkerCapacity);
+		if (bunker) currentBunker = bunker;
+		else if (currentBunker) {
+			currentBunker.capacity = capacity;
+			if ('Capacity' in currentBunker) currentBunker.Capacity = capacity;
+		}
+		currentBunkerCapacity = capacity;
 		const input = document.getElementById('gmBunkerCapacity');
-		if (input) input.value = data.capacity;
+		if (input) input.value = capacity;
 		setBunkerCapacityPending(false);
 		const feedback = document.getElementById('gmBunkerCapacityFeedback');
 		if (feedback) feedback.textContent = t('gmCapacitySaved');
-		renderBunker(data.bunker);
-		addEventMessage(`<span class="event-gm">GM</span> змінив кількість слотів бункера на <strong>${data.capacity}</strong>`);
+		renderBunker(currentBunker);
+		addEventMessage(`<span class="event-gm">GM</span> ${escapeHtml(t('capacity'))}: <strong>${escapeHtml(capacity)}</strong>`);
 	});
 
 	connection.off("GamePauseUpdated");
@@ -3849,12 +3998,13 @@ function registerSignalREvents() {
 	connection.off("BunkerChanged");
 	connection.on("BunkerChanged", function (data) {
 		console.log("Bunker changed:", data);
-		currentBunker = data.bunker;
-		currentBunkerCapacity = data.bunker.capacity;
+		const bunker = data.bunker || data.Bunker || data;
+		currentBunker = bunker;
+		currentBunkerCapacity = getBunkerCapacityValue(bunker, currentBunkerCapacity);
 		const capacityInput = document.getElementById('gmBunkerCapacity');
-		if (capacityInput) capacityInput.value = data.bunker.capacity;
-		renderBunker(data.bunker);
-		addEventMessage(`<span class="event-bunker">🏠 Новий бункер:</span> ${data.bunker.name}`);
+		if (capacityInput) capacityInput.value = currentBunkerCapacity;
+		renderBunker(currentBunker);
+		addEventMessage(`<span class="event-bunker">🏠 ${escapeHtml(t('bunker'))}:</span> ${escapeHtml(getLocalizedValue(bunker, 'name'))}`);
 	});
 
 	// Апокаліпсис змінено
@@ -3888,9 +4038,11 @@ function registerSignalREvents() {
 	connection.on("EventEffectApplied", function (data) {
 		console.log("Event effect applied:", data);
 		// Оновлюємо бункер якщо потрібно
-		if (data.bunker) {
-			currentBunker = data.bunker;
-			renderBunker(data.bunker);
+		const bunker = data.bunker || data.Bunker;
+		if (bunker) {
+			currentBunker = bunker;
+			currentBunkerCapacity = getBunkerCapacityValue(bunker, currentBunkerCapacity);
+			renderBunker(currentBunker);
 		}
 		addEventToHistory(`<span class="event-special">Застосовано ефект: ${data.effectDescription}</span>`, 'special');
 	});
@@ -4316,8 +4468,10 @@ function registerSignalREvents() {
 	connection.off("BunkerImageUpdated");
 	connection.on("BunkerImageUpdated", function (data) {
 		console.log("[BunkerImageUpdated]", data);
-		if (currentBunker && currentBunker.id === data.bunkerId) {
-			currentBunker.imageUrl = data.imageUrl;
+		if (currentBunker && (currentBunker.id || currentBunker.Id) === (data.bunkerId || data.BunkerId)) {
+			const imageUrl = data.imageUrl || data.ImageUrl || null;
+			currentBunker.imageUrl = imageUrl;
+			if ('ImageUrl' in currentBunker) currentBunker.ImageUrl = imageUrl;
 			renderBunker(currentBunker);
 			addEventMessage(`<span class="event-image">🖼️</span> Зображення бункера оновлено`);
 		}
@@ -4351,8 +4505,9 @@ function registerSignalREvents() {
 	connection.off("BunkerImageRemoved");
 	connection.on("BunkerImageRemoved", function (data) {
 		console.log("[BunkerImageRemoved]", data);
-		if (currentBunker && currentBunker.id === data.bunkerId) {
+		if (currentBunker && (currentBunker.id || currentBunker.Id) === (data.bunkerId || data.BunkerId)) {
 			currentBunker.imageUrl = null;
+			if ('ImageUrl' in currentBunker) currentBunker.ImageUrl = null;
 			renderBunker(currentBunker);
 			addEventMessage(`<span class="event-image">🗑️</span> Зображення бункера видалено`);
 		}
@@ -4378,7 +4533,9 @@ function registerSignalREvents() {
 		console.log("[BunkerSuppliesAdded]", data);
 
 		if (currentBunker) {
-			currentBunker.suppliesMonths = data.totalSuppliesMonths;
+			const supplies = data.totalSuppliesMonths ?? data.TotalSuppliesMonths;
+			currentBunker.suppliesMonths = supplies;
+			if ('SuppliesMonths' in currentBunker) currentBunker.SuppliesMonths = supplies;
 			renderBunker(currentBunker);
 		}
 
@@ -4391,7 +4548,9 @@ function registerSignalREvents() {
 		console.log("[BunkerSuppliesRemoved]", data);
 
 		if (currentBunker) {
-			currentBunker.suppliesMonths = data.totalSuppliesMonths;
+			const supplies = data.totalSuppliesMonths ?? data.TotalSuppliesMonths;
+			currentBunker.suppliesMonths = supplies;
+			if ('SuppliesMonths' in currentBunker) currentBunker.SuppliesMonths = supplies;
 			renderBunker(currentBunker);
 		}
 
@@ -4534,7 +4693,7 @@ async function uploadBunkerImage(input) {
 	formData.append('roomId', currentRoom?.id || '');
 	formData.append('connectionId', myConnectionId || '');
 	formData.append('hostToken', hostToken || '');
-	formData.append('bunkerId', currentBunker?.id || '');
+	formData.append('bunkerId', currentBunker?.id || currentBunker?.Id || '');
 
 	try {
 		const response = await fetch('/api/ScenarioImage/bunker', {
@@ -4648,7 +4807,7 @@ async function removeBunkerImage() {
 			roomId: currentRoom?.id || '',
 			connectionId: myConnectionId || '',
 			hostToken: hostToken || '',
-			bunkerId: currentBunker?.id || ''
+			bunkerId: currentBunker?.id || currentBunker?.Id || ''
 		});
 
 		const response = await fetch(`/api/ScenarioImage/bunker?${params}`, {
@@ -5570,12 +5729,12 @@ function renderApocalypseScenario(model) {
 	const details = model.description && model.description !== model.shortDescription
 		? `<p class="apocalypse-footer-description">${escapeHtml(model.description)}</p>` : '';
 
-	return `<article class="apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
-		<header class="apocalypse-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
+	return `<article class="scenario-immersive-shell apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
+		<header class="scenario-immersive-hero apocalypse-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
 			${heroImage}
 			<div class="apocalypse-hero-overlay" aria-hidden="true"></div>
 			<div class="apocalypse-hero-pattern" aria-hidden="true"></div>
-			<div class="apocalypse-theme-mark">${renderApocalypseIcon(variant)}</div>
+			<div class="apocalypse-theme-mark" aria-hidden="true">${renderApocalypseIcon(variant)}</div>
 			<div class="apocalypse-hero-content apocalypse-hero-copy">
 				<span class="apocalypse-badge">${escapeHtml(t('apocBadge'))}</span>
 				<h4 id="apocalypse-scenario-title" class="apocalypse-title">${escapeHtml(model.name)}</h4>
@@ -5887,96 +6046,187 @@ function resolveNoElimination() {
 	}
 }
 
+const bunkerIconSvgRegistry = Object.freeze({
+	military: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 53 14v16c0 13-8 23-21 28C19 53 11 43 11 30V14l21-8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 38V26l11-7 11 7v12M27 38v-8h10v8" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	industrial: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56V26l16 9V25l16 10V16h10v40H8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M16 46h6m8 0h6m8 0h6M44 8h10" stroke="currentColor" stroke-width="4"/></svg>',
+	underground: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 55V35C7 18 18 8 32 8s25 10 25 27v20M17 55V35c0-10 6-17 15-17s15 7 15 17v20M6 55h52" fill="none" stroke="currentColor" stroke-width="4"/><path d="M27 55V36h10v19" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	scientific: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 7h16M28 7v17L14 50c-2 4 1 7 5 7h26c4 0 7-3 5-7L36 24V7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 42h22M25 35h14" stroke="currentColor" stroke-width="3"/><circle cx="31" cy="49" r="2"/></svg>',
+	medical: '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="14" width="48" height="42" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 14V8h16v6M27 25h10v8h8v10h-8v8H27v-8h-8V33h8v-8Z" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	civilian: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m7 30 25-21 25 21M13 27v29h38V27M25 56V39h14v17" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	luxury: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m8 22 10-13 14 13L46 9l10 13-7 34H15L8 22Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M14 29h36M22 43h20" stroke="currentColor" stroke-width="4"/></svg>',
+	emergency: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 47h30l-3-24c-1-8-6-13-12-13s-11 5-12 13l-3 24ZM10 56h44M8 26H2m60 0h-6M13 9 8 4m43 5 5-5" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	natural: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 55h50M13 55V37C13 20 22 9 32 9s19 11 19 28v18M22 55V39c0-9 4-15 10-15s10 6 10 15v16" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 38c-8-8-14 0 0 12 14-12 8-20 0-12Z" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+	remote: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m5 53 16-25 9 12L41 19l18 34H5Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 8a22 22 0 0 1 22 22M32 16a14 14 0 0 1 14 14M32 24a6 6 0 0 1 6 6" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+	damaged: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m8 29 24-20 24 20v27H8V29Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m31 10-5 18 10 5-8 23M16 43h8m17 0h7" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
+	critical: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 56H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 23v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>',
+	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56V24L32 8l24 16v32H8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M17 34h30M17 43h30M25 56V43h14v13" fill="none" stroke="currentColor" stroke-width="3"/></svg>'
+});
+
+function normalizeBunkerMetadataValue(value) {
+	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+function resolveBunkerCondition(value) {
+	const condition = normalizeBunkerMetadataValue(value);
+	const groups = [
+		['excellent', 'positive', /^(excellent|відмінний|відмінна|отличный|отличное)$/],
+		['good', 'positive', /^(good|хороший|хороша|хорошее)$/],
+		['stable', 'neutral', /^(stable|стабільний|стабільна|стабильный|стабильное)$/],
+		['worn', 'warning-soft', /^(worn|fair|зношений|зношена|задовільний|изношенный|удовлетворительный)$/],
+		['damaged', 'damaged', /^(damaged|пошкоджений|пошкоджена|поврежденный|повреждённый)$/],
+		['poor', 'damaged', /^(poor|поганий|погана|плохой|плохое)$/],
+		['critical', 'critical', /^(critical|критичний|критична|критический|критическое)$/]
+	];
+	const match = groups.find(([, , pattern]) => pattern.test(condition));
+	return match ? { key: match[0], semantic: match[1] } : { key: 'unknown', semantic: 'neutral' };
+}
+
+function getBunkerConditionLabel(key) {
+	return t({ excellent: 'conditionExcellent', good: 'conditionGood', stable: 'conditionStable', worn: 'conditionWorn', damaged: 'conditionDamaged', poor: 'conditionPoor', critical: 'conditionCritical' }[key] || 'conditionUnknown');
+}
+
+function getBunkerCapacityValue(source, fallback = '') {
+	return source?.capacity ?? source?.Capacity ?? fallback;
+}
+
+function resolveBunkerVisualVariant(model) {
+	if (model?.conditionSemantic === 'critical') return 'critical';
+	if (model?.conditionSemantic === 'damaged') return 'damaged';
+	const metadata = [
+		...(Array.isArray(model?.tags) ? model.tags : []), model?.category, model?.type,
+		model?.classification, model?.locationMetadata, model?.imageCategory, model?.imageType
+	].map(normalizeBunkerMetadataValue).filter(Boolean).join(' ');
+	const rules = [
+		['military', /military|tactical|defen[cs]e|security_complex/],
+		['scientific', /scientific|research_lab|laboratory|science_facility/],
+		['industrial', /industrial|factory|manufacturing|power_plant/],
+		['underground', /underground|subterranean|tunnel|mine|cave_bunker/],
+		['luxury', /luxury|premium|executive|vip/],
+		['emergency', /emergency|temporary_shelter|rapid_response/],
+		['remote', /isolated_location|mountain_location|remote|arctic|offshore/],
+		['natural', /natural|rural_location|agriculture|forest|cavern|spring/],
+		['medical', /medical|hospital|clinic|healthcare/],
+		['civilian', /civilian|residential|public_shelter|community/]
+	];
+	return rules.find(([, pattern]) => pattern.test(metadata))?.[0] || 'generic';
+}
+
+function buildBunkerFacilityModel(source) {
+	if (!source) return null;
+	const rawCondition = source.condition ?? source.Condition ?? '';
+	const condition = resolveBunkerCondition(rawCondition);
+	const tags = source.bunkerTags || source.BunkerTags || source.tags || source.Tags || [];
+	const supplies = source.supplies ?? source.Supplies ?? source.suppliesMonths ?? source.SuppliesMonths ?? '';
+	const model = {
+		id: source.id || source.Id || '',
+		name: getLocalizedValue(source, 'name') || t('unknown'),
+		shortDescription: getLocalizedByFields(source, ['shortDescription', 'subtitle', 'description']),
+		description: getLocalizedValue(source, 'description'),
+		capacity: source.capacity ?? source.Capacity ?? '',
+		condition: rawCondition,
+		conditionKey: condition.key,
+		conditionSemantic: condition.semantic,
+		supplies,
+		location: getLocalizedValue(source, 'location') || '',
+		locationMetadata: source.location || source.Location || '',
+		rooms: getLocalizedArray(source, 'rooms').length ? getLocalizedArray(source, 'rooms') : getLocalizedArray(source, 'facilities'),
+		resources: getLocalizedArray(source, 'resources'),
+		problems: getLocalizedArray(source, 'problems'),
+		imageUrl: normalizeLocalScenarioImageUrl(source.imageUrl || source.ImageUrl || source.uploadedImagePath || source.UploadedImagePath),
+		tags: Array.isArray(tags) ? tags : [],
+		category: source.category || source.Category || '',
+		type: source.type || source.Type || '',
+		classification: source.classification || source.Classification || '',
+		imageCategory: source.imageCategory || source.ImageCategory || '',
+		imageType: source.imageType || source.ImageType || ''
+	};
+	model.visualVariant = resolveBunkerVisualVariant(model);
+	return model;
+}
+
+function renderBunkerIcon(variant) {
+	return bunkerIconSvgRegistry[variant] || bunkerIconSvgRegistry.generic;
+}
+
+function renderBunkerSectionIcon(kind) {
+	const icons = {
+		rooms: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5h16v16M8 9h3v3H8zm5 0h3v3h-3zM8 15h3v3H8zm5 0h3v3h-3z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+		resources: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4-8-4Zm0 0v8l8 4 8-4V8M12 12v8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+		problems: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3Zm0 6v5m0 3v1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+	};
+	return icons[kind] || '';
+}
+
+function renderBunkerContentSection(kind, title, items) {
+	if (!Array.isArray(items) || !items.length) return '';
+	return `<section class="bunker-content-card content-${kind}" aria-labelledby="bunker-${kind}-title">
+		<h5 id="bunker-${kind}-title" class="bunker-content-title">${renderBunkerSectionIcon(kind)}<span>${escapeHtml(title)}</span></h5>
+		<ul>${items.map(item => `<li><span aria-hidden="true"></span><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
+	</section>`;
+}
+
+function renderBunkerFacility(model) {
+	if (!model) return `<p class="bunker-empty">${escapeHtml(t('unknown'))}</p>`;
+	const variant = bunkerIconSvgRegistry[model.visualVariant] ? model.visualVariant : resolveBunkerVisualVariant(model);
+	const capacityValue = model.capacity === '' || model.capacity == null ? t('unknown') : model.capacity;
+	const suppliesValue = model.supplies === '' || model.supplies == null
+		? t('unknown')
+		: `${escapeHtml(model.supplies)}${typeof model.supplies === 'number' ? ` ${escapeHtml(t('bunkerMonths'))}` : ''}`;
+	const locationValue = model.location || t('unknown');
+	const media = model.imageUrl ? `<div class="bunker-hero-media" aria-hidden="true">
+		<img class="bunker-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleBunkerHeroImageError(this)">
+	</div>` : '';
+	const imageButton = model.imageUrl ? `<button type="button" class="bunker-open-image" onclick="openCurrentBunkerImage()">${escapeHtml(t('bunkerOpenImage'))}</button>` : '';
+	const hostControls = isHost ? `<div class="scenario-image-controls bunker-image-controls">
+		<input type="file" id="bunkerImageInput" accept="image/*" hidden onchange="uploadBunkerImage(this)">
+		<button type="button" class="btn-scenario-image" onclick="document.getElementById('bunkerImageInput').click()">${escapeHtml(t('uploadImage'))}</button>
+		<button type="button" class="btn-scenario-image btn-generate" onclick="generateBunkerPrompt()">${escapeHtml(t('generatePrompt'))}</button>
+		${model.imageUrl ? `<button type="button" class="btn-scenario-image btn-remove" onclick="removeBunkerImage()">${escapeHtml(t('remove'))}</button>` : ''}
+	</div>` : '';
+	const actions = `${imageButton}${hostControls}`;
+
+	return `<article class="scenario-immersive-shell bunker-facility-shell variant-${variant} condition-${model.conditionSemantic}" aria-labelledby="bunker-facility-title">
+		<header class="scenario-immersive-hero bunker-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
+			${media}<div class="bunker-hero-overlay" aria-hidden="true"></div><div class="bunker-hero-pattern" aria-hidden="true"></div>
+			<div class="bunker-status-medallion" aria-hidden="true"><span class="bunker-status-icon">${renderBunkerIcon(variant)}</span></div>
+			<div class="bunker-hero-content">
+				<span class="bunker-badge">${escapeHtml(t('bunkerBadge'))}</span>
+				<h4 id="bunker-facility-title" class="bunker-title">${escapeHtml(model.name)}</h4>
+				${model.shortDescription ? `<p class="bunker-subtitle">${escapeHtml(model.shortDescription)}</p>` : ''}
+			</div>
+		</header>
+		<section class="bunker-metrics" aria-label="${escapeHtml(t('bunkerFacilityRecord'))}">
+			<div class="bunker-metric metric-capacity"><span class="bunker-metric-label">${escapeHtml(t('capacity'))}</span><strong>${escapeHtml(capacityValue)}</strong></div>
+			<div class="bunker-metric metric-condition"><span class="bunker-metric-label">${escapeHtml(t('condition'))}</span><strong>${escapeHtml(getBunkerConditionLabel(model.conditionKey))}</strong></div>
+			<div class="bunker-metric metric-supplies"><span class="bunker-metric-label">${escapeHtml(t('supplies'))}</span><strong>${suppliesValue}</strong></div>
+			<div class="bunker-metric metric-location"><span class="bunker-metric-label">${escapeHtml(t('location'))}</span><strong>${escapeHtml(locationValue)}</strong></div>
+		</section>
+		<div class="bunker-content-grid">
+			${renderBunkerContentSection('rooms', t('bunkerRooms'), model.rooms)}
+			${renderBunkerContentSection('resources', t('bunkerResources'), model.resources)}
+			${renderBunkerContentSection('problems', t('bunkerProblems'), model.problems)}
+		</div>
+		${actions ? `<footer class="bunker-footer"><span class="bunker-footer-kicker">${escapeHtml(t('bunkerFacilityRecord'))}</span><div class="bunker-footer-actions">${actions}</div></footer>` : ''}
+	</article>`;
+}
+
 function renderBunker(bunker) {
 	const container = document.getElementById('bunkerContent');
 	if (!container) return;
+	container.innerHTML = renderBunkerFacility(buildBunkerFacilityModel(bunker));
+}
 
-	if (!bunker) {
-		container.innerHTML = `<p>${t('unknown')}</p>`;
-		return;
-	}
-	const bunkerName = getLocalizedValue(bunker, 'name') || t('unknown');
-	const bunkerDescription = getLocalizedValue(bunker, 'description');
-	const bunkerLocation = getLocalizedValue(bunker, 'location') || bunker.location || bunker.Location || '';
-	const bunkerFacilities = getLocalizedArray(bunker, 'facilities');
-	const bunkerResources = getLocalizedArray(bunker, 'resources');
-	const bunkerProblems = getLocalizedArray(bunker, 'problems');
+function handleBunkerHeroImageError(image) {
+	const hero = image?.closest?.('.bunker-hero');
+	if (!hero) return;
+	hero.classList.remove('has-image');
+	hero.classList.add('no-image');
+	image.closest('.bunker-hero-media')?.remove();
+}
 
-	const conditionColors = {
-		'poor': '#e74c3c',
-		'fair': '#f39c12',
-		'good': '#27ae60',
-		'excellent': '#3498db'
-	};
-
-	const conditionLabels = {
-		uk: { poor: 'Поганий', fair: 'Задовільний', good: 'Хороший', excellent: 'Відмінний' },
-		en: { poor: 'Poor', fair: 'Fair', good: 'Good', excellent: 'Excellent' },
-		ru: { poor: 'Плохой', fair: 'Удовлетворительный', good: 'Хороший', excellent: 'Отличный' }
-	};
-
-	// Перевіряємо наявність зображення
-	const imageUrl = bunker.imageUrl || bunker.ImageUrl;
-	const imageSection = imageUrl ? `
-            <div class="scenario-image-container">
-                <img src="${imageUrl}" alt="${escapeHtml(bunkerName)}" class="scenario-image" onclick="openImageModal('${imageUrl}', '${escapeHtml(bunkerName)}')" />
-            </div>
-        ` : '';
-
-	// Контроли хоста для зображення
-	const hostControls = isHost ? `
-            <div class="scenario-image-controls">
-                <input type="file" id="bunkerImageInput" accept="image/*" style="display: none;" onchange="uploadBunkerImage(this)" />
-                <button class="btn-scenario-image" onclick="document.getElementById('bunkerImageInput').click()">
-                    ${t('uploadImage')}
-                </button>
-                <button class="btn-scenario-image btn-generate" onclick="generateBunkerPrompt()">
-                    ${t('generatePrompt')}
-                </button>
-                ${imageUrl ? `<button class="btn-scenario-image btn-remove" onclick="removeBunkerImage()">${t('remove')}</button>` : ''}
-            </div>
-        ` : '';
-
-	container.innerHTML = `
-            <h4 class="bunker-name">${escapeHtml(bunkerName)}</h4>
-            <p class="bunker-desc">${escapeHtml(bunkerDescription)}</p>
-            ${imageSection}
-            ${hostControls}
-            <div class="bunker-stats">
-                <div class="stat-item">
-                    <span class="stat-label">${t('capacity')}:</span>
-                    <span class="stat-value">${bunker.capacity}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">${t('condition')}:</span>
-                    <span class="stat-value" style="color: ${conditionColors[bunker.condition]}">${conditionLabels[getCurrentLanguage()]?.[bunker.condition] || bunker.condition}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">${t('supplies')}:</span>
-                    <span class="stat-value">${bunker.suppliesMonths}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">${t('location')}:</span>
-                    <span class="stat-value">${escapeHtml(bunkerLocation)}</span>
-                </div>
-            </div>
-            <div class="bunker-lists">
-                <div class="list-section">
-                    <span class="list-title">${t('facilities')}</span>
-                    <ul>${bunkerFacilities.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
-                </div>
-                <div class="list-section">
-                    <span class="list-title">${t('resources')}</span>
-                    <ul>${bunkerResources.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
-                </div>
-                ${bunkerProblems.length > 0 ? `
-                <div class="list-section problems">
-                    <span class="list-title">${t('problems')}</span>
-                    <ul>${bunkerProblems.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
-                </div>
-                ` : ''}
-            </div>
-        `;
+function openCurrentBunkerImage() {
+	const model = buildBunkerFacilityModel(currentBunker);
+	if (model?.imageUrl) openImageModal(model.imageUrl, model.name);
 }
 
 // ==================== EVENTS SYSTEM ====================
@@ -7434,6 +7684,9 @@ function updateRoomUI() {
 	const roomStateElement = document.getElementById('currentRoomState');
 	if (roomStateElement) {
 		roomStateElement.textContent = getRoomStateLabel();
+		roomStateElement.classList.remove('state-lobby', 'state-playing', 'state-voting');
+		const roomState = String(currentRoom.state || '').toLowerCase();
+		roomStateElement.classList.add(roomState === 'lobby' ? 'state-lobby' : roomState === 'voting' ? 'state-voting' : 'state-playing');
 	}
 
 	const playerCount = Object.keys(roomPlayers).length;
@@ -7507,10 +7760,6 @@ function updateRoomUI() {
 
 	renderRoomPlayers();
 	renderLobbyState();
-
-	if (currentRoom.state !== 'Lobby') {
-		updatePlayersTable();
-	}
 }
 
 // Нова функція для оновлення GM секцій
@@ -7777,6 +8026,26 @@ function getSpecialCardTargets() {
 		.sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999));
 }
 
+function getAutomaticSpecialCardOrderLabel(card) {
+	const effectType = String(card?.effectType || card?.EffectType || '');
+	if (!/(Upper|Lower|Neighbors)/.test(effectType)) return '';
+	const models = getCanonicalPublicPlayerModels({ activeOnly: true });
+	if (models.length < 2) return '';
+	const ownerIndex = models.findIndex(({ player }) => isMyPlayerRef(
+		player.connectionId || player.ConnectionId,
+		player.stablePlayerId || player.StablePlayerId));
+	if (ownerIndex < 0) return '';
+	const formatNeighbor = (direction, labelKey) => {
+		const target = models[(ownerIndex + direction + models.length) % models.length];
+		return `${t(labelKey)}: #${target.seat} ${target.player.name || target.player.Name || t('playerLabel')}`;
+	};
+	const hasBothDirections = /Neighbors|Upper.*Lower|Lower.*Upper/.test(effectType);
+	if (hasBothDirections) return [formatNeighbor(-1, 'specialPreviousOrder'), formatNeighbor(1, 'specialNextOrder')].join(' · ');
+	return /Upper/.test(effectType)
+		? formatNeighbor(-1, 'specialPreviousOrder')
+		: formatNeighbor(1, 'specialNextOrder');
+}
+
 function rememberSpecialCardSelection(cardIndex = 0, rerender = true, keyOverride = '') {
 	const cards = normalizeSpecialCards(myPlayerData?.specialCards, myPlayerData?.specialCard);
 	const card = cards[cardIndex];
@@ -7821,6 +8090,7 @@ function buildSpecialCardModel(card, cardIndex = 0) {
 	const isAvailable = !isPending && !isActive && !isUsed && canUseSpecialCardNow(normalized);
 	const selection = specialCardSelectionState.get(getSpecialCardSelectionKey(normalized, cardIndex)) || {};
 	const selectedTarget = getSpecialCardTargets().find(player => getSpecialCardTargetRef(player) === selection.targetRef);
+	const automaticOrderLabel = getAutomaticSpecialCardOrderLabel(normalized);
 	const model = {
 		id: normalized.id,
 		name: getSpecialCardName(normalized),
@@ -7828,8 +8098,8 @@ function buildSpecialCardModel(card, cardIndex = 0) {
 		description: '',
 		effect: getSpecialCardDescription(normalized),
 		iconKey: resolveSpecialCardIconKey(normalized, visualVariant),
-		targetType: normalized.requiresTarget ? 'player' : '',
-		targetLabel: normalized.requiresTarget ? (selectedTarget?.name || selectedTarget?.Name || normalized.targetPlayerName || t('specialTargetRequired')) : '',
+		targetType: normalized.requiresTarget ? 'player' : automaticOrderLabel ? 'seat-order' : '',
+		targetLabel: normalized.requiresTarget ? (selectedTarget?.name || selectedTarget?.Name || normalized.targetPlayerName || t('specialTargetRequired')) : automaticOrderLabel,
 		stageRestriction: getSpecialCardStageLabel(normalized.phase),
 		isAvailable,
 		isPending,
@@ -8060,93 +8330,320 @@ function updateSpecialCardsUI() {
 	}
 }
 
-function updatePlayersTable() {
-	const tbody = document.getElementById('playersTableBody');
-	if (!tbody) return;
-	const players = Object.values(roomPlayers);
+const publicCharacteristicDefinitions = Object.freeze([
+	{ key: 'personality', labelKey: 'personality', icon: 'user' },
+	{ key: 'body', labelKey: 'body', icon: 'body' },
+	{ key: 'profession', labelKey: 'profession', icon: 'briefcase' },
+	{ key: 'physicalHealth', labelKey: 'physicalHealth', icon: 'heart' },
+	{ key: 'mentalHealth', labelKey: 'mentalHealth', icon: 'brain' },
+	{ key: 'hobby', labelKey: 'hobby', icon: 'star' },
+	{ key: 'characterTrait', labelKey: 'characterTrait', icon: 'mask' },
+	{ key: 'phobia', labelKey: 'phobia', icon: 'eye' },
+	{ key: 'inventory', labelKey: 'inventory', icon: 'backpack' },
+	{ key: 'fact', labelKey: 'fact', icon: 'document' }
+]);
 
-	if (players.length === 0) {
-		tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">${t('players')}: 0</td></tr>`;
+function isPublicGameplayPlayer(player) {
+	if (!player || player.isSpectatorGm || player.IsSpectatorGm) return false;
+	const role = String(player.publicRole || player.PublicRole || 'player').toLowerCase().replace(/[_\s-]/g, '');
+	return !['spectator', 'technicalgm', 'omniscientgm'].includes(role);
+}
+
+function getCanonicalPublicPlayerModels(options = null) {
+	const activeOnly = options?.activeOnly === true;
+	const players = Object.values(roomPlayers || {})
+		.filter(isPublicGameplayPlayer)
+		.filter(player => !activeOnly || (!(player.isEliminated || player.IsEliminated) && (player.isConnected ?? player.IsConnected ?? true)))
+		.sort((a, b) => {
+			const seatA = Number(a.seatNumber ?? a.SeatNumber) || Number.MAX_SAFE_INTEGER;
+			const seatB = Number(b.seatNumber ?? b.SeatNumber) || Number.MAX_SAFE_INTEGER;
+			return seatA - seatB;
+		});
+
+	return players.map((player, index) => ({
+		player,
+		seat: Number(player.seatNumber ?? player.SeatNumber) || index + 1
+	}));
+}
+
+function getPublicActivePlayerSeat(models = getCanonicalPublicPlayerModels()) {
+	const directSeat = Number(currentRoundState?.activePlayerSeatNumber || 0);
+	if (directSeat > 0 && models.some(model => model.seat === directSeat)) return directSeat;
+	const connectionRef = currentRoundState?.activePlayerConnectionId || '';
+	const stableRef = currentRoundState?.activePlayerStableId || '';
+	return models.find(({ player }) =>
+		(connectionRef && (player.connectionId || player.ConnectionId) === connectionRef) ||
+		(stableRef && (player.stablePlayerId || player.StablePlayerId) === stableRef)
+	)?.seat || null;
+}
+
+function resolveSelectedPublicPlayer(models) {
+	if (models.length === 0) return null;
+	const retained = models.find(model => model.seat === selectedPublicPlayerSeat);
+	if (retained) return retained;
+
+	if (Number.isFinite(selectedPublicPlayerSeat)) {
+		return models.reduce((nearest, model) =>
+			Math.abs(model.seat - selectedPublicPlayerSeat) < Math.abs(nearest.seat - selectedPublicPlayerSeat) ? model : nearest,
+		models[0]);
+	}
+
+	const self = models.find(({ player }) =>
+		!(player.isEliminated || player.IsEliminated) &&
+		isMyPlayerRef(player.connectionId || player.ConnectionId, player.stablePlayerId || player.StablePlayerId));
+	if (self) return self;
+	const activeSeat = getPublicActivePlayerSeat(models);
+	return models.find(model => model.seat === activeSeat) ||
+		models.find(({ player }) => !(player.isEliminated || player.IsEliminated)) ||
+		models[0];
+}
+
+function selectPublicPlayerSeat(seat, focusSelector = false) {
+	const parsedSeat = Number(seat);
+	if (!Number.isInteger(parsedSeat)) return;
+	selectedPublicPlayerSeat = parsedSeat;
+	renderPublicPlayerOverview();
+	if (focusSelector) document.querySelector(`#publicPlayerSelector [data-player-seat="${parsedSeat}"]`)?.focus({ preventScroll: true });
+}
+
+function navigatePublicPlayerOverview(direction) {
+	const models = getCanonicalPublicPlayerModels();
+	if (models.length === 0) return;
+	const current = resolveSelectedPublicPlayer(models) || models[0];
+	const index = Math.max(0, models.findIndex(model => model.seat === current.seat));
+	const nextIndex = (index + direction + models.length) % models.length;
+	selectPublicPlayerSeat(models[nextIndex].seat, true);
+}
+
+function ensurePublicPlayerOverviewEvents() {
+	const shell = document.getElementById('publicPlayerOverview');
+	if (!shell || shell.dataset.overviewEventsBound === 'true') return;
+	shell.dataset.overviewEventsBound = 'true';
+	shell.addEventListener('click', event => {
+		const viewButton = event.target.closest('[data-player-view]');
+		if (viewButton && shell.contains(viewButton)) {
+			publicPlayerViewMode = viewButton.dataset.playerView === 'single' ? 'single' : 'all';
+			renderPublicPlayerOverview();
+			return;
+		}
+		const playerButton = event.target.closest('[data-player-seat]');
+		if (playerButton && shell.contains(playerButton)) {
+			selectPublicPlayerSeat(playerButton.dataset.playerSeat, true);
+			return;
+		}
+		const navigation = event.target.closest('[data-overview-nav]');
+		if (navigation && shell.contains(navigation)) navigatePublicPlayerOverview(navigation.dataset.overviewNav === 'next' ? 1 : -1);
+	});
+	shell.addEventListener('keydown', event => {
+		if (!event.target.closest('#publicPlayerSelector')) return;
+		if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+		event.preventDefault();
+		navigatePublicPlayerOverview(['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1);
+	});
+	shell.addEventListener('change', event => {
+		if (event.target.id !== 'playerComparisonSort') return;
+		publicPlayerSortMode = ['seat', 'name', 'revealed-desc', 'revealed-asc'].includes(event.target.value) ? event.target.value : 'seat';
+		renderAllPlayersComparison();
+	});
+}
+
+function renderPublicPlayerBadges(player, seat, activeSeat) {
+	const isMe = isMyPlayerRef(player.connectionId || player.ConnectionId, player.stablePlayerId || player.StablePlayerId);
+	const eliminated = !!(player.isEliminated || player.IsEliminated);
+	const badges = [
+		player.isHost || player.IsHost ? `<span class="player-overview-badge badge-host">${t('host')}</span>` : '',
+		isMe ? `<span class="player-overview-badge badge-you">${t('you')}</span>` : '',
+		seat === activeSeat ? `<span class="player-overview-badge badge-turn">${t('activePlayer')}</span>` : '',
+		eliminated ? `<span class="player-overview-badge badge-eliminated">${t('eliminated')}</span>` : `<span class="player-overview-badge badge-active">${t('playerActive')}</span>`
+	];
+	if (player.isConnected !== undefined || player.IsConnected !== undefined) {
+		const connected = player.isConnected ?? player.IsConnected;
+		badges.push(`<span class="player-overview-badge ${connected ? 'badge-online' : 'badge-offline'}">${connected ? t('playerOnline') : t('playerOffline')}</span>`);
+	}
+	return badges.filter(Boolean).join('');
+}
+
+function renderPublicPlayerSelectorItem(model, activeSeat) {
+	const { player, seat } = model;
+	const selected = seat === selectedPublicPlayerSeat;
+	const eliminated = !!(player.isEliminated || player.IsEliminated);
+	const connected = player.isConnected ?? player.IsConnected ?? true;
+	return `<button type="button" class="player-selector-item${selected ? ' is-selected' : ''}${eliminated ? ' is-eliminated' : ''}${connected ? '' : ' is-offline'}" role="option" aria-selected="${selected}" data-player-seat="${seat}">
+		<span class="player-selector-seat">#${seat}</span>
+		<span class="player-selector-name">${escapeHtml(player.name || player.Name || t('playerLabel'))}</span>
+		<span class="player-selector-badges">${renderPublicPlayerBadges(player, seat, activeSeat)}</span>
+	</button>`;
+}
+
+function renderPublicCharacteristicCard(player, definition) {
+	const { key, labelKey, icon } = definition;
+	const label = t(labelKey);
+	const revealed = !!player.revealed?.[key];
+	if (!revealed) {
+		return `<article class="public-characteristic-card is-sealed type-${key}" data-characteristic="${key}" data-revealed="false">
+			<header><span class="public-characteristic-icon">${renderCharacteristicIcon(icon)}</span><h4>${escapeHtml(label)}</h4></header>
+			<div class="public-characteristic-seal"><span class="public-lock-icon" aria-hidden="true">${renderCharacteristicIcon('lock')}</span><span>${t('notRevealed')}</span></div>
+		</article>`;
+	}
+
+	const value = getLocalizedRevealedValue(player, key) || t('noData');
+	const tooltipData = getLocalizedRevealedTooltip(player, key);
+	const tooltip = tooltipData ? `<span class="characteristic-with-tooltip public-characteristic-tooltip"><button type="button" class="tooltip-trigger ${getTooltipTypeClass(key)}" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button><span class="tooltip-content">${escapeHtml(tooltipData)}</span></span>` : '';
+	const additional = key === 'physicalHealth' ? renderAdditionalPhysicalConditionsForOverview(player) : '';
+	return `<article class="public-characteristic-card is-revealed type-${key}" data-characteristic="${key}" data-revealed="true">
+		<header><span class="public-characteristic-icon">${renderCharacteristicIcon(icon)}</span><h4>${escapeHtml(label)}</h4>${tooltip}</header>
+		<div class="public-characteristic-value">${escapeHtml(value)}</div>${additional}
+	</article>`;
+}
+
+function getPublicRevealedCount(player) {
+	return publicCharacteristicDefinitions.reduce((count, definition) => count + (player?.revealed?.[definition.key] ? 1 : 0), 0);
+}
+
+function sortPublicPlayerModels(models, sortMode = publicPlayerSortMode) {
+	const sorted = [...models];
+	const bySeat = (a, b) => a.seat - b.seat;
+	if (sortMode === 'name') {
+		return sorted.sort((a, b) => String(a.player.name || a.player.Name || '').localeCompare(String(b.player.name || b.player.Name || ''), getCurrentLanguage(), { sensitivity: 'base' }) || bySeat(a, b));
+	}
+	if (sortMode === 'revealed-desc' || sortMode === 'revealed-asc') {
+		const direction = sortMode === 'revealed-desc' ? -1 : 1;
+		return sorted.sort((a, b) => direction * (getPublicRevealedCount(a.player) - getPublicRevealedCount(b.player)) || bySeat(a, b));
+	}
+	return sorted.sort(bySeat);
+}
+
+function renderComparisonCharacteristic(player, definition) {
+	const { key, labelKey, icon } = definition;
+	const label = t(labelKey);
+	const revealed = !!player?.revealed?.[key];
+	if (!revealed) {
+		return `<div class="comparison-characteristic is-sealed type-${key}" data-characteristic="${key}" data-revealed="false">
+			<span class="comparison-characteristic-icon" aria-hidden="true">${renderCharacteristicIcon(icon)}</span>
+			<span class="comparison-characteristic-copy"><strong>${escapeHtml(label)}</strong><span class="comparison-sealed-value"><span class="comparison-lock" aria-hidden="true">${renderCharacteristicIcon('lock')}</span>${t('notRevealed')}</span></span>
+		</div>`;
+	}
+
+	const value = getLocalizedRevealedValue(player, key) || t('noData');
+	const tooltipData = getLocalizedRevealedTooltip(player, key);
+	const tooltip = tooltipData ? `<span class="characteristic-with-tooltip comparison-tooltip"><button type="button" class="tooltip-trigger ${getTooltipTypeClass(key)}" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button><span class="tooltip-content">${escapeHtml(tooltipData)}</span></span>` : '';
+	const additional = key === 'physicalHealth' ? renderAdditionalPhysicalConditionsForOverview(player) : '';
+	return `<div class="comparison-characteristic is-revealed type-${key}" data-characteristic="${key}" data-revealed="true">
+		<span class="comparison-characteristic-icon" aria-hidden="true">${renderCharacteristicIcon(icon)}</span>
+		<span class="comparison-characteristic-copy"><strong>${escapeHtml(label)}</strong><span class="comparison-public-value">${escapeHtml(value)}</span>${additional}</span>${tooltip}
+	</div>`;
+}
+
+function renderPlayerDossierCard(model, activeSeat) {
+	const { player, seat } = model;
+	const revealedCount = getPublicRevealedCount(player);
+	const progress = t('revealedProgress').replace('{shown}', revealedCount).replace('{total}', publicCharacteristicDefinitions.length);
+	return `<article class="player-dossier-card${player.isEliminated || player.IsEliminated ? ' is-eliminated' : ''}" data-canonical-seat="${seat}">
+		<header class="player-dossier-header">
+			<div class="player-dossier-identity"><span class="player-dossier-seat">#${seat}</span><div><h3>${escapeHtml(player.name || player.Name || t('playerLabel'))}</h3><span class="player-dossier-progress">${escapeHtml(progress)}</span></div></div>
+			<div class="player-dossier-badges">${renderPublicPlayerBadges(player, seat, activeSeat)}</div>
+		</header>
+		<div class="player-dossier-characteristics">${publicCharacteristicDefinitions.map(definition => renderComparisonCharacteristic(player, definition)).join('')}</div>
+	</article>`;
+}
+
+function renderAllPlayersComparison(state = null) {
+	const grid = document.getElementById('playerDossierGrid');
+	if (!grid) return;
+	const models = state?.models || getCanonicalPublicPlayerModels();
+	if (!models.length) {
+		grid.innerHTML = `<div class="player-overview-empty">${t('noAvailablePlayers')}</div>`;
+		return;
+	}
+	const activeSeat = state?.activeSeat ?? getPublicActivePlayerSeat(models);
+	grid.innerHTML = sortPublicPlayerModels(models).map(model => renderPlayerDossierCard(model, activeSeat)).join('');
+	window.reinitTooltips?.();
+}
+
+function updatePublicPlayerComparisonToolbar() {
+	const shell = document.getElementById('publicPlayerOverview');
+	if (!shell) return;
+	const labels = { all: t('allPlayersView'), single: t('singlePlayerView') };
+	for (const button of shell.querySelectorAll('[data-player-view]')) {
+		const active = button.dataset.playerView === publicPlayerViewMode;
+		button.textContent = labels[button.dataset.playerView] || labels.all;
+		button.classList.toggle('is-active', active);
+		button.setAttribute('aria-pressed', String(active));
+	}
+	const toggle = shell.querySelector('.view-mode-toggle');
+	if (toggle) toggle.setAttribute('aria-label', t('playerViewMode'));
+	const sortField = shell.querySelector('.comparison-sort-field');
+	if (sortField) {
+		sortField.hidden = publicPlayerViewMode !== 'all';
+		const label = sortField.querySelector('span');
+		if (label) label.textContent = t('comparisonSort');
+	}
+	const sort = document.getElementById('playerComparisonSort');
+	if (sort) {
+		const labelsByValue = { seat: t('sortBySeat'), name: t('sortByName'), 'revealed-desc': t('sortMostRevealed'), 'revealed-asc': t('sortLeastRevealed') };
+		for (const option of sort.options) option.textContent = labelsByValue[option.value] || option.textContent;
+		sort.value = publicPlayerSortMode;
+	}
+}
+
+function renderPublicPlayerOverview() {
+	const shell = document.getElementById('publicPlayerOverview');
+	const comparison = document.getElementById('allPlayersComparison');
+	const singleOverview = document.getElementById('singlePlayerOverview');
+	const selector = document.getElementById('publicPlayerSelector');
+	const panel = document.getElementById('selectedPlayerPanel');
+	if (!shell || !comparison || !singleOverview || !selector || !panel) return;
+	ensurePublicPlayerOverviewEvents();
+	updatePublicPlayerComparisonToolbar();
+	const title = document.getElementById('publicPlayerOverviewTitle');
+	if (title) title.textContent = t('playerOverviewTitle');
+	selector.setAttribute('aria-label', t('playerOverviewTitle'));
+	const roomState = String(currentRoom?.state || currentRoom?.State || '').toLowerCase();
+	if (!roomState || roomState === 'lobby') {
+		selectedPublicPlayerSeat = null;
+		publicPlayerViewMode = 'all';
+		selector.innerHTML = '';
+		panel.innerHTML = '';
+		document.getElementById('playerDossierGrid').innerHTML = '';
 		return;
 	}
 
-	// Сортуємо за номером місця (якщо призначено)
-	players.sort(function (a, b) { return (a.seatNumber || 999) - (b.seatNumber || 999); });
-
-	tbody.innerHTML = players.map((player, index) => {
-		var seatLabel = player.seatNumber ? '#' + player.seatNumber : '#' + (index + 1);
-		const isMe = player.connectionId === myConnectionId;
-		const isEliminated = player.isEliminated || player.IsEliminated || false;
-		const isSpectatorGm = player.isSpectatorGm || player.IsSpectatorGm || false;
-
-		// Build CSS classes
-		let rowClasses = [];
-		if (isMe) rowClasses.push('my-player-row');
-		if (isEliminated) rowClasses.push('player-eliminated');
-		if (isSpectatorGm) rowClasses.push('room-player-spectator-gm');
-
-		// Eliminated badge
-		const eliminatedBadge = isEliminated
-			? `<span class="eliminated-badge">${player.hasRevealedAllAfterElimination ? t('eliminatedRevealedBadge') : t('eliminated')}</span>`
-			: '';
-		const immunity = normalizeEliminationVoteImmunity(player.eliminationVoteImmunity || player.EliminationVoteImmunity);
-		const immunityBadge = immunity.isActive && immunity.remainingUses > 0
-			? `<span class="immunity-badge">Імунітет до наступного голосування</span>`
-			: '';
-
-		return `
-            <tr class="${rowClasses.join(' ')}" data-player="${player.connectionId}">
-                <td class="player-number">${seatLabel}</td>
-                <td class="player-name-cell">
-                    <span class="player-name-text">${escapeHtml(player.name)}</span>
-                    ${isMe ? `<span class="my-badge">(${t('you')})</span>` : ''}
-                    ${player.isHost ? `<span class="host-badge-small">${t('host')}</span>` : ''}
-                    ${eliminatedBadge}
-                    ${immunityBadge}
-                    ${isSpectatorGm ? `<span class="host-badge-small">${t('omniscientPublicBadge')}</span>` : ''}
-                </td>
-                <td>${renderTableCell(player, 'personality')}</td>
-                <td>${renderTableCell(player, 'body')}</td>
-                <td>${renderTableCell(player, 'profession')}</td>
-                <td>${renderTableCell(player, 'physicalHealth')}</td>
-                <td>${renderTableCell(player, 'mentalHealth')}</td>
-                <td>${renderTableCell(player, 'hobby')}</td>
-                <td>${renderTableCell(player, 'characterTrait')}</td>
-                <td>${renderTableCell(player, 'phobia')}</td>
-                <td>${renderTableCell(player, 'inventory')}</td>
-                <td>${renderTableCell(player, 'fact')}</td>
-            </tr>
-            `;
-	}).join('');
-
-	// Count non-eliminated players for bunker capacity display
-	const activePlayers = players.filter(p => !(p.isEliminated || p.IsEliminated) && !(p.isSpectatorGm || p.IsSpectatorGm));
-	document.getElementById('playerCount').textContent = `${activePlayers.length}/${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
-}
-
-function renderTableCell(player, charKey) {
-	const revealed = player.revealed && player.revealed[charKey];
-	if (revealed) {
-		const value = getLocalizedRevealedValue(player, charKey);
-		const additionalPhysicalConditions = charKey === 'physicalHealth'
-			? renderAdditionalPhysicalConditionsForTable(player)
-			: '';
-		// Додаємо tooltip якщо є
-		const tooltipData = getLocalizedRevealedTooltip(player, charKey);
-		if (tooltipData) {
-			const typeClass = getTooltipTypeClass(charKey);
-			return `<div class="char-revealed">
-                    <span class="characteristic-with-tooltip">
-                        <span>${escapeHtml(value)}</span>
-                        <span class="tooltip-trigger ${typeClass}">!</span>
-                        <div class="tooltip-content">${escapeHtml(tooltipData)}</div>
-                    </span>
-                    ${additionalPhysicalConditions}
-                </div>`;
-		}
-		return `<div class="char-revealed">${escapeHtml(value)}${additionalPhysicalConditions}</div>`;
+	const models = getCanonicalPublicPlayerModels();
+	const activePlayers = models.filter(({ player }) => !(player.isEliminated || player.IsEliminated));
+	const count = document.getElementById('playerCount');
+	if (count) count.textContent = `${activePlayers.length}/${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
+	if (models.length === 0) {
+		selectedPublicPlayerSeat = null;
+		selector.innerHTML = '';
+		panel.innerHTML = `<div class="player-overview-empty">${t('noAvailablePlayers')}</div>`;
+		renderAllPlayersComparison({ models });
+		return;
 	}
-	return `<span class="char-hidden">${t('hidden')}</span>`;
+	const canonicalSeatsReady = models.every(({ player }) => Number(player.seatNumber ?? player.SeatNumber) > 0);
+	if (!canonicalSeatsReady) {
+		selectedPublicPlayerSeat = null;
+		selector.innerHTML = '';
+		panel.innerHTML = '';
+		document.getElementById('playerDossierGrid').innerHTML = '';
+		return;
+	}
+
+	const selected = resolveSelectedPublicPlayer(models);
+	selectedPublicPlayerSeat = selected.seat;
+	const activeSeat = getPublicActivePlayerSeat(models);
+	comparison.hidden = publicPlayerViewMode !== 'all';
+	singleOverview.hidden = publicPlayerViewMode !== 'single';
+	renderAllPlayersComparison({ models, activeSeat });
+	selector.innerHTML = models.map(model => renderPublicPlayerSelectorItem(model, activeSeat)).join('');
+	const { player, seat } = selected;
+	const revealedCount = publicCharacteristicDefinitions.filter(definition => !!player.revealed?.[definition.key]).length;
+	const progress = t('revealedProgress').replace('{shown}', revealedCount).replace('{total}', publicCharacteristicDefinitions.length);
+	const disableNavigation = models.length < 2 ? ' disabled aria-disabled="true"' : '';
+	panel.innerHTML = `<header class="selected-player-header">
+		<div class="selected-player-heading"><span class="selected-player-kicker">${t('playerLabel')} #${seat}</span><h3>${escapeHtml(player.name || player.Name || t('playerLabel'))}</h3><div class="selected-player-status">${renderPublicPlayerBadges(player, seat, activeSeat)}</div></div>
+		<div class="selected-player-tools"><span class="selected-player-progress">${escapeHtml(progress)}</span><div class="selected-player-navigation" aria-label="${t('playerOverviewTitle')}"><button type="button" data-overview-nav="previous" aria-label="${t('previousPlayer')}"${disableNavigation}>‹</button><button type="button" data-overview-nav="next" aria-label="${t('nextPlayer')}"${disableNavigation}>›</button></div></div>
+	</header><div class="public-characteristics-grid">${publicCharacteristicDefinitions.map(definition => renderPublicCharacteristicCard(player, definition)).join('')}</div>`;
+	window.reinitTooltips?.();
 }
 
 function formatAdditionalPhysicalCondition(effect) {
@@ -8204,14 +8701,13 @@ function renderAdditionalPhysicalCondition(effect, prefix = '') {
         </span>`;
 }
 
-function renderAdditionalPhysicalConditionsForTable(player) {
-	const sourcePlayer = player.connectionId === myConnectionId ? myPlayerData : player;
-	const conditions = (sourcePlayer?.additionalPhysicalConditions || sourcePlayer?.additionalConditionEffects || [])
+function renderAdditionalPhysicalConditionsForOverview(player) {
+	const conditions = (player?.additionalPhysicalConditions || player?.additionalConditionEffects || [])
 		.map(effect => renderAdditionalPhysicalCondition(effect, '+ '))
 		.filter(Boolean);
 	if (!conditions.length) return '';
 
-	return `<div class="additional-conditions-table">${conditions.join('')}</div>`;
+	return `<div class="public-additional-conditions">${conditions.join('')}</div>`;
 }
 
 function getTooltipTypeClass(charKey) {

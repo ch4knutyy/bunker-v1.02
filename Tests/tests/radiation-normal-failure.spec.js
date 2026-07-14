@@ -49,7 +49,7 @@ test('normal radiation failure updates health card, revealed table and tooltip w
     await expect.poll(() => room.host.evaluate(() => currentThreatState?.threatStatus || '')).toBe('failed');
     await expect.poll(() => room.host.evaluate(() => (myPlayerData?.additionalPhysicalConditions || myPlayerData?.additionalConditionEffects || []).filter(item => (item.conditionId || item.ConditionId) === 'physical_152').length)).toBe(1);
     await expect(room.host.locator('#myPlayerCards')).toContainText(/Променева хвороба|Radiation sickness|Лучевая болезнь/i);
-    await expect(room.host.locator('#playersTableBody')).toContainText(/Променева хвороба|Radiation sickness|Лучевая болезнь/i);
+    await expect(room.host.locator('.player-dossier-card')).toContainText(/Променева хвороба|Radiation sickness|Лучевая болезнь/i);
 
     const radiationRow = room.host.locator('#myPlayerCards .additional-condition-item').filter({ hasText: /Променева хвороба|Radiation sickness|Лучевая болезнь/i }).first();
     await radiationRow.locator('.tooltip-trigger').hover();

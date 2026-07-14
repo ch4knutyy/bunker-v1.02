@@ -62,6 +62,15 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
     const heroImage = room.host.locator('.apocalypse-hero-media .apocalypse-hero-image');
     await expect(heroImage).toBeVisible();
     await expect.poll(() => heroImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+    expect(await room.host.locator('.apocalypse-hero-pattern').evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThanOrEqual(.04);
+    const medallion = room.host.locator('.apocalypse-theme-mark');
+    await expect(medallion).toBeVisible();
+    await expect(medallion).toHaveAttribute('aria-hidden', 'true');
+    expect(await room.host.locator('.apocalypse-hero').evaluate(hero => {
+      const title = hero.querySelector('.apocalypse-title').getBoundingClientRect();
+      const mark = hero.querySelector('.apocalypse-theme-mark').getBoundingClientRect();
+      return title.right <= mark.left || title.left >= mark.right || title.bottom <= mark.top || title.top >= mark.bottom;
+    })).toBe(true);
     expect(await room.host.locator('.apocalypse-hero').evaluate(hero => {
       const media = hero.querySelector('.apocalypse-hero-media');
       const overlay = hero.querySelector('.apocalypse-hero-overlay');
@@ -92,6 +101,26 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
   }
 });
 
+test('desktop no-image and broken-image apocalypse retain the restrained atmospheric fallback', async ({ browser }) => {
+  const room = await createTwoPlayerRoom(browser, `Apocalypse fallback ${Date.now()}`);
+  try {
+    await startRoom(room);
+    await room.host.evaluate(nextScenario => { currentApocalypse = nextScenario; renderApocalypse(currentApocalypse); }, { ...fixture(), imageUrl:'' });
+    const hero = room.host.locator('.apocalypse-hero');
+    await expect(hero).toHaveClass(/no-image/);
+    await expect(hero.locator('.apocalypse-hero-media')).toHaveCount(0);
+    expect(await hero.locator('.apocalypse-hero-pattern').evaluate(element => Number(getComputedStyle(element).opacity))).toBe(.14);
+    await expect(hero.locator('.apocalypse-theme-mark')).toBeVisible();
+
+    await room.host.evaluate(nextScenario => { currentApocalypse = nextScenario; renderApocalypse(currentApocalypse); }, { ...fixture(), imageUrl:'/uploads/apocalypses/definitely-missing-image.png' });
+    await expect(hero).toHaveClass(/no-image/);
+    await expect(hero.locator('.apocalypse-hero-media')).toHaveCount(0);
+    expect(await hero.locator('.apocalypse-hero-pattern').evaluate(element => Number(getComputedStyle(element).opacity))).toBe(.14);
+  } finally {
+    await room.close();
+  }
+});
+
 test('mobile scenario stays one-column, readable and free of horizontal overflow', async ({ browser }) => {
   const hostContext = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, ignoreHTTPSErrors: true });
   const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, ignoreHTTPSErrors: true });
@@ -109,6 +138,10 @@ test('mobile scenario stays one-column, readable and free of horizontal overflow
     await expect(shell.locator('.apocalypse-title')).toBeVisible();
     await expect(shell.locator('.apocalypse-hero-image')).toBeVisible();
     await expect.poll(() => shell.locator('.apocalypse-hero-image').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+    expect(await shell.locator('.apocalypse-hero-pattern').evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThanOrEqual(.04);
+    const medallionBox = await shell.locator('.apocalypse-theme-mark').boundingBox();
+    expect(medallionBox.width).toBeGreaterThanOrEqual(56);
+    expect(medallionBox.width).toBeLessThanOrEqual(72);
     await expect(shell.locator('.apocalypse-metric')).toHaveCount(3);
     await expect(shell.locator('.apocalypse-content-card')).toHaveCount(3);
     const columns = await shell.locator('.apocalypse-content-grid').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length);
