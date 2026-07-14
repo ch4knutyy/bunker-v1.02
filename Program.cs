@@ -40,6 +40,7 @@ builder.Services.AddSingleton<OmniscientGmRoleService>();
 builder.Services.AddSingleton<OmniscientHiddenStateService>();
 builder.Services.AddSingleton<DirectorControlService>();
 builder.Services.AddSingleton<LobbyStartService>();
+builder.Services.AddSingleton<RoomGameSettingsService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 

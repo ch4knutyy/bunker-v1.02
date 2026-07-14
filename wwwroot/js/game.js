@@ -70,6 +70,13 @@ let directorCommandPending = false;
 let lobbyState = null;
 let lobbyStartPreview = null;
 let lobbyCommandPending = false;
+let lobbySettingsDraft = null;
+let lobbySettingsBaseRevision = 0;
+let lobbySettingsDirty = false;
+let lobbySettingsPending = false;
+let lobbySettingsOwnerId = '';
+let lobbySettingsActiveTab = 'basic';
+const lobbyLocalPresetStorageKey = 'bunker.lobbyGamePresets.v1';
 const pendingCharacteristicReveals = new Set();
 const pendingSpecialCardUses = new Set();
 const specialCardSelectionState = new Map();
@@ -465,6 +472,31 @@ Object.assign(uiTranslations.ru, {
 	lobbyRolePlayerHelp: 'Получает персонажа, голосует и участвует в угрозах.', lobbyRoleSpectatorHelp: 'Не получает персонажа, не голосует и не занимает место среди активных игроков.', lobbyRoleTechnicalHelp: 'Помогает управлять техническим состоянием комнаты без доступа к скрытым характеристикам.', lobbyRoleOmniscientHelp: 'Наблюдает за игрой, видит скрытое состояние и не участвует как игрок.',
 	lobbyBlockMinimum: 'Для старта нужны как минимум 2 активных игрока.', lobbyBlockReady: 'Не все подключённые участники подтвердили готовность.', lobbyBlockRole: 'Один или несколько участников имеют несовместимую роль.', lobbyBlockVoting: 'Нельзя начать игру во время активного голосования.', lobbyBlockThreat: 'Нельзя начать игру во время активной угрозы.', lobbyBlockHost: 'Начать игру может только текущий хост.', lobbyBlockFallback: 'Игру пока нельзя начать. Обновите состояние лобби.', lobbyPreviewReady: 'Проверка завершена: комната готова к старту.', lobbyPreviewBlocked: 'Проверка завершена: устраните препятствия ниже.'
 });
+
+Object.assign(uiTranslations.uk, {
+	lobbySetupTitle:'Налаштування гри', lobbyRevision:'Ревізія', lobbyUnsaved:'Незбережені зміни', lobbyPreset:'Пресет', lobbyPresetClassic:'Класичний', lobbyPresetCalm:'Спокійний', lobbyPresetDangerous:'Небезпечний', lobbyPresetHardcore:'Хардкор', lobbyPresetQuick:'Швидка гра', lobbyPresetLong:'Довга гра', lobbyPresetCustom:'Власний',
+	lobbyTabBasic:'Основне', lobbyTabThreats:'Загрози', lobbyTabRounds:'Раунди', lobbyTabAccess:'Доступ', lobbyMaxPlayers:'Максимум гравців', lobbyMinPlayers:'Мінімум гравців', lobbyBunkerCapacityMode:'Місткість бункера', lobbyAutomatic:'Автоматично', lobbyManual:'Вручну', lobbyRandomRange:'Випадковий діапазон', lobbyManualCapacity:'Місць', lobbyRangeMin:'Мінімум місць', lobbyRangeMax:'Максимум місць', lobbyStartingItems:'Стартові предмети', lobbySpecialCardsCount:'Спеціальних карт на гравця', lobbyApocalypseEnabled:'Апокаліпсис', lobbyBunkerEnabled:'Бункер', lobbySpecialCardsEnabled:'Спеціальні карти',
+	lobbyInteractiveRate:'Інтерактивні загрози', lobbyFirstThreatRound:'Перший раунд загрози', lobbyThreatFrequency:'Частота загроз', lobbyOnce:'Один раз', lobbyEveryOther:'Через раунд', lobbyEveryRound:'Щораунду', lobbyRandomRounds:'Випадково', lobbyMaxThreats:'Максимум загроз', lobbyUnlimited:'Без обмеження', lobbyThreatsEnabled:'Загрози увімкнено', lobbyAvoidThreatRepeats:'Не повторювати ID загроз', lobbyTimerDuration:'Таймер раунду', lobbyVotingStart:'Голосування з раунду', lobbyVotingFrequency:'Частота голосувань', lobbyBonusRound:'Бонусний інвентар у раунді', lobbyBonusCount:'Бонусних предметів', lobbyTimerEnabled:'Таймер увімкнено', lobbyTimerAutoStart:'Автостарт таймера', lobbyTimerPauseDisconnect:'Пауза при відключенні host', lobbyVotingEnabled:'Голосування увімкнено', lobbyBonusEnabled:'Бонусний інвентар',
+	lobbyReadyPolicy:'Політика готовності', lobbyAllReady:'Усі гравці', lobbyHostDecides:'Вирішує host', lobbyRoomPassword:'Пароль кімнати', lobbyPasswordPlaceholder:'Порожньо — вимкнути захист', lobbyPasswordApply:'Оновити пароль', lobbySpectatorsAllowed:'Дозволити спостерігачів', lobbyHostOverride:'Host може стартувати без усіх ready', lobbyResetReady:'Скидати ready після змін', lobbyLockJoins:'Заблокувати нові входи', lobbyPresetName:'Назва локального пресету', lobbyPresetSave:'Зберегти локально', lobbyPresetLoad:'Завантажити', lobbyPresetDelete:'Видалити', lobbyPresetExport:'Export JSON', lobbyPresetImport:'Import JSON', lobbyReset:'Скинути', lobbyResetClassic:'Класичний', lobbyApply:'Застосувати', lobbyAuditTitle:'Останні події лобі',
+	lobbySettingsApplied:'Налаштування застосовано.', lobbySettingsConflict:'Налаштування змінилися в іншій вкладці. Завантажено актуальні значення.', lobbySettingsInvalid:'Перевірте значення налаштувань.', lobbyPresetSaved:'Локальний пресет збережено.', lobbyPresetLoaded:'Пресет завантажено в чернетку.', lobbyPresetDeleted:'Локальний пресет видалено.', lobbyPresetImportOk:'JSON імпортовано в чернетку.', lobbyPresetImportError:'Некоректний або застарілий JSON-пресет.', lobbyPasswordUpdated:'Захист кімнати оновлено.', lobbyResetMemberReady:'Скинути ready', lobbyKickMember:'Видалити', lobbyKicked:'Host видалив вас із кімнати.', lobbyNoAudit:'Подій ще немає.', lobbySettingsReadOnly:'Налаштування доступні лише для перегляду.', lobbySummaryThreats:'Загрози', lobbySummaryTimer:'Таймер', lobbySummaryVoting:'Голосування', lobbySummaryBunker:'Бункер', lobbySummaryCards:'Карти', lobbyOff:'Вимкнено', lobbyFromRound:'з раунду'
+});
+Object.assign(uiTranslations.en, {
+	lobbySetupTitle:'Game setup', lobbyRevision:'Revision', lobbyUnsaved:'Unsaved changes', lobbyPreset:'Preset', lobbyPresetClassic:'Classic', lobbyPresetCalm:'Calm', lobbyPresetDangerous:'Dangerous', lobbyPresetHardcore:'Hardcore', lobbyPresetQuick:'Quick game', lobbyPresetLong:'Long game', lobbyPresetCustom:'Custom',
+	lobbyTabBasic:'Basic', lobbyTabThreats:'Threats', lobbyTabRounds:'Rounds', lobbyTabAccess:'Access', lobbyMaxPlayers:'Maximum players', lobbyMinPlayers:'Minimum players', lobbyBunkerCapacityMode:'Bunker capacity', lobbyAutomatic:'Automatic', lobbyManual:'Manual', lobbyRandomRange:'Random range', lobbyManualCapacity:'Seats', lobbyRangeMin:'Minimum seats', lobbyRangeMax:'Maximum seats', lobbyStartingItems:'Starting items', lobbySpecialCardsCount:'Special cards per player', lobbyApocalypseEnabled:'Apocalypse', lobbyBunkerEnabled:'Bunker', lobbySpecialCardsEnabled:'Special cards',
+	lobbyInteractiveRate:'Interactive threats', lobbyFirstThreatRound:'First threat round', lobbyThreatFrequency:'Threat frequency', lobbyOnce:'Once', lobbyEveryOther:'Every other round', lobbyEveryRound:'Every round', lobbyRandomRounds:'Random', lobbyMaxThreats:'Maximum threats', lobbyUnlimited:'Unlimited', lobbyThreatsEnabled:'Threats enabled', lobbyAvoidThreatRepeats:'Avoid repeated threat IDs', lobbyTimerDuration:'Round timer', lobbyVotingStart:'Voting from round', lobbyVotingFrequency:'Voting frequency', lobbyBonusRound:'Bonus items round', lobbyBonusCount:'Bonus item count', lobbyTimerEnabled:'Timer enabled', lobbyTimerAutoStart:'Auto-start timer', lobbyTimerPauseDisconnect:'Pause when host disconnects', lobbyVotingEnabled:'Voting enabled', lobbyBonusEnabled:'Bonus items',
+	lobbyReadyPolicy:'Readiness policy', lobbyAllReady:'All players', lobbyHostDecides:'Host decides', lobbyRoomPassword:'Room password', lobbyPasswordPlaceholder:'Empty disables protection', lobbyPasswordApply:'Update password', lobbySpectatorsAllowed:'Allow spectators', lobbyHostOverride:'Host may start without everyone ready', lobbyResetReady:'Reset readiness after changes', lobbyLockJoins:'Lock new joins', lobbyPresetName:'Local preset name', lobbyPresetSave:'Save locally', lobbyPresetLoad:'Load', lobbyPresetDelete:'Delete', lobbyPresetExport:'Export JSON', lobbyPresetImport:'Import JSON', lobbyReset:'Reset', lobbyResetClassic:'Classic', lobbyApply:'Apply', lobbyAuditTitle:'Recent lobby events',
+	lobbySettingsApplied:'Settings applied.', lobbySettingsConflict:'Settings changed in another tab. Current values were loaded.', lobbySettingsInvalid:'Check the settings values.', lobbyPresetSaved:'Local preset saved.', lobbyPresetLoaded:'Preset loaded into the draft.', lobbyPresetDeleted:'Local preset deleted.', lobbyPresetImportOk:'JSON imported into the draft.', lobbyPresetImportError:'Invalid or outdated JSON preset.', lobbyPasswordUpdated:'Room protection updated.', lobbyResetMemberReady:'Reset ready', lobbyKickMember:'Remove', lobbyKicked:'The host removed you from the room.', lobbyNoAudit:'No events yet.', lobbySettingsReadOnly:'Settings are read-only.', lobbySummaryThreats:'Threats', lobbySummaryTimer:'Timer', lobbySummaryVoting:'Voting', lobbySummaryBunker:'Bunker', lobbySummaryCards:'Cards', lobbyOff:'Off', lobbyFromRound:'from round'
+});
+Object.assign(uiTranslations.ru, {
+	lobbySetupTitle:'Настройки игры', lobbyRevision:'Ревизия', lobbyUnsaved:'Несохранённые изменения', lobbyPreset:'Пресет', lobbyPresetClassic:'Классический', lobbyPresetCalm:'Спокойный', lobbyPresetDangerous:'Опасный', lobbyPresetHardcore:'Хардкор', lobbyPresetQuick:'Быстрая игра', lobbyPresetLong:'Долгая игра', lobbyPresetCustom:'Свой',
+	lobbyTabBasic:'Основное', lobbyTabThreats:'Угрозы', lobbyTabRounds:'Раунды', lobbyTabAccess:'Доступ', lobbyMaxPlayers:'Максимум игроков', lobbyMinPlayers:'Минимум игроков', lobbyBunkerCapacityMode:'Вместимость бункера', lobbyAutomatic:'Автоматически', lobbyManual:'Вручную', lobbyRandomRange:'Случайный диапазон', lobbyManualCapacity:'Мест', lobbyRangeMin:'Минимум мест', lobbyRangeMax:'Максимум мест', lobbyStartingItems:'Стартовые предметы', lobbySpecialCardsCount:'Специальных карт на игрока', lobbyApocalypseEnabled:'Апокалипсис', lobbyBunkerEnabled:'Бункер', lobbySpecialCardsEnabled:'Специальные карты',
+	lobbyInteractiveRate:'Интерактивные угрозы', lobbyFirstThreatRound:'Первый раунд угрозы', lobbyThreatFrequency:'Частота угроз', lobbyOnce:'Один раз', lobbyEveryOther:'Через раунд', lobbyEveryRound:'Каждый раунд', lobbyRandomRounds:'Случайно', lobbyMaxThreats:'Максимум угроз', lobbyUnlimited:'Без ограничения', lobbyThreatsEnabled:'Угрозы включены', lobbyAvoidThreatRepeats:'Не повторять ID угроз', lobbyTimerDuration:'Таймер раунда', lobbyVotingStart:'Голосование с раунда', lobbyVotingFrequency:'Частота голосований', lobbyBonusRound:'Бонусный инвентарь в раунде', lobbyBonusCount:'Бонусных предметов', lobbyTimerEnabled:'Таймер включён', lobbyTimerAutoStart:'Автозапуск таймера', lobbyTimerPauseDisconnect:'Пауза при отключении host', lobbyVotingEnabled:'Голосование включено', lobbyBonusEnabled:'Бонусный инвентарь',
+	lobbyReadyPolicy:'Политика готовности', lobbyAllReady:'Все игроки', lobbyHostDecides:'Решает host', lobbyRoomPassword:'Пароль комнаты', lobbyPasswordPlaceholder:'Пусто — отключить защиту', lobbyPasswordApply:'Обновить пароль', lobbySpectatorsAllowed:'Разрешить наблюдателей', lobbyHostOverride:'Host может начать без всех ready', lobbyResetReady:'Сбрасывать ready после изменений', lobbyLockJoins:'Заблокировать новые входы', lobbyPresetName:'Название локального пресета', lobbyPresetSave:'Сохранить локально', lobbyPresetLoad:'Загрузить', lobbyPresetDelete:'Удалить', lobbyPresetExport:'Export JSON', lobbyPresetImport:'Import JSON', lobbyReset:'Сбросить', lobbyResetClassic:'Классический', lobbyApply:'Применить', lobbyAuditTitle:'Последние события лобби',
+	lobbySettingsApplied:'Настройки применены.', lobbySettingsConflict:'Настройки изменились в другой вкладке. Загружены актуальные значения.', lobbySettingsInvalid:'Проверьте значения настроек.', lobbyPresetSaved:'Локальный пресет сохранён.', lobbyPresetLoaded:'Пресет загружен в черновик.', lobbyPresetDeleted:'Локальный пресет удалён.', lobbyPresetImportOk:'JSON импортирован в черновик.', lobbyPresetImportError:'Некорректный или устаревший JSON-пресет.', lobbyPasswordUpdated:'Защита комнаты обновлена.', lobbyResetMemberReady:'Сбросить ready', lobbyKickMember:'Удалить', lobbyKicked:'Host удалил вас из комнаты.', lobbyNoAudit:'Событий пока нет.', lobbySettingsReadOnly:'Настройки доступны только для просмотра.', lobbySummaryThreats:'Угрозы', lobbySummaryTimer:'Таймер', lobbySummaryVoting:'Голосование', lobbySummaryBunker:'Бункер', lobbySummaryCards:'Карты', lobbyOff:'Выключено', lobbyFromRound:'с раунда'
+});
+Object.assign(uiTranslations.uk, { lobbyWarningCapacity:'Місткість бункера не менша за поточну кількість активних гравців.', lobbyWarningSpectators:'У кімнаті вже є спостерігачі, хоча нові ролі спостерігачів вимкнено.', lobbyWarningPlayers:'Поточна кількість гравців перевищує максимум.', lobbyAuditSettings:'Host застосував налаштування гри.', lobbyAuditReady:'Учасник змінив готовність.', lobbyAuditReadyReset:'Host скинув готовність учасника.', lobbyAuditRole:'Host змінив роль учасника.', lobbyAuditHost:'Передано роль host.', lobbyAuditKick:'Host видалив учасника.', lobbyAuditJoined:'Учасник приєднався до лобі.', lobbyAuditReconnected:'Учасник відновив з’єднання.', lobbyAuditLeft:'Учасник залишив лобі.', lobbyAuditPassword:'Host змінив захист кімнати.', lobbyAuditStarted:'Гру запущено з лобі.', lobbyAuditGeneric:'Оновлено стан лобі.' });
+Object.assign(uiTranslations.en, { lobbyWarningCapacity:'Bunker capacity is not lower than the current active-player count.', lobbyWarningSpectators:'Spectators are already present although new spectator roles are disabled.', lobbyWarningPlayers:'The current player count exceeds the maximum.', lobbyAuditSettings:'The host applied game settings.', lobbyAuditReady:'A member changed readiness.', lobbyAuditReadyReset:'The host reset a member’s readiness.', lobbyAuditRole:'The host changed a member role.', lobbyAuditHost:'The host role was transferred.', lobbyAuditKick:'The host removed a member.', lobbyAuditJoined:'A member joined the lobby.', lobbyAuditReconnected:'A member reconnected.', lobbyAuditLeft:'A member left the lobby.', lobbyAuditPassword:'The host changed room protection.', lobbyAuditStarted:'The game was started from the lobby.', lobbyAuditGeneric:'Lobby state updated.' });
+Object.assign(uiTranslations.ru, { lobbyWarningCapacity:'Вместимость бункера не меньше текущего количества активных игроков.', lobbyWarningSpectators:'В комнате уже есть наблюдатели, хотя новые роли наблюдателей отключены.', lobbyWarningPlayers:'Текущее количество игроков превышает максимум.', lobbyAuditSettings:'Host применил настройки игры.', lobbyAuditReady:'Участник изменил готовность.', lobbyAuditReadyReset:'Host сбросил готовность участника.', lobbyAuditRole:'Host изменил роль участника.', lobbyAuditHost:'Передана роль host.', lobbyAuditKick:'Host удалил участника.', lobbyAuditJoined:'Участник присоединился к лобби.', lobbyAuditReconnected:'Участник восстановил соединение.', lobbyAuditLeft:'Участник покинул лобби.', lobbyAuditPassword:'Host изменил защиту комнаты.', lobbyAuditStarted:'Игра запущена из лобби.', lobbyAuditGeneric:'Состояние лобби обновлено.' });
 
 Object.assign(uiTranslations.uk, {
 	cardExperience:'Досвід', cardAdditionalItem:'Додатково має', cardSeverity:'Тяжкість', cardTooltipLabel:'Пояснення характеристики',
@@ -1280,9 +1312,13 @@ function renderThreatPanel(threat) {
 	const panel = document.getElementById('threatPanel');
 	const content = panel?.querySelector('.panel-content');
 	if (!panel || !content) return;
+	const enabled = isLobbyConfiguredSystemEnabled('threatsEnabled');
+	panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none';
+	if (!enabled) { content.innerHTML = ''; updateScenarioSectionVisibility(); return; }
 	const isRevealed = !!currentRoundState?.threatRevealed && !!threat;
 	content.innerHTML = renderThreatScenario(buildThreatScenarioModel(threat, isRevealed));
 	panel.classList.toggle('threat-unknown', !isRevealed);
+	updateScenarioSectionVisibility();
 }
 
 function handleThreatHeroImageError(image) {
@@ -3087,8 +3123,16 @@ function registerSignalREvents() {
 		const version = Number(state?.stateVersion ?? state?.StateVersion ?? 0);
 		const currentVersion = Number(lobbyState?.stateVersion ?? lobbyState?.StateVersion ?? 0);
 		if (currentVersion && version < currentVersion) return;
+		syncLobbySettingsState(state);
 		lobbyState = state; lobbyStartPreview = null; renderLobbyState();
 		tryRenderRunningGameState();
+	});
+
+	connection.off("LobbyKicked");
+	connection.on("LobbyKicked", function () {
+		lobbySettingsDraft = null; lobbySettingsDirty = false;
+		alert(t('lobbyKicked'));
+		window.location.reload();
 	});
 
 	connection.off("OmniscientHiddenStateUpdated");
@@ -5758,7 +5802,12 @@ function renderApocalypseScenario(model) {
 function renderApocalypse(apocalypse) {
 	const container = document.getElementById('apocalypseContent');
 	if (!container) return;
+	const panel = document.getElementById('apocalypsePanel');
+	const enabled = isLobbyConfiguredSystemEnabled('apocalypseEnabled');
+	if (panel) { panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none'; }
+	if (!enabled) { container.innerHTML = ''; updateScenarioSectionVisibility(); return; }
 	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse));
+	updateScenarioSectionVisibility();
 }
 
 function handleApocalypseHeroImageError(image) {
@@ -6213,7 +6262,12 @@ function renderBunkerFacility(model) {
 function renderBunker(bunker) {
 	const container = document.getElementById('bunkerContent');
 	if (!container) return;
+	const panel = document.getElementById('bunkerPanel');
+	const enabled = isLobbyConfiguredSystemEnabled('bunkerScenarioEnabled');
+	if (panel) { panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none'; }
+	if (!enabled) { container.innerHTML = ''; updateScenarioSectionVisibility(); return; }
 	container.innerHTML = renderBunkerFacility(buildBunkerFacilityModel(bunker));
+	updateScenarioSectionVisibility();
 }
 
 function handleBunkerHeroImageError(image) {
@@ -7832,6 +7886,178 @@ function renderRoomPlayers() {
 }
 
 const lobbyGet = (object, camel, pascal) => object?.[camel] ?? object?.[pascal];
+const lobbySettingNumberKeys = new Set(['maxGameplayPlayers','minGameplayPlayers','manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','firstThreatRound','maxThreatsPerGame','roundTimerDurationSeconds','votingStartRound','specialCardsPerPlayer','bonusInventoryRound','bonusInventoryCount','startingInventoryCount']);
+const lobbySettingNullableNumberKeys = new Set(['manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','maxThreatsPerGame']);
+const lobbySettingBooleanKeys = new Set(['spectatorsAllowed','allowSpectatorsAfterStart','allowLateGameplayJoin','lockRoomOnStart','joinsLocked','hostCanStartWithoutAllReady','resetReadinessAfterSettingsChange','apocalypseEnabled','bunkerScenarioEnabled','threatsEnabled','avoidRepeatedThreats','roundTimerEnabled','autoStartRoundTimer','pauseTimerOnHostDisconnect','votingEnabled','specialCardsEnabled','bonusInventoryEnabled']);
+
+function normalizeLobbySettings(source) {
+	const get = key => source?.[key] ?? source?.[key.charAt(0).toUpperCase() + key.slice(1)];
+	return {
+		version:Number(get('version') ?? 1), preset:String(get('preset') ?? 'Classic'),
+		maxGameplayPlayers:Number(get('maxGameplayPlayers') ?? 12), minGameplayPlayers:Number(get('minGameplayPlayers') ?? 2),
+		spectatorsAllowed:Boolean(get('spectatorsAllowed') ?? true), allowSpectatorsAfterStart:Boolean(get('allowSpectatorsAfterStart') ?? false),
+		allowLateGameplayJoin:Boolean(get('allowLateGameplayJoin') ?? false), lockRoomOnStart:Boolean(get('lockRoomOnStart') ?? true), joinsLocked:Boolean(get('joinsLocked') ?? false),
+		readyRequirement:String(get('readyRequirement') ?? 'AllPlayers'), hostCanStartWithoutAllReady:Boolean(get('hostCanStartWithoutAllReady') ?? false), resetReadinessAfterSettingsChange:Boolean(get('resetReadinessAfterSettingsChange') ?? true),
+		bunkerCapacityMode:String(get('bunkerCapacityMode') ?? 'Automatic'), manualBunkerCapacity:get('manualBunkerCapacity') == null ? null : Number(get('manualBunkerCapacity')), randomBunkerCapacityMin:get('randomBunkerCapacityMin') == null ? null : Number(get('randomBunkerCapacityMin')), randomBunkerCapacityMax:get('randomBunkerCapacityMax') == null ? null : Number(get('randomBunkerCapacityMax')),
+		apocalypseEnabled:Boolean(get('apocalypseEnabled') ?? true), bunkerScenarioEnabled:Boolean(get('bunkerScenarioEnabled') ?? true),
+		threatsEnabled:Boolean(get('threatsEnabled') ?? true), interactiveThreatRate:String(get('interactiveThreatRate') ?? 'Rare'), firstThreatRound:Number(get('firstThreatRound') ?? 3), threatFrequency:String(get('threatFrequency') ?? 'OncePerGame'), maxThreatsPerGame:get('maxThreatsPerGame') == null ? null : Number(get('maxThreatsPerGame')), avoidRepeatedThreats:Boolean(get('avoidRepeatedThreats') ?? true),
+		roundTimerEnabled:Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds:Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer:Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect:Boolean(get('pauseTimerOnHostDisconnect') ?? false),
+		votingEnabled:Boolean(get('votingEnabled') ?? true), votingStartRound:Number(get('votingStartRound') ?? 3), votingFrequency:String(get('votingFrequency') ?? 'EveryRound'),
+		specialCardsEnabled:Boolean(get('specialCardsEnabled') ?? true), specialCardsPerPlayer:Number(get('specialCardsPerPlayer') ?? 1), bonusInventoryEnabled:Boolean(get('bonusInventoryEnabled') ?? true), bonusInventoryRound:Number(get('bonusInventoryRound') ?? 3), bonusInventoryCount:Number(get('bonusInventoryCount') ?? 1), startingInventoryCount:Number(get('startingInventoryCount') ?? 1), characterGenerationMode:String(get('characterGenerationMode') ?? 'Classic')
+	};
+}
+
+function isLobbyConfiguredSystemEnabled(key) {
+	const source = lobbyGet(lobbyState, 'settings', 'Settings');
+	return !source || normalizeLobbySettings(source)[key] !== false;
+}
+
+function updateScenarioSectionVisibility() {
+	const section = document.querySelector('#gameSection > .scenario-immersive-section');
+	if (!section) return;
+	const anyVisible = ['apocalypsePanel','bunkerPanel','threatPanel'].some(id => document.getElementById(id)?.style.display !== 'none');
+	section.hidden = !anyVisible; section.style.display = anyVisible ? '' : 'none';
+}
+
+function lobbyAmCurrentHost(state = lobbyState) {
+	const meId = getMyStablePlayerId();
+	return (lobbyGet(state, 'members', 'Members') || []).some(member => lobbyGet(member, 'playerId', 'PlayerId') === meId && lobbyGet(member, 'isCurrentHost', 'IsCurrentHost'));
+}
+
+function syncLobbySettingsState(state) {
+	const hostNow = lobbyAmCurrentHost(state); const ownerId = getMyStablePlayerId();
+	const revision = Number(lobbyGet(state, 'settingsRevision', 'SettingsRevision') || 1);
+	const canonical = lobbyGet(state, 'settings', 'Settings');
+	if (!hostNow) { lobbySettingsDraft = null; lobbySettingsDirty = false; lobbySettingsOwnerId = ''; lobbySettingsBaseRevision = revision; return; }
+	if (!lobbySettingsDraft || lobbySettingsOwnerId !== ownerId || lobbySettingsBaseRevision !== revision) {
+		lobbySettingsDraft = normalizeLobbySettings(canonical); lobbySettingsBaseRevision = revision; lobbySettingsDirty = false; lobbySettingsOwnerId = ownerId;
+	}
+}
+
+function lobbyPresetLabel(value) { return t({ Classic:'lobbyPresetClassic', Calm:'lobbyPresetCalm', Dangerous:'lobbyPresetDangerous', Hardcore:'lobbyPresetHardcore', Quick:'lobbyPresetQuick', Long:'lobbyPresetLong', Custom:'lobbyPresetCustom' }[value] || 'lobbyPresetCustom'); }
+function lobbyFrequencyLabel(value) { return t({ OncePerGame:'lobbyOnce', EveryOtherRound:'lobbyEveryOther', EveryRound:'lobbyEveryRound', RandomEligibleRounds:'lobbyRandomRounds', EveryTwoRounds:'lobbyEveryOther' }[value] || 'lobbyOnce'); }
+function lobbyCapacityLabel(settings) {
+	if (settings.bunkerCapacityMode === 'Manual') return `${t('lobbyManual')}: ${settings.manualBunkerCapacity ?? '—'}`;
+	if (settings.bunkerCapacityMode === 'RandomRange') return `${t('lobbyRandomRange')}: ${settings.randomBunkerCapacityMin ?? '—'}–${settings.randomBunkerCapacityMax ?? '—'}`;
+	return t('lobbyAutomatic');
+}
+function setLobbySettingsFeedback(key, error = false) {
+	const element = document.getElementById('lobbySettingsFeedback'); if (!element) return;
+	element.textContent = key ? t(key) : ''; element.className = `lobby-settings-feedback${key ? error ? ' error' : ' success' : ''}`;
+}
+function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive:'lobbyWarningCapacity', spectators_present:'lobbyWarningSpectators', player_count_exceeds_max:'lobbyWarningPlayers' }[code] || 'lobbySettingsInvalid'); }
+function lobbyAuditLabel(action) { return t({ lobby_settings_applied:'lobbyAuditSettings', lobby_readiness_changed:'lobbyAuditReady', lobby_readiness_reset:'lobbyAuditReadyReset', lobby_role_changed:'lobbyAuditRole', host_transfer:'lobbyAuditHost', lobby_player_kicked:'lobbyAuditKick', lobby_player_joined:'lobbyAuditJoined', lobby_player_reconnected:'lobbyAuditReconnected', lobby_player_left:'lobbyAuditLeft', lobby_password_changed:'lobbyAuditPassword', game_started_from_lobby:'lobbyAuditStarted' }[action] || 'lobbyAuditGeneric'); }
+
+function renderLobbyGameSetup() {
+	const state = lobbyState; const setup = document.getElementById('lobbyGameSetup'); if (!state || !setup) return;
+	const host = lobbyAmCurrentHost(state); const canonical = normalizeLobbySettings(lobbyGet(state, 'settings', 'Settings'));
+	if (host && !lobbySettingsDraft) syncLobbySettingsState(state);
+	const displayed = host && lobbySettingsDraft ? lobbySettingsDraft : canonical;
+	const revision = Number(lobbyGet(state, 'settingsRevision', 'SettingsRevision') || 1);
+	const revisionElement = document.getElementById('lobbySettingsRevision'); if (revisionElement) revisionElement.textContent = `${t('lobbyRevision')}: ${revision}`;
+	const dirty = document.getElementById('lobbySettingsDirty'); if (dirty) dirty.textContent = host && lobbySettingsDirty ? t('lobbyUnsaved') : '';
+	const editor = document.getElementById('lobbySettingsHostEditor'); const readOnly = document.getElementById('lobbySettingsReadOnly');
+	if (editor) editor.hidden = !host; if (readOnly) readOnly.hidden = host;
+	const chipValues = [
+		`${lobbyPresetLabel(displayed.preset)}`,
+		`${displayed.minGameplayPlayers}–${displayed.maxGameplayPlayers} ${t('players').toLowerCase()}`,
+		`${t('lobbySummaryBunker')}: ${lobbyCapacityLabel(displayed)}`,
+		`${t('lobbySummaryThreats')}: ${displayed.threatsEnabled ? `${displayed.interactiveThreatRate} ${displayed.firstThreatRound}+` : t('lobbyOff')}`,
+		`${t('lobbySummaryTimer')}: ${displayed.roundTimerEnabled ? `${Math.round(displayed.roundTimerDurationSeconds / 60)} min` : t('lobbyOff')}`,
+		`${t('lobbySummaryVoting')}: ${displayed.votingEnabled ? `${t('lobbyFromRound')} ${displayed.votingStartRound}` : t('lobbyOff')}`,
+		`${t('lobbySummaryCards')}: ${displayed.specialCardsEnabled ? displayed.specialCardsPerPlayer : 0}`
+	];
+	const chips = document.getElementById('lobbySettingsChips'); if (chips) chips.innerHTML = chipValues.map(value => `<span class="lobby-settings-chip">${escapeHtml(String(value))}</span>`).join('');
+	const warnings = lobbyGet(state, 'settingsWarnings', 'SettingsWarnings') || []; const warningsElement = document.getElementById('lobbySettingsWarnings');
+	if (warningsElement) warningsElement.innerHTML = warnings.map(warning => `<div class="lobby-settings-warning">${escapeHtml(lobbyWarningText(lobbyGet(warning,'code','Code')))}</div>`).join('');
+
+	if (host) {
+		const preset = document.getElementById('lobbyPresetSelect');
+		if (preset && preset.dataset.language !== getCurrentLanguage()) {
+			preset.innerHTML = ['Classic','Calm','Dangerous','Hardcore','Quick','Long','Custom'].map(value => `<option value="${value}">${escapeHtml(lobbyPresetLabel(value))}</option>`).join(''); preset.dataset.language = getCurrentLanguage();
+		}
+		setup.querySelectorAll('.lobby-setting-input[data-setting]').forEach(control => {
+			const key = control.dataset.setting; const value = displayed[key];
+			if (control.type === 'checkbox') control.checked = Boolean(value); else control.value = value ?? '';
+			control.disabled = lobbySettingsPending;
+		});
+		const mode = displayed.bunkerCapacityMode;
+		for (const [id, visible] of [['lobbyManualCapacityRow',mode === 'Manual'],['lobbyRandomCapacityMinRow',mode === 'RandomRange'],['lobbyRandomCapacityMaxRow',mode === 'RandomRange']]) { const row = document.getElementById(id); if (row) row.hidden = !visible; }
+		setup.querySelectorAll('[data-settings-tab]').forEach(button => { const active = button.dataset.settingsTab === lobbySettingsActiveTab; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); });
+		setup.querySelectorAll('[data-settings-pane]').forEach(pane => { const active = pane.dataset.settingsPane === lobbySettingsActiveTab; pane.classList.toggle('active', active); pane.hidden = !active; });
+		for (const id of ['lobbySettingsApply','lobbySettingsReset','lobbySettingsClassic','lobbyPresetSave','lobbyPresetLoad','lobbyPresetDelete','lobbyPresetExport','lobbyPresetImport','lobbyPasswordApply']) { const button = document.getElementById(id); if (button) button.disabled = lobbySettingsPending || (id === 'lobbySettingsApply' && !lobbySettingsDirty); }
+		renderLobbyLocalPresetOptions();
+	} else if (readOnly) {
+		const rows = [[t('lobbyPreset'),lobbyPresetLabel(canonical.preset)],[t('lobbyBunkerCapacityMode'),lobbyCapacityLabel(canonical)],[t('lobbySummaryThreats'),canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')],[t('lobbySummaryTimer'),canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')],[t('lobbySummaryVoting'),canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')],[t('lobbySpecialCardsCount'),canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
+		readOnly.innerHTML = rows.map(([label,value]) => `<article><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
+	}
+	const events = lobbyGet(state, 'recentEvents', 'RecentEvents') || []; const audit = document.getElementById('lobbyAuditEvents');
+	if (audit) audit.innerHTML = events.length ? events.map(event => `<div class="lobby-audit-event"><time>${escapeHtml(new Date(lobbyGet(event,'occurredAtUtc','OccurredAtUtc')).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}))}</time><span>${escapeHtml(lobbyAuditLabel(lobbyGet(event,'actionType','ActionType')))}</span></div>`).join('') : `<p>${escapeHtml(t('lobbyNoAudit'))}</p>`;
+}
+
+function updateLobbySettingsDraft(control) {
+	if (!lobbySettingsDraft || !control?.dataset?.setting) return;
+	const key = control.dataset.setting;
+	if (key === 'preset') { loadLobbyServerPreset(control.value); return; }
+	let value = control.type === 'checkbox' ? control.checked : control.value;
+	if (lobbySettingNumberKeys.has(key)) value = value === '' && lobbySettingNullableNumberKeys.has(key) ? null : Number(value);
+	lobbySettingsDraft[key] = value;
+	if (key === 'specialCardsPerPlayer') lobbySettingsDraft.specialCardsEnabled = Number(value) > 0;
+	lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback(''); renderLobbyGameSetup();
+}
+
+async function loadLobbyServerPreset(preset) {
+	if (lobbySettingsPending || preset === 'Custom') return;
+	lobbySettingsPending = true; renderLobbyGameSetup();
+	try { lobbySettingsDraft = normalizeLobbySettings(await connection.invoke('GetLobbyGamePreset', preset)); lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); }
+	catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); }
+	finally { lobbySettingsPending = false; renderLobbyGameSetup(); }
+}
+
+function lobbySettingsHubPayload(settings) {
+	const enumValue = (value, values) => Math.max(0, values.indexOf(value));
+	return { ...settings,
+		preset:enumValue(settings.preset,['Classic','Calm','Dangerous','Hardcore','Quick','Long','Custom']),
+		readyRequirement:enumValue(settings.readyRequirement,['AllPlayers','HostDecision']),
+		bunkerCapacityMode:enumValue(settings.bunkerCapacityMode,['Automatic','Manual','RandomRange']),
+		interactiveThreatRate:enumValue(settings.interactiveThreatRate,['Off','Rare','Standard','Often','Always']),
+		threatFrequency:enumValue(settings.threatFrequency,['OncePerGame','EveryOtherRound','EveryRound','RandomEligibleRounds']),
+		votingFrequency:enumValue(settings.votingFrequency,['EveryRound','EveryTwoRounds']), characterGenerationMode:0
+	};
+}
+
+async function applyLobbySettings() {
+	if (!lobbySettingsDraft || !lobbySettingsDirty || lobbySettingsPending) return;
+	lobbySettingsPending = true; renderLobbyGameSetup();
+	try {
+		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision:lobbySettingsBaseRevision, commandId:crypto.randomUUID(), settings:lobbySettingsHubPayload(lobbySettingsDraft) });
+		if (!(result?.success ?? result?.Success)) {
+			const code = result?.errorCode ?? result?.ErrorCode; setLobbySettingsFeedback(code === 'settings_revision_conflict' ? 'lobbySettingsConflict' : 'lobbySettingsInvalid', true);
+			lobbySettingsDraft = normalizeLobbySettings(result?.settings ?? result?.Settings); lobbySettingsBaseRevision = Number(result?.settingsRevision ?? result?.SettingsRevision ?? lobbySettingsBaseRevision); lobbySettingsDirty = false;
+		} else { lobbySettingsDirty = false; setLobbySettingsFeedback('lobbySettingsApplied'); }
+	} catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); }
+	finally { lobbySettingsPending = false; renderLobbyGameSetup(); }
+}
+
+function readLobbyLocalPresets() { try { const value = JSON.parse(localStorage.getItem(lobbyLocalPresetStorageKey) || '{}'); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch (_) { return {}; } }
+function writeLobbyLocalPresets(value) { localStorage.setItem(lobbyLocalPresetStorageKey, JSON.stringify(value)); }
+function renderLobbyLocalPresetOptions() { const select = document.getElementById('lobbyLocalPresetSelect'); if (!select) return; const value = select.value; const presets = readLobbyLocalPresets(); select.innerHTML = Object.keys(presets).sort().map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join(''); if (presets[value]) select.value = value; }
+function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0,40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version:1, settings:normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
+function loadLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; const entry = readLobbyLocalPresets()[name]; if (!entry || entry.version !== 1) return setLobbySettingsFeedback('lobbyPresetImportError', true); lobbySettingsDraft = normalizeLobbySettings(entry.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); renderLobbyGameSetup(); }
+function deleteLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; if (!name) return; const presets = readLobbyLocalPresets(); delete presets[name]; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetDeleted'); }
+function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema:'bunker-room-game-settings', version:1, name, settings:normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'})); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi,'-')}.json`; link.click(); URL.revokeObjectURL(url); }
+async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || data?.settings?.version !== 1) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
+
+async function updateLobbyPassword() { if (lobbySettingsPending) return; lobbySettingsPending = true; renderLobbyGameSetup(); try { await connection.invoke('SetLobbyPassword', document.getElementById('lobbyPasswordInput')?.value || null, crypto.randomUUID()); document.getElementById('lobbyPasswordInput').value = ''; setLobbySettingsFeedback('lobbyPasswordUpdated'); } catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); } finally { lobbySettingsPending = false; renderLobbyGameSetup(); } }
+async function resetLobbyMemberReady(playerId) { if (lobbyCommandPending) return; lobbyCommandPending = true; try { await connection.invoke('ResetLobbyReady', playerId, crypto.randomUUID()); } finally { lobbyCommandPending = false; } }
+async function kickLobbyMember(playerId) { if (lobbyCommandPending || !confirm(t('lobbyKickMember') + '?')) return; lobbyCommandPending = true; try { await connection.invoke('KickLobbyPlayer', playerId, crypto.randomUUID()); } finally { lobbyCommandPending = false; } }
+
+function bindLobbySettingsControls() {
+	const setup = document.getElementById('lobbyGameSetup'); if (!setup || setup.dataset.bound === 'true') return; setup.dataset.bound = 'true';
+	setup.addEventListener('input', event => { if (event.target.matches('.lobby-setting-input') && event.target.tagName === 'INPUT' && event.target.type !== 'checkbox') updateLobbySettingsDraft(event.target); });
+	setup.addEventListener('change', event => { if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
+	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; renderLobbyGameSetup(); return; } const actions = { lobbySettingsApply:applyLobbySettings, lobbySettingsReset:()=>{ lobbySettingsDraft=normalizeLobbySettings(lobbyGet(lobbyState,'settings','Settings')); lobbySettingsDirty=false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic:()=>loadLobbyServerPreset('Classic'), lobbyPresetSave:saveLobbyLocalPreset, lobbyPresetLoad:loadLobbyLocalPreset, lobbyPresetDelete:deleteLobbyLocalPreset, lobbyPresetExport:exportLobbyPreset, lobbyPresetImport:()=>document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply:updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
+}
 function isLobbyRunning() {
 	const lifecycle = lobbyGet(lobbyState, 'lifecycle', 'Lifecycle');
 	const roomState = currentRoom?.state || currentRoom?.State;
@@ -7854,7 +8080,7 @@ function localizeLobbyLifecycle(value) { return t({ Lobby: 'lobbyLifecycleLobby'
 function localizeLobbyRole(value) { return t({ HostPlayer: 'lobbyRoleHostPlayer', Player: 'lobbyRolePlayer', Spectator: 'lobbyRoleSpectator', TechnicalGm: 'lobbyRoleTechnicalGm', OmniscientGm: 'lobbyRoleOmniscientGm' }[value] || 'lobbyRolePlayer'); }
 function lobbyRoleHelp(value) { return t(value === 'Spectator' ? 'lobbyRoleSpectatorHelp' : value === 'TechnicalGm' ? 'lobbyRoleTechnicalHelp' : value === 'OmniscientGm' ? 'lobbyRoleOmniscientHelp' : 'lobbyRolePlayerHelp'); }
 function localizeLobbyBlocker(code) {
-	const key = { minimum_gameplay_players: 'lobbyBlockMinimum', connected_members_not_ready: 'lobbyBlockReady', invalid_lobby_role: 'lobbyBlockRole', active_voting: 'lobbyBlockVoting', active_threat: 'lobbyBlockThreat', not_current_host: 'lobbyBlockHost', host_missing: 'lobbyBlockHost' }[code];
+	const key = { minimum_gameplay_players: 'lobbyBlockMinimum', maximum_gameplay_players:'lobbyWarningPlayers', connected_members_not_ready: 'lobbyBlockReady', invalid_lobby_role: 'lobbyBlockRole', active_voting: 'lobbyBlockVoting', active_threat: 'lobbyBlockThreat', not_current_host: 'lobbyBlockHost', host_missing: 'lobbyBlockHost', bunker_capacity_exceeds_players:'lobbyWarningCapacity', settings_revision_conflict:'lobbySettingsConflict' }[code];
 	return t(key || 'lobbyBlockFallback');
 }
 function renderLobbyPreviewSummary(failed = false) {
@@ -7866,36 +8092,38 @@ function renderLobbyPreviewSummary(failed = false) {
 function renderLobbyState() {
 	const state = lobbyState; if (!state) return;
 	document.querySelectorAll('[data-lobby-i18n]').forEach(element => { element.textContent = t(element.dataset.lobbyI18n); });
+	document.querySelectorAll('[data-lobby-i18n-placeholder]').forEach(element => { element.placeholder = t(element.dataset.lobbyI18nPlaceholder); });
 	const lifecycle = lobbyGet(state, 'lifecycle', 'Lifecycle') || 'Lobby';
 	const members = lobbyGet(state, 'members', 'Members') || []; const connectedCount = lobbyGet(state, 'totalConnectedMembers', 'TotalConnectedMembers') || 0;
-	const readyCount = lobbyGet(state, 'readyCount', 'ReadyCount') || 0; const gameplayCount = lobbyGet(state, 'gameplayPlayerCount', 'GameplayPlayerCount') || 0;
+	const readyCount = lobbyGet(state, 'readyCount', 'ReadyCount') || 0; const readyRequiredCount = lobbyGet(state, 'readyRequiredCount', 'ReadyRequiredCount') || 0; const gameplayCount = lobbyGet(state, 'gameplayPlayerCount', 'GameplayPlayerCount') || 0;
 	const meId = getMyStablePlayerId(); const me = members.find(member => lobbyGet(member, 'playerId', 'PlayerId') === meId);
+	isHost = Boolean(lobbyGet(me, 'isCurrentHost', 'IsCurrentHost'));
 	const focusedKey = document.activeElement?.dataset?.lobbyFocus || null;
 	const summary = document.getElementById('lobbySummary');
 	if (summary) summary.innerHTML = [
 		[t('lobbyActivePlayers'), gameplayCount], [t('lobbySpectators'), lobbyGet(state, 'spectatorCount', 'SpectatorCount') || 0],
-		[t('lobbyReadySummary'), `${readyCount} ${getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із'} ${connectedCount}`], [t('lobbyRoomState'), localizeLobbyLifecycle(lifecycle)]
+		[t('lobbyReadySummary'), `${readyCount} ${getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із'} ${readyRequiredCount}`], [t('lobbyRoomState'), localizeLobbyLifecycle(lifecycle)]
 	].map(([label, value]) => `<article class="lobby-summary-card"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	const list = document.getElementById('lobbyMembers');
 	if (list) list.innerHTML = members.map(member => {
 		const id = lobbyGet(member, 'playerId', 'PlayerId'); const role = lobbyGet(member, 'role', 'Role'); const host = lobbyGet(member, 'isCurrentHost', 'IsCurrentHost');
-		const ready = lobbyGet(member, 'isReady', 'IsReady'); const connected = lobbyGet(member, 'isConnected', 'IsConnected'); const self = id === meId;
+		const ready = lobbyGet(member, 'isReady', 'IsReady'); const connected = lobbyGet(member, 'isConnected', 'IsConnected'); const self = id === meId; const gameplay = lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant');
 		const gmRole = lobbyGet(member, 'isTechnicalGm', 'IsTechnicalGm') || lobbyGet(member, 'isOmniscientGm', 'IsOmniscientGm');
 		return `<article class="lobby-member-card ${ready ? 'is-ready' : ''}" data-player-id="${escapeHtml(String(id))}">
                 <header class="lobby-member-header"><strong>${escapeHtml(String(lobbyGet(member, 'displayName', 'DisplayName') || ''))}</strong><div class="lobby-badges"><span class="lobby-role-badge">${escapeHtml(localizeLobbyRole(role))}</span>${host ? `<span class="lobby-host-badge">${t('lobbyHostBadge')}</span>` : ''}<span class="lobby-connection-indicator ${connected ? 'online' : 'offline'}" aria-label="${connected ? t('lobbyConnected') : t('lobbyDisconnected')}"></span></div></header>
                 <div class="lobby-status-row"><span>${connected ? t('lobbyConnected') : t('lobbyDisconnected')}</span><span class="${ready ? 'lobby-ready-status' : 'lobby-not-ready-status'}">${ready ? t('lobbyReady') : t('lobbyNotReady')}</span></div>
-                ${self ? `<button id="lobbyReadyButton" type="button" class="btn-success lobby-self-ready lobby-command" data-lobby-focus="ready-${escapeHtml(String(id))}" onclick="toggleLobbyReady()" ${lobbyCommandPending || lifecycle !== 'Lobby' ? 'disabled' : ''}>${ready ? t('lobbyCancelReady') : t('lobbyIAmReady')}</button>` : ''}
-                ${isHost && lifecycle === 'Lobby' && !gmRole ? `<div class="lobby-host-controls"><div class="lobby-role-control"><span>${t('lobbyRoleLabel')}</span><span class="characteristic-with-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(lobbyRoleHelp(role))}">?</button><span class="tooltip-content">${escapeHtml(lobbyRoleHelp(role))}</span></span></div><div class="lobby-segmented"><button class="lobby-command ${role === 'Player' || role === 'HostPlayer' ? 'active' : ''}" data-lobby-focus="player-${escapeHtml(String(id))}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', false)">${t('lobbyRolePlayer')}</button><button class="lobby-command ${role === 'Spectator' ? 'active' : ''}" data-lobby-focus="spectator-${escapeHtml(String(id))}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', true)">${t('lobbyRoleSpectator')}</button></div>${!host ? `<button class="btn-secondary lobby-transfer-host lobby-command" data-lobby-focus="host-${escapeHtml(String(id))}" onclick="transferLobbyHost('${escapeHtml(String(id))}')">${t('lobbyTransferHost')}</button>` : ''}</div>` : ''}
+                ${self && gameplay ? `<button id="lobbyReadyButton" type="button" class="btn-success lobby-self-ready lobby-command" data-lobby-focus="ready-${escapeHtml(String(id))}" onclick="toggleLobbyReady()" ${lobbyCommandPending || lifecycle !== 'Lobby' ? 'disabled' : ''}>${ready ? t('lobbyCancelReady') : t('lobbyIAmReady')}</button>` : ''}
+                ${isHost && lifecycle === 'Lobby' && !gmRole ? `<div class="lobby-host-controls"><div class="lobby-role-control"><span>${t('lobbyRoleLabel')}</span><span class="characteristic-with-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(lobbyRoleHelp(role))}">?</button><span class="tooltip-content">${escapeHtml(lobbyRoleHelp(role))}</span></span></div><div class="lobby-segmented"><button class="lobby-command ${role === 'Player' || role === 'HostPlayer' ? 'active' : ''}" data-lobby-focus="player-${escapeHtml(String(id))}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', false)">${t('lobbyRolePlayer')}</button><button class="lobby-command ${role === 'Spectator' ? 'active' : ''}" data-lobby-focus="spectator-${escapeHtml(String(id))}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', true)">${t('lobbyRoleSpectator')}</button></div>${!host ? `<div class="lobby-member-actions"><button class="btn-secondary lobby-command" data-lobby-focus="reset-${escapeHtml(String(id))}" onclick="resetLobbyMemberReady('${escapeHtml(String(id))}')">${t('lobbyResetMemberReady')}</button><button class="btn-danger lobby-command" data-lobby-focus="kick-${escapeHtml(String(id))}" onclick="kickLobbyMember('${escapeHtml(String(id))}')">${t('lobbyKickMember')}</button></div><button class="btn-secondary lobby-transfer-host lobby-command" data-lobby-focus="host-${escapeHtml(String(id))}" onclick="transferLobbyHost('${escapeHtml(String(id))}')">${t('lobbyTransferHost')}</button>` : ''}</div>` : ''}
             </article>`;
 	}).join('');
 	if (focusedKey) [...document.querySelectorAll('[data-lobby-focus]')].find(element => element.dataset.lobbyFocus === focusedKey)?.focus({ preventScroll: true });
 	window.reinitTooltips?.();
 	const blockers = lobbyGet(state, 'blockers', 'Blockers') || []; const blockersEl = document.getElementById('lobbyBlockers');
 	if (blockersEl) blockersEl.innerHTML = blockers.map(blocker => `<div class="lobby-blocker-row"><span aria-hidden="true">!</span><p>${escapeHtml(localizeLobbyBlocker(blocker))}</p></div>`).join('');
-	const readyProgress = document.getElementById('lobbyReadyProgress'); if (readyProgress) readyProgress.textContent = `${t('lobbyReadyProgress')}: ${readyCount} ${getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із'} ${connectedCount}`;
-	const gameplayProgress = document.getElementById('lobbyGameplayProgress'); if (gameplayProgress) gameplayProgress.textContent = `${t('lobbyGameplayProgress')}: ${gameplayCount} ${getCurrentLanguage() === 'en' ? 'of minimum' : getCurrentLanguage() === 'ru' ? 'из минимум' : 'із мінімум'} 2`;
+	const readyProgress = document.getElementById('lobbyReadyProgress'); if (readyProgress) readyProgress.textContent = `${t('lobbyReadyProgress')}: ${readyCount} ${getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із'} ${readyRequiredCount}`;
+	const settings = normalizeLobbySettings(lobbyGet(state,'settings','Settings')); const gameplayProgress = document.getElementById('lobbyGameplayProgress'); if (gameplayProgress) gameplayProgress.textContent = `${t('lobbyGameplayProgress')}: ${gameplayCount} ${getCurrentLanguage() === 'en' ? 'of minimum' : getCurrentLanguage() === 'ru' ? 'из минимум' : 'із мінімум'} ${settings.minGameplayPlayers}`;
 	const roomCode = document.getElementById('lobbyRoomCode'); if (roomCode) roomCode.textContent = `${t('lobbyRoomCode')}: ${currentRoom?.id || currentRoom?.Id || '—'}`;
-	const capacity = document.getElementById('lobbyMemberCapacity'); if (capacity) capacity.textContent = `${t('lobbyParticipants')}: ${members.length} / ${currentRoom?.maxPlayers || currentRoom?.MaxPlayers || 12}`;
+	const capacity = document.getElementById('lobbyMemberCapacity'); if (capacity) capacity.textContent = `${t('lobbyParticipants')}: ${gameplayCount} / ${settings.maxGameplayPlayers}`;
 	const previewButton = document.getElementById('lobbyStartPreviewButton'); if (previewButton) { previewButton.style.display = isHost && lifecycle === 'Lobby' ? '' : 'none'; previewButton.disabled = lobbyCommandPending; }
 	const canApplyStart = !!lobbyStartPreview?.canStart && !!lobbyGet(state, 'canStart', 'CanStart');
 	['startGameBtn', 'lobbyStartPrimaryButton'].forEach(id => { const button = document.getElementById(id); if (!button) return; button.style.display = isHost && lifecycle === 'Lobby' ? 'inline-flex' : 'none'; button.disabled = lobbyCommandPending || !canApplyStart; button.style.pointerEvents = button.disabled ? 'none' : 'auto'; button.textContent = t('startGame'); });
@@ -7907,6 +8135,7 @@ function renderLobbyState() {
 	const roomLobby = document.getElementById('roomLobby'); const game = document.getElementById('gameSection'); const mine = document.getElementById('myPlayerSection');
 	if (lifecycle === 'Lobby') { if (roomLobby) roomLobby.style.display = 'block'; if (game) game.style.display = 'none'; if (mine) mine.style.display = 'none'; }
 	else if (lifecycle === 'Running') { if (roomLobby) roomLobby.style.display = 'none'; if (game) game.style.display = 'block'; if (mine) mine.style.display = lobbyGet(me, 'isGameplayParticipant', 'IsGameplayParticipant') ? 'block' : 'none'; }
+	bindLobbySettingsControls(); renderLobbyGameSetup();
 	renderLobbyPreviewSummary();
 }
 
@@ -8237,10 +8466,11 @@ function renderMySpecialCards(player) {
 	captureSpecialCardSelections();
 	const cards = normalizeSpecialCards(player?.specialCards || player?.SpecialCards, player?.specialCard || player?.SpecialCard);
 	if (cards.length === 0) {
-		container.innerHTML = `<p class="special-cards-empty">${t('noData')}</p>`;
+		section.hidden = true; section.style.display = 'none'; container.innerHTML = '';
 		return;
 	}
 
+	section.hidden = false; section.style.display = '';
 	container.innerHTML = cards.map((card, index) => renderSpecialCard(buildSpecialCardModel(card, index))).join('');
 	renderedSpecialCardKeys = cards.map((card, index) => getSpecialCardSelectionKey(card, index));
 	window.reinitTooltips?.();

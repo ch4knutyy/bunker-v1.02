@@ -430,41 +430,25 @@ namespace Bunker.Hubs
                 completedRound,
                 roundState = BuildRoundState(room)
             });
+            _gameTimerService.Stop(room);
+            room.VotingReadyResponses.Clear();
 
-            if (completedRound < 3)
+            var threatTriggered = false;
+            if (ShouldTriggerThreat(room, completedRound))
             {
-                RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
-                room.CurrentRound = completedRound + 1;
-                room.CurrentRoundReveals.Clear();
-                room.VotingReadyResponses.Clear();
-                room.CurrentPhase = GamePhase.RoundReveal;
-
-                var nextRoundState = BuildRoundState(room);
-                await Clients.Group(roomId).SendAsync("RoundAdvanced", new
-                {
-                    completedRound,
-                    currentRound = room.CurrentRound,
-                    roundState = nextRoundState
-                });
-                await Clients.Group(roomId).SendAsync("RoundStateUpdated", nextRoundState);
-
-                _logger.LogInformation("Раунд {CompletedRound} завершено в кімнаті {RoomName}, стартував раунд {CurrentRound}", completedRound, room.Name, room.CurrentRound);
-                return;
-            }
-
-            if (completedRound == 3)
-            {
-                room.VotingReadyResponses.Clear();
                 lock (room.ThreatSyncRoot)
                 {
-                    var newlyRevealed = room.CurrentThreat == null;
-                    room.CurrentThreat ??= DrawThreatForRound(room, completedRound);
+                    room.CurrentThreat = DrawThreatForRound(room, completedRound);
+                    room.ThreatState = null;
                     room.IsThreatRevealed = true;
                     room.ThreatRevealedAtRound = completedRound;
+                    room.ThreatsTriggeredCount++;
+                    room.ThreatRoundsTriggered.Add(completedRound);
+                    if (!string.IsNullOrWhiteSpace(room.CurrentThreat?.Id)) room.TriggeredThreatIds.Add(room.CurrentThreat.Id);
                     EnsureRadiationThreatState(room);
                     room.CurrentPhase = GamePhase.Threat;
-                    if (newlyRevealed)
-                        _threatAudit.Append(room, ThreatAuditEventType.Revealed, deduplicateTransition: true);
+                    _threatAudit.Append(room, ThreatAuditEventType.Revealed, deduplicateTransition: true);
+                    threatTriggered = true;
                 }
 
                 var threatState = BuildRoundState(room);
@@ -477,10 +461,12 @@ namespace Bunker.Hubs
                 await Clients.Group(roomId).SendAsync("RoundStateUpdated", threatState);
                 if (!string.IsNullOrWhiteSpace(room.HostConnectionId))
                     await Clients.Client(room.HostConnectionId).SendAsync("GMThreatControlData", BuildGMThreatControlData(room));
+            }
 
-                var additionalInventory = GrantAdditionalInventoryAfterRound3(room);
+            var additionalInventory = GrantConfiguredBonusInventory(room, completedRound);
+            if (threatTriggered || additionalInventory.Count > 0)
+            {
                 room.CurrentPhase = GamePhase.ExtraInventory;
-
                 var extraInventoryState = BuildRoundState(room);
                 await Clients.Group(roomId).SendAsync("AdditionalInventoryGranted", new
                 {
@@ -489,20 +475,41 @@ namespace Bunker.Hubs
                     roundState = extraInventoryState
                 });
                 await Clients.Group(roomId).SendAsync("RoundStateUpdated", extraInventoryState);
+            }
 
-                _logger.LogInformation("Раунд 3 завершено в кімнаті {RoomName}: відкрито загрозу та видано додатковий інвентар", room.Name);
+            if (IsVotingRound(room, completedRound))
+            {
+                if (!threatTriggered && additionalInventory.Count == 0)
+                {
+                    room.CurrentPhase = GamePhase.PreVotingReadyCheck;
+                    var postRoundState = BuildRoundState(room);
+                    await Clients.Group(roomId).SendAsync("VotingReadyCheckStarted", new
+                    {
+                        round = room.CurrentRound,
+                        message = "Всі готові до голосування?",
+                        roundState = postRoundState
+                    });
+                    await Clients.Group(roomId).SendAsync("RoundStateUpdated", postRoundState);
+                }
                 return;
             }
 
-            room.CurrentPhase = GamePhase.PreVotingReadyCheck;
-            var postRoundState = BuildRoundState(room);
-            await Clients.Group(roomId).SendAsync("VotingReadyCheckStarted", new
+            RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
+            room.CurrentRound = completedRound + 1;
+            room.CurrentRoundReveals.Clear();
+            room.VotingReadyResponses.Clear();
+            room.CurrentPhase = GamePhase.RoundReveal;
+            StartConfiguredRoundTimer(room);
+
+            var nextRoundState = BuildRoundState(room);
+            await Clients.Group(roomId).SendAsync("RoundAdvanced", new
             {
-                round = room.CurrentRound,
-                message = "Всі готові до голосування?",
-                roundState = postRoundState
+                completedRound,
+                currentRound = room.CurrentRound,
+                roundState = nextRoundState
             });
-            await Clients.Group(roomId).SendAsync("RoundStateUpdated", postRoundState);
+            await Clients.Group(roomId).SendAsync("RoundStateUpdated", nextRoundState);
+            _logger.LogInformation("Раунд {CompletedRound} завершено в кімнаті {RoomName}, стартував раунд {CurrentRound}", completedRound, room.Name, room.CurrentRound);
         }
 
         /// <summary>
@@ -657,6 +664,7 @@ namespace Bunker.Hubs
                 room.CurrentRoundReveals.Clear();
                 room.VotingReadyResponses.Clear();
                 room.CurrentPhase = GamePhase.RoundReveal;
+                StartConfiguredRoundTimer(room);
                 var nextRoundState = BuildRoundState(room);
                 await Clients.Group(room.Id).SendAsync("RoundAdvanced", new
                 {

@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const tooltip = fs.readFileSync('wwwroot/js/tooltip.js', 'utf8');
+const stoneTexture = fs.readFileSync('wwwroot/images/ui/character-card-stone.svg', 'utf8');
 
 function cssRule(selector) {
   const start = css.indexOf(selector);
@@ -102,8 +103,10 @@ test('health presentation separates a safe severity suffix and semantic variants
 });
 
 test('shared shell uses variables, fixed geometry, inner border and footer anchoring', () => {
-  for (const variable of ['--card-accent','--card-accent-strong','--card-accent-soft','--card-border','--card-inner-border','--card-glow','--card-surface','--card-surface-overlay','--card-pattern','--card-divider','--card-button-border','--card-button-text','--card-medallion-border','--card-medallion-surface']) assert.match(css, new RegExp(variable));
-  assert.match(css, /\.vault-characteristic-card::before[\s\S]*border:\s*1px solid var\(--card-inner-border\)[\s\S]*pointer-events:\s*none/);
+  for (const variable of ['--card-accent','--card-accent-strong','--card-accent-soft','--card-border','--card-inner-border','--card-glow','--card-surface','--card-surface-overlay','--card-stone-texture','--card-stone-opacity','--card-tint','--card-category-wash','--card-pattern','--card-divider','--card-button-border','--card-button-text','--card-medallion-border','--card-medallion-surface']) assert.match(css, new RegExp(variable));
+  assert.match(css, /\.vault-characteristic-card::before[\s\S]*background-image:\s*var\(--card-stone-texture\)[\s\S]*mix-blend-mode:\s*soft-light[\s\S]*pointer-events:\s*none/);
+  assert.match(css, /\.vault-characteristic-card::after[\s\S]*border:\s*1px solid color-mix\(in srgb, var\(--card-inner-border\)[\s\S]*pointer-events:\s*none/);
+  assert.match(css, /\.vault-characteristic-card > \*\s*\{\s*z-index:\s*1/);
   assert.match(css, /\.vault-characteristic-card\s*\{[\s\S]*?min-height:\s*415px/);
   assert.match(css, /@media \(max-width: 1050px\)[\s\S]*?\.vault-characteristic-card\s*\{\s*min-height:\s*400px/);
   assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.vault-characteristic-card\s*\{\s*min-height:\s*340px/);
@@ -116,21 +119,50 @@ test('all ten card types keep one shell and expose distinct CSS-only identities'
   const types = ['Personality','Body','Profession','PhysicalHealth','MentalHealth','Hobby','CharacterTrait','Phobia','Inventory','Fact'];
   const patterns = new Set();
   const accents = new Set();
+  const tints = new Set();
   for (const type of types) {
     const rule = cssRule(`.vault-characteristic-card[data-characteristic-type="${type}"]`);
     assert.match(rule, /--card-accent:/);
+    assert.match(rule, /--card-tint:/);
     assert.match(rule, /--card-inner-border:/);
-    assert.match(rule, /--card-pattern:/);
+    assert.match(rule, /--card-pattern:linear-gradient\(transparent,transparent\)/);
     assert.match(rule, /--card-divider:/);
     assert.match(rule, /--card-button-border:/);
     assert.match(rule, /--card-medallion-surface:/);
     patterns.add(rule.match(/--card-pattern:([^;]+);/)[1].trim());
     accents.add(rule.match(/--card-accent:([^;]+);/)[1].trim());
+    tints.add(rule.match(/--card-tint:([^;]+);/)[1].trim());
+    assert.doesNotMatch(rule, /repeating-(?:linear|radial)-gradient/);
   }
-  assert.equal(patterns.size, types.length);
+  assert.equal(patterns.size, 1);
   assert.equal(accents.size, types.length);
-  assert.match(css, /background:\s*var\(--card-pattern\),\s*var\(--card-surface-overlay\),\s*var\(--card-surface\)/);
+  assert.equal(tints.size, types.length);
+  assert.match(css, /background:\s*var\(--card-pattern\),\s*var\(--card-category-wash\),\s*var\(--card-surface-overlay\),\s*var\(--card-surface\)/);
   assert.doesNotMatch(css, /\.vault-characteristic-card\.variant-(?:severe|severe-dark|critical|dark)\s*\{[^}]*--card-pattern:/s);
+});
+
+test('stone material, category accent line and layered bevel use one local asset', () => {
+  const shell = cssRule('.vault-characteristic-card');
+  assert.match(shell, /--card-stone-texture:\s*url\('\/images\/ui\/character-card-stone\.svg'\)/);
+  assert.match(shell, /--card-stone-opacity:\s*0\.2/);
+  assert.match(shell, /inset 2px 2px 0 color-mix/);
+  assert.match(shell, /inset -2px -2px 0 rgba\(0, 0, 0, 0\.72\)/);
+  assert.match(shell, /0 20px 44px rgba\(0, 0, 0, 0\.34\)/);
+  assert.match(stoneTexture, /<feTurbulence[^>]*type="fractalNoise"/);
+  assert.match(stoneTexture, /<path\b/);
+  assert.doesNotMatch(stoneTexture, /(?:href|src)="https?:\/\//);
+  assert.match(css, /\.vault-characteristic-card::before\s*\{[\s\S]*background-image:\s*var\(--card-stone-texture\)[\s\S]*mix-blend-mode:\s*soft-light[\s\S]*opacity:\s*var\(--card-stone-opacity\)[\s\S]*pointer-events:\s*none/);
+  assert.match(css, /\.vault-characteristic-card::after\s*\{[\s\S]*inset:\s*7px[\s\S]*border:\s*1px solid color-mix[\s\S]*inset 1px 1px 0[\s\S]*inset -1px -1px 0[\s\S]*pointer-events:\s*none/);
+  assert.match(css, /\.vault-card-separator\s*\{[^}]*width:\s*76%/);
+  assert.match(css, /\.vault-card-separator span\s*\{[^}]*height:\s*2px[^}]*var\(--card-divider\)[^}]*var\(--card-accent-strong\)/);
+  assert.match(css, /\.vault-card-separator i\s*\{[^}]*width:\s*8px[^}]*var\(--card-accent-strong\)/);
+  assert.match(css, /\.vault-card-icon\s*\{[\s\S]*inset 0 -12px 18px rgba\(0, 0, 0, 0\.48\)[\s\S]*0 7px 16px rgba\(0, 0, 0, 0\.4\)/);
+  assert.match(css, /\.vault-card-icon::before\s*\{[\s\S]*pointer-events:\s*none/);
+  assert.match(css, /\.vault-card-icon::after\s*\{[\s\S]*pointer-events:\s*none/);
+  const privateDeckCss = css.slice(css.indexOf('.vault-characteristic-card {'), css.indexOf('.my-special-card {'));
+  assert.doesNotMatch(privateDeckCss, /repeating-(?:linear|radial)-gradient/);
+  assert.match(cssRule('.vault-characteristic-card[data-characteristic-type="PhysicalHealth"]'), /--card-accent:#b86d52/);
+  assert.doesNotMatch(shell, /data:image|filter:\s*blur/);
 });
 
 test('visual impact variants drive the full shell and keep the tooltip out of flow', () => {
@@ -146,8 +178,8 @@ test('visual impact variants drive the full shell and keep the tooltip out of fl
   assert.match(css, /\.vault-card-reveal\s*\{[\s\S]*?border:\s*1px solid var\(--card-button-border\)[\s\S]*?background:\s*var\(--card-button-surface\)/);
   assert.doesNotMatch(css, /\.vault-card-reveal\s*\{[^}]*background:\s*(?:var\(--color-gold\)|#d8a846)/s);
   assert.match(css, /\.vault-card-detail \.char-label\s*\{\s*color:\s*var\(--card-detail-label\)/);
-  assert.match(css, /@media \(prefers-reduced-motion: no-preference\)[\s\S]*variant-critical::before[\s\S]*animation:\s*vault-critical-pulse/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*variant-critical::before\s*\{\s*animation:\s*none/);
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\)[\s\S]*variant-critical::after[\s\S]*animation:\s*vault-critical-pulse/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*variant-critical::after\s*\{\s*animation:\s*none/);
 });
 
 test('hobby mirrors profession optional details and does not derive tooltip from rows', () => {

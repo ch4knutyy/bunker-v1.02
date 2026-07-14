@@ -16,16 +16,17 @@ public sealed class LobbyStartServiceTests
     }
 
     [Fact]
-    public void SpectatorTechnicalAndOmniscientAreExcludedFromGameplayCountButIncludedInReadiness()
+    public void SpectatorTechnicalAndOmniscientAreExcludedFromGameplayCountAndReadiness()
     {
         var (service, room, host, guest, third) = Setup(); guest.IsLobbySpectator = true; third.GmRole = GmMode.TechnicalGm;
         var omni = new Player { Name = "Omni", ConnectionId = "omni", StablePlayerId = "omni-id", IsSpectatorGm = true, GmRole = GmMode.OmniscientGm };
         room.Players[omni.ConnectionId] = omni; room.IrreversibleOmniscientPlayerIds.Add(omni.StablePlayerId);
+        host.IsLobbyReady = true;
         var state = service.GetState(room);
         Assert.Equal(1, state.GameplayPlayerCount); Assert.Equal(3, state.SpectatorCount); Assert.Equal(1, state.TechnicalGmCount); Assert.Equal(1, state.OmniscientGmCount);
-        Assert.Contains("connected_members_not_ready", state.Blockers);
-        foreach (var player in room.Players.Values) player.IsLobbyReady = true;
-        Assert.DoesNotContain("connected_members_not_ready", service.GetState(room).Blockers);
+        Assert.Equal(1, state.ReadyRequiredCount); Assert.Equal(1, state.ReadyCount);
+        Assert.DoesNotContain("connected_members_not_ready", state.Blockers);
+        Assert.Contains("minimum_gameplay_players", state.Blockers);
     }
 
     [Fact]
@@ -54,6 +55,21 @@ public sealed class LobbyStartServiceTests
         foreach (var player in room.Players.Values) player.IsLobbyReady = true;
         Assert.Equal(2, LobbyStartService.MinimumGameplayPlayers); Assert.True(service.GetState(room).CanStart);
         room.State = RoomState.Playing; Assert.Equal("Running", service.GetState(room).Lifecycle); Assert.False(service.GetState(room).CanStart);
+    }
+
+    [Fact]
+    public void ExplicitHostReadinessOverrideAllowsStartWithoutMutatingMemberReadyState()
+    {
+        var (service, room, host, guest, third) = Setup();
+        third.IsLobbySpectator = true;
+        host.IsLobbyReady = false; guest.IsLobbyReady = false;
+        room.GameSettings.HostCanStartWithoutAllReady = true;
+
+        var state = service.GetState(room);
+
+        Assert.True(state.CanStart);
+        Assert.False(host.IsLobbyReady);
+        Assert.False(guest.IsLobbyReady);
     }
 
     [Fact]

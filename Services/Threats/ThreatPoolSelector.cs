@@ -14,7 +14,8 @@ public sealed class ThreatPoolSelector
         IReadOnlyCollection<ThreatData> candidates,
         Func<ThreatData, bool> isAvailableSpecial,
         Func<int, int, int> next,
-        ThreatData safeFallback)
+        ThreatData safeFallback,
+        int specialChancePercent = 1)
     {
         var valid = candidates.Where(IsValid).ToList();
         var specialPool = valid.Where(threat => ExplicitSpecialIds.Contains(threat.Id) && isAvailableSpecial(threat)).ToList();
@@ -28,7 +29,7 @@ public sealed class ThreatPoolSelector
         else if (textPool.Count == 0)
             selectedPool = specialPool;
         else
-            selectedPool = next(0, 100) == 0 ? specialPool : textPool;
+            selectedPool = next(0, 100) < Math.Clamp(specialChancePercent, 0, 100) ? specialPool : textPool;
 
         return selectedPool[next(0, selectedPool.Count)];
     }

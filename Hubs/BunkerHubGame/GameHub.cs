@@ -33,11 +33,12 @@ namespace Bunker.Hubs
         private readonly OmniscientHiddenStateService _omniscientHiddenState;
         private readonly DirectorControlService _directorControls;
         private readonly LobbyStartService _lobbyStart;
+        private readonly RoomGameSettingsService _roomGameSettings;
         private GmCapability? _activeDirectorCapability;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, StableIdMigrationService? stableIdMigrations = null, OmniscientGmAccessPolicy? omniscientAccess = null, OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, StableIdMigrationService? stableIdMigrations = null, OmniscientGmAccessPolicy? omniscientAccess = null, OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, RoomGameSettingsService? roomGameSettings = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -62,7 +63,8 @@ namespace Bunker.Hubs
             _omniscientRoles = omniscientRoles ?? new OmniscientGmRoleService(roomService);
             _omniscientHiddenState = omniscientHiddenState ?? new OmniscientHiddenStateService(TimeProvider.System, gameTimerService, roomService);
             _directorControls = directorControls ?? new DirectorControlService(TimeProvider.System);
-            _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System);
+            _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit);
+            _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
             _logger = logger;
         }
 

@@ -14,8 +14,8 @@ test('lobby roles readiness start and spectator reconnect stay canonical', async
     await expect(room.host.locator('#lobbyReadyButton')).toBeEnabled({ timeout: 15000 });
     await room.host.locator('#lobbyReadyButton').click(); await expect(room.host.locator('#lobbyReadyButton')).toContainText(/Скасувати|Cancel|Отменить/);
     await room.guest.locator('#lobbyReadyButton').click(); await expect(room.guest.locator('#lobbyReadyButton')).toContainText(/Скасувати|Cancel|Отменить/);
-    await spectator.locator('#lobbyReadyButton').click(); await expect(spectator.locator('#lobbyReadyButton')).toContainText(/Скасувати|Cancel|Отменить/);
-    await expect(room.host.locator('#lobbySummary')).toContainText(/3 (із|of|из) 3/, { timeout: 15000 });
+    await expect(spectator.locator('#lobbyReadyButton')).toHaveCount(0);
+    await expect(room.host.locator('#lobbySummary')).toContainText(/2 (із|of|из) 2/, { timeout: 15000 });
     await room.host.locator('#lobbyStartPreviewButton').click(); await expect(room.host.locator('#lobbyStartPreview')).toContainText(/готова до старту|ready to start|готова к старту/i);
     await expect(room.host.locator('#startGameBtn')).toBeEnabled(); await room.host.locator('#startGameBtn').click();
 

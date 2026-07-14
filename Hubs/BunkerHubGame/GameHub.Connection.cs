@@ -18,6 +18,14 @@ namespace Bunker.Hubs
             
             if (roomId != null)
             {
+                var room = _roomService.GetRoom(roomId);
+                var disconnectedPlayer = _roomService.GetPlayer(disconnectedId);
+                var disconnectedPlayerId = disconnectedPlayer == null ? disconnectedId : RoomService.GetPlayerKey(disconnectedPlayer);
+                if (room != null && disconnectedPlayer != null && room.IsHost(disconnectedPlayer) &&
+                    _roomGameSettings.GetEffective(room).PauseTimerOnHostDisconnect && _gameTimerService.Pause(room))
+                {
+                    await Clients.Group(room.Id).SendAsync("GameTimerUpdated", _gameTimerService.GetDto(room));
+                }
                 _roomService.MarkPlayerDisconnected(disconnectedId);
 
 				// Даємо grace period на refresh, закриття вкладки або коротку втрату зв'язку.
@@ -39,9 +47,20 @@ namespace Bunker.Hubs
                     if (room != null && !roomDeleted)
                     {
                         var playersSnapshot = RoomService.GetPlayersSnapshot(room);
+						if (room.State == RoomState.Lobby)
+						{
+							_gmAudit.Append(room, disconnectedPlayerId, "lobby_player_left", GmAuditResult.Success,
+								"A disconnected lobby member left after the reconnect grace period.", disconnectedPlayerId);
+						}
                         var newHostName = newHostConnectionId != null
                             ? playersSnapshot.FirstOrDefault(entry => entry.Key == newHostConnectionId).Value?.Name
                             : null;
+						if (room.State == RoomState.Lobby && newHostConnectionId != null)
+						{
+							var newHost = playersSnapshot.FirstOrDefault(entry => entry.Key == newHostConnectionId).Value;
+							if (newHost != null) _gmAudit.Append(room, disconnectedPlayerId, "host_transfer", GmAuditResult.Success,
+								"Host role was transferred after the reconnect grace period.", RoomService.GetPlayerKey(newHost));
+						}
 
                         await Clients.Group(room.Id).SendAsync("PlayerLeftRoom", new
                         {

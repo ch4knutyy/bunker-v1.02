@@ -43,13 +43,15 @@ test('desktop cards render, reveal live and survive reconnect', async ({ browser
     await expect(room.host.locator('[data-characteristic-type="Hobby"] .tooltip-trigger')).toHaveCount(0);
     await expect(room.guest.locator('#publicPlayerOverview')).not.toContainText('Гончарний круг');
     await expect(room.host.locator('[data-characteristic-type="Personality"] .tooltip-trigger')).toHaveCount(0);
-    const identityPatterns = await room.host.locator('#myPlayerCards .vault-characteristic-card').evaluateAll(cards => cards.map(card => ({
+    const identities = await room.host.locator('#myPlayerCards .vault-characteristic-card').evaluateAll(cards => cards.map(card => ({
       type: card.dataset.characteristicType,
-      pattern: getComputedStyle(card).getPropertyValue('--card-pattern').trim()
+      tint: getComputedStyle(card).getPropertyValue('--card-tint').trim(),
+      accent: getComputedStyle(card).getPropertyValue('--card-accent').trim()
     })));
-    expect(identityPatterns).toHaveLength(10);
-    expect(new Set(identityPatterns.map(item => item.type)).size).toBe(10);
-    expect(new Set(identityPatterns.map(item => item.pattern)).size).toBe(10);
+    expect(identities).toHaveLength(10);
+    expect(new Set(identities.map(item => item.type)).size).toBe(10);
+    expect(new Set(identities.map(item => item.tint)).size).toBe(10);
+    expect(new Set(identities.map(item => item.accent)).size).toBe(10);
     const palette = await room.host.evaluate(() => Object.fromEntries(['Profession','PhysicalHealth','MentalHealth','CharacterTrait','Hobby'].map(type => {
       const card = document.querySelector(`[data-characteristic-type="${type}"]`);
       const style = getComputedStyle(card);
@@ -60,6 +62,44 @@ test('desktop cards render, reveal live and survive reconnect', async ({ browser
     expect(palette.MentalHealth).not.toEqual(palette.PhysicalHealth);
     expect(palette.CharacterTrait).not.toEqual(palette.Profession);
     expect(palette.Hobby).not.toEqual(palette.CharacterTrait);
+    const material = await profession.evaluate(card => {
+      const style = getComputedStyle(card);
+      const texture = getComputedStyle(card, '::before');
+      const frame = getComputedStyle(card, '::after');
+      const separator = card.querySelector('.vault-card-separator');
+      const separatorLine = separator.querySelector('span');
+      const medallion = card.querySelector('.vault-card-icon');
+      return {
+        background: style.backgroundImage,
+        shadow: style.boxShadow,
+        textureBackground: texture.backgroundImage,
+        textureOpacity: texture.opacity,
+        textureBlend: texture.mixBlendMode,
+        texturePointerEvents: texture.pointerEvents,
+        frameBorder: frame.borderTopWidth,
+        frameShadow: frame.boxShadow,
+        separatorRatio: separator.getBoundingClientRect().width / card.getBoundingClientRect().width,
+        lineHeight: getComputedStyle(separatorLine).height,
+        lineBackground: getComputedStyle(separatorLine).backgroundImage,
+        medallionShadow: getComputedStyle(medallion).boxShadow
+      };
+    });
+    expect(material.background).toContain('radial-gradient');
+    expect(material.background).not.toContain('repeating-');
+    expect(material.shadow).toContain('inset');
+    expect(material.textureBackground).toContain('character-card-stone.svg');
+    expect(Number(material.textureOpacity)).toBeGreaterThanOrEqual(0.12);
+    expect(Number(material.textureOpacity)).toBeLessThanOrEqual(0.22);
+    expect(material.textureBlend).toBe('soft-light');
+    expect(material.texturePointerEvents).toBe('none');
+    expect(material.frameBorder).toBe('1px');
+    expect(material.frameShadow).toContain('inset');
+    expect(material.separatorRatio).toBeGreaterThan(0.63);
+    expect(material.separatorRatio).toBeLessThan(0.8);
+    expect(material.lineHeight).toBe('2px');
+    expect(material.lineBackground).toContain('linear-gradient');
+    expect(material.medallionShadow).toContain('inset');
+    await room.host.locator('#myPlayerCards').screenshot({ path: 'Tests/test-results/character-cards-material-v2-desktop.png' });
     const physicalCardBox = await room.host.locator('[data-characteristic-type="PhysicalHealth"]').boundingBox();
     const physicalTriggerBox = await room.host.locator('[data-characteristic-type="PhysicalHealth"] .tooltip-trigger').boundingBox();
     expect(Math.abs(physicalTriggerBox.y - physicalCardBox.y - 18)).toBeLessThanOrEqual(2);
@@ -68,6 +108,8 @@ test('desktop cards render, reveal live and survive reconnect', async ({ browser
     expect(Math.max(...firstRowHeights) - Math.min(...firstRowHeights)).toBeLessThanOrEqual(1);
     await profession.locator('.vault-card-reveal').click();
     await expect(profession.locator('.status-revealed')).toContainText(/Розкрито|Revealed|Открыто/, { timeout: 15000 });
+    expect(await profession.evaluate(card => getComputedStyle(card).backgroundImage)).toBe(material.background);
+    expect(await profession.evaluate(card => getComputedStyle(card, '::before').backgroundImage)).toBe(material.textureBackground);
     const value = (await profession.locator('.vault-card-value').innerText()).trim();
     await room.guest.locator('[data-player-view="single"]').click();
     await room.guest.locator('#publicPlayerSelector .player-selector-item').filter({ hasText: 'P1' }).click();
@@ -101,6 +143,7 @@ test('mobile cards are single-column, overflow-safe and tooltip toggles by tap',
     const firstBox = await first.boundingBox();
     const secondBox = await host.locator('.vault-characteristic-card').nth(1).boundingBox();
     expect(secondBox.y).toBeGreaterThan(firstBox.y + firstBox.height - 2);
+    await host.locator('#myPlayerCards').screenshot({ path: 'Tests/test-results/character-cards-material-v2-mobile.png' });
     const tooltipTrigger = host.locator('.vault-card-tooltip .tooltip-trigger').first();
     await tooltipTrigger.tap();
     await expect(host.locator('.tooltip-portal')).toBeVisible();
@@ -111,6 +154,19 @@ test('mobile cards are single-column, overflow-safe and tooltip toggles by tap',
     await host.keyboard.press('Escape');
     await expect(host.locator('.tooltip-portal')).toBeHidden();
     expect(await host.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    const mobileMaterial = await first.evaluate(card => ({
+      background: getComputedStyle(card).backgroundImage,
+      textureBackground: getComputedStyle(card, '::before').backgroundImage,
+      textureOpacity: getComputedStyle(card, '::before').opacity,
+      frameBorder: getComputedStyle(card, '::after').borderTopWidth,
+      accentHeight: getComputedStyle(card.querySelector('.vault-card-separator span')).height
+    }));
+    expect(mobileMaterial.background).toContain('radial-gradient');
+    expect(mobileMaterial.background).not.toContain('repeating-');
+    expect(mobileMaterial.textureBackground).toContain('character-card-stone.svg');
+    expect(Number(mobileMaterial.textureOpacity)).toBeGreaterThanOrEqual(0.12);
+    expect(mobileMaterial.frameBorder).toBe('1px');
+    expect(mobileMaterial.accentHeight).toBe('2px');
     const buttonBox = await first.locator('.vault-card-reveal').boundingBox();
     expect(buttonBox.width).toBeGreaterThan(firstBox.width * 0.8);
   } finally { await guestContext.close(); await hostContext.close(); }

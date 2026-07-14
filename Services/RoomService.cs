@@ -22,12 +22,18 @@ namespace Bunker.Services
         /// </summary>
         public Room CreateRoom(string name, string hostConnectionId, string hostName, int maxPlayers = 12, string? password = null)
         {
+            var normalizedMaxPlayers = Math.Clamp(maxPlayers, 2, 12);
+            var gameSettings = RoomGameSettingsService.Preset(GamePreset.Classic);
+            gameSettings.MaxGameplayPlayers = normalizedMaxPlayers;
+            if (gameSettings.MaxGameplayPlayers != 12) gameSettings.Preset = GamePreset.Custom;
             var room = new Room
             {
                 Name = name,
                 HostConnectionId = hostConnectionId,
                 HostName = hostName,
-                MaxPlayers = Math.Clamp(maxPlayers, 4, 16),
+                MaxPlayers = normalizedMaxPlayers,
+                MinPlayers = gameSettings.MinGameplayPlayers,
+                GameSettings = gameSettings,
                 Password = string.IsNullOrWhiteSpace(password) ? null : password
             };
 
@@ -61,6 +67,11 @@ namespace Bunker.Services
             if (string.IsNullOrWhiteSpace(player.StablePlayerId)) player.StablePlayerId = "";
 
             var playersSnapshot = GetPlayersSnapshot(room, "JoinRoom", cleanupInvalid: true);
+
+            if (RoomGameSettingsService.Migrate(room.GameSettings).JoinsLocked)
+            {
+                return (false, "Приєднання до кімнати заблоковано", null);
+            }
 
             if (room.State != RoomState.Lobby || GetGameplayPlayersSnapshot(room).Count >= room.MaxPlayers)
             {
@@ -293,8 +304,11 @@ namespace Bunker.Services
 					return (false, "Тільки хост може почати гру", null);
 
 				var playersSnapshot = GetGameplayPlayersSnapshot(room);
-				if (playersSnapshot.Count < 2)
+				var gameSettings = RoomGameSettingsService.Migrate(room.GameSettings);
+				if (playersSnapshot.Count < gameSettings.MinGameplayPlayers)
 					return (false, "Недостатньо гравців для початку", null);
+				if (playersSnapshot.Count > gameSettings.MaxGameplayPlayers)
+					return (false, "Забагато гравців для поточних налаштувань", null);
 				if (room.State != RoomState.Lobby)
 					return (false, "Гра вже запущена", null);
 
@@ -323,6 +337,9 @@ namespace Bunker.Services
 			room.CurrentThreat = null;
 			room.IsThreatRevealed = false;
 			room.ThreatRevealedAtRound = null;
+			room.ThreatsTriggeredCount = 0;
+			room.TriggeredThreatIds.Clear();
+			room.ThreatRoundsTriggered.Clear();
 			room.VotingReadyResponses.Clear();
 
 			// (опціонально) очистити тимчасові стани
