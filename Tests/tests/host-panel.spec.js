@@ -9,6 +9,14 @@ test('host panel opens after game start and keeps normal GM controls', async ({ 
 	const room = await createTwoPlayerRoom(browser, `Host Panel ${Date.now()}`);
 
 	try {
+		await room.host.locator('#lobbyReadyButton').click();
+		await room.guest.locator('#lobbyReadyButton').click();
+		await room.host.locator('#lobbyStartPreviewButton').click();
+		await expect(room.host.locator('#lobbyStartPreview')).toContainText(
+			/готова до старту|ready to start|готова к старту/i,
+			{ timeout: 15000 }
+		);
+		await expect(room.host.locator('#startGameBtn')).toBeEnabled();
 		await room.host.locator('#startGameBtn').click();
 		await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
 

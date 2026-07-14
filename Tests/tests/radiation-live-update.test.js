@@ -44,17 +44,19 @@ test('live merge replaces private player state and refreshes public snapshots', 
   assert.ok(handler.indexOf('mergeThreatPlayerSnapshots(data)') < handler.indexOf('renderCurrentGameUI()'));
 });
 
-test('card and table render every condition while the table respects reveal state', () => {
+test('private card and public overview render every condition while overview respects reveal state', () => {
   assert.match(client, /additionalConditionEffects\.map\(effect =>[\s\S]*renderAdditionalPhysicalCondition\(effect\)/);
   assert.match(client, /renderAdditionalPhysicalCondition\(effect, '\+ '\)/);
-  const tableCell = method(client, 'renderTableCell');
-  assert.match(tableCell, /if \(revealed\)/);
-  assert.ok(tableCell.indexOf("renderAdditionalPhysicalConditionsForTable(player)") > tableCell.indexOf('if (revealed)'));
-  assert.match(tableCell, /char-hidden/);
+  const overviewCard = method(client, 'renderPublicCharacteristicCard');
+  assert.match(overviewCard, /if \(!revealed\)/);
+  assert.ok(overviewCard.indexOf("renderAdditionalPhysicalConditionsForOverview(player)") > overviewCard.indexOf('if (!revealed)'));
+  assert.match(overviewCard, /notRevealed/);
 });
 
 test('reload and reveal paths normalize the same condition collection', () => {
   assert.ok((client.match(/additionalConditionEffects: normalizeAdditionalPhysicalConditions\(p\.additionalConditionEffects \|\| p\.AdditionalConditionEffects \|\| \[\]\)/g) || []).length >= 3);
   assert.match(client, /info\.data\.additionalConditionEffects \|\| info\.data\.AdditionalConditionEffects/);
-  assert.match(client, /sourcePlayer = player\.connectionId === myConnectionId \? myPlayerData : player/);
+  const additional = method(client, 'renderAdditionalPhysicalConditionsForOverview');
+  assert.doesNotMatch(additional, /myPlayerData/);
+  assert.match(additional, /player\?\.additionalPhysicalConditions \|\| player\?\.additionalConditionEffects/);
 });

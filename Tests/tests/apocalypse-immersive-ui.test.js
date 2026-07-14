@@ -94,9 +94,19 @@ test('hero stacking keeps real media above fallback and below readable decoratio
   assert.match(css, /\.apocalypse-hero-media\s*\{[^}]*z-index: 0/);
   assert.match(css, /\.apocalypse-hero-image\s*\{[\s\S]*object-fit: cover[\s\S]*object-position:/);
   assert.match(css, /\.apocalypse-hero-overlay\s*\{[^}]*z-index: 1/);
-  assert.match(css, /\.apocalypse-hero-pattern\s*\{[^}]*z-index: 2[\s\S]*opacity: \.12/);
-  assert.match(css, /\.apocalypse-hero-content\s*\{[^}]*z-index: 4/);
+  assert.match(css, /\.apocalypse-hero-pattern\s*\{[^}]*z-index: 2[\s\S]*opacity: \.14/);
+  assert.match(css, /\.apocalypse-hero-content\s*\{[^}]*z-index: 3/);
   assert.doesNotMatch(css, /\.apocalypse-(?:background|hero-image)\s*\{[^}]*z-index:\s*-/);
+});
+
+test('apocalypse image state restrains pattern and keeps a circular decorative medallion', () => {
+  const renderer = method(game, 'renderApocalypseScenario');
+  assert.match(renderer, /apocalypse-hero \$\{model\.imageUrl \? 'has-image' : 'no-image'\}/);
+  assert.match(css, /\.apocalypse-hero\.has-image \.apocalypse-hero-pattern,\s*\.bunker-hero\.has-image \.bunker-hero-pattern\s*\{[^}]*display:\s*none;[^}]*opacity:\s*0;[^}]*background-image:\s*none/);
+  assert.match(css, /\.apocalypse-hero\.no-image \.apocalypse-hero-pattern\s*\{[^}]*opacity: \.14/);
+  assert.match(renderer, /class="apocalypse-theme-mark" aria-hidden="true"/);
+  assert.match(css, /\.apocalypse-theme-mark\s*\{[\s\S]*z-index: 3[\s\S]*width: 84px[\s\S]*height: 84px[\s\S]*border-radius: 50%/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*apocalypse-theme-mark[^}]*width: 62px[^}]*height: 62px/);
 });
 
 test('shared CSS variables drive twelve variants and responsive card geometry', () => {

@@ -65,7 +65,7 @@ public partial class GameHub
         if (!_lobbyStart.TryConsume(room, host, previewToken, out var error)) throw new HubException(error ?? "lobby_start_blocked");
         lock (room.ProcessedLobbyCommandIds) if (!room.ProcessedLobbyCommandIds.Add(commandId)) return;
         PrepareLobbyGameplayCharacters(room);
-        var result = _roomService.StartGame(room.Id, Context.ConnectionId);
+        var result = _roomService.StartGame(room.Id, Context.ConnectionId, _random.Next);
         if (!result.success) throw new HubException(result.error ?? "lobby_start_failed");
         foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)) player.IsLobbyReady = false;
         await CompleteLobbyStart(room);

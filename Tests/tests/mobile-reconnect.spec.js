@@ -1,5 +1,9 @@
 const { test, expect, devices } = require('@playwright/test');
-const { setupNgrokBypass, newContextWithNgrokBypass } = require('./ngrok-bypass');
+const {
+    BASE_URL,
+    setupNgrokBypass,
+    newContextWithNgrokBypass,
+} = require('./ngrok-bypass');
 
 test.use({
     ...devices['iPhone 13'],
@@ -8,8 +12,8 @@ test.use({
 
 test.describe.configure({ mode: 'serial' });
 
-const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const LOBBY_MEMBERS = '#lobbyMembers';
 
 test.beforeEach(async ({ page }) => {
     await setupNgrokBypass(page);
@@ -23,7 +27,7 @@ async function createRoom(page, playerName, roomName) {
 
     await page.getByTestId('create-room-btn').click();
 
-    await expect(page.locator('#roomPlayersList')).toContainText(playerName, {
+    await expect(page.locator(LOBBY_MEMBERS)).toContainText(playerName, {
         timeout: 10000,
     });
 }
@@ -34,8 +38,8 @@ test('MOBILE: гравець створює кімнату з телефона',
 
     await createRoom(page, playerName, roomName);
 
-    await expect(page.locator('#roomPlayersList')).toContainText(playerName);
-    await expect(page.locator('body')).not.toContainText('Немає даних гравця');
+    await expect(page.locator(LOBBY_MEMBERS)).toContainText(playerName);
+    await expect(page.locator('#roomLobby')).toBeVisible();
 });
 
 test('MOBILE: після F5 гравець залишається в кімнаті', async ({ page }) => {
@@ -46,13 +50,13 @@ test('MOBILE: після F5 гравець залишається в кімна�
 
     await page.reload();
 
-    await expect(page.locator('#roomPlayersList')).toContainText(playerName, {
+    await expect(page.locator(LOBBY_MEMBERS)).toContainText(playerName, {
         timeout: 10000,
     });
 
-    await expect(page.locator('#roomPlayersList')).toContainText(/Хост|Host/);
+    await expect(page.locator(LOBBY_MEMBERS)).toContainText(/Хост|Host/);
 
-    const playersText = await page.locator('#roomPlayersList').innerText();
+    const playersText = await page.locator(LOBBY_MEMBERS).innerText();
     const playerCount = (playersText.match(new RegExp(playerName, 'g')) || []).length;
 
     expect(playerCount).toBe(1);
@@ -76,13 +80,13 @@ test('MOBILE: закрив сайт і повернувся — гравець �
     const returnedPage = await context.newPage();
     await returnedPage.goto(GAME_URL);
 
-    await expect(returnedPage.locator('#roomPlayersList')).toContainText(playerName, {
+    await expect(returnedPage.locator(LOBBY_MEMBERS)).toContainText(playerName, {
         timeout: 10000,
     });
 
-    await expect(returnedPage.locator('#roomPlayersList')).toContainText(/Хост|Host/);
+    await expect(returnedPage.locator(LOBBY_MEMBERS)).toContainText(/Хост|Host/);
 
-    const playersText = await returnedPage.locator('#roomPlayersList').innerText();
+    const playersText = await returnedPage.locator(LOBBY_MEMBERS).innerText();
     const playerCount = (playersText.match(new RegExp(playerName, 'g')) || []).length;
 
     expect(playerCount).toBe(1);
@@ -111,11 +115,11 @@ test('MOBILE: після втрати інтернету і повернення
 
     await page.reload();
 
-    await expect(page.locator('#roomPlayersList')).toContainText(playerName, {
+    await expect(page.locator(LOBBY_MEMBERS)).toContainText(playerName, {
         timeout: 10000,
     });
 
-    const playersText = await page.locator('#roomPlayersList').innerText();
+    const playersText = await page.locator(LOBBY_MEMBERS).innerText();
     const playerCount = (playersText.match(new RegExp(playerName, 'g')) || []).length;
 
     expect(playerCount).toBe(1);
@@ -134,11 +138,11 @@ test('MOBILE: поворот телефона не ламає кімнату', a
         height: 390,
     });
 
-    await expect(page.locator('#roomPlayersList')).toContainText(playerName, {
+    await expect(page.locator(LOBBY_MEMBERS)).toContainText(playerName, {
         timeout: 10000,
     });
 
-    await expect(page.locator('body')).not.toContainText('Немає даних гравця');
+    await expect(page.locator('#roomLobby')).toBeVisible();
 });
 
 test('MOBILE: другий гравець закрив сайт і повернувся в кімнату', async ({ browser }) => {
@@ -171,16 +175,16 @@ test('MOBILE: другий гравець закрив сайт і поверн�
     });
 
     const roomCard = roomTitle.locator(
-        'xpath=ancestor::*[.//button[contains(., "Приєднатися") or contains(., "Join")]][1]'
+        'xpath=ancestor::*[.//button[contains(., "Приєднатися") or contains(., "Join") or contains(., "Присоединиться")]][1]'
     );
 
-    await roomCard.getByRole('button', { name: /Приєднатися|Join/ }).click();
+    await roomCard.getByRole('button', { name: /Приєднатися|Join|Присоединиться/ }).click();
 
-    await expect(guest.locator('#roomPlayersList')).toContainText(hostName, {
+    await expect(guest.locator(LOBBY_MEMBERS)).toContainText(hostName, {
         timeout: 10000,
     });
 
-    await expect(guest.locator('#roomPlayersList')).toContainText(guestName, {
+    await expect(guest.locator(LOBBY_MEMBERS)).toContainText(guestName, {
         timeout: 10000,
     });
 
@@ -189,15 +193,15 @@ test('MOBILE: другий гравець закрив сайт і поверн�
     const returnedGuest = await guestContext.newPage();
     await returnedGuest.goto(GAME_URL);
 
-    await expect(returnedGuest.locator('#roomPlayersList')).toContainText(hostName, {
+    await expect(returnedGuest.locator(LOBBY_MEMBERS)).toContainText(hostName, {
         timeout: 10000,
     });
 
-    await expect(returnedGuest.locator('#roomPlayersList')).toContainText(guestName, {
+    await expect(returnedGuest.locator(LOBBY_MEMBERS)).toContainText(guestName, {
         timeout: 10000,
     });
 
-    await expect(host.locator('#roomPlayersList')).toContainText(guestName, {
+    await expect(host.locator(LOBBY_MEMBERS)).toContainText(guestName, {
         timeout: 10000,
     });
 

@@ -302,10 +302,12 @@ test('host can start the game and reveal a characteristic', async ({ browser }) 
 		await expect(room.host.locator('#myPlayerCards .status-revealed').first()).toBeVisible({
 			timeout: 15000,
 		});
-		await expect(room.guest.locator('#playersTableBody')).toContainText('P1', {
+		await room.guest.locator('[data-player-view="single"]').click();
+		await room.guest.locator('#publicPlayerSelector .player-selector-item').filter({ hasText: 'P1' }).click();
+		await expect(room.guest.locator('#selectedPlayerPanel')).toContainText('P1', {
 			timeout: 15000,
 		});
-		await expect(room.guest.locator('#playersTableBody')).not.toContainText(/No character data/i);
+		await expect(room.guest.locator('#selectedPlayerPanel')).not.toContainText(/No character data/i);
 	} finally {
 		await room.close();
 	}
