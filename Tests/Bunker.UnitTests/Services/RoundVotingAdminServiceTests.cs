@@ -48,6 +48,25 @@ public sealed class RoundVotingAdminServiceTests
     }
 
     [Fact]
+    public void FrozenLobbyVotingPolicyControlsStartRoundFrequencyAndDisabledState()
+    {
+        var room = PlayableRoom(2, GamePhase.PreVotingReadyCheck);
+        room.SettingsFrozen = true;
+        room.FrozenGameSettings = RoomGameSettingsService.Preset(GamePreset.Classic);
+        room.FrozenGameSettings.VotingStartRound = 2;
+        Assert.True(RoundVotingAdminService.CanStartVoting(room).Allowed);
+
+        room.FrozenGameSettings.VotingFrequency = VotingFrequencyMode.EveryTwoRounds;
+        room.CurrentRound = 3;
+        Assert.Equal("voting_not_scheduled", RoundVotingAdminService.CanStartVoting(room).Code);
+        room.CurrentRound = 4;
+        Assert.True(RoundVotingAdminService.CanStartVoting(room).Allowed);
+
+        room.FrozenGameSettings.VotingEnabled = false;
+        Assert.Equal("voting_disabled", RoundVotingAdminService.CanStartVoting(room).Code);
+    }
+
+    [Fact]
     public void PausePersistsWithoutChangingRoundVotingOrThreat()
     {
         var voting = ActiveVoting();

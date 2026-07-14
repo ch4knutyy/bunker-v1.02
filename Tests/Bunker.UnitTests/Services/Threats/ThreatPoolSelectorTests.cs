@@ -84,6 +84,21 @@ public class ThreatPoolSelectorTests
         Assert.Equal(1, draws);
     }
 
+    [Theory]
+    [InlineData(0, 0, "text")]
+    [InlineData(1, 0, "radiation_leak")]
+    [InlineData(10, 9, "radiation_leak")]
+    [InlineData(10, 10, "text")]
+    [InlineData(25, 24, "radiation_leak")]
+    [InlineData(100, 99, "radiation_leak")]
+    public void ConfiguredInteractiveRateUsesDeterministicServerRng(int percent, int roll, string expected)
+    {
+        var values = new Queue<int>(new[] { roll, 0 });
+        var result = _selector.Select(AllPools(), _ => true,
+            (min, max) => Math.Clamp(values.Dequeue(), min, max - 1), _fallback, percent);
+        Assert.Equal(expected, result.Id);
+    }
+
     private ThreatData Select(IEnumerable<ThreatData> threats, bool specialsAvailable, params int[] values)
     {
         var queue = new Queue<int>(values);

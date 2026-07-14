@@ -39,6 +39,16 @@ namespace Bunker.Models
         public HashSet<string> IrreversibleOmniscientPlayerIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public HashSet<string> ProcessedOmniscientCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public HashSet<string> ProcessedLobbyCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        [System.Text.Json.Serialization.JsonIgnore]
+        public object GameSettingsSyncRoot { get; } = new();
+        public RoomGameSettings GameSettings { get; set; } = new();
+        public RoomGameSettings? FrozenGameSettings { get; set; }
+        public long SettingsRevision { get; set; } = 1;
+        public bool SettingsFrozen { get; set; }
+        public int? ResolvedBunkerCapacity { get; set; }
+        public int ThreatsTriggeredCount { get; set; }
+        public HashSet<string> TriggeredThreatIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<int> ThreatRoundsTriggered { get; set; } = new();
         public bool IsPaused { get; set; }
         public string? PauseReason { get; set; }
         public DateTimeOffset? PausedAtUtc { get; set; }
@@ -182,7 +192,7 @@ namespace Bunker.Models
         /// <summary>
         /// Чи можна приєднатися
         /// </summary>
-        public bool CanJoin => State == RoomState.Lobby && GameplayPlayerCount < MaxPlayers;
+        public bool CanJoin => State == RoomState.Lobby && GameSettings?.JoinsLocked != true && GameplayPlayerCount < MaxPlayers;
         
         /// <summary>
         /// Чи можна почати гру

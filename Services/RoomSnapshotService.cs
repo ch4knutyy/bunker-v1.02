@@ -174,6 +174,11 @@ public sealed class RoomSnapshotService
         var state = new RoomSnapshotState
         {
             State = room.State,
+            GameSettings = RoomGameSettingsService.Clone(room.GameSettings),
+            FrozenGameSettings = room.FrozenGameSettings == null ? null : RoomGameSettingsService.Clone(room.FrozenGameSettings),
+            SettingsRevision = room.SettingsRevision,
+            SettingsFrozen = room.SettingsFrozen,
+            ResolvedBunkerCapacity = room.ResolvedBunkerCapacity,
             HostDisplayName = room.HostName,
             CurrentRound = room.CurrentRound,
             CurrentPhase = room.CurrentPhase,
@@ -186,6 +191,9 @@ public sealed class RoomSnapshotService
             CurrentRoundReveals = Clone(room.CurrentRoundReveals) ?? new(StringComparer.OrdinalIgnoreCase),
             RoundDiceRolls = Clone(room.RoundDiceRolls) ?? new(),
             AdditionalInventoryGrantedAfterRound3 = room.AdditionalInventoryGrantedAfterRound3,
+            ThreatsTriggeredCount = room.ThreatsTriggeredCount,
+            TriggeredThreatIds = new(room.TriggeredThreatIds, StringComparer.OrdinalIgnoreCase),
+            ThreatRoundsTriggered = new(room.ThreatRoundsTriggered),
             IsThreatRevealed = room.IsThreatRevealed,
             ThreatRevealedAtRound = room.ThreatRevealedAtRound,
             VotingReadyResponses = Clone(room.VotingReadyResponses) ?? new(StringComparer.OrdinalIgnoreCase),
@@ -222,6 +230,13 @@ public sealed class RoomSnapshotService
     {
         var state = Clone(source)!;
         room.State = state.State;
+        room.GameSettings = RoomGameSettingsService.Migrate(state.GameSettings);
+        room.FrozenGameSettings = state.FrozenGameSettings == null ? null : RoomGameSettingsService.Migrate(state.FrozenGameSettings);
+        room.SettingsRevision = Math.Max(1, state.SettingsRevision);
+        room.SettingsFrozen = state.SettingsFrozen;
+        room.ResolvedBunkerCapacity = state.ResolvedBunkerCapacity;
+        room.MaxPlayers = room.GameSettings.MaxGameplayPlayers;
+        room.MinPlayers = room.GameSettings.MinGameplayPlayers;
         room.HostName = state.HostDisplayName;
         room.CurrentRound = state.CurrentRound;
         room.CurrentPhase = state.CurrentPhase;
@@ -234,6 +249,9 @@ public sealed class RoomSnapshotService
         room.CurrentRoundReveals = state.CurrentRoundReveals;
         room.RoundDiceRolls = state.RoundDiceRolls;
         room.AdditionalInventoryGrantedAfterRound3 = state.AdditionalInventoryGrantedAfterRound3;
+        room.ThreatsTriggeredCount = state.ThreatsTriggeredCount;
+        room.TriggeredThreatIds = new(state.TriggeredThreatIds ?? [], StringComparer.OrdinalIgnoreCase);
+        room.ThreatRoundsTriggered = new(state.ThreatRoundsTriggered ?? []);
         room.IsThreatRevealed = state.IsThreatRevealed;
         room.ThreatRevealedAtRound = state.ThreatRevealedAtRound;
         lock (room.ThreatSyncRoot)
@@ -348,6 +366,7 @@ public sealed class RoomSnapshotService
         var result = new List<RoomSnapshotDiffDto>();
         void Add(string category, int count) { if (count > 0) result.Add(new(category, count)); }
         Add("round_phase", current.CurrentRound != state.CurrentRound || current.CurrentPhase != state.CurrentPhase || current.State != state.State ? 1 : 0);
+        Add("game_settings", Json(current.GameSettings) != Json(state.GameSettings) || Json(current.FrozenGameSettings) != Json(state.FrozenGameSettings) || current.SettingsFrozen != state.SettingsFrozen || current.ResolvedBunkerCapacity != state.ResolvedBunkerCapacity ? 1 : 0);
         Add("pause", current.IsPaused != state.IsPaused || current.PauseReason != state.PauseReason ? 1 : 0);
         Add("players_state", state.PlayersByStableId.Count(pair => current.PlayersByStableId.TryGetValue(pair.Key, out var player) && Json(player) != Json(pair.Value)));
         Add("revealed_state", state.PlayersByStableId.Count(pair => current.PlayersByStableId.TryGetValue(pair.Key, out var player) && Json(player.Revealed) != Json(pair.Value.Revealed)));

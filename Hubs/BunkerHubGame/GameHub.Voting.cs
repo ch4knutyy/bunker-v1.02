@@ -507,7 +507,8 @@ namespace Bunker.Hubs
             var cancelledVotingId = room.CurrentVoting.Id;
             room.CurrentVoting = null;
             room.State = RoomState.Playing;
-            room.CurrentPhase = room.CurrentRound >= 3
+            var settings = _roomGameSettings.GetEffective(room);
+            room.CurrentPhase = room.CurrentRound >= settings.VotingStartRound
                 ? GamePhase.PreVotingReadyCheck
                 : GamePhase.RoundReveal;
 

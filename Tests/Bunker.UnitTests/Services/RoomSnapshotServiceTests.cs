@@ -61,6 +61,39 @@ public sealed class RoomSnapshotServiceTests
     }
 
     [Fact]
+    public void SnapshotRestoresFrozenSettingsResolvedCapacityAndThreatScheduleWithoutReroll()
+    {
+        var context = CreateContext();
+        context.Room.State = RoomState.Playing;
+        context.Room.CurrentRound = 1;
+        context.Room.CurrentPhase = GamePhase.RoundReveal;
+        context.Room.SettingsFrozen = true;
+        context.Room.SettingsRevision = 4;
+        context.Room.GameSettings = RoomGameSettingsService.Preset(GamePreset.Dangerous);
+        context.Room.FrozenGameSettings = RoomGameSettingsService.Clone(context.Room.GameSettings);
+        context.Room.ResolvedBunkerCapacity = 2;
+        context.Room.ThreatsTriggeredCount = 1;
+        context.Room.TriggeredThreatIds.Add("radiation_leak");
+        context.Room.ThreatRoundsTriggered.Add(2);
+        var snapshot = context.Snapshots.CreateSnapshot(context.Room, "host-player", "settings");
+
+        context.Room.SettingsRevision = 9;
+        context.Room.ResolvedBunkerCapacity = 5;
+        context.Room.ThreatsTriggeredCount = 0;
+        context.Room.TriggeredThreatIds.Clear();
+        context.Room.ThreatRoundsTriggered.Clear();
+
+        Assert.True(context.Snapshots.RestoreSnapshot(context.Room, snapshot.SnapshotId, "host-player", "restore-settings").Success);
+        Assert.True(context.Room.SettingsFrozen);
+        Assert.Equal(4, context.Room.SettingsRevision);
+        Assert.Equal(2, context.Room.ResolvedBunkerCapacity);
+        Assert.Equal(1, context.Room.ThreatsTriggeredCount);
+        Assert.Contains("radiation_leak", context.Room.TriggeredThreatIds);
+        Assert.Contains(2, context.Room.ThreatRoundsTriggered);
+        Assert.Equal(GamePreset.Dangerous, context.Room.FrozenGameSettings!.Preset);
+    }
+
+    [Fact]
     public void Snapshot_DoesNotSerializeRuntimeOrHistories()
     {
         var context = CreateContext();

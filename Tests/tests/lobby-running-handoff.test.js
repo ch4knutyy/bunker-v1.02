@@ -9,7 +9,11 @@ const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 
 test('lobby start uses one ordered canonical running handoff', () => {
   const start = lobbyHub.slice(lobbyHub.indexOf('public async Task StartGameFromLobby'));
-  assert.ok(start.indexOf('PrepareLobbyGameplayCharacters(room)') < start.indexOf('_roomService.StartGame(room.Id'));
+  const stateTransition = start.indexOf('_roomService.StartGame(room.Id');
+  const freeze = start.indexOf('_roomGameSettings.FreezeForStart(room');
+  const preparation = start.indexOf('PrepareLobbyGameplayCharacters(room)');
+  assert.ok(stateTransition < freeze && freeze < preparation, 'validation/state transition must precede freeze and generation');
+  assert.match(start, /lock \(room\.GameSettingsSyncRoot\)/);
 
   const handoff = roomsHub.slice(roomsHub.indexOf('private async Task CompleteLobbyStart'));
   const ordered = [

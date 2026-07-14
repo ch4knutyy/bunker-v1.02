@@ -233,6 +233,21 @@ namespace Bunker.Services
             return inventory;
         }
 
+        public List<SpecialCard> GenerateSpecialCards(int count)
+        {
+            var requested = Math.Clamp(count, 0, 2);
+            var result = new List<SpecialCard>();
+            var attempts = 0;
+            while (result.Count < requested && attempts++ < 20)
+            {
+                var card = GenerateSpecialCard();
+                if (string.IsNullOrWhiteSpace(card.Id) || card.Id == "no_special_card") break;
+                if (result.Any(existing => string.Equals(existing.Id, card.Id, StringComparison.OrdinalIgnoreCase))) continue;
+                result.Add(card);
+            }
+            return result;
+        }
+
         private Item CreateProfessionItem(Profession profession)
         {
             if (string.IsNullOrWhiteSpace(profession.SelectedItem))

@@ -139,12 +139,30 @@ namespace Bunker.Hubs
 
         private Bunker.Models.GameData.ThreatData? DrawThreatForRound(Room room, int round)
         {
+            var settings = _roomGameSettings.GetEffective(room);
             var candidates = _gameData.Threats
                 .Where(threat =>
                     threat.RevealRound == round ||
                     threat.Round == round ||
                     (threat.RevealRound <= 0 && threat.Round <= 0))
                 .ToList();
+
+            if (settings.InteractiveThreatRate == InteractiveThreatRate.Off)
+            {
+                candidates = candidates.Where(threat =>
+                    !string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (candidates.Count == 0)
+                    candidates = _gameData.Threats.Where(threat =>
+                        !string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (settings.AvoidRepeatedThreats)
+            {
+                var unused = candidates.Where(threat => !room.TriggeredThreatIds.Contains(threat.Id)).ToList();
+                if (unused.Count > 0) candidates = unused;
+            }
 
             if (candidates.Count == 0)
             {
@@ -160,13 +178,48 @@ namespace Bunker.Hubs
             };
             var selected = new ThreatPoolSelector().Select(
                 candidates,
-                threat => string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase)
+                threat => settings.InteractiveThreatRate != InteractiveThreatRate.Off &&
+                    (string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase)
                     ? _threatMiniGames.TryGet(RadiationLeakThreatId, out _)
                     : string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
-                      IsPlanChoiceMechanics(threat.Mechanics),
+                      IsPlanChoiceMechanics(threat.Mechanics)),
                 _random.Next,
-                safeFallback);
+                safeFallback,
+                RoomGameSettingsService.InteractivePercent(settings.InteractiveThreatRate));
             return CloneThreatData(selected);
+        }
+
+        private bool ShouldTriggerThreat(Room room, int completedRound)
+        {
+            var settings = _roomGameSettings.GetEffective(room);
+            if (!settings.ThreatsEnabled || completedRound < settings.FirstThreatRound || room.ThreatRoundsTriggered.Contains(completedRound)) return false;
+            if (settings.MaxThreatsPerGame.HasValue && room.ThreatsTriggeredCount >= settings.MaxThreatsPerGame.Value) return false;
+            if (room.ThreatState != null && room.ThreatState.ThreatStatus is not ("hidden" or "aborted" or "resolved_safely" or "resolved_with_casualty" or "failed" or "completed")) return false;
+            return settings.ThreatFrequency switch
+            {
+                ThreatFrequencyMode.OncePerGame => room.ThreatsTriggeredCount == 0,
+                ThreatFrequencyMode.EveryRound => true,
+                ThreatFrequencyMode.EveryOtherRound => (completedRound - settings.FirstThreatRound) % 2 == 0,
+                ThreatFrequencyMode.RandomEligibleRounds => _random.Next(0, 2) == 0,
+                _ => false
+            };
+        }
+
+        private static bool IsVotingRound(Room room, int completedRound)
+        {
+            var settings = room.SettingsFrozen && room.FrozenGameSettings != null
+                ? RoomGameSettingsService.Migrate(room.FrozenGameSettings)
+                : RoomGameSettingsService.Migrate(room.GameSettings);
+            if (!settings.VotingEnabled || completedRound < settings.VotingStartRound) return false;
+            return settings.VotingFrequency == VotingFrequencyMode.EveryRound ||
+                   (completedRound - settings.VotingStartRound) % 2 == 0;
+        }
+
+        private void StartConfiguredRoundTimer(Room room)
+        {
+            var settings = _roomGameSettings.GetEffective(room);
+            if (settings.RoundTimerEnabled && settings.AutoStartRoundTimer)
+                _gameTimerService.Start(room, settings.RoundTimerDurationSeconds, GameTimerPurpose.Round, $"Round {room.CurrentRound}");
         }
 
         private RoundVotingAdminService.VotingStartAvailability GetVotingStartAvailability(Room room)
@@ -233,9 +286,10 @@ namespace Bunker.Hubs
             };
         }
 
-        private List<object> GrantAdditionalInventoryAfterRound3(Room room)
+        private List<object> GrantConfiguredBonusInventory(Room room, int completedRound)
         {
-            if (room.AdditionalInventoryGrantedAfterRound3)
+            var settings = _roomGameSettings.GetEffective(room);
+            if (!settings.BonusInventoryEnabled || completedRound != settings.BonusInventoryRound || room.AdditionalInventoryGrantedAfterRound3)
             {
                 return new();
             }
@@ -243,7 +297,7 @@ namespace Bunker.Hubs
             room.AdditionalInventoryGrantedAfterRound3 = true;
             var grants = new List<object>();
 
-            foreach (var entry in RoomService.GetPlayersSnapshot(room))
+            foreach (var entry in RoomService.GetGameplayPlayersSnapshot(room))
             {
                 var player = entry.Value;
                 if (player == null || player.IsEliminated)
@@ -251,29 +305,29 @@ namespace Bunker.Hubs
                     continue;
                 }
 
-                var item = DrawRandomInventoryItem();
-                if (item == null)
+                for (var itemIndex = 0; itemIndex < settings.BonusInventoryCount; itemIndex++)
                 {
-                    continue;
+                    var item = DrawRandomInventoryItem();
+                    if (item == null) continue;
+
+                    player.Inventory.Items.Add(item);
+
+					if (player.Revealed.Inventory)
+					{
+						SetCharacteristicRevealed(player, "Inventory");
+					}
+
+                    grants.Add(new
+                    {
+                        connectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
+                        stablePlayerId = RoomService.GetPlayerKey(player),
+                        playerName = player.Name ?? "Unknown",
+                        itemName = item.Name,
+                        item,
+                        inventory = player.Inventory,
+                        isInventoryRevealed = player.Revealed.Inventory
+                    });
                 }
-
-                player.Inventory.Items.Add(item);
-
-                if (player.Revealed.Inventory)
-                {
-                    SetCharacteristicRevealed(player, "Inventory");
-                }
-
-                grants.Add(new
-                {
-                    connectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
-                    stablePlayerId = RoomService.GetPlayerKey(player),
-                    playerName = player.Name ?? "Unknown",
-                    itemName = item.Name,
-                    item,
-                    inventory = player.Inventory,
-                    isInventoryRevealed = player.Revealed.Inventory
-                });
             }
 
             return grants;

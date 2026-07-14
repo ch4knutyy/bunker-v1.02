@@ -51,6 +51,7 @@ namespace Bunker.Hubs
 
 				// Додаємо до SignalR групи
 				await Groups.AddToGroupAsync(Context.ConnectionId, joinedRoom.Id);
+				AppendLobbyPresenceAudit(joinedRoom, RoomService.GetPlayerKey(player), "lobby_player_joined", "A lobby member joined the room.");
 
 				// Повідомляємо клієнта про успішне створення кімнати
 				await Clients.Caller.SendAsync("RoomCreated", new
@@ -104,6 +105,7 @@ namespace Bunker.Hubs
 					if (rejoinSuccess && rejoinRoom != null && rejoinPlayer != null)
 					{
 						EnsurePlayerHasGeneratedData(rejoinPlayer, rejoinRoom);
+						AppendLobbyPresenceAudit(rejoinRoom, RoomService.GetPlayerKey(rejoinPlayer), "lobby_player_reconnected", "A lobby member reconnected.");
 						await SendRejoinSuccess(roomId, rejoinRoom, rejoinPlayer, wasHost);
 						return;
 					}
@@ -124,6 +126,7 @@ namespace Bunker.Hubs
 
 				// Додаємо до SignalR групи
 				await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
+				AppendLobbyPresenceAudit(room, RoomService.GetPlayerKey(player), "lobby_player_joined", "A lobby member joined the room.");
 
 				// Відправляємо дані новому гравцю
 				await Clients.Caller.SendAsync("RoomJoined", new
@@ -164,6 +167,8 @@ namespace Bunker.Hubs
         {
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
             if (roomId == null) return;
+			var leavingPlayer = _roomService.GetPlayer(Context.ConnectionId);
+			var leavingPlayerId = leavingPlayer == null ? Context.ConnectionId : RoomService.GetPlayerKey(leavingPlayer);
 
             var (success, room, roomDeleted, newHostConnectionId) = _roomService.LeaveRoom(Context.ConnectionId);
 
@@ -177,6 +182,7 @@ namespace Bunker.Hubs
 
             if (!roomDeleted)
             {
+				AppendLobbyPresenceAudit(room, leavingPlayerId, "lobby_player_left", "A lobby member left the room.");
                 var playersSnapshot = RoomService.GetPlayersSnapshot(room);
                 var newHostName = newHostConnectionId != null
                     ? playersSnapshot.FirstOrDefault(entry => entry.Key == newHostConnectionId).Value?.Name
@@ -245,6 +251,7 @@ namespace Bunker.Hubs
 					);
 				}
 
+				AppendLobbyPresenceAudit(room, RoomService.GetPlayerKey(player), "lobby_player_reconnected", "A lobby member reconnected.");
 				await SendRejoinSuccess(roomId, room, player, wasHost);
 
 				_logger.LogInformation($"Гравець {playerName} перепідключився до кімнати {room.Name}");
@@ -254,6 +261,12 @@ namespace Bunker.Hubs
 				_logger.LogError(ex, "Помилка перепідключення");
 				await Clients.Caller.SendAsync("RejoinFailed", "Помилка перепідключення");
 			}
+		}
+
+		private void AppendLobbyPresenceAudit(Room room, string playerId, string action, string summary)
+		{
+			if (room.State != RoomState.Lobby) return;
+			_gmAudit.Append(room, playerId, action, GmAuditResult.Success, summary, playerId);
 		}
 
 		private async Task SendRejoinSuccess(string roomId, Room room, Player player, bool wasHost)
@@ -514,28 +527,82 @@ namespace Bunker.Hubs
 
 		private void PrepareLobbyGameplayCharacters(Room room)
 		{
+			var settings = _roomGameSettings.GetCanonical(room);
 			foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
+			{
 				EnsurePlayerHasGeneratedData(player);
+				ConfigureGeneratedPlayerForLobby(player, settings);
+			}
+		}
+
+		private void ConfigureGeneratedPlayerForLobby(Player player, RoomGameSettings settings)
+		{
+			if (!settings.SpecialCardsEnabled || settings.SpecialCardsPerPlayer == 0)
+			{
+				player.SpecialCards = new();
+				player.SpecialCard = new();
+			}
+			else
+			{
+				var cards = GetPlayerSpecialCards(player)
+					.Where(card => !string.IsNullOrWhiteSpace(card.Id) && card.Id != "no_special_card")
+					.Take(settings.SpecialCardsPerPlayer).ToList();
+				var attempts = 0;
+				while (cards.Count < settings.SpecialCardsPerPlayer && attempts++ < 8)
+				{
+					var generated = _generator.GenerateSpecialCards(1).FirstOrDefault();
+					if (generated == null) break;
+					if (cards.Any(card => string.Equals(card.Id, generated.Id, StringComparison.OrdinalIgnoreCase))) continue;
+					cards.Add(generated);
+				}
+				player.SpecialCards = cards;
+				player.SpecialCard = cards.FirstOrDefault() ?? new();
+			}
+
+			player.Inventory ??= new();
+			player.Inventory.Items ??= new();
+			while (player.Inventory.Items.Count > settings.StartingInventoryCount)
+				player.Inventory.Items.RemoveAt(player.Inventory.Items.Count - 1);
+			while (player.Inventory.Items.Count < settings.StartingInventoryCount)
+			{
+				var item = DrawRandomInventoryItem();
+				if (item == null) break;
+				player.Inventory.Items.Add(item);
+			}
 		}
 
 		private async Task CompleteLobbyStart(Room room)
         {
             var roomId = room.Id;
 
-            // Генеруємо апокаліпсис та бункер
-            if (room.Apocalypse == null && _gameData.Apocalypses.Count > 0)
+            var settings = _roomGameSettings.GetEffective(room);
+            // Генеруємо лише увімкнені room-local сценарії.
+            if (!settings.ApocalypseEnabled) room.Apocalypse = null;
+            else if (room.Apocalypse == null && _gameData.Apocalypses.Count > 0)
             {
                 room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
                 // Оновлюємо URL зображення з кешу
                 _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
             }
             
-            if (room.Bunker == null && _gameData.Bunkers.Count > 0)
+            if (!settings.BunkerScenarioEnabled) room.Bunker = null;
+            else if (room.Bunker == null && _gameData.Bunkers.Count > 0)
             {
                 room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
                 // Оновлюємо URL зображення з кешу
                 _imageService.UpdateBunkerImageUrl(room.Bunker);
             }
+
+            if (room.Bunker != null)
+            {
+                room.ResolvedBunkerCapacity ??= room.Bunker.Capacity;
+                room.Bunker.Capacity = room.ResolvedBunkerCapacity.Value;
+            }
+
+            if (settings.RoundTimerEnabled && settings.AutoStartRoundTimer)
+                _gameTimerService.Start(room, settings.RoundTimerDurationSeconds, GameTimerPurpose.Round, $"Round {room.CurrentRound}");
+            else
+                _gameTimerService.Stop(room);
 
             // Canonical seats are assigned atomically by RoomService.StartGame.
             var playersSnapshot = RoomService.GetGameplayPlayersSnapshot(room);

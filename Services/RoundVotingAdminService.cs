@@ -9,12 +9,20 @@ public static class RoundVotingAdminService
 
     public static VotingStartAvailability CanStartVoting(Room room, bool hasUnresolvedBlockingThreat = false)
     {
+        var settings = room.SettingsFrozen && room.FrozenGameSettings != null
+            ? RoomGameSettingsService.Migrate(room.FrozenGameSettings)
+            : RoomGameSettingsService.Migrate(room.GameSettings);
         if (room.IsPaused)
             return new(false, "game_paused", "Голосування недоступне, поки гра на паузі");
         if (room.State != RoomState.Playing)
             return new(false, "room_not_playing", "Голосування доступне тільки під час гри");
-        if (room.CurrentRound < 3)
-            return new(false, "round_not_completed", "Голосування доступне тільки після завершення 3 раунду");
+        if (!settings.VotingEnabled)
+            return new(false, "voting_disabled", "Голосування вимкнено в налаштуваннях кімнати");
+        if (room.CurrentRound < settings.VotingStartRound)
+            return new(false, "round_not_completed", $"Голосування доступне після завершення раунду {settings.VotingStartRound}");
+        if (settings.VotingFrequency == VotingFrequencyMode.EveryTwoRounds &&
+            (room.CurrentRound - settings.VotingStartRound) % 2 != 0)
+            return new(false, "voting_not_scheduled", "Голосування не заплановано для цього раунду");
         if (hasUnresolvedBlockingThreat)
             return new(false, "threat_not_resolved", "Спершу завершіть інтерактивну загрозу");
         if (room.CurrentPhase is not (GamePhase.ExtraInventory or GamePhase.PreVotingReadyCheck))
