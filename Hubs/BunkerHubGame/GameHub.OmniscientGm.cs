@@ -7,16 +7,44 @@ namespace Bunker.Hubs;
 public partial class GameHub
 {
     private readonly Dictionary<string, Queue<DateTimeOffset>> _omniscientRequestWindows = new(StringComparer.Ordinal);
-    public Task<OmniscientGmPreviewDto> PreviewEnterOmniscientGm(string bootstrapKey)
-    {
-        var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-        var player = _roomService.GetPlayer(Context.ConnectionId);
-        if (room == null || player == null || !room.IsHost(player) || !_omniscientAccess.CanEnter(room.GmMode, bootstrapKey))
-            throw new HubException("omniscient_access_denied");
-        return Task.FromResult(_omniscientRoles.Preview(room, player));
-    }
+	public Task<OmniscientGmPreviewDto> PreviewEnterOmniscientGm(
+		string bootstrapKey)
+	{
+		var connectionId = Context.ConnectionId;
 
-    public async Task EnterOmniscientGm(string bootstrapKey, string commandId, bool confirmation)
+		var room = _roomService.GetPlayerRoom(connectionId);
+
+		if (room == null)
+		{
+			throw new HubException("omniscient_room_not_found");
+		}
+
+		var player = _roomService.GetPlayer(connectionId);
+
+		if (player == null)
+		{
+			throw new HubException("omniscient_player_not_found");
+		}
+
+		if (!room.IsHost(player))
+		{
+			throw new HubException("omniscient_host_required");
+		}
+
+		if (string.IsNullOrWhiteSpace(bootstrapKey))
+		{
+			throw new HubException("omniscient_bootstrap_key_missing");
+		}
+
+		if (!_omniscientAccess.CanEnter(room.GmMode, bootstrapKey))
+		{
+			throw new HubException("omniscient_invalid_bootstrap_key");
+		}
+
+		return Task.FromResult(
+			_omniscientRoles.Preview(room, player));
+	}
+	public async Task EnterOmniscientGm(string bootstrapKey, string commandId, bool confirmation)
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
         var player = _roomService.GetPlayer(Context.ConnectionId);
