@@ -13,6 +13,7 @@ namespace Bunker.Hubs
     {
         private readonly CharacterGeneratorService _generator;
         private readonly RoomService _roomService;
+        private readonly PlayerDisconnectCleanupCoordinator _playerDisconnectCleanup;
         private readonly GameDataService _gameData;
         private readonly ScenarioImageService _imageService;
         private readonly ThreatScalingService _threatScaling;
@@ -39,10 +40,11 @@ namespace Bunker.Hubs
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, StableIdMigrationService? stableIdMigrations = null, OmniscientGmAccessPolicy? omniscientAccess = null, OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, RoomGameSettingsService? roomGameSettings = null, OmniscientRequestRateLimitService? omniscientRequestRateLimits = null)
+        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, PlayerDisconnectCleanupCoordinator playerDisconnectCleanup, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, StableIdMigrationService? stableIdMigrations = null, OmniscientGmAccessPolicy? omniscientAccess = null, OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, RoomGameSettingsService? roomGameSettings = null, OmniscientRequestRateLimitService? omniscientRequestRateLimits = null)
         {
             _generator = generator;
             _roomService = roomService;
+            _playerDisconnectCleanup = playerDisconnectCleanup;
             _gameData = gameData;
             _imageService = imageService;
             _threatScaling = threatScaling;

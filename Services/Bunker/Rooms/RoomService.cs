@@ -3,6 +3,17 @@ using System.Collections.Concurrent;
 
 namespace Bunker.Services
 {
+    public sealed record DisconnectedPlayerFinalizationResult(
+        bool Removed,
+        bool RoomDeleted,
+        string RoomId,
+        string ConnectionId,
+        string? NewHostConnectionId,
+        string? NewHostName,
+        string? NewHostPlayerId,
+        bool WasLobby,
+        Room? Room);
+
     /// <summary>
     /// Сервіс для управління ігровими кімнатами
     /// </summary>
@@ -740,6 +751,68 @@ namespace Bunker.Services
             return (result.room, result.roomDeleted, result.newHostConnectionId);
         }
 
+        public DisconnectedPlayerFinalizationResult TryFinalizeDisconnectedPlayer(
+            string roomId,
+            Guid playerId,
+            string expectedConnectionId)
+        {
+            DisconnectedPlayerFinalizationResult NotRemoved() =>
+                new(false, false, roomId, expectedConnectionId, null, null, null, false, null);
+
+            if (!_rooms.TryGetValue(roomId, out var room) || room.Players == null)
+            {
+                return NotRemoved();
+            }
+
+            lock (room.Players)
+            {
+                if (!_rooms.TryGetValue(roomId, out var currentRoom) || !ReferenceEquals(currentRoom, room))
+                {
+                    return NotRemoved();
+                }
+
+                var playerEntry = room.Players.FirstOrDefault(entry => entry.Value?.Id == playerId);
+                var player = playerEntry.Value;
+                if (player == null ||
+                    player.IsConnected ||
+                    !string.Equals(player.ConnectionId, expectedConnectionId, StringComparison.Ordinal) ||
+                    !string.Equals(playerEntry.Key, expectedConnectionId, StringComparison.Ordinal) ||
+                    !_playerToRoom.TryGetValue(expectedConnectionId, out var mappedRoomId) ||
+                    !string.Equals(mappedRoomId, roomId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return NotRemoved();
+                }
+
+                var removal = LeaveRoom(expectedConnectionId);
+                if (!removal.success || removal.room == null)
+                {
+                    return NotRemoved();
+                }
+
+                var finalizedRoom = removal.room;
+                string? newHostName = null;
+                string? newHostPlayerId = null;
+                if (!removal.roomDeleted && !string.IsNullOrWhiteSpace(removal.newHostConnectionId))
+                {
+                    var newHost = GetPlayersSnapshot(finalizedRoom)
+                        .FirstOrDefault(entry => entry.Key == removal.newHostConnectionId).Value;
+                    newHostName = newHost?.Name;
+                    newHostPlayerId = newHost == null ? null : GetPlayerKey(newHost);
+                }
+
+                return new(
+                    true,
+                    removal.roomDeleted,
+                    finalizedRoom.Id,
+                    expectedConnectionId,
+                    removal.newHostConnectionId,
+                    newHostName,
+                    newHostPlayerId,
+                    finalizedRoom.State == RoomState.Lobby,
+                    finalizedRoom);
+            }
+        }
+
 		/// <summary>
 		/// Спроба повторного приєднання до кімнати (після перезавантаження сторінки)
 		/// Шукає гравця за стабільним ID та переносить його на новий connectionId
@@ -758,6 +831,13 @@ namespace Bunker.Services
 			}
 
 			EnsureRoomIdentity(room, roomId);
+
+            lock (room.Players)
+            {
+            if (!_rooms.TryGetValue(roomId, out var currentRoom) || !ReferenceEquals(currentRoom, room))
+            {
+                return (false, "Кімнату не знайдено", null, null, false);
+            }
 
 			var existingEntry = GetPlayersSnapshot(room, "RejoinRoom", cleanupInvalid: true)
 				.FirstOrDefault(p => p.Value != null && p.Value.StablePlayerId == stablePlayerId);
@@ -814,6 +894,7 @@ namespace Bunker.Services
 			);
 
 			return (true, null, room, player, wasHost);
+            }
 		}
 
 		private static void RemapVotingConnectionId(Room room, string oldConnectionId, string newConnectionId, string playerKey)
