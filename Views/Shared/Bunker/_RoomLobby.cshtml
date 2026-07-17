@@ -5,32 +5,40 @@
     та елементи керування запуском гри.
 *@
 <div id="roomLobby">
-	<header class="lobby-intro site-panel">
-		<div><h2 data-lobby-i18n="lobbyTitle">Лобі кімнати</h2><p id="lobbyRoomCode" class="lobby-room-code"></p></div>
-		<p data-lobby-i18n="lobbyHint">Оберіть ролі, підтвердьте готовність і почніть гру.</p>
-		<strong id="lobbyMemberCapacity"></strong>
+	<header class="lobby-intro lobby-status-hero site-panel">
+		<div class="lobby-status-heading">
+			<span class="lobby-status-badge" data-lobby-i18n="lobbyLifecycleLobby">Лобі</span>
+			<h2 data-lobby-i18n="lobbyTitle">Лобі кімнати</h2>
+			<p id="lobbyRoomCode" class="lobby-room-code"></p>
+		</div>
+		<div class="lobby-status-copy">
+			<strong id="lobbyMemberCapacity"></strong>
+			<p data-lobby-i18n="lobbyHint">Оберіть ролі, підтвердьте готовність і почніть гру.</p>
+		</div>
+		<div id="lobbySummary" class="gm-status-grid lobby-status-grid"></div>
 	</header>
 	<section id="canonicalLobbyPanel" class="lobby-shell">
-		<div id="lobbySummary" class="gm-status-grid"></div>
 		<section id="lobbyGameSetup" class="lobby-setup site-panel" aria-labelledby="lobbySetupTitle">
 			<header class="lobby-setup-header">
-				<div><h3 id="lobbySetupTitle" data-lobby-i18n="lobbySetupTitle">Налаштування гри</h3><p id="lobbySettingsRevision"></p></div>
+				<div><span class="lobby-section-kicker">Vault protocol</span><h3 id="lobbySetupTitle" data-lobby-i18n="lobbySetupTitle">Налаштування гри</h3><p id="lobbySettingsRevision"></p></div>
 				<span id="lobbySettingsDirty" class="lobby-settings-dirty" aria-live="polite"></span>
 			</header>
 			<div id="lobbySettingsChips" class="lobby-settings-chips"></div>
 			<div id="lobbySettingsWarnings" class="lobby-settings-warnings" role="status"></div>
-			<div id="lobbySettingsHostEditor" class="lobby-settings-editor" hidden>
-				<div class="lobby-preset-row">
+			<details id="lobbySettingsHostEditor" class="lobby-settings-editor" hidden>
+				<summary class="lobby-settings-toggle"><span data-lobby-i18n="lobbySetupTitle">Змінити налаштування</span><span aria-hidden="true">+</span></summary>
+				<div class="lobby-settings-editor-body">
+					<div class="lobby-preset-row">
 					<label for="lobbyPresetSelect" data-lobby-i18n="lobbyPreset">Пресет</label>
 					<select id="lobbyPresetSelect" class="input-field lobby-setting-input" data-setting="preset"></select>
-				</div>
-				<div class="lobby-settings-tabs" role="tablist" aria-label="Game setup">
+					</div>
+					<div class="lobby-settings-tabs" role="tablist" aria-label="Game setup">
 					<button type="button" class="active" role="tab" aria-selected="true" aria-controls="lobbySettingsBasic" data-settings-tab="basic" data-lobby-i18n="lobbyTabBasic">Основне</button>
 					<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsThreats" data-settings-tab="threats" data-lobby-i18n="lobbyTabThreats">Загрози</button>
 					<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsRounds" data-settings-tab="rounds" data-lobby-i18n="lobbyTabRounds">Раунди</button>
 					<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsAccess" data-settings-tab="access" data-lobby-i18n="lobbyTabAccess">Доступ</button>
-				</div>
-				<div id="lobbySettingsBasic" class="lobby-settings-pane active" role="tabpanel" data-settings-pane="basic">
+					</div>
+					<div id="lobbySettingsBasic" class="lobby-settings-pane active" role="tabpanel" data-settings-pane="basic">
 					<div class="lobby-setting-grid">
 						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxPlayers">Максимум гравців</span><input id="lobbyMaxPlayers" class="input-field lobby-setting-input" data-setting="maxGameplayPlayers" type="number" min="2" max="12" step="1"></label>
 						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMinPlayers">Мінімум гравців</span><select id="lobbyMinPlayers" class="input-field lobby-setting-input" data-setting="minGameplayPlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
@@ -80,22 +88,29 @@
 					<button id="lobbyPresetImport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetImport">Import JSON</button>
 					<input id="lobbyPresetFile" type="file" accept="application/json,.json" hidden>
 				</div>
-				<div class="lobby-settings-applybar">
+					<div class="lobby-settings-applybar">
 					<button id="lobbySettingsReset" type="button" class="btn-secondary" data-lobby-i18n="lobbyReset">Скинути</button>
 					<button id="lobbySettingsClassic" type="button" class="btn-secondary" data-lobby-i18n="lobbyResetClassic">Класичний</button>
 					<button id="lobbySettingsApply" type="button" class="btn-success" data-lobby-i18n="lobbyApply">Застосувати</button>
+					</div>
 				</div>
-			</div>
+			</details>
 			<div id="lobbySettingsReadOnly" class="lobby-settings-readonly"></div>
 			<div id="lobbySettingsFeedback" class="lobby-settings-feedback" aria-live="polite"></div>
 			<details class="lobby-audit"><summary data-lobby-i18n="lobbyAuditTitle">Останні події лобі</summary><div id="lobbyAuditEvents"></div></details>
 		</section>
 		<section class="lobby-members-section site-panel">
-			<h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3>
+			<header class="lobby-section-heading">
+				<div><span class="lobby-section-kicker">Room roster</span><h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3></div>
+				<span class="lobby-section-marker" aria-hidden="true">01</span>
+			</header>
 			<div id="lobbyMembers" class="gm-diagnostics-list"></div>
 		</section>
 		<section id="lobbyStartSection" class="lobby-start-card site-panel">
-			<h3 data-lobby-i18n="lobbyStartTitle">Готовність до старту</h3>
+			<header class="lobby-section-heading">
+				<div><span class="lobby-section-kicker">Launch sequence</span><h3 data-lobby-i18n="lobbyStartTitle">Готовність до старту</h3></div>
+				<span class="lobby-section-marker" aria-hidden="true">02</span>
+			</header>
 			<div class="lobby-start-metrics"><span id="lobbyReadyProgress"></span><span id="lobbyGameplayProgress"></span></div>
 			<div id="lobbyBlockers" class="lobby-blockers" role="status"></div>
 			<div class="lobby-start-actions">
