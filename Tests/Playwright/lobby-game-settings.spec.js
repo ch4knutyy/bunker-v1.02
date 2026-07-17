@@ -3,12 +3,23 @@ const { createRoom, createTwoPlayerRoom } = require('./game-test-helpers');
 
 test.use({ ignoreHTTPSErrors: true });
 
+async function openLobbySettingsEditor(page) {
+  const editor = page.locator('#lobbySettingsHostEditor');
+  const details = page.locator('details#lobbySettingsHostEditor, details:has(#lobbySettingsHostEditor)').first();
+  await expect(details).toBeVisible({ timeout: 15000 });
+  if (!(await details.evaluate(element => element.open))) {
+    await details.locator('summary').click();
+  }
+  await expect(editor).toBeVisible({ timeout: 15000 });
+}
+
 test('host applies canonical setup, guest updates live, refresh persists and start uses it', async ({ browser }) => {
   const room = await createTwoPlayerRoom(browser, `Lobby settings ${Date.now()}`);
   try {
     await expect(room.host.locator('#lobbySettingsHostEditor')).toBeVisible({ timeout: 15000 });
     await expect(room.guest.locator('#lobbySettingsHostEditor')).toBeHidden();
     await expect(room.guest.locator('#lobbySettingsReadOnly')).toBeVisible();
+    await openLobbySettingsEditor(room.host);
 
     await room.host.locator('#lobbyMaxPlayers').fill('7');
     await room.host.locator('[data-setting="specialCardsPerPlayer"]').selectOption('2');
@@ -29,6 +40,7 @@ test('host applies canonical setup, guest updates live, refresh persists and sta
 
     await room.host.reload();
     await room.guest.reload();
+    await openLobbySettingsEditor(room.host);
     await expect(room.host.locator('#lobbyMaxPlayers')).toHaveValue('7', { timeout: 15000 });
     await expect(room.host.locator('[data-setting="interactiveThreatRate"]')).toHaveValue('Standard');
     await expect(room.guest.locator('#lobbySettingsChips')).toContainText(/2–7/);
@@ -52,6 +64,7 @@ test('mobile setup has no horizontal overflow and local presets restore a draft'
   try {
     await createRoom(page, 'MobileHost', `Mobile lobby ${Date.now()}`, { maxPlayers: 6 });
     await expect(page.locator('#lobbySettingsHostEditor')).toBeVisible({ timeout: 15000 });
+    await openLobbySettingsEditor(page);
     await page.locator('#lobbyLocalPresetName').fill('mobile-safe');
     await page.locator('#lobbyPresetSave').click();
     await expect(page.locator('#lobbySettingsFeedback')).toContainText(/збережено|saved|сохранён/i);
@@ -74,6 +87,7 @@ test('mobile setup has no horizontal overflow and local presets restore a draft'
 test('host transfer discards the old draft and gives the new host canonical editing', async ({ browser }) => {
   const room = await createTwoPlayerRoom(browser, `Lobby transfer ${Date.now()}`);
   try {
+    await openLobbySettingsEditor(room.host);
     await room.host.locator('#lobbyMaxPlayers').fill('8');
     await expect(room.host.locator('#lobbySettingsDirty')).not.toBeEmpty();
     const guestCard = room.host.locator('#lobbyMembers .lobby-member-card').filter({ hasText: 'P2' });
@@ -82,6 +96,7 @@ test('host transfer discards the old draft and gives the new host canonical edit
     await expect(room.host.locator('#lobbySettingsHostEditor')).toBeHidden({ timeout: 15000 });
     await expect(room.host.locator('#lobbySettingsDirty')).toBeEmpty();
     await expect(room.guest.locator('#lobbySettingsHostEditor')).toBeVisible({ timeout: 15000 });
+    await openLobbySettingsEditor(room.guest);
     await expect(room.guest.locator('#lobbyMaxPlayers')).toHaveValue('6');
 
     await room.guest.locator('#lobbyMaxPlayers').fill('7');
@@ -99,6 +114,7 @@ test('disabled scenarios, threats and special cards start without empty surfaces
   room.host.on('pageerror', error => pageErrors.push(error.message));
   room.guest.on('pageerror', error => pageErrors.push(error.message));
   try {
+    await openLobbySettingsEditor(room.host);
     await room.host.locator('[data-setting="specialCardsPerPlayer"]').selectOption('0');
     await room.host.locator('[data-setting="apocalypseEnabled"]').uncheck();
     await room.host.locator('[data-setting="bunkerScenarioEnabled"]').uncheck();
