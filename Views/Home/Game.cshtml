@@ -319,10 +319,16 @@
                         <label class="gm-label" data-gm-i18n="gmHideCharacteristic">Сховати розкриту характеристику</label>
                         <div class="gm-round-actions">
                             <select id="gmHideCharacteristicSelect" class="gm-select">
-                                <option value="Profession">Професія</option><option value="PhysicalHealth">Фізичне здоров'я</option>
-                                <option value="MentalHealth">Психічне здоров'я</option><option value="Hobby">Хобі</option>
-                                <option value="CharacterTrait">Риса характеру</option><option value="Phobia">Фобія</option>
-                                <option value="Inventory">Інвентар</option><option value="Fact">Факт</option>
+                                <option value="Personality">Особистість</option>
+                                <option value="Body">Статура</option>
+                                <option value="Profession">Професія</option>
+                                <option value="PhysicalHealth">Фізичне здоров'я</option>
+                                <option value="MentalHealth">Психічне здоров'я</option>
+                                <option value="Hobby">Хобі</option>
+                                <option value="CharacterTrait">Риса характеру</option>
+                                <option value="Phobia">Фобія</option>
+                                <option value="Inventory">Інвентар</option>
+                                <option value="Fact">Факт</option>
                             </select>
                             <button class="btn-gm-action gm-player-command" data-gm-i18n="gmHide" onclick="hideSelectedCharacteristic()">Сховати</button>
                         </div>
@@ -458,8 +464,13 @@
                 </div>
 
                 <!-- Система подій -->
-                <div class="gm-section" id="gmEventsSection" data-gm-tab="content" style="display: none;">
+                <div class="gm-section"
+                     id="gmEventsSection"
+                     data-gm-tab="content"
+                     style="display: none;">
+
                     <h4 class="gm-section-title">Ігрові події</h4>
+
                     <div class="gm-event-form">
                         <select id="gmEventType" class="gm-select">
                             <option value="info">Інформація</option>
@@ -468,15 +479,67 @@
                             <option value="success">Позитив</option>
                             <option value="catastrophe">Катастрофа</option>
                         </select>
-                        <textarea id="gmEventText" class="input-field gm-event-textarea" placeholder="Текст події..." rows="2"></textarea>
-                        <button class="btn-gm-action btn-send-event" onclick="sendGameEvent()">Відправити подію</button>
+
+                        <textarea id="gmEventText"
+                                  class="input-field gm-event-textarea"
+                                  placeholder="Текст події..."
+                                  rows="2"></textarea>
+
+                        <button type="button"
+                                class="btn-gm-action btn-send-event"
+                                onclick="sendGameEvent()">
+                            Відправити подію
+                        </button>
                     </div>
+
                     <div class="gm-quick-events">
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Землетрус! Частина бункера пошкоджена.', 'catastrophe')">Землетрус</button>
-                        <button class="btn-gm-quick" onclick="addBunkerSupplies()">Запаси</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Загроза зараження! Потрібна дезінфекція.', 'warning')">Зараження</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Зовнішні виживальці просять допомоги.', 'info')">Виживальці</button>
-                        <button class="btn-gm-quick" onclick="sendQuickEvent('Генератор зламався! Світла немає.', 'danger')">Генератор</button>
+                        <button type="button"
+                                class="btn-gm-quick"
+                                onclick="sendQuickEvent(
+                            'Землетрус! Частина бункера пошкоджена.',
+                            'catastrophe'
+                            )">
+                            Землетрус
+                        </button>
+
+                        <button type="button"
+                                class="btn-gm-quick btn-gm-supplies-add"
+                                onclick="addBunkerSupplies()">
+                            + Запаси
+                        </button>
+
+                        <button type="button"
+                                class="btn-gm-quick btn-gm-supplies-remove"
+                                onclick="removeBunkerSupplies()">
+                            − Запаси
+                        </button>
+
+                        <button type="button"
+                                class="btn-gm-quick"
+                                onclick="sendQuickEvent(
+                            'Загроза зараження! Потрібна дезінфекція.',
+                            'warning'
+                            )">
+                            Зараження
+                        </button>
+
+                        <button type="button"
+                                class="btn-gm-quick"
+                                onclick="sendQuickEvent(
+                            'Зовнішні виживальці просять допомоги.',
+                            'info'
+                            )">
+                            Виживальці
+                        </button>
+
+                        <button type="button"
+                                class="btn-gm-quick"
+                                onclick="sendQuickEvent(
+                            'Генератор зламався! Світла немає.',
+                            'danger'
+                            )">
+                            Генератор
+                        </button>
                     </div>
                 </div>
 

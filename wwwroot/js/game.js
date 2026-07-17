@@ -5055,30 +5055,56 @@ function closeImageModal() {
 
 // ==================== BUNKER SUPPLIES FUNCTIONS ====================
 
-// Додати випадкову кількість запасів до бункера (1-12 місяців)
-function addBunkerSupplies() {
+// Додати запаси до бункера
+async function addBunkerSupplies(months = null) {
 	if (!isHost) {
-		alert('Тільки хост може додавати запаси');
+		alert("Тільки хост може додавати запаси");
 		return;
 	}
 
 	if (!currentBunker) {
-		alert('Бункер не визначено. Спочатку почніть гру.');
+		alert("Бункер не визначено. Спочатку почніть гру.");
 		return;
 	}
 
-	console.log("[addBunkerSupplies] Invoking...");
+	let amount = months;
 
-	connection.invoke("AddBunkerSupplies")
-		.then(() => {
-			console.log("[addBunkerSupplies] Success");
-		})
-		.catch(err => {
-			console.error("[addBunkerSupplies] Error:", err);
-			alert('Помилка додавання запасів');
-		});
+	if (amount === null || amount === undefined) {
+		const input = prompt(
+			"Скільки місяців запасів додати?",
+			"3"
+		);
+
+		if (input === null) {
+			return;
+		}
+
+		amount = Number.parseInt(input, 10);
+	}
+
+	if (!Number.isInteger(amount) || amount < 1 || amount > 120) {
+		alert("Вкажіть ціле число від 1 до 120");
+		return;
+	}
+
+	try {
+		console.log("[addBunkerSupplies] Invoking with:", amount);
+
+		await connection.invoke(
+			"AddBunkerSupplies",
+			amount
+		);
+
+		console.log("[addBunkerSupplies] Success");
+	} catch (err) {
+		console.error("[addBunkerSupplies] Error:", err);
+
+		alert(
+			"Помилка додавання запасів:\n" +
+			(err?.message ?? String(err))
+		);
+	}
 }
-
 // Зменшити запаси бункера
 function removeBunkerSupplies(months) {
 	if (!isHost) {
