@@ -6,7 +6,7 @@ const test = require('node:test');
 const root = path.resolve(__dirname, '..', '..');
 const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.Threats.cs'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
-const state = fs.readFileSync(path.join(root, 'Models', 'Game', 'ThreatInteractionState.cs'), 'utf8');
+const state = fs.readFileSync(path.join(root, 'Models', 'Game', 'Threats', 'ThreatInteractionState.cs'), 'utf8');
 
 test('random modifier is generated once and persisted in threat state', () => {
   assert.match(state, /public int\? RandomModifier/);

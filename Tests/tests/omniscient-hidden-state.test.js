@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.OmniscientGm.cs', 'utf8');
-const dto = fs.readFileSync('Models/Game/OmniscientHiddenState.cs', 'utf8');
-const service = fs.readFileSync('Services/OmniscientHiddenStateService.cs', 'utf8');
+const dto = fs.readFileSync('Models/Game/Gm/Omniscient/OmniscientHiddenState.cs', 'utf8');
+const service = fs.readFileSync('Services/Bunker/Gm/Omniscient/OmniscientHiddenStateService.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 
 test('hidden delivery uses one private event and no room broadcast', () => {

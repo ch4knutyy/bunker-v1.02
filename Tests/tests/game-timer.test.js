@@ -3,9 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GameMaster.cs', 'utf8');
-const expiry = fs.readFileSync('Services/GameTimerExpiryService.cs', 'utf8');
+const expiry = fs.readFileSync('Services/Bunker/GameFlow/GameTimerExpiryService.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const model = fs.readFileSync('Models/Game/GameTimerState.cs', 'utf8');
+const model = fs.readFileSync('Models/Game/Timers/GameTimerState.cs', 'utf8');
 
 test('timer commands are authorized, idempotent, and never accept timestamps', () => {
   for (const method of ['StartGameTimer', 'PauseGameTimer', 'ResumeGameTimer', 'RestartGameTimer', 'SetGameTimer', 'AdjustGameTimer', 'StopGameTimer'])

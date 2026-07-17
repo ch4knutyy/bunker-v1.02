@@ -9,7 +9,7 @@ const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 const helpers = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Helpers.cs', 'utf8');
-const service = fs.readFileSync('Services/RoundVotingAdminService.cs', 'utf8');
+const service = fs.readFileSync('Services/Bunker/GameFlow/RoundVotingAdminService.cs', 'utf8');
 
 test('voting availability has one server rule and live public state', () => {
   assert.match(service, /CanStartVoting\(Room room,/);

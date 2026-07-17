@@ -4,7 +4,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..", "..");
 const threatsPath = path.join(root, "Hubs", "BunkerHubGame", "GameHub.Threats.cs");
-const statePath = path.join(root, "Models", "Game", "ThreatInteractionState.cs");
+const statePath = path.join(root, "Models", "Game", "Threats", "ThreatInteractionState.cs");
 
 const threatsSource = fs.readFileSync(threatsPath, "utf8");
 const stateSource = fs.readFileSync(statePath, "utf8");

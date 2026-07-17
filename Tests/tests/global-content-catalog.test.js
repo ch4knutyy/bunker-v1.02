@@ -3,8 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GlobalContentCatalog.cs', 'utf8');
-const service = fs.readFileSync('Services/GlobalContentCatalogService.cs', 'utf8');
-const model = fs.readFileSync('Models/Game/GlobalContentCatalog.cs', 'utf8');
+const service = fs.readFileSync('Services/Bunker/Content/Global/GlobalContentCatalogService.cs', 'utf8');
+const model = fs.readFileSync('Models/Game/Content/GlobalContentCatalog.cs', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');

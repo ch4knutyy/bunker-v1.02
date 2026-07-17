@@ -1,7 +1,7 @@
 const test = require('node:test'); const assert = require('node:assert/strict'); const fs = require('node:fs');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Lobby.cs','utf8');
 const rooms = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Rooms.cs','utf8');
-const dto = fs.readFileSync('Models/Game/LobbyState.cs','utf8');
+const dto = fs.readFileSync('Models/Game/Lobby/LobbyState.cs','utf8');
 const client = fs.readFileSync('wwwroot/js/game.js','utf8');
 test('lobby uses one safe canonical event and preview-token start', () => {
   assert.match(hub,/LobbyStateUpdated/); assert.match(hub,/PreviewStartGameFromLobby/); assert.match(hub,/StartGameFromLobby/);

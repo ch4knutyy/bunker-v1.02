@@ -6,8 +6,8 @@ const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
-const settings = fs.readFileSync('Models/Game/RoomGameSettings.cs', 'utf8');
-const service = fs.readFileSync('Services/RoomGameSettingsService.cs', 'utf8');
+const settings = fs.readFileSync('Models/Game/Rooms/Settings/RoomGameSettings.cs', 'utf8');
+const service = fs.readFileSync('Services/Bunker/Rooms/RoomGameSettingsService.cs', 'utf8');
 const lobby = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Lobby.cs', 'utf8');
 
 test('lobby setup has one compact host editor with read-only public summary', () => {

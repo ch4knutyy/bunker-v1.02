@@ -1,8 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const migration = fs.readFileSync('Services/StableIdMigrationService.cs', 'utf8');
-const commit = fs.readFileSync('Services/GlobalContentCommitService.cs', 'utf8');
+const migration = fs.readFileSync('Services/Bunker/Rooms/StableIdMigrationService.cs', 'utf8');
+const commit = fs.readFileSync('Services/Bunker/Content/Global/GlobalContentCommitService.cs', 'utf8');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GlobalContentCatalog.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const models = fs.readFileSync('Models/GameData/HobbyData.cs', 'utf8') + fs.readFileSync('Models/GameData/CharacterTraitData.cs', 'utf8');
@@ -26,7 +26,7 @@ test('migration reuses canonical commit backup and rollback pipeline', () => {
 });
 
 test('migration UI is restricted to blocked categories and double confirmed', () => {
-  assert.match(client, /\['hobbies','character_traits'\]\.includes\(category\)/);
+  assert.match(client, /\['hobbies',\s*'character_traits'\]\.includes\(category\)/);
   assert.match(client, /PreviewStableIdMigration/);
   assert.match(client, /ApplyStableIdMigration/);
   assert.match(client, /Only missing id fields will be added/);

@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const service = fs.readFileSync('Services/GlobalContentDraftService.cs', 'utf8');
+const service = fs.readFileSync('Services/Bunker/Content/Global/GlobalContentDraftService.cs', 'utf8');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GlobalContentCatalog.cs', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
