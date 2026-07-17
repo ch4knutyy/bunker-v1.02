@@ -104,6 +104,7 @@ namespace Bunker.Hubs
 
 					if (rejoinSuccess && rejoinRoom != null && rejoinPlayer != null)
 					{
+						_playerDisconnectCleanup.Cancel(rejoinRoom.Id, rejoinPlayer.Id);
 						EnsurePlayerHasGeneratedData(rejoinPlayer, rejoinRoom);
 						AppendLobbyPresenceAudit(rejoinRoom, RoomService.GetPlayerKey(rejoinPlayer), "lobby_player_reconnected", "A lobby member reconnected.");
 						await SendRejoinSuccess(roomId, rejoinRoom, rejoinPlayer, wasHost);
@@ -232,6 +233,8 @@ namespace Bunker.Hubs
 					await Clients.Caller.SendAsync("RejoinFailed", error ?? "Не вдалося перепідключитися");
 					return;
 				}
+
+				_playerDisconnectCleanup.Cancel(room.Id, player.Id);
 
 				_logger.LogInformation(
 					"REJOIN SEND: RoomId={RoomId}, State={State}, Apocalypse={Apocalypse}, Bunker={Bunker}",
