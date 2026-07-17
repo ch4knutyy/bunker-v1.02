@@ -1,0 +1,37 @@
+﻿@*
+    Журнал ігрових подій поточної кімнати.
+
+    Події оновлюються через чинну клієнтську
+    та SignalR-логіку.
+*@
+<div class="events-section-wrapper site-major-section">
+	<div class="events-section-main site-panel">
+		<h2 class="section-title site-section-heading">Ігрові події</h2>
+
+		@* Поточна активна подія *@
+		<div id="currentEventPanel" class="current-event-panel" style="display: none;">
+			<div class="current-event-header">
+				<span class="current-event-badge">ПОТОЧНА ПОДІЯ</span>
+				<span id="currentEventTime" class="current-event-time"></span>
+			</div>
+			<div id="currentEventContent" class="current-event-content"></div>
+			<div id="currentEventEffect" class="current-event-effect" style="display: none;">
+				<span class="effect-label">Можливий ефект:</span>
+				<span id="currentEventEffectText" class="effect-text"></span>
+			</div>
+			@* Керування поточною подією для ведучого *@
+			<div id="eventHostControls" class="event-host-controls" style="display: none;">
+				<button class="btn-apply-effect" onclick="applyCurrentEventEffect()">Застосувати ефект</button>
+				<button class="btn-dismiss-event" onclick="dismissCurrentEvent()">Закрити подію</button>
+			</div>
+		</div>
+
+		@* Історія подій кімнати *@
+		<div class="events-history">
+			<h3 class="events-history-title">Історія подій</h3>
+			<div id="events" class="events-list">
+				<p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
+			</div>
+		</div>
+	</div>
+</div>
