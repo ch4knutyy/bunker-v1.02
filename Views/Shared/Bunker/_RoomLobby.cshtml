@@ -9,10 +9,10 @@
 		<div class="lobby-status-heading">
 			<span class="lobby-status-badge" data-lobby-i18n="lobbyLifecycleLobby">Лобі</span>
 			<h2 data-lobby-i18n="lobbyTitle">Лобі кімнати</h2>
-			<p id="lobbyRoomCode" class="lobby-room-code"></p>
+			<p id="lobbyRoomCode" class="lobby-room-code" hidden></p>
 		</div>
 		<div class="lobby-status-copy">
-			<strong id="lobbyMemberCapacity"></strong>
+			<strong id="lobbyMemberCapacity" hidden></strong>
 			<p data-lobby-i18n="lobbyHint">Оберіть ролі, підтвердьте готовність і почніть гру.</p>
 		</div>
 		<div id="lobbySummary" class="gm-status-grid lobby-status-grid"></div>
@@ -115,11 +115,21 @@
 				<div><span class="lobby-section-kicker">Launch sequence</span><h3 data-lobby-i18n="lobbyStartTitle">Готовність до старту</h3></div>
 				<span class="lobby-section-marker" aria-hidden="true">02</span>
 			</header>
-			<div class="lobby-start-metrics"><span id="lobbyReadyProgress"></span><span id="lobbyGameplayProgress"></span></div>
+			<div class="lobby-readiness-status">
+				<strong id="lobbyReadyProgress"></strong>
+				<span id="lobbyGameplayProgress"></span>
+				<progress id="lobbyReadyMeter" max="1" value="0"></progress>
+			</div>
 			<div id="lobbyBlockers" class="lobby-blockers" role="status"></div>
 			<div class="lobby-start-actions">
-				<button id="lobbyStartPreviewButton" type="button" class="btn-secondary lobby-host-command" onclick="previewLobbyStart()" style="display:none;" data-lobby-i18n="lobbyCheckReadiness">Перевірити готовність</button>
-				<button id="lobbyStartPrimaryButton" type="button" class="btn-success lobby-host-command" onclick="startGame()" style="display:none;" data-lobby-i18n="startGame">Почати гру</button>
+				<div class="lobby-start-step">
+					<span aria-hidden="true">01</span>
+					<button id="lobbyStartPreviewButton" type="button" class="btn-secondary lobby-host-command" onclick="previewLobbyStart()" style="display:none;" data-lobby-i18n="lobbyCheckReadiness">Перевірити готовність</button>
+				</div>
+				<div class="lobby-start-step is-primary">
+					<span aria-hidden="true">02</span>
+					<button id="lobbyStartPrimaryButton" type="button" class="btn-success lobby-host-command" onclick="startGame()" style="display:none;" data-lobby-i18n="startGame">Почати гру</button>
+				</div>
 			</div>
 			<div id="lobbyStartPreview" class="lobby-preview-summary" aria-live="polite"></div>
 		</section>
