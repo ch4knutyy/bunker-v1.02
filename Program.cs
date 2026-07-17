@@ -41,6 +41,7 @@ builder.Services.Configure<OmniscientGmOptions>(builder.Configuration.GetSection
 builder.Services.AddSingleton<OmniscientGmAccessPolicy>();
 builder.Services.AddSingleton<OmniscientGmRoleService>();
 builder.Services.AddSingleton<OmniscientHiddenStateService>();
+builder.Services.AddSingleton<OmniscientRequestRateLimitService>();
 builder.Services.AddSingleton<DirectorControlService>();
 builder.Services.AddSingleton<LobbyStartService>();
 builder.Services.AddSingleton<RoomGameSettingsService>();

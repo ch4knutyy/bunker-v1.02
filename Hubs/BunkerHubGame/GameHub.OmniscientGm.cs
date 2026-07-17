@@ -6,7 +6,6 @@ namespace Bunker.Hubs;
 
 public partial class GameHub
 {
-    private readonly Dictionary<string, Queue<DateTimeOffset>> _omniscientRequestWindows = new(StringComparer.Ordinal);
 	public Task<OmniscientGmPreviewDto> PreviewEnterOmniscientGm(
 		string bootstrapKey)
 	{
@@ -122,15 +121,8 @@ public partial class GameHub
 
     private void EnsureOmniscientRateLimit()
     {
-        var now = DateTimeOffset.UtcNow;
-        lock (_omniscientRequestWindows)
-        {
-            if (!_omniscientRequestWindows.TryGetValue(Context.ConnectionId, out var requests))
-                _omniscientRequestWindows[Context.ConnectionId] = requests = new();
-            while (requests.Count > 0 && now - requests.Peek() > TimeSpan.FromSeconds(5)) requests.Dequeue();
-            if (requests.Count >= 12) throw new HubException("omniscient_rate_limited");
-            requests.Enqueue(now);
-        }
+        if (!_omniscientRequestRateLimits.TryConsume(Context.ConnectionId))
+            throw new HubException("omniscient_rate_limited");
     }
 
     private OmniscientRoomStateDto BuildOmniscientHiddenState(Room room, Player player) =>
