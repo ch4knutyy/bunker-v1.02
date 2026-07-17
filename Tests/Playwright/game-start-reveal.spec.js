@@ -8,18 +8,28 @@ test.use({
 async function getInventoryItems(page) {
 	const value = await page.locator('#myPlayerCards').evaluate(container => {
 		const clean = text => String(text || '').replace(/\s+/g, ' ').trim();
-		const cards = [...container.querySelectorAll('.char-card')];
-		const inventoryCard = cards.find(card =>
-			/Інвентар|Inventory|Инвентарь/i.test(clean(card.querySelector('.char-card-title')?.innerText || ''))
-		);
-		const rows = [...(inventoryCard?.querySelectorAll('.char-row') || [])];
-		const itemRow = rows.find(row =>
-			/Предмети|Items|Предметы/i.test(clean(row.querySelector('.char-label')?.innerText || ''))
-		);
-		return clean(itemRow?.querySelector('.char-value')?.innerText || '');
+		const inventoryCard = container.querySelector('[data-characteristic-type="Inventory"]');
+		return clean(inventoryCard?.querySelector('.vault-card-value')?.innerText || '');
 	});
 
 	return value.split(/\s*,\s*/).map(item => item.trim()).filter(Boolean);
+}
+
+async function readyAndStartGame(room) {
+	await expect(room.host.locator('#lobbyReadyButton')).toBeVisible({ timeout: 15000 });
+	await room.host.locator('#lobbyReadyButton').click();
+	await expect(room.host.locator('#lobbyReadyButton')).toContainText(/Скасувати готовність|Cancel readiness|Отменить готовность/i, { timeout: 15000 });
+
+	await expect(room.guest.locator('#lobbyReadyButton')).toBeVisible({ timeout: 15000 });
+	await room.guest.locator('#lobbyReadyButton').click();
+	await expect(room.guest.locator('#lobbyReadyButton')).toContainText(/Скасувати готовність|Cancel readiness|Отменить готовность/i, { timeout: 15000 });
+	await expect(room.host.locator('#lobbyReadyProgress')).toContainText(/2\s+(?:із|of|из)\s+2/i, { timeout: 15000 });
+
+	await room.host.locator('#lobbyStartPreviewButton').click();
+	await expect(room.host.locator('#lobbyStartPrimaryButton')).toBeEnabled({ timeout: 15000 });
+	await room.host.locator('#lobbyStartPrimaryButton').click();
+	await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+	await expect(room.guest.locator('#gameSection')).toBeVisible({ timeout: 15000 });
 }
 
 async function openGmPanel(page) {
@@ -28,6 +38,8 @@ async function openGmPanel(page) {
 		await page.locator('#gmPanelBtn').click();
 	}
 	await expect(panel).toBeVisible({ timeout: 15000 });
+	await page.locator('[data-gm-tab-button="round"]').click();
+	await expect(page.locator('#gmRoundSection')).toBeVisible({ timeout: 15000 });
 }
 
 async function revealAllPlayersForRound(room) {
@@ -60,6 +72,7 @@ test('profession bonus item is shown as one inventory item, not in profession na
 	const room = await createTwoPlayerRoom(browser, `Profession Inventory ${Date.now()}`);
 
 	try {
+		await readyAndStartGame(room);
 		await room.host.evaluate(() => {
 			myPlayerData.profession.name = 'Оборотень (+Ланцюги)';
 			myPlayerData.profession.tooltip = 'Вміє перетворюватися на вовка (міфологія).';
@@ -76,20 +89,13 @@ test('profession bonus item is shown as one inventory item, not in profession na
 
 		const characterValues = await room.host.locator('#myPlayerCards').evaluate(container => {
 			const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
-			const cards = [...container.querySelectorAll('.char-card')];
-			const findCard = titlePattern => cards.find(card =>
-				titlePattern.test(clean(card.querySelector('.char-card-title')?.innerText || ''))
-			);
-			const valueByLabel = (card, labelPattern) => {
-				const rows = [...(card?.querySelectorAll('.char-row') || [])];
-				const row = rows.find(item => labelPattern.test(clean(item.querySelector('.char-label')?.innerText || '')));
-				return clean(row?.querySelector('.char-value')?.innerText || '');
-			};
+			const findCard = type => container.querySelector(`[data-characteristic-type="${type}"]`);
+			const cardValue = card => clean(card?.querySelector('.vault-card-value')?.innerText || '');
 
 			return {
-				profession: valueByLabel(findCard(/Професія|Profession|Профессия/i), /Назва|Name|Название/i),
-				professionTooltip: clean(findCard(/Професія|Profession|Профессия/i)?.querySelector('.tooltip-content')?.innerText || ''),
-				inventory: valueByLabel(findCard(/Інвентар|Inventory|Инвентарь/i), /Предмети|Items|Предметы/i),
+				profession: cardValue(findCard('Profession')),
+				professionTooltip: clean(findCard('Profession')?.querySelector('.tooltip-content')?.innerText || ''),
+				inventory: cardValue(findCard('Inventory')),
 			};
 		});
 
@@ -108,13 +114,10 @@ test('round three completion reveals threat, grants inventory, then unlocks voti
 	const room = await createTwoPlayerRoom(browser, `Round Three Inventory ${Date.now()}`);
 
 	try {
+		await readyAndStartGame(room);
 		const initialHostItems = await getInventoryItems(room.host);
 		const initialGuestItems = await getInventoryItems(room.guest);
 
-		await expect(room.host.locator('#startGameBtn')).toBeVisible({ timeout: 15000 });
-		await room.host.locator('#startGameBtn').click();
-		await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
-		await expect(room.guest.locator('#gameSection')).toBeVisible({ timeout: 15000 });
 		await expect(room.host.locator('#roundStatusNumber')).toHaveText('Раунд 1', { timeout: 15000 });
 		await openGmPanel(room.host);
 		await expect(room.host.locator('#gmRoundSection')).toBeVisible({ timeout: 15000 });
@@ -214,10 +217,7 @@ test('current round and phase survive host refresh', async ({ browser }) => {
 	const room = await createTwoPlayerRoom(browser, `Round Phase Refresh ${Date.now()}`);
 
 	try {
-		await expect(room.host.locator('#startGameBtn')).toBeVisible({ timeout: 15000 });
-		await room.host.locator('#startGameBtn').click();
-		await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
-		await expect(room.guest.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+		await readyAndStartGame(room);
 
 		await revealAndEndRound(room);
 		await expect(room.host.locator('#roundStatusNumber')).toHaveText('Раунд 2', { timeout: 15000 });
@@ -249,9 +249,7 @@ test('host can roll dice once after all players reveal in a round', async ({ bro
 	const room = await createTwoPlayerRoom(browser, `Round Dice ${Date.now()}`);
 
 	try {
-		await expect(room.host.locator('#startGameBtn')).toBeVisible({ timeout: 15000 });
-		await room.host.locator('#startGameBtn').click();
-		await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+		await readyAndStartGame(room);
 
 		await openGmPanel(room.host);
 		await expect(room.host.locator('#rollDiceBtn')).toBeVisible({ timeout: 15000 });
@@ -289,11 +287,7 @@ test('host can start the game and reveal a characteristic', async ({ browser }) 
 	const room = await createTwoPlayerRoom(browser, `Start Reveal ${Date.now()}`);
 
 	try {
-		await expect(room.host.locator('#startGameBtn')).toBeVisible({ timeout: 15000 });
-		await room.host.locator('#startGameBtn').click();
-
-		await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
-		await expect(room.guest.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+		await readyAndStartGame(room);
 
 		const firstRevealButton = room.host.locator('#myPlayerCards .char-btn.locked').first();
 		await expect(firstRevealButton).toBeVisible({ timeout: 15000 });
@@ -317,10 +311,7 @@ test('a player can reveal only one characteristic in the current round', async (
 	const room = await createTwoPlayerRoom(browser, `One Reveal ${Date.now()}`);
 
 	try {
-		await expect(room.host.locator('#startGameBtn')).toBeVisible({ timeout: 15000 });
-		await room.host.locator('#startGameBtn').click();
-
-		await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+		await readyAndStartGame(room);
 
 		const firstRevealButton = room.host.locator('#myPlayerCards .char-btn.locked:not(:disabled)').first();
 		await expect(firstRevealButton).toBeVisible({ timeout: 15000 });
