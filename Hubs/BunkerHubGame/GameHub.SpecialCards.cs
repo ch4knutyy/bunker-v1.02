@@ -1007,7 +1007,7 @@ namespace Bunker.Hubs
             });
         }
 
-        public void RestoreExpiredTemporarySpecialCardEffects(Room room, int completedRound)
+        private void RestoreExpiredTemporarySpecialCardEffects(Room room, int completedRound)
         {
             foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
             {
