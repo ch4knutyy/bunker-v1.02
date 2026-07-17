@@ -162,7 +162,14 @@ public class GameHubForceOutcomePipelineTests
             new ThreatMiniGameRegistry([miniGame]),
             new GameTimerService(TimeProvider.System),
             new ThreatAuditService(TimeProvider.System),
-            NullLogger<GameHub>.Instance);
+            NullLogger<GameHub>.Instance,
+            new PlayerDisconnectCleanupCoordinator(
+                roomService,
+                new GmAuditService(TimeProvider.System),
+                null!,
+                TimeProvider.System,
+                null!,
+                NullLogger<PlayerDisconnectCleanupCoordinator>.Instance));
 
         var player = new Player { Name = "Participant", StablePlayerId = "p1", ConnectionId = "c1", IsConnected = true };
         var room = new Room

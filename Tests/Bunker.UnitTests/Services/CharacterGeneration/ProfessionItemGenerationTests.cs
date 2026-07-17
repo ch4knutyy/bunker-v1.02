@@ -13,7 +13,7 @@ namespace Bunker.UnitTests.Services.CharacterGeneration;
 
 public class ProfessionItemGenerationTests
 {
-    [Fact]
+    [Xunit.Fact]
     public void GeneratedProfessionItemComesFromProfessionItemsAndIsNotInventory()
     {
         var gameData = CreateGameData();
@@ -35,7 +35,7 @@ public class ProfessionItemGenerationTests
         }
     }
 
-    [Fact]
+    [Xunit.Fact]
     public void ProfessionItemInventoryAndProfessionSurviveJsonRoundTrip()
     {
         var gameData = CreateGameData();
@@ -52,7 +52,7 @@ public class ProfessionItemGenerationTests
         Assert.Equal(inventoryBefore, JsonSerializer.Serialize(restored.Inventory));
     }
 
-    [Fact]
+    [Xunit.Fact]
     public void ProfessionsJsonHasOnlyPhysicalItemsAndSynchronizedI18nItems()
     {
         var gameData = CreateGameData();
@@ -79,7 +79,7 @@ public class ProfessionItemGenerationTests
         }
     }
 
-    [Fact]
+    [Xunit.Fact]
     public void ServerThreatItemResolverAcceptsOwnedProfessionItemAndRejectsForgedToken()
     {
         var player = CreatePlayerWithProfessionItem();
