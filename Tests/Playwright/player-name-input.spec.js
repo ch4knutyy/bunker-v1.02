@@ -5,7 +5,7 @@ test.use({
   ignoreHTTPSErrors: true,
 });
 
-const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+const BASE_URL = (process.env.BASE_URL || 'https://localhost:7283').replace(/\/$/, '');
 const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 const HOME_URL = `${BASE_URL}/`;
 
