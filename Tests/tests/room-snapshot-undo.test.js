@@ -4,10 +4,10 @@ const path = require('node:path');
 const test = require('node:test');
 
 const root = path.resolve(__dirname, '..', '..');
-const service = fs.readFileSync(path.join(root, 'Services', 'RoomSnapshotService.cs'), 'utf8');
+const service = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Rooms', 'RoomSnapshotService.cs'), 'utf8');
 const diagnosticsHub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.Diagnostics.cs'), 'utf8');
 const threatHub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.GMThreats.cs'), 'utf8');
-const view = fs.readFileSync(path.join(root, 'Views', 'Home', 'Game.cshtml'), 'utf8');
+const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
 
 test('snapshot service uses explicit state and excludes runtime room fields', () => {

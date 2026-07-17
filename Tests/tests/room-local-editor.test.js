@@ -3,10 +3,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const root = path.resolve(__dirname, '..', '..');
-const service = fs.readFileSync(path.join(root, 'Services', 'RoomLocalEditorService.cs'), 'utf8');
+const service = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Rooms', 'RoomLocalEditorService.cs'), 'utf8');
 const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.RoomLocalEditor.cs'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
-const view = fs.readFileSync(path.join(root, 'Views', 'Home', 'Game.cshtml'), 'utf8');
+const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 
 test('editor is host-authorized and uses typed allowlist without reflection or threat fields', () => {
   assert.match(hub, /TryGetDiagnosticsRoom/);

@@ -4,7 +4,7 @@ const path = require('node:path');
 const test = require('node:test');
 
 const root = path.resolve(__dirname, '..', '..');
-const view = fs.readFileSync(path.join(root, 'Views', 'Home', 'Game.cshtml'), 'utf8');
+const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GameBoard.cshtml'), 'utf8');
 const game = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'wwwroot', 'css', 'game.css'), 'utf8');
 

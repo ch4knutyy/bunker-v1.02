@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
-const model = fs.readFileSync('Models/Game/ThreatAuditEntry.cs', 'utf8');
-const service = fs.readFileSync('Services/Threats/ThreatAuditService.cs', 'utf8');
+const model = fs.readFileSync('Models/Game/Threats/ThreatAuditEntry.cs', 'utf8');
+const service = fs.readFileSync('Services/Bunker/Threats/ThreatAuditService.cs', 'utf8');
 const gmHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GMThreats.cs', 'utf8');
 const threatsHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Threats.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');

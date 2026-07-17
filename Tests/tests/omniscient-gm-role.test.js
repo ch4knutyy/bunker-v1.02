@@ -1,10 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const model = fs.readFileSync('Models/Player/Player.cs','utf8') + fs.readFileSync('Models/Game/Room.cs','utf8') + fs.readFileSync('Models/Game/GmMode.cs','utf8');
-const role = fs.readFileSync('Services/OmniscientGmRoleService.cs','utf8');
-const room = fs.readFileSync('Services/RoomService.cs','utf8');
-const snapshot = fs.readFileSync('Services/RoomSnapshotService.cs','utf8');
+const model = fs.readFileSync('Models/Player/Player.cs','utf8') + fs.readFileSync('Models/Game/Rooms/Room.cs','utf8') + fs.readFileSync('Models/Game/Gm/GmMode.cs','utf8');
+const role = fs.readFileSync('Services/Bunker/Gm/Omniscient/OmniscientGmRoleService.cs','utf8');
+const room = fs.readFileSync('Services/Bunker/Rooms/RoomService.cs','utf8');
+const snapshot = fs.readFileSync('Services/Bunker/Rooms/RoomSnapshotService.cs','utf8');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.OmniscientGm.cs','utf8');
 const client = fs.readFileSync('wwwroot/js/game.js','utf8');
 
@@ -21,6 +21,6 @@ test('preview apply authorization and audit expose no hidden state', () => {
 
 test('UI has double confirmation and public spectator marker only', () => {
   assert.match(client, /This cannot be undone in this room/); assert.match(client, /omniscientCommandPending/); assert.match(client, /omniscientPublicBadge/);
-  const publicMarker = client.slice(client.indexOf('function renderRoomPlayers'), client.indexOf('function toCamelCase'));
+  const publicMarker = client.slice(client.indexOf('function renderRoomPlayers'), client.indexOf('const lobbyGet'));
   assert.doesNotMatch(publicMarker, /omniscientHiddenState|SecretVotes|Inventory/);
 });

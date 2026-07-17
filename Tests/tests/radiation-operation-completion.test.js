@@ -5,8 +5,8 @@ const test = require('node:test');
 
 const root = path.resolve(__dirname, '..', '..');
 const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.Threats.cs'), 'utf8');
-const service = fs.readFileSync(path.join(root, 'Services', 'Threats', 'RadiationLeakMiniGameService.cs'), 'utf8');
-const dto = fs.readFileSync(path.join(root, 'Services', 'Threats', 'IThreatMiniGameService.cs'), 'utf8');
+const service = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Threats', 'RadiationLeakMiniGameService.cs'), 'utf8');
+const dto = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Threats', 'IThreatMiniGameService.cs'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
 
 test('all completion paths converge on the idempotent finalizer', () => {
