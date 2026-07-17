@@ -7776,10 +7776,11 @@ function renderLobbyState() {
 	isHost = Boolean(lobbyGet(me, 'isCurrentHost', 'IsCurrentHost'));
 	const focusedKey = document.activeElement?.dataset?.lobbyFocus || null;
 	const summary = document.getElementById('lobbySummary');
+	const countSeparator = getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із';
 	if (summary) summary.innerHTML = [
 		[t('lobbyActivePlayers'), gameplayCount], [t('lobbySpectators'), lobbyGet(state, 'spectatorCount', 'SpectatorCount') || 0],
-		[t('lobbyReadySummary'), `${readyCount} ${getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із'} ${readyRequiredCount}`], [t('lobbyRoomState'), localizeLobbyLifecycle(lifecycle)]
-	].map(([label, value]) => `<article class="lobby-summary-card"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
+		[t('lobbyReadySummary'), `${readyCount} ${countSeparator} ${readyRequiredCount}`, 'lobby-summary-ready-legacy']
+	].map(([label, value, className = '']) => `<article class="lobby-summary-card ${className}"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	const list = document.getElementById('lobbyMembers');
 	if (list) list.innerHTML = members.map(member => {
 		const id = lobbyGet(member, 'playerId', 'PlayerId'); const role = lobbyGet(member, 'role', 'Role'); const host = lobbyGet(member, 'isCurrentHost', 'IsCurrentHost');
@@ -7799,11 +7800,20 @@ function renderLobbyState() {
 	if (focusedKey) [...document.querySelectorAll('[data-lobby-focus]')].find(element => element.dataset.lobbyFocus === focusedKey)?.focus({ preventScroll: true });
 	window.reinitTooltips?.();
 	const blockers = lobbyGet(state, 'blockers', 'Blockers') || []; const blockersEl = document.getElementById('lobbyBlockers');
-	if (blockersEl) blockersEl.innerHTML = blockers.map(blocker => `<div class="lobby-blocker-row"><span aria-hidden="true">!</span><p>${escapeHtml(localizeLobbyBlocker(blocker))}</p></div>`).join('');
-	const readyProgress = document.getElementById('lobbyReadyProgress'); if (readyProgress) readyProgress.textContent = `${t('lobbyReadyProgress')}: ${readyCount} ${getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із'} ${readyRequiredCount}`;
-	const settings = normalizeLobbySettings(lobbyGet(state,'settings','Settings')); const gameplayProgress = document.getElementById('lobbyGameplayProgress'); if (gameplayProgress) gameplayProgress.textContent = `${t('lobbyGameplayProgress')}: ${gameplayCount} ${getCurrentLanguage() === 'en' ? 'of minimum' : getCurrentLanguage() === 'ru' ? 'из минимум' : 'із мінімум'} ${settings.minGameplayPlayers}`;
+	const waitingMembers = members.filter(member => lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant') && !lobbyGet(member, 'isReady', 'IsReady'));
+	const waitingNames = waitingMembers.map(member => String(lobbyGet(member, 'displayName', 'DisplayName') || '')).filter(Boolean);
+	const allReady = readyRequiredCount > 0 && readyCount >= readyRequiredCount && waitingMembers.length === 0;
+	const validationBlockers = blockers.filter(blocker => blocker !== 'connected_members_not_ready');
+	if (blockersEl) {
+		const readinessMessage = allReady ? t('lobbyPreviewReady') : `${t('lobbyBlockReady')}${waitingNames.length ? `: ${waitingNames.join(', ')}` : ''}`;
+		blockersEl.innerHTML = `<div class="lobby-waiting-row ${allReady ? 'is-ready' : ''}"><span aria-hidden="true">${allReady ? '✓' : '…'}</span><p>${escapeHtml(readinessMessage)}</p></div>${validationBlockers.map(blocker => `<div class="lobby-blocker-row"><span aria-hidden="true">!</span><p>${escapeHtml(localizeLobbyBlocker(blocker))}</p></div>`).join('')}`;
+	}
+	const readyProgress = document.getElementById('lobbyReadyProgress'); if (readyProgress) readyProgress.textContent = `${t('lobbyReadyProgress')}: ${readyCount} ${countSeparator} ${readyRequiredCount}`;
+	const gameplayProgress = document.getElementById('lobbyGameplayProgress'); if (gameplayProgress) gameplayProgress.textContent = allReady ? t('lobbyPreviewReady') : t('lobbyHint');
+	const readyMeter = document.getElementById('lobbyReadyMeter'); if (readyMeter) { readyMeter.max = Math.max(readyRequiredCount, 1); readyMeter.value = Math.min(readyCount, readyMeter.max); }
+	const startSection = document.getElementById('lobbyStartSection'); if (startSection) startSection.classList.toggle('is-ready', allReady);
 	const roomCode = document.getElementById('lobbyRoomCode'); if (roomCode) roomCode.textContent = `${t('lobbyRoomCode')}: ${currentRoom?.id || currentRoom?.Id || '—'}`;
-	const capacity = document.getElementById('lobbyMemberCapacity'); if (capacity) capacity.textContent = `${t('lobbyParticipants')}: ${gameplayCount} / ${settings.maxGameplayPlayers}`;
+	const capacity = document.getElementById('lobbyMemberCapacity'); if (capacity) capacity.textContent = `${t('lobbyParticipants')}: ${gameplayCount}`;
 	const previewButton = document.getElementById('lobbyStartPreviewButton'); if (previewButton) { previewButton.style.display = isHost && lifecycle === 'Lobby' ? '' : 'none'; previewButton.disabled = lobbyCommandPending; }
 	const canApplyStart = !!lobbyStartPreview?.canStart && !!lobbyGet(state, 'canStart', 'CanStart');
 	['startGameBtn', 'lobbyStartPrimaryButton'].forEach(id => { const button = document.getElementById(id); if (!button) return; button.style.display = isHost && lifecycle === 'Lobby' ? 'inline-flex' : 'none'; button.disabled = lobbyCommandPending || !canApplyStart; button.style.pointerEvents = button.disabled ? 'none' : 'auto'; button.textContent = t('startGame'); });
