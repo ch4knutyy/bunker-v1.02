@@ -925,82 +925,139 @@ namespace Bunker.Hubs
             _logger.LogInformation($"Ефект події {eventId} застосовано в кімнаті {room.Name}");
         }
 
-        /// <summary>
-        /// Додати випадкову кількість запасів до бункера (тільки хост)
-        /// </summary>
-        public async Task AddBunkerSupplies()
-        {
-            if (!IsCallerHost())
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може додавати запаси");
-                return;
-            }
+		/// <summary>
+		/// Додати запаси до бункера — тільки для хоста.
+		/// </summary>
+		public async Task AddBunkerSupplies(int months)
+		{
+			if (!IsCallerHost())
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Тільки хост може змінювати запаси"
+				);
+				return;
+			}
 
-            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-            if (room == null) return;
+			if (months <= 0 || months > 120)
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Кількість місяців має бути від 1 до 120"
+				);
+				return;
+			}
 
-            if (room.Bunker == null)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
-                return;
-            }
+			var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+			if (room == null)
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Кімнату не знайдено"
+				);
+				return;
+			}
 
-            // Генеруємо випадкову кількість місяців 1-12
-            int addedMonths = _random.Next(1, 13);
-            
-            // Додаємо до поточних запасів
-            room.Bunker.SuppliesMonths += addedMonths;
+			if (room.Bunker == null)
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Бункер не визначено"
+				);
+				return;
+			}
 
-            _logger.LogInformation($"GM додав {addedMonths} місяців запасів до бункера в кімнаті {room.Name}. Всього: {room.Bunker.SuppliesMonths}");
+			room.Bunker.SuppliesMonths += months;
 
-            // Надсилаємо оновлення всім гравцям
-            await Clients.Group(room.Id).SendAsync("BunkerSuppliesAdded", new
-            {
-                addedMonths = addedMonths,
-                totalSuppliesMonths = room.Bunker.SuppliesMonths,
-                bunker = room.Bunker.ToClientInfo()
-            });
-        }
+			_logger.LogInformation(
+				"GM додав {AddedMonths} місяців запасів у кімнаті {RoomName}. " +
+				"Усього залишилось: {TotalSuppliesMonths}",
+				months,
+				room.Name,
+				room.Bunker.SuppliesMonths
+			);
 
-        /// <summary>
-        /// Зменшити запаси бункера (тільки хост)
-        /// </summary>
-        public async Task RemoveBunkerSupplies(int months)
-        {
-            if (!IsCallerHost())
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати запаси");
-                return;
-            }
+			await Clients.Group(room.Id).SendAsync(
+				"BunkerSuppliesAdded",
+				new
+				{
+					addedMonths = months,
+					totalSuppliesMonths = room.Bunker.SuppliesMonths,
+					bunker = room.Bunker.ToClientInfo()
+				}
+			);
+		}
+		/// <summary>
+		/// Зменшити запаси бункера — тільки для хоста.
+		/// </summary>
+		public async Task RemoveBunkerSupplies(int months)
+		{
+			if (!IsCallerHost())
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Тільки хост може змінювати запаси"
+				);
+				return;
+			}
 
-            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-            if (room == null) return;
+			if (months <= 0)
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Кількість місяців має бути більшою за нуль"
+				);
+				return;
+			}
 
-            if (room.Bunker == null)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
-                return;
-            }
+			var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+			if (room == null)
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Кімнату не знайдено"
+				);
+				return;
+			}
 
-            // Забираємо місяці (мінімум 0)
-            int removedMonths = Math.Min(months, room.Bunker.SuppliesMonths);
-            room.Bunker.SuppliesMonths = Math.Max(0, room.Bunker.SuppliesMonths - months);
+			if (room.Bunker == null)
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Бункер не визначено"
+				);
+				return;
+			}
 
-            _logger.LogInformation($"GM зняв {removedMonths} місяців запасів з бункера в кімнаті {room.Name}. Залишилось: {room.Bunker.SuppliesMonths}");
+			int removedMonths = Math.Min(
+				months,
+				room.Bunker.SuppliesMonths
+			);
 
-            // Надсилаємо оновлення всім гравцям
-            await Clients.Group(room.Id).SendAsync("BunkerSuppliesRemoved", new
-            {
-                removedMonths = removedMonths,
-                totalSuppliesMonths = room.Bunker.SuppliesMonths,
-                bunker = room.Bunker.ToClientInfo()
-            });
-        }
+			room.Bunker.SuppliesMonths -= removedMonths;
 
-        /// <summary>
-        /// Відправити нову подію з ефектом всім гравцям
-        /// </summary>
-        public async Task TriggerNewEvent(string eventName, string eventDescription, string? effectType = null, int? effectValue = null)
+			_logger.LogInformation(
+				"GM зняв {RemovedMonths} місяців запасів у кімнаті {RoomName}. " +
+				"Залишилось: {TotalSuppliesMonths}",
+				removedMonths,
+				room.Name,
+				room.Bunker.SuppliesMonths
+			);
+
+			await Clients.Group(room.Id).SendAsync(
+				"BunkerSuppliesRemoved",
+				new
+				{
+					removedMonths,
+					totalSuppliesMonths = room.Bunker.SuppliesMonths,
+					bunker = room.Bunker.ToClientInfo()
+				}
+			);
+		}
+		/// <summary>
+		/// Відправити нову подію з ефектом всім гравцям
+		/// </summary>
+		public async Task TriggerNewEvent(string eventName, string eventDescription, string? effectType = null, int? effectValue = null)
         {
             if (!IsCallerHost())
             {
@@ -1348,37 +1405,117 @@ namespace Bunker.Hubs
                 "Player was removed from the room.", GetSafeAuditPlayerId(player), commandId, snapshot: kickSnapshot, allowUndo: false);
         }
 
-        public async Task HideRevealedCharacteristic(string targetPlayerId, string characteristicName, string? commandId = null)
-        {
-            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
-                return;
-            }
-            if (!RememberPlayerCommand(room, commandId)) { await SendPlayerHostControlData(room); return; }
-            characteristicName = NormalizeCharacteristicName(characteristicName);
-            if (!GmPlayerStateMutator.CanHideCharacteristic(characteristicName))
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Невідома характеристика");
-                return;
-            }
-            var hideSnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "characteristic_hide", commandId, "Before hiding a revealed characteristic");
-            if (!TrySetCharacteristicHidden(player, characteristicName))
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Невідома характеристика");
-                return;
-            }
-            _roomService.UpdatePlayer(connectionId, player);
-            await SendPersonalPlayerSnapshot(connectionId, player, "characteristic_hidden");
-            await Clients.Group(room.Id).SendAsync("CharacteristicHidden", new { connectionId, characteristicKey = characteristicName });
-            await SendPublicPlayersUpdate(room);
-            await SendPlayerHostControlData(room);
-            await Clients.Caller.SendAsync("GMActionSuccess", new { action = "hide", playerName = player.Name, characteristicName });
-            await AppendGmAudit(room, GetGmActorId(room), "characteristic_hide", GmAuditResult.Success,
-                "A revealed characteristic was hidden.", GetSafeAuditPlayerId(player), commandId, snapshot: hideSnapshot);
-        }
+		public async Task HideRevealedCharacteristic(
+			string targetPlayerId,
+			string characteristicName,
+			string? commandId = null)
+		{
+			if (!TryGetManagedPlayer(
+					targetPlayerId,
+					out var room,
+					out var connectionId,
+					out var player))
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Недостатньо прав або гравця не знайдено");
 
-        public async Task ResyncPlayer(string targetPlayerId, string? commandId = null)
+				return;
+			}
+
+			if (!RememberPlayerCommand(room, commandId))
+			{
+				await SendPlayerHostControlData(room);
+				return;
+			}
+
+			characteristicName = NormalizeCharacteristicName(characteristicName);
+
+			if (!GmPlayerStateMutator.CanHideCharacteristic(characteristicName))
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Невідома характеристика");
+
+				return;
+			}
+
+			var hideSnapshot = CreateMutationSnapshot(
+				room,
+				GetGmActorId(room),
+				"characteristic_hide",
+				commandId,
+				"Before hiding a revealed characteristic");
+
+			if (!TrySetCharacteristicHidden(player, characteristicName))
+			{
+				await Clients.Caller.SendAsync(
+					"ReceiveError",
+					"Невідома характеристика");
+
+				return;
+			}
+
+			room.CurrentRoundReveals ??= new();
+
+			var playerKey = RoomService.GetPlayerKey(player);
+
+			if (room.CurrentRoundReveals.TryGetValue(
+					playerKey,
+					out var revealedThisRound)
+				&& string.Equals(
+					revealedThisRound,
+					characteristicName,
+					StringComparison.OrdinalIgnoreCase))
+			{
+				room.CurrentRoundReveals.Remove(playerKey);
+			}
+
+			_roomService.UpdatePlayer(connectionId, player);
+
+			await SendPersonalPlayerSnapshot(
+				connectionId,
+				player,
+				"characteristic_hidden");
+
+			await Clients.Group(room.Id).SendAsync(
+				"CharacteristicHidden",
+				new
+				{
+					connectionId,
+					characteristicKey = characteristicName
+				});
+
+			await SendPublicPlayersUpdate(room);
+			await SendPlayerHostControlData(room);
+
+			var roundState = BuildRoundState(room);
+
+			await Clients.Group(room.Id).SendAsync(
+				"RoundStateUpdated",
+				roundState);
+
+			await Clients.Caller.SendAsync(
+				"GMActionSuccess",
+				new
+				{
+					action = "hide",
+					playerName = player.Name,
+					characteristicName
+				});
+
+			await AppendGmAudit(
+				room,
+				GetGmActorId(room),
+				"characteristic_hide",
+				GmAuditResult.Success,
+				"A revealed characteristic was hidden.",
+				GetSafeAuditPlayerId(player),
+				commandId,
+				snapshot: hideSnapshot);
+		}
+
+		public async Task ResyncPlayer(string targetPlayerId, string? commandId = null)
         {
             if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
             {

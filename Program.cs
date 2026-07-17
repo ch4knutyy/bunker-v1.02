@@ -11,7 +11,10 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+	options.EnableDetailedErrors = true;
+});
 
 builder.Services.AddSingleton<GameDataService>();
 builder.Services.AddSingleton<CharacterGeneratorService>();
