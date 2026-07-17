@@ -1,17 +1,21 @@
-# .NET
+# .NET build artifacts
 bin/
 obj/
 .vs/
+
+# Visual Studio user-specific files
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
 *.csproj.user
 
-# Local settings
+# Local settings and secrets
 .env
-appsettings.Development.json
 appsettings.Local.json
+
+# Keep appsettings.Development.json in Git.
+# Store real secrets with .NET User Secrets instead.
 
 # Node / Playwright
 node_modules/
@@ -24,19 +28,22 @@ playwright/.auth/
 # Logs
 *.log
 
-# OS / Editor
+# OS / editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 
-# Reject/patch files
+# Patch and rejected merge files
 *.rej
 
-# Local dev / AI agent artifacts (not needed for the project)
+# Local development and AI-agent artifacts
 .emergent/
+.agents/
 memory/
 test_reports/
 .nuget/
 .tmp/
+
+# Accidental local files
 tatus
