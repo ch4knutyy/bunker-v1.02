@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const service = fs.readFileSync('Services/GlobalContentDraftService.cs', 'utf8');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GlobalContentCatalog.cs', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 
 test('draft lifecycle is in-memory and exposes no commit or filesystem writer', () => {

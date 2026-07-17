@@ -1,5 +1,5 @@
 const test = require('node:test'); const assert = require('node:assert/strict'); const fs = require('node:fs');
-const client = fs.readFileSync('wwwroot/js/game.js','utf8'); const view = fs.readFileSync('Views/Home/Game.cshtml','utf8'); const css = fs.readFileSync('wwwroot/css/game.css','utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers'); const client = fs.readFileSync('wwwroot/js/game.js','utf8'); const view = readBunkerView(); const css = fs.readFileSync('wwwroot/css/game.css','utf8');
 test('UA RU EN lobby labels use localization keys', () => {
   for (const key of ['lobbyActivePlayers','lobbySpectators','lobbyReadySummary','lobbyRoomState','lobbyRoleHostPlayer','lobbyCheckReadiness']) {
     assert.match(client, new RegExp(`${key}:`));

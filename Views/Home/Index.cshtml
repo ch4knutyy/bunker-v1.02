@@ -15,7 +15,7 @@
                 хто має шанс потрапити до бункера.
             </p>
             <div class="landing-actions" aria-label="Основні дії">
-                <a class="landing-btn landing-btn--primary" href="/play">Почати гру</a>
+                <a class="landing-btn landing-btn--primary" asp-controller="Games" asp-action="Index">Почати гру</a>
                 <a class="landing-btn" href="/rules">Правила</a>
                 <a class="landing-btn" href="https://github.com/ch4knutyy/bunker-v1.02" target="_blank" rel="noopener noreferrer">GitHub</a>
                 <a class="landing-btn" href="#author">Про автора</a>
@@ -39,7 +39,7 @@
             </dl>
         </div>
         <div class="session-actions">
-            <a class="landing-btn landing-btn--primary" href="/game">Повернутися</a>
+            <a class="landing-btn landing-btn--primary" asp-controller="Bunker" asp-action="Index">Повернутися</a>
             <button id="previousSessionForget" class="landing-btn landing-btn--muted" type="button">Забути сесію</button>
         </div>
     </section>

@@ -6,7 +6,7 @@ test.use({
 });
 
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
-const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 
 test.beforeEach(async ({ page }) => {
   await setupNgrokBypass(page);

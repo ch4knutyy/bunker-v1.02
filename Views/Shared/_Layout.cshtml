@@ -27,10 +27,10 @@
 
     var isHomeActive = currentPath == "/";
     var isPlayActive =
-        currentPath == "/play" ||
-        currentPath.StartsWith("/play/") ||
-        currentPath == "/game" ||
-        currentPath.StartsWith("/game/") ||
+        currentPath == "/games" ||
+        currentPath.StartsWith("/games/") ||
+        currentPath == "/bunker" ||
+        currentPath.StartsWith("/bunker/") ||
         currentPath == "/room" ||
         currentPath.StartsWith("/room/") ||
         currentPath == "/rooms" ||
@@ -41,7 +41,7 @@
     var isRulesActive =
         currentPath == "/rules" ||
         currentPath.StartsWith("/rules/");
-}
+    }
 
     @* Головна навігація сайту *@
     <header class="main-header">
@@ -56,7 +56,7 @@
 
             <nav class="main-nav">
                 <a class="nav-link @(isHomeActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index" data-i18n="navHome">Головна</a>
-                <a href="/play" class="nav-link @(isPlayActive ? "active" : "")" data-i18n="navPlay">Грати</a>
+                <a class="nav-link @(isPlayActive ? "active" : "")" asp-controller="Games" asp-action="Index" data-i18n="navPlay">Грати</a>
                 <a href="/rules" class="nav-link @(isRulesActive ? "active" : "")" data-i18n="navRules">Правила</a>
                 <a href="/#author" class="nav-link" data-i18n="navAuthor">Автор</a>
                 <a href="https://github.com/ch4knutyy/bunker-v1.02" class="nav-link" target="_blank" rel="noopener noreferrer" data-i18n="navGithub">GitHub</a>

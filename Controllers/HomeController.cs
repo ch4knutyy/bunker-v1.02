@@ -12,15 +12,17 @@ namespace Bunker.Controllers
 		}
 
 		[HttpGet("/game")]
+		[HttpGet("/Home/Game")]
 		public IActionResult Game()
 		{
-			return View();
+			return RedirectToAction("Index", "Bunker");
 		}
 
 		[HttpGet("/play")]
+		[HttpGet("/Home/Play")]
 		public IActionResult Play()
 		{
-			return View();
+			return RedirectToAction("Index", "Games");
 		}
 
 		[HttpGet("/rules")]
@@ -29,24 +31,10 @@ namespace Bunker.Controllers
 			return View();
 		}
 
-		[HttpGet("/spy")]
+		[HttpGet("/Home/Spy")]
 		public IActionResult Spy()
 		{
-			return View();
-		}
-
-		[HttpGet("/spy/{roomCode}")]
-		public IActionResult SpyRoom(string roomCode)
-		{
-			ViewData["InviteSpyRoomCode"] = roomCode;
-			return View("Spy");
-		}
-
-		[HttpGet("/room/{roomId}")]
-		public IActionResult Room(string roomId)
-		{
-			ViewData["InviteRoomId"] = roomId;
-			return View("Game");
+			return RedirectToAction("Index", "Spy");
 		}
 
 		public IActionResult Privacy()

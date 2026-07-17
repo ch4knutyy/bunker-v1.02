@@ -4,7 +4,8 @@ const fs = require('node:fs');
 
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GameMaster.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 
 test('server uses one absolute validated capacity command', () => {
   const method = hub.match(/Task SetBunkerCapacity[\s\S]*?Task RegenerateBunker/)?.[0] || '';

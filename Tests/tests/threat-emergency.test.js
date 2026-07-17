@@ -6,7 +6,8 @@ const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GMThreats.cs', 'utf8');
 const mutator = fs.readFileSync('Services/Threats/GMThreatStateMutator.cs', 'utf8');
 const threats = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Threats.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 
 test('abort is terminal, preserves CurrentThreat, and applies no effects', () => {
   const abort = mutator.match(/public static bool Abort[\s\S]*?public static bool Restart/)?.[0] || '';

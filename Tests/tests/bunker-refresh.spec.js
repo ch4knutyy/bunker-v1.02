@@ -11,7 +11,7 @@ test.use({
 test.describe.configure({ mode: 'serial' });
 
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
-const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 const HOME_URL = `${BASE_URL}/`;
 
 test.beforeEach(async ({ page }) => {

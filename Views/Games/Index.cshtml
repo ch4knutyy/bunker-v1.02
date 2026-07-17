@@ -12,7 +12,7 @@
             <div class="mode-card-marker"></div>
             <h2 data-i18n="bunkerMode">Бункер</h2>
             <p data-i18n="bunkerModeDescription">Класичний режим виживання та голосування в бункері.</p>
-            <a class="mode-action" href="/game" data-i18n="playAction">Грати</a>
+            <a class="mode-action" asp-controller="Bunker" asp-action="Index" data-i18n="playAction">Грати</a>
         </article>
 
         <article class="mode-card mode-card-active">
@@ -22,7 +22,7 @@
                 <span data-i18n="mvpReady">MVP</span>
             </div>
             <p data-i18n="spyModeDescription">Режим соціальної дедукції: один шпигун не знає локацію.</p>
-            <a class="mode-action" href="/spy" data-i18n="playAction">Грати</a>
+            <a class="mode-action" asp-controller="Spy" asp-action="Index" data-i18n="playAction">Грати</a>
         </article>
 
         <article class="mode-card mode-card-disabled" aria-disabled="true">

@@ -10,7 +10,7 @@ test.use({
 test.describe.configure({ mode: 'serial' });
 
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
-const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 const SAMPLE_COUNT = Number(process.env.SAMPLE_COUNT || 100);
 
 const CARD_HEADINGS = [
