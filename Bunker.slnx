@@ -1,11 +1,6 @@
 <Solution>
-  <Folder Name="/Tests/" />
-  <Folder Name="/Tests/Bunker.UnitTests/">
-    <File Path="Bunker.UnitTests.csproj" />
-  </Folder>
-  <Folder Name="/Tests/Services/" />
-  <Folder Name="/Tests/Services/Threats/">
-    <File Path="ThreatScalingServiceTests.cs" />
-  </Folder>
   <Project Path="Bunker.csproj" />
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Bunker.UnitTests/Bunker.UnitTests.csproj" />
+  </Folder>
 </Solution>
