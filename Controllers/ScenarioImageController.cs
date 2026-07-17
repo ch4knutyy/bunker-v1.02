@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Bunker.Services;
 using Bunker.Hubs;
+using Bunker.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Controllers
@@ -45,12 +46,11 @@ namespace Bunker.Controllers
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
             // Перевірка прав хоста
-            var room = _roomService.GetRoom(roomId);
-            if (room == null)
-                return NotFound(new { error = "Кімнату не знайдено" });
-                
-            if (!IsValidHostRequest(room, hostToken))
-                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може завантажувати зображення" });
+            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            if (hostRoomResult.Failure is { } failure)
+                return CreateHostRoomError(failure, "Тільки хост може завантажувати зображення");
+
+            var room = hostRoomResult.Room!;
 
             // Зберігаємо файл
             using var stream = file.OpenReadStream();
@@ -97,12 +97,11 @@ namespace Bunker.Controllers
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
             // Перевірка прав хоста
-            var room = _roomService.GetRoom(roomId);
-            if (room == null)
-                return NotFound(new { error = "Кімнату не знайдено" });
-                
-            if (!IsValidHostRequest(room, hostToken))
-                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може завантажувати зображення" });
+            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            if (hostRoomResult.Failure is { } failure)
+                return CreateHostRoomError(failure, "Тільки хост може завантажувати зображення");
+
+            var room = hostRoomResult.Room!;
 
             // Зберігаємо файл
             using var stream = file.OpenReadStream();
@@ -147,12 +146,11 @@ namespace Bunker.Controllers
             if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(threatId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            var room = _roomService.GetRoom(roomId);
-            if (room == null)
-                return NotFound(new { error = "Кімнату не знайдено" });
+            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            if (hostRoomResult.Failure is { } failure)
+                return CreateHostRoomError(failure, "Тільки хост може завантажувати зображення");
 
-            if (!IsValidHostRequest(room, hostToken))
-                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може завантажувати зображення" });
+            var room = hostRoomResult.Room!;
 
             if (!room.IsThreatRevealed || room.CurrentThreat == null || room.CurrentThreat.Id != threatId)
                 return BadRequest(new { error = "Загрозу ще не розкрито" });
@@ -193,12 +191,11 @@ namespace Bunker.Controllers
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
             // Перевірка прав хоста
-            var room = _roomService.GetRoom(roomId);
-            if (room == null)
-                return NotFound(new { error = "Кімнату не знайдено" });
-                
-            if (!IsValidHostRequest(room, hostToken))
-                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може видаляти зображення" });
+            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            if (hostRoomResult.Failure is { } failure)
+                return CreateHostRoomError(failure, "Тільки хост може видаляти зображення");
+
+            var room = hostRoomResult.Room!;
 
             // Видаляємо файл
             _imageService.RemoveApocalypseImage(apocalypseId);
@@ -234,12 +231,11 @@ namespace Bunker.Controllers
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
             // Перевірка прав хоста
-            var room = _roomService.GetRoom(roomId);
-            if (room == null)
-                return NotFound(new { error = "Кімнату не знайдено" });
-                
-            if (!IsValidHostRequest(room, hostToken))
-                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може видаляти зображення" });
+            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            if (hostRoomResult.Failure is { } failure)
+                return CreateHostRoomError(failure, "Тільки хост може видаляти зображення");
+
+            var room = hostRoomResult.Room!;
 
             // Видаляємо файл
             _imageService.RemoveBunkerImage(bunkerId);
@@ -274,12 +270,11 @@ namespace Bunker.Controllers
             if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(threatId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            var room = _roomService.GetRoom(roomId);
-            if (room == null)
-                return NotFound(new { error = "Кімнату не знайдено" });
+            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            if (hostRoomResult.Failure is { } failure)
+                return CreateHostRoomError(failure, "Тільки хост може видаляти зображення");
 
-            if (!IsValidHostRequest(room, hostToken))
-                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Тільки хост може видаляти зображення" });
+            var room = hostRoomResult.Room!;
 
             if (!room.IsThreatRevealed || room.CurrentThreat == null || room.CurrentThreat.Id != threatId)
                 return BadRequest(new { error = "Загрозу ще не розкрито" });
@@ -345,11 +340,43 @@ namespace Bunker.Controllers
             return $"{roomId}_{threatId}";
         }
 
-        private static bool IsValidHostRequest(Bunker.Models.Room room, string? hostToken)
+        private HostRoomResult GetHostRoom(string roomId, string? hostToken)
+        {
+            var room = _roomService.GetRoom(roomId);
+            if (room == null)
+                return new HostRoomResult(null, HostRoomFailure.RoomNotFound);
+
+            if (!IsValidHostRequest(room, hostToken))
+                return new HostRoomResult(null, HostRoomFailure.InvalidHostToken);
+
+            return new HostRoomResult(room, null);
+        }
+
+        private IActionResult CreateHostRoomError(HostRoomFailure failure, string invalidHostTokenMessage)
+        {
+            return failure switch
+            {
+                HostRoomFailure.RoomNotFound => NotFound(new { error = "Кімнату не знайдено" }),
+                HostRoomFailure.InvalidHostToken => StatusCode(
+                    StatusCodes.Status403Forbidden,
+                    new { error = invalidHostTokenMessage }),
+                _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null)
+            };
+        }
+
+        private static bool IsValidHostRequest(Room room, string? hostToken)
         {
             return !string.IsNullOrWhiteSpace(hostToken) &&
                 !string.IsNullOrWhiteSpace(room.HostToken) &&
                 string.Equals(room.HostToken, hostToken, StringComparison.Ordinal);
+        }
+
+        private sealed record HostRoomResult(Room? Room, HostRoomFailure? Failure);
+
+        private enum HostRoomFailure
+        {
+            RoomNotFound,
+            InvalidHostToken
         }
     }
 }
