@@ -5,7 +5,8 @@ const test = require('node:test');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const tooltipCss = fs.readFileSync('wwwroot/css/tooltip.css', 'utf8');
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 const layout = fs.readFileSync('Views/Shared/_Layout.cshtml', 'utf8');
 const sitePass = css.slice(css.indexOf('/* ==================== GLOBAL GAME SITE VISUAL PASS'));
 
@@ -23,7 +24,7 @@ test('main command shell is wider and has both outer and inner border treatment'
 });
 
 test('navbar keeps its routes and gains a scoped active premium treatment', () => {
-  for (const route of ['asp-action="Index"', 'href="/play"', 'href="/rules"', 'href="/#author"', 'github.com/ch4knutyy/bunker-v1.02']) assert.match(layout, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const route of ['asp-controller="Games"', 'asp-action="Index"', 'href="/rules"', 'href="/#author"', 'github.com/ch4knutyy/bunker-v1.02']) assert.match(layout, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(sitePass, /\.main-header\s*\{[^}]*border-bottom:[^}]*box-shadow/);
   assert.match(sitePass, /\.nav-link\.active\s*\{[^}]*border-color:[^}]*background:/);
   assert.match(sitePass, /\.language-btn\.active,[\s\S]*?background:\s*var\(--site-accent\)/);

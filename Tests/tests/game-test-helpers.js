@@ -1,7 +1,7 @@
 const { expect } = require('@playwright/test');
 const { BASE_URL, setupNgrokBypass, newContextWithNgrokBypass } = require('./ngrok-bypass');
 
-const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 
 async function preparePage(page) {
 	await setupNgrokBypass(page);

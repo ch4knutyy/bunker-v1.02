@@ -4,7 +4,8 @@ const test = require('node:test');
 
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 
 function method(source, name) {
   const start = source.indexOf(`function ${name}(`);

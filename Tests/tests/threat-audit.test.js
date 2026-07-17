@@ -7,7 +7,8 @@ const service = fs.readFileSync('Services/Threats/ThreatAuditService.cs', 'utf8'
 const gmHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GMThreats.cs', 'utf8');
 const threatsHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Threats.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 
 test('canonical audit is bounded, sequenced, clocked and locked on ThreatSyncRoot', () => {
   assert.match(service, /MaxEntriesPerRoom = 200/);

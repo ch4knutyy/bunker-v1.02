@@ -5,7 +5,8 @@ const fs = require('node:fs');
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GlobalContentCatalog.cs', 'utf8');
 const service = fs.readFileSync('Services/GlobalContentCatalogService.cs', 'utf8');
 const model = fs.readFileSync('Models/Game/GlobalContentCatalog.cs', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 
 test('catalog is read-only, allowlisted and capability guarded', () => {

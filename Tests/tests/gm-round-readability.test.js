@@ -2,7 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 
 test('round blocks have labels, spacing, wrapping and responsive layout', () => {

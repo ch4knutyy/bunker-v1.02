@@ -12,7 +12,7 @@ test.use({
 
 test.describe.configure({ mode: 'serial' });
 
-const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 const LOBBY_MEMBERS = '#lobbyMembers';
 
 test.beforeEach(async ({ page }) => {

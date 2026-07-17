@@ -13,7 +13,7 @@ test.use({
 test.describe.configure({ mode: 'serial' });
 
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
-const GAME_URL = process.env.GAME_URL || `${BASE_URL}/game`;
+const GAME_URL = process.env.GAME_URL || `${BASE_URL}/Bunker`;
 
 const SAMPLE_ROOM_COUNT = positiveInt(process.env.SAMPLE_ROOM_COUNT, 1000);
 const PLAYERS_PER_ROOM = positiveInt(process.env.PLAYERS_PER_ROOM, 6);

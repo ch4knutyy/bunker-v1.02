@@ -7,7 +7,8 @@ const threatsHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Threats.cs', 'utf
 const mutator = fs.readFileSync('Services/Threats/GMThreatStateMutator.cs', 'utf8');
 const auditModel = fs.readFileSync('Models/Game/ThreatAuditEntry.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 
 test('preview is host-authorized, fingerprinted and does not mutate or broadcast room state', () => {
   const preview = gmHub.match(/Task GMPreviewForceThreat[\s\S]*?Task GMConfirmForceThreat/)?.[0] || '';

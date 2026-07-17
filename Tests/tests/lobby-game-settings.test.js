@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
-const view = fs.readFileSync('Views/Home/Game.cshtml', 'utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers');
+const view = readBunkerView();
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const settings = fs.readFileSync('Models/Game/RoomGameSettings.cs', 'utf8');
 const service = fs.readFileSync('Services/RoomGameSettingsService.cs', 'utf8');
