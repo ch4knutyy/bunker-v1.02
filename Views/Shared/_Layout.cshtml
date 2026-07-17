@@ -43,7 +43,7 @@
         currentPath.StartsWith("/rules/");
 }
 
-    <!-- Header with Navigation -->
+    @* Головна навігація сайту *@
     <header class="main-header">
         <div class="header-container">
             <a class="logo-section" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Vault Judgment">
@@ -73,12 +73,12 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    @* Вміст поточного представлення *@
     <main class="main-content">
         @RenderBody()
     </main>
 
-    <!-- Footer -->
+    @* Нижня частина сайту *@
     <footer class="main-footer">
         <div class="footer-container">
             <p>&copy; 2026 - Vault Judgment - Всі права захищено</p>

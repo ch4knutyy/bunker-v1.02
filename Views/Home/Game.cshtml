@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Грати";
+	ViewData["Title"] = "Грати";
 }
 
 <link rel="stylesheet" href="/css/site.css" />
@@ -7,968 +7,213 @@
 <link rel="stylesheet" href="/css/game.css" />
 
 <div class="game-container site-game-shell">
-    <div class="top-bar site-titlebar">
-        <h1 class="page-title">Vault Judgment</h1>
-    </div>
+	<div class="top-bar site-titlebar">
+		<h1 class="page-title">Vault Judgment</h1>
+	</div>
 
-    <!-- Lobby Section (вибір кімнати) -->
-    <div id="lobbySection">
-        <div class="lobby-container">
-            <!-- Створення кімнати -->
-            <div class="create-room-panel site-panel">
-                <h2 class="section-title site-section-heading">Створити кімнату</h2>
-                <div class="create-room-form">
-                    <input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" data-testid="player-name-input" />
-                    <input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." data-testid="room-name-input" />
-                    <div class="form-row">
-                        <input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="2" max="12" data-testid="room-max-players-input" />
-                        <input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" data-testid="room-password-input" />
-                    </div>
-                    <button type="button" id="createRoomBtn" class="btn-primary" data-testid="create-room-btn">Створити кімнату</button>
-                    <p id="connectionStatus" class="connection-status" style="display: none; margin-top: 0.5rem; font-size: 0.85rem;"></p>
-                </div>
-            </div>
+	@* Вибір і створення кімнати *@
+	<div id="lobbySection">
+		<div class="lobby-container">
+			@* Створення нової кімнати *@
+			<div class="create-room-panel site-panel">
+				<h2 class="section-title site-section-heading">Створити кімнату</h2>
+				<div class="create-room-form">
+					<input id="playerNameCreate" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" data-testid="player-name-input" />
+					<input id="roomName" type="text" class="input-field" placeholder="Назва кімнати..." data-testid="room-name-input" />
+					<div class="form-row">
+						<input id="maxPlayers" type="number" class="input-field small" placeholder="Макс. гравців" value="12" min="2" max="12" data-testid="room-max-players-input" />
+						<input id="roomPassword" type="password" class="input-field" placeholder="Пароль (необов'язково)" data-testid="room-password-input" />
+					</div>
+					<button type="button" id="createRoomBtn" class="btn-primary" data-testid="create-room-btn">Створити кімнату</button>
+					<p id="connectionStatus" class="connection-status" style="display: none; margin-top: 0.5rem; font-size: 0.85rem;"></p>
+				</div>
+			</div>
 
-            <!-- Список кімнат -->
-            <div class="rooms-list-panel site-panel">
-                <h2 class="section-title site-section-heading">Доступні кімнати</h2>
-                <div id="roomsList" class="rooms-list">
-                    <p class="no-rooms">Завантаження кімнат...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+			@* Список доступних кімнат *@
+			<div class="rooms-list-panel site-panel">
+				<h2 class="section-title site-section-heading">Доступні кімнати</h2>
+				<div id="roomsList" class="rooms-list">
+					<p class="no-rooms">Завантаження кімнат...</p>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- Room Section (в кімнаті / лобі) -->
-    <div id="roomSection" style="display: none;">
-        <div class="room-header site-command-bar">
-            <div class="room-info site-command-identity">
-                <h2 class="room-name" id="currentRoomName">Кімната</h2>
-                <span class="room-id" id="currentRoomId">ID: ---</span>
-                <span class="room-state" id="currentRoomState">Лобі</span>
-            </div>
-            <div class="room-actions site-command-actions">
-                <button id="copyInviteLinkBtn" class="btn-secondary" type="button" data-testid="copy-invite-link-btn" onclick="copyInviteLink()">Посилання</button>
-                <button id="gmPanelBtn" class="btn-gm" onclick="toggleGMPanel()" style="display: none;">🎮 GM Панель</button>
-                <button id="startVotingBtn" class="btn-vote" onclick="startVoting()" style="display: none;">🗳️ Голосування</button>
-                <button id="startGameBtn" class="btn-success" onclick="startGame()" style="display: none;">Почати гру</button>
-                <button class="btn-danger" onclick="leaveRoom()">Покинути кімнату</button>
-            </div>
-        </div>
+	@* Поточна кімната: lobby та активна гра *@
+	<div id="roomSection" style="display: none;">
+		<div class="room-header site-command-bar">
+			<div class="room-info site-command-identity">
+				<h2 class="room-name" id="currentRoomName">Кімната</h2>
+				<span class="room-id" id="currentRoomId">ID: ---</span>
+				<span class="room-state" id="currentRoomState">Лобі</span>
+			</div>
+			<div class="room-actions site-command-actions">
+				<button id="copyInviteLinkBtn" class="btn-secondary" type="button" data-testid="copy-invite-link-btn" onclick="copyInviteLink()">Посилання</button>
+				<button id="gmPanelBtn" class="btn-gm" onclick="toggleGMPanel()" style="display: none;">🎮 GM Панель</button>
+				<button id="startVotingBtn" class="btn-vote" onclick="startVoting()" style="display: none;">🗳️ Голосування</button>
+				<button id="startGameBtn" class="btn-success" onclick="startGame()" style="display: none;">Почати гру</button>
+				<button class="btn-danger" onclick="leaveRoom()">Покинути кімнату</button>
+			</div>
+		</div>
 
-        <div id="omniscientGmBanner" class="global-catalog-warning" style="display: none;" role="status"></div>
+		<div id="omniscientGmBanner" class="global-catalog-warning" style="display: none;" role="status"></div>
 
-        <div id="roundStatusPanel" class="round-status-panel site-round-hud" style="display: none;">
-            <div class="round-status-main site-hud-module module-round">
-                <span class="round-status-label">Поточний раунд</span>
-                <strong id="roundStatusNumber">Раунд 1</strong>
-            </div>
-            <div class="round-status-details site-hud-module module-phase">
-                <span id="roundStatusPhase">Розкриття характеристик</span>
-                <span id="roundStatusProgress">0/0 відкрили</span>
-                <span id="roundDiceResult" class="round-dice-result" style="display: none;"></span>
-            </div>
-            <div id="publicGameTimer" class="public-game-timer site-hud-module module-timer">
-                <strong id="publicGameTimerValue">05:00</strong>
-                <span id="publicGameTimerStatus">Зупинено</span>
-                <small id="publicGameTimerLabel"></small>
-            </div>
-        </div>
+		@* Публічний стан поточного раунду *@
+		<div id="roundStatusPanel" class="round-status-panel site-round-hud" style="display: none;">
+			<div class="round-status-main site-hud-module module-round">
+				<span class="round-status-label">Поточний раунд</span>
+				<strong id="roundStatusNumber">Раунд 1</strong>
+			</div>
+			<div class="round-status-details site-hud-module module-phase">
+				<span id="roundStatusPhase">Розкриття характеристик</span>
+				<span id="roundStatusProgress">0/0 відкрили</span>
+				<span id="roundDiceResult" class="round-dice-result" style="display: none;"></span>
+			</div>
+			<div id="publicGameTimer" class="public-game-timer site-hud-module module-timer">
+				<strong id="publicGameTimerValue">05:00</strong>
+				<span id="publicGameTimerStatus">Зупинено</span>
+				<small id="publicGameTimerLabel"></small>
+			</div>
+		</div>
 
-        <!-- Voting Panel -->
-        <div id="votingPanel" class="voting-panel site-panel" style="display: none;">
-            <div class="voting-header">
-                <h3>🗳️ Голосування (Раунд <span id="votingRound">1</span>)</h3>
-                <div class="voting-progress">
-                    <span id="votingProgressText">0/0 проголосували</span>
-                </div>
-            </div>
-            
-            <div class="voting-content">
-                <!-- Для гравців - вибір кандидата -->
-                <div id="votingCandidates" class="voting-candidates"></div>
-                
-                <!-- Моє голосування -->
-                <div id="myVoteStatus" class="my-vote-status" style="display: none;">
-                    Ви проголосували за: <span id="myVoteTarget" class="vote-target"></span>
-                </div>
-            </div>
-            
-            <!-- Кнопки хоста -->
-            <div id="votingHostControls" class="voting-host-controls" style="display: none;">
-                <button class="btn-warning" onclick="endVotingEarly()">Завершити голосування</button>
-                <button class="btn-secondary" onclick="cancelVoting()">Скасувати</button>
-            </div>
-        </div>
+		@* Голосування гравців *@
+		<div id="votingPanel" class="voting-panel site-panel" style="display: none;">
+			<div class="voting-header">
+				<h3>🗳️ Голосування (Раунд <span id="votingRound">1</span>)</h3>
+				<div class="voting-progress">
+					<span id="votingProgressText">0/0 проголосували</span>
+				</div>
+			</div>
 
-        <!-- Voting Results Panel (для хоста) -->
-        <div id="votingResultsPanel" class="voting-results-panel site-panel" style="display: none;">
-            <div class="voting-results-header">
-                <h3>📊 Результати голосування</h3>
-            </div>
-            <div id="votingResultsContent" class="voting-results-content"></div>
-            <div id="votingDecisionControls" class="voting-decision-controls">
-                <p class="decision-prompt">Оберіть дію:</p>
-                <button id="eliminateTopBtn" class="btn-danger" onclick="eliminateTopVoted()">❌ Елімінувати лідера</button>
-                <button class="btn-success" onclick="resolveNoElimination()">✓ Нікого не елімінувати</button>
-            </div>
-        </div>
+			<div class="voting-content">
+				@* Вибір кандидата для голосування *@
+				<div id="votingCandidates" class="voting-candidates"></div>
 
-        <div id="readyCheckPanel" class="ready-check-panel site-panel" style="display: none;">
-            <div class="ready-check-header">
-                <strong>Всі готові до голосування?</strong>
-                <span id="readyCheckSummary">Очікуємо відповіді гравців</span>
-            </div>
-            <div class="ready-check-actions">
-                <button type="button" onclick="submitVotingReadyStatus('ready')">Готовий</button>
-                <button type="button" onclick="submitVotingReadyStatus('add')">Хочу щось додати</button>
-                <button type="button" onclick="submitVotingReadyStatus('special')">Хочу використати карту</button>
-            </div>
-        </div>
+				@* Статус голосу поточного гравця *@
+				<div id="myVoteStatus" class="my-vote-status" style="display: none;">
+					Ви проголосували за: <span id="myVoteTarget" class="vote-target"></span>
+				</div>
+			</div>
 
-        <!-- Game Master Panel (тільки для хоста) -->
-        <div id="gmPanel" class="gm-panel" style="display: none;">
-            <div class="gm-panel-header">
-                <h3>🎮 Game Master Panel</h3>
-                <button class="btn-close" onclick="toggleGMPanel()">×</button>
-            </div>
-            <nav class="gm-tabs" aria-label="GM sections">
-                <button type="button" class="gm-tab active" data-gm-tab-button="state" data-gm-i18n="gmGameState" onclick="switchGMTab('state')">Стан гри</button>
-                <button type="button" class="gm-tab" data-gm-tab-button="round" data-gm-i18n="gmRoundControl" onclick="switchGMTab('round')">Керування раундом</button>
-                <button type="button" class="gm-tab" data-gm-tab-button="threat" data-gm-i18n="gmThreatControl" onclick="switchGMTab('threat')">Керування загрозою</button>
-                <button type="button" class="gm-tab" data-gm-tab-button="content" data-gm-i18n="gmContent" onclick="switchGMTab('content')">Контент</button>
-                <button type="button" class="gm-tab" data-gm-tab-button="diagnostics" data-gm-i18n="gmDiagnostics" onclick="switchGMTab('diagnostics')">Діагностика</button>
-                <button id="omniscientHiddenTab" type="button" class="gm-tab" data-gm-tab-button="omniscient" data-gm-i18n="omniscientHiddenTitle" onclick="switchGMTab('omniscient')" style="display:none;">Всезнаючий GM</button>
-            </nav>
-            <div class="gm-panel-content">
-                <div class="gm-section" id="gmGameStateSection" data-gm-tab="state">
-                    <h4 class="gm-section-title">Стан гри</h4>
-                    <div id="gmGameStateSummary" class="gm-status-grid"></div>
-                </div>
+			@* Керування голосуванням для хоста *@
+			<div id="votingHostControls" class="voting-host-controls" style="display: none;">
+				<button class="btn-warning" onclick="endVotingEarly()">Завершити голосування</button>
+				<button class="btn-secondary" onclick="cancelVoting()">Скасувати</button>
+			</div>
+		</div>
 
-                <div class="gm-section" id="omniscientHiddenSection" data-gm-tab="omniscient" style="display:none;">
-                    <h4 data-gm-i18n="omniscientHiddenTitle">Всезнаючий GM</h4>
-                    <p class="global-catalog-warning" data-gm-i18n="omniscientReadOnlyNotice">Спостерігач — не бере участі у грі. Read-only.</p>
-                    <div class="gm-diagnostics-toolbar">
-                        <input id="omniscientHiddenSearch" class="input-field" type="search" maxlength="100" data-gm-i18n-placeholder="omniscientHiddenSearch" placeholder="Пошук гравця або характеристики" oninput="renderOmniscientHiddenState()" />
-                        <button type="button" class="btn-gm-action" data-gm-i18n="omniscientRefresh" onclick="resyncOmniscientHiddenState()">Оновити</button>
-                    </div>
-                    <p id="omniscientHiddenStatus" aria-live="polite"></p>
-                    <div id="omniscientRoomSummary" class="gm-status-grid"></div>
-                    <div id="omniscientSecretVotes" class="gm-threat-audit"></div>
-                    <details id="omniscientDirectorControls" class="gm-threat-audit">
-                        <summary data-gm-i18n="directorControlsTitle">Director controls</summary>
-                        <p class="global-catalog-warning" data-gm-i18n="directorControlsWarning">Preview і підтвердження обов’язкові.</p>
-                        <div class="gm-editor-grid">
-                            <select id="directorTargetPlayer" class="input-field" onchange="syncDirectorControls()"></select>
-                            <select id="directorAction" class="input-field" onchange="syncDirectorControls()">
-                                <option value="reveal">Reveal characteristic</option><option value="hide">Hide characteristic</option>
-                                <option value="reveal_all">Reveal all</option><option value="hide_all">Hide all</option>
-                                <option value="eliminate">Eliminate</option><option value="restore">Restore</option>
-                                <option value="condition_severity">Condition severity</option><option value="condition_remove">Remove condition</option>
-                                <option value="pause">Pause</option><option value="resume">Resume</option><option value="round_forward">Forward round</option>
-                                <option value="reset_readiness">Reset readiness</option><option value="clear_votes">Clear votes</option><option value="remove_vote">Remove vote</option><option value="voting_resync">Voting resync</option>
-                                <option value="threat_force_success">Force threat success</option><option value="threat_force_failure">Force threat failure</option>
-                                <option value="threat_cancel">Cancel threat</option><option value="threat_restart">Restart threat</option><option value="threat_resync">Threat resync</option>
-                            </select>
-                            <select id="directorCategory" class="input-field"><option>Profession</option><option>PhysicalHealth</option><option>MentalHealth</option><option>Hobby</option><option>CharacterTrait</option><option>Phobia</option><option>Inventory</option><option>Fact</option><option>SpecialCard</option></select>
-                            <input id="directorOption" class="input-field" maxlength="80" data-gm-i18n-placeholder="directorOption" placeholder="Option / severity / round" />
-                        </div>
-                        <button id="directorPreviewButton" class="btn-gm-action director-command" data-gm-i18n="directorPreview" onclick="previewDirectorAction()">Preview</button>
-                        <button id="directorApplyButton" class="btn-danger director-command" data-gm-i18n="directorApply" onclick="applyDirectorAction()" disabled>Apply</button>
-                        <pre id="directorPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
-                    </details>
-                    <div id="omniscientHiddenPlayers" class="gm-diagnostics-list"></div>
-                </div>
+		@* Результати голосування та рішення хоста *@
+		<div id="votingResultsPanel" class="voting-results-panel site-panel" style="display: none;">
+			<div class="voting-results-header">
+				<h3>📊 Результати голосування</h3>
+			</div>
+			<div id="votingResultsContent" class="voting-results-content"></div>
+			<div id="votingDecisionControls" class="voting-decision-controls">
+				<p class="decision-prompt">Оберіть дію:</p>
+				<button id="eliminateTopBtn" class="btn-danger" onclick="eliminateTopVoted()">❌ Елімінувати лідера</button>
+				<button class="btn-success" onclick="resolveNoElimination()">✓ Нікого не елімінувати</button>
+			</div>
+		</div>
 
-                <div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="round" style="display: none;">
-                    <h4 class="gm-section-title">Керування раундом</h4>
-                    <section class="gm-round-control-block gm-round-state-block" aria-labelledby="gmRoundStateHeading">
-                        <h5 id="gmRoundStateHeading" data-gm-i18n="gmRoundCurrentState">Поточний стан</h5>
-                        <div class="gm-round-summary">
-                            <span id="gmCurrentRound">Раунд 1</span>
-                            <strong id="gmCurrentPhase">Розкриття характеристик</strong>
-                            <small id="gmRoundProgress">0/0 відкрили</small>
-                            <small id="gmDiceResult" class="gm-dice-result" style="display: none;"></small>
-                            <span id="gmPauseBadge" class="gm-status-badge">Гра триває</span>
-                            <small id="gmPauseReasonSummary" class="gm-pause-reason-summary" style="display: none;"></small>
-                        </div>
-                    </section>
-                    <section class="gm-round-control-block" aria-labelledby="gmRoundMainHeading">
-                        <h5 id="gmRoundMainHeading" data-gm-i18n="gmRoundMainActions">Основні дії</h5>
-                        <label class="gm-label" for="gmPauseReason" data-gm-i18n="gmPauseReason">Причина паузи</label>
-                        <input id="gmPauseReason" class="gm-select" maxlength="160" />
-                        <div class="gm-round-actions">
-                            <button class="btn-gm-action gm-round-command gm-action-secondary" data-gm-i18n="gmPause" onclick="setGamePause(true)">Пауза</button>
-                            <button class="btn-gm-action gm-round-command gm-action-secondary" data-gm-i18n="gmResume" onclick="setGamePause(false)">Продовжити</button>
-                        </div>
-                        <div class="gm-round-actions gm-round-main-actions">
-                            <button id="rollDiceBtn" class="btn-gm-action" onclick="rollRoundDice()" disabled>Кинути кубик</button>
-                            <button id="endRoundBtn" class="btn-gm-action gm-action-primary" onclick="endRound()" disabled>Раунд закінчено</button>
-                            <button id="startReadyCheckBtn" class="btn-gm-action" onclick="markAllPlayersReady()" disabled>Всі готові</button>
-                            <button id="gmStartVotingBtn" class="btn-gm-action" onclick="startVoting()" style="display: none;">Почати голосування</button>
-                        </div>
-                        <p id="gmVotingLockedHint" class="gm-round-hint">Голосування відкриється після завершення 3 раунду.</p>
-                        <div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
-                        <div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
-                    </section>
-                    <section class="gm-round-control-block" aria-labelledby="gmManualRoundHeading">
-                        <h5 id="gmManualRoundHeading" data-gm-i18n="gmManualRoundHeading">Ручне встановлення раунду</h5>
-                        <p class="gm-round-hint" data-gm-i18n="gmManualRoundHint">Перехід можливий лише вперед; частину стану поточного раунду буде очищено.</p>
-                        <div class="gm-round-form-row">
-                            <label class="gm-field" for="gmManualRound"><span data-gm-i18n="gmManualRound">Номер раунду</span>
-                                <input id="gmManualRound" class="gm-select" type="number" min="1" max="99" step="1" />
-                            </label>
-                            <button class="btn-gm-action gm-round-command gm-action-primary" data-gm-i18n="gmPreviewRound" onclick="previewManualRoundChange()">Preview / підтвердити</button>
-                        </div>
-                    </section>
-                    <section class="gm-round-control-block gm-round-danger-zone" aria-labelledby="gmReadinessHeading">
-                        <h5 id="gmReadinessHeading" data-gm-i18n="gmReadinessHeading">Скидання готовності</h5>
-                        <p class="gm-round-hint" data-gm-i18n="gmReadinessHint">Очищає поточні позначки готовності після підтвердження.</p>
-                        <button class="btn-gm-action btn-danger gm-round-command" data-gm-i18n="gmResetReadiness" onclick="resetRoundReadiness()">Скинути готовність</button>
-                    </section>
-                    <section class="gm-round-control-block gm-timer-block" id="gmGameTimerCard" aria-labelledby="gmTimerHeading">
-                        <h5 id="gmTimerHeading" data-gm-i18n="gmGameTimer">Серверний таймер</h5>
-                        <div class="gm-timer-fields">
-                            <label class="gm-field" for="gmTimerMinutes"><span data-gm-i18n="gmTimerMinutes">Хвилини</span><input id="gmTimerMinutes" class="gm-select" type="number" min="0" max="120" step="1" value="5" /></label>
-                            <label class="gm-field" for="gmTimerSeconds"><span data-gm-i18n="gmTimerSeconds">Секунди</span><input id="gmTimerSeconds" class="gm-select" type="number" min="0" max="59" step="1" value="0" onkeydown="handleGameTimerKeydown(event)" /></label>
-                            <label class="gm-field" for="gmTimerPurpose"><span data-gm-i18n="gmTimerPurpose">Призначення</span><select id="gmTimerPurpose" class="gm-select">
-                                <option value="Round">Round</option><option value="Voting">Voting</option>
-                                <option value="Threat">Threat</option><option value="Custom">Custom</option>
-                            </select></label>
-                            <label class="gm-field" for="gmTimerLabel"><span data-gm-i18n="gmTimerName">Назва</span><input id="gmTimerLabel" class="gm-select" maxlength="80" data-gm-i18n-placeholder="gmTimerLabel" placeholder="Label" /></label>
-                        </div>
-                        <div class="gm-round-actions">
-                            <button id="gmTimerStart" class="btn-gm-action gm-timer-command gm-action-primary" data-gm-i18n="gmTimerStart" onclick="startGameTimer()">Старт</button>
-                            <button id="gmTimerPause" class="btn-gm-action gm-timer-command" data-gm-i18n="gmPause" onclick="invokeGameTimerCommand('PauseGameTimer')">Пауза</button>
-                            <button id="gmTimerResume" class="btn-gm-action gm-timer-command" data-gm-i18n="gmResume" onclick="invokeGameTimerCommand('ResumeGameTimer')">Продовжити</button>
-                            <button id="gmTimerRestart" class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerRestart" onclick="restartGameTimer()">Перезапустити</button>
-                            <button class="btn-gm-action gm-timer-command" onclick="adjustGameTimer(30)">+30 сек</button>
-                            <button class="btn-gm-action gm-timer-command" onclick="adjustGameTimer(-30)">−30 сек</button>
-                            <button class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerSet" onclick="setGameTimer()">Встановити</button>
-                            <button id="gmTimerStop" class="btn-gm-action btn-danger gm-timer-command" data-gm-i18n="gmTimerStop" onclick="stopGameTimer()">Зупинити</button>
-                        </div>
-                        <p id="gmTimerFeedback" class="gm-round-hint" aria-live="polite"></p>
-                    </section>
-                    <div class="gm-voting-admin-card">
-                        <h5 data-gm-i18n="gmVotingRecovery">Відновлення голосування</h5>
-                        <div class="gm-round-actions">
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmClearVotes" onclick="clearCurrentVotes()">Очистити голоси</button>
-                            <button class="btn-gm-action gm-round-command" data-gm-i18n="gmVotingResync" onclick="resyncVotingAdmin()">Синхронізувати</button>
-                        </div>
-                        <select id="gmRemoveVoterSelect" class="gm-select"></select>
-                        <button class="btn-gm-action gm-round-command" data-gm-i18n="gmRemoveVote" onclick="removeSelectedVote()">Видалити голос voter</button>
-                        <div id="gmNonVotersList" class="gm-ready-status-list"></div>
-                    </div>
-                    <details class="gm-player-danger">
-                        <summary data-gm-i18n="gmUnavailableRecovery">Недоступні recovery controls</summary>
-                        <button class="btn-gm-action" disabled data-gm-i18n="gmStageUnavailable">Reopen/skip потребує transition helper</button>
-                    </details>
-                    <p id="gmRoundCommandResult" class="gm-round-hint" aria-live="polite"></p>
-                </div>
+		@* Перевірка готовності до голосування *@
+		<div id="readyCheckPanel" class="ready-check-panel site-panel" style="display: none;">
+			<div class="ready-check-header">
+				<strong>Всі готові до голосування?</strong>
+				<span id="readyCheckSummary">Очікуємо відповіді гравців</span>
+			</div>
+			<div class="ready-check-actions">
+				<button type="button" onclick="submitVotingReadyStatus('ready')">Готовий</button>
+				<button type="button" onclick="submitVotingReadyStatus('add')">Хочу щось додати</button>
+				<button type="button" onclick="submitVotingReadyStatus('special')">Хочу використати карту</button>
+			</div>
+		</div>
 
-                <div class="gm-section" id="gmThreatControlSection" data-gm-tab="threat" style="display: none;">
-                    <h4 class="gm-section-title">Керування загрозою</h4>
-                    <div id="gmThreatCurrent" class="gm-threat-current">Поточна загроза відсутня</div>
-                    <div id="gmSpecificThreatControls" style="display: none;">
-                        <input id="gmThreatSearch" class="gm-select" type="search" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
-                        <select id="gmThreatSelect" class="gm-select"></select>
-                        <button class="btn-gm-action" onclick="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
-                    </div>
-                    <div class="gm-round-actions">
-                        <button class="btn-gm-action" onclick="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
-                        <button class="btn-gm-action" onclick="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
-                        <button class="btn-gm-action" onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
-                    </div>
-                    <div class="gm-threat-danger-zone" id="gmThreatEmergencyBlock">
-                        <strong data-gm-i18n="gmThreatEmergency">Аварійне керування</strong>
-                        <button id="gmThreatResync" class="btn-gm-action" data-gm-i18n="gmThreatResync" onclick="gmResyncThreatRoom()">Оновити стан загрози</button>
-                        <button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" onclick="gmRestartThreat()">Перезапустити спробу</button>
-                        <button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" onclick="gmCancelThreat()">Скасувати загрозу</button>
-                        <button id="gmThreatForceSuccess" class="btn-gm-action gm-force-success" data-gm-i18n="gmThreatForceSuccess" onclick="requestGMThreatForcePreview('success')">Примусовий успіх</button>
-                        <button id="gmThreatForceFailure" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatForceFailure" onclick="requestGMThreatForcePreview('failure')">Примусовий провал</button>
-                    </div>
-                    <p id="gmThreatCommandResult" class="gm-round-hint"></p>
-                </div>
+		@* Панель керування грою для хоста та GM *@
+		<partial name="~/Views/Shared/Game/_GmPanel.cshtml" />
 
-                <!-- Вибір гравця -->
-                <div class="gm-section" id="gmPlayerSelectSection" data-gm-tab="state">
-                    <label class="gm-label">Вибрати гравця:</label>
-                    <select id="gmPlayerSelect" class="gm-select" onchange="loadPlayerDataForGM()">
-                        <option value="">-- Виберіть гравця --</option>
-                    </select>
-                </div>
+		@* Глобальний каталог і редактор JSON-контенту *@
+		<partial name="~/Views/Shared/Game/_GlobalContentCatalog.cshtml" />
 
-                <!-- Інформація про вибраного гравця -->
-                <div id="gmPlayerInfo" class="gm-player-info" data-gm-tab="state" style="display: none;">
-                    <h4 id="gmPlayerName">Гравець</h4>
-                    
-                    <!-- Швидкі дії -->
-                    <div class="gm-quick-actions">
-                        <button class="btn-gm-action btn-eliminate" onclick="eliminateSelectedPlayer()">❌ Елімінувати</button>
-                        <button class="btn-gm-action btn-restore" onclick="restoreSelectedPlayer()">✅ Повернути</button>
-                    </div>
-                    <p id="gmPlayerCommandResult" class="gm-round-hint" aria-live="polite"></p>
-                    <details class="gm-player-secondary">
-                        <summary data-gm-i18n="gmPlayerSecondaryActions">Додаткові дії</summary>
-                        <div class="gm-round-actions">
-                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmResyncPlayer" onclick="resyncSelectedPlayer()">Синхронізувати гравця</button>
-                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmInspectConnection" onclick="inspectSelectedConnection()">Перевірити connection</button>
-                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmTransferHost" onclick="transferHostToSelectedPlayer()">Передати host</button>
-                        </div>
-                        <label class="gm-label" data-gm-i18n="gmHideCharacteristic">Сховати розкриту характеристику</label>
-                        <div class="gm-round-actions">
-                            <select id="gmHideCharacteristicSelect" class="gm-select">
-                                <option value="Personality">Особистість</option>
-                                <option value="Body">Статура</option>
-                                <option value="Profession">Професія</option>
-                                <option value="PhysicalHealth">Фізичне здоров'я</option>
-                                <option value="MentalHealth">Психічне здоров'я</option>
-                                <option value="Hobby">Хобі</option>
-                                <option value="CharacterTrait">Риса характеру</option>
-                                <option value="Phobia">Фобія</option>
-                                <option value="Inventory">Інвентар</option>
-                                <option value="Fact">Факт</option>
-                            </select>
-                            <button class="btn-gm-action gm-player-command" data-gm-i18n="gmHide" onclick="hideSelectedCharacteristic()">Сховати</button>
-                        </div>
-                        <div id="gmAdditionalConditions"></div>
-                    </details>
-                    <details class="gm-player-danger">
-                        <summary data-gm-i18n="gmDangerousActions">Небезпечні дії</summary>
-                        <button class="btn-gm-action btn-danger gm-player-command" data-gm-i18n="gmKickPlayer" onclick="kickSelectedPlayer()">Виключити з кімнати</button>
-                    </details>
+		@* Lobby кімнати до початку гри *@
+		<partial name="~/Views/Shared/Game/_RoomLobby.cshtml" />
 
-                    <!-- Характеристики -->
-                    <div class="gm-characteristics">
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Особистість:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Статура:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Професія:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Profession')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Profession')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Фіз. здоров'я:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('PhysicalHealth')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('PhysicalHealth')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Псих. здоров'я:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('MentalHealth')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('MentalHealth')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Хобі:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Hobby')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Hobby')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Риса характеру:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('CharacterTrait')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('CharacterTrait')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Фобія:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Phobia')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Phobia')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Інвентар:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmInventory">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Inventory')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                        <div class="gm-char-item">
-                            <span class="gm-char-name">Факт:</span>
-                            <span class="gm-char-value gm-char-hidden" id="gmFact">Приховано</span>
-                            <div class="gm-char-actions">
-                                <button onclick="peekCharacteristic('Fact')" title="Підглянути" class="btn-peek">&#128065;</button>
-                                <button onclick="editCharacteristic('Fact')" title="Редагувати">✏️</button>
-                                <button onclick="regenerateCharacteristic('Fact')" title="Регенерувати">🔄</button>
-                                <button onclick="forceReveal('Fact')" title="Розкрити для всіх">📢</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+		@* Приватні характеристики та спеціальні карти поточного гравця *@
+		<div id="myPlayerSection" class="site-major-section" style="display:none;">
+			<h2 class="section-title site-section-heading">Мої характеристики (бачу тільки я)</h2>
+			<div id="myPlayerCards" class="player-cards-grid"></div>
+			<section id="mySpecialCardsSection" class="my-special-cards-section">
+				<h2 class="section-title site-section-heading">Мої спеціальні карти</h2>
+				<div id="mySpecialCardsList" class="my-special-cards-list"></div>
+			</section>
+		</div>
 
-                <!-- Бункер/Апокаліпсис контролі -->
-                <div class="gm-section" id="gmScenarioSection" data-gm-tab="content" style="display: none;">
-                    <h4 class="gm-section-title">Сценарій гри</h4>
-                    <div class="gm-scenario-controls">
-                        <div class="gm-control-row">
-                            <label class="gm-label" for="gmBunkerCapacity" data-gm-i18n="gmBunkerCapacityLabel">Місткість бункера</label>
-                            <div class="gm-capacity-control">
-                                <input id="gmBunkerCapacity" class="gm-capacity-input" type="number" min="1" max="99" step="1" value="6" onkeydown="handleBunkerCapacityKeydown(event)" />
-                                <button id="gmBunkerCapacitySubmit" class="btn-gm-action" data-gm-i18n="gmCapacitySubmit" onclick="submitBunkerCapacity()">ОК</button>
-                            </div>
-                            <small id="gmBunkerCapacityFeedback" class="gm-round-hint" aria-live="polite"></small>
-                        </div>
-                        <div class="gm-control-row">
-                            <button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
-                            <button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
-                        </div>
-                    </div>
-                </div>
+		@* Основне ігрове поле після початку гри *@
+		<partial name="~/Views/Shared/Game/_GameBoard.cshtml" />
 
-                <!-- Система подій -->
-                <div class="gm-section"
-                     id="gmEventsSection"
-                     data-gm-tab="content"
-                     style="display: none;">
+		@* Журнал ігрових подій поточної кімнати *@
+		<partial name="~/Views/Shared/Game/_EventsPanel.cshtml" />
 
-                    <h4 class="gm-section-title">Ігрові події</h4>
-
-                    <div class="gm-event-form">
-                        <select id="gmEventType" class="gm-select">
-                            <option value="info">Інформація</option>
-                            <option value="warning">Попередження</option>
-                            <option value="danger">Небезпека</option>
-                            <option value="success">Позитив</option>
-                            <option value="catastrophe">Катастрофа</option>
-                        </select>
-
-                        <textarea id="gmEventText"
-                                  class="input-field gm-event-textarea"
-                                  placeholder="Текст події..."
-                                  rows="2"></textarea>
-
-                        <button type="button"
-                                class="btn-gm-action btn-send-event"
-                                onclick="sendGameEvent()">
-                            Відправити подію
-                        </button>
-                    </div>
-
-                    <div class="gm-quick-events">
-                        <button type="button"
-                                class="btn-gm-quick"
-                                onclick="sendQuickEvent(
-                            'Землетрус! Частина бункера пошкоджена.',
-                            'catastrophe'
-                            )">
-                            Землетрус
-                        </button>
-
-                        <button type="button"
-                                class="btn-gm-quick btn-gm-supplies-add"
-                                onclick="addBunkerSupplies()">
-                            + Запаси
-                        </button>
-
-                        <button type="button"
-                                class="btn-gm-quick btn-gm-supplies-remove"
-                                onclick="removeBunkerSupplies()">
-                            − Запаси
-                        </button>
-
-                        <button type="button"
-                                class="btn-gm-quick"
-                                onclick="sendQuickEvent(
-                            'Загроза зараження! Потрібна дезінфекція.',
-                            'warning'
-                            )">
-                            Зараження
-                        </button>
-
-                        <button type="button"
-                                class="btn-gm-quick"
-                                onclick="sendQuickEvent(
-                            'Зовнішні виживальці просять допомоги.',
-                            'info'
-                            )">
-                            Виживальці
-                        </button>
-
-                        <button type="button"
-                                class="btn-gm-quick"
-                                onclick="sendQuickEvent(
-                            'Генератор зламався! Світла немає.',
-                            'danger'
-                            )">
-                            Генератор
-                        </button>
-                    </div>
-                </div>
-
-                <div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="diagnostics" style="display: none;">
-                    <h4 class="gm-section-title" data-gm-i18n="gmDiagnostics">Діагностика</h4>
-                    <div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
-                    <p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
-                    <div class="gm-diagnostics-actions">
-                        <button id="gmRunDiagnostics" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRunDiagnostics" onclick="runRoomIntegrityCheck()">Перевірити кімнату</button>
-                        <button id="gmPreviewAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmPreviewAutoFix" onclick="previewRoomAutoFix()">Preview auto-fix</button>
-                        <button id="gmApplyAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmApplyAutoFix" onclick="applyRoomAutoFix()" disabled>Застосувати безпечні виправлення</button>
-                    </div>
-                    <p id="gmDiagnosticsFeedback" class="gm-round-hint" aria-live="polite"></p>
-                    <div class="gm-diagnostics-toolbar">
-                        <label for="gmIssueSeverity" data-gm-i18n="gmIssueFilter">Фільтр issues</label>
-                        <select id="gmIssueSeverity" class="input-field" onchange="renderRoomDiagnostics()">
-                            <option value="all" data-gm-i18n="gmAll">Усі</option>
-                            <option value="error">Error</option><option value="warning">Warning</option><option value="info">Info</option>
-                        </select>
-                    </div>
-                    <div id="gmDiagnosticsIssues" class="gm-diagnostics-list" aria-live="polite"></div>
-                    <details id="gmSnapshotsSection" class="gm-threat-audit">
-                        <summary data-gm-i18n="gmSnapshotsTitle">Snapshots / Undo</summary>
-                        <div class="gm-diagnostics-toolbar">
-                            <input id="gmSnapshotReason" class="input-field" maxlength="120" data-gm-i18n-placeholder="gmSnapshotReason" placeholder="Назва контрольної точки" />
-                            <button id="gmCreateSnapshot" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmCreateSnapshot" onclick="createManualRoomSnapshot()">Створити контрольну точку</button>
-                            <button id="gmUndoLastAction" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Скасувати останню GM-дію</button>
-                            <button type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmRefreshSnapshots" onclick="refreshRoomSnapshots()">Оновити snapshots</button>
-                        </div>
-                        <p id="gmSnapshotFeedback" class="gm-round-hint" aria-live="polite"></p>
-                        <div id="gmSnapshotPreview" class="gm-snapshot-preview" aria-live="polite"></div>
-                        <div id="gmSnapshotsList" class="gm-snapshots-list" aria-live="polite"></div>
-                    </details>
-                    <details id="gmRoomLocalEditor" class="gm-threat-audit">
-                        <summary data-gm-i18n="gmRoomLocalEditor">Редактор поточної кімнати</summary>
-                        <p data-gm-i18n="gmRoomLocalWarning">Зміни діють лише в цій кімнаті.</p>
-                        <div class="gm-editor-grid">
-                            <select id="gmEditorCategory" class="input-field" onchange="renderRoomLocalEditor()"><option value="bunker">Bunker</option><option value="apocalypse">Apocalypse</option><option value="player">Player</option></select>
-                            <select id="gmEditorPlayer" class="input-field" onchange="renderRoomLocalEditor()"></select>
-                            <select id="gmEditorField" class="input-field" onchange="syncRoomLocalEditorField()"></select>
-                            <input id="gmEditorCurrent" class="input-field" readonly data-gm-i18n-placeholder="gmCurrentPublicValue" placeholder="Поточне публічне значення" />
-                            <textarea id="gmEditorValue" class="input-field" rows="3" data-gm-i18n-placeholder="gmNewPublicValue" placeholder="Нове значення"></textarea>
-                        </div>
-                        <div class="gm-diagnostics-actions">
-                            <button id="gmEditorPreviewButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmSnapshotPreview" onclick="previewRoomLocalEdit()">Preview</button>
-                            <button id="gmEditorApplyButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmEditorApply" onclick="applyRoomLocalEdit()" disabled>Застосувати</button>
-                            <button class="btn-gm-action gm-editor-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Undo</button>
-                        </div>
-                        <p id="gmEditorFeedback" class="gm-round-hint" aria-live="polite"></p>
-                    </details>
-                    <details id="gmOmniscientMode" class="gm-threat-audit">
-                        <summary data-gm-i18n="omniscientModeTitle">Режим GM-спостерігача</summary>
-                        <p data-gm-i18n="omniscientModeWarning">Незворотно для цієї кімнати: GM перестане бути учасником гри.</p>
-                        <input id="omniscientBootstrapKey" class="input-field" type="password" maxlength="200" autocomplete="off" data-gm-i18n-placeholder="omniscientBootstrapKey" placeholder="Development bootstrap key" />
-                        <button id="omniscientPreviewButton" type="button" class="btn-gm-action omniscient-command" data-gm-i18n="omniscientPreview" onclick="previewEnterOmniscientGm()">Preview</button>
-                        <button id="omniscientEnterButton" type="button" class="btn-danger omniscient-command" data-gm-i18n="omniscientEnter" onclick="enterOmniscientGm()" disabled>Увійти</button>
-                        <pre id="omniscientPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
-                    </details>
-                    <details id="gmThreatAudit" class="gm-threat-audit" open>
-                        <summary data-gm-i18n="gmAuditLog">GM audit log</summary>
-                        <div class="gm-diagnostics-toolbar">
-                            <input id="gmAuditSearch" class="input-field" type="search" data-gm-i18n-placeholder="gmAuditSearch" placeholder="Пошук action" oninput="renderUnifiedGmAudit()" />
-                            <select id="gmAuditResult" class="input-field" onchange="renderUnifiedGmAudit()">
-                                <option value="all" data-gm-i18n="gmAll">Усі</option>
-                                <option value="success">Success</option><option value="rejected">Rejected</option><option value="failed">Failed</option>
-                            </select>
-                            <button type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRefreshAudit" onclick="refreshGmAudit()">Оновити журнал</button>
-                        </div>
-                        <div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
-                    </details>
-                </div>
-            </div>
-        </div>
-        <section id="globalContentCatalog" class="global-content-catalog" style="display: none;" aria-labelledby="globalContentCatalogTitle">
-            <h3 id="globalContentCatalogTitle" data-gm-i18n="globalCatalogTitle">Global Content Catalog</h3>
-            <p class="global-catalog-warning" data-gm-i18n="globalCatalogDevelopmentWarning">Development-only, read-only catalog. Production access is disabled.</p>
-            <p data-gm-i18n="globalCatalogReadOnly">Read-only: saving, deleting, committing and rollback are unavailable.</p>
-            <div class="global-catalog-toolbar">
-                <label for="globalCatalogCategory" data-gm-i18n="globalCatalogCategory">Category</label>
-                <select id="globalCatalogCategory" class="input-field" onchange="loadGlobalContentPage(1)"></select>
-                <label for="globalCatalogSearch" data-gm-i18n="globalCatalogSearch">Search</label>
-                <input id="globalCatalogSearch" class="input-field" type="search" maxlength="100" oninput="scheduleGlobalContentSearch()" />
-            </div>
-            <div id="globalCatalogMetadata" class="global-catalog-metadata" aria-live="polite"></div>
-            <div id="globalCatalogEntries" class="global-catalog-entries" aria-live="polite"></div>
-            <div class="global-catalog-pagination">
-                <button id="globalCatalogPrevious" type="button" class="btn-secondary" data-gm-i18n="globalCatalogPrevious" onclick="changeGlobalContentPage(-1)">Previous</button>
-                <span id="globalCatalogPage">1</span>
-                <button id="globalCatalogNext" type="button" class="btn-secondary" data-gm-i18n="globalCatalogNext" onclick="changeGlobalContentPage(1)">Next</button>
-            </div>
-            <pre id="globalCatalogDetails" class="global-catalog-details" aria-live="polite"></pre>
-            <section id="globalCatalogDrafts" class="global-catalog-drafts">
-                <h4 data-gm-i18n="globalDraftsTitle">Drafts</h4>
-                <button id="globalDraftCreate" type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftCreate" onclick="createGlobalContentDraft()">Create draft</button>
-                <div id="globalDraftBlocked" class="global-catalog-warning" aria-live="polite"></div>
-                <select id="globalDraftSelect" class="input-field" onchange="renderGlobalDraftState()"></select>
-                <div id="globalDraftStatus" class="global-catalog-metadata"></div>
-                <div class="global-catalog-toolbar">
-                    <select id="globalDraftOperation" class="input-field"><option value="CreateEntry">Create</option><option value="UpdateEntry">Update</option><option value="DeleteEntry">Delete</option></select>
-                    <input id="globalDraftEntryId" class="input-field" maxlength="100" placeholder="Entry ID" />
-                    <input id="globalDraftName" class="input-field" maxlength="500" placeholder="Name" />
-                    <input id="globalDraftDescription" class="input-field" maxlength="2000" placeholder="Description" />
-                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftApply" onclick="applyGlobalDraftCommand()">Apply to draft</button>
-                </div>
-                <div class="global-catalog-toolbar">
-                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftValidate" onclick="validateGlobalDraft()">Validate</button>
-                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftPreview" onclick="previewGlobalDraftDiff()">Preview diff</button>
-                    <button type="button" class="btn-danger global-draft-command" data-gm-i18n="globalDraftDiscard" onclick="discardGlobalDraft()">Discard</button>
-                    <button id="globalDraftCommit" type="button" class="btn-success global-draft-command" data-gm-i18n="globalDraftCommit" onclick="commitGlobalDraft()" disabled>Commit</button>
-                </div>
-                <pre id="globalDraftResult" class="global-catalog-details" aria-live="polite"></pre>
-                <p class="global-catalog-warning" data-gm-i18n="globalRuntimeRestart">Changes take effect after application restart.</p>
-                <h4 data-gm-i18n="globalBackupsTitle">Backups</h4>
-                <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalBackupsRefresh" onclick="loadGlobalContentBackups()">Refresh backups</button>
-                <select id="globalBackupSelect" class="input-field"></select>
-                <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalRollbackPreview" onclick="previewGlobalRollback()">Preview rollback</button>
-                <button id="globalRollbackExecute" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalRollbackExecute" onclick="executeGlobalRollback()" disabled>Rollback</button>
-                <pre id="globalRollbackResult" class="global-catalog-details" aria-live="polite"></pre>
-                <section id="globalStableIdMigration" class="global-catalog-drafts" style="display: none;">
-                    <h4 data-gm-i18n="globalMigrationTitle">Stable-ID migration required</h4>
-                    <button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalMigrationPreview" onclick="previewStableIdMigration()">Preview migration</button>
-                    <button id="globalMigrationApply" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalMigrationApply" onclick="applyStableIdMigration()" disabled>Apply migration</button>
-                    <pre id="globalMigrationResult" class="global-catalog-details" aria-live="polite"></pre>
-                </section>
-            </section>
-        </section>
-        <div id="roomLobby">
-            <header class="lobby-intro site-panel">
-                <div><h2 data-lobby-i18n="lobbyTitle">Лобі кімнати</h2><p id="lobbyRoomCode" class="lobby-room-code"></p></div>
-                <p data-lobby-i18n="lobbyHint">Оберіть ролі, підтвердьте готовність і почніть гру.</p>
-                <strong id="lobbyMemberCapacity"></strong>
-            </header>
-            <section id="canonicalLobbyPanel" class="lobby-shell">
-                <div id="lobbySummary" class="gm-status-grid"></div>
-                <section id="lobbyGameSetup" class="lobby-setup site-panel" aria-labelledby="lobbySetupTitle">
-                    <header class="lobby-setup-header">
-                        <div><h3 id="lobbySetupTitle" data-lobby-i18n="lobbySetupTitle">Налаштування гри</h3><p id="lobbySettingsRevision"></p></div>
-                        <span id="lobbySettingsDirty" class="lobby-settings-dirty" aria-live="polite"></span>
-                    </header>
-                    <div id="lobbySettingsChips" class="lobby-settings-chips"></div>
-                    <div id="lobbySettingsWarnings" class="lobby-settings-warnings" role="status"></div>
-                    <div id="lobbySettingsHostEditor" class="lobby-settings-editor" hidden>
-                        <div class="lobby-preset-row">
-                            <label for="lobbyPresetSelect" data-lobby-i18n="lobbyPreset">Пресет</label>
-                            <select id="lobbyPresetSelect" class="input-field lobby-setting-input" data-setting="preset"></select>
-                        </div>
-                        <div class="lobby-settings-tabs" role="tablist" aria-label="Game setup">
-                            <button type="button" class="active" role="tab" aria-selected="true" aria-controls="lobbySettingsBasic" data-settings-tab="basic" data-lobby-i18n="lobbyTabBasic">Основне</button>
-                            <button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsThreats" data-settings-tab="threats" data-lobby-i18n="lobbyTabThreats">Загрози</button>
-                            <button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsRounds" data-settings-tab="rounds" data-lobby-i18n="lobbyTabRounds">Раунди</button>
-                            <button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsAccess" data-settings-tab="access" data-lobby-i18n="lobbyTabAccess">Доступ</button>
-                        </div>
-                        <div id="lobbySettingsBasic" class="lobby-settings-pane active" role="tabpanel" data-settings-pane="basic">
-                            <div class="lobby-setting-grid">
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxPlayers">Максимум гравців</span><input id="lobbyMaxPlayers" class="input-field lobby-setting-input" data-setting="maxGameplayPlayers" type="number" min="2" max="12" step="1"></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyMinPlayers">Мінімум гравців</span><select id="lobbyMinPlayers" class="input-field lobby-setting-input" data-setting="minGameplayPlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyBunkerCapacityMode">Місткість бункера</span><select id="lobbyBunkerCapacityMode" class="input-field lobby-setting-input" data-setting="bunkerCapacityMode"><option value="Automatic" data-lobby-i18n="lobbyAutomatic">Автоматично</option><option value="Manual" data-lobby-i18n="lobbyManual">Вручну</option><option value="RandomRange" data-lobby-i18n="lobbyRandomRange">Випадковий діапазон</option></select></label>
-                                <label id="lobbyManualCapacityRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyManualCapacity">Місць</span><input class="input-field lobby-setting-input" data-setting="manualBunkerCapacity" type="number" min="1" max="12" step="1"></label>
-                                <label id="lobbyRandomCapacityMinRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyRangeMin">Мінімум місць</span><input class="input-field lobby-setting-input" data-setting="randomBunkerCapacityMin" type="number" min="1" max="12" step="1"></label>
-                                <label id="lobbyRandomCapacityMaxRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyRangeMax">Максимум місць</span><input class="input-field lobby-setting-input" data-setting="randomBunkerCapacityMax" type="number" min="1" max="12" step="1"></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyStartingItems">Стартові предмети</span><select class="input-field lobby-setting-input" data-setting="startingInventoryCount"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbySpecialCardsCount">Спеціальних карт на гравця</span><select class="input-field lobby-setting-input" data-setting="specialCardsPerPlayer"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
-                            </div>
-                            <div class="lobby-toggle-grid">
-                                <label><input class="lobby-setting-input" data-setting="apocalypseEnabled" type="checkbox"><span data-lobby-i18n="lobbyApocalypseEnabled">Апокаліпсис</span></label>
-                                <label><input class="lobby-setting-input" data-setting="bunkerScenarioEnabled" type="checkbox"><span data-lobby-i18n="lobbyBunkerEnabled">Бункер</span></label>
-                                <label><input class="lobby-setting-input" data-setting="specialCardsEnabled" type="checkbox"><span data-lobby-i18n="lobbySpecialCardsEnabled">Спеціальні карти</span></label>
-                            </div>
-                        </div>
-                        <div id="lobbySettingsThreats" class="lobby-settings-pane" role="tabpanel" data-settings-pane="threats" hidden>
-                            <div class="lobby-setting-grid">
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyInteractiveRate">Інтерактивні загрози</span><select class="input-field lobby-setting-input" data-setting="interactiveThreatRate"><option value="Off">0%</option><option value="Rare">1%</option><option value="Standard">10%</option><option value="Often">25%</option><option value="Always">100%</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyFirstThreatRound">Перший раунд загрози</span><select class="input-field lobby-setting-input" data-setting="firstThreatRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyThreatFrequency">Частота загроз</span><select class="input-field lobby-setting-input" data-setting="threatFrequency"><option value="OncePerGame" data-lobby-i18n="lobbyOnce">Один раз</option><option value="EveryOtherRound" data-lobby-i18n="lobbyEveryOther">Через раунд</option><option value="EveryRound" data-lobby-i18n="lobbyEveryRound">Щораунду</option><option value="RandomEligibleRounds" data-lobby-i18n="lobbyRandomRounds">Випадково</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxThreats">Максимум загроз</span><select class="input-field lobby-setting-input" data-setting="maxThreatsPerGame"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="" data-lobby-i18n="lobbyUnlimited">Без обмеження</option></select></label>
-                            </div>
-                            <div class="lobby-toggle-grid"><label><input class="lobby-setting-input" data-setting="threatsEnabled" type="checkbox"><span data-lobby-i18n="lobbyThreatsEnabled">Загрози увімкнено</span></label><label><input class="lobby-setting-input" data-setting="avoidRepeatedThreats" type="checkbox"><span data-lobby-i18n="lobbyAvoidThreatRepeats">Не повторювати ID загроз</span></label></div>
-                        </div>
-                        <div id="lobbySettingsRounds" class="lobby-settings-pane" role="tabpanel" data-settings-pane="rounds" hidden>
-                            <div class="lobby-setting-grid">
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyTimerDuration">Таймер раунду</span><select class="input-field lobby-setting-input" data-setting="roundTimerDurationSeconds"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="420">7 min</option><option value="600">10 min</option><option value="900">15 min</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyVotingStart">Голосування з раунду</span><select class="input-field lobby-setting-input" data-setting="votingStartRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyVotingFrequency">Частота голосувань</span><select class="input-field lobby-setting-input" data-setting="votingFrequency"><option value="EveryRound" data-lobby-i18n="lobbyEveryRound">Щораунду</option><option value="EveryTwoRounds" data-lobby-i18n="lobbyEveryOther">Через раунд</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyBonusRound">Бонусний інвентар у раунді</span><select class="input-field lobby-setting-input" data-setting="bonusInventoryRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-                                <label class="lobby-setting-row"><span data-lobby-i18n="lobbyBonusCount">Бонусних предметів</span><select class="input-field lobby-setting-input" data-setting="bonusInventoryCount"><option value="1">1</option><option value="2">2</option></select></label>
-                            </div>
-                            <div class="lobby-toggle-grid"><label><input class="lobby-setting-input" data-setting="roundTimerEnabled" type="checkbox"><span data-lobby-i18n="lobbyTimerEnabled">Таймер увімкнено</span></label><label><input class="lobby-setting-input" data-setting="autoStartRoundTimer" type="checkbox"><span data-lobby-i18n="lobbyTimerAutoStart">Автостарт таймера</span></label><label><input class="lobby-setting-input" data-setting="pauseTimerOnHostDisconnect" type="checkbox"><span data-lobby-i18n="lobbyTimerPauseDisconnect">Пауза при відключенні host</span></label><label><input class="lobby-setting-input" data-setting="votingEnabled" type="checkbox"><span data-lobby-i18n="lobbyVotingEnabled">Голосування увімкнено</span></label><label><input class="lobby-setting-input" data-setting="bonusInventoryEnabled" type="checkbox"><span data-lobby-i18n="lobbyBonusEnabled">Бонусний інвентар</span></label></div>
-                        </div>
-                        <div id="lobbySettingsAccess" class="lobby-settings-pane" role="tabpanel" data-settings-pane="access" hidden>
-                            <div class="lobby-setting-grid"><label class="lobby-setting-row"><span data-lobby-i18n="lobbyReadyPolicy">Політика готовності</span><select class="input-field lobby-setting-input" data-setting="readyRequirement"><option value="AllPlayers" data-lobby-i18n="lobbyAllReady">Усі гравці</option><option value="HostDecision" data-lobby-i18n="lobbyHostDecides">Вирішує host</option></select></label><label class="lobby-setting-row"><span data-lobby-i18n="lobbyRoomPassword">Пароль кімнати</span><input id="lobbyPasswordInput" class="input-field" type="password" maxlength="64" autocomplete="new-password" data-lobby-i18n-placeholder="lobbyPasswordPlaceholder"><button id="lobbyPasswordApply" type="button" class="btn-secondary" data-lobby-i18n="lobbyPasswordApply">Оновити пароль</button></label></div>
-                            <div class="lobby-toggle-grid"><label><input class="lobby-setting-input" data-setting="spectatorsAllowed" type="checkbox"><span data-lobby-i18n="lobbySpectatorsAllowed">Дозволити спостерігачів</span></label><label><input class="lobby-setting-input" data-setting="hostCanStartWithoutAllReady" type="checkbox"><span data-lobby-i18n="lobbyHostOverride">Host може стартувати без усіх ready</span></label><label><input class="lobby-setting-input" data-setting="resetReadinessAfterSettingsChange" type="checkbox"><span data-lobby-i18n="lobbyResetReady">Скидати ready після змін</span></label><label><input class="lobby-setting-input" data-setting="joinsLocked" type="checkbox"><span data-lobby-i18n="lobbyLockJoins">Заблокувати нові входи</span></label></div>
-                        </div>
-                        <div class="lobby-settings-tools">
-                            <input id="lobbyLocalPresetName" class="input-field" maxlength="40" data-lobby-i18n-placeholder="lobbyPresetName" placeholder="Назва локального пресету">
-                            <select id="lobbyLocalPresetSelect" class="input-field"></select>
-                            <button id="lobbyPresetSave" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetSave">Зберегти локально</button>
-                            <button id="lobbyPresetLoad" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetLoad">Завантажити</button>
-                            <button id="lobbyPresetDelete" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetDelete">Видалити</button>
-                            <button id="lobbyPresetExport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetExport">Export JSON</button>
-                            <button id="lobbyPresetImport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetImport">Import JSON</button>
-                            <input id="lobbyPresetFile" type="file" accept="application/json,.json" hidden>
-                        </div>
-                        <div class="lobby-settings-applybar">
-                            <button id="lobbySettingsReset" type="button" class="btn-secondary" data-lobby-i18n="lobbyReset">Скинути</button>
-                            <button id="lobbySettingsClassic" type="button" class="btn-secondary" data-lobby-i18n="lobbyResetClassic">Класичний</button>
-                            <button id="lobbySettingsApply" type="button" class="btn-success" data-lobby-i18n="lobbyApply">Застосувати</button>
-                        </div>
-                    </div>
-                    <div id="lobbySettingsReadOnly" class="lobby-settings-readonly"></div>
-                    <div id="lobbySettingsFeedback" class="lobby-settings-feedback" aria-live="polite"></div>
-                    <details class="lobby-audit"><summary data-lobby-i18n="lobbyAuditTitle">Останні події лобі</summary><div id="lobbyAuditEvents"></div></details>
-                </section>
-                <section class="lobby-members-section site-panel"><h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3>
-                <div id="lobbyMembers" class="gm-diagnostics-list"></div>
-                </section>
-                <section id="lobbyStartSection" class="lobby-start-card site-panel">
-                    <h3 data-lobby-i18n="lobbyStartTitle">Готовність до старту</h3>
-                    <div class="lobby-start-metrics"><span id="lobbyReadyProgress"></span><span id="lobbyGameplayProgress"></span></div>
-                    <div id="lobbyBlockers" class="lobby-blockers" role="status"></div>
-                    <div class="lobby-start-actions">
-                        <button id="lobbyStartPreviewButton" type="button" class="btn-secondary lobby-host-command" onclick="previewLobbyStart()" style="display:none;" data-lobby-i18n="lobbyCheckReadiness">Перевірити готовність</button>
-                        <button id="lobbyStartPrimaryButton" type="button" class="btn-success lobby-host-command" onclick="startGame()" style="display:none;" data-lobby-i18n="startGame">Почати гру</button>
-                    </div>
-                    <div id="lobbyStartPreview" class="lobby-preview-summary" aria-live="polite"></div>
-                </section>
-            </section>
-            <p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
-        </div>
-        <div id="roomPlayersList" class="room-players-grid site-player-status-row" style="display:none;"></div>
-
-        <!-- My Player Characteristics Section (тільки для власника) -->
-        <div id="myPlayerSection" class="site-major-section" style="display:none;">
-            <h2 class="section-title site-section-heading">Мої характеристики (бачу тільки я)</h2>
-            <div id="myPlayerCards" class="player-cards-grid"></div>
-            <section id="mySpecialCardsSection" class="my-special-cards-section">
-                <h2 class="section-title site-section-heading">Мої спеціальні карти</h2>
-                <div id="mySpecialCardsList" class="my-special-cards-list"></div>
-            </section>
-        </div>
-
-        <!-- Players Table Section (під час гри) -->
-        <div id="gameSection" class="site-major-section" style="display: none;">
-            <section class="scenario-immersive-section" aria-labelledby="scenarioSectionTitle">
-                <!-- Section Header for Apocalypse & Bunker -->
-                <div class="scenario-section-header site-section-heading">
-                    <div class="section-header-line"></div>
-                    <h2 class="section-header-title" id="scenarioSectionTitle">🎭 Бункер та Апокаліпсис</h2>
-                    <div class="section-header-line"></div>
-                </div>
-
-                <!-- Apocalypse, Bunker & Threat Info -->
-                <div class="game-info-panels scenario-immersive-grid">
-                    <div class="apocalypse-panel scenario-immersive-panel" id="apocalypsePanel">
-                        <h3 class="panel-title apocalypse-panel-title">Апокаліпсис</h3>
-                        <div class="panel-content" id="apocalypseContent">
-                            <p>Завантаження...</p>
-                        </div>
-                    </div>
-                    <div class="bunker-panel scenario-immersive-panel" id="bunkerPanel">
-                        <h3 class="panel-title bunker-panel-title">Бункер</h3>
-                        <div class="panel-content" id="bunkerContent">
-                            <p>Завантаження...</p>
-                        </div>
-                    </div>
-                    <div id="threatPanel" class="threat-panel scenario-immersive-panel">
-                        <h3 class="panel-title threat-panel-title">Загроза</h3>
-                        <div class="panel-content" id="threatContent">
-                            <article class="scenario-immersive-shell threat-scenario-shell is-sealed" aria-labelledby="threat-hidden-title">
-                                <div class="threat-sealed-pattern" aria-hidden="true"></div>
-                                <div class="threat-sealed-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 28v-8c0-8 4-13 11-13s11 5 11 13v8M32 38v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
-                                </div>
-                                <div class="threat-sealed-copy">
-                                    <span class="threat-badge">Загроза</span>
-                                    <h4 id="threat-hidden-title" class="threat-title">Невідомо</h4>
-                                    <p class="threat-description">Загроза ще не розкрита.</p>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <h2 class="section-title site-section-heading">
-                Гравці в бункері: <span class="bunker-count" id="playerCount">0/6</span>
-            </h2>
-
-            <div id="publicPlayerOverview" class="player-overview-section" aria-labelledby="publicPlayerOverviewTitle">
-                <div class="comparison-toolbar">
-                    <div class="view-mode-toggle" role="group" aria-label="Режим перегляду">
-                        <button type="button" class="view-mode-button is-active" data-player-view="all" aria-pressed="true">Усі гравці</button>
-                        <button type="button" class="view-mode-button" data-player-view="single" aria-pressed="false">Один гравець</button>
-                    </div>
-                    <label class="comparison-sort-field" for="playerComparisonSort">
-                        <span>Сортування</span>
-                        <select id="playerComparisonSort">
-                            <option value="seat">За номером</option>
-                            <option value="name">За ім’ям</option>
-                            <option value="revealed-desc">Більше розкрито</option>
-                            <option value="revealed-asc">Менше розкрито</option>
-                        </select>
-                    </label>
-                </div>
-                <h3 id="publicPlayerOverviewTitle" class="visually-hidden">Гравці</h3>
-                <section id="allPlayersComparison" class="player-comparison-shell" aria-live="polite">
-                    <div id="playerDossierGrid" class="player-dossier-grid"></div>
-                </section>
-                <div id="singlePlayerOverview" class="player-overview-shell" hidden>
-                    <aside class="player-selector-panel" aria-labelledby="publicPlayerOverviewTitle">
-                        <h3 class="player-selector-title">Гравці</h3>
-                        <div id="publicPlayerSelector" class="player-selector" role="listbox" aria-label="Гравці"></div>
-                    </aside>
-                    <section id="selectedPlayerPanel" class="selected-player-panel" aria-live="polite"></section>
-                </div>
-            </div>
-
-            <div id="specialCardsSection" class="special-cards-section" style="display: none;">
-                <h2 class="section-title site-section-heading">Розкриті спеціальні карти</h2>
-                <div class="special-cards-table-wrap">
-                    <table class="special-cards-table" data-testid="special-cards-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Гравець</th>
-                                <th>Спеціальна карта</th>
-                                <th>Опис / ефект</th>
-                                <th>Ціль</th>
-                                <th>Статус</th>
-                            </tr>
-                        </thead>
-                        <tbody id="specialCardsTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Events Section (покращена) -->
-    <div class="events-section-wrapper site-major-section">
-        <div class="events-section-main site-panel">
-            <h2 class="section-title site-section-heading">Ігрові події</h2>
-            
-            <!-- Поточна подія -->
-            <div id="currentEventPanel" class="current-event-panel" style="display: none;">
-                <div class="current-event-header">
-                    <span class="current-event-badge">ПОТОЧНА ПОДІЯ</span>
-                    <span id="currentEventTime" class="current-event-time"></span>
-                </div>
-                <div id="currentEventContent" class="current-event-content"></div>
-                <div id="currentEventEffect" class="current-event-effect" style="display: none;">
-                    <span class="effect-label">Можливий ефект:</span>
-                    <span id="currentEventEffectText" class="effect-text"></span>
-                </div>
-                <!-- Кнопка для ведучого -->
-                <div id="eventHostControls" class="event-host-controls" style="display: none;">
-                    <button class="btn-apply-effect" onclick="applyCurrentEventEffect()">Застосувати ефект</button>
-                    <button class="btn-dismiss-event" onclick="dismissCurrentEvent()">Закрити подію</button>
-                </div>
-            </div>
-            
-            <!-- Історія подій -->
-            <div class="events-history">
-                <h3 class="events-history-title">Історія подій</h3>
-                <div id="events" class="events-list">
-                    <p style="color: var(--color-text-muted); text-align: center;">Тут будуть відображатися події гри...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+	</div>
 </div>
 
+@* Підтвердження примусового завершення загрози для GM *@
 <div id="gmThreatForceModal" class="modal gm-threat-force-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="gmThreatForceTitle">
-    <div class="modal-content">
-        <h3 id="gmThreatForceTitle" data-gm-i18n="gmThreatForcePreviewTitle">Підтвердження примусового завершення</h3>
-        <div id="gmThreatForcePreviewContent"></div>
-        <p id="gmThreatForceError" class="gm-threat-force-error" aria-live="polite"></p>
-        <div class="modal-actions">
-            <button type="button" class="btn-secondary" data-gm-i18n="cancel" onclick="closeGMThreatForceModal()">Скасувати</button>
-            <button type="button" id="gmThreatForceRefresh" class="btn-secondary" data-gm-i18n="gmThreatForceRefresh" onclick="refreshGMThreatForcePreview()" style="display: none;">Оновити preview</button>
-            <button type="button" id="gmThreatForceConfirm" class="btn-primary" data-gm-i18n="confirm" onclick="confirmGMThreatForce()">Підтвердити</button>
-        </div>
-    </div>
+	<div class="modal-content">
+		<h3 id="gmThreatForceTitle" data-gm-i18n="gmThreatForcePreviewTitle">Підтвердження примусового завершення</h3>
+		<div id="gmThreatForcePreviewContent"></div>
+		<p id="gmThreatForceError" class="gm-threat-force-error" aria-live="polite"></p>
+		<div class="modal-actions">
+			<button type="button" class="btn-secondary" data-gm-i18n="cancel" onclick="closeGMThreatForceModal()">Скасувати</button>
+			<button type="button" id="gmThreatForceRefresh" class="btn-secondary" data-gm-i18n="gmThreatForceRefresh" onclick="refreshGMThreatForcePreview()" style="display: none;">Оновити preview</button>
+			<button type="button" id="gmThreatForceConfirm" class="btn-primary" data-gm-i18n="confirm" onclick="confirmGMThreatForce()">Підтвердити</button>
+		</div>
+	</div>
 </div>
 
-<!-- Join Room Modal -->
+@* Приєднання до вибраної кімнати *@
 <div id="joinModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3>Приєднатися до кімнати</h3>
-        <div>
-            <input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
-            <input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
-            <input type="hidden" id="joinRoomId" />
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeJoinModal()">Скасувати</button>
-                <button type="button" class="btn-primary" onclick="submitJoinRoom()">Приєднатися</button>
-            </div>
-        </div>
-    </div>
+	<div class="modal-content">
+		<h3>Приєднатися до кімнати</h3>
+		<div>
+			<input id="playerNameJoin" type="text" class="input-field" placeholder="Ваше ім'я..." maxlength="10" oninput="sanitizeNameInput(this)" />
+			<input id="joinRoomPassword" type="password" class="input-field" placeholder="Пароль (якщо є)" />
+			<input type="hidden" id="joinRoomId" />
+			<div class="modal-actions">
+				<button type="button" class="btn-secondary" onclick="closeJoinModal()">Скасувати</button>
+				<button type="button" class="btn-primary" onclick="submitJoinRoom()">Приєднатися</button>
+			</div>
+		</div>
+	</div>
 </div>
 
-<!-- Edit Characteristic Modal -->
+@* Редагування характеристики гравця *@
 <div id="editCharModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3>Редагувати характеристику</h3>
-        <p id="editCharInfo" class="edit-char-info"></p>
-        <div>
-            <input id="editCharValue" type="text" class="input-field" placeholder="Нове значення..." />
-            <input type="hidden" id="editCharName" />
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeEditCharModal()">Скасувати</button>
-                <button type="button" class="btn-warning" onclick="clearCharacteristic()">Очистити</button>
-                <button type="button" class="btn-primary" onclick="submitEditCharacteristic()">Зберегти</button>
-            </div>
-        </div>
-    </div>
+	<div class="modal-content">
+		<h3>Редагувати характеристику</h3>
+		<p id="editCharInfo" class="edit-char-info"></p>
+		<div>
+			<input id="editCharValue" type="text" class="input-field" placeholder="Нове значення..." />
+			<input type="hidden" id="editCharName" />
+			<div class="modal-actions">
+				<button type="button" class="btn-secondary" onclick="closeEditCharModal()">Скасувати</button>
+				<button type="button" class="btn-warning" onclick="clearCharacteristic()">Очистити</button>
+				<button type="button" class="btn-primary" onclick="submitEditCharacteristic()">Зберегти</button>
+			</div>
+		</div>
+	</div>
 </div>
 
-<!-- Peek Characteristic Modal (тільки для хоста) -->
+@* Перегляд прихованої характеристики для хоста *@
 <div id="peekModal" class="modal" style="display: none;">
-    <div class="modal-content modal-peek">
-        <h3>&#128065; Підгляд характеристики</h3>
-        <div id="peekModalContent"></div>
-        <div class="modal-actions">
-            <button type="button" class="btn-primary" onclick="closePeekModal()">Закрити</button>
-        </div>
-    </div>
+	<div class="modal-content modal-peek">
+		<h3>&#128065; Підгляд характеристики</h3>
+		<div id="peekModalContent"></div>
+		<div class="modal-actions">
+			<button type="button" class="btn-primary" onclick="closePeekModal()">Закрити</button>
+		</div>
+	</div>
 </div>
 
 <script src="/js/signalr-lite.js"></script>
 <script src="/js/game.js"></script>
-
 

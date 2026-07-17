@@ -1,0 +1,101 @@
+﻿@*
+    Основне ігрове поле.
+
+    Містить характеристики, інформацію про бункер
+    та апокаліпсис, загрози, спеціальні карти
+    й публічний стан учасників.
+*@
+<div id="gameSection" class="site-major-section" style="display: none;">
+    <section class="scenario-immersive-section" aria-labelledby="scenarioSectionTitle">
+        @* Заголовок сценарію бункера та апокаліпсису *@
+        <div class="scenario-section-header site-section-heading">
+            <div class="section-header-line"></div>
+            <h2 class="section-header-title" id="scenarioSectionTitle">🎭 Бункер та Апокаліпсис</h2>
+            <div class="section-header-line"></div>
+        </div>
+
+        @* Інформація про апокаліпсис, бункер і поточну загрозу *@
+        <div class="game-info-panels scenario-immersive-grid">
+            <div class="apocalypse-panel scenario-immersive-panel" id="apocalypsePanel">
+                <h3 class="panel-title apocalypse-panel-title">Апокаліпсис</h3>
+                <div class="panel-content" id="apocalypseContent">
+                    <p>Завантаження...</p>
+                </div>
+            </div>
+            <div class="bunker-panel scenario-immersive-panel" id="bunkerPanel">
+                <h3 class="panel-title bunker-panel-title">Бункер</h3>
+                <div class="panel-content" id="bunkerContent">
+                    <p>Завантаження...</p>
+                </div>
+            </div>
+            <div id="threatPanel" class="threat-panel scenario-immersive-panel">
+                <h3 class="panel-title threat-panel-title">Загроза</h3>
+                <div class="panel-content" id="threatContent">
+                    <article class="scenario-immersive-shell threat-scenario-shell is-sealed" aria-labelledby="threat-hidden-title">
+                        <div class="threat-sealed-pattern" aria-hidden="true"></div>
+                        <div class="threat-sealed-icon" aria-hidden="true">
+                            <svg viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="4" /><path d="M21 28v-8c0-8 4-13 11-13s11 5 11 13v8M32 38v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" /></svg>
+                        </div>
+                        <div class="threat-sealed-copy">
+                            <span class="threat-badge">Загроза</span>
+                            <h4 id="threat-hidden-title" class="threat-title">Невідомо</h4>
+                            <p class="threat-description">Загроза ще не розкрита.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <h2 class="section-title site-section-heading">
+        Гравці в бункері: <span class="bunker-count" id="playerCount">0/6</span>
+    </h2>
+
+    <div id="publicPlayerOverview" class="player-overview-section" aria-labelledby="publicPlayerOverviewTitle">
+        <div class="comparison-toolbar">
+            <div class="view-mode-toggle" role="group" aria-label="Режим перегляду">
+                <button type="button" class="view-mode-button is-active" data-player-view="all" aria-pressed="true">Усі гравці</button>
+                <button type="button" class="view-mode-button" data-player-view="single" aria-pressed="false">Один гравець</button>
+            </div>
+            <label class="comparison-sort-field" for="playerComparisonSort">
+                <span>Сортування</span>
+                <select id="playerComparisonSort">
+                    <option value="seat">За номером</option>
+                    <option value="name">За ім’ям</option>
+                    <option value="revealed-desc">Більше розкрито</option>
+                    <option value="revealed-asc">Менше розкрито</option>
+                </select>
+            </label>
+        </div>
+        <h3 id="publicPlayerOverviewTitle" class="visually-hidden">Гравці</h3>
+        <section id="allPlayersComparison" class="player-comparison-shell" aria-live="polite">
+            <div id="playerDossierGrid" class="player-dossier-grid"></div>
+        </section>
+        <div id="singlePlayerOverview" class="player-overview-shell" hidden>
+            <aside class="player-selector-panel" aria-labelledby="publicPlayerOverviewTitle">
+                <h3 class="player-selector-title">Гравці</h3>
+                <div id="publicPlayerSelector" class="player-selector" role="listbox" aria-label="Гравці"></div>
+            </aside>
+            <section id="selectedPlayerPanel" class="selected-player-panel" aria-live="polite"></section>
+        </div>
+    </div>
+
+    <div id="specialCardsSection" class="special-cards-section" style="display: none;">
+        <h2 class="section-title site-section-heading">Розкриті спеціальні карти</h2>
+        <div class="special-cards-table-wrap">
+            <table class="special-cards-table" data-testid="special-cards-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Гравець</th>
+                        <th>Спеціальна карта</th>
+                        <th>Опис / ефект</th>
+                        <th>Ціль</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody id="specialCardsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>

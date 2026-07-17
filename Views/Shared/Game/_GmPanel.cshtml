@@ -1,0 +1,517 @@
+﻿@*
+    Панель Game Master.
+
+    Містить керування станом гри, раундами, загрозами,
+    гравцями, діагностикою, audit, snapshots та undo.
+
+    Приховування елементів інтерфейсу не є перевіркою прав:
+    доступ до команд повинен перевірятися на backend.
+*@
+<div id="gmPanel" class="gm-panel" style="display: none;">
+	<div class="gm-panel-header">
+		<h3>🎮 Game Master Panel</h3>
+		<button class="btn-close" onclick="toggleGMPanel()">×</button>
+	</div>
+	<nav class="gm-tabs" aria-label="GM sections">
+		<button type="button" class="gm-tab active" data-gm-tab-button="state" data-gm-i18n="gmGameState" onclick="switchGMTab('state')">Стан гри</button>
+		<button type="button" class="gm-tab" data-gm-tab-button="round" data-gm-i18n="gmRoundControl" onclick="switchGMTab('round')">Керування раундом</button>
+		<button type="button" class="gm-tab" data-gm-tab-button="threat" data-gm-i18n="gmThreatControl" onclick="switchGMTab('threat')">Керування загрозою</button>
+		<button type="button" class="gm-tab" data-gm-tab-button="content" data-gm-i18n="gmContent" onclick="switchGMTab('content')">Контент</button>
+		<button type="button" class="gm-tab" data-gm-tab-button="diagnostics" data-gm-i18n="gmDiagnostics" onclick="switchGMTab('diagnostics')">Діагностика</button>
+		<button id="omniscientHiddenTab" type="button" class="gm-tab" data-gm-tab-button="omniscient" data-gm-i18n="omniscientHiddenTitle" onclick="switchGMTab('omniscient')" style="display:none;">Всезнаючий GM</button>
+	</nav>
+	<div class="gm-panel-content">
+		<div class="gm-section" id="gmGameStateSection" data-gm-tab="state">
+			<h4 class="gm-section-title">Стан гри</h4>
+			<div id="gmGameStateSummary" class="gm-status-grid"></div>
+		</div>
+
+		<div class="gm-section" id="omniscientHiddenSection" data-gm-tab="omniscient" style="display:none;">
+			<h4 data-gm-i18n="omniscientHiddenTitle">Всезнаючий GM</h4>
+			<p class="global-catalog-warning" data-gm-i18n="omniscientReadOnlyNotice">Спостерігач — не бере участі у грі. Read-only.</p>
+			<div class="gm-diagnostics-toolbar">
+				<input id="omniscientHiddenSearch" class="input-field" type="search" maxlength="100" data-gm-i18n-placeholder="omniscientHiddenSearch" placeholder="Пошук гравця або характеристики" oninput="renderOmniscientHiddenState()" />
+				<button type="button" class="btn-gm-action" data-gm-i18n="omniscientRefresh" onclick="resyncOmniscientHiddenState()">Оновити</button>
+			</div>
+			<p id="omniscientHiddenStatus" aria-live="polite"></p>
+			<div id="omniscientRoomSummary" class="gm-status-grid"></div>
+			<div id="omniscientSecretVotes" class="gm-threat-audit"></div>
+			<details id="omniscientDirectorControls" class="gm-threat-audit">
+				<summary data-gm-i18n="directorControlsTitle">Director controls</summary>
+				<p class="global-catalog-warning" data-gm-i18n="directorControlsWarning">Preview і підтвердження обов’язкові.</p>
+				<div class="gm-editor-grid">
+					<select id="directorTargetPlayer" class="input-field" onchange="syncDirectorControls()"></select>
+					<select id="directorAction" class="input-field" onchange="syncDirectorControls()">
+						<option value="reveal">Reveal characteristic</option>
+						<option value="hide">Hide characteristic</option>
+						<option value="reveal_all">Reveal all</option>
+						<option value="hide_all">Hide all</option>
+						<option value="eliminate">Eliminate</option>
+						<option value="restore">Restore</option>
+						<option value="condition_severity">Condition severity</option>
+						<option value="condition_remove">Remove condition</option>
+						<option value="pause">Pause</option>
+						<option value="resume">Resume</option>
+						<option value="round_forward">Forward round</option>
+						<option value="reset_readiness">Reset readiness</option>
+						<option value="clear_votes">Clear votes</option>
+						<option value="remove_vote">Remove vote</option>
+						<option value="voting_resync">Voting resync</option>
+						<option value="threat_force_success">Force threat success</option>
+						<option value="threat_force_failure">Force threat failure</option>
+						<option value="threat_cancel">Cancel threat</option>
+						<option value="threat_restart">Restart threat</option>
+						<option value="threat_resync">Threat resync</option>
+					</select>
+					<select id="directorCategory" class="input-field"><option>Profession</option><option>PhysicalHealth</option><option>MentalHealth</option><option>Hobby</option><option>CharacterTrait</option><option>Phobia</option><option>Inventory</option><option>Fact</option><option>SpecialCard</option></select>
+					<input id="directorOption" class="input-field" maxlength="80" data-gm-i18n-placeholder="directorOption" placeholder="Option / severity / round" />
+				</div>
+				<button id="directorPreviewButton" class="btn-gm-action director-command" data-gm-i18n="directorPreview" onclick="previewDirectorAction()">Preview</button>
+				<button id="directorApplyButton" class="btn-danger director-command" data-gm-i18n="directorApply" onclick="applyDirectorAction()" disabled>Apply</button>
+				<pre id="directorPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
+			</details>
+			<div id="omniscientHiddenPlayers" class="gm-diagnostics-list"></div>
+		</div>
+
+		<div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="round" style="display: none;">
+			<h4 class="gm-section-title">Керування раундом</h4>
+			<section class="gm-round-control-block gm-round-state-block" aria-labelledby="gmRoundStateHeading">
+				<h5 id="gmRoundStateHeading" data-gm-i18n="gmRoundCurrentState">Поточний стан</h5>
+				<div class="gm-round-summary">
+					<span id="gmCurrentRound">Раунд 1</span>
+					<strong id="gmCurrentPhase">Розкриття характеристик</strong>
+					<small id="gmRoundProgress">0/0 відкрили</small>
+					<small id="gmDiceResult" class="gm-dice-result" style="display: none;"></small>
+					<span id="gmPauseBadge" class="gm-status-badge">Гра триває</span>
+					<small id="gmPauseReasonSummary" class="gm-pause-reason-summary" style="display: none;"></small>
+				</div>
+			</section>
+			<section class="gm-round-control-block" aria-labelledby="gmRoundMainHeading">
+				<h5 id="gmRoundMainHeading" data-gm-i18n="gmRoundMainActions">Основні дії</h5>
+				<label class="gm-label" for="gmPauseReason" data-gm-i18n="gmPauseReason">Причина паузи</label>
+				<input id="gmPauseReason" class="gm-select" maxlength="160" />
+				<div class="gm-round-actions">
+					<button class="btn-gm-action gm-round-command gm-action-secondary" data-gm-i18n="gmPause" onclick="setGamePause(true)">Пауза</button>
+					<button class="btn-gm-action gm-round-command gm-action-secondary" data-gm-i18n="gmResume" onclick="setGamePause(false)">Продовжити</button>
+				</div>
+				<div class="gm-round-actions gm-round-main-actions">
+					<button id="rollDiceBtn" class="btn-gm-action" onclick="rollRoundDice()" disabled>Кинути кубик</button>
+					<button id="endRoundBtn" class="btn-gm-action gm-action-primary" onclick="endRound()" disabled>Раунд закінчено</button>
+					<button id="startReadyCheckBtn" class="btn-gm-action" onclick="markAllPlayersReady()" disabled>Всі готові</button>
+					<button id="gmStartVotingBtn" class="btn-gm-action" onclick="startVoting()" style="display: none;">Почати голосування</button>
+				</div>
+				<p id="gmVotingLockedHint" class="gm-round-hint">Голосування відкриється після завершення 3 раунду.</p>
+				<div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
+				<div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
+			</section>
+			<section class="gm-round-control-block" aria-labelledby="gmManualRoundHeading">
+				<h5 id="gmManualRoundHeading" data-gm-i18n="gmManualRoundHeading">Ручне встановлення раунду</h5>
+				<p class="gm-round-hint" data-gm-i18n="gmManualRoundHint">Перехід можливий лише вперед; частину стану поточного раунду буде очищено.</p>
+				<div class="gm-round-form-row">
+					<label class="gm-field" for="gmManualRound">
+						<span data-gm-i18n="gmManualRound">Номер раунду</span>
+						<input id="gmManualRound" class="gm-select" type="number" min="1" max="99" step="1" />
+					</label>
+					<button class="btn-gm-action gm-round-command gm-action-primary" data-gm-i18n="gmPreviewRound" onclick="previewManualRoundChange()">Preview / підтвердити</button>
+				</div>
+			</section>
+			<section class="gm-round-control-block gm-round-danger-zone" aria-labelledby="gmReadinessHeading">
+				<h5 id="gmReadinessHeading" data-gm-i18n="gmReadinessHeading">Скидання готовності</h5>
+				<p class="gm-round-hint" data-gm-i18n="gmReadinessHint">Очищає поточні позначки готовності після підтвердження.</p>
+				<button class="btn-gm-action btn-danger gm-round-command" data-gm-i18n="gmResetReadiness" onclick="resetRoundReadiness()">Скинути готовність</button>
+			</section>
+			<section class="gm-round-control-block gm-timer-block" id="gmGameTimerCard" aria-labelledby="gmTimerHeading">
+				<h5 id="gmTimerHeading" data-gm-i18n="gmGameTimer">Серверний таймер</h5>
+				<div class="gm-timer-fields">
+					<label class="gm-field" for="gmTimerMinutes"><span data-gm-i18n="gmTimerMinutes">Хвилини</span><input id="gmTimerMinutes" class="gm-select" type="number" min="0" max="120" step="1" value="5" /></label>
+					<label class="gm-field" for="gmTimerSeconds"><span data-gm-i18n="gmTimerSeconds">Секунди</span><input id="gmTimerSeconds" class="gm-select" type="number" min="0" max="59" step="1" value="0" onkeydown="handleGameTimerKeydown(event)" /></label>
+					<label class="gm-field" for="gmTimerPurpose">
+						<span data-gm-i18n="gmTimerPurpose">Призначення</span>
+						<select id="gmTimerPurpose" class="gm-select">
+							<option value="Round">Round</option>
+							<option value="Voting">Voting</option>
+							<option value="Threat">Threat</option>
+							<option value="Custom">Custom</option>
+						</select>
+					</label>
+					<label class="gm-field" for="gmTimerLabel"><span data-gm-i18n="gmTimerName">Назва</span><input id="gmTimerLabel" class="gm-select" maxlength="80" data-gm-i18n-placeholder="gmTimerLabel" placeholder="Label" /></label>
+				</div>
+				<div class="gm-round-actions">
+					<button id="gmTimerStart" class="btn-gm-action gm-timer-command gm-action-primary" data-gm-i18n="gmTimerStart" onclick="startGameTimer()">Старт</button>
+					<button id="gmTimerPause" class="btn-gm-action gm-timer-command" data-gm-i18n="gmPause" onclick="invokeGameTimerCommand('PauseGameTimer')">Пауза</button>
+					<button id="gmTimerResume" class="btn-gm-action gm-timer-command" data-gm-i18n="gmResume" onclick="invokeGameTimerCommand('ResumeGameTimer')">Продовжити</button>
+					<button id="gmTimerRestart" class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerRestart" onclick="restartGameTimer()">Перезапустити</button>
+					<button class="btn-gm-action gm-timer-command" onclick="adjustGameTimer(30)">+30 сек</button>
+					<button class="btn-gm-action gm-timer-command" onclick="adjustGameTimer(-30)">−30 сек</button>
+					<button class="btn-gm-action gm-timer-command" data-gm-i18n="gmTimerSet" onclick="setGameTimer()">Встановити</button>
+					<button id="gmTimerStop" class="btn-gm-action btn-danger gm-timer-command" data-gm-i18n="gmTimerStop" onclick="stopGameTimer()">Зупинити</button>
+				</div>
+				<p id="gmTimerFeedback" class="gm-round-hint" aria-live="polite"></p>
+			</section>
+			<div class="gm-voting-admin-card">
+				<h5 data-gm-i18n="gmVotingRecovery">Відновлення голосування</h5>
+				<div class="gm-round-actions">
+					<button class="btn-gm-action gm-round-command" data-gm-i18n="gmClearVotes" onclick="clearCurrentVotes()">Очистити голоси</button>
+					<button class="btn-gm-action gm-round-command" data-gm-i18n="gmVotingResync" onclick="resyncVotingAdmin()">Синхронізувати</button>
+				</div>
+				<select id="gmRemoveVoterSelect" class="gm-select"></select>
+				<button class="btn-gm-action gm-round-command" data-gm-i18n="gmRemoveVote" onclick="removeSelectedVote()">Видалити голос voter</button>
+				<div id="gmNonVotersList" class="gm-ready-status-list"></div>
+			</div>
+			<details class="gm-player-danger">
+				<summary data-gm-i18n="gmUnavailableRecovery">Недоступні recovery controls</summary>
+				<button class="btn-gm-action" disabled data-gm-i18n="gmStageUnavailable">Reopen/skip потребує transition helper</button>
+			</details>
+			<p id="gmRoundCommandResult" class="gm-round-hint" aria-live="polite"></p>
+		</div>
+
+		<div class="gm-section" id="gmThreatControlSection" data-gm-tab="threat" style="display: none;">
+			<h4 class="gm-section-title">Керування загрозою</h4>
+			<div id="gmThreatCurrent" class="gm-threat-current">Поточна загроза відсутня</div>
+			<div id="gmSpecificThreatControls" style="display: none;">
+				<input id="gmThreatSearch" class="gm-select" type="search" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
+				<select id="gmThreatSelect" class="gm-select"></select>
+				<button class="btn-gm-action" onclick="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
+			</div>
+			<div class="gm-round-actions">
+				<button class="btn-gm-action" onclick="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
+				<button class="btn-gm-action" onclick="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
+				<button class="btn-gm-action" onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
+			</div>
+			<div class="gm-threat-danger-zone" id="gmThreatEmergencyBlock">
+				<strong data-gm-i18n="gmThreatEmergency">Аварійне керування</strong>
+				<button id="gmThreatResync" class="btn-gm-action" data-gm-i18n="gmThreatResync" onclick="gmResyncThreatRoom()">Оновити стан загрози</button>
+				<button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" onclick="gmRestartThreat()">Перезапустити спробу</button>
+				<button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" onclick="gmCancelThreat()">Скасувати загрозу</button>
+				<button id="gmThreatForceSuccess" class="btn-gm-action gm-force-success" data-gm-i18n="gmThreatForceSuccess" onclick="requestGMThreatForcePreview('success')">Примусовий успіх</button>
+				<button id="gmThreatForceFailure" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatForceFailure" onclick="requestGMThreatForcePreview('failure')">Примусовий провал</button>
+			</div>
+			<p id="gmThreatCommandResult" class="gm-round-hint"></p>
+		</div>
+
+		@* Вибір гравця для керування через GM-панель *@
+		<div class="gm-section" id="gmPlayerSelectSection" data-gm-tab="state">
+			<label class="gm-label">Вибрати гравця:</label>
+			<select id="gmPlayerSelect" class="gm-select" onchange="loadPlayerDataForGM()">
+				<option value="">-- Виберіть гравця --</option>
+			</select>
+		</div>
+
+		@* Інформація та дії для вибраного гравця *@
+		<div id="gmPlayerInfo" class="gm-player-info" data-gm-tab="state" style="display: none;">
+			<h4 id="gmPlayerName">Гравець</h4>
+
+			@* Швидкі дії над вибраним гравцем *@
+			<div class="gm-quick-actions">
+				<button class="btn-gm-action btn-eliminate" onclick="eliminateSelectedPlayer()">❌ Елімінувати</button>
+				<button class="btn-gm-action btn-restore" onclick="restoreSelectedPlayer()">✅ Повернути</button>
+			</div>
+			<p id="gmPlayerCommandResult" class="gm-round-hint" aria-live="polite"></p>
+			<details class="gm-player-secondary">
+				<summary data-gm-i18n="gmPlayerSecondaryActions">Додаткові дії</summary>
+				<div class="gm-round-actions">
+					<button class="btn-gm-action gm-player-command" data-gm-i18n="gmResyncPlayer" onclick="resyncSelectedPlayer()">Синхронізувати гравця</button>
+					<button class="btn-gm-action gm-player-command" data-gm-i18n="gmInspectConnection" onclick="inspectSelectedConnection()">Перевірити connection</button>
+					<button class="btn-gm-action gm-player-command" data-gm-i18n="gmTransferHost" onclick="transferHostToSelectedPlayer()">Передати host</button>
+				</div>
+				<label class="gm-label" data-gm-i18n="gmHideCharacteristic">Сховати розкриту характеристику</label>
+				<div class="gm-round-actions">
+					<select id="gmHideCharacteristicSelect" class="gm-select">
+						<option value="Personality">Особистість</option>
+						<option value="Body">Статура</option>
+						<option value="Profession">Професія</option>
+						<option value="PhysicalHealth">Фізичне здоров'я</option>
+						<option value="MentalHealth">Психічне здоров'я</option>
+						<option value="Hobby">Хобі</option>
+						<option value="CharacterTrait">Риса характеру</option>
+						<option value="Phobia">Фобія</option>
+						<option value="Inventory">Інвентар</option>
+						<option value="Fact">Факт</option>
+					</select>
+					<button class="btn-gm-action gm-player-command" data-gm-i18n="gmHide" onclick="hideSelectedCharacteristic()">Сховати</button>
+				</div>
+				<div id="gmAdditionalConditions"></div>
+			</details>
+			<details class="gm-player-danger">
+				<summary data-gm-i18n="gmDangerousActions">Небезпечні дії</summary>
+				<button class="btn-gm-action btn-danger gm-player-command" data-gm-i18n="gmKickPlayer" onclick="kickSelectedPlayer()">Виключити з кімнати</button>
+			</details>
+
+			@* Характеристики вибраного гравця *@
+			<div class="gm-characteristics">
+				<div class="gm-char-item">
+					<span class="gm-char-name">Особистість:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Статура:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Професія:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Profession')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Profession')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Фіз. здоров'я:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('PhysicalHealth')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('PhysicalHealth')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Псих. здоров'я:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('MentalHealth')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('MentalHealth')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Хобі:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Hobby')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Hobby')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Риса характеру:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('CharacterTrait')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('CharacterTrait')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Фобія:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Phobia')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Phobia')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Інвентар:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmInventory">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Inventory')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Факт:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmFact">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Fact')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="editCharacteristic('Fact')" title="Редагувати">✏️</button>
+						<button onclick="regenerateCharacteristic('Fact')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Fact')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		@* Керування бункером та апокаліпсисом *@
+		<div class="gm-section" id="gmScenarioSection" data-gm-tab="content" style="display: none;">
+			<h4 class="gm-section-title">Сценарій гри</h4>
+			<div class="gm-scenario-controls">
+				<div class="gm-control-row">
+					<label class="gm-label" for="gmBunkerCapacity" data-gm-i18n="gmBunkerCapacityLabel">Місткість бункера</label>
+					<div class="gm-capacity-control">
+						<input id="gmBunkerCapacity" class="gm-capacity-input" type="number" min="1" max="99" step="1" value="6" onkeydown="handleBunkerCapacityKeydown(event)" />
+						<button id="gmBunkerCapacitySubmit" class="btn-gm-action" data-gm-i18n="gmCapacitySubmit" onclick="submitBunkerCapacity()">ОК</button>
+					</div>
+					<small id="gmBunkerCapacityFeedback" class="gm-round-hint" aria-live="polite"></small>
+				</div>
+				<div class="gm-control-row">
+					<button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
+					<button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
+				</div>
+			</div>
+		</div>
+
+		@* Система ігрових подій *@
+		<div class="gm-section"
+			 id="gmEventsSection"
+			 data-gm-tab="content"
+			 style="display: none;">
+
+			<h4 class="gm-section-title">Ігрові події</h4>
+
+			<div class="gm-event-form">
+				<select id="gmEventType" class="gm-select">
+					<option value="info">Інформація</option>
+					<option value="warning">Попередження</option>
+					<option value="danger">Небезпека</option>
+					<option value="success">Позитив</option>
+					<option value="catastrophe">Катастрофа</option>
+				</select>
+
+				<textarea id="gmEventText"
+						  class="input-field gm-event-textarea"
+						  placeholder="Текст події..."
+						  rows="2"></textarea>
+
+				<button type="button"
+						class="btn-gm-action btn-send-event"
+						onclick="sendGameEvent()">
+					Відправити подію
+				</button>
+			</div>
+
+			<div class="gm-quick-events">
+				<button type="button"
+						class="btn-gm-quick"
+						onclick="sendQuickEvent(
+					'Землетрус! Частина бункера пошкоджена.',
+					'catastrophe'
+					)">
+					Землетрус
+				</button>
+
+				<button type="button"
+						class="btn-gm-quick btn-gm-supplies-add"
+						onclick="addBunkerSupplies()">
+					+ Запаси
+				</button>
+
+				<button type="button"
+						class="btn-gm-quick btn-gm-supplies-remove"
+						onclick="removeBunkerSupplies()">
+					− Запаси
+				</button>
+
+				<button type="button"
+						class="btn-gm-quick"
+						onclick="sendQuickEvent(
+					'Загроза зараження! Потрібна дезінфекція.',
+					'warning'
+					)">
+					Зараження
+				</button>
+
+				<button type="button"
+						class="btn-gm-quick"
+						onclick="sendQuickEvent(
+					'Зовнішні виживальці просять допомоги.',
+					'info'
+					)">
+					Виживальці
+				</button>
+
+				<button type="button"
+						class="btn-gm-quick"
+						onclick="sendQuickEvent(
+					'Генератор зламався! Світла немає.',
+					'danger'
+					)">
+					Генератор
+				</button>
+			</div>
+		</div>
+
+		<div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="diagnostics" style="display: none;">
+			<h4 class="gm-section-title" data-gm-i18n="gmDiagnostics">Діагностика</h4>
+			<div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
+			<p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
+			<div class="gm-diagnostics-actions">
+				<button id="gmRunDiagnostics" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRunDiagnostics" onclick="runRoomIntegrityCheck()">Перевірити кімнату</button>
+				<button id="gmPreviewAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmPreviewAutoFix" onclick="previewRoomAutoFix()">Preview auto-fix</button>
+				<button id="gmApplyAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmApplyAutoFix" onclick="applyRoomAutoFix()" disabled>Застосувати безпечні виправлення</button>
+			</div>
+			<p id="gmDiagnosticsFeedback" class="gm-round-hint" aria-live="polite"></p>
+			<div class="gm-diagnostics-toolbar">
+				<label for="gmIssueSeverity" data-gm-i18n="gmIssueFilter">Фільтр issues</label>
+				<select id="gmIssueSeverity" class="input-field" onchange="renderRoomDiagnostics()">
+					<option value="all" data-gm-i18n="gmAll">Усі</option>
+					<option value="error">Error</option>
+					<option value="warning">Warning</option>
+					<option value="info">Info</option>
+				</select>
+			</div>
+			<div id="gmDiagnosticsIssues" class="gm-diagnostics-list" aria-live="polite"></div>
+			<details id="gmSnapshotsSection" class="gm-threat-audit">
+				<summary data-gm-i18n="gmSnapshotsTitle">Snapshots / Undo</summary>
+				<div class="gm-diagnostics-toolbar">
+					<input id="gmSnapshotReason" class="input-field" maxlength="120" data-gm-i18n-placeholder="gmSnapshotReason" placeholder="Назва контрольної точки" />
+					<button id="gmCreateSnapshot" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmCreateSnapshot" onclick="createManualRoomSnapshot()">Створити контрольну точку</button>
+					<button id="gmUndoLastAction" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Скасувати останню GM-дію</button>
+					<button type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmRefreshSnapshots" onclick="refreshRoomSnapshots()">Оновити snapshots</button>
+				</div>
+				<p id="gmSnapshotFeedback" class="gm-round-hint" aria-live="polite"></p>
+				<div id="gmSnapshotPreview" class="gm-snapshot-preview" aria-live="polite"></div>
+				<div id="gmSnapshotsList" class="gm-snapshots-list" aria-live="polite"></div>
+			</details>
+			<details id="gmRoomLocalEditor" class="gm-threat-audit">
+				<summary data-gm-i18n="gmRoomLocalEditor">Редактор поточної кімнати</summary>
+				<p data-gm-i18n="gmRoomLocalWarning">Зміни діють лише в цій кімнаті.</p>
+				<div class="gm-editor-grid">
+					<select id="gmEditorCategory" class="input-field" onchange="renderRoomLocalEditor()"><option value="bunker">Bunker</option><option value="apocalypse">Apocalypse</option><option value="player">Player</option></select>
+					<select id="gmEditorPlayer" class="input-field" onchange="renderRoomLocalEditor()"></select>
+					<select id="gmEditorField" class="input-field" onchange="syncRoomLocalEditorField()"></select>
+					<input id="gmEditorCurrent" class="input-field" readonly data-gm-i18n-placeholder="gmCurrentPublicValue" placeholder="Поточне публічне значення" />
+					<textarea id="gmEditorValue" class="input-field" rows="3" data-gm-i18n-placeholder="gmNewPublicValue" placeholder="Нове значення"></textarea>
+				</div>
+				<div class="gm-diagnostics-actions">
+					<button id="gmEditorPreviewButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmSnapshotPreview" onclick="previewRoomLocalEdit()">Preview</button>
+					<button id="gmEditorApplyButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmEditorApply" onclick="applyRoomLocalEdit()" disabled>Застосувати</button>
+					<button class="btn-gm-action gm-editor-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Undo</button>
+				</div>
+				<p id="gmEditorFeedback" class="gm-round-hint" aria-live="polite"></p>
+			</details>
+			<details id="gmOmniscientMode" class="gm-threat-audit">
+				<summary data-gm-i18n="omniscientModeTitle">Режим GM-спостерігача</summary>
+				<p data-gm-i18n="omniscientModeWarning">Незворотно для цієї кімнати: GM перестане бути учасником гри.</p>
+				<input id="omniscientBootstrapKey" class="input-field" type="password" maxlength="200" autocomplete="off" data-gm-i18n-placeholder="omniscientBootstrapKey" placeholder="Development bootstrap key" />
+				<button id="omniscientPreviewButton" type="button" class="btn-gm-action omniscient-command" data-gm-i18n="omniscientPreview" onclick="previewEnterOmniscientGm()">Preview</button>
+				<button id="omniscientEnterButton" type="button" class="btn-danger omniscient-command" data-gm-i18n="omniscientEnter" onclick="enterOmniscientGm()" disabled>Увійти</button>
+				<pre id="omniscientPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
+			</details>
+			<details id="gmThreatAudit" class="gm-threat-audit" open>
+				<summary data-gm-i18n="gmAuditLog">GM audit log</summary>
+				<div class="gm-diagnostics-toolbar">
+					<input id="gmAuditSearch" class="input-field" type="search" data-gm-i18n-placeholder="gmAuditSearch" placeholder="Пошук action" oninput="renderUnifiedGmAudit()" />
+					<select id="gmAuditResult" class="input-field" onchange="renderUnifiedGmAudit()">
+						<option value="all" data-gm-i18n="gmAll">Усі</option>
+						<option value="success">Success</option>
+						<option value="rejected">Rejected</option>
+						<option value="failed">Failed</option>
+					</select>
+					<button type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRefreshAudit" onclick="refreshGmAudit()">Оновити журнал</button>
+				</div>
+				<div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
+			</details>
+		</div>
+	</div>
+</div>
