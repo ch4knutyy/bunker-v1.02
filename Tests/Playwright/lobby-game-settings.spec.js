@@ -13,6 +13,14 @@ async function openLobbySettingsEditor(page) {
   await expect(editor).toBeVisible({ timeout: 15000 });
 }
 
+async function closeLobbySettingsEditor(page) {
+  const details = page.locator('details#lobbySettingsHostEditor, details:has(#lobbySettingsHostEditor)').first();
+  if (await details.evaluate(element => element.open)) {
+    await details.locator('summary').click();
+  }
+  await expect(details).not.toHaveAttribute('open', '');
+}
+
 test('host applies canonical setup, guest updates live, refresh persists and start uses it', async ({ browser }) => {
   const room = await createTwoPlayerRoom(browser, `Lobby settings ${Date.now()}`);
   try {
@@ -44,6 +52,7 @@ test('host applies canonical setup, guest updates live, refresh persists and sta
     await expect(room.host.locator('#lobbyMaxPlayers')).toHaveValue('7', { timeout: 15000 });
     await expect(room.host.locator('[data-setting="interactiveThreatRate"]')).toHaveValue('Standard');
     await expect(room.guest.locator('#lobbySettingsChips')).toContainText(/2–7/);
+    await closeLobbySettingsEditor(room.host);
 
     await room.host.locator('#lobbyReadyButton').click();
     await room.guest.locator('#lobbyReadyButton').click();
@@ -90,7 +99,9 @@ test('host transfer discards the old draft and gives the new host canonical edit
     await openLobbySettingsEditor(room.host);
     await room.host.locator('#lobbyMaxPlayers').fill('8');
     await expect(room.host.locator('#lobbySettingsDirty')).not.toBeEmpty();
+    await closeLobbySettingsEditor(room.host);
     const guestCard = room.host.locator('#lobbyMembers .lobby-member-card').filter({ hasText: 'P2' });
+    await guestCard.locator('.lobby-player-menu > summary').click();
     await guestCard.locator('.lobby-transfer-host').click();
 
     await expect(room.host.locator('#lobbySettingsHostEditor')).toBeHidden({ timeout: 15000 });
@@ -122,6 +133,7 @@ test('disabled scenarios, threats and special cards start without empty surfaces
     await room.host.locator('[data-setting="threatsEnabled"]').uncheck();
     await room.host.locator('#lobbySettingsApply').click();
     await expect(room.host.locator('#lobbySettingsFeedback')).toContainText(/застосовано|applied|применены/i, { timeout: 15000 });
+    await closeLobbySettingsEditor(room.host);
 
     await room.host.locator('#lobbyReadyButton').click();
     await room.guest.locator('#lobbyReadyButton').click();
