@@ -119,10 +119,15 @@ public partial class GameHub
 		await BroadcastLobbyState(room);
 	}
 
-	public Task<LobbyStartPreviewDto> PreviewStartGameFromLobby()
+	public async Task<LobbyStartPreviewDto> PreviewStartGameFromLobby()
 	{
 		var room = RequireLobbyHost(); var host = _roomService.GetPlayer(Context.ConnectionId)!;
-		return Task.FromResult(_lobbyStart.Preview(room, host));
+		var preview = _lobbyStart.Preview(room, host);
+		if (preview.CanStart)
+		{
+			await BroadcastLobbyState(room);
+		}
+		return preview;
 	}
 
 	public async Task StartGameFromLobby(
@@ -210,6 +215,7 @@ public partial class GameHub
 				_random.Next);
 
 			PrepareLobbyGameplayCharacters(room);
+			room.GuestWarningRevision++;
 
 			participantSnapshots =
 				GameSessionParticipantSnapshotFactory.FromRoom(room);
