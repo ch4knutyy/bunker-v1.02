@@ -74,6 +74,30 @@
 			</div>
 		</div>
 
+		<section id="gameFinishedPanel" class="game-finished-panel" style="display: none;" aria-labelledby="gameFinishedTitle" aria-live="polite">
+			<div class="game-finished-heading">
+				<span class="game-finished-kicker">Vault Judgment</span>
+				<h2 id="gameFinishedTitle">Гру завершено</h2>
+				<p id="gameFinishedReason">Місткість бункера досягнута.</p>
+			</div>
+			<div class="game-finished-summary">
+				<div><span id="gameFinishedCapacityLabel">Місткість бункера</span><strong id="gameFinishedCapacity">—</strong></div>
+				<div><span id="gameFinishedSurvivorLabel">Переможців</span><strong id="gameFinishedSurvivorCount">—</strong></div>
+				<div><span id="gameFinishedRoundLabel">Раунд завершення</span><strong id="gameFinishedRound">—</strong></div>
+				<div><span id="gameFinishedTimeLabel">Час завершення</span><strong id="gameFinishedTime">—</strong></div>
+			</div>
+			<div class="game-finished-winners">
+				<h3 id="gameFinishedWinnersTitle">Переможці</h3>
+				<ul id="gameFinishedWinners"></ul>
+			</div>
+			<p id="gameFinishedWaitingForHost" class="game-finished-waiting"></p>
+			<p id="gameFinishedFeedback" class="game-finished-feedback" role="status"></p>
+			<div class="game-finished-actions">
+				<button id="returnFinishedGameButton" type="button" class="btn-primary" onclick="returnFinishedGameToLobby()" style="display: none;">Нова гра</button>
+				<button id="copyGameSummaryButton" type="button" class="btn-secondary" onclick="copyGameSummary()">Скопіювати підсумок</button>
+			</div>
+		</section>
+
 		@* Голосування гравців *@
 		<div id="votingPanel" class="voting-panel site-panel" style="display: none;">
 			<div class="voting-header">

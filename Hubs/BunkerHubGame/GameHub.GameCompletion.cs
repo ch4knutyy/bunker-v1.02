@@ -1,25 +1,18 @@
 ﻿using Bunker.Models;
 using Bunker.Services;
 using Microsoft.AspNetCore.SignalR;
-using System.Collections.Immutable;
 
 namespace Bunker.Hubs
 {
 	public partial class GameHub
 	{
-		internal sealed record GameWinnerSummary(
-			string PlayerId,
-			string Name);
-
 		internal sealed record GameCompletionSnapshot(
-			int BunkerCapacity,
-			int SurvivorCount,
-			ImmutableArray<GameWinnerSummary> Winners,
-			Guid? GameSessionId,
-			int CurrentRound);
+			GameCompletionState State,
+			Guid? GameSessionId);
 
 		internal static bool TryMarkGameFinishedAfterElimination(
 			Room room,
+			string source,
 			out GameCompletionSnapshot? completion)
 		{
 			completion = null;
@@ -46,27 +39,34 @@ namespace Bunker.Hubs
 					return false;
 				}
 
-				ImmutableArray<GameWinnerSummary> winners =
+				GameWinnerState[] winners =
 					RoomService.GetPlayersSnapshot(room)
 						.Select(entry => entry.Value)
 						.Where(player =>
 							RoomService.IsGameplayParticipant(player) &&
 							!player.IsEliminated)
 						.Select(player =>
-							new GameWinnerSummary(
+							new GameWinnerState(
 								RoomService.GetPlayerKey(player),
 								player.Name))
-						.ToImmutableArray();
+						.ToArray();
+
+				var completionState = new GameCompletionState(
+					"bunker_capacity_reached",
+					source,
+					bunkerCapacity,
+					winners.Length,
+					room.CurrentRound,
+					DateTime.UtcNow,
+					Array.AsReadOnly(winners));
 
 				room.State = RoomState.Finished;
 				room.CurrentPhase = GamePhase.Finished;
+				room.Completion = completionState;
 
 				completion = new GameCompletionSnapshot(
-					bunkerCapacity,
-					winners.Length,
-					winners,
-					room.GameSessionId,
-					room.CurrentRound);
+					completionState,
+					room.GameSessionId);
 
 				return true;
 			}
@@ -75,24 +75,22 @@ namespace Bunker.Hubs
 		private async Task PublishGameCompletionAsync(
 			Room room,
 			GameCompletionSnapshot completion,
-			string actorId,
-			string source)
+			string actorId)
 		{
+			var state = completion.State;
+
 			// Спочатку повідомляємо клієнтів.
 			await Clients.Group(room.Id).SendAsync(
 				"GameFinished",
 				new
 				{
-					reason = "bunker_capacity_reached",
-					source,
-					bunkerCapacity = completion.BunkerCapacity,
-					survivorCount = completion.SurvivorCount,
-					winners = completion.Winners.Select(winner => new
-					{
-						playerId = winner.PlayerId,
-						name = winner.Name
-					}),
-					currentRound = completion.CurrentRound,
+					reason = state.Reason,
+					source = state.Source,
+					bunkerCapacity = state.BunkerCapacity,
+					survivorCount = state.SurvivorCount,
+					winners = state.Winners,
+					completedAtRound = state.CompletedAtRound,
+					completedAtUtc = state.CompletedAtUtc,
 					roundState = BuildRoundState(room)
 				});
 
@@ -101,8 +99,8 @@ namespace Bunker.Hubs
 				actorId,
 				"game_completed",
 				GmAuditResult.Success,
-				$"Game completed with {completion.SurvivorCount} survivors " +
-				$"for bunker capacity {completion.BunkerCapacity}.",
+				$"Game completed with {state.SurvivorCount} survivors " +
+				$"for bunker capacity {state.BunkerCapacity}.",
 				allowUndo: false);
 
 			// База не повинна блокувати завершення гри в UI.

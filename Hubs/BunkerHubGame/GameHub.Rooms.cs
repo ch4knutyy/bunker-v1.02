@@ -290,6 +290,8 @@ namespace Bunker.Hubs
 				isHost = wasHost,
 				hostToken = wasHost ? room.HostToken : null,
 				roomState = room.State.ToString(),
+				currentPhase = room.CurrentPhase.ToString(),
+				completion = room.Completion,
 				apocalypse = room.Apocalypse?.ToClientInfo(),
 				bunker = room.Bunker?.ToClientInfo(),
 				voting = BuildVotingReconnectInfo(room, player),

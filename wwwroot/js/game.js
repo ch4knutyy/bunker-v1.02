@@ -106,6 +106,8 @@ let currentThreatState = null;
 let lastThreatTimeoutCheckDeadline = null;
 let currentVoting = null;
 let currentRoundState = null;
+let currentGameCompletion = null;
+let returnFinishedGamePending = false;
 let myVote = null;
 let initialInviteRoomId = getRoomIdFromPath();
 
@@ -497,6 +499,9 @@ Object.assign(uiTranslations.ru, {
 Object.assign(uiTranslations.uk, { lobbyWarningCapacity:'Місткість бункера не менша за поточну кількість активних гравців.', lobbyWarningSpectators:'У кімнаті вже є спостерігачі, хоча нові ролі спостерігачів вимкнено.', lobbyWarningPlayers:'Поточна кількість гравців перевищує максимум.', lobbyAuditSettings:'Host застосував налаштування гри.', lobbyAuditReady:'Учасник змінив готовність.', lobbyAuditReadyReset:'Host скинув готовність учасника.', lobbyAuditRole:'Host змінив роль учасника.', lobbyAuditHost:'Передано роль host.', lobbyAuditKick:'Host видалив учасника.', lobbyAuditJoined:'Учасник приєднався до лобі.', lobbyAuditReconnected:'Учасник відновив з’єднання.', lobbyAuditLeft:'Учасник залишив лобі.', lobbyAuditPassword:'Host змінив захист кімнати.', lobbyAuditStarted:'Гру запущено з лобі.', lobbyAuditGeneric:'Оновлено стан лобі.' });
 Object.assign(uiTranslations.en, { lobbyWarningCapacity:'Bunker capacity is not lower than the current active-player count.', lobbyWarningSpectators:'Spectators are already present although new spectator roles are disabled.', lobbyWarningPlayers:'The current player count exceeds the maximum.', lobbyAuditSettings:'The host applied game settings.', lobbyAuditReady:'A member changed readiness.', lobbyAuditReadyReset:'The host reset a member’s readiness.', lobbyAuditRole:'The host changed a member role.', lobbyAuditHost:'The host role was transferred.', lobbyAuditKick:'The host removed a member.', lobbyAuditJoined:'A member joined the lobby.', lobbyAuditReconnected:'A member reconnected.', lobbyAuditLeft:'A member left the lobby.', lobbyAuditPassword:'The host changed room protection.', lobbyAuditStarted:'The game was started from the lobby.', lobbyAuditGeneric:'Lobby state updated.' });
 Object.assign(uiTranslations.ru, { lobbyWarningCapacity:'Вместимость бункера не меньше текущего количества активных игроков.', lobbyWarningSpectators:'В комнате уже есть наблюдатели, хотя новые роли наблюдателей отключены.', lobbyWarningPlayers:'Текущее количество игроков превышает максимум.', lobbyAuditSettings:'Host применил настройки игры.', lobbyAuditReady:'Участник изменил готовность.', lobbyAuditReadyReset:'Host сбросил готовность участника.', lobbyAuditRole:'Host изменил роль участника.', lobbyAuditHost:'Передана роль host.', lobbyAuditKick:'Host удалил участника.', lobbyAuditJoined:'Участник присоединился к лобби.', lobbyAuditReconnected:'Участник восстановил соединение.', lobbyAuditLeft:'Участник покинул лобби.', lobbyAuditPassword:'Host изменил защиту комнаты.', lobbyAuditStarted:'Игра запущена из лобби.', lobbyAuditGeneric:'Состояние лобби обновлено.' });
+Object.assign(uiTranslations.uk, { gameFinishedTitle:'Гру завершено', gameFinishedReason:'Місткість бункера досягнута.', gameFinishedCapacity:'Місткість бункера', gameFinishedSurvivors:'Переможців', gameFinishedRound:'Раунд завершення', gameFinishedTime:'Час завершення', gameFinishedWinners:'Переможці', gameFinishedNoWinners:'Переможців немає', gameFinishedNewGame:'Нова гра', gameFinishedCopy:'Скопіювати підсумок', gameFinishedWaitHost:'Очікуємо, поки хост почне нову гру.', gameFinishedCopied:'Підсумок скопійовано', gameFinishedCopyFailed:'Не вдалося скопіювати підсумок', gameFinishedConfirmReturn:'Повернути цю кімнату в lobby для нової гри?', gameFinishedReturning:'Повертаємо кімнату в lobby…' });
+Object.assign(uiTranslations.en, { gameFinishedTitle:'Game finished', gameFinishedReason:'The bunker capacity has been reached.', gameFinishedCapacity:'Bunker capacity', gameFinishedSurvivors:'Winners', gameFinishedRound:'Completion round', gameFinishedTime:'Completed at', gameFinishedWinners:'Winners', gameFinishedNoWinners:'No winners', gameFinishedNewGame:'New game', gameFinishedCopy:'Copy summary', gameFinishedWaitHost:'Waiting for the host to start a new game.', gameFinishedCopied:'Summary copied', gameFinishedCopyFailed:'Could not copy the summary', gameFinishedConfirmReturn:'Return this room to the lobby for a new game?', gameFinishedReturning:'Returning the room to the lobby…' });
+Object.assign(uiTranslations.ru, { gameFinishedTitle:'Игра завершена', gameFinishedReason:'Вместимость бункера достигнута.', gameFinishedCapacity:'Вместимость бункера', gameFinishedSurvivors:'Победителей', gameFinishedRound:'Раунд завершения', gameFinishedTime:'Время завершения', gameFinishedWinners:'Победители', gameFinishedNoWinners:'Победителей нет', gameFinishedNewGame:'Новая игра', gameFinishedCopy:'Скопировать итог', gameFinishedWaitHost:'Ожидаем, пока хост начнёт новую игру.', gameFinishedCopied:'Итог скопирован', gameFinishedCopyFailed:'Не удалось скопировать итог', gameFinishedConfirmReturn:'Вернуть эту комнату в lobby для новой игры?', gameFinishedReturning:'Возвращаем комнату в lobby…' });
 
 Object.assign(uiTranslations.uk, {
 	cardExperience:'Досвід', cardAdditionalItem:'Додатково має', cardSeverity:'Тяжкість', cardTooltipLabel:'Пояснення характеристики',
@@ -695,8 +700,11 @@ function normalizeRoundState(source) {
 	const threatRevealed = !!(source.threatRevealed ?? source.ThreatRevealed);
 	return {
 		currentRound: source.currentRound ?? source.CurrentRound ?? 0,
+		state: source.state || source.State || source.roomState || source.RoomState || currentRoom?.state || "Lobby",
 		roomState: source.roomState || source.RoomState || currentRoom?.state || "Lobby",
+		currentPhase: source.currentPhase || source.CurrentPhase || source.phase || source.Phase || currentRoundState?.phase || "Lobby",
 		phase: source.phase || source.Phase || currentRoundState?.phase || "Lobby",
+		completion: normalizeGameCompletion(source.completion || source.Completion || null),
 		isPaused: source.isPaused ?? source.IsPaused ?? false,
 		pauseReason: source.pauseReason || source.PauseReason || null,
 		pausedAtUtc: source.pausedAtUtc || source.PausedAtUtc || null,
@@ -738,10 +746,11 @@ function applyRoundState(source) {
 
 	currentRoundState = normalized;
 	if (currentRoom) {
-		currentRoom.state = normalized.roomState || currentRoom.state;
+		currentRoom.state = normalized.state || normalized.roomState || currentRoom.state;
 		currentRoom.currentRound = normalized.currentRound;
-		currentRoom.phase = normalized.phase;
+		currentRoom.phase = normalized.currentPhase || normalized.phase;
 	}
+	if (normalized.completion) currentGameCompletion = normalized.completion;
 	currentThreat = normalized.threat || (normalized.threatRevealed ? currentThreat : null);
 	currentThreatState = normalized.threatState || currentThreatState;
 	if (normalized.gameTimer) syncGameTimer(normalized.gameTimer);
@@ -749,6 +758,187 @@ function applyRoundState(source) {
 	renderThreatPanel(currentThreat);
 	updateReadyCheckUI();
 	updateSpecialCardsUI();
+}
+
+function normalizeGameCompletion(source) {
+	if (!source) return null;
+	const winners = source.winners || source.Winners || [];
+	return {
+		reason: source.reason || source.Reason || 'bunker_capacity_reached',
+		source: source.source || source.Source || '',
+		bunkerCapacity: source.bunkerCapacity ?? source.BunkerCapacity ?? 0,
+		survivorCount: source.survivorCount ?? source.SurvivorCount ?? winners.length,
+		completedAtRound: source.completedAtRound ?? source.CompletedAtRound ?? source.currentRound ?? source.CurrentRound ?? 0,
+		completedAtUtc: source.completedAtUtc || source.CompletedAtUtc || null,
+		winners: winners.map(winner => ({
+			name: winner.name || winner.Name || '',
+			playerId: winner.playerId || winner.PlayerId || ''
+		}))
+	};
+}
+
+function isFinishedGameState(source, completion = null) {
+	const state = source?.state || source?.State || source?.roomState || source?.RoomState || currentRoom?.state;
+	const phase = source?.currentPhase || source?.CurrentPhase || source?.phase || source?.Phase || currentRoundState?.phase;
+	return state === 'Finished' || phase === 'Finished' || !!completion;
+}
+
+function setGameFinishedMutationState(finished) {
+	const roomSection = document.getElementById('roomSection');
+	if (roomSection) roomSection.classList.toggle('is-game-finished', finished);
+
+	const selectors = [
+		'#startVotingBtn', '#startGameBtn', '#gmPanelBtn',
+		'#votingPanel button', '#votingResultsPanel button', '#readyCheckPanel button',
+		'#gmPanel button:not(.btn-close):not(.gm-tab)',
+		'#myPlayerSection .vault-card-reveal', '#myPlayerSection .special-card-use-btn',
+		'#myPlayerSection .btn-eliminated-reveal-all', '#threatPanel .char-btn',
+		'#threatPanel .btn-scenario-image', '.events-section-wrapper .btn-apply-effect'
+	];
+	document.querySelectorAll(selectors.join(',')).forEach(button => {
+		if (finished) {
+			if (!button.dataset.postGameDisabled) {
+				button.dataset.postGameDisabled = button.disabled ? 'preserve' : 'restore';
+			}
+			button.disabled = true;
+			button.setAttribute('aria-disabled', 'true');
+		} else if (button.dataset.postGameDisabled) {
+			if (button.dataset.postGameDisabled === 'restore') button.disabled = false;
+			button.removeAttribute('data-post-game-disabled');
+			button.removeAttribute('aria-disabled');
+		}
+	});
+}
+
+function renderGameFinished(completion, context = {}) {
+	const normalized = normalizeGameCompletion(completion || currentGameCompletion);
+	if (!normalized) return false;
+
+	currentGameCompletion = normalized;
+	if (currentRoom) {
+		currentRoom.state = 'Finished';
+		currentRoom.phase = 'Finished';
+	}
+	currentGameTimer = null;
+	gameTimerClockAnchor = null;
+	currentVoting = null;
+	myVote = null;
+
+	showRoomSection();
+	const lobby = document.getElementById('roomLobby');
+	const game = document.getElementById('gameSection');
+	const personal = document.getElementById('myPlayerSection');
+	const panel = document.getElementById('gameFinishedPanel');
+	if (lobby) lobby.style.display = 'none';
+	if (game) game.style.display = 'block';
+	if (personal) personal.style.display = 'block';
+	if (panel) panel.style.display = 'grid';
+
+	setText('#gameFinishedTitle', t('gameFinishedTitle'));
+	setText('#gameFinishedReason', t('gameFinishedReason'));
+	setText('#gameFinishedCapacityLabel', t('gameFinishedCapacity'));
+	setText('#gameFinishedSurvivorLabel', t('gameFinishedSurvivors'));
+	setText('#gameFinishedRoundLabel', t('gameFinishedRound'));
+	setText('#gameFinishedTimeLabel', t('gameFinishedTime'));
+	setText('#gameFinishedWinnersTitle', t('gameFinishedWinners'));
+	setText('#gameFinishedCapacity', normalized.bunkerCapacity);
+	setText('#gameFinishedSurvivorCount', normalized.survivorCount);
+	setText('#gameFinishedRound', normalized.completedAtRound || '—');
+
+	const locale = { uk: 'uk-UA', en: 'en-GB', ru: 'ru-RU' }[getCurrentLanguage()] || 'uk-UA';
+	const completedDate = normalized.completedAtUtc ? new Date(normalized.completedAtUtc) : null;
+	setText('#gameFinishedTime', completedDate && !Number.isNaN(completedDate.getTime()) ? completedDate.toLocaleString(locale) : '—');
+
+	const winnerList = document.getElementById('gameFinishedWinners');
+	if (winnerList) {
+		winnerList.innerHTML = normalized.winners.length
+			? normalized.winners.map(winner => `<li>${escapeHtml(winner.name || t('unknown'))}</li>`).join('')
+			: `<li>${escapeHtml(t('gameFinishedNoWinners'))}</li>`;
+	}
+
+	const newGameButton = document.getElementById('returnFinishedGameButton');
+	if (newGameButton) {
+		newGameButton.style.display = isHost ? 'inline-flex' : 'none';
+		newGameButton.textContent = returnFinishedGamePending ? t('gameFinishedReturning') : t('gameFinishedNewGame');
+		newGameButton.disabled = returnFinishedGamePending;
+	}
+	const copyButton = document.getElementById('copyGameSummaryButton');
+	if (copyButton) copyButton.textContent = t('gameFinishedCopy');
+	const waiting = document.getElementById('gameFinishedWaitingForHost');
+	if (waiting) {
+		waiting.textContent = isHost ? '' : t('gameFinishedWaitHost');
+		waiting.style.display = isHost ? 'none' : 'block';
+	}
+	const stateLabel = document.getElementById('currentRoomState');
+	if (stateLabel) stateLabel.textContent = t('gameFinishedTitle');
+
+	setGameFinishedMutationState(true);
+	return true;
+}
+
+function buildGameSummaryText() {
+	const completion = normalizeGameCompletion(currentGameCompletion);
+	if (!completion) return '';
+	const winnerNames = completion.winners.map(winner => winner.name).filter(Boolean);
+	return [
+		t('gameFinishedTitle'),
+		`${t('gameFinishedCapacity')}: ${completion.bunkerCapacity}`,
+		`${t('gameFinishedSurvivors')}: ${completion.survivorCount}`,
+		`${t('gameFinishedRound')}: ${completion.completedAtRound || '—'}`,
+		`${t('gameFinishedWinners')}: ${winnerNames.length ? winnerNames.join(', ') : t('gameFinishedNoWinners')}`
+	].join('\n');
+}
+
+async function copyGameSummary() {
+	const feedback = document.getElementById('gameFinishedFeedback');
+	try {
+		const summary = buildGameSummaryText();
+		if (!summary || !navigator.clipboard?.writeText) throw new Error('clipboard_unavailable');
+		await navigator.clipboard.writeText(summary);
+		if (feedback) { feedback.textContent = t('gameFinishedCopied'); feedback.classList.remove('is-error'); }
+		addEventMessage(escapeHtml(t('gameFinishedCopied')));
+	} catch (_) {
+		if (feedback) { feedback.textContent = t('gameFinishedCopyFailed'); feedback.classList.add('is-error'); }
+		addEventMessage(escapeHtml(t('gameFinishedCopyFailed')));
+	}
+}
+
+async function returnFinishedGameToLobby() {
+	if (!isHost || returnFinishedGamePending || !currentGameCompletion) return;
+	if (!confirm(t('gameFinishedConfirmReturn'))) return;
+	returnFinishedGamePending = true;
+	renderGameFinished(currentGameCompletion, { source: 'return-request' });
+	try {
+		await connection.invoke('ReturnFinishedGameToLobby', true, crypto.randomUUID());
+	} catch (error) {
+		returnFinishedGamePending = false;
+		renderGameFinished(currentGameCompletion, { source: 'return-error' });
+		const feedback = document.getElementById('gameFinishedFeedback');
+		if (feedback) { feedback.textContent = localizeServerMessage(error?.message || 'game_return_failed'); feedback.classList.add('is-error'); }
+	}
+}
+
+function clearGameFinishedStateForLobby() {
+	currentGameCompletion = null;
+	returnFinishedGamePending = false;
+	currentVoting = null;
+	currentRoundState = null;
+	currentThreat = null;
+	currentThreatState = null;
+	currentGameTimer = null;
+	gameTimerClockAnchor = null;
+	myVote = null;
+	currentApocalypse = null;
+	currentBunker = null;
+	['myPlayerCards', 'mySpecialCardsList', 'votingCandidates', 'votingResultsContent', 'threatContent'].forEach(id => {
+		const element = document.getElementById(id);
+		if (element) element.innerHTML = '';
+	});
+	const panel = document.getElementById('gameFinishedPanel');
+	if (panel) panel.style.display = 'none';
+	const feedback = document.getElementById('gameFinishedFeedback');
+	if (feedback) { feedback.textContent = ''; feedback.classList.remove('is-error'); }
+	setGameFinishedMutationState(false);
 }
 
 function normalizeGameTimer(source) {
@@ -1056,6 +1246,7 @@ function getRoomStateLabel() {
 	if (!currentRoom) return t('lobby');
 
 	if (currentRoom.state === 'Lobby') return t('lobby');
+	if (currentRoom.state === 'Finished') return t('gameFinishedTitle');
 	if (currentRoom.state === 'Voting') {
 		return getCurrentLanguage() === 'en' ? 'Voting' : getCurrentLanguage() === 'ru' ? 'Голосование' : 'Голосування';
 	}
@@ -2029,6 +2220,7 @@ function renderCurrentGameUI() {
 	if (typeof updateSpecialCardsUI === "function") updateSpecialCardsUI();
 	if (typeof updateGMPlayerSelect === "function") updateGMPlayerSelect();
 	if (selectedPlayerForGM && typeof loadPlayerDataForGM === "function") loadPlayerDataForGM();
+	if (currentGameCompletion) setGameFinishedMutationState(true);
 }
 
 function resetClientGameStateForNewRoom() {
@@ -2048,6 +2240,8 @@ function resetClientGameStateForNewRoom() {
 	currentThreat = null;
 	currentVoting = null;
 	currentRoundState = null;
+	currentGameCompletion = null;
+	returnFinishedGamePending = false;
 	myVote = null;
 	if (typeof gmRevealedChars !== "undefined") gmRevealedChars = {};
 
@@ -3128,6 +3322,23 @@ function registerSignalREvents() {
 		tryRenderRunningGameState();
 	});
 
+	connection.off("GameReturnedToLobby");
+	connection.on("GameReturnedToLobby", function (data) {
+		clearGameFinishedStateForLobby();
+		if (currentRoom) {
+			currentRoom.state = data?.state || data?.State || 'Lobby';
+			currentRoom.phase = data?.currentPhase || data?.CurrentPhase || 'Lobby';
+			currentRoom.currentRound = 0;
+		}
+		const nextLobbyState = data?.lobbyState || data?.LobbyState || null;
+		if (nextLobbyState) {
+			syncLobbySettingsState(nextLobbyState);
+			lobbyState = nextLobbyState;
+		}
+		showRoomSection();
+		renderLobbyState();
+	});
+
 	connection.off("LobbyKicked");
 	connection.on("LobbyKicked", function () {
 		lobbySettingsDraft = null; lobbySettingsDirty = false;
@@ -3246,6 +3457,7 @@ function registerSignalREvents() {
 		console.log("[GameStarted] data.players:", data.players);
 
 		isStartingGame = false;
+		clearGameFinishedStateForLobby();
 		console.log("[GameStarted] Reset isStartingGame = false");
 
 		// Normalize room state (handle both camelCase and PascalCase)
@@ -3439,6 +3651,10 @@ function registerSignalREvents() {
 		const wasComplete = currentRoundState?.allPlayersRevealed;
 		applyRoundState(data);
 		renderCurrentGameUI();
+		if (isFinishedGameState(data, currentGameCompletion)) {
+			renderGameFinished(currentGameCompletion || data?.completion || data?.Completion, { source: 'round-state' });
+			return;
+		}
 
 		if (isHost && currentRoundState?.allPlayersRevealed && !wasComplete) {
 			addEventMessage(`Усі активні гравці відкрили характеристику в раунді ${getCurrentRoundNumber()}. Можна завершити раунд.`);
@@ -3651,6 +3867,14 @@ function registerSignalREvents() {
 		addEventMessage(`<span class="event-eliminate">❌ ${info.playerName}</span> елімінований!`);
 	});
 
+	connection.off("GameFinished");
+	connection.on("GameFinished", function (data) {
+		applyRoundState(data?.roundState || data?.RoundState);
+		const completion = normalizeGameCompletion(data);
+		renderCurrentGameUI();
+		renderGameFinished(completion, { source: 'live' });
+	});
+
 	// Гравця повернено
 	connection.off("PlayerRestored");
 	connection.on("PlayerRestored", function (info) {
@@ -3809,6 +4033,11 @@ function registerSignalREvents() {
 			currentRoom.maxPlayers = currentRoom.maxPlayers || currentRoom.MaxPlayers || 12;
 		}
 		applyRoundState(data.roundState || data.RoundState);
+		const rejoinCompletion = normalizeGameCompletion(
+			data.completion || data.Completion ||
+			data.roundState?.completion || data.RoundState?.Completion ||
+			currentGameCompletion);
+		if (rejoinCompletion) currentGameCompletion = rejoinCompletion;
 
 		console.log("[RejoinSuccess] currentRoom:", currentRoom);
 		console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
@@ -3853,6 +4082,9 @@ function registerSignalREvents() {
 
 		console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
 
+		const isFinishedState = isFinishedGameState(
+			data.roundState || data.RoundState || data,
+			rejoinCompletion);
 		const isGameState =
 			currentRoom.state === 'Playing' ||
 			currentRoom.state === 'Voting' ||
@@ -3861,7 +4093,16 @@ function registerSignalREvents() {
 		showRoomSection();
 		renderCurrentGameUI();
 
-		if (isGameState) {
+		if (isFinishedState) {
+			currentApocalypse = data.apocalypse || data.Apocalypse;
+			currentBunker = data.bunker || data.Bunker;
+			currentVoting = null;
+			document.getElementById('roomLobby').style.display = 'none';
+			document.getElementById('gameSection').style.display = 'block';
+			document.getElementById('myPlayerSection').style.display = 'block';
+			renderCurrentGameUI();
+			renderGameFinished(rejoinCompletion, { source: 'rejoin' });
+		} else if (isGameState) {
 			currentApocalypse = data.apocalypse || data.Apocalypse;
 			currentBunker = data.bunker || data.Bunker;
 			currentVoting = data.voting || data.Voting || null;

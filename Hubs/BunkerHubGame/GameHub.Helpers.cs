@@ -69,8 +69,11 @@ namespace Bunker.Hubs
             return new
             {
                 currentRound = room.CurrentRound,
+                state = room.State.ToString(),
                 roomState = room.State.ToString(),
+                currentPhase = room.CurrentPhase.ToString(),
                 phase = room.CurrentPhase.ToString(),
+                completion = room.Completion,
                 isPaused = room.IsPaused,
                 pauseReason = room.PauseReason,
                 pausedAtUtc = room.PausedAtUtc,

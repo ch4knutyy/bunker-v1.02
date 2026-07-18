@@ -135,6 +135,11 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
                 return;
             }
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
+                return;
+            }
 
             // Застосовуємо зміну
             bool success = ApplyCharacteristicChange(player, characteristicName, newValue);
@@ -753,6 +758,11 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для зміни місткості бункера");
                 return;
             }
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
+                return;
+            }
 
             if (room.Bunker == null)
             {
@@ -957,6 +967,11 @@ namespace Bunker.Hubs
 				);
 				return;
 			}
+			if (room.State == RoomState.Finished)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "game_finished");
+				return;
+			}
 
 			if (room.Bunker == null)
 			{
@@ -1017,6 +1032,11 @@ namespace Bunker.Hubs
 					"ReceiveError",
 					"Кімнату не знайдено"
 				);
+				return;
+			}
+			if (room.State == RoomState.Finished)
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "game_finished");
 				return;
 			}
 
@@ -1100,6 +1120,12 @@ namespace Bunker.Hubs
                 return;
             }
 
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
+                return;
+            }
+
             var eliminateSnapshot = CreateMutationSnapshot(room, GetGmActorId(room), "player_eliminate", null, "Before player elimination");
             player.IsEliminated = true;
             player.EliminatedAtRound = room.CurrentRound;
@@ -1107,7 +1133,7 @@ namespace Bunker.Hubs
             player.CanRevealAllAfterElimination = true;
             player.HasRevealedAllAfterElimination = false;
             _roomService.UpdatePlayer(targetCurrentConnectionId, player);
-            TryMarkGameFinishedAfterElimination(room, out var gameCompletion);
+            TryMarkGameFinishedAfterElimination(room, "gm", out var gameCompletion);
 
             await Clients.Group(room.Id).SendAsync("PlayerEliminated", new
             {
@@ -1127,8 +1153,7 @@ namespace Bunker.Hubs
                 await PublishGameCompletionAsync(
                     room,
                     gameCompletion,
-                    GetGmActorId(room),
-                    "gm");
+                    GetGmActorId(room));
             }
 
             _logger.LogInformation($"Гравець {player.Name} елімінований");
@@ -1149,6 +1174,12 @@ namespace Bunker.Hubs
             if (room == null || !_roomService.TryResolvePlayer(room, targetConnectionId, out var targetCurrentConnectionId, out var player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
+                return;
+            }
+
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
                 return;
             }
 
@@ -1180,6 +1211,11 @@ namespace Bunker.Hubs
             if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для pause/resume");
+                return;
+            }
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("GamePauseUpdated", BuildPauseState(room)); return; }
@@ -1295,6 +1331,11 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для керування таймером");
                 return null;
             }
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
+                return null;
+            }
             if (string.IsNullOrWhiteSpace(commandId))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Некоректний command id");
@@ -1320,6 +1361,11 @@ namespace Bunker.Hubs
                 !RoundVotingAdminService.TryParseRound(roundValue, out var targetRound))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Некоректний номер раунду");
+                return;
+            }
+            if (room.State == RoomState.Finished)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "game_finished");
                 return;
             }
             if (!RememberPlayerCommand(room, commandId)) { await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room)); return; }
