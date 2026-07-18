@@ -1,5 +1,6 @@
 using Bunker.Data.Persistence.Identity;
 using Bunker.Models.ViewModels.Account;
+using Bunker.Services.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,14 @@ namespace Bunker.Controllers;
 public sealed class ProfileController : Controller
 {
 	private readonly UserManager<ApplicationUser> _userManager;
+	private readonly IProfileGameHistoryService _gameHistoryService;
 
-	public ProfileController(UserManager<ApplicationUser> userManager)
+	public ProfileController(
+		UserManager<ApplicationUser> userManager,
+		IProfileGameHistoryService gameHistoryService)
 	{
 		_userManager = userManager;
+		_gameHistoryService = gameHistoryService;
 	}
 
 	[HttpGet("")]
@@ -26,11 +31,38 @@ public sealed class ProfileController : Controller
 			return Challenge();
 		}
 
+		var overview = await _gameHistoryService.GetOverviewAsync(user.Id, recentCount: 8);
+
 		return View(new ProfileViewModel
 		{
 			DisplayName = user.DisplayName,
 			Email = user.Email ?? string.Empty,
-			CreatedAtUtc = user.CreatedAtUtc
+			CreatedAtUtc = user.CreatedAtUtc,
+			Statistics = overview.Statistics,
+			RecentGames = overview.RecentGames
+		});
+	}
+
+	[HttpGet("history")]
+	public async Task<IActionResult> History(int page = 1)
+	{
+		var user = await _userManager.GetUserAsync(User);
+		if (user is null)
+		{
+			return Challenge();
+		}
+
+		const int pageSize = 20;
+		var history = await _gameHistoryService.GetHistoryAsync(user.Id, page, pageSize);
+
+		return View(new ProfileGameHistoryPageViewModel
+		{
+			Items = history.Items,
+			CurrentPage = history.CurrentPage,
+			TotalPages = history.TotalPages,
+			TotalItems = history.TotalItems,
+			HasPreviousPage = history.HasPreviousPage,
+			HasNextPage = history.HasNextPage
 		});
 	}
 

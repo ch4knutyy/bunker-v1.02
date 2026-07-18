@@ -5,4 +5,6 @@ public sealed class ProfileViewModel
 	public string DisplayName { get; init; } = string.Empty;
 	public string Email { get; init; } = string.Empty;
 	public DateTime CreatedAtUtc { get; init; }
+	public ProfileGameStatistics Statistics { get; init; } = new(0, 0, 0, 0, 0, 0);
+	public IReadOnlyList<ProfileGameHistoryItem> RecentGames { get; init; } = [];
 }

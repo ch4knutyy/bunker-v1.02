@@ -1,0 +1,125 @@
+@model Bunker.Models.ViewModels.Account.ProfileGameHistoryPageViewModel
+@{
+    ViewData["Title"] = "Історія партій";
+}
+
+<section class="auth-shell profile-shell">
+    <div class="auth-card profile-card">
+        <div class="profile-section-heading profile-history-heading">
+            <div>
+                <span class="auth-eyebrow">Vault archive</span>
+                <h1 data-i18n="profileGameHistory">Історія партій</h1>
+                <p><span data-i18n="profileTotalGames">Усього записів</span>: @Model.TotalItems</p>
+            </div>
+            <a class="auth-secondary auth-link-button" asp-action="Index" data-i18n="profileBackToProfile">
+                До профілю
+            </a>
+        </div>
+
+        @if (Model.Items.Count == 0)
+        {
+            <p class="profile-empty-state" data-i18n="profileEmptyHistory">
+                У вас ще немає зіграних партій.
+            </p>
+        }
+        else
+        {
+            <div class="profile-game-list profile-history-list">
+                @foreach (var game in Model.Items)
+                {
+                    <article class="profile-game-card">
+                        <div class="profile-game-primary">
+                            <strong>@game.RoomCode</strong>
+                            <time data-profile-utc="@UtcIso(game.StartedAtUtc)">
+                                @(game.StartedAtUtc?.ToString("dd.MM.yyyy HH:mm") ?? "—") UTC
+                            </time>
+                        </div>
+                        <div class="profile-game-badges">
+                            <span class="profile-badge profile-badge-status" data-i18n="@(game.Status == "Started" ? "profileGameInProgress" : "profileCompletedStatus")">
+                                @(game.Status == "Started" ? "Партія триває" : "Завершено")
+                            </span>
+                            <span class="profile-badge" data-i18n="@(game.IsHost ? "profileHost" : "profilePlayer")">
+                                @(game.IsHost ? "Хост" : "Гравець")
+                            </span>
+                            <span class="profile-badge @ResultClass(game)" data-i18n="@ResultKey(game)">
+                                @ResultText(game)
+                            </span>
+                        </div>
+                        <div class="profile-game-meta">
+                            <span><strong>@game.PlayerCount</strong> <span data-i18n="profilePlayersCount">гравців</span></span>
+                            @if (game.Duration.HasValue)
+                            {
+                                <span>
+                                    <span data-i18n="profileDuration">Тривалість</span>:
+                                    <span data-profile-duration-minutes="@Math.Max(0, (int)game.Duration.Value.TotalMinutes)">
+                                        @FormatDuration(game.Duration.Value)
+                                    </span>
+                                </span>
+                            }
+                            @if (game.EliminatedAtRound.HasValue)
+                            {
+                                <span><span data-i18n="profileEliminationRound">Раунд елімінування</span>: @game.EliminatedAtRound</span>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+
+            <nav class="profile-pagination" aria-label="Game history pagination">
+                @if (Model.HasPreviousPage)
+                {
+                    <a asp-action="History" asp-route-page="@(Model.CurrentPage - 1)" data-i18n="profilePrevious">Попередня</a>
+                }
+                else
+                {
+                    <span class="profile-pagination-disabled" data-i18n="profilePrevious">Попередня</span>
+                }
+                <span>
+                    <span data-i18n="profilePage">Сторінка</span>
+                    @Model.CurrentPage / @Model.TotalPages
+                </span>
+                @if (Model.HasNextPage)
+                {
+                    <a asp-action="History" asp-route-page="@(Model.CurrentPage + 1)" data-i18n="profileNext">Наступна</a>
+                }
+                else
+                {
+                    <span class="profile-pagination-disabled" data-i18n="profileNext">Наступна</span>
+                }
+            </nav>
+        }
+    </div>
+</section>
+
+@functions {
+    private static string? UtcIso(DateTime? value) =>
+        value.HasValue
+            ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc).ToString("O")
+            : null;
+
+    private static string ResultKey(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+        game.Status == "Started" ? "profileGameInProgress" :
+        game.IsWinner ? "profileVictory" :
+        game.WasEliminated ? "profileEliminated" :
+        "profileCompletedWithoutVictory";
+
+    private static string ResultText(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+        game.Status == "Started" ? "Партія триває" :
+        game.IsWinner ? "Перемога" :
+        game.WasEliminated ? "Елімінований" :
+        "Завершено без перемоги";
+
+    private static string ResultClass(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+        game.Status == "Started" ? "profile-badge-active" :
+        game.IsWinner ? "profile-badge-win" :
+        game.WasEliminated ? "profile-badge-eliminated" :
+        "profile-badge-neutral";
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        var totalMinutes = Math.Max(0, (int)duration.TotalMinutes);
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+        return hours > 0 ? $"{hours} год {minutes} хв" : $"{minutes} хв";
+    }
+}

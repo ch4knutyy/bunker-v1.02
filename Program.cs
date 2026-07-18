@@ -8,6 +8,7 @@ using Bunker.Data.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Bunker.Services.Bunker.GameSessions;
+using Bunker.Services.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +91,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 	options.AccessDeniedPath = "/account/access-denied";
 });
 builder.Services.AddScoped<IGameSessionHistoryService, GameSessionHistoryService>();
+builder.Services.AddScoped<IProfileGameHistoryService, ProfileGameHistoryService>();
 
 var app = builder.Build();
 

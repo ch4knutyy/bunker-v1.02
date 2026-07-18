@@ -78,7 +78,33 @@ function safeRenderAll() {
             spyWas: "Шпигун був",
             locationWas: "Локація була",
             waitingPlayers: "Очікування гравців",
-            minPlayersRequired: "Потрібно мінімум 3 гравці"
+            minPlayersRequired: "Потрібно мінімум 3 гравці",
+            profileStatistics: "Статистика партій",
+            profileCompletedGames: "Завершено партій",
+            profileCompletedStatus: "Завершено",
+            profileActiveGames: "Активних партій",
+            profileWins: "Перемог",
+            profileLosses: "Поразок",
+            profileWinRate: "Відсоток перемог",
+            profileHostedGames: "Проведено як хост (усі партії)",
+            profileRecentGames: "Останні партії",
+            profileFullHistory: "Переглянути всю історію",
+            profileGameHistory: "Історія партій",
+            profileVictory: "Перемога",
+            profileEliminated: "Елімінований",
+            profileCompletedWithoutVictory: "Завершено без перемоги",
+            profileGameInProgress: "Партія триває",
+            profileHost: "Хост",
+            profilePlayer: "Гравець",
+            profilePlayersCount: "гравців",
+            profileDuration: "Тривалість",
+            profileEliminationRound: "Раунд елімінування",
+            profilePrevious: "Попередня",
+            profileNext: "Наступна",
+            profilePage: "Сторінка",
+            profileEmptyHistory: "У вас ще немає зіграних партій.",
+            profileTotalGames: "Усього записів",
+            profileBackToProfile: "До профілю"
         },
         en: {
             navHome: "Home",
@@ -123,7 +149,33 @@ function safeRenderAll() {
             spyWas: "The spy was",
             locationWas: "The location was",
             waitingPlayers: "Waiting for players",
-            minPlayersRequired: "At least 3 players required"
+            minPlayersRequired: "At least 3 players required",
+            profileStatistics: "Game statistics",
+            profileCompletedGames: "Completed games",
+            profileCompletedStatus: "Completed",
+            profileActiveGames: "Active games",
+            profileWins: "Wins",
+            profileLosses: "Losses",
+            profileWinRate: "Win rate",
+            profileHostedGames: "Hosted games (all sessions)",
+            profileRecentGames: "Recent games",
+            profileFullHistory: "View full history",
+            profileGameHistory: "Game history",
+            profileVictory: "Victory",
+            profileEliminated: "Eliminated",
+            profileCompletedWithoutVictory: "Completed without victory",
+            profileGameInProgress: "Game in progress",
+            profileHost: "Host",
+            profilePlayer: "Player",
+            profilePlayersCount: "players",
+            profileDuration: "Duration",
+            profileEliminationRound: "Elimination round",
+            profilePrevious: "Previous",
+            profileNext: "Next",
+            profilePage: "Page",
+            profileEmptyHistory: "You have no games in your history yet.",
+            profileTotalGames: "Total records",
+            profileBackToProfile: "Back to profile"
         },
         ru: {
             navHome: "Главная",
@@ -168,7 +220,33 @@ function safeRenderAll() {
             spyWas: "Шпионом был",
             locationWas: "Локация была",
             waitingPlayers: "Ожидание игроков",
-            minPlayersRequired: "Нужно минимум 3 игрока"
+            minPlayersRequired: "Нужно минимум 3 игрока",
+            profileStatistics: "Статистика партий",
+            profileCompletedGames: "Завершено партий",
+            profileCompletedStatus: "Завершено",
+            profileActiveGames: "Активных партий",
+            profileWins: "Побед",
+            profileLosses: "Поражений",
+            profileWinRate: "Процент побед",
+            profileHostedGames: "Проведено как хост (все партии)",
+            profileRecentGames: "Последние партии",
+            profileFullHistory: "Посмотреть всю историю",
+            profileGameHistory: "История партий",
+            profileVictory: "Победа",
+            profileEliminated: "Элиминирован",
+            profileCompletedWithoutVictory: "Завершено без победы",
+            profileGameInProgress: "Партия продолжается",
+            profileHost: "Хост",
+            profilePlayer: "Игрок",
+            profilePlayersCount: "игроков",
+            profileDuration: "Длительность",
+            profileEliminationRound: "Раунд элиминации",
+            profilePrevious: "Предыдущая",
+            profileNext: "Следующая",
+            profilePage: "Страница",
+            profileEmptyHistory: "У вас ещё нет сыгранных партий.",
+            profileTotalGames: "Всего записей",
+            profileBackToProfile: "К профилю"
         }
     };
 
@@ -191,6 +269,36 @@ function safeRenderAll() {
         });
         document.querySelectorAll(".language-btn").forEach(function (button) {
             button.classList.toggle("active", button.dataset.lang === lang);
+        });
+        localizeProfileValues(lang);
+    }
+
+    function localizeProfileValues(lang) {
+        const locale = { uk: "uk-UA", en: "en-GB", ru: "ru-RU" }[lang];
+        const durationUnits = {
+            uk: { hour: "год", minute: "хв" },
+            en: { hour: "h", minute: "min" },
+            ru: { hour: "ч", minute: "мин" }
+        }[lang];
+
+        document.querySelectorAll("[data-profile-utc]").forEach(function (element) {
+            const date = new Date(element.dataset.profileUtc);
+            if (!Number.isNaN(date.getTime())) {
+                element.textContent = new Intl.DateTimeFormat(locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                }).format(date);
+            }
+        });
+
+        document.querySelectorAll("[data-profile-duration-minutes]").forEach(function (element) {
+            const totalMinutes = Number.parseInt(element.dataset.profileDurationMinutes, 10);
+            if (!Number.isFinite(totalMinutes)) return;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            element.textContent = hours > 0
+                ? `${hours} ${durationUnits.hour} ${minutes} ${durationUnits.minute}`
+                : `${minutes} ${durationUnits.minute}`;
         });
     }
 
