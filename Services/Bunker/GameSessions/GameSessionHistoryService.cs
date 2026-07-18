@@ -1,10 +1,10 @@
 ﻿using Bunker.Data.Persistence;
 using Bunker.Data.Persistence.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bunker.Services.Bunker.GameSessions
 {
-	public sealed class GameSessionHistoryService
-		: IGameSessionHistoryService
+	public sealed class GameSessionHistoryService : IGameSessionHistoryService
 	{
 		private readonly BunkerDbContext _dbContext;
 
@@ -54,6 +54,38 @@ namespace Bunker.Services.Bunker.GameSessions
 			await _dbContext.SaveChangesAsync(cancellationToken);
 
 			return session.Id;
+		}
+		public async Task<bool> CompleteSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
+		{
+			if (sessionId == Guid.Empty)
+			{
+				throw new ArgumentException(
+					"Session ID cannot be empty.",
+					nameof(sessionId));
+			}
+
+			GameSessionEntity? session =
+				await _dbContext.GameSessions
+					.SingleOrDefaultAsync(
+						item => item.Id == sessionId,
+						cancellationToken);
+
+			if (session is null)
+			{
+				return false;
+			}
+
+			if (session.Status == "Completed")
+			{
+				return true;
+			}
+
+			session.Status = "Completed";
+			session.EndedAtUtc = DateTime.UtcNow;
+
+			await _dbContext.SaveChangesAsync(cancellationToken);
+
+			return true;
 		}
 	}
 }

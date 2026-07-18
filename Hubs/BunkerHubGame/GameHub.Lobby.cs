@@ -125,9 +125,9 @@ public partial class GameHub
 	}
 
 	public async Task StartGameFromLobby(
-		string previewToken,
-		bool confirmation,
-		string commandId)
+	string previewToken,
+	bool confirmation,
+	string commandId)
 	{
 		var room = RequireLobbyHost();
 
@@ -217,6 +217,7 @@ public partial class GameHub
 			}
 		}
 
+		// Спочатку повідомляємо клієнтів про старт.
 		await CompleteLobbyStart(room);
 
 		await AppendGmAudit(
@@ -230,22 +231,32 @@ public partial class GameHub
 			commandId: commandId,
 			allowUndo: false);
 
-		// Записуємо інформацію про запущену гру в базу.
-		// Це виконується після lock, тому тут можна використовувати await.
-		if (_gameSessionHistoryService is not null)
+		// Потім зберігаємо історію в БД.
+		if (_gameSessionHistoryService is not null &&
+			room.GameSessionId is null)
 		{
 			try
 			{
-				await _gameSessionHistoryService
-					.CreateStartedSessionAsync(
-						roomCode: roomCode,
-						playerCount: playerCount,
-						apocalypseId: null,
-						bunkerId: null);
+				Guid sessionId =
+					await _gameSessionHistoryService
+						.CreateStartedSessionAsync(
+							roomCode: roomCode,
+							playerCount: playerCount,
+							apocalypseId: null,
+							bunkerId: null);
+
+				lock (room.GameSettingsSyncRoot)
+				{
+					room.GameSessionId ??= sessionId;
+				}
+
+				_logger.LogInformation(
+					"Game session {GameSessionId} linked to room {RoomCode}",
+					sessionId,
+					roomCode);
 			}
 			catch (Exception exception)
 			{
-				// Помилка БД не повинна зупиняти вже запущену гру.
 				_logger.LogError(
 					exception,
 					"Failed to save started game session for room {RoomCode}",
