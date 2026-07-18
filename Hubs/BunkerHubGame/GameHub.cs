@@ -3,9 +3,10 @@ using Bunker.Models.Сharacteristics;
 using Bunker.Services;
 using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.FileProviders;
 using System.Numerics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.Extensions.FileProviders;
+using Bunker.Services.Bunker.GameSessions;
 
 namespace Bunker.Hubs
 {
@@ -39,8 +40,21 @@ namespace Bunker.Hubs
         private GmCapability? _activeDirectorCapability;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
+		private readonly IGameSessionHistoryService? _gameSessionHistoryService;
 
-        public GameHub(CharacterGeneratorService generator, RoomService roomService, GameDataService gameData, ScenarioImageService imageService, ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, PlayerDisconnectCleanupCoordinator playerDisconnectCleanup, RoomIntegrityService? roomIntegrity = null, GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, StableIdMigrationService? stableIdMigrations = null, OmniscientGmAccessPolicy? omniscientAccess = null, OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, RoomGameSettingsService? roomGameSettings = null, OmniscientRequestRateLimitService? omniscientRequestRateLimits = null)
+		public GameHub(CharacterGeneratorService generator, 
+            RoomService roomService, GameDataService gameData, ScenarioImageService imageService,
+            ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, 
+            GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, 
+            PlayerDisconnectCleanupCoordinator playerDisconnectCleanup, RoomIntegrityService? roomIntegrity = null, 
+            GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, 
+            GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, 
+            GlobalContentDraftService? globalContentDrafts = null, GlobalContentCommitService? globalContentCommits = null, 
+            StableIdMigrationService? stableIdMigrations = null, OmniscientGmAccessPolicy? omniscientAccess = null, 
+            OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, 
+            DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, 
+            RoomGameSettingsService? roomGameSettings = null, OmniscientRequestRateLimitService? omniscientRequestRateLimits = null, 
+            IGameSessionHistoryService? gameSessionHistoryService = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -69,7 +83,8 @@ namespace Bunker.Hubs
             _directorControls = directorControls ?? new DirectorControlService(TimeProvider.System);
             _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit);
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
-            _logger = logger;
+			_gameSessionHistoryService = gameSessionHistoryService;
+			_logger = logger;
         }
 
         private sealed class FallbackDevelopmentEnvironment : IHostEnvironment
