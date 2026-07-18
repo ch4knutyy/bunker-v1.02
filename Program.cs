@@ -36,6 +36,12 @@ builder.Services.AddSingleton<GmAuditService>();
 builder.Services.AddSingleton<PlayerDisconnectCleanupCoordinator>();
 builder.Services.AddSingleton<RoomIntegrityService>();
 builder.Services.AddSingleton<RoomSnapshotService>();
+builder.Services.Configure<RoomRecoveryOptions>(builder.Configuration.GetSection(RoomRecoveryOptions.SectionName));
+builder.Services.AddSingleton<RoomRecoveryCaptureService>();
+builder.Services.AddSingleton<IRoomRecoverySnapshotStore, RoomRecoverySnapshotStore>();
+builder.Services.AddSingleton<RoomRecoveryCoordinator>();
+builder.Services.AddSingleton<IRoomRecoveryCoordinator>(services => services.GetRequiredService<RoomRecoveryCoordinator>());
+builder.Services.AddHostedService(services => services.GetRequiredService<RoomRecoveryCoordinator>());
 builder.Services.AddSingleton<RoomLocalEditorService>();
 builder.Services.Configure<GlobalContentCatalogOptions>(builder.Configuration.GetSection(GlobalContentCatalogOptions.SectionName));
 builder.Services.AddSingleton<GlobalContentAccessPolicy>();
@@ -86,6 +92,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IGameSessionHistoryService, GameSessionHistoryService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+	await scope.ServiceProvider.GetRequiredService<BunkerDbContext>().Database.MigrateAsync();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -169,7 +169,7 @@ public sealed class RoomSnapshotService
         return result;
     }
 
-    private static RoomSnapshotState CaptureState(Room room)
+    internal static RoomSnapshotState CaptureState(Room room)
     {
         var state = new RoomSnapshotState
         {
@@ -226,7 +226,7 @@ public sealed class RoomSnapshotService
         return state;
     }
 
-    private static void ApplyState(Room room, RoomSnapshotState source)
+    internal static void ApplyState(Room room, RoomSnapshotState source)
     {
         var state = Clone(source)!;
         room.State = state.State;

@@ -108,6 +108,52 @@ namespace Bunker.Data.Persistence.Migrations
                     b.ToTable("GameSessionPlayers", (string)null);
                 });
 
+            modelBuilder.Entity("Bunker.Data.Persistence.Entities.RoomRecoverySnapshotEntity", b =>
+                {
+                    b.Property<string>("RoomCode")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ExpiresAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Fingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("GameSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RoomState")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StateJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RoomCode");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.HasIndex("RoomState");
+
+                    b.HasIndex("UpdatedAtUtc");
+
+                    b.ToTable("RoomRecoverySnapshots", (string)null);
+                });
+
             modelBuilder.Entity("Bunker.Data.Persistence.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")

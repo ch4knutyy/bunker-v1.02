@@ -41,6 +41,7 @@ namespace Bunker.Hubs
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
 		private readonly IGameSessionHistoryService? _gameSessionHistoryService;
+		private readonly IRoomRecoveryCoordinator? _roomRecovery;
 
 		public GameHub(CharacterGeneratorService generator, 
             RoomService roomService, GameDataService gameData, ScenarioImageService imageService,
@@ -54,7 +55,8 @@ namespace Bunker.Hubs
             OmniscientGmRoleService? omniscientRoles = null, OmniscientHiddenStateService? omniscientHiddenState = null, 
             DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, 
             RoomGameSettingsService? roomGameSettings = null, OmniscientRequestRateLimitService? omniscientRequestRateLimits = null, 
-            IGameSessionHistoryService? gameSessionHistoryService = null)
+            IGameSessionHistoryService? gameSessionHistoryService = null,
+            IRoomRecoveryCoordinator? roomRecovery = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -84,8 +86,12 @@ namespace Bunker.Hubs
             _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit);
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;
+			_roomRecovery = roomRecovery;
 			_logger = logger;
         }
+
+		private void QueueRoomRecovery(Room room, string reason) =>
+			_roomRecovery?.QueueSnapshot(room.Id, reason);
 
         private sealed class FallbackDevelopmentEnvironment : IHostEnvironment
         {

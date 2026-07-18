@@ -38,6 +38,7 @@ namespace Bunker.Hubs
 				var room = _roomService.CreateRoom(roomName, Context.ConnectionId, playerName, maxPlayers, password);
 
 				var player = CreateGeneratedPlayer(playerName, stablePlayerId, room);
+				var reconnectToken = CreateReconnectToken(player);
 
 				// Приєднуємо хоста до створеної кімнати
 				var (joinSuccess, joinError, joinedRoom) =
@@ -60,6 +61,7 @@ namespace Bunker.Hubs
 					player = player,
 					isHost = true,
 					hostToken = joinedRoom.HostToken,
+					reconnectToken,
 					players = BuildRoomPlayersPayload(joinedRoom),
 					roundState = BuildRoundState(joinedRoom)
 				});
@@ -77,7 +79,7 @@ namespace Bunker.Hubs
 			}
 		}
 
-		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null)
+		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null, string? reconnectToken = null)
 		{
 			// Validate and sanitize inputs
 			roomId = roomId?.Trim() ?? "";
@@ -105,7 +107,8 @@ namespace Bunker.Hubs
 							Context.ConnectionId,
 							playerName,
 							stablePlayerId,
-							GetCallerAccountUserId());
+							GetCallerAccountUserId(),
+							reconnectToken);
 
 					if (rejoinSuccess && rejoinRoom != null && rejoinPlayer != null)
 					{
@@ -119,7 +122,8 @@ namespace Bunker.Hubs
 					if (string.Equals(
 						rejoinError,
 						RoomService.AccountReconnectMismatchError,
-						StringComparison.Ordinal))
+						StringComparison.Ordinal) ||
+						string.Equals(rejoinError, RoomService.ReconnectTokenMismatchError, StringComparison.Ordinal))
 					{
 						await Clients.Caller.SendAsync("ReceiveError", rejoinError);
 						return;
@@ -128,6 +132,7 @@ namespace Bunker.Hubs
 
 				var existingRoom = _roomService.GetRoom(roomId);
 				var player = CreateGeneratedPlayer(playerName, stablePlayerId, existingRoom);
+				reconnectToken = CreateReconnectToken(player);
 
 				// Один виклик JoinRoom
 				var (joinSuccess, joinError, room) =
@@ -150,6 +155,7 @@ namespace Bunker.Hubs
 					player = player,
 					isHost = room.IsHost(Context.ConnectionId),
 					hostToken = room.IsHost(Context.ConnectionId) ? room.HostToken : null,
+					reconnectToken,
 					players = BuildRoomPlayersPayload(room),
 					roundState = BuildRoundState(room)
 				});
@@ -229,7 +235,7 @@ namespace Bunker.Hubs
 		/// <summary>
 		/// Спроба повторного приєднання після перезавантаження сторінки
 		/// </summary>
-		public async Task RejoinRoom(string roomId, string playerName, string? stablePlayerId = null)
+		public async Task RejoinRoom(string roomId, string playerName, string? stablePlayerId = null, string? reconnectToken = null)
 		{
 			if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(playerName) || string.IsNullOrWhiteSpace(stablePlayerId))
 			{
@@ -245,7 +251,8 @@ namespace Bunker.Hubs
 						Context.ConnectionId,
 						playerName,
 						stablePlayerId,
-						GetCallerAccountUserId());
+						GetCallerAccountUserId(),
+						reconnectToken);
 
 				if (!success || room == null || player == null)
 				{
@@ -394,6 +401,13 @@ namespace Bunker.Hubs
 				StablePlayerId = stablePlayerId ?? "",
 				AccountUserId = GetCallerAccountUserId()
 			};
+		}
+
+		private static string CreateReconnectToken(Player player)
+		{
+			var token = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+			player.RecoveryReconnectTokenHash = RoomRecoverySecurity.HashReconnectToken(token);
+			return token;
 		}
 
 		private void EnsurePlayerHasGeneratedData(Player player, Room? room = null)

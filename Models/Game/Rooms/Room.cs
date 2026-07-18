@@ -42,6 +42,10 @@ namespace Bunker.Models
 		public HashSet<string> ProcessedGameResetCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		[System.Text.Json.Serialization.JsonIgnore]
 		public object GameSettingsSyncRoot { get; } = new();
+		[System.Text.Json.Serialization.JsonIgnore]
+		public object RecoverySyncRoot { get; } = new();
+		[System.Text.Json.Serialization.JsonIgnore]
+		public long RecoveryRevision { get; set; }
 		public RoomGameSettings GameSettings { get; set; } = new();
 		public RoomGameSettings? FrozenGameSettings { get; set; }
 		public long SettingsRevision { get; set; } = 1;
@@ -69,7 +73,9 @@ namespace Bunker.Models
 		public GameCompletionState? Completion { get; set; }
 		public string Name { get; set; } = "";
 		public string? Password { get; set; }
-		public bool HasPassword => !string.IsNullOrEmpty(Password);
+		[System.Text.Json.Serialization.JsonIgnore]
+		public string? PasswordVerificationHash { get; set; }
+		public bool HasPassword => !string.IsNullOrEmpty(Password) || !string.IsNullOrEmpty(PasswordVerificationHash);
 		public int MaxPlayers { get; set; } = 12;
 		public int MinPlayers { get; set; } = 4;
 

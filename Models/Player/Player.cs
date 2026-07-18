@@ -14,6 +14,8 @@ namespace Bunker.Models
 
         [JsonIgnore]
         public Guid? AccountUserId { get; set; }
+        [JsonIgnore]
+        public string RecoveryReconnectTokenHash { get; set; } = "";
 
         // Поточний статус SignalR-з'єднання. Гравця не видаляємо одразу після refresh.
         public bool IsConnected { get; set; } = true;
