@@ -3,7 +3,7 @@
     ViewData["Title"] = "Профіль";
 }
 
-<section class="auth-shell">
+<section class="auth-shell profile-shell">
     <div class="auth-card profile-card">
         <div class="auth-card-heading">
             <span class="auth-eyebrow">Vault resident</span>
@@ -23,15 +23,131 @@
             </div>
             <div>
                 <dt>Створено</dt>
-                <dd>@Model.CreatedAtUtc.ToString("dd.MM.yyyy") UTC</dd>
+                <dd>
+                    <time data-profile-utc="@UtcIso(Model.CreatedAtUtc)">
+                        @Model.CreatedAtUtc.ToString("dd.MM.yyyy HH:mm") UTC
+                    </time>
+                </dd>
             </div>
         </dl>
 
         <a class="auth-primary auth-link-button" asp-action="Edit">Змінити ім’я</a>
 
-        <div class="profile-history-placeholder">
-            <h2>Історія ігор</h2>
-            <p>Історія ігор з’явиться після прив’язування партій до акаунта.</p>
-        </div>
+        <section class="profile-statistics" aria-labelledby="profile-statistics-title">
+            <h2 id="profile-statistics-title" data-i18n="profileStatistics">Статистика партій</h2>
+            <div class="profile-statistics-grid">
+                <div class="profile-stat-card">
+                    <strong>@Model.Statistics.CompletedGames</strong>
+                    <span data-i18n="profileCompletedGames">Завершено партій</span>
+                </div>
+                <div class="profile-stat-card profile-stat-card-win">
+                    <strong>@Model.Statistics.Wins</strong>
+                    <span data-i18n="profileWins">Перемог</span>
+                </div>
+                <div class="profile-stat-card">
+                    <strong>@Model.Statistics.Losses</strong>
+                    <span data-i18n="profileLosses">Поразок</span>
+                </div>
+                <div class="profile-stat-card">
+                    <strong>@Model.Statistics.WinRatePercent.ToString("0.0")%</strong>
+                    <span data-i18n="profileWinRate">Відсоток перемог</span>
+                </div>
+                <div class="profile-stat-card">
+                    <strong>@Model.Statistics.HostedGames</strong>
+                    <span data-i18n="profileHostedGames">Проведено як хост (усі партії)</span>
+                </div>
+                <div class="profile-stat-card profile-stat-card-active">
+                    <strong>@Model.Statistics.ActiveGames</strong>
+                    <span data-i18n="profileActiveGames">Активних партій</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-history" aria-labelledby="recent-games-title">
+            <div class="profile-section-heading">
+                <h2 id="recent-games-title" data-i18n="profileRecentGames">Останні партії</h2>
+                <a asp-action="History" data-i18n="profileFullHistory">Переглянути всю історію</a>
+            </div>
+
+            @if (Model.RecentGames.Count == 0)
+            {
+                <p class="profile-empty-state" data-i18n="profileEmptyHistory">
+                    У вас ще немає зіграних партій.
+                </p>
+            }
+            else
+            {
+                <div class="profile-game-list">
+                    @foreach (var game in Model.RecentGames)
+                    {
+                        <article class="profile-game-card">
+                            <div class="profile-game-primary">
+                                <strong>@game.RoomCode</strong>
+                                <time data-profile-utc="@UtcIso(game.StartedAtUtc)">
+                                    @(game.StartedAtUtc?.ToString("dd.MM.yyyy HH:mm") ?? "—") UTC
+                                </time>
+                            </div>
+                            <div class="profile-game-badges">
+                                <span class="profile-badge profile-badge-status" data-i18n="@(game.Status == "Started" ? "profileGameInProgress" : "profileCompletedStatus")">
+                                    @(game.Status == "Started" ? "Партія триває" : "Завершено")
+                                </span>
+                                <span class="profile-badge" data-i18n="@(game.IsHost ? "profileHost" : "profilePlayer")">
+                                    @(game.IsHost ? "Хост" : "Гравець")
+                                </span>
+                                <span class="profile-badge @ResultClass(game)" data-i18n="@ResultKey(game)">
+                                    @ResultText(game)
+                                </span>
+                            </div>
+                            <div class="profile-game-meta">
+                                <span><strong>@game.PlayerCount</strong> <span data-i18n="profilePlayersCount">гравців</span></span>
+                                @if (game.Duration.HasValue)
+                                {
+                                    <span data-profile-duration-minutes="@Math.Max(0, (int)game.Duration.Value.TotalMinutes)">
+                                        @FormatDuration(game.Duration.Value)
+                                    </span>
+                                }
+                                @if (game.EliminatedAtRound.HasValue)
+                                {
+                                    <span><span data-i18n="profileEliminationRound">Раунд елімінування</span>: @game.EliminatedAtRound</span>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
     </div>
 </section>
+
+@functions {
+    private static string? UtcIso(DateTime? value) =>
+        value.HasValue
+            ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc).ToString("O")
+            : null;
+
+    private static string ResultKey(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+        game.Status == "Started" ? "profileGameInProgress" :
+        game.IsWinner ? "profileVictory" :
+        game.WasEliminated ? "profileEliminated" :
+        "profileCompletedWithoutVictory";
+
+    private static string ResultText(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+        game.Status == "Started" ? "Партія триває" :
+        game.IsWinner ? "Перемога" :
+        game.WasEliminated ? "Елімінований" :
+        "Завершено без перемоги";
+
+    private static string ResultClass(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+        game.Status == "Started" ? "profile-badge-active" :
+        game.IsWinner ? "profile-badge-win" :
+        game.WasEliminated ? "profile-badge-eliminated" :
+        "profile-badge-neutral";
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        var totalMinutes = Math.Max(0, (int)duration.TotalMinutes);
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+        return hours > 0 ? $"{hours} год {minutes} хв" : $"{minutes} хв";
+    }
+}
