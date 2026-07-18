@@ -148,23 +148,29 @@
     };
 
     async function refreshGmPanelV2State() {
-        if (!globalThis.connection ||
+        if (typeof connection === "undefined" ||
             connection.state !== signalR.HubConnectionState.Connected) {
             setPanelLoadState("error", "connection_unavailable");
             return;
         }
+
         if (!hasJoinedRoom()) {
             setPanelLoadState("error", "room_not_joined");
             return;
         }
+
         try {
             const state = await connection.invoke("GetGmPanelState");
             applyGmPanelV2State(state);
             setPanelLoadState("ready");
         } catch (error) {
             console.error("GetGmPanelState failed", error);
+
             const status = document.getElementById("gmPanelConnectionStatus");
-            if (status) status.textContent = "Не вдалося синхронізувати";
+            if (status) {
+                status.textContent = "Не вдалося синхронізувати";
+            }
+
             setPanelLoadState("error", gmPanelErrorCode(error));
         }
     }
