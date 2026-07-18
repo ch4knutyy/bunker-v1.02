@@ -15,6 +15,7 @@ public sealed class LobbyStartService
     private sealed record VersionStamp(string Fingerprint, long Version);
     private readonly ConcurrentDictionary<string, Ticket> _tickets = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, VersionStamp> _versions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, long> _guestWarningRequests = new(StringComparer.OrdinalIgnoreCase);
 
     public LobbyStartService(TimeProvider time, RoomGameSettingsService? settings = null, GmAuditService? audit = null)
     {
@@ -36,17 +37,20 @@ public sealed class LobbyStartService
             members.Count(x => x.IsTechnicalGm), members.Count(x => x.IsOmniscientGm), requiredMembers.Count(x => x.IsReady),
             members.Count(x => x.IsConnected), blockers.Count == 0, blockers, Version(room), time.GetUtcNow(), members,
             requiredMembers.Count, room.HasPassword, settings.ToDto(room), room.SettingsRevision, room.SettingsFrozen,
-            settings.GetWarnings(room), recentEvents);
+            settings.GetWarnings(room), recentEvents, room.GuestWarningRevision,
+            _guestWarningRequests.GetValueOrDefault(room.Id));
     }
 
     public LobbyStartPreviewDto Preview(Room room, Player host)
     {
         var state = GetState(room); var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(24)).ToLowerInvariant(); var expiry = time.GetUtcNow().AddSeconds(30);
         _tickets[token] = new(room.Id, RoomService.GetPlayerKey(host), state.StateVersion, Fingerprint(room), expiry, state.CanStart);
-        return new(state.GameplayPlayerCount, state.SpectatorCount, state.TechnicalGmCount, state.OmniscientGmCount,
+        var preview = new LobbyStartPreviewDto(state.GameplayPlayerCount, state.SpectatorCount, state.TechnicalGmCount, state.OmniscientGmCount,
             state.Members.Where(x => x.IsGameplayParticipant && x.IsConnected && !x.IsReady).Select(x => x.DisplayName).ToList(),
             state.Members.Where(x => x.IsGameplayParticipant && !x.IsConnected).Select(x => x.DisplayName).ToList(), state.Blockers, state.CanStart,
-            state.StateVersion, token, expiry);
+            state.StateVersion, token, expiry, state.Members.Count(x => x.IsGameplayParticipant && !x.IsAccountBound));
+        if (preview.CanStart) _guestWarningRequests[room.Id] = room.GuestWarningRevision;
+        return preview;
     }
 
     public bool TryConsume(Room room, Player host, string token, out string? error)
@@ -65,7 +69,7 @@ public sealed class LobbyStartService
         var technical = player.GmRole == GmMode.TechnicalGm; var spectator = !gameplay;
         var role = omni ? "OmniscientGm" : technical ? "TechnicalGm" : gameplay && room.IsHost(player) ? "HostPlayer" : gameplay ? "Player" : "Spectator";
         return new(RoomService.GetPlayerKey(player), player.Name, role, room.IsHost(player), gameplay, spectator, technical, omni,
-            player.IsLobbyReady, player.IsConnected, null);
+            player.IsLobbyReady, player.IsConnected, player.AccountUserId.HasValue, null);
     }
 
     public static string Lifecycle(Room room) => room.State switch { RoomState.Lobby or RoomState.Waiting => "Lobby", RoomState.Finished => "Finished", _ => "Running" };

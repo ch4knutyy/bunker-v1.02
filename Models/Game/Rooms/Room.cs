@@ -45,6 +45,8 @@ namespace Bunker.Models
 		public RoomGameSettings GameSettings { get; set; } = new();
 		public RoomGameSettings? FrozenGameSettings { get; set; }
 		public long SettingsRevision { get; set; } = 1;
+		[System.Text.Json.Serialization.JsonIgnore]
+		public long GuestWarningRevision { get; set; } = 1;
 		public bool SettingsFrozen { get; set; }
 		public int? ResolvedBunkerCapacity { get; set; }
 		public int ThreatsTriggeredCount { get; set; }

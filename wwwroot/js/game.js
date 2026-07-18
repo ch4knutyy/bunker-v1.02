@@ -70,6 +70,7 @@ let directorCommandPending = false;
 let lobbyState = null;
 let lobbyStartPreview = null;
 let lobbyCommandPending = false;
+let pendingGuestWarningStorageKey = '';
 let lobbySettingsDraft = null;
 let lobbySettingsBaseRevision = 0;
 let lobbySettingsDirty = false;
@@ -455,6 +456,7 @@ Object.assign(uiTranslations.uk, {
 	lobbyBlockMinimum: 'Для старту потрібно щонайменше 2 активні гравці.', lobbyBlockReady: 'Не всі підключені учасники підтвердили готовність.', lobbyBlockRole: 'Один або кілька учасників мають несумісну роль.',
 	lobbyBlockVoting: 'Неможливо почати гру під час активного голосування.', lobbyBlockThreat: 'Неможливо почати гру під час активної загрози.', lobbyBlockHost: 'Почати гру може лише поточний хост.',
 	lobbyBlockFallback: 'Гру поки неможливо почати. Оновіть стан лобі.', lobbyPreviewReady: 'Перевірку завершено: кімната готова до старту.', lobbyPreviewBlocked: 'Перевірку завершено: усуньте перешкоди нижче.'
+	, guestWarningTitle: 'Ви граєте без акаунта', guestWarningPrimary: 'Звичайне перепідключення після оновлення сторінки підтримується. Проте після очищення даних браузера, зміни пристрою або повного перезапуску сервера відновлення вашого персонажа поки не гарантується.', guestWarningSecondary: 'Акаунт створює стабільну прив’язку до користувача та буде використаний для надійнішого відновлення й історії партій.', guestWarningContinue: 'Продовжити як гість', guestWarningRegister: 'Зареєструватися', guestWarningCurrentPlayerRemainsGuest: 'Поточний гравець залишиться гостьовим до повторного входу в кімнату з авторизованим акаунтом.', lobbyGuestCount: 'У кімнаті є гостьові гравці: {count}', lobbyGuestRisk: 'Вони можуть грати без реєстрації. Оновлення сторінки та звичайне перепідключення підтримуються, але після втрати даних браузера або повного перезапуску сервера відновлення поточної гри поки не гарантується.'
 });
 Object.assign(uiTranslations.en, {
 	lobbyTitle: 'Room lobby', lobbyHint: 'Choose roles, confirm readiness, and start the game.', lobbyMembersTitle: 'Members', lobbyParticipants: 'Participants',
@@ -464,6 +466,7 @@ Object.assign(uiTranslations.en, {
 	lobbyStartTitle: 'Ready to start', lobbyTransferHost: 'Transfer host', lobbyHostBadge: 'Host', lobbyRoomCode: 'Room code', lobbyCopyLink: 'Copy link', lobbyGmPanel: 'GM panel', lobbyLeave: 'Leave room', lobbyReadyProgress: 'Ready', lobbyGameplayProgress: 'Active players', lobbyMinimum: 'minimum', lobbyRoleLabel: 'Role',
 	lobbyRolePlayerHelp: 'Receives a character, votes, and participates in threats.', lobbyRoleSpectatorHelp: 'Does not receive a character, vote, or occupy an active-player slot.', lobbyRoleTechnicalHelp: 'Helps manage technical room state without access to hidden characteristics.', lobbyRoleOmniscientHelp: 'Observes the game, sees hidden state, and does not participate as a player.',
 	lobbyBlockMinimum: 'At least 2 active players are required to start.', lobbyBlockReady: 'Not all connected members have confirmed readiness.', lobbyBlockRole: 'One or more members have an incompatible role.', lobbyBlockVoting: 'The game cannot start during active voting.', lobbyBlockThreat: 'The game cannot start during an active threat.', lobbyBlockHost: 'Only the current host can start the game.', lobbyBlockFallback: 'The game cannot start yet. Refresh the lobby state.', lobbyPreviewReady: 'Check complete: the room is ready to start.', lobbyPreviewBlocked: 'Check complete: resolve the blockers below.'
+	, guestWarningTitle: 'You are playing without an account', guestWarningPrimary: 'Normal reconnection after refreshing the page is supported. However, after clearing browser data, changing devices, or a full server restart, recovery of your character is not currently guaranteed.', guestWarningSecondary: 'An account creates a stable user binding and will be used for more reliable recovery and game history.', guestWarningContinue: 'Continue as guest', guestWarningRegister: 'Register', guestWarningCurrentPlayerRemainsGuest: 'The current player will remain a guest until you re-enter the room with an authenticated account.', lobbyGuestCount: 'Guest players in the room: {count}', lobbyGuestRisk: 'They can play without registering. Page refresh and normal reconnection are supported, but recovery of the current game after browser data loss or a full server restart is not currently guaranteed.'
 });
 Object.assign(uiTranslations.ru, {
 	lobbyTitle: 'Лобби комнаты', lobbyHint: 'Выберите роли, подтвердите готовность и начните игру.', lobbyMembersTitle: 'Участники', lobbyParticipants: 'Участники',
@@ -473,6 +476,7 @@ Object.assign(uiTranslations.ru, {
 	lobbyStartTitle: 'Готовность к старту', lobbyTransferHost: 'Передать хост', lobbyHostBadge: 'Хост', lobbyRoomCode: 'Код комнаты', lobbyCopyLink: 'Скопировать ссылку', lobbyGmPanel: 'GM-панель', lobbyLeave: 'Выйти из комнаты', lobbyReadyProgress: 'Готовы', lobbyGameplayProgress: 'Активные игроки', lobbyMinimum: 'минимум', lobbyRoleLabel: 'Роль',
 	lobbyRolePlayerHelp: 'Получает персонажа, голосует и участвует в угрозах.', lobbyRoleSpectatorHelp: 'Не получает персонажа, не голосует и не занимает место среди активных игроков.', lobbyRoleTechnicalHelp: 'Помогает управлять техническим состоянием комнаты без доступа к скрытым характеристикам.', lobbyRoleOmniscientHelp: 'Наблюдает за игрой, видит скрытое состояние и не участвует как игрок.',
 	lobbyBlockMinimum: 'Для старта нужны как минимум 2 активных игрока.', lobbyBlockReady: 'Не все подключённые участники подтвердили готовность.', lobbyBlockRole: 'Один или несколько участников имеют несовместимую роль.', lobbyBlockVoting: 'Нельзя начать игру во время активного голосования.', lobbyBlockThreat: 'Нельзя начать игру во время активной угрозы.', lobbyBlockHost: 'Начать игру может только текущий хост.', lobbyBlockFallback: 'Игру пока нельзя начать. Обновите состояние лобби.', lobbyPreviewReady: 'Проверка завершена: комната готова к старту.', lobbyPreviewBlocked: 'Проверка завершена: устраните препятствия ниже.'
+	, guestWarningTitle: 'Вы играете без аккаунта', guestWarningPrimary: 'Обычное переподключение после обновления страницы поддерживается. Однако после очистки данных браузера, смены устройства или полного перезапуска сервера восстановление вашего персонажа пока не гарантируется.', guestWarningSecondary: 'Аккаунт создаёт стабильную привязку к пользователю и будет использоваться для более надёжного восстановления и истории партий.', guestWarningContinue: 'Продолжить как гость', guestWarningRegister: 'Зарегистрироваться', guestWarningCurrentPlayerRemainsGuest: 'Текущий игрок останется гостевым до повторного входа в комнату с авторизованным аккаунтом.', lobbyGuestCount: 'В комнате есть гостевые игроки: {count}', lobbyGuestRisk: 'Они могут играть без регистрации. Обновление страницы и обычное переподключение поддерживаются, но после потери данных браузера или полного перезапуска сервера восстановление текущей игры пока не гарантируется.'
 });
 
 Object.assign(uiTranslations.uk, {
@@ -3319,6 +3323,11 @@ function registerSignalREvents() {
 		if (currentVersion && version < currentVersion) return;
 		syncLobbySettingsState(state);
 		lobbyState = state; lobbyStartPreview = null; renderLobbyState();
+		const guestWarningRevision = Number(state?.guestWarningRevision ?? state?.GuestWarningRevision ?? 0);
+		const requestedRevision = Number(state?.guestWarningRequestedRevision ?? state?.GuestWarningRequestedRevision ?? 0);
+		if (guestWarningRevision > 0 && requestedRevision === guestWarningRevision) {
+			showGuestWarningIfEligible(guestWarningRevision);
+		}
 		tryRenderRunningGameState();
 	});
 
@@ -3457,6 +3466,7 @@ function registerSignalREvents() {
 		console.log("[GameStarted] data.players:", data.players);
 
 		isStartingGame = false;
+		hideGuestWarningModal(false);
 		clearGameFinishedStateForLobby();
 		console.log("[GameStarted] Reset isStartingGame = false");
 
@@ -8004,8 +8014,83 @@ function renderLobbyPreviewSummary(failed = false) {
 	const output = document.getElementById('lobbyStartPreview'); if (!output) return;
 	if (failed) { output.textContent = t('lobbyBlockFallback'); return; }
 	if (!lobbyStartPreview) { output.textContent = ''; return; }
-	output.textContent = lobbyStartPreview.canStart ? t('lobbyPreviewReady') : t('lobbyPreviewBlocked');
+	const status = lobbyStartPreview.canStart ? t('lobbyPreviewReady') : t('lobbyPreviewBlocked');
+	const guestCount = Number(lobbyStartPreview.guestGameplayPlayerCount ?? lobbyStartPreview.GuestGameplayPlayerCount ?? 0);
+	const warning = guestCount > 0
+		? `<div class="lobby-guest-warning"><strong>${escapeHtml(t('lobbyGuestCount').replace('{count}', String(guestCount)))}</strong><p>${escapeHtml(t('lobbyGuestRisk'))}</p></div>`
+		: '';
+	output.innerHTML = `<span>${escapeHtml(status)}</span>${warning}`;
 }
+
+function isGuestGameplayLobbyMember(member) {
+	return Boolean(member &&
+		lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant') &&
+		!lobbyGet(member, 'isAccountBound', 'IsAccountBound') &&
+		!lobbyGet(member, 'isSpectator', 'IsSpectator') &&
+		!lobbyGet(member, 'isTechnicalGm', 'IsTechnicalGm') &&
+		!lobbyGet(member, 'isOmniscientGm', 'IsOmniscientGm'));
+}
+
+function guestWarningStorageKey(roomCode, playerId, revision) {
+	return `bunker:guest-warning:${roomCode}:${playerId}:${revision}`;
+}
+
+function showGuestWarningIfEligible(revision) {
+	const members = lobbyGet(lobbyState, 'members', 'Members') || [];
+	const playerId = getMyStablePlayerId();
+	const member = members.find(item => lobbyGet(item, 'playerId', 'PlayerId') === playerId);
+	const roomCode = currentRoom?.id || currentRoom?.Id || '';
+	const numericRevision = Number(revision);
+	if (!isGuestGameplayLobbyMember(member) || !roomCode || !playerId || !Number.isSafeInteger(numericRevision) || numericRevision < 1) return false;
+	const key = guestWarningStorageKey(roomCode, playerId, numericRevision);
+	if (localStorage.getItem(key) === 'acknowledged') return false;
+	pendingGuestWarningStorageKey = key;
+	const modal = document.getElementById('guestAccountWarningModal');
+	if (!modal) return false;
+	modal.hidden = false;
+	document.getElementById('guestWarningContinueButton')?.focus();
+	return true;
+}
+
+function hideGuestWarningModal(acknowledge = true) {
+	if (acknowledge && pendingGuestWarningStorageKey) {
+		localStorage.setItem(pendingGuestWarningStorageKey, 'acknowledged');
+	}
+	pendingGuestWarningStorageKey = '';
+	const modal = document.getElementById('guestAccountWarningModal');
+	if (modal) modal.hidden = true;
+}
+
+function continueAsGuest() {
+	hideGuestWarningModal(true);
+}
+
+function registerFromGuestWarning() {
+	window.open('/account/register', '_blank', 'noopener');
+	hideGuestWarningModal(true);
+}
+
+function handleGuestWarningKeydown(event) {
+	if (event.key === 'Escape') {
+		event.preventDefault();
+		hideGuestWarningModal(true);
+		return;
+	}
+	if (event.key !== 'Tab') return;
+	const modal = document.getElementById('guestAccountWarningModal');
+	const controls = [...(modal?.querySelectorAll('button:not([disabled])') || [])];
+	if (!controls.length) return;
+	const first = controls[0];
+	const last = controls[controls.length - 1];
+	if (event.shiftKey && document.activeElement === first) {
+		event.preventDefault();
+		last.focus();
+	} else if (!event.shiftKey && document.activeElement === last) {
+		event.preventDefault();
+		first.focus();
+	}
+}
+
 function renderLobbyState() {
 	const state = lobbyState; if (!state) return;
 	document.querySelectorAll('[data-lobby-i18n]').forEach(element => { element.textContent = t(element.dataset.lobbyI18n); });

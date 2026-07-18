@@ -871,6 +871,10 @@
     z-index: 2000;
 }
 
+.modal[hidden] {
+    display: none;
+}
+
 .modal-content {
     background: var(--color-bg-secondary);
     padding: 2rem;
@@ -972,6 +976,60 @@
     opacity: 0.45;
     cursor: not-allowed;
     filter: grayscale(35%);
+}
+
+.guest-account-warning-content {
+    width: min(92vw, 620px);
+    min-width: 0;
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 0 28px rgba(212, 175, 55, 0.18);
+}
+
+.guest-account-warning-content p {
+    line-height: 1.55;
+}
+
+.guest-account-warning-note {
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+}
+
+.lobby-guest-warning {
+    margin-top: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.lobby-guest-warning strong,
+.lobby-guest-warning p {
+    display: block;
+    margin: 0;
+}
+
+.lobby-guest-warning p {
+    margin-top: 0.35rem;
+    color: var(--color-text-muted);
+    line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+    .guest-account-warning-modal {
+        padding: 0.75rem;
+    }
+
+    .guest-account-warning-content {
+        padding: 1.25rem;
+    }
+
+    .guest-account-warning-content .modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .guest-account-warning-content .modal-actions button {
+        width: 100%;
+    }
 }
 .player-cards-grid {
     display: grid;

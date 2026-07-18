@@ -136,4 +136,18 @@
 	</section>
 	<p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
 </div>
+<div id="guestAccountWarningModal" class="modal guest-account-warning-modal" hidden
+	 role="dialog" aria-modal="true" aria-labelledby="guestAccountWarningTitle"
+	 onkeydown="handleGuestWarningKeydown(event)">
+	<div class="modal-content guest-account-warning-content">
+		<h3 id="guestAccountWarningTitle" data-lobby-i18n="guestWarningTitle">Ви граєте без акаунта</h3>
+		<p data-lobby-i18n="guestWarningPrimary">Звичайне перепідключення після оновлення сторінки підтримується. Проте після очищення даних браузера, зміни пристрою або повного перезапуску сервера відновлення вашого персонажа поки не гарантується.</p>
+		<p data-lobby-i18n="guestWarningSecondary">Акаунт створює стабільну прив’язку до користувача та буде використаний для надійнішого відновлення й історії партій.</p>
+		<p class="guest-account-warning-note" data-lobby-i18n="guestWarningCurrentPlayerRemainsGuest">Поточний гравець залишиться гостьовим до повторного входу в кімнату з авторизованим акаунтом.</p>
+		<div class="modal-actions">
+			<button id="guestWarningRegisterButton" type="button" class="btn-secondary" onclick="registerFromGuestWarning()" data-lobby-i18n="guestWarningRegister">Зареєструватися</button>
+			<button id="guestWarningContinueButton" type="button" class="btn-primary" onclick="continueAsGuest()" data-lobby-i18n="guestWarningContinue">Продовжити як гість</button>
+		</div>
+	</div>
+</div>
 <div id="roomPlayersList" class="room-players-grid site-player-status-row" style="display:none;"></div>
