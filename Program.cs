@@ -3,6 +3,8 @@ using Bunker.Hubs.GameHunSpy;
 using Bunker.Models;
 using Bunker.Services;
 using Bunker.Services.Threats;
+using Bunker.Data.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +50,14 @@ builder.Services.AddSingleton<LobbyStartService>();
 builder.Services.AddSingleton<RoomGameSettingsService>();
 builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
+
+string connectionString =
+	builder.Configuration.GetConnectionString("DefaultConnection")
+	?? throw new InvalidOperationException(
+		"Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<BunkerDbContext>(options =>
+	options.UseSqlite(connectionString));
 
 var app = builder.Build();
 
