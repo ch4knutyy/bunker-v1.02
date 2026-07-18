@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Bunker.Services.Bunker.GameSessions;
 using Bunker.Services.Profile;
+using Bunker.Services.OwnerContent;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,26 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<OwnerAccessOptions>(
+	builder.Configuration.GetSection(OwnerAccessOptions.SectionName));
+builder.Services.Configure<ContentEditorOptions>(
+	builder.Configuration.GetSection(ContentEditorOptions.SectionName));
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("OwnerOnly", policy =>
+	{
+		policy.RequireAuthenticatedUser();
+		policy.AddRequirements(new OwnerOnlyRequirement());
+	});
+});
+builder.Services.AddSingleton<IAuthorizationHandler, OwnerOnlyAuthorizationHandler>();
+builder.Services.AddSingleton<IContentDocumentRegistry, ContentDocumentRegistry>();
+builder.Services.AddSingleton<IContentDocumentValidator, GenericContentDocumentValidator>();
+builder.Services.AddSingleton<ContentFileLockManager>();
+builder.Services.AddSingleton<ContentEditorCommandRegistry>();
+builder.Services.AddSingleton<ContentDocumentServiceFaults>();
+builder.Services.AddSingleton<IContentReloadCoordinator, ContentReloadCoordinator>();
+builder.Services.AddSingleton<IContentDocumentService, ContentDocumentService>();
 builder.Services.AddSignalR(options =>
 {
 	options.EnableDetailedErrors = true;

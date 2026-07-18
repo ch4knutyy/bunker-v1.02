@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Редактор контенту";
+}
+
+<link rel="stylesheet" href="~/css/owner-content.css" asp-append-version="true" />
+
+<section id="ownerContentEditor"
+         class="owner-content-shell"
+         data-files-url="@Url.Action("Files", "OwnerContent")"
+         data-document-url="@Url.Action("Document", "OwnerContent")"
+         data-validate-url="@Url.Action("Validate", "OwnerContent")"
+         data-preview-url="@Url.Action("Preview", "OwnerContent")"
+         data-save-url="@Url.Action("Save", "OwnerContent")"
+         data-backups-url="@Url.Action("Backups", "OwnerContent")"
+         data-restore-url="@Url.Action("Restore", "OwnerContent")">
+    @Html.AntiForgeryToken()
+
+    <header class="owner-content-header">
+        <div>
+            <span class="auth-eyebrow">Owner only</span>
+            <h1>Редактор контенту</h1>
+            <p>Зміни застосовуються до нових генерацій. Поточні активні партії не змінюються.</p>
+        </div>
+        <a class="owner-content-back" asp-controller="Profile" asp-action="Index">До профілю</a>
+    </header>
+
+    <div id="ownerContentToast" class="owner-content-toast" role="status" aria-live="polite"></div>
+
+    <div class="owner-content-layout">
+        <aside class="owner-content-files" aria-label="Content files">
+            <label for="ownerContentSearch">Пошук файлів</label>
+            <input id="ownerContentSearch" type="search" autocomplete="off" placeholder="Назва або папка" />
+            <div id="ownerContentFileList" class="owner-content-file-list">
+                <p class="owner-content-muted">Завантаження…</p>
+            </div>
+        </aside>
+
+        <main class="owner-content-workspace">
+            <div class="owner-content-document-header">
+                <div>
+                    <h2 id="ownerContentFileName">Оберіть JSON-файл</h2>
+                    <p id="ownerContentRelativePath" class="owner-content-muted"></p>
+                </div>
+                <span id="ownerContentDirty" class="owner-content-dirty" hidden>Незбережені зміни</span>
+            </div>
+
+            <dl class="owner-content-metadata">
+                <div>
+                    <dt>SHA-256</dt>
+                    <dd id="ownerContentHash">—</dd>
+                </div>
+                <div>
+                    <dt>Змінено</dt>
+                    <dd id="ownerContentModified">—</dd>
+                </div>
+                <div>
+                    <dt>Reload</dt>
+                    <dd id="ownerContentReloadStatus">—</dd>
+                </div>
+            </dl>
+
+            <div class="owner-content-toolbar">
+                <button id="ownerContentReload" type="button" disabled>Перезавантажити з диска</button>
+                <button id="ownerContentFormat" type="button" disabled>Форматувати</button>
+                <button id="ownerContentValidate" type="button" disabled>Перевірити</button>
+                <button id="ownerContentPreview" type="button" disabled>Переглянути зміни</button>
+                <button id="ownerContentSave" class="owner-content-primary" type="button" disabled>Зберегти</button>
+                <button id="ownerContentBackups" type="button" disabled>Резервні копії</button>
+            </div>
+
+            <label class="owner-content-editor-label" for="ownerContentText">Raw JSON</label>
+            <textarea id="ownerContentText"
+                      class="owner-content-textarea"
+                      spellcheck="false"
+                      autocomplete="off"
+                      disabled></textarea>
+            <div class="owner-content-editor-status">
+                <span id="ownerContentCursor">Рядок 1, колонка 1</span>
+                <span>Ctrl+S відкриває preview, але не зберігає автоматично</span>
+            </div>
+        </main>
+
+        <aside class="owner-content-inspector">
+            <section>
+                <h2>Перевірка</h2>
+                <div id="ownerContentValidation" class="owner-content-panel">
+                    <p class="owner-content-muted">Ще не виконувалась.</p>
+                </div>
+            </section>
+            <section>
+                <h2>Зміни</h2>
+                <div id="ownerContentDiff" class="owner-content-panel">
+                    <p class="owner-content-muted">Спочатку відкрийте preview.</p>
+                </div>
+            </section>
+            <section>
+                <h2>Резервні копії</h2>
+                <div id="ownerContentBackupList" class="owner-content-panel">
+                    <p class="owner-content-muted">Оберіть файл.</p>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/owner-content-editor.js" asp-append-version="true"></script>
+}

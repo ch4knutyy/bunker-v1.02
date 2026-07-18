@@ -52,3 +52,6 @@ tatus
 *.db
 *.db-shm
 *.db-wal
+
+# Owner content editor backups (private, never served from wwwroot)
+App_Data/content-editor/backups/
