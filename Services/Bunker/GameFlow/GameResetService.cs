@@ -1,5 +1,6 @@
 using Bunker.Models;
 using Bunker.Models.Сharacteristics;
+using Bunker.Services.Bunker.GameSessions;
 
 namespace Bunker.Services;
 
@@ -7,7 +8,8 @@ internal sealed record GameResetResult(
 	bool Success,
 	bool IsDuplicate,
 	string? ErrorCode,
-	Guid? PreviousGameSessionId);
+	Guid? PreviousGameSessionId,
+	IReadOnlyCollection<GameSessionParticipantResult> ParticipantResults);
 
 internal static class GameResetService
 {
@@ -21,7 +23,12 @@ internal static class GameResetService
 			{
 				if (room.ProcessedGameResetCommandIds.Contains(commandId))
 				{
-					return new GameResetResult(false, true, null, null);
+					return new GameResetResult(
+						false,
+						true,
+						null,
+						null,
+						Array.Empty<GameSessionParticipantResult>());
 				}
 			}
 
@@ -32,18 +39,29 @@ internal static class GameResetService
 					false,
 					false,
 					"game_not_finished",
-					null);
+					null,
+					Array.Empty<GameSessionParticipantResult>());
 			}
 
 			lock (room.ProcessedGameResetCommandIds)
 			{
 				if (!room.ProcessedGameResetCommandIds.Add(commandId))
 				{
-					return new GameResetResult(false, true, null, null);
+					return new GameResetResult(
+						false,
+						true,
+						null,
+						null,
+						Array.Empty<GameSessionParticipantResult>());
 				}
 			}
 
 			var previousGameSessionId = room.GameSessionId;
+			var participantResults =
+				GameSessionParticipantSnapshotFactory.ResultsFromRoom(
+					room,
+					room.Completion?.Winners.Select(winner => winner.PlayerId) ??
+						Array.Empty<string>());
 
 			room.State = RoomState.Lobby;
 			room.CurrentPhase = GamePhase.Lobby;
@@ -99,7 +117,8 @@ internal static class GameResetService
 				true,
 				false,
 				null,
-				previousGameSessionId);
+				previousGameSessionId,
+				participantResults);
 		}
 	}
 

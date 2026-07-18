@@ -1,4 +1,5 @@
 using Bunker.Models.Сharacteristics;
+using System.Text.Json.Serialization;
 
 namespace Bunker.Models
 {
@@ -10,6 +11,9 @@ namespace Bunker.Models
         
         // Стабільний ID гравця (зберігається в localStorage клієнта)
         public string StablePlayerId { get; set; } = "";
+
+        [JsonIgnore]
+        public Guid? AccountUserId { get; set; }
 
         // Поточний статус SignalR-з'єднання. Гравця не видаляємо одразу після refresh.
         public bool IsConnected { get; set; } = true;

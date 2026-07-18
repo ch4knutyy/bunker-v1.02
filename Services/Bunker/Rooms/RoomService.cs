@@ -19,6 +19,7 @@ namespace Bunker.Services
     /// </summary>
     public class RoomService
     {
+        internal const string AccountReconnectMismatchError = "Обліковий запис не відповідає гравцю";
         private readonly ConcurrentDictionary<string, Room> _rooms = new();
         private readonly ConcurrentDictionary<string, string> _playerToRoom = new(); // ConnectionId -> RoomId
         private readonly ILogger<RoomService> _logger;
@@ -818,7 +819,12 @@ namespace Bunker.Services
 		/// Шукає гравця за стабільним ID та переносить його на новий connectionId
 		/// </summary>
 		public (bool success, string? error, Room? room, Player? player, bool wasHost)
-			RejoinRoom(string roomId, string newConnectionId, string playerName, string? stablePlayerId = null)
+			RejoinRoom(
+				string roomId,
+				string newConnectionId,
+				string playerName,
+				string? stablePlayerId = null,
+				Guid? accountUserId = null)
 		{
 			if (!_rooms.TryGetValue(roomId, out var room))
 			{
@@ -849,6 +855,12 @@ namespace Bunker.Services
 
 			var oldConnectionId = existingEntry.Key;
 			var player = existingEntry.Value;
+
+			if (player.AccountUserId is Guid boundAccountUserId &&
+				boundAccountUserId != accountUserId)
+			{
+				return (false, AccountReconnectMismatchError, null, null, false);
+			}
 
 			TryRemovePlayer(room, oldConnectionId, out _);
 			_playerToRoom.TryRemove(oldConnectionId, out _);

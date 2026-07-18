@@ -11,5 +11,6 @@
 		public int PlayerCount { get; set; }
 		public string? ApocalypseId { get; set; }
 		public string? BunkerId { get; set; }
+		public ICollection<GameSessionPlayerEntity> GameSessionPlayers { get; set; } = new List<GameSessionPlayerEntity>();
 	}
 }
