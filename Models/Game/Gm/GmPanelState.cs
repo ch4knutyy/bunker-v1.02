@@ -36,7 +36,7 @@ public sealed record GmPanelStateDto(
 	string Phase,
 	int Round,
 	int ActivePlayerCount,
-	int BunkerCapacity,
+	int? BunkerCapacity,
 	string TimerStatus,
 	int TimerRemainingSeconds,
 	string VotingStatus,

@@ -48,7 +48,9 @@ public sealed class GmPanelStateBuilder
 			room.CurrentPhase == GamePhase.Finished;
 		var voting = room.CurrentVoting;
 		var threat = room.ThreatState;
-		var players = room.Players.Values
+		var timer = room.GameTimer;
+		var players = (room.Players?.Values.AsEnumerable() ??
+				Enumerable.Empty<Player>())
 			.Where(player => player is not null)
 			.DistinctBy(RoomService.GetPlayerKey)
 			.Select(player => new GmPanelPlayerSummaryDto(
@@ -75,17 +77,21 @@ public sealed class GmPanelStateBuilder
 			isOmniscient ? "OmniscientGm" :
 				isTechnical ? "TechnicalGm" : "Host",
 			room.State.ToString(),
-			room.CurrentPhase.ToString(),
-			room.CurrentRound,
+			room.State == RoomState.Lobby
+				? "Lobby"
+				: room.CurrentPhase.ToString(),
+			room.State == RoomState.Lobby ? 0 : room.CurrentRound,
 			activePlayerCount,
-			room.ResolvedBunkerCapacity ?? room.Bunker?.Capacity ?? 0,
-			room.GameTimer.Status.ToString(),
-			RemainingSeconds(room.GameTimer),
+			room.ResolvedBunkerCapacity ?? room.Bunker?.Capacity,
+			room.State == RoomState.Lobby
+				? "Inactive"
+				: timer?.Status.ToString() ?? "Inactive",
+			room.State == RoomState.Lobby ? 0 : RemainingSeconds(timer),
 			voting?.State.ToString() ?? "Inactive",
 			voting?.RealVoteCount ?? 0,
 			voting?.RequiredVoterCount ?? 0,
 			voting?.IsTie ?? false,
-			threat?.ThreatStatus ?? (room.IsThreatRevealed ? "revealed" : "inactive"),
+			threat?.ThreatStatus ?? (room.IsThreatRevealed ? "Revealed" : "Inactive"),
 			room.CurrentThreat?.Name,
 			completed,
 			permissions,
@@ -101,8 +107,12 @@ public sealed class GmPanelStateBuilder
 			players);
 	}
 
-	private int RemainingSeconds(GameTimerState timer)
+	private int RemainingSeconds(GameTimerState? timer)
 	{
+		if (timer is null)
+		{
+			return 0;
+		}
 		if (timer.Status == GameTimerStatus.Paused)
 		{
 			return Math.Max(0, timer.RemainingSecondsWhenPaused);

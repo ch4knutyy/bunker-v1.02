@@ -70,14 +70,49 @@
 
     function setPanelOpen(opening, persist) {
         const panel = document.getElementById("gmPanel");
-        if (!panel) return;
-        panel.style.display = opening ? "flex" : "none";
+        const backdrop = document.getElementById("gmPanelBackdrop");
+        if (!panel || !backdrop) return;
+        panel.style.removeProperty("display");
         panel.classList.toggle("is-open", opening);
+        backdrop.classList.toggle("is-open", opening);
         panel.setAttribute("aria-hidden", String(!opening));
+        backdrop.setAttribute("aria-hidden", String(!opening));
         document.body.classList.toggle("gm-panel-v2-open", opening);
         if (persist && roomCode()) {
             localStorage.setItem(preferenceKey("open"), opening ? "1" : "0");
         }
+    }
+
+    function setPanelLoadState(state, errorCode) {
+        const container = document.getElementById("gmPanelV2LoadState");
+        const message = document.getElementById("gmPanelV2LoadMessage");
+        const retry = document.getElementById("gmPanelV2Retry");
+        if (!container || !message || !retry) return;
+        container.hidden = state === "ready";
+        retry.hidden = state !== "error";
+        const errors = {
+            connection_unavailable: "З’єднання із сервером ще не готове.",
+            room_not_joined: "Спочатку приєднайтеся до кімнати.",
+            room_not_found: "Кімнату для поточного з’єднання не знайдено.",
+            gm_panel_access_denied: "Немає доступу до GM-панелі.",
+            gm_panel_state_failed: "Сервер не зміг побудувати стан GM-панелі."
+        };
+        message.textContent = state === "error"
+            ? errors[errorCode] || "Не вдалося завантажити стан GM-панелі."
+            : "Завантаження панелі ведучого…";
+    }
+
+    function gmPanelErrorCode(error) {
+        const message = String(error?.message || error || "");
+        return [
+            "room_not_found",
+            "gm_panel_access_denied",
+            "gm_panel_state_failed"
+        ].find(code => message.includes(code)) || "unknown";
+    }
+
+    function hasJoinedRoom() {
+        return Boolean(currentRoom?.id || currentRoom?.Id);
     }
 
     window.switchGMTab = function switchGMTabV2(tab) {
@@ -103,24 +138,41 @@
     window.toggleGMPanel = function toggleGmPanelV2() {
         const panel = document.getElementById("gmPanel");
         if (!panel) return;
-        const opening = panel.style.display === "none" || !panel.classList.contains("is-open");
+        const opening = !panel.classList.contains("is-open");
         setPanelOpen(opening, true);
         if (opening) {
+            setPanelLoadState("loading");
             refreshGmPanelV2State();
             window.setTimeout(() => panel.querySelector('[role="tab"]:not([hidden])')?.focus(), 0);
         }
     };
 
     async function refreshGmPanelV2State() {
-        if (!globalThis.connection || connection.state === "Disconnected") return;
+        if (!globalThis.connection ||
+            connection.state !== signalR.HubConnectionState.Connected) {
+            setPanelLoadState("error", "connection_unavailable");
+            return;
+        }
+        if (!hasJoinedRoom()) {
+            setPanelLoadState("error", "room_not_joined");
+            return;
+        }
         try {
             const state = await connection.invoke("GetGmPanelState");
             applyGmPanelV2State(state);
-        } catch {
+            setPanelLoadState("ready");
+        } catch (error) {
+            console.error("GetGmPanelState failed", error);
             const status = document.getElementById("gmPanelConnectionStatus");
-            if (status) status.textContent = "Стан недоступний";
+            if (status) status.textContent = "Не вдалося синхронізувати";
+            setPanelLoadState("error", gmPanelErrorCode(error));
         }
     }
+
+    window.retryGmPanelV2 = function retryGmPanelV2() {
+        setPanelLoadState("loading");
+        refreshGmPanelV2State();
+    };
 
     function scheduleGmPanelV2Refresh() {
         globalThis.clearTimeout(refreshTimer);
@@ -328,6 +380,6 @@
             if (selectedStablePlayerId) selectPlayerImmediately(selectedStablePlayerId);
             renderPlayerCards();
         });
-        connection.onreconnected?.(refreshGmPanelV2State);
+        connection.onreconnected?.(() => refreshGmPanelV2State());
     }
 })();

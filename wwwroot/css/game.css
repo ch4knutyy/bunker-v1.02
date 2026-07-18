@@ -5726,23 +5726,32 @@ body.gm-panel-v2-open {
     overflow: hidden;
 }
 
-body.gm-panel-v2-open::before {
-    content: "";
+.gm-panel-v2-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 9998;
+    z-index: 4000;
     background: rgba(0, 0, 0, 0.58);
     backdrop-filter: blur(1px);
+    visibility: hidden;
+    pointer-events: none;
 }
 
-.gm-panel.gm-panel-v2 {
+.gm-panel-v2-backdrop.is-open {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.gm-panel-v2-drawer {
     position: fixed;
-    inset: 0 0 0 auto;
-    z-index: 9999;
-    display: none;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4010;
+    display: flex;
     flex-direction: column;
-    width: min(440px, 94vw);
+    width: min(440px, 100vw);
     height: 100dvh;
+    min-height: 100vh;
     max-height: none;
     padding: 0;
     overflow: hidden;
@@ -5751,9 +5760,23 @@ body.gm-panel-v2-open::before {
     border-radius: 0;
     background: #0b0b0b;
     box-shadow: -18px 0 50px rgba(0, 0, 0, 0.55);
+    transform: translateX(100%);
+    visibility: hidden;
+    opacity: 1;
+    pointer-events: none;
 }
 
-.gm-panel-v2 .gm-panel-header {
+.gm-panel-v2-drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+}
+
+body.gm-panel-v2-open .modal {
+    z-index: 4020;
+}
+
+.gm-panel-v2-header {
     position: sticky;
     top: 0;
     z-index: 4;
@@ -5766,7 +5789,7 @@ body.gm-panel-v2-open::before {
     background: #10100f;
 }
 
-.gm-panel-v2 .gm-panel-header h3 {
+.gm-panel-v2-header h3 {
     margin: 0;
     color: #e5c96f;
     font-size: 1.1rem;
@@ -5786,7 +5809,7 @@ body.gm-panel-v2-open::before {
     color: #81d69d;
 }
 
-.gm-panel-v2 .btn-close {
+.gm-panel-v2-drawer .btn-close {
     min-width: 44px;
     min-height: 44px;
     color: #ddd;
@@ -5796,7 +5819,7 @@ body.gm-panel-v2-open::before {
     cursor: pointer;
 }
 
-.gm-panel-v2 .gm-tabs {
+.gm-panel-v2-tabs {
     position: sticky;
     top: 0;
     z-index: 3;
@@ -5810,7 +5833,7 @@ body.gm-panel-v2-open::before {
     scrollbar-width: thin;
 }
 
-.gm-panel-v2 .gm-tab {
+.gm-panel-v2-drawer .gm-tab {
     flex: 0 0 auto;
     min-height: 40px;
     padding: 0.55rem 0.75rem;
@@ -5821,30 +5844,48 @@ body.gm-panel-v2-open::before {
     cursor: pointer;
 }
 
-.gm-panel-v2 .gm-tab.active {
+.gm-panel-v2-drawer .gm-tab.active {
     color: #f0d986;
     border-color: rgba(203, 166, 79, 0.65);
     background: rgba(203, 166, 79, 0.12);
 }
 
-.gm-panel-v2 .gm-tab:focus-visible,
-.gm-panel-v2 button:focus-visible,
-.gm-panel-v2 select:focus-visible,
-.gm-panel-v2 input:focus-visible,
-.gm-panel-v2 textarea:focus-visible {
+.gm-panel-v2-drawer .gm-tab:focus-visible,
+.gm-panel-v2-drawer button:focus-visible,
+.gm-panel-v2-drawer select:focus-visible,
+.gm-panel-v2-drawer input:focus-visible,
+.gm-panel-v2-drawer textarea:focus-visible {
     outline: 2px solid #e5c96f;
     outline-offset: 2px;
 }
 
-.gm-panel-v2 .gm-panel-content {
+.gm-panel-v2-content {
     flex: 1 1 auto;
+    min-height: 0;
     padding: 0.85rem;
     overflow-x: hidden;
     overflow-y: auto;
 }
 
-.gm-panel-v2 .gm-section,
-.gm-panel-v2 .gm-player-info {
+.gm-panel-v2-load-state {
+    display: grid;
+    min-height: 10rem;
+    place-content: center;
+    gap: 0.75rem;
+    color: #c7c1b5;
+    text-align: center;
+}
+
+.gm-panel-v2-load-state[hidden] {
+    display: none;
+}
+
+.gm-panel-v2-load-state p {
+    margin: 0;
+}
+
+.gm-panel-v2-drawer .gm-section,
+.gm-panel-v2-drawer .gm-player-info {
     margin: 0 0 0.75rem;
     padding: 0.8rem;
     border: 1px solid rgba(203, 166, 79, 0.2);
@@ -5852,12 +5893,12 @@ body.gm-panel-v2-open::before {
     background: rgba(255, 255, 255, 0.025);
 }
 
-.gm-panel-v2 .gm-status-grid {
+.gm-panel-v2-drawer .gm-status-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
 }
 
-.gm-panel-v2 .gm-status-card {
+.gm-panel-v2-drawer .gm-status-card {
     min-width: 0;
     padding: 0.65rem;
     border-color: rgba(203, 166, 79, 0.2);
@@ -5894,28 +5935,28 @@ body.gm-panel-v2-open::before {
     background: rgba(208, 172, 82, 0.1);
 }
 
-.gm-panel-v2 .gm-round-actions,
-.gm-panel-v2 .gm-quick-actions,
-.gm-panel-v2 .gm-quick-events {
+.gm-panel-v2-drawer .gm-round-actions,
+.gm-panel-v2-drawer .gm-quick-actions,
+.gm-panel-v2-drawer .gm-quick-events {
     gap: 0.45rem;
 }
 
-.gm-panel-v2 .btn-gm-action,
-.gm-panel-v2 .btn-gm-quick {
+.gm-panel-v2-drawer .btn-gm-action,
+.gm-panel-v2-drawer .btn-gm-quick {
     min-height: 42px;
 }
 
-.gm-panel-v2 [data-gm-tab="technical"] details {
+.gm-panel-v2-drawer [data-gm-tab="technical"] details {
     margin-top: 0.55rem;
 }
 
-.gm-panel-v2 [data-gm-tab="technical"] details:not([open]) > :not(summary) {
+.gm-panel-v2-drawer [data-gm-tab="technical"] details:not([open]) > :not(summary) {
     display: none;
 }
 
-.gm-panel-v2 .gm-threat-danger-zone,
-.gm-panel-v2 .gm-player-danger,
-.gm-panel-v2 .gm-round-danger-zone {
+.gm-panel-v2-drawer .gm-threat-danger-zone,
+.gm-panel-v2-drawer .gm-player-danger,
+.gm-panel-v2-drawer .gm-round-danger-zone {
     border-color: rgba(184, 57, 52, 0.5);
     background: rgba(184, 57, 52, 0.08);
 }
@@ -5926,7 +5967,7 @@ body.gm-panel-v2-open::before {
     text-decoration: none;
 }
 
-.gm-panel-v2 .is-pending {
+.gm-panel-v2-drawer .is-pending {
     cursor: wait;
     opacity: 0.65;
 }
@@ -5938,32 +5979,34 @@ body.gm-panel-v2-open::before {
 }
 
 @media (max-width: 768px) {
-    .gm-panel.gm-panel-v2 {
+    .gm-panel-v2-drawer {
         inset: 0;
         width: 100vw;
         max-width: none;
+        height: 100dvh;
+        min-height: 100vh;
         border-left: 0;
     }
 
-    .gm-panel-v2 .gm-panel-header {
+    .gm-panel-v2-header {
         padding-top: max(0.8rem, env(safe-area-inset-top));
     }
 
-    .gm-panel-v2 .gm-tabs {
+    .gm-panel-v2-tabs {
         scroll-snap-type: x proximity;
     }
 
-    .gm-panel-v2 .gm-tab {
+    .gm-panel-v2-drawer .gm-tab {
         scroll-snap-align: start;
     }
 
-    .gm-panel-v2 .gm-panel-content {
+    .gm-panel-v2-content {
         padding: 0.65rem;
         padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
 
-    .gm-panel-v2 .gm-round-actions > *,
-    .gm-panel-v2 .gm-quick-actions > * {
+    .gm-panel-v2-drawer .gm-round-actions > *,
+    .gm-panel-v2-drawer .gm-quick-actions > * {
         flex: 1 1 100%;
         width: 100%;
     }
