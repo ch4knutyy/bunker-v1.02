@@ -1,3 +1,11 @@
+@using Bunker.Data.Persistence.Identity
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var signedInUser = User.Identity?.IsAuthenticated == true
+        ? await UserManager.GetUserAsync(User)
+        : null;
+}
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -68,7 +76,23 @@
                     <button type="button" class="lang-btn language-btn" data-lang="en" onclick="changeLanguage('en')">EN</button>
                     <button type="button" class="lang-btn language-btn" data-lang="ru" onclick="changeLanguage('ru')">RU</button>
                 </div>
-                <a class="profile-btn" href="/#player-profile" title="Профіль">👤</a>
+                <div class="account-nav">
+                    @if (signedInUser is null)
+                    {
+                        <a class="account-nav-link" asp-controller="Account" asp-action="Login" data-i18n="authLogin">Увійти</a>
+                        <a class="account-nav-link account-nav-primary" asp-controller="Account" asp-action="Register" data-i18n="authRegister">Реєстрація</a>
+                    }
+                    else
+                    {
+                        <a class="account-nav-user" asp-controller="Profile" asp-action="Index" title="Профіль">
+                            <span aria-hidden="true">👤</span>
+                            <span>@signedInUser.DisplayName</span>
+                        </a>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="account-logout-form">
+                            <button type="submit" class="account-nav-link account-nav-button" data-i18n="authLogout">Вийти</button>
+                        </form>
+                    }
+                </div>
             </div>
         </div>
     </header>

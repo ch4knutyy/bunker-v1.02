@@ -4,6 +4,8 @@ using Bunker.Models;
 using Bunker.Services;
 using Bunker.Services.Threats;
 using Bunker.Data.Persistence;
+using Bunker.Data.Persistence.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Bunker.Services.Bunker.GameSessions;
 
@@ -53,6 +55,34 @@ builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameServi
 builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<BunkerDbContext>(options => options.UseSqlite(connectionString));
+builder.Services
+	.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+	{
+		options.User.RequireUniqueEmail = true;
+		options.Password.RequiredLength = 8;
+		options.Password.RequireDigit = true;
+		options.Password.RequireLowercase = true;
+		options.Password.RequireUppercase = true;
+		options.Password.RequireNonAlphanumeric = false;
+		options.Lockout.AllowedForNewUsers = true;
+		options.Lockout.MaxFailedAccessAttempts = 5;
+		options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+		options.SignIn.RequireConfirmedAccount = false;
+		options.SignIn.RequireConfirmedEmail = false;
+	})
+	.AddEntityFrameworkStores<BunkerDbContext>()
+	.AddDefaultTokenProviders();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.Cookie.Name = "Bunker.Identity";
+	options.Cookie.HttpOnly = true;
+	options.Cookie.SameSite = SameSiteMode.Lax;
+	options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+	options.SlidingExpiration = true;
+	options.ExpireTimeSpan = TimeSpan.FromDays(14);
+	options.LoginPath = "/account/login";
+	options.AccessDeniedPath = "/account/access-denied";
+});
 builder.Services.AddScoped<IGameSessionHistoryService, GameSessionHistoryService>();
 
 var app = builder.Build();
@@ -60,6 +90,8 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
 	name: "default",
