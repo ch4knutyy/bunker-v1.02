@@ -1,0 +1,25 @@
+@model Bunker.Models.ViewModels.Account.EditProfileViewModel
+@{
+    ViewData["Title"] = "Редагування профілю";
+}
+
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-card-heading">
+            <span class="auth-eyebrow">Profile settings</span>
+            <h1>Змінити ім’я</h1>
+            <p>Email і пароль залишаються без змін.</p>
+        </div>
+
+        <form asp-action="Edit" method="post" class="auth-form">
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+            <div class="auth-field">
+                <label asp-for="DisplayName"></label>
+                <input asp-for="DisplayName" autocomplete="name" maxlength="32" />
+                <span asp-validation-for="DisplayName"></span>
+            </div>
+            <button type="submit" class="auth-primary">Зберегти</button>
+            <a class="auth-secondary auth-link-button" asp-action="Index">Скасувати</a>
+        </form>
+    </div>
+</section>

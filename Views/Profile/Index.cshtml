@@ -1,0 +1,37 @@
+@model Bunker.Models.ViewModels.Account.ProfileViewModel
+@{
+    ViewData["Title"] = "Профіль";
+}
+
+<section class="auth-shell">
+    <div class="auth-card profile-card">
+        <div class="auth-card-heading">
+            <span class="auth-eyebrow">Vault resident</span>
+            <h1>@Model.DisplayName</h1>
+            <p>Ваш особистий обліковий запис Vault Judgment.</p>
+        </div>
+
+        @if (TempData["ProfileUpdated"] is string message)
+        {
+            <div class="auth-success" role="status">@message</div>
+        }
+
+        <dl class="profile-details">
+            <div>
+                <dt>Email</dt>
+                <dd>@Model.Email</dd>
+            </div>
+            <div>
+                <dt>Створено</dt>
+                <dd>@Model.CreatedAtUtc.ToString("dd.MM.yyyy") UTC</dd>
+            </div>
+        </dl>
+
+        <a class="auth-primary auth-link-button" asp-action="Edit">Змінити ім’я</a>
+
+        <div class="profile-history-placeholder">
+            <h2>Історія ігор</h2>
+            <p>Історія ігор з’явиться після прив’язування партій до акаунта.</p>
+        </div>
+    </div>
+</section>
