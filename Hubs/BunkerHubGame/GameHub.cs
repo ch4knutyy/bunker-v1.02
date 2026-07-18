@@ -2,6 +2,7 @@
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
 using Bunker.Services.Threats;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using System.Numerics;
@@ -37,6 +38,8 @@ namespace Bunker.Hubs
         private readonly DirectorControlService _directorControls;
         private readonly LobbyStartService _lobbyStart;
         private readonly RoomGameSettingsService _roomGameSettings;
+        private readonly GmPanelStateBuilder _gmPanelStateBuilder;
+        private readonly IAuthorizationService? _authorizationService;
         private GmCapability? _activeDirectorCapability;
         private readonly ILogger<GameHub> _logger;
         private readonly Random _random = new();
@@ -56,7 +59,9 @@ namespace Bunker.Hubs
             DirectorControlService? directorControls = null, LobbyStartService? lobbyStart = null, 
             RoomGameSettingsService? roomGameSettings = null, OmniscientRequestRateLimitService? omniscientRequestRateLimits = null, 
             IGameSessionHistoryService? gameSessionHistoryService = null,
-            IRoomRecoveryCoordinator? roomRecovery = null)
+            IRoomRecoveryCoordinator? roomRecovery = null,
+            GmPanelStateBuilder? gmPanelStateBuilder = null,
+            IAuthorizationService? authorizationService = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -87,6 +92,8 @@ namespace Bunker.Hubs
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;
+			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
+			_authorizationService = authorizationService;
 			_logger = logger;
         }
 

@@ -7,26 +7,35 @@
     Приховування елементів інтерфейсу не є перевіркою прав:
     доступ до команд повинен перевірятися на backend.
 *@
-<div id="gmPanel" class="gm-panel" style="display: none;">
+<div id="gmPanel" class="gm-panel gm-panel-v2" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="gmPanelTitle">
 	<div class="gm-panel-header">
-		<h3>🎮 Game Master Panel</h3>
-		<button class="btn-close" onclick="toggleGMPanel()">×</button>
+		<div>
+			<h3 id="gmPanelTitle">Панель ведучого</h3>
+			<div class="gm-panel-identity">
+				<span id="gmPanelRoleBadge" class="gm-status-badge">Host</span>
+				<span id="gmPanelRoomCode">—</span>
+				<span id="gmPanelConnectionStatus" class="gm-panel-connection">Синхронізовано</span>
+			</div>
+		</div>
+		<button type="button" class="btn-close" aria-label="Закрити панель ведучого" onclick="toggleGMPanel()">×</button>
 	</div>
 	<nav class="gm-tabs" aria-label="GM sections">
-		<button type="button" class="gm-tab active" data-gm-tab-button="state" data-gm-i18n="gmGameState" onclick="switchGMTab('state')">Стан гри</button>
-		<button type="button" class="gm-tab" data-gm-tab-button="round" data-gm-i18n="gmRoundControl" onclick="switchGMTab('round')">Керування раундом</button>
-		<button type="button" class="gm-tab" data-gm-tab-button="threat" data-gm-i18n="gmThreatControl" onclick="switchGMTab('threat')">Керування загрозою</button>
-		<button type="button" class="gm-tab" data-gm-tab-button="content" data-gm-i18n="gmContent" onclick="switchGMTab('content')">Контент</button>
-		<button type="button" class="gm-tab" data-gm-tab-button="diagnostics" data-gm-i18n="gmDiagnostics" onclick="switchGMTab('diagnostics')">Діагностика</button>
-		<button id="omniscientHiddenTab" type="button" class="gm-tab" data-gm-tab-button="omniscient" data-gm-i18n="omniscientHiddenTitle" onclick="switchGMTab('omniscient')" style="display:none;">Всезнаючий GM</button>
+		<button type="button" class="gm-tab active" role="tab" aria-selected="true" data-gm-tab-button="game" onclick="switchGMTab('game')" hidden>Гра</button>
+		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="players" onclick="switchGMTab('players')" hidden>Гравці</button>
+		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="voting" onclick="switchGMTab('voting')" hidden>Голосування</button>
+		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="threats" onclick="switchGMTab('threats')" hidden>Загрози</button>
+		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="bunker" onclick="switchGMTab('bunker')" hidden>Бункер</button>
+		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="events" onclick="switchGMTab('events')" hidden>Події</button>
+		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="technical" onclick="switchGMTab('technical')" hidden>Технічне</button>
+		<button id="omniscientHiddenTab" type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="overview" onclick="switchGMTab('overview')" hidden>Огляд</button>
 	</nav>
 	<div class="gm-panel-content">
-		<div class="gm-section" id="gmGameStateSection" data-gm-tab="state">
+		<div class="gm-section" id="gmGameStateSection" data-gm-tab="game" style="display: none;">
 			<h4 class="gm-section-title">Стан гри</h4>
 			<div id="gmGameStateSummary" class="gm-status-grid"></div>
 		</div>
 
-		<div class="gm-section" id="omniscientHiddenSection" data-gm-tab="omniscient" style="display:none;">
+		<div class="gm-section" id="omniscientHiddenSection" data-gm-tab="overview" style="display:none;">
 			<h4 data-gm-i18n="omniscientHiddenTitle">Всезнаючий GM</h4>
 			<p class="global-catalog-warning" data-gm-i18n="omniscientReadOnlyNotice">Спостерігач — не бере участі у грі. Read-only.</p>
 			<div class="gm-diagnostics-toolbar">
@@ -73,7 +82,7 @@
 			<div id="omniscientHiddenPlayers" class="gm-diagnostics-list"></div>
 		</div>
 
-		<div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="round" style="display: none;">
+		<div class="gm-section gm-round-section" id="gmRoundSection" data-gm-tab="game" style="display: none;">
 			<h4 class="gm-section-title">Керування раундом</h4>
 			<section class="gm-round-control-block gm-round-state-block" aria-labelledby="gmRoundStateHeading">
 				<h5 id="gmRoundStateHeading" data-gm-i18n="gmRoundCurrentState">Поточний стан</h5>
@@ -165,7 +174,19 @@
 			<p id="gmRoundCommandResult" class="gm-round-hint" aria-live="polite"></p>
 		</div>
 
-		<div class="gm-section" id="gmThreatControlSection" data-gm-tab="threat" style="display: none;">
+		<div class="gm-section" id="gmVotingV2Section" data-gm-tab="voting" style="display: none;">
+			<h4 class="gm-section-title">Голосування</h4>
+			<div id="gmVotingV2Summary" class="gm-status-grid"></div>
+			<p id="gmVotingV2Hint" class="gm-round-hint">Голосування стане доступним після третього раунду.</p>
+			<div class="gm-round-actions">
+				<button type="button" class="btn-gm-action gm-round-command" onclick="startVoting()">Почати голосування</button>
+				<button type="button" class="btn-gm-action gm-round-command" onclick="endVoting()">Завершити голосування</button>
+				<button type="button" class="btn-gm-action gm-round-command" onclick="cancelVoting()">Скасувати</button>
+			</div>
+			<div id="gmVotingV2NonVoters" class="gm-ready-status-list"></div>
+		</div>
+
+		<div class="gm-section" id="gmThreatControlSection" data-gm-tab="threats" style="display: none;">
 			<h4 class="gm-section-title">Керування загрозою</h4>
 			<div id="gmThreatCurrent" class="gm-threat-current">Поточна загроза відсутня</div>
 			<div id="gmSpecificThreatControls" style="display: none;">
@@ -190,15 +211,16 @@
 		</div>
 
 		@* Вибір гравця для керування через GM-панель *@
-		<div class="gm-section" id="gmPlayerSelectSection" data-gm-tab="state">
+		<div class="gm-section" id="gmPlayerSelectSection" data-gm-tab="players" style="display: none;">
 			<label class="gm-label">Вибрати гравця:</label>
+			<div id="gmPlayerCardsV2" class="gm-player-cards-v2"></div>
 			<select id="gmPlayerSelect" class="gm-select" onchange="loadPlayerDataForGM()">
 				<option value="">-- Виберіть гравця --</option>
 			</select>
 		</div>
 
 		@* Інформація та дії для вибраного гравця *@
-		<div id="gmPlayerInfo" class="gm-player-info" data-gm-tab="state" style="display: none;">
+		<div id="gmPlayerInfo" class="gm-player-info" data-gm-tab="players" style="display: none;">
 			<h4 id="gmPlayerName">Гравець</h4>
 
 			@* Швидкі дії над вибраним гравцем *@
@@ -343,7 +365,7 @@
 		</div>
 
 		@* Керування бункером та апокаліпсисом *@
-		<div class="gm-section" id="gmScenarioSection" data-gm-tab="content" style="display: none;">
+		<div class="gm-section" id="gmScenarioSection" data-gm-tab="bunker" style="display: none;">
 			<h4 class="gm-section-title">Сценарій гри</h4>
 			<div class="gm-scenario-controls">
 				<div class="gm-control-row">
@@ -364,7 +386,7 @@
 		@* Система ігрових подій *@
 		<div class="gm-section"
 			 id="gmEventsSection"
-			 data-gm-tab="content"
+			 data-gm-tab="events"
 			 style="display: none;">
 
 			<h4 class="gm-section-title">Ігрові події</h4>
@@ -441,8 +463,9 @@
 			</div>
 		</div>
 
-		<div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="diagnostics" style="display: none;">
+		<div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="technical" style="display: none;">
 			<h4 class="gm-section-title" data-gm-i18n="gmDiagnostics">Діагностика</h4>
+			<a id="gmOwnerContentEditorLink" class="btn-gm-action gm-owner-content-link" href="/owner/content" hidden>Редактор контенту</a>
 			<div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
 			<p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
 			<div class="gm-diagnostics-actions">
@@ -498,7 +521,7 @@
 				<button id="omniscientEnterButton" type="button" class="btn-danger omniscient-command" data-gm-i18n="omniscientEnter" onclick="enterOmniscientGm()" disabled>Увійти</button>
 				<pre id="omniscientPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
 			</details>
-			<details id="gmThreatAudit" class="gm-threat-audit" open>
+			<details id="gmThreatAudit" class="gm-threat-audit">
 				<summary data-gm-i18n="gmAuditLog">GM audit log</summary>
 				<div class="gm-diagnostics-toolbar">
 					<input id="gmAuditSearch" class="input-field" type="search" data-gm-i18n-placeholder="gmAuditSearch" placeholder="Пошук action" oninput="renderUnifiedGmAudit()" />
