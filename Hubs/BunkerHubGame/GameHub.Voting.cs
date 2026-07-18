@@ -325,7 +325,7 @@ namespace Bunker.Hubs
                 player.HasRevealedAllAfterElimination = false;
                 eliminatedName = player.Name;
                 _roomService.UpdatePlayer(eliminatedConnectionId, player);
-                TryMarkGameFinishedAfterElimination(room, out gameCompletion);
+                TryMarkGameFinishedAfterElimination(room, "vote", out gameCompletion);
                 resultMessage = $"Гравець {eliminatedName} елімінований за рішенням ведучого";
                 eliminateConnectionId = eliminatedConnectionId;
             }
@@ -394,8 +394,7 @@ namespace Bunker.Hubs
                 await PublishGameCompletionAsync(
                     room,
                     gameCompletion,
-                    GetGmActorId(room),
-                    "vote");
+                    GetGmActorId(room));
             }
 
             _logger.LogInformation($"Голосування вирішено в кімнаті {room.Name}: {resultMessage}");

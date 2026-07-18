@@ -10,7 +10,7 @@ public class GameCompletionTests
     {
         var room = CreatePlayingRoom(capacity: 1, GameplayPlayer("p1"), GameplayPlayer("p2"));
 
-        var completed = GameHub.TryMarkGameFinishedAfterElimination(room, out var completion);
+        var completed = GameHub.TryMarkGameFinishedAfterElimination(room, "vote", out var completion);
 
         Assert.False(completed);
         Assert.Null(completion);
@@ -34,19 +34,25 @@ public class GameCompletionTests
         room.CurrentRound = 4;
         room.GameSessionId = Guid.Parse("11111111-2222-3333-4444-555555555555");
 
-        var completed = GameHub.TryMarkGameFinishedAfterElimination(room, out var completion);
+        var before = DateTime.UtcNow;
+        var completed = GameHub.TryMarkGameFinishedAfterElimination(room, "vote", out var completion);
+        var after = DateTime.UtcNow;
 
         Assert.True(completed);
         Assert.NotNull(completion);
         Assert.Equal(RoomState.Finished, room.State);
         Assert.Equal(GamePhase.Finished, room.CurrentPhase);
-        Assert.Equal(2, completion.BunkerCapacity);
-        Assert.Equal(2, completion.SurvivorCount);
-        Assert.Equal(4, completion.CurrentRound);
+        Assert.Same(room.Completion, completion.State);
+        Assert.Equal("bunker_capacity_reached", completion.State.Reason);
+        Assert.Equal("vote", completion.State.Source);
+        Assert.Equal(2, completion.State.BunkerCapacity);
+        Assert.Equal(2, completion.State.SurvivorCount);
+        Assert.Equal(4, completion.State.CompletedAtRound);
+        Assert.InRange(completion.State.CompletedAtUtc, before, after);
         Assert.Equal(room.GameSessionId, completion.GameSessionId);
         Assert.Equal(
             ["winner-1", "winner-2"],
-            completion.Winners.Select(winner => winner.PlayerId).OrderBy(id => id));
+            completion.State.Winners.Select(winner => winner.PlayerId).OrderBy(id => id));
     }
 
     [Fact]
@@ -70,11 +76,11 @@ public class GameCompletionTests
                 GmRole = GmMode.OmniscientGm
             });
 
-        var completed = GameHub.TryMarkGameFinishedAfterElimination(room, out var completion);
+        var completed = GameHub.TryMarkGameFinishedAfterElimination(room, "gm", out var completion);
 
         Assert.True(completed);
         Assert.NotNull(completion);
-        var winner = Assert.Single(completion.Winners);
+        var winner = Assert.Single(completion.State.Winners);
         Assert.Equal("winner", winner.PlayerId);
     }
 
@@ -83,11 +89,14 @@ public class GameCompletionTests
     {
         var room = CreatePlayingRoom(capacity: 1, GameplayPlayer("winner"));
 
-        Assert.True(GameHub.TryMarkGameFinishedAfterElimination(room, out var firstCompletion));
+        Assert.True(GameHub.TryMarkGameFinishedAfterElimination(room, "vote", out var firstCompletion));
         Assert.NotNull(firstCompletion);
+        var completedAtUtc = room.Completion!.CompletedAtUtc;
 
-        Assert.False(GameHub.TryMarkGameFinishedAfterElimination(room, out var repeatedCompletion));
+        Assert.False(GameHub.TryMarkGameFinishedAfterElimination(room, "gm", out var repeatedCompletion));
         Assert.Null(repeatedCompletion);
+        Assert.Equal(completedAtUtc, room.Completion.CompletedAtUtc);
+        Assert.Equal("vote", room.Completion.Source);
         Assert.Equal(RoomState.Finished, room.State);
         Assert.Equal(GamePhase.Finished, room.CurrentPhase);
     }

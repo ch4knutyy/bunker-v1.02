@@ -39,6 +39,7 @@ namespace Bunker.Models
 		public HashSet<string> IrreversibleOmniscientPlayerIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		public HashSet<string> ProcessedOmniscientCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		public HashSet<string> ProcessedLobbyCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+		public HashSet<string> ProcessedGameResetCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		[System.Text.Json.Serialization.JsonIgnore]
 		public object GameSettingsSyncRoot { get; } = new();
 		public RoomGameSettings GameSettings { get; set; } = new();
@@ -63,6 +64,7 @@ namespace Bunker.Models
 		/// </summary>
 		[System.Text.Json.Serialization.JsonIgnore]
 		public Guid? GameSessionId { get; set; }
+		public GameCompletionState? Completion { get; set; }
 		public string Name { get; set; } = "";
 		public string? Password { get; set; }
 		public bool HasPassword => !string.IsNullOrEmpty(Password);

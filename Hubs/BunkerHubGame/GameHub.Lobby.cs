@@ -198,6 +198,11 @@ public partial class GameHub
 					result.error ?? "lobby_start_failed");
 			}
 
+			lock (room.ProcessedGameResetCommandIds)
+			{
+				room.ProcessedGameResetCommandIds.Clear();
+			}
+
 			_roomGameSettings.FreezeForStart(
 				room,
 				_random.Next);
@@ -261,6 +266,78 @@ public partial class GameHub
 					exception,
 					"Failed to save started game session for room {RoomCode}",
 					roomCode);
+			}
+		}
+	}
+
+	public async Task ReturnFinishedGameToLobby(
+		bool confirmation,
+		string commandId)
+	{
+		var room = RequireLobbyHost();
+		if (!confirmation || string.IsNullOrWhiteSpace(commandId))
+		{
+			throw new HubException("game_return_confirmation_required");
+		}
+
+		var actorId = GetGmActorId(room);
+		var result = GameResetService.TryReturnFinishedGameToLobby(
+			room,
+			commandId);
+
+		if (result.IsDuplicate)
+		{
+			return;
+		}
+
+		if (!result.Success)
+		{
+			throw new HubException(
+				result.ErrorCode ?? "game_return_failed");
+		}
+
+		await Clients.Group(room.Id).SendAsync(
+			"GameReturnedToLobby",
+			new
+			{
+				state = room.State.ToString(),
+				currentPhase = room.CurrentPhase.ToString(),
+				completion = room.Completion,
+				lobbyState = _lobbyStart.GetState(room)
+			});
+
+		await AppendGmAudit(
+			room,
+			actorId,
+			"game_returned_to_lobby",
+			GmAuditResult.Success,
+			"Finished game returned to the lobby.",
+			commandId: commandId,
+			allowUndo: false);
+
+		if (_gameSessionHistoryService is not null &&
+			result.PreviousGameSessionId is Guid previousSessionId)
+		{
+			try
+			{
+				var completed = await _gameSessionHistoryService
+					.CompleteSessionAsync(previousSessionId);
+
+				if (!completed)
+				{
+					_logger.LogWarning(
+						"Previous game session {GameSessionId} was not found while returning room {RoomCode} to lobby",
+						previousSessionId,
+						room.Id);
+				}
+			}
+			catch (Exception exception)
+			{
+				_logger.LogError(
+					exception,
+					"Failed to retry completion of game session {GameSessionId} while returning room {RoomCode} to lobby",
+					previousSessionId,
+					room.Id);
 			}
 		}
 	}
