@@ -20,9 +20,11 @@ namespace Bunker.Services
     public class RoomService
     {
         internal const string AccountReconnectMismatchError = "Обліковий запис не відповідає гравцю";
+        internal const string ReconnectTokenMismatchError = "Невірні дані для перепідключення";
         private readonly ConcurrentDictionary<string, Room> _rooms = new();
         private readonly ConcurrentDictionary<string, string> _playerToRoom = new(); // ConnectionId -> RoomId
         private readonly ILogger<RoomService> _logger;
+        public event Action<string>? RoomRemoved;
 
         public RoomService(ILogger<RoomService> logger)
         {
@@ -46,7 +48,8 @@ namespace Bunker.Services
                 MaxPlayers = normalizedMaxPlayers,
                 MinPlayers = gameSettings.MinGameplayPlayers,
                 GameSettings = gameSettings,
-                Password = string.IsNullOrWhiteSpace(password) ? null : password
+                Password = string.IsNullOrWhiteSpace(password) ? null : password,
+                PasswordVerificationHash = string.IsNullOrWhiteSpace(password) ? null : RoomRecoverySecurity.HashPassword(password)
             };
 
             if (_rooms.TryAdd(room.Id, room))
@@ -90,7 +93,7 @@ namespace Bunker.Services
                 return (false, room.State != RoomState.Lobby ? "Гра вже почалась" : "Кімната заповнена", null);
             }
 
-            if (room.HasPassword && room.Password != password)
+            if (room.HasPassword && !VerifyRoomPassword(room, password))
             {
                 return (false, "Невірний пароль", null);
             }
@@ -98,6 +101,11 @@ namespace Bunker.Services
             if (playersSnapshot.Any(entry => entry.Key == connectionId))
             {
                 return (false, "Ви вже в цій кімнаті", null);
+            }
+            if (!string.IsNullOrWhiteSpace(player.StablePlayerId) &&
+                playersSnapshot.Any(entry => string.Equals(entry.Value.StablePlayerId, player.StablePlayerId, StringComparison.Ordinal)))
+            {
+                return (false, ReconnectTokenMismatchError, null);
             }
 
             // Видаляємо з попередньої кімнати якщо був
@@ -152,7 +160,7 @@ namespace Bunker.Services
 
             if (playersSnapshot.Count == 0)
             {
-                _rooms.TryRemove(roomId, out _);
+                RemoveRoom(roomId);
                 _logger.LogInformation($"Кімната {room.Name} (ID: {room.Id}) видалена (порожня)");
                 return (true, room, true, null);
             }
@@ -163,7 +171,7 @@ namespace Bunker.Services
             {
                 if (!TryAssignNewHost(room, "LeaveRoom", out newHostConnectionId))
                 {
-                    _rooms.TryRemove(roomId, out _);
+                    RemoveRoom(roomId);
                     _logger.LogWarning("Кімната {RoomId} видалена: не вдалося призначити нового хоста", roomId);
                     return (true, room, true, null);
                 }
@@ -287,7 +295,7 @@ namespace Bunker.Services
 
                     if (playersSnapshot.Count == 0)
                     {
-                        _rooms.TryRemove(oldRoomId, out _);
+                        RemoveRoom(oldRoomId);
                     }
                     else if (oldRoom.HostConnectionId == connectionId)
                     {
@@ -427,6 +435,19 @@ namespace Bunker.Services
         {
             _playerToRoom.TryGetValue(connectionId, out var roomId);
             return roomId;
+        }
+
+        public bool TryRegisterRecoveredRoom(Room room)
+        {
+            if (room == null || string.IsNullOrWhiteSpace(room.Id)) return false;
+            room.HostConnectionId = "";
+            foreach (var player in GetPlayersSnapshot(room).Select(entry => entry.Value))
+            {
+                player.ConnectionId = "";
+                player.IsConnected = false;
+                player.DisconnectedAt = null;
+            }
+            return _rooms.TryAdd(room.Id, room);
         }
 
         private void EnsureRoomIdentity(Room room, string fallbackRoomId)
@@ -824,7 +845,8 @@ namespace Bunker.Services
 				string newConnectionId,
 				string playerName,
 				string? stablePlayerId = null,
-				Guid? accountUserId = null)
+				Guid? accountUserId = null,
+				string? reconnectToken = null)
 		{
 			if (!_rooms.TryGetValue(roomId, out var room))
 			{
@@ -860,6 +882,12 @@ namespace Bunker.Services
 				boundAccountUserId != accountUserId)
 			{
 				return (false, AccountReconnectMismatchError, null, null, false);
+			}
+			if (player.AccountUserId == null &&
+				!string.IsNullOrWhiteSpace(player.RecoveryReconnectTokenHash) &&
+				!RoomRecoverySecurity.VerifyReconnectToken(reconnectToken ?? "", player.RecoveryReconnectTokenHash))
+			{
+				return (false, ReconnectTokenMismatchError, null, null, false);
 			}
 
 			TryRemovePlayer(room, oldConnectionId, out _);
@@ -908,6 +936,22 @@ namespace Bunker.Services
 			return (true, null, room, player, wasHost);
             }
 		}
+
+        private static bool VerifyRoomPassword(Room room, string? password)
+        {
+            if (!string.IsNullOrEmpty(room.Password))
+            {
+                return string.Equals(room.Password, password, StringComparison.Ordinal);
+            }
+            return RoomRecoverySecurity.VerifyPassword(password, room.PasswordVerificationHash);
+        }
+
+        private bool RemoveRoom(string roomId)
+        {
+            if (!_rooms.TryRemove(roomId, out _)) return false;
+            RoomRemoved?.Invoke(roomId);
+            return true;
+        }
 
 		private static void RemapVotingConnectionId(Room room, string oldConnectionId, string newConnectionId, string playerKey)
 		{

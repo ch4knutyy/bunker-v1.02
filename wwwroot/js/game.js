@@ -100,6 +100,7 @@ let gmLastServerUpdateAt = null;
 let gmLastCommandError = '';
 let pendingJoinRoomId = null; // Для закриття модалки після успішного join
 let hostToken = null;
+let reconnectToken = null;
 let currentApocalypse = null;
 let currentBunker = null;
 let currentThreat = null;
@@ -3095,7 +3096,7 @@ function registerSignalREvents() {
 
 	connection.off("RoomCreated");
 	connection.on("RoomCreated", function (data) {
-		console.log("[RoomCreated] Received:", data);
+		console.log("[RoomCreated] Room creation payload received");
 
 		resetClientGameStateForNewRoom();
 
@@ -3103,6 +3104,7 @@ function registerSignalREvents() {
 		myPlayerData = normalizePlayer(data.player || data.Player);
 		isHost = data.isHost ?? data.IsHost ?? true;
 		hostToken = data.hostToken || data.HostToken || null;
+		reconnectToken = data.reconnectToken || data.ReconnectToken || reconnectToken;
 		myConnectionId = myPlayerData.connectionId;
 
 		if (currentRoom) {
@@ -3189,12 +3191,13 @@ function registerSignalREvents() {
 	// Приєднались до кімнати
 	connection.off("RoomJoined");
 	connection.on("RoomJoined", function (data) {
-		console.log("[RoomJoined] Received:", data);
+		console.log("[RoomJoined] Room join payload received");
 
 		currentRoom = data.room || data.Room;
 		myPlayerData = normalizePlayer(data.player || data.Player);
 		isHost = data.isHost ?? data.IsHost ?? false;
 		hostToken = data.hostToken || data.HostToken || null;
+		reconnectToken = data.reconnectToken || data.ReconnectToken || reconnectToken;
 		myConnectionId = myPlayerData.connectionId;
 
 		if (currentRoom) {
@@ -5101,6 +5104,7 @@ const sessionKeys = {
 	playerName: 'bunker_playerName',
 	hostToken: 'bunker_hostToken',
 	stablePlayerId: 'bunker_stablePlayerId',
+	reconnectToken: 'bunker_reconnectToken',
 	isHost: 'bunker_isHost'
 };
 
@@ -5122,6 +5126,10 @@ function saveSession(roomId, playerName, currentHostToken) {
 		localStorage.setItem(sessionKeys.roomId, roomId);
 		localStorage.setItem(sessionKeys.playerName, playerName);
 		localStorage.setItem(sessionKeys.stablePlayerId, stablePlayerId);
+		if (reconnectToken) {
+			sessionStorage.setItem(sessionKeys.reconnectToken, reconnectToken);
+			localStorage.setItem(sessionKeys.reconnectToken, reconnectToken);
+		}
 		localStorage.setItem(sessionKeys.isHost, isHostValue);
 		if (currentHostToken) {
 			localStorage.setItem(sessionKeys.hostToken, currentHostToken);
@@ -5165,6 +5173,7 @@ function loadSession() {
 			playerName: sessionStorage.getItem(sessionKeys.playerName) || localStorage.getItem(sessionKeys.playerName),
 			hostToken: sessionStorage.getItem(sessionKeys.hostToken) || localStorage.getItem(sessionKeys.hostToken),
 			stablePlayerId: sessionStorage.getItem(sessionKeys.stablePlayerId) || localStorage.getItem(sessionKeys.stablePlayerId)
+			, reconnectToken: sessionStorage.getItem(sessionKeys.reconnectToken) || localStorage.getItem(sessionKeys.reconnectToken)
 		};
 	} catch (e) { return { roomId: null, playerName: null }; }
 }
@@ -5174,8 +5183,9 @@ function tryRejoin() {
 	var rejoinStablePlayerId = session.stablePlayerId || stablePlayerId;
 	if (session.roomId && session.playerName && rejoinStablePlayerId) {
 		hostToken = session.hostToken || null;
+		reconnectToken = session.reconnectToken || null;
 		console.log('Attempting rejoin with playerId:', rejoinStablePlayerId);
-		connection.invoke("RejoinRoom", session.roomId, session.playerName, rejoinStablePlayerId)
+		connection.invoke("RejoinRoom", session.roomId, session.playerName, rejoinStablePlayerId, session.reconnectToken || null)
 			.catch(function (err) {
 				console.error("RejoinRoom error:", err);
 				clearSession();
@@ -5508,7 +5518,7 @@ function joinRoom(roomId, hasPassword) {
 				alert(validation.error);
 				return;
 			}
-			connection.invoke("JoinRoom", roomId, validation.name, null, stablePlayerId)
+			connection.invoke("JoinRoom", roomId, validation.name, null, stablePlayerId, loadSession().reconnectToken || null)
 				.catch(err => console.error("JoinRoom error:", err));
 		}
 	}
@@ -5532,7 +5542,7 @@ function submitJoinRoom() {
 	// Зберігаємо roomId для перевірки в RoomJoined handler
 	pendingJoinRoomId = roomId;
 
-	connection.invoke("JoinRoom", roomId, playerName, password, stablePlayerId)
+	connection.invoke("JoinRoom", roomId, playerName, password, stablePlayerId, loadSession().reconnectToken || null)
 		.catch(err => {
 			console.error("JoinRoom error:", err);
 			pendingJoinRoomId = null;

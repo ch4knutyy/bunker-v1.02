@@ -1809,6 +1809,7 @@ namespace Bunker.Hubs
 
         private async Task BroadcastThreatState(Room room, string roomId)
         {
+            QueueRoomRecovery(room, "threat_state");
             var roundState = BuildRoundState(room);
             var threatState = BuildThreatPublicState(room);
             var players = BuildRoomPlayersPayload(room);

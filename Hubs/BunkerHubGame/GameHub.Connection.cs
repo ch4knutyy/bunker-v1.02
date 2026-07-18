@@ -27,6 +27,7 @@ namespace Bunker.Hubs
                     await Clients.Group(room.Id).SendAsync("GameTimerUpdated", _gameTimerService.GetDto(room));
                 }
                 _roomService.MarkPlayerDisconnected(disconnectedId);
+                if (room != null) QueueRoomRecovery(room, "disconnect");
 
                 if (room != null && disconnectedPlayer != null)
                 {

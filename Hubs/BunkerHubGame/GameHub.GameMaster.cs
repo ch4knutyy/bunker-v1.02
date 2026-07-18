@@ -87,6 +87,7 @@ namespace Bunker.Hubs
 
         private async Task SendPublicPlayersUpdate(Room room)
         {
+            QueueRoomRecovery(room, "public_players");
             await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
             await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
@@ -1351,6 +1352,7 @@ namespace Bunker.Hubs
 
         private async Task BroadcastGameTimer(Room room)
         {
+            QueueRoomRecovery(room, "game_timer");
             await Clients.Group(room.Id).SendAsync("GameTimerUpdated", _gameTimerService.GetDto(room));
         }
 

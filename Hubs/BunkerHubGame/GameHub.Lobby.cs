@@ -385,5 +385,9 @@ public partial class GameHub
 		if (string.IsNullOrWhiteSpace(commandId)) return false;
 		lock (room.ProcessedLobbyCommandIds) return room.ProcessedLobbyCommandIds.Add(commandId);
 	}
-	private Task BroadcastLobbyState(Room room) => Clients.Group(room.Id).SendAsync("LobbyStateUpdated", _lobbyStart.GetState(room));
+	private Task BroadcastLobbyState(Room room)
+	{
+		QueueRoomRecovery(room, "lobby_state");
+		return Clients.Group(room.Id).SendAsync("LobbyStateUpdated", _lobbyStart.GetState(room));
+	}
 }
