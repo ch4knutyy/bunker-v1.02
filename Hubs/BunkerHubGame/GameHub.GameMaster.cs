@@ -1107,6 +1107,7 @@ namespace Bunker.Hubs
             player.CanRevealAllAfterElimination = true;
             player.HasRevealedAllAfterElimination = false;
             _roomService.UpdatePlayer(targetCurrentConnectionId, player);
+            TryMarkGameFinishedAfterElimination(room, out var gameCompletion);
 
             await Clients.Group(room.Id).SendAsync("PlayerEliminated", new
             {
@@ -1120,6 +1121,15 @@ namespace Bunker.Hubs
             await SendPlayerHostControlData(room);
             await AppendGmAudit(room, GetGmActorId(room), "player_eliminate", GmAuditResult.Success,
                 "Player was eliminated by GM.", GetSafeAuditPlayerId(player), snapshot: eliminateSnapshot);
+
+            if (gameCompletion != null)
+            {
+                await PublishGameCompletionAsync(
+                    room,
+                    gameCompletion,
+                    GetGmActorId(room),
+                    "gm");
+            }
 
             _logger.LogInformation($"Гравець {player.Name} елімінований");
         }

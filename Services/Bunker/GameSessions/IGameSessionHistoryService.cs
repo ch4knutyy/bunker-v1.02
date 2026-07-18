@@ -8,5 +8,9 @@
 			string? apocalypseId = null,
 			string? bunkerId = null,
 			CancellationToken cancellationToken = default);
+
+		Task<bool> CompleteSessionAsync(
+			Guid sessionId,
+			CancellationToken cancellationToken = default);
 	}
 }

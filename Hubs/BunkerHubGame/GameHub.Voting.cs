@@ -312,6 +312,7 @@ namespace Bunker.Hubs
 
             string resultMessage;
             string? eliminatedName = null;
+            GameCompletionSnapshot? gameCompletion = null;
 
             if (!string.IsNullOrEmpty(eliminateConnectionId) &&
                 _roomService.TryResolvePlayer(room, eliminateConnectionId, out var eliminatedConnectionId, out var player))
@@ -324,6 +325,7 @@ namespace Bunker.Hubs
                 player.HasRevealedAllAfterElimination = false;
                 eliminatedName = player.Name;
                 _roomService.UpdatePlayer(eliminatedConnectionId, player);
+                TryMarkGameFinishedAfterElimination(room, out gameCompletion);
                 resultMessage = $"Гравець {eliminatedName} елімінований за рішенням ведучого";
                 eliminateConnectionId = eliminatedConnectionId;
             }
@@ -333,8 +335,11 @@ namespace Bunker.Hubs
             }
 
             // Повертаємо стан гри
-            room.State = RoomState.Playing;
-            room.CurrentPhase = GamePhase.VotingResults;
+            if (gameCompletion == null)
+            {
+                room.State = RoomState.Playing;
+                room.CurrentPhase = GamePhase.VotingResults;
+            }
 
             // Скидаємо одноразові ефекти карт (захист, додаткові голоси)
             foreach (var p in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
@@ -382,6 +387,15 @@ namespace Bunker.Hubs
                     canRevealAllAfterElimination = true,
                     hasRevealedAllAfterElimination = false
                 });
+            }
+
+            if (gameCompletion != null)
+            {
+                await PublishGameCompletionAsync(
+                    room,
+                    gameCompletion,
+                    GetGmActorId(room),
+                    "vote");
             }
 
             _logger.LogInformation($"Голосування вирішено в кімнаті {room.Name}: {resultMessage}");
