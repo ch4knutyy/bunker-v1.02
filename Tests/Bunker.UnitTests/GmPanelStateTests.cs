@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Bunker.Models;
 using Bunker.Models.GameData;
 using Bunker.Services;
@@ -6,6 +7,51 @@ namespace Bunker.UnitTests;
 
 public sealed class GmPanelStateTests
 {
+	[Fact]
+	public void LobbyHostReceivesSerializableStateWithSafeInactiveSummaries()
+	{
+		var builder = new GmPanelStateBuilder(TimeProvider.System);
+		var host = new Player
+		{
+			Name = "Lobby Host",
+			ConnectionId = "lobby-host-connection",
+			StablePlayerId = "lobby-host"
+		};
+		var room = new Room
+		{
+			Id = "LOBBYV2",
+			HostConnectionId = host.ConnectionId,
+			HostPlayerId = host.StablePlayerId,
+			HostToken = "host-secret",
+			Password = "room-secret",
+			State = RoomState.Lobby,
+			GmMode = GmMode.PlayerHost,
+			GameTimer = null!,
+			CurrentVoting = null,
+			ThreatState = null!,
+			CurrentThreat = null,
+			Bunker = null
+		};
+		room.Players[host.ConnectionId] = host;
+
+		var state = builder.TryBuild(room, host);
+		var serialized = JsonSerializer.Serialize(state);
+
+		Assert.NotNull(state);
+		Assert.Equal("Lobby", state.Phase);
+		Assert.Equal(0, state.Round);
+		Assert.Equal("Inactive", state.TimerStatus);
+		Assert.Equal(0, state.TimerRemainingSeconds);
+		Assert.Equal("Inactive", state.VotingStatus);
+		Assert.Equal("Inactive", state.ThreatStatus);
+		Assert.Null(state.BunkerCapacity);
+		Assert.True(state.Permissions.CanManageRounds);
+		Assert.False(state.Permissions.CanUseTechnicalTools);
+		Assert.True(state.AvailableActions.CanStartGame);
+		Assert.DoesNotContain("host-secret", serialized);
+		Assert.DoesNotContain("room-secret", serialized);
+	}
+
 	[Fact]
 	public void StateContainsCanonicalRoundTimerVotingThreatBunkerAndPlayerSummaries()
 	{

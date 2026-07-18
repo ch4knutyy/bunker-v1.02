@@ -150,9 +150,6 @@
 			</div>
 		</div>
 
-		@* Панель керування грою для хоста та GM *@
-		<partial name="~/Views/Shared/Bunker/_GmPanel.cshtml" />
-
 		@* Глобальний каталог і редактор JSON-контенту *@
 		<partial name="~/Views/Shared/Bunker/_GlobalContentCatalog.cshtml" />
 
@@ -177,6 +174,9 @@
 
 	</div>
 </div>
+
+@* Панель керування грою рендериться на верхньому рівні, щоб fixed drawer не залежав від game container. *@
+<partial name="~/Views/Shared/Bunker/_GmPanel.cshtml" />
 
 @* Підтвердження примусового завершення загрози для GM *@
 <div id="gmThreatForceModal" class="modal gm-threat-force-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="gmThreatForceTitle">

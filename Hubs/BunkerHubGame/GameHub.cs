@@ -92,7 +92,8 @@ namespace Bunker.Hubs
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;
-			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
+			_gmPanelStateBuilder = gmPanelStateBuilder ??
+				throw new ArgumentNullException(nameof(gmPanelStateBuilder));
 			_authorizationService = authorizationService;
 			_logger = logger;
         }

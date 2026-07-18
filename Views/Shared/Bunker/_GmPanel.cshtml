@@ -7,8 +7,17 @@
     Приховування елементів інтерфейсу не є перевіркою прав:
     доступ до команд повинен перевірятися на backend.
 *@
-<div id="gmPanel" class="gm-panel gm-panel-v2" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="gmPanelTitle">
-	<div class="gm-panel-header">
+<div id="gmPanelBackdrop"
+	 class="gm-panel-v2-backdrop"
+	 aria-hidden="true"
+	 onclick="toggleGMPanel()"></div>
+<aside id="gmPanel"
+	   class="gm-panel-v2-drawer"
+	   role="dialog"
+	   aria-modal="true"
+	   aria-hidden="true"
+	   aria-labelledby="gmPanelTitle">
+	<div class="gm-panel-v2-header">
 		<div>
 			<h3 id="gmPanelTitle">Панель ведучого</h3>
 			<div class="gm-panel-identity">
@@ -19,7 +28,7 @@
 		</div>
 		<button type="button" class="btn-close" aria-label="Закрити панель ведучого" onclick="toggleGMPanel()">×</button>
 	</div>
-	<nav class="gm-tabs" aria-label="GM sections">
+	<nav class="gm-panel-v2-tabs" aria-label="GM sections">
 		<button type="button" class="gm-tab active" role="tab" aria-selected="true" data-gm-tab-button="game" onclick="switchGMTab('game')" hidden>Гра</button>
 		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="players" onclick="switchGMTab('players')" hidden>Гравці</button>
 		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="voting" onclick="switchGMTab('voting')" hidden>Голосування</button>
@@ -29,7 +38,15 @@
 		<button type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="technical" onclick="switchGMTab('technical')" hidden>Технічне</button>
 		<button id="omniscientHiddenTab" type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="overview" onclick="switchGMTab('overview')" hidden>Огляд</button>
 	</nav>
-	<div class="gm-panel-content">
+	<div class="gm-panel-v2-content">
+		<div id="gmPanelV2LoadState" class="gm-panel-v2-load-state" role="status" aria-live="polite">
+			<p id="gmPanelV2LoadMessage">Завантаження панелі ведучого…</p>
+			<button id="gmPanelV2Retry"
+					type="button"
+					class="btn-gm-action"
+					onclick="retryGmPanelV2()"
+					hidden>Повторити</button>
+		</div>
 		<div class="gm-section" id="gmGameStateSection" data-gm-tab="game" style="display: none;">
 			<h4 class="gm-section-title">Стан гри</h4>
 			<div id="gmGameStateSummary" class="gm-status-grid"></div>
@@ -537,4 +554,4 @@
 			</details>
 		</div>
 	</div>
-</div>
+</aside>
