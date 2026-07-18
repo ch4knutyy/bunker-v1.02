@@ -99,8 +99,13 @@ namespace Bunker.Hubs
 			{
 				if (!string.IsNullOrWhiteSpace(stablePlayerId))
 				{
-					var (rejoinSuccess, _, rejoinRoom, rejoinPlayer, wasHost) =
-						_roomService.RejoinRoom(roomId, Context.ConnectionId, playerName, stablePlayerId);
+					var (rejoinSuccess, rejoinError, rejoinRoom, rejoinPlayer, wasHost) =
+						_roomService.RejoinRoom(
+							roomId,
+							Context.ConnectionId,
+							playerName,
+							stablePlayerId,
+							GetCallerAccountUserId());
 
 					if (rejoinSuccess && rejoinRoom != null && rejoinPlayer != null)
 					{
@@ -108,6 +113,15 @@ namespace Bunker.Hubs
 						EnsurePlayerHasGeneratedData(rejoinPlayer, rejoinRoom);
 						AppendLobbyPresenceAudit(rejoinRoom, RoomService.GetPlayerKey(rejoinPlayer), "lobby_player_reconnected", "A lobby member reconnected.");
 						await SendRejoinSuccess(roomId, rejoinRoom, rejoinPlayer, wasHost);
+						return;
+					}
+
+					if (string.Equals(
+						rejoinError,
+						RoomService.AccountReconnectMismatchError,
+						StringComparison.Ordinal))
+					{
+						await Clients.Caller.SendAsync("ReceiveError", rejoinError);
 						return;
 					}
 				}
@@ -226,7 +240,12 @@ namespace Bunker.Hubs
 			try
 			{
 				var (success, error, room, player, wasHost) =
-					_roomService.RejoinRoom(roomId, Context.ConnectionId, playerName, stablePlayerId);
+					_roomService.RejoinRoom(
+						roomId,
+						Context.ConnectionId,
+						playerName,
+						stablePlayerId,
+						GetCallerAccountUserId());
 
 				if (!success || room == null || player == null)
 				{
@@ -368,7 +387,13 @@ namespace Bunker.Hubs
 
 		private Player CreateGeneratedPlayer(string playerName, string? stablePlayerId, Room? room = null)
 		{
-			return new Player { Name = playerName, ConnectionId = Context.ConnectionId, StablePlayerId = stablePlayerId ?? "" };
+			return new Player
+			{
+				Name = playerName,
+				ConnectionId = Context.ConnectionId,
+				StablePlayerId = stablePlayerId ?? "",
+				AccountUserId = GetCallerAccountUserId()
+			};
 		}
 
 		private void EnsurePlayerHasGeneratedData(Player player, Room? room = null)

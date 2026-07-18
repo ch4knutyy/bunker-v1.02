@@ -38,7 +38,11 @@ namespace Bunker.UnitTests.Data
 				sessionId =
 					await service.CreateStartedSessionAsync(
 						roomCode: "ROOM1234",
-						playerCount: 2,
+						participants:
+						[
+							new(null, "player-1", "Player 1", true),
+							new(null, "player-2", "Player 2", false)
+						],
 						apocalypseId: "apocalypse-1",
 						bunkerId: "bunker-1");
 			}
@@ -112,7 +116,9 @@ namespace Bunker.UnitTests.Data
 					new GameSessionHistoryService(updateContext);
 
 				bool completed =
-					await service.CompleteSessionAsync(sessionId);
+					await service.CompleteSessionAsync(
+						sessionId,
+						Array.Empty<GameSessionParticipantResult>());
 
 				Assert.True(completed);
 			}

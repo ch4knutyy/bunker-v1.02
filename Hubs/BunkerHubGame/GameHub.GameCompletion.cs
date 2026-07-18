@@ -1,5 +1,6 @@
 ﻿using Bunker.Models;
 using Bunker.Services;
+using Bunker.Services.Bunker.GameSessions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Hubs
@@ -8,7 +9,8 @@ namespace Bunker.Hubs
 	{
 		internal sealed record GameCompletionSnapshot(
 			GameCompletionState State,
-			Guid? GameSessionId);
+			Guid? GameSessionId,
+			IReadOnlyCollection<GameSessionParticipantResult> ParticipantResults);
 
 		internal static bool TryMarkGameFinishedAfterElimination(
 			Room room,
@@ -66,7 +68,10 @@ namespace Bunker.Hubs
 
 				completion = new GameCompletionSnapshot(
 					completionState,
-					room.GameSessionId);
+					room.GameSessionId,
+					GameSessionParticipantSnapshotFactory.ResultsFromRoom(
+						room,
+						winners.Select(winner => winner.PlayerId)));
 
 				return true;
 			}
@@ -121,7 +126,9 @@ namespace Bunker.Hubs
 			{
 				bool completed =
 					await _gameSessionHistoryService
-						.CompleteSessionAsync(sessionId);
+						.CompleteSessionAsync(
+							sessionId,
+							completion.ParticipantResults);
 
 				if (!completed)
 				{

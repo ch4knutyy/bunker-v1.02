@@ -62,6 +62,52 @@ namespace Bunker.Data.Persistence.Migrations
                     b.ToTable("GameSessions", (string)null);
                 });
 
+            modelBuilder.Entity("Bunker.Data.Persistence.Entities.GameSessionPlayerEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("EliminatedAtRound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("GameSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsHost")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsWinner")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PlayerNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StablePlayerIdSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("WasEliminated")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameSessionId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("GameSessionId", "StablePlayerIdSnapshot")
+                        .IsUnique();
+
+                    b.ToTable("GameSessionPlayers", (string)null);
+                });
+
             modelBuilder.Entity("Bunker.Data.Persistence.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -263,6 +309,24 @@ namespace Bunker.Data.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Bunker.Data.Persistence.Entities.GameSessionPlayerEntity", b =>
+                {
+                    b.HasOne("Bunker.Data.Persistence.Entities.GameSessionEntity", "GameSession")
+                        .WithMany("GameSessionPlayers")
+                        .HasForeignKey("GameSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bunker.Data.Persistence.Identity.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("GameSession");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -312,6 +376,11 @@ namespace Bunker.Data.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Bunker.Data.Persistence.Entities.GameSessionEntity", b =>
+                {
+                    b.Navigation("GameSessionPlayers");
                 });
 #pragma warning restore 612, 618
         }

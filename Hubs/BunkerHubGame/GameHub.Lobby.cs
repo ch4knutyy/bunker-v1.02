@@ -1,5 +1,6 @@
 using Bunker.Models;
 using Bunker.Services;
+using Bunker.Services.Bunker.GameSessions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Hubs;
@@ -143,7 +144,8 @@ public partial class GameHub
 		bool readinessOverrideUsed = false;
 
 		string roomCode = room.Id;
-		int playerCount = 0;
+		IReadOnlyCollection<GameSessionParticipantSnapshot> participantSnapshots =
+			Array.Empty<GameSessionParticipantSnapshot>();
 
 		lock (room.GameSettingsSyncRoot)
 		{
@@ -209,10 +211,8 @@ public partial class GameHub
 
 			PrepareLobbyGameplayCharacters(room);
 
-			playerCount =
-				RoomService
-					.GetGameplayPlayersSnapshot(room)
-					.Count;
+			participantSnapshots =
+				GameSessionParticipantSnapshotFactory.FromRoom(room);
 
 			foreach (var player in RoomService
 				.GetPlayersSnapshot(room)
@@ -246,7 +246,7 @@ public partial class GameHub
 					await _gameSessionHistoryService
 						.CreateStartedSessionAsync(
 							roomCode: roomCode,
-							playerCount: playerCount,
+							participants: participantSnapshots,
 							apocalypseId: null,
 							bunkerId: null);
 
@@ -321,7 +321,9 @@ public partial class GameHub
 			try
 			{
 				var completed = await _gameSessionHistoryService
-					.CompleteSessionAsync(previousSessionId);
+					.CompleteSessionAsync(
+						previousSessionId,
+						result.ParticipantResults);
 
 				if (!completed)
 				{

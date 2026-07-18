@@ -13,12 +13,14 @@ namespace Bunker.Data.Persistence
 		{
 		}
 		public DbSet<GameSessionEntity> GameSessions => Set<GameSessionEntity>();
+		public DbSet<GameSessionPlayerEntity> GameSessionPlayers => Set<GameSessionPlayerEntity>();
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 
 			modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
 			modelBuilder.ApplyConfiguration(new GameSessionEntityConfiguration());
+			modelBuilder.ApplyConfiguration(new GameSessionPlayerEntityConfiguration());
 		}
 	}
 }
