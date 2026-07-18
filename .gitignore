@@ -47,3 +47,8 @@ test_reports/
 
 # Accidental local files
 tatus
+
+
+*.db
+*.db-shm
+*.db-wal
