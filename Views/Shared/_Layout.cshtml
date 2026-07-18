@@ -1,10 +1,14 @@
 @using Bunker.Data.Persistence.Identity
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
 @inject UserManager<ApplicationUser> UserManager
+@inject IAuthorizationService AuthorizationService
 @{
     var signedInUser = User.Identity?.IsAuthenticated == true
         ? await UserManager.GetUserAsync(User)
         : null;
+    var canUseOwnerContentEditor = signedInUser is not null &&
+        (await AuthorizationService.AuthorizeAsync(User, "OwnerOnly")).Succeeded;
 }
 <!DOCTYPE html>
 <html lang="uk">
@@ -88,6 +92,12 @@
                             <span aria-hidden="true">👤</span>
                             <span>@signedInUser.DisplayName</span>
                         </a>
+                        @if (canUseOwnerContentEditor)
+                        {
+                            <a class="account-nav-link" asp-controller="OwnerContent" asp-action="Index">
+                                Редактор контенту
+                            </a>
+                        }
                         <form asp-controller="Account" asp-action="Logout" method="post" class="account-logout-form">
                             <button type="submit" class="account-nav-link account-nav-button" data-i18n="authLogout">Вийти</button>
                         </form>
