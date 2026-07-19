@@ -3,7 +3,7 @@
   "cards": [
     {
       "id": "hidden_food_cache_6",
-      "enabled": true,
+      "enabled": false,
       "category": "resource_leverage",
       "rarity": "rare",
       "visibility": "private",
@@ -58,7 +58,7 @@
     },
     {
       "id": "hidden_water_cache_4",
-      "enabled": true,
+      "enabled": false,
       "category": "resource_leverage",
       "rarity": "rare",
       "visibility": "private",
@@ -191,7 +191,7 @@
     },
     {
       "id": "bunker_archive_access",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "uncommon",
       "visibility": "private",
@@ -228,7 +228,7 @@
     },
     {
       "id": "choose_bunker_intel",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "rare",
       "visibility": "private",
@@ -266,7 +266,7 @@
     },
     {
       "id": "sealed_inventory_case",
-      "enabled": true,
+      "enabled": false,
       "category": "personal_resource",
       "rarity": "uncommon",
       "visibility": "private",
@@ -341,7 +341,7 @@
     },
     {
       "id": "private_medical_course",
-      "enabled": true,
+      "enabled": false,
       "category": "health",
       "rarity": "uncommon",
       "visibility": "private",
@@ -378,7 +378,7 @@
     },
     {
       "id": "private_psychological_support",
-      "enabled": true,
+      "enabled": false,
       "category": "health",
       "rarity": "uncommon",
       "visibility": "private",
@@ -415,7 +415,7 @@
     },
     {
       "id": "evidence_fragment",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "rare",
       "visibility": "private",
@@ -456,7 +456,7 @@
     },
     {
       "id": "public_bunker_disclosure",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "rare",
       "visibility": "public",
@@ -494,7 +494,7 @@
     },
     {
       "id": "emergency_food_voucher_3",
-      "enabled": true,
+      "enabled": false,
       "category": "resource_support",
       "rarity": "uncommon",
       "visibility": "private",
@@ -531,7 +531,7 @@
     },
     {
       "id": "emergency_water_voucher_2",
-      "enabled": true,
+      "enabled": false,
       "category": "resource_support",
       "rarity": "uncommon",
       "visibility": "private",
@@ -568,7 +568,7 @@
     },
     {
       "id": "resource_recovery_choice",
-      "enabled": true,
+      "enabled": false,
       "category": "resource_support",
       "rarity": "rare",
       "visibility": "private",
@@ -629,7 +629,7 @@
     },
     {
       "id": "double_inventory_case",
-      "enabled": true,
+      "enabled": false,
       "category": "personal_resource",
       "rarity": "rare",
       "visibility": "private",
@@ -710,7 +710,7 @@
     },
     {
       "id": "shared_archive_pass",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "rare",
       "visibility": "private",
@@ -756,7 +756,7 @@
     },
     {
       "id": "deep_archive_access",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "rare",
       "visibility": "private",
@@ -915,7 +915,7 @@
     },
     {
       "id": "public_archive_release",
-      "enabled": true,
+      "enabled": false,
       "category": "information",
       "rarity": "legendary",
       "visibility": "private",
@@ -1118,6 +1118,120 @@
           ]
         }
       ]
+    },
+    {
+      "id": "main_store_access",
+      "enabled": true,
+      "category": "social_betrayal",
+      "rarity": "rare",
+      "visibility": "private",
+      "transferable": false,
+      "expiresAfterRounds": 1,
+      "maxUses": 1,
+      "title": {
+        "uk": "Доступ до головного складу",
+        "en": "Main Storage Access",
+        "ru": "Доступ к главному складу"
+      },
+      "description": {
+        "uk": "Ви можете непомітно винести всі запаси їжі та води. Після цього вирішіть: залишити їх, повернути або підставити іншого гравця.",
+        "en": "You can secretly remove all food and water supplies. Then decide whether to keep them, return them, or frame another player.",
+        "ru": "Вы можете незаметно вынести все запасы еды и воды. Затем решите: оставить их, вернуть или подставить другого игрока."
+      },
+      "actions": [
+        {
+          "id": "steal_all_supplies",
+          "label": {
+            "uk": "Вкрасти всі припаси",
+            "en": "Steal all supplies",
+            "ru": "Украсть все припасы"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "self",
+          "consumeCard": false,
+          "effects": [
+            {
+              "type": "steal_all_bunker_supplies",
+              "target": "self"
+            }
+          ]
+        },
+        {
+          "id": "keep_supplies",
+          "label": {
+            "uk": "Залишити собі",
+            "en": "Keep the supplies",
+            "ru": "Оставить себе"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "keep_stolen_supplies",
+              "target": "self"
+            }
+          ]
+        },
+        {
+          "id": "return_supplies",
+          "label": {
+            "uk": "Повернути припаси",
+            "en": "Return the supplies",
+            "ru": "Вернуть припасы"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "return_stolen_supplies",
+              "target": "self"
+            }
+          ]
+        },
+        {
+          "id": "frame_player",
+          "label": {
+            "uk": "Підставити гравця",
+            "en": "Frame a player",
+            "ru": "Подставить игрока"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "frame_supply_theft",
+              "target": "selected_player"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stolen_bunker_cache",
+      "enabled": true,
+      "category": "secret_asset",
+      "rarity": "unique",
+      "visibility": "private",
+      "transferable": false,
+      "maxUses": 1,
+      "title": {
+        "uk": "Таємний запас бункера",
+        "en": "Secret Bunker Cache",
+        "ru": "Тайный запас бункера"
+      },
+      "description": {
+        "uk": "Ви приховуєте викрадені запаси. Точний обсяг зберігається системою та не розкривається іншим гравцям.",
+        "en": "You are hiding the stolen supplies. Their exact amount is stored by the system and is not disclosed to other players.",
+        "ru": "Вы скрываете украденные припасы. Их точный объём хранится системой и не раскрывается другим игрокам."
+      },
+      "actions": []
     }
   ]
 }

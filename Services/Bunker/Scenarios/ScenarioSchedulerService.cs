@@ -25,11 +25,17 @@ public sealed class ScenarioSchedulerService
         return new ScenarioSituationState
         {
             Enabled = configured.Enabled,
-            FirstScenarioAfterRound = Math.Clamp(configured.FirstScenarioAfterRound, 3, 6),
+            FirstScenarioAfterRound = Math.Clamp(
+                configured.FirstScenarioAfterRound,
+                ScenarioRules.EarliestSocialScenarioRound,
+                6),
             IntervalRounds = Math.Clamp(configured.IntervalRounds, 2, 5),
             TriggerPhase = configured.TriggerPhase is "after_voting" ? "after_voting" : "after_round_before_voting",
             EnabledTypes = new(configured.EnabledTypes.Where(IsSelectableType), StringComparer.OrdinalIgnoreCase),
-            NextDueAfterRound = Math.Clamp(configured.FirstScenarioAfterRound, 3, 6)
+            NextDueAfterRound = Math.Clamp(
+                configured.FirstScenarioAfterRound,
+                ScenarioRules.EarliestSocialScenarioRound,
+                6)
         };
     }
 

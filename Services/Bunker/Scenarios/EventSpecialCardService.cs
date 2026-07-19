@@ -17,6 +17,14 @@ public sealed record EventCardCommandResult(
     object? Card,
     ScenarioEffectResult? Effects);
 
+public sealed record EventCardPublicNotice(
+    string Code,
+    string? AccusedPlayerName = null);
+
+public sealed record EventCardRoundBoundaryResult(
+    IReadOnlyList<Player> ChangedPlayers,
+    IReadOnlyList<EventCardPublicNotice> PublicNotices);
+
 public sealed class EventSpecialCardService
 {
     private readonly IScenarioContentRegistry _content;
@@ -50,6 +58,7 @@ public sealed class EventSpecialCardService
         {
             DefinitionId = definition.Id,
             SourceScenarioId = sourceScenarioId,
+            OriginalOwnerPlayerId = owner.Id.ToString("N"),
             OwnerPlayerId = owner.Id.ToString("N"),
             GrantedAtRound = room.CurrentRound,
             ExpiresAfterRound = ReadNullableInt(definition.Source, "expiresAfterRounds") is { } expires
@@ -79,16 +88,19 @@ public sealed class EventSpecialCardService
         {
             if (card.ProcessedCommandIds.Contains(commandId))
                 return new(true, true, null, Project(card), null);
-            if (card.RemainingUses <= 0) return Failure("event_card_consumed");
+            if (!CanAct(card)) return Failure(CardUnavailableCode(card));
             if (!Remember(card, commandId)) return Failure("invalid_command_id");
             var definition = _content.FindCard(card.DefinitionId);
             if (definition == null || !definition.Transferable) return Failure("event_card_not_transferable");
             if (owner.Id == recipient.Id || !IsActiveRoomPlayer(room, recipient))
                 return Failure("invalid_event_card_target");
-            owner.EventSpecialCards.Remove(card);
-            card.OwnerPlayerId = recipient.Id.ToString("N");
-            recipient.EventSpecialCards.Add(card);
-            return new(true, false, null, Project(card), null);
+            card.Status = EventSpecialCardStatus.Resolved;
+            card.Result = EventSpecialCardResult.Transferred;
+            card.ResolvedAtRound = room.CurrentRound;
+            card.RemainingUses = 0;
+            var transferred = CloneForNewOwner(card, recipient, EventSpecialCardStatus.Available);
+            recipient.EventSpecialCards.Add(transferred);
+            return new(true, false, null, Project(transferred), null);
         }
     }
 
@@ -108,7 +120,7 @@ public sealed class EventSpecialCardService
         {
             if (card.ProcessedCommandIds.Contains(commandId))
                 return new(true, true, null, Project(card), null);
-            if (card.RemainingUses <= 0) return Failure("event_card_consumed");
+            if (!CanAct(card)) return Failure(CardUnavailableCode(card));
             if (card.ExpiresAfterRound is { } expiry && room.CurrentRound > expiry)
                 return Failure("event_card_expired");
             var definition = _content.FindCard(card.DefinitionId);
@@ -116,6 +128,9 @@ public sealed class EventSpecialCardService
             var action = definition.Source.GetProperty("actions").EnumerateArray().FirstOrDefault(item =>
                 string.Equals(ReadString(item, "id"), actionId, StringComparison.OrdinalIgnoreCase));
             if (action.ValueKind != JsonValueKind.Object) return Failure("event_card_action_not_found");
+            if (!GetAvailableActionDefinitions(card, definition).Any(item =>
+                    string.Equals(ReadString(item, "id"), actionId, StringComparison.OrdinalIgnoreCase)))
+                return Failure("event_card_action_not_available");
             if (!ValidateTarget(room, owner, selectedTarget, ReadString(action, "targetMode")))
                 return Failure("invalid_event_card_target");
             if (!Remember(card, commandId)) return Failure("invalid_command_id");
@@ -138,9 +153,18 @@ public sealed class EventSpecialCardService
             }
 
             if (ReadBool(action, "revealCardOnUse")) card.IsRevealedPublicly = true;
-            if (ReadBool(action, "consumeCard", true) && result.Options.Count == 0)
+            if (result.Options.Count > 0)
+            {
+                card.Status = EventSpecialCardStatus.PendingChoice;
+            }
+            else if (card.Status is EventSpecialCardStatus.Available or EventSpecialCardStatus.PendingChoice &&
+                     ReadBool(action, "consumeCard", true))
             {
                 card.RemainingUses = Math.Max(0, card.RemainingUses - 1);
+                card.Status = EventSpecialCardStatus.Resolved;
+                card.Result = EventSpecialCardResult.Used;
+                card.UsedAtRound ??= room.CurrentRound;
+                card.ResolvedAtRound = room.CurrentRound;
             }
             return new(true, false, null, Project(card), result);
         }
@@ -242,6 +266,74 @@ public sealed class EventSpecialCardService
                     changes.Add(new { type, playerId = actualTarget.Id });
                     break;
                 }
+                case "steal_all_bunker_supplies":
+                {
+                    if (card == null) return EffectFailure("event_card_required");
+                    if (room.Bunker == null) return EffectFailure("bunker_not_available");
+                    if (card.TheftActivated) return EffectFailure("event_card_action_already_applied");
+
+                    var food = room.Bunker.SuppliesMonths;
+                    var water = room.Bunker.WaterMonths;
+                    card.StoredRuntimeValues["food"] = food;
+                    card.StoredRuntimeValues["water"] = water;
+                    if (food > 0)
+                        changes.Add(_resources.Remove(room.Bunker, BunkerResourceKind.Food, food));
+                    if (water > 0)
+                        changes.Add(_resources.Remove(room.Bunker, BunkerResourceKind.Water, water));
+                    card.TheftActivated = true;
+                    card.Status = EventSpecialCardStatus.PendingChoice;
+                    card.UsedAtRound = room.CurrentRound;
+                    changes.Add(new { type = "bunker_supplies_stolen" });
+                    break;
+                }
+                case "keep_stolen_supplies":
+                {
+                    if (!CanResolveTheft(card)) return EffectFailure("event_card_choice_not_available");
+                    CreatePersistentStolenCache(room, actualTarget, card!);
+                    CompleteTheftDecision(card!, room.CurrentRound, EventSpecialCardResult.Kept);
+                    changes.Add(new { type = "stolen_supplies_kept" });
+                    break;
+                }
+                case "return_stolen_supplies":
+                {
+                    if (!CanResolveTheft(card)) return EffectFailure("event_card_choice_not_available");
+                    if (room.Bunker == null) return EffectFailure("bunker_not_available");
+                    var storedFood = ReadStoredRuntime(card!, "food");
+                    var storedWater = ReadStoredRuntime(card!, "water");
+                    if (storedFood > 0)
+                        changes.Add(_resources.Add(room.Bunker, BunkerResourceKind.Food, storedFood));
+                    if (storedWater > 0)
+                        changes.Add(_resources.Add(room.Bunker, BunkerResourceKind.Water, storedWater));
+                    CompleteTheftDecision(card!, room.CurrentRound, EventSpecialCardResult.Returned);
+                    changes.Add(new { type = "stolen_supplies_returned" });
+                    break;
+                }
+                case "frame_supply_theft":
+                {
+                    if (!CanResolveTheft(card)) return EffectFailure("event_card_choice_not_available");
+                    if (card!.TransferDepth >= 1) return EffectFailure("event_card_transfer_depth_exceeded");
+                    if (owner.Id == actualTarget.Id || !IsActiveRoomPlayer(room, actualTarget))
+                        return EffectFailure("invalid_event_card_target");
+                    if (actualTarget.EventSpecialCards.Any(existing =>
+                            existing.Status == EventSpecialCardStatus.PendingChoice))
+                        return EffectFailure("event_card_target_has_pending_choice");
+
+                    card.Status = EventSpecialCardStatus.Resolved;
+                    card.Result = EventSpecialCardResult.Framed;
+                    card.ResolvedAtRound = room.CurrentRound;
+                    card.RemainingUses = 0;
+                    var framed = CloneForNewOwner(card, actualTarget, EventSpecialCardStatus.PendingChoice);
+                    framed.TransferDepth = 1;
+                    framed.TheftActivated = true;
+                    actualTarget.EventSpecialCards.Add(framed);
+                    changes.Add(new
+                    {
+                        type = "supply_theft_framed",
+                        targetPlayerId = actualTarget.Id,
+                        runtimeCardId = framed.RuntimeCardId
+                    });
+                    break;
+                }
                 case "grant_profession_retraining":
                 {
                     if (card == null) return EffectFailure("event_card_required");
@@ -301,6 +393,9 @@ public sealed class EventSpecialCardService
     public object Project(EventSpecialCard card)
     {
         var definition = _content.FindCard(card.DefinitionId);
+        var availableActions = definition == null
+            ? Array.Empty<JsonElement>()
+            : GetAvailableActionDefinitions(card, definition).Select(action => action.Clone()).ToArray();
         return new
         {
             runtimeCardId = card.RuntimeCardId,
@@ -311,9 +406,74 @@ public sealed class EventSpecialCardService
             card.ExpiresAfterRound,
             card.RemainingUses,
             card.IsRevealedPublicly,
-            storedResource = card.StoredResource,
-            actions = definition?.Source.GetProperty("actions").Clone()
+            status = ToClientCode(card.Status),
+            result = ToClientCode(card.Result),
+            card.UsedAtRound,
+            card.ResolvedAtRound,
+            pendingProfessionOptions = card.PendingProfessionOptions.Select(option => new { option.Name }).ToArray(),
+            canUse = availableActions.Length > 0,
+            availableActions,
+            actions = availableActions
         };
+    }
+
+    public IReadOnlyList<object> ProjectForOwner(Player owner) =>
+        owner.EventSpecialCards
+            .OrderBy(card => card.Status is EventSpecialCardStatus.Available or EventSpecialCardStatus.PendingChoice ? 0 : 1)
+            .ThenByDescending(card => card.GrantedAtUtc)
+            .Select(Project)
+            .ToArray();
+
+    public EventCardRoundBoundaryResult ProcessRoundBoundary(Room room, int completedRound)
+    {
+        var changedPlayers = new Dictionary<Guid, Player>();
+        var notices = new List<EventCardPublicNotice>();
+        foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
+        {
+            foreach (var card in player.EventSpecialCards.ToArray())
+            {
+                if (card.ExpiresAfterRound is not { } expiry || expiry > completedRound)
+                    continue;
+
+                if (card.Status == EventSpecialCardStatus.Available)
+                {
+                    card.Status = EventSpecialCardStatus.Expired;
+                    card.Result = EventSpecialCardResult.OpportunityMissed;
+                    card.RemainingUses = 0;
+                    card.ResolvedAtRound = completedRound;
+                    changedPlayers[player.Id] = player;
+                }
+                else if (card.Status == EventSpecialCardStatus.PendingChoice)
+                {
+                    if (card.TheftActivated)
+                    {
+                        CreatePersistentStolenCache(room, player, card);
+                        card.Result = EventSpecialCardResult.Kept;
+                        card.PublicRevealPending = true;
+                    }
+                    else
+                    {
+                        card.Result = EventSpecialCardResult.OpportunityMissed;
+                    }
+                    card.Status = EventSpecialCardStatus.Expired;
+                    card.RemainingUses = 0;
+                    card.ResolvedAtRound = completedRound;
+                    changedPlayers[player.Id] = player;
+                }
+
+                if (card.PublicRevealPending && !card.PublicRevealCompleted)
+                {
+                    var code = card.Result == EventSpecialCardResult.Returned
+                        ? "supplies_returned_accusation"
+                        : "supplies_missing_accusation";
+                    notices.Add(new(code, player.Name));
+                    card.PublicRevealPending = false;
+                    card.PublicRevealCompleted = true;
+                    changedPlayers[player.Id] = player;
+                }
+            }
+        }
+        return new(changedPlayers.Values.ToArray(), notices);
     }
 
     private List<Profession> GenerateProfessionOptions(Room room, Player target, int count)
@@ -406,6 +566,13 @@ public sealed class EventSpecialCardService
             string.Equals(card.OwnerPlayerId, owner.Id.ToString("N"), StringComparison.OrdinalIgnoreCase));
     private static bool Remember(EventSpecialCard card, string commandId) =>
         !string.IsNullOrWhiteSpace(commandId) && card.ProcessedCommandIds.Add(commandId);
+    private static bool CanAct(EventSpecialCard card) =>
+        card.RemainingUses > 0 &&
+        card.Status is EventSpecialCardStatus.Available or EventSpecialCardStatus.PendingChoice;
+    private static string CardUnavailableCode(EventSpecialCard card) =>
+        card.Status == EventSpecialCardStatus.Expired ? "event_card_expired" : "event_card_consumed";
+    private static bool CanResolveTheft(EventSpecialCard? card) =>
+        card is { TheftActivated: true, Status: EventSpecialCardStatus.PendingChoice, RemainingUses: > 0 };
     private static EventCardCommandResult Failure(string code) => new(false, false, code, null, null);
     private static ScenarioEffectResult EffectFailure(string code) => new(false, code, [], []);
     private string? ResolveIntelCategory(
@@ -437,6 +604,90 @@ public sealed class EventSpecialCardService
             string.Equals(ReadString(item, "id"), choiceId, StringComparison.OrdinalIgnoreCase));
         return choice.ValueKind == JsonValueKind.Object && choice.TryGetProperty("effects", out effects) ? effects : null;
     }
+    private static IEnumerable<JsonElement> GetAvailableActionDefinitions(
+        EventSpecialCard card,
+        EventSpecialCardDefinition definition)
+    {
+        if (!CanAct(card) || !definition.Source.TryGetProperty("actions", out var actions))
+            return [];
+        var result = actions.EnumerateArray();
+        if (!string.Equals(card.DefinitionId, "main_store_access", StringComparison.OrdinalIgnoreCase))
+            return result.ToArray();
+        if (!card.TheftActivated)
+            return result.Where(action =>
+                string.Equals(ReadString(action, "id"), "steal_all_supplies", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        return result.Where(action =>
+        {
+            var id = ReadString(action, "id");
+            return id is "keep_supplies" or "return_supplies" ||
+                   string.Equals(id, "frame_player", StringComparison.OrdinalIgnoreCase) &&
+                   card.TransferDepth < 1;
+        }).ToArray();
+    }
+    private static EventSpecialCard CloneForNewOwner(
+        EventSpecialCard source,
+        Player recipient,
+        EventSpecialCardStatus status)
+    {
+        return new EventSpecialCard
+        {
+            DefinitionId = source.DefinitionId,
+            SourceScenarioId = source.SourceScenarioId,
+            OriginalOwnerPlayerId = string.IsNullOrWhiteSpace(source.OriginalOwnerPlayerId)
+                ? source.OwnerPlayerId
+                : source.OriginalOwnerPlayerId,
+            OwnerPlayerId = recipient.Id.ToString("N"),
+            GrantedAtRound = source.GrantedAtRound,
+            ExpiresAfterRound = source.ExpiresAfterRound,
+            RemainingUses = 1,
+            Status = status,
+            TransferDepth = source.TransferDepth + 1,
+            TheftActivated = source.TheftActivated,
+            PublicRevealPending = source.PublicRevealPending,
+            IsRevealedPublicly = source.IsRevealedPublicly,
+            StoredResource = source.StoredResource,
+            StoredRuntimeValues = new(source.StoredRuntimeValues, StringComparer.OrdinalIgnoreCase),
+            GrantedAtUtc = source.GrantedAtUtc,
+            Title = new(source.Title, StringComparer.OrdinalIgnoreCase),
+            Description = new(source.Description, StringComparer.OrdinalIgnoreCase),
+            Actions = source.Actions.Clone()
+        };
+    }
+    private EventSpecialCard CreatePersistentStolenCache(Room room, Player owner, EventSpecialCard source)
+    {
+        var existing = owner.EventSpecialCards.FirstOrDefault(card =>
+            string.Equals(card.DefinitionId, "stolen_bunker_cache", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(card.SourceScenarioId, source.RuntimeCardId, StringComparison.OrdinalIgnoreCase));
+        if (existing != null) return existing;
+        var cache = Grant(room, owner, "stolen_bunker_cache", source.RuntimeCardId);
+        cache.Status = EventSpecialCardStatus.Resolved;
+        cache.Result = EventSpecialCardResult.Kept;
+        cache.RemainingUses = 0;
+        cache.ResolvedAtRound = room.CurrentRound;
+        cache.StoredRuntimeValues = new(source.StoredRuntimeValues, StringComparer.OrdinalIgnoreCase);
+        return cache;
+    }
+    private static void CompleteTheftDecision(
+        EventSpecialCard card,
+        int round,
+        EventSpecialCardResult result)
+    {
+        card.Status = EventSpecialCardStatus.Resolved;
+        card.Result = result;
+        card.RemainingUses = 0;
+        card.ResolvedAtRound = round;
+        card.PublicRevealPending = true;
+    }
+    private static int ReadStoredRuntime(EventSpecialCard card, string key) =>
+        card.StoredRuntimeValues.TryGetValue(key, out var value) ? Math.Max(0, value) : 0;
+    private static string ToClientCode<T>(T value) where T : struct, Enum =>
+        value.ToString().ToLowerInvariant() switch
+        {
+            "pendingchoice" => "pending_choice",
+            "opportunitymissed" => "opportunity_missed",
+            var code => code
+        };
     private static StoredScenarioResource? ReadStoredResource(JsonElement definition)
     {
         if (!definition.TryGetProperty("storedResource", out var value)) return null;

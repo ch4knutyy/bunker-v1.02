@@ -59,7 +59,7 @@ public sealed class RoomGameSettings
 
     public CharacterGenerationMode CharacterGenerationMode { get; set; } = CharacterGenerationMode.Classic;
     public ScenarioScheduleSettings? ScenarioSchedule { get; set; } = new();
-    public BunkerIntelMode? BunkerIntelMode { get; set; } = Bunker.Models.BunkerIntelMode.Progressive;
+    public BunkerIntelMode? BunkerIntelMode { get; set; } = Bunker.Models.BunkerIntelMode.AllVisible;
     public int BunkerIntelIntervalRounds { get; set; } = 2;
 }
 
@@ -105,11 +105,11 @@ public sealed record LobbyGameSettingsDto(
     int StartingInventoryCount,
     string CharacterGenerationMode,
     bool ScenarioEnabled = true,
-    int ScenarioFirstAfterRound = 3,
+    int ScenarioFirstAfterRound = 2,
     int ScenarioIntervalRounds = 3,
     string ScenarioTriggerPhase = "after_round_before_voting",
     IReadOnlyList<string>? ScenarioEnabledTypes = null,
-    string BunkerIntelMode = "Progressive",
+    string BunkerIntelMode = "AllVisible",
     int BunkerIntelIntervalRounds = 2);
 
 public sealed record LobbySettingsWarningDto(string Code, string Message);

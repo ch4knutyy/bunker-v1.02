@@ -16,7 +16,9 @@ public sealed class BunkerIntelService
 
     public BunkerIntelState InitializeForNewGame(RoomGameSettings settings) => new()
     {
-        Mode = settings.BunkerIntelMode ?? BunkerIntelMode.Progressive,
+        Mode = ScenarioRules.BunkerIntelEnabled
+            ? settings.BunkerIntelMode ?? BunkerIntelMode.Progressive
+            : BunkerIntelMode.AllVisible,
         FirstRevealAfterRound = 2,
         IntervalRounds = Math.Clamp(settings.BunkerIntelIntervalRounds, 1, 3)
     };
@@ -26,7 +28,10 @@ public sealed class BunkerIntelService
         var bunker = room.Bunker;
         if (bunker == null) return null;
         var state = room.BunkerIntel;
-        var allVisible = state == null || state.Mode == BunkerIntelMode.AllVisible || elevatedPrivateAccess;
+        var allVisible = !ScenarioRules.BunkerIntelEnabled ||
+                         state == null ||
+                         state.Mode == BunkerIntelMode.AllVisible ||
+                         elevatedPrivateAccess;
         var playerId = viewer?.Id.ToString("N");
 
         bool HasCategory(string category) =>
@@ -97,6 +102,8 @@ public sealed class BunkerIntelService
 
     public BunkerIntelRevealResult RevealNextPublic(Room room, int completedRound, bool force = false)
     {
+        if (!ScenarioRules.BunkerIntelEnabled)
+            return new(false, null, null, "public", null);
         var state = room.BunkerIntel;
         if (state == null || state.Mode != BunkerIntelMode.Progressive || room.Bunker == null)
             return new(false, null, null, "public", null);
@@ -137,6 +144,8 @@ public sealed class BunkerIntelService
 
     public BunkerIntelRevealResult RevealPublic(Room room, string category, string scopePolicy = "entire_category")
     {
+        if (!ScenarioRules.BunkerIntelEnabled)
+            return new(false, null, null, "public", null);
         var state = room.BunkerIntel;
         if (state == null || room.Bunker == null || !IsCategory(category))
             return new(false, null, null, "public", null);
@@ -157,6 +166,8 @@ public sealed class BunkerIntelService
 
     public BunkerIntelRevealResult RevealPrivate(Room room, Player player, string category, string scopePolicy = "entire_category")
     {
+        if (!ScenarioRules.BunkerIntelEnabled)
+            return new(false, null, null, "private", player.Id.ToString("N"));
         var state = room.BunkerIntel;
         if (state == null || room.Bunker == null || !IsCategory(category))
             return new(false, null, null, "private", player.Id.ToString("N"));
@@ -178,6 +189,8 @@ public sealed class BunkerIntelService
 
     public BunkerIntelRevealResult RevealRandomPrivate(Room room, Player player)
     {
+        if (!ScenarioRules.BunkerIntelEnabled)
+            return new(false, null, null, "private", player.Id.ToString("N"));
         var hidden = new[] { "condition", "food", "water", "facilities", "resources", "problems" }
             .Where(category => HasHiddenUnit(room, player, category))
             .ToList();
@@ -189,6 +202,7 @@ public sealed class BunkerIntelService
 
     public static int CountHiddenUnits(Room room)
     {
+        if (!ScenarioRules.BunkerIntelEnabled) return 0;
         if (room.Bunker == null || room.BunkerIntel == null) return 0;
         var state = room.BunkerIntel;
         var scalar = ScalarOrder.Count(category => !state.PublicCategories.Contains(category));
@@ -199,6 +213,7 @@ public sealed class BunkerIntelService
 
     public IReadOnlyList<string> GetHiddenCategories(Room room, Player? player = null)
     {
+        if (!ScenarioRules.BunkerIntelEnabled) return [];
         var categories = new[] { "condition", "food", "water", "facilities", "resources", "problems" };
         if (player != null) return categories.Where(category => HasHiddenUnit(room, player, category)).ToList();
         if (room.Bunker == null || room.BunkerIntel == null) return [];
@@ -212,6 +227,7 @@ public sealed class BunkerIntelService
     }
 
     public bool IsPublic(Room room, string category) =>
+        !ScenarioRules.BunkerIntelEnabled ||
         room.BunkerIntel == null ||
         room.BunkerIntel.Mode == BunkerIntelMode.AllVisible ||
         room.BunkerIntel.PublicCategories.Contains(category);

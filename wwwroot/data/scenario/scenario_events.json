@@ -3,7 +3,7 @@
   "events": [
     {
       "id": "unknown_food_thief_6",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -65,7 +65,7 @@
     },
     {
       "id": "unknown_water_thief_4",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -127,7 +127,7 @@
     },
     {
       "id": "personal_food_offer",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "secret_player_choice",
       "title": {
@@ -231,7 +231,7 @@
     },
     {
       "id": "personal_water_offer",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "secret_player_choice",
       "title": {
@@ -335,7 +335,7 @@
     },
     {
       "id": "torn_bunker_report",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "split_private_information",
       "title": {
@@ -497,7 +497,7 @@
     },
     {
       "id": "private_archive_key",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -542,7 +542,7 @@
     },
     {
       "id": "personal_sealed_case",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -589,7 +589,7 @@
     },
     {
       "id": "supply_cache_for_everyone",
-      "enabled": true,
+      "enabled": false,
       "type": "event",
       "resolutionMode": "automatic_public_event",
       "title": {
@@ -631,7 +631,7 @@
     },
     {
       "id": "bunker_archive_scan",
-      "enabled": true,
+      "enabled": false,
       "type": "event",
       "resolutionMode": "automatic_public_event",
       "title": {
@@ -808,7 +808,7 @@
     },
     {
       "id": "ration_coupon_found",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -856,7 +856,7 @@
     },
     {
       "id": "water_coupon_found",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -904,7 +904,7 @@
     },
     {
       "id": "reserve_access_code",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -953,7 +953,7 @@
     },
     {
       "id": "reinforced_supply_case_event",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -1050,7 +1050,7 @@
     },
     {
       "id": "shared_archive_invitation_event",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -1100,7 +1100,7 @@
     },
     {
       "id": "deep_archive_terminal_event",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -1296,7 +1296,7 @@
     },
     {
       "id": "archive_release_authority_event",
-      "enabled": true,
+      "enabled": false,
       "type": "secret_event",
       "resolutionMode": "automatic_secret_grant",
       "title": {
@@ -1537,6 +1537,55 @@
         "property",
         "alliance",
         "trade",
+        "secret"
+      ]
+    },
+    {
+      "id": "main_store_access_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Зникнення запасів",
+        "en": "Vanishing Supplies",
+        "ru": "Исчезновение запасов"
+      },
+      "publicText": {
+        "uk": "Під час технічної перевірки виявлено незахищений доступ до головного складу. Хтось із мешканців отримав можливість скористатися ним.",
+        "en": "A maintenance inspection revealed unsecured access to the main storage. One resident now has an opportunity to use it.",
+        "ru": "Техническая проверка выявила незащищённый доступ к главному складу. Один из жителей получил возможность им воспользоваться."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий активний гравець отримав таємне рішення.",
+        "en": "One unknown active player received a secret decision.",
+        "ru": "Один неизвестный активный игрок получил тайное решение."
+      },
+      "minRound": 2,
+      "weight": 14,
+      "oncePerGame": true,
+      "cooldownGroup": "social_betrayal",
+      "cooldownRounds": 8,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "main_store_access"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "main_store_access"
+        }
+      ],
+      "tags": [
+        "betrayal",
+        "resources",
+        "frame",
         "secret"
       ]
     }

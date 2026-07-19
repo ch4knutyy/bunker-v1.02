@@ -3478,6 +3478,13 @@ function registerSignalREvents() {
 		}
 	});
 
+	connection.off("EventSpecialCardsUpdated");
+	connection.on("EventSpecialCardsUpdated", function (data) {
+		if (!myPlayerData) return;
+		myPlayerData.eventSpecialCards = data?.cards || data?.Cards || [];
+		renderMyEventCards(myPlayerData);
+	});
+
 	connection.off("PlayerKicked");
 	connection.on("PlayerKicked", function (data) {
 		alert(data.message || data.Message || 'Вас виключено з кімнати');
@@ -4418,12 +4425,9 @@ function registerSignalREvents() {
 		const scenario = data.scenario || data.Scenario;
 		if (!scenario) return;
 		const modal = document.getElementById('scenarioPublicModal');
-		document.getElementById('scenarioPublicType').textContent = scenario.type || scenario.Type || 'EVENT';
+		document.getElementById('scenarioPublicType').textContent = scenarioTypeLabel(scenario.type || scenario.Type);
 		document.getElementById('scenarioPublicTitle').textContent = scenario.title || scenario.Title || '';
 		document.getElementById('scenarioPublicText').textContent = scenario.text || scenario.Text || '';
-		const delta = data.resourceDelta || data.ResourceDelta || {};
-		const effects = document.getElementById('scenarioPublicEffects');
-		if (effects) effects.textContent = `Food: ${delta.foodBefore ?? '—'} → ${delta.foodAfter ?? '—'} · Water: ${delta.waterBefore ?? '—'} → ${delta.waterAfter ?? '—'}${(data.hasUnknownRecipients ?? data.HasUnknownRecipients) ? ' · Одержувач невідомий' : ''}`;
 		if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
 		addEventToHistory(`<strong>${escapeHtml(scenario.title || scenario.Title || '')}</strong>: ${escapeHtml(scenario.text || scenario.Text || '')}`, 'special');
 	});
@@ -4432,13 +4436,25 @@ function registerSignalREvents() {
 	connection.on("ScenarioPrivateOpened", function (data) {
 		currentPendingScenarioChoice = data.choice || data.Choice || null;
 		const modal = document.getElementById('scenarioPrivateModal');
-		document.getElementById('scenarioPrivateTitle').textContent = data.title || data.Title || 'Приватна подія';
+		document.getElementById('scenarioPrivateType').textContent = scenarioTypeLabel('secret_event');
+		document.getElementById('scenarioPrivateTitle').textContent = data.title || data.Title || scenarioUiText('privateEvent');
 		document.getElementById('scenarioPrivateMessage').textContent = data.message || data.Message || '';
 		const card = data.card || data.Card;
 		document.getElementById('scenarioPrivateCard').textContent = card ? eventCardLocalized(card.title || card.Title) : '';
 		renderScenarioPrivateChoices();
 		const expiry = data.expiresAtUtc || data.ExpiresAtUtc;
 		document.getElementById('scenarioPrivateExpiry').textContent = expiry ? `До ${new Date(expiry).toLocaleTimeString()}` : '';
+		if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
+	});
+
+	connection.off("EventCardPublicNotice");
+	connection.on("EventCardPublicNotice", function (data) {
+		const modal = document.getElementById('scenarioPublicModal');
+		const code = data?.code || data?.Code || '';
+		const accused = data?.accusedPlayerName || data?.AccusedPlayerName || '';
+		document.getElementById('scenarioPublicType').textContent = scenarioTypeLabel('event');
+		document.getElementById('scenarioPublicTitle').textContent = scenarioUiText('supplyIncident');
+		document.getElementById('scenarioPublicText').textContent = eventCardPublicNoticeText(code, accused);
 		if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
 	});
 
@@ -8007,9 +8023,9 @@ function normalizeLobbySettings(source) {
 		roundTimerEnabled:Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds:Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer:Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect:Boolean(get('pauseTimerOnHostDisconnect') ?? false),
 		votingEnabled:Boolean(get('votingEnabled') ?? true), votingStartRound:Number(get('votingStartRound') ?? 3), votingFrequency:String(get('votingFrequency') ?? 'EveryRound'),
 		specialCardsEnabled:Boolean(get('specialCardsEnabled') ?? true), specialCardsPerPlayer:Number(get('specialCardsPerPlayer') ?? 1), bonusInventoryEnabled:Boolean(get('bonusInventoryEnabled') ?? true), bonusInventoryRound:Number(get('bonusInventoryRound') ?? 3), bonusInventoryCount:Number(get('bonusInventoryCount') ?? 1), startingInventoryCount:Number(get('startingInventoryCount') ?? 1), characterGenerationMode:String(get('characterGenerationMode') ?? 'Classic'),
-		scenarioEnabled:Boolean(get('scenarioEnabled') ?? true), scenarioFirstAfterRound:Number(get('scenarioFirstAfterRound') ?? 3), scenarioIntervalRounds:Number(get('scenarioIntervalRounds') ?? 3), scenarioTriggerPhase:String(get('scenarioTriggerPhase') ?? 'after_round_before_voting'),
+		scenarioEnabled:Boolean(get('scenarioEnabled') ?? true), scenarioFirstAfterRound:Number(get('scenarioFirstAfterRound') ?? 2), scenarioIntervalRounds:Number(get('scenarioIntervalRounds') ?? 3), scenarioTriggerPhase:String(get('scenarioTriggerPhase') ?? 'after_round_before_voting'),
 		scenarioThreatEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('threat'), scenarioEventEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('event'), scenarioSecretEventEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('secret_event'),
-		bunkerIntelMode:String(get('bunkerIntelMode') ?? 'Progressive'), bunkerIntelIntervalRounds:Number(get('bunkerIntelIntervalRounds') ?? 2)
+		bunkerIntelMode:'AllVisible', bunkerIntelIntervalRounds:Number(get('bunkerIntelIntervalRounds') ?? 2)
 	};
 }
 
@@ -8686,6 +8702,72 @@ function eventCardLocalized(value) {
 	return value[language] || value[language.toUpperCase()] || value.uk || value.Uk || value.en || value.En || '';
 }
 
+function scenarioUiText(key) {
+	const language = getCurrentLanguage();
+	const texts = {
+		uk: {
+			event: 'Подія', secretEvent: 'Таємна подія', privateEvent: 'Приватна подія',
+			eventCard: 'Подієва карта', available: 'Доступна', pending_choice: 'Очікує рішення',
+			resolved: 'Використано', expired: 'Згоріла', transferred: 'Передано',
+			opportunity_missed: 'Можливість втрачено', returned: 'Повернуто', kept: 'Залишено',
+			used: 'Використано', consumed: 'Використано', framed: 'Передано',
+			validUntil: 'Діє до завершення {round} раунду', usedRound: 'Використано у {round} раунді',
+			resolvedRound: 'Завершено у {round} раунді', supplyIncident: 'Інцидент зі складом'
+		},
+		en: {
+			event: 'Event', secretEvent: 'Secret event', privateEvent: 'Private event',
+			eventCard: 'Event card', available: 'Available', pending_choice: 'Awaiting decision',
+			resolved: 'Used', expired: 'Expired', transferred: 'Transferred',
+			opportunity_missed: 'Opportunity missed', returned: 'Returned', kept: 'Kept',
+			used: 'Used', consumed: 'Used', framed: 'Transferred',
+			validUntil: 'Valid until the end of round {round}', usedRound: 'Used in round {round}',
+			resolvedRound: 'Resolved in round {round}', supplyIncident: 'Storage incident'
+		},
+		ru: {
+			event: 'Событие', secretEvent: 'Тайное событие', privateEvent: 'Приватное событие',
+			eventCard: 'Карта события', available: 'Доступна', pending_choice: 'Ожидает решения',
+			resolved: 'Использована', expired: 'Сгорела', transferred: 'Передана',
+			opportunity_missed: 'Возможность упущена', returned: 'Возвращено', kept: 'Оставлено',
+			used: 'Использована', consumed: 'Использована', framed: 'Передана',
+			validUntil: 'Действует до завершения {round} раунда', usedRound: 'Использована в {round} раунде',
+			resolvedRound: 'Завершена в {round} раунде', supplyIncident: 'Инцидент на складе'
+		}
+	};
+	return texts[language]?.[key] || texts.uk[key] || '';
+}
+
+function scenarioTypeLabel(type) {
+	return String(type || '').toLowerCase() === 'secret_event'
+		? scenarioUiText('secretEvent')
+		: scenarioUiText('event');
+}
+
+function eventCardPublicNoticeText(code, accused) {
+	const language = getCurrentLanguage();
+	const templates = {
+		uk: {
+			supplies_stolen: 'Усі запаси їжі та води зникли зі складу. Винного не встановлено.',
+			supplies_returned: 'Зниклі припаси повернули до бункера.',
+			supplies_returned_accusation: 'Припаси повернули, але знайдені докази вказують на {name}.',
+			supplies_missing_accusation: 'Припаси не повернули. Знайдені докази вказують на {name}.'
+		},
+		en: {
+			supplies_stolen: 'All food and water supplies disappeared from storage. The culprit is unknown.',
+			supplies_returned: 'The missing supplies were returned to the bunker.',
+			supplies_returned_accusation: 'The supplies were returned, but the evidence points to {name}.',
+			supplies_missing_accusation: 'The supplies were not returned. The evidence points to {name}.'
+		},
+		ru: {
+			supplies_stolen: 'Все запасы еды и воды исчезли со склада. Виновный не установлен.',
+			supplies_returned: 'Пропавшие припасы вернули в бункер.',
+			supplies_returned_accusation: 'Припасы вернули, но найденные доказательства указывают на {name}.',
+			supplies_missing_accusation: 'Припасы не вернули. Найденные доказательства указывают на {name}.'
+		}
+	};
+	return (templates[language]?.[code] || templates.uk[code] || scenarioUiText('supplyIncident'))
+		.replace('{name}', accused || t('unknown'));
+}
+
 function eventCardPlayerOptions(ownerId, includeEliminated = false) {
 	return Object.values(roomPlayers)
 		.filter(player => (includeEliminated || !player.isEliminated) && !player.isSpectatorGm)
@@ -8705,10 +8787,13 @@ function renderMyEventCards(player) {
 	section.style.display = '';
 	container.innerHTML = cards.map((card, cardIndex) => {
 		const runtimeId = card.runtimeCardId || card.RuntimeCardId;
-		const ownerId = card.ownerPlayerId || card.OwnerPlayerId || '';
-		const actions = card.actions || card.Actions || [];
+		const ownerId = getMyStablePlayerId();
+		const actions = card.availableActions || card.AvailableActions || card.actions || card.Actions || [];
+		const status = card.status || card.Status || 'available';
+		const result = card.result || card.Result || 'none';
+		const canUse = card.canUse ?? card.CanUse ?? false;
 		const professionOptions = card.pendingProfessionOptions || card.PendingProfessionOptions || [];
-		const actionMarkup = actions.map((action, actionIndex) => {
+		const actionMarkup = canUse ? actions.map((action, actionIndex) => {
 			const targetMode = action.targetMode || action.TargetMode || 'room';
 			const operation = action.operation || action.Operation || 'apply_effects';
 			const needsTarget = ['other_active_player','self_or_other_active_player','eliminated_other_player'].includes(targetMode);
@@ -8720,12 +8805,24 @@ function renderMyEventCards(player) {
 			const choiceSelect = choices.length ? `<select id="eventCardChoice-${cardIndex}-${actionIndex}" class="special-card-target-select">${choices.map(choice => `<option value="${escapeHtml(choice.id || choice.Id)}">${escapeHtml(eventCardLocalized(choice.label || choice.Label))}</option>`).join('')}</select>` : '';
 			const professionSelect = professionOptions.length ? `<select id="eventCardProfession-${cardIndex}-${actionIndex}" class="special-card-target-select"><option value="">${escapeHtml(t('choosePlayer'))}</option>${professionOptions.map(option => `<option value="${escapeHtml(option.name || option.Name)}">${escapeHtml(option.name || option.Name)}</option>`).join('')}</select>` : '';
 			return `<div class="event-card-action">${targetSelect}${choiceSelect}${professionSelect}<button type="button" class="special-card-use-btn" onclick="useEventSpecialCard(${cardIndex},${actionIndex},'${escapeHtml(operation)}')">${escapeHtml(eventCardLocalized(action.label || action.Label) || t('use'))}</button></div>`;
-		}).join('');
-		return `<article class="my-special-card special-card-shell variant-secret state-hand">
-			<header class="special-card-header"><div class="special-card-heading"><span class="special-card-category">EVENT</span><h3 class="special-card-title">${escapeHtml(eventCardLocalized(card.title || card.Title))}</h3></div></header>
+		}).join('') : '';
+		const expiresAfterRound = card.expiresAfterRound ?? card.ExpiresAfterRound;
+		const usedAtRound = card.usedAtRound ?? card.UsedAtRound;
+		const resolvedAtRound = card.resolvedAtRound ?? card.ResolvedAtRound;
+		const resultLabel = result !== 'none' ? scenarioUiText(result) : '';
+		const timing = expiresAfterRound && canUse
+			? scenarioUiText('validUntil').replace('{round}', expiresAfterRound)
+			: usedAtRound
+				? scenarioUiText('usedRound').replace('{round}', usedAtRound)
+				: resolvedAtRound
+					? scenarioUiText('resolvedRound').replace('{round}', resolvedAtRound)
+					: '';
+		return `<article class="my-special-card event-special-card special-card-shell variant-secret state-${escapeHtml(status)}" data-event-card-id="${escapeHtml(card.definitionId || card.DefinitionId || '')}" data-event-card-status="${escapeHtml(status)}">
+			<header class="special-card-header"><div class="special-card-heading"><span class="special-card-category">${escapeHtml(scenarioUiText('eventCard'))}</span><h3 class="special-card-title">${escapeHtml(eventCardLocalized(card.title || card.Title))}</h3></div><span class="event-card-status">${escapeHtml(scenarioUiText(status))}</span></header>
 			<section class="special-card-effect"><p>${escapeHtml(eventCardLocalized(card.description || card.Description))}</p></section>
-			${card.storedResource || card.StoredResource ? `<p class="special-card-note">${escapeHtml(String((card.storedResource || card.StoredResource).amount ?? (card.storedResource || card.StoredResource).Amount))}</p>` : ''}
-			<footer class="special-card-footer">${actionMarkup}</footer>
+			${timing ? `<p class="event-card-timing">${escapeHtml(timing)}</p>` : ''}
+			${resultLabel ? `<p class="event-card-result">${escapeHtml(resultLabel)}</p>` : ''}
+			${actionMarkup ? `<footer class="special-card-footer">${actionMarkup}</footer>` : ''}
 		</article>`;
 	}).join('');
 }
@@ -8733,7 +8830,7 @@ function renderMyEventCards(player) {
 async function useEventSpecialCard(cardIndex, actionIndex, operation) {
 	const cards = myPlayerData?.eventSpecialCards || [];
 	const card = cards[cardIndex];
-	const action = (card?.actions || card?.Actions || [])[actionIndex];
+	const action = (card?.availableActions || card?.AvailableActions || card?.actions || card?.Actions || [])[actionIndex];
 	if (!card || !action) return;
 	const runtimeId = card.runtimeCardId || card.RuntimeCardId;
 	const actionId = action.id || action.Id;
