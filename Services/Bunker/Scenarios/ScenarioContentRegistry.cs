@@ -177,8 +177,7 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
             ValidateGenericTree(item, file, path, id);
             ValidateCardReferences(item, file, path, id, cards);
             ValidateResourceEligibility(item, file, path, id);
-            if (item.TryGetProperty("targetSelection", out var targetSelection))
-                ValidateTargetProperty(targetSelection, "mode", file, path + ".targetSelection", id);
+            ValidateEventTargetSelection(item, mode, file, path, id);
 
             result.Add(new ScenarioDefinition
             {
@@ -306,9 +305,79 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
 
     private static void ValidateTargetProperty(JsonElement element, string propertyName, string file, string path, string id)
     {
+        if (element.ValueKind != JsonValueKind.Object)
+            Fail(file, path, id, $"target contract must be an object, but received {element.ValueKind}");
         if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind != JsonValueKind.String) return;
         if (!KnownTargets.Contains(value.GetString()!))
             Fail(file, path + "." + propertyName, id, $"unknown target value '{value.GetString()}'");
+    }
+
+    private static void ValidateEventTargetSelection(
+        JsonElement item,
+        string resolutionMode,
+        string file,
+        string path,
+        string id)
+    {
+        var required = resolutionMode is "automatic_secret_grant" or "secret_player_choice" or
+            "split_private_information" || HasSelectorDependentTarget(item);
+        if (!item.TryGetProperty("targetSelection", out var selector))
+        {
+            if (required) Fail(file, path + ".targetSelection", id, "targeted event requires a target selector");
+            return;
+        }
+        if (selector.ValueKind == JsonValueKind.Null)
+        {
+            if (required) Fail(file, path + ".targetSelection", id, "targeted event cannot have a null target selector");
+            return;
+        }
+        if (selector.ValueKind != JsonValueKind.Object)
+            Fail(file, path + ".targetSelection", id,
+                $"target selector must be an object or null, but received {selector.ValueKind}");
+
+        var mode = RequiredString(selector, "mode", file, path + ".targetSelection", id);
+        if (!KnownTargets.Contains(mode))
+            Fail(file, path + ".targetSelection.mode", id, $"unknown target value '{mode}'");
+        ValidateOptionalBoolean(selector, "excludeHostRoleOnlySpectators", file, path + ".targetSelection", id);
+        ValidateOptionalBoolean(selector, "excludePlayersAtMaximumPhysicalSeverity", file, path + ".targetSelection", id);
+        if (selector.TryGetProperty("prefer", out var prefer) &&
+            prefer.ValueKind is not (JsonValueKind.Object or JsonValueKind.Null))
+            Fail(file, path + ".targetSelection.prefer", id,
+                $"prefer must be an object or null, but received {prefer.ValueKind}");
+    }
+
+    private static bool HasSelectorDependentTarget(JsonElement element)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                if (property.Name is "target" or "targets" or "targetMode" &&
+                    property.Value.ValueKind == JsonValueKind.String &&
+                    property.Value.GetString() is "selected" or "selected_1" or "selected_2" or
+                        "selected_player" or "selected_players" or "owner_selected_player")
+                    return true;
+                if (HasSelectorDependentTarget(property.Value)) return true;
+            }
+        }
+        else if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var child in element.EnumerateArray())
+                if (HasSelectorDependentTarget(child)) return true;
+        }
+        return false;
+    }
+
+    private static void ValidateOptionalBoolean(
+        JsonElement element,
+        string property,
+        string file,
+        string path,
+        string id)
+    {
+        if (element.TryGetProperty(property, out var value) &&
+            value.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+            Fail(file, path + "." + property, id, $"{property} must be a boolean");
     }
 
     private static void ValidateLocalized(JsonElement element, string propertyName, string file, string path, string id)

@@ -45,6 +45,39 @@ public sealed class ScenarioContentRegistryTests
         Assert.Contains("id=bad", exception.Message);
         Assert.Contains("unknown", exception.Message);
     }
+
+    [Fact]
+    public void GlobalNullTargetIsAllowedAndInvalidTargetShapesFailAtStartup()
+    {
+        using var valid = new ScenarioFixture();
+        valid.WriteCards("""{"schemaVersion":3,"cards":[]}""");
+        valid.WriteEvents("""
+            {"schemaVersion":3,"events":[{
+              "id":"global","enabled":true,"type":"event","resolutionMode":"automatic_public_event",
+              "title":{"uk":"u","en":"e","ru":"r"},"publicText":{"uk":"u","en":"e","ru":"r"},
+              "targetSelection":null,"effects":[{"type":"no_effect","targets":"room"}]
+            }]}
+            """);
+        Assert.Single(new ScenarioContentRegistry(valid.Directory).Events);
+
+        foreach (var invalidShape in new[] { "\"random_active_player\"", "[]" })
+        {
+            using var invalid = new ScenarioFixture();
+            invalid.WriteCards("""{"schemaVersion":3,"cards":[]}""");
+            invalid.WriteEvents($$"""
+                {"schemaVersion":3,"events":[{
+                  "id":"bad_target","enabled":true,"type":"event","resolutionMode":"automatic_public_event",
+                  "title":{"uk":"u","en":"e","ru":"r"},"publicText":{"uk":"u","en":"e","ru":"r"},
+                  "targetSelection":{{invalidShape}}
+                }]}
+                """);
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                new ScenarioContentRegistry(invalid.Directory));
+            Assert.Contains("$.events[0].targetSelection", exception.Message);
+            Assert.Contains("id=bad_target", exception.Message);
+        }
+    }
 }
 
 public sealed class ScenarioSchedulerTests
@@ -53,7 +86,7 @@ public sealed class ScenarioSchedulerTests
     public void NewScheduleIsDueAfterRoundThreeBeforeVotingAndUsesActualRoundForNextInterval()
     {
         var scheduler = new ScenarioSchedulerService(new FakeRegistry(), TimeProvider.System, new Random(1));
-        var room = ScenarioTestData.Room();
+        var room = ScenarioTestData.Room(twoPlayers: true);
         room.ScenarioSituations = scheduler.InitializeForNewGame(new RoomGameSettings
         {
             ScenarioSchedule = new ScenarioScheduleSettings
@@ -65,10 +98,12 @@ public sealed class ScenarioSchedulerTests
             }
         });
 
+        Assert.False(scheduler.SelectForCompletedRound(room, 1).IsDue);
         Assert.False(scheduler.SelectForCompletedRound(room, 2).IsDue);
         var due = scheduler.SelectForCompletedRound(room, 3);
         Assert.True(due.IsDue);
         Assert.NotNull(due.Scenario);
+        Assert.Equal(3, due.Scenario!.MinRound);
         scheduler.MarkStarted(room, due.Scenario!, 4);
         Assert.Equal(8, room.ScenarioSituations.NextDueAfterRound);
     }
@@ -109,6 +144,136 @@ public sealed class ScenarioSchedulerTests
         public ImmutableArray<EventSpecialCardDefinition> Cards => [];
         public ScenarioDefinition? FindEvent(string id) => Events.FirstOrDefault(item => item.Id == id);
         public EventSpecialCardDefinition? FindCard(string id) => null;
+    }
+}
+
+public sealed class ScenarioRunnerTests
+{
+    [Fact]
+    public void RoundThreeSelectionReachesRunnerAndAfterVotingCommandRunsOnlyOnce()
+    {
+        var runtime = ScenarioTestData.Runtime();
+        var room = ScenarioTestData.Room(twoPlayers: true);
+        room.ScenarioSituations = runtime.Scheduler.InitializeForNewGame(new RoomGameSettings
+        {
+            ScenarioSchedule = new ScenarioScheduleSettings
+            {
+                Enabled = true,
+                FirstScenarioAfterRound = 3,
+                IntervalRounds = 3,
+                TriggerPhase = "after_voting",
+                EnabledTypes = new(["event"], StringComparer.OrdinalIgnoreCase)
+            }
+        });
+
+        Assert.False(runtime.Scheduler.SelectForCompletedRound(
+            room, 3, "after_round_before_voting").IsDue);
+        var selection = runtime.Scheduler.SelectForCompletedRound(room, 3, "after_voting");
+        Assert.True(selection.IsDue);
+        Assert.NotNull(selection.Scenario);
+
+        var first = runtime.Runner.Run(room, selection.Scenario!, 3, commandId: "round-3-after-voting");
+        var duplicate = runtime.Runner.Run(room, selection.Scenario!, 3, commandId: "round-3-after-voting");
+
+        Assert.True(first.Success);
+        Assert.True(duplicate.Success);
+        Assert.Equal(3, room.ScenarioSituations.ActiveScenario!.TriggeredAfterRound);
+        Assert.Single(room.ScenarioSituations.History, item => item.Result == "started");
+    }
+
+    [Fact]
+    public void ThreatAndGlobalEventsWithoutPlayerTargetsDoNotCrash()
+    {
+        var runtime = ScenarioTestData.Runtime();
+        var threatRoom = ScenarioTestData.Room();
+        threatRoom.ScenarioSituations = runtime.Scheduler.InitializeForNewGame(new RoomGameSettings());
+        var threat = new ScenarioDefinition
+        {
+            Id = "__existing_threat_flow__",
+            Type = "threat",
+            ResolutionMode = "existing_threat_flow",
+            Title = ScenarioTestData.Localized(),
+            PublicText = ScenarioTestData.Localized()
+        };
+
+        var threatResult = runtime.Runner.Run(threatRoom, threat, 3, commandId: "threat-3");
+        Assert.True(threatResult.Success);
+        Assert.True(threatResult.BlocksVoting);
+
+        foreach (var sourceJson in new[] { "{}", """{"targetSelection":null}""" })
+        {
+            var room = ScenarioTestData.Room();
+            room.ScenarioSituations = runtime.Scheduler.InitializeForNewGame(new RoomGameSettings());
+            var global = ScenarioTestData.Definition(
+                "global-" + sourceJson.Length,
+                JsonDocument.Parse(sourceJson).RootElement.Clone());
+
+            var result = runtime.Runner.Run(room, global, 3);
+
+            Assert.True(result.Success);
+            Assert.Null(result.ErrorCode);
+        }
+    }
+
+    [Theory]
+    [InlineData("""{"targetSelection":"random_active_player"}""")]
+    [InlineData("""{"targetSelection":[]}""")]
+    public void InvalidTargetSelectorFailsBeforeScenarioIsMarkedStarted(string sourceJson)
+    {
+        var runtime = ScenarioTestData.Runtime();
+        var room = ScenarioTestData.Room();
+        room.ScenarioSituations = runtime.Scheduler.InitializeForNewGame(new RoomGameSettings());
+        var scenario = ScenarioTestData.Definition(
+            "invalid-target",
+            JsonDocument.Parse(sourceJson).RootElement.Clone());
+
+        Assert.Throws<InvalidDataException>(() =>
+            runtime.Runner.Run(room, scenario, 3, commandId: "invalid-target-3"));
+        Assert.Null(room.ScenarioSituations.ActiveScenario);
+        Assert.Empty(room.ScenarioSituations.History);
+        Assert.DoesNotContain("invalid-target-3", room.ScenarioSituations.ProcessedCommandIds);
+    }
+
+    [Fact]
+    public void InventoryScenarioAppliesOnceAndSnapshotStatePreventsReplay()
+    {
+        var runtime = ScenarioTestData.Runtime();
+        var room = ScenarioTestData.Room(twoPlayers: true);
+        room.ScenarioSituations = runtime.Scheduler.InitializeForNewGame(new RoomGameSettings());
+        var scenario = runtime.Registry.FindEvent("supply_cache_for_everyone")!;
+        var before = room.Players.Values.ToDictionary(
+            player => player.Id,
+            player => player.Inventory.Items.Count);
+
+        var first = runtime.Runner.Run(room, scenario, 3, commandId: "inventory-round-3");
+        Assert.True(first.Success);
+        Assert.All(room.Players.Values, player =>
+            Assert.Equal(before[player.Id] + 1, player.Inventory.Items.Count));
+
+        var recoveredState = RoomSnapshotService.CaptureState(room);
+        RoomSnapshotService.ApplyState(room, recoveredState);
+        var duplicate = runtime.Runner.Run(room, scenario, 3, commandId: "inventory-round-3");
+
+        Assert.True(duplicate.Success);
+        Assert.All(room.Players.Values, player =>
+            Assert.Equal(before[player.Id] + 1, player.Inventory.Items.Count));
+        Assert.Single(room.ScenarioSituations!.History, item => item.Result == "started");
+    }
+
+    [Fact]
+    public void RoundLifecycleHasNoLegacyBonusInventoryTriggerButKeepsStartingInventory()
+    {
+        var gameMaster = File.ReadAllText(Path.Combine(
+            ScenarioTestData.Root, "Hubs", "BunkerHubGame", "GameHub.GameMaster.cs"));
+        var scenarios = File.ReadAllText(Path.Combine(
+            ScenarioTestData.Root, "Hubs", "BunkerHubGame", "GameHub.Scenarios.cs"));
+        var rooms = File.ReadAllText(Path.Combine(
+            ScenarioTestData.Root, "Hubs", "BunkerHubGame", "GameHub.Rooms.cs"));
+
+        Assert.DoesNotContain("GrantConfiguredBonusInventory(", gameMaster);
+        Assert.DoesNotContain("GrantConfiguredBonusInventory(", scenarios);
+        Assert.Contains("StartingInventoryCount", rooms);
+        Assert.Contains("ConfigureGeneratedPlayerForLobby", rooms);
     }
 }
 
@@ -220,6 +385,40 @@ internal static class ScenarioTestData
     }
     public static string ContentDirectory => Path.Combine(Root, "wwwroot", "data", "scenario");
 
+    public static ScenarioRuntime Runtime()
+    {
+        var registry = new ScenarioContentRegistry(ContentDirectory);
+        var scheduler = new ScenarioSchedulerService(registry, TimeProvider.System, new Random(1));
+        var intel = new BunkerIntelService();
+        var resources = new BunkerResourceService();
+        var gameData = new GameDataService(new TestEnvironment(Root),
+            NullLogger<GameDataService>.Instance);
+        var cards = new EventSpecialCardService(
+            registry,
+            resources,
+            intel,
+            new CharacterGeneratorService(gameData, NullLogger<CharacterGeneratorService>.Instance),
+            TimeProvider.System);
+        return new(registry, scheduler, new ScenarioRunnerService(
+            scheduler, cards, intel, TimeProvider.System));
+    }
+
+    public static IReadOnlyDictionary<string, string> Localized() =>
+        new Dictionary<string, string> { ["uk"] = "u", ["en"] = "e", ["ru"] = "r" };
+
+    public static ScenarioDefinition Definition(string id, JsonElement source) => new()
+    {
+        Id = id,
+        Enabled = true,
+        Type = "event",
+        ResolutionMode = "automatic_public_event",
+        MinRound = 3,
+        Weight = 1,
+        Title = Localized(),
+        PublicText = Localized(),
+        Source = source
+    };
+
     public static Room Room(bool twoPlayers = false)
     {
         var room = new Room
@@ -246,6 +445,11 @@ internal static class ScenarioTestData
         return room;
     }
 }
+
+internal sealed record ScenarioRuntime(
+    ScenarioContentRegistry Registry,
+    ScenarioSchedulerService Scheduler,
+    ScenarioRunnerService Runner);
 
 internal sealed class ScenarioFixture : IDisposable
 {

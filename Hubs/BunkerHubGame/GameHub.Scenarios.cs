@@ -1,6 +1,7 @@
 using Bunker.Models;
 using Bunker.Services;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
 namespace Bunker.Hubs;
 
@@ -26,13 +27,42 @@ public partial class GameHub
         var selection = _scenarioScheduler.SelectForCompletedRound(room, completedRound, triggerPhase);
         if (!selection.IsDue || selection.IsPostponed || selection.Scenario == null) return null;
 
-        var scenarioCommandId = $"scenario-{room.Id}-{completedRound}-{Guid.NewGuid():N}";
+        var scenarioCommandId = $"scenario-{room.Id}-{completedRound}-{triggerPhase}";
         var snapshot = CreateMutationSnapshot(room, "system", "scenario_started",
             scenarioCommandId, "Before scheduled scenario");
-        var result = _scenarioRunner.Run(room, selection.Scenario, completedRound);
+        ScenarioRunResult result;
+        try
+        {
+            result = _scenarioRunner.Run(
+                room,
+                selection.Scenario,
+                completedRound,
+                commandId: scenarioCommandId);
+        }
+        catch (Exception exception) when (exception is InvalidDataException or JsonException)
+        {
+            RoomSnapshotService.ApplyState(room, snapshot.State);
+            _logger.LogError(
+                exception,
+                "Scenario {ScenarioId} failed in room {RoomId} after round {CompletedRound}; target selector ValueKind={ValueKind}.",
+                selection.Scenario.Id,
+                room.Id,
+                completedRound,
+                GetTargetSelectorValueKind(selection.Scenario));
+            await Clients.Client(room.HostConnectionId).SendAsync(
+                "ReceiveError",
+                "scenario_content_invalid");
+            return null;
+        }
         if (!result.Success)
         {
-            _scenarioScheduler.MarkResolved(room, "failed");
+            RoomSnapshotService.ApplyState(room, snapshot.State);
+            _logger.LogWarning(
+                "Scenario {ScenarioId} was skipped in room {RoomId} after round {CompletedRound}: {ErrorCode}.",
+                selection.Scenario.Id,
+                room.Id,
+                completedRound,
+                result.ErrorCode);
             await Clients.Client(room.HostConnectionId).SendAsync("ReceiveError",
                 result.ErrorCode ?? "scenario_resolution_failed");
             return result;
@@ -158,20 +188,6 @@ public partial class GameHub
 
     private async Task ContinueAfterBlockingScenario(Room room, int completedRound)
     {
-        var additionalInventory = GrantConfiguredBonusInventory(room, completedRound);
-        if (additionalInventory.Count > 0)
-        {
-            room.CurrentPhase = GamePhase.ExtraInventory;
-            var inventoryState = BuildRoundState(room);
-            await Clients.Group(room.Id).SendAsync("AdditionalInventoryGranted", new
-            {
-                completedRound,
-                grants = additionalInventory,
-                roundState = inventoryState
-            });
-            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", inventoryState);
-        }
-
         if (IsVotingRound(room, completedRound))
         {
             room.CurrentPhase = GamePhase.PreVotingReadyCheck;
@@ -206,6 +222,15 @@ public partial class GameHub
             roundState = nextRoundState
         });
         await Clients.Group(room.Id).SendAsync("RoundStateUpdated", nextRoundState);
+    }
+
+    private static JsonValueKind GetTargetSelectorValueKind(ScenarioDefinition scenario)
+    {
+        if (scenario.Source.ValueKind != JsonValueKind.Object)
+            return scenario.Source.ValueKind;
+        return scenario.Source.TryGetProperty("targetSelection", out var selector)
+            ? selector.ValueKind
+            : JsonValueKind.Undefined;
     }
 
     public async Task ResolveScenarioChoice(
@@ -547,7 +572,7 @@ public partial class GameHub
         room.ScenarioSituations ??= _scenarioScheduler.InitializeForNewGame(_roomGameSettings.GetEffective(room));
         var snapshot = CreateMutationSnapshot(room, GetGmActorId(room), "scenario_started",
             commandId, "Before forced scenario");
-        var result = _scenarioRunner.Run(room, definition, room.CurrentRound);
+        var result = _scenarioRunner.Run(room, definition, room.CurrentRound, commandId: commandId);
         if (!result.Success)
         {
             await Clients.Caller.SendAsync("ReceiveError", result.ErrorCode ?? "scenario_force_failed");

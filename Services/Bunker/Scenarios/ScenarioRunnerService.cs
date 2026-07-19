@@ -34,14 +34,51 @@ public sealed class ScenarioRunnerService
         _timeProvider = timeProvider;
     }
 
-    public ScenarioRunResult Run(Room room, ScenarioDefinition scenario, int completedRound, string language = "uk")
+    public ScenarioRunResult Run(
+        Room room,
+        ScenarioDefinition scenario,
+        int completedRound,
+        string language = "uk",
+        string? commandId = null)
     {
-        var active = _scheduler.MarkStarted(room, scenario, completedRound);
+        var state = room.ScenarioSituations;
+        if (!string.IsNullOrWhiteSpace(commandId))
+        {
+            if (state == null) return EmptyFailure("scenario_disabled");
+            lock (state.ProcessedCommandIds)
+            {
+                if (!state.ProcessedCommandIds.Add(commandId))
+                    return EmptySuccess();
+            }
+        }
+
+        try
+        {
+            var result = RunCore(room, scenario, completedRound, language);
+            if (!result.Success) ForgetCommand(state, commandId);
+            return result;
+        }
+        catch
+        {
+            ForgetCommand(state, commandId);
+            throw;
+        }
+    }
+
+    private ScenarioRunResult RunCore(
+        Room room,
+        ScenarioDefinition scenario,
+        int completedRound,
+        string language)
+    {
         var foodBefore = room.Bunker?.SuppliesMonths ?? 0;
         var waterBefore = room.Bunker?.WaterMonths ?? 0;
         var privateMessages = new List<ScenarioRecipientMessage>();
         var players = ActivePlayers(room);
-        var selected = SelectTargets(scenario.Source, players);
+        var selected = scenario.ResolutionMode == "existing_threat_flow"
+            ? []
+            : SelectTargets(scenario.Source, players);
+        var active = _scheduler.MarkStarted(room, scenario, completedRound);
 
         if (scenario.ResolutionMode == "existing_threat_flow")
         {
@@ -236,13 +273,27 @@ public sealed class ScenarioRunnerService
             .Where(player => !player.IsEliminated).ToList();
     private static List<Player> SelectTargets(JsonElement source, IReadOnlyList<Player> players)
     {
-        if (players.Count == 0) return [];
-        var mode = source.TryGetProperty("targetSelection", out var selection)
-            ? ReadString(selection, "mode") : "";
+        if (source.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return [];
+        if (source.ValueKind != JsonValueKind.Object)
+            throw new InvalidDataException(
+                $"Scenario source must be an object, but received {source.ValueKind}.");
+        if (!source.TryGetProperty("targetSelection", out var selection) ||
+            selection.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return [];
+        if (selection.ValueKind != JsonValueKind.Object)
+            throw new InvalidDataException(
+                $"Scenario target selector must be an object, but received {selection.ValueKind}.");
+
+        var mode = ReadString(selection, "mode");
         var desired = mode.StartsWith("two_", StringComparison.Ordinal) ? 2 : mode == "random_active_player" ? 1 : 0;
-        var candidates = selection.ValueKind == JsonValueKind.Object &&
-                         selection.TryGetProperty("excludePlayersAtMaximumPhysicalSeverity", out var excludeMaximum) &&
-                         excludeMaximum.ValueKind == JsonValueKind.True
+        if (selection.TryGetProperty("excludePlayersAtMaximumPhysicalSeverity", out var excludeMaximum) &&
+            excludeMaximum.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+            throw new InvalidDataException(
+                "Scenario target selector property 'excludePlayersAtMaximumPhysicalSeverity' must be a boolean.");
+
+        if (players.Count == 0) return [];
+        var candidates = excludeMaximum.ValueKind == JsonValueKind.True
             ? players.Where(player => !string.Equals(player.PhysicalHealth.SeverityCode, "critical",
                 StringComparison.OrdinalIgnoreCase)).ToList()
             : players.ToList();
@@ -272,4 +323,10 @@ public sealed class ScenarioRunnerService
         new(false, code, null, [], false, 0, 0, 0, 0);
     private static ScenarioRunResult EmptySuccess() =>
         new(true, null, null, [], false, 0, 0, 0, 0);
+    private static void ForgetCommand(ScenarioSituationState? state, string? commandId)
+    {
+        if (state == null || string.IsNullOrWhiteSpace(commandId)) return;
+        lock (state.ProcessedCommandIds)
+            state.ProcessedCommandIds.Remove(commandId);
+    }
 }
