@@ -164,6 +164,10 @@
 				<h2 class="section-title site-section-heading">Мої спеціальні карти</h2>
 				<div id="mySpecialCardsList" class="my-special-cards-list"></div>
 			</section>
+			<section id="myEventCardsSection" class="my-special-cards-section" hidden>
+				<h2 class="section-title site-section-heading">Подієві карти</h2>
+				<div id="myEventCardsList" class="my-special-cards-list"></div>
+			</section>
 		</div>
 
 		@* Основне ігрове поле після початку гри *@
@@ -177,6 +181,32 @@
 
 @* Панель керування грою рендериться на верхньому рівні, щоб fixed drawer не залежав від game container. *@
 <partial name="~/Views/Shared/Bunker/_GmPanel.cshtml" />
+
+<div id="scenarioPublicModal" class="modal scenario-situation-modal" hidden role="dialog" aria-modal="true" aria-labelledby="scenarioPublicTitle">
+	<div class="modal-content">
+		<span id="scenarioPublicType" class="scenario-situation-badge">EVENT</span>
+		<h3 id="scenarioPublicTitle"></h3>
+		<p id="scenarioPublicText"></p>
+		<div id="scenarioPublicEffects" class="scenario-situation-effects"></div>
+		<div class="modal-actions">
+			<button type="button" class="btn-primary" onclick="closeScenarioPublicModal()">Продовжити</button>
+		</div>
+	</div>
+</div>
+
+<div id="scenarioPrivateModal" class="modal scenario-situation-modal" hidden role="dialog" aria-modal="true" aria-labelledby="scenarioPrivateTitle">
+	<div class="modal-content">
+		<span class="scenario-situation-badge scenario-situation-badge-private">PRIVATE</span>
+		<h3 id="scenarioPrivateTitle">Приватна подія</h3>
+		<p id="scenarioPrivateMessage"></p>
+		<div id="scenarioPrivateCard"></div>
+		<div id="scenarioPrivateChoices"></div>
+		<p id="scenarioPrivateExpiry"></p>
+		<div class="modal-actions">
+			<button type="button" class="btn-secondary" onclick="closeScenarioPrivateModal()">Закрити</button>
+		</div>
+	</div>
+</div>
 
 @* Підтвердження примусового завершення загрози для GM *@
 <div id="gmThreatForceModal" class="modal gm-threat-force-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="gmThreatForceTitle">

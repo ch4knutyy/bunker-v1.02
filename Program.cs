@@ -68,6 +68,11 @@ builder.Services.AddSingleton<IRoomRecoveryCoordinator>(services => services.Get
 builder.Services.AddHostedService(services => services.GetRequiredService<RoomRecoveryCoordinator>());
 builder.Services.AddSingleton<RoomLocalEditorService>();
 builder.Services.AddSingleton<BunkerResourceService>();
+builder.Services.AddSingleton<IScenarioContentRegistry, ScenarioContentRegistry>();
+builder.Services.AddSingleton<ScenarioSchedulerService>();
+builder.Services.AddSingleton<BunkerIntelService>();
+builder.Services.AddSingleton<EventSpecialCardService>();
+builder.Services.AddSingleton<ScenarioRunnerService>();
 builder.Services.Configure<GlobalContentCatalogOptions>(builder.Configuration.GetSection(GlobalContentCatalogOptions.SectionName));
 builder.Services.AddSingleton<GlobalContentAccessPolicy>();
 builder.Services.AddSingleton<GlobalContentCatalogService>();
@@ -118,6 +123,9 @@ builder.Services.AddScoped<IGameSessionHistoryService, GameSessionHistoryService
 builder.Services.AddScoped<IProfileGameHistoryService, ProfileGameHistoryService>();
 
 var app = builder.Build();
+
+// Fail fast before the server starts accepting requests.
+_ = app.Services.GetRequiredService<IScenarioContentRegistry>();
 
 using (var scope = app.Services.CreateScope())
 {

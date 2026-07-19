@@ -10,7 +10,7 @@ public enum CharacterGenerationMode { Classic }
 
 public sealed class RoomGameSettings
 {
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
     public int Version { get; set; } = CurrentVersion;
     public GamePreset Preset { get; set; } = GamePreset.Classic;
 
@@ -58,6 +58,9 @@ public sealed class RoomGameSettings
     public int StartingInventoryCount { get; set; } = 1;
 
     public CharacterGenerationMode CharacterGenerationMode { get; set; } = CharacterGenerationMode.Classic;
+    public ScenarioScheduleSettings? ScenarioSchedule { get; set; } = new();
+    public BunkerIntelMode? BunkerIntelMode { get; set; } = Bunker.Models.BunkerIntelMode.Progressive;
+    public int BunkerIntelIntervalRounds { get; set; } = 2;
 }
 
 public sealed record LobbyGameSettingsDto(
@@ -100,7 +103,14 @@ public sealed record LobbyGameSettingsDto(
     int BonusInventoryRound,
     int BonusInventoryCount,
     int StartingInventoryCount,
-    string CharacterGenerationMode);
+    string CharacterGenerationMode,
+    bool ScenarioEnabled = true,
+    int ScenarioFirstAfterRound = 3,
+    int ScenarioIntervalRounds = 3,
+    string ScenarioTriggerPhase = "after_round_before_voting",
+    IReadOnlyList<string>? ScenarioEnabledTypes = null,
+    string BunkerIntelMode = "Progressive",
+    int BunkerIntelIntervalRounds = 2);
 
 public sealed record LobbySettingsWarningDto(string Code, string Message);
 public sealed record LobbyAuditEventDto(long Id, DateTimeOffset OccurredAtUtc, string ActionType, string Summary, string Result);

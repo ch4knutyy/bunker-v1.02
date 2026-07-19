@@ -221,7 +221,7 @@ public partial class GameHub
         await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
         await SendVotingAdminState(Clients.Client(room.HostConnectionId), room);
         await SendPlayerHostControlData(room);
-        if (room.Bunker != null) await Clients.Group(room.Id).SendAsync("BunkerChanged", new { bunker = room.Bunker.ToClientInfo() });
+        if (room.Bunker != null) await BroadcastBunkerIntelProjection(room);
         if (room.Apocalypse != null) await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
         await BroadcastOmniscientStateToAuthorizedSpectators(room);
     }

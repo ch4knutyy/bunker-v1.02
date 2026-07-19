@@ -41,6 +41,8 @@ namespace Bunker.Models
 		public Fact Fact { get; set; } = new();
         public SpecialCard SpecialCard { get; set; } = new();
         public List<SpecialCard> SpecialCards { get; set; } = new();
+        public List<EventSpecialCard> EventSpecialCards { get; set; } = new();
+        public List<PrivateInspectedFact> PrivateInspectedFacts { get; set; } = new();
 
 		// Відстеження відкритих характеристик
 		public RevealedCharacteristics Revealed { get; set; } = new();

@@ -40,6 +40,11 @@ namespace Bunker.Hubs
         private readonly RoomGameSettingsService _roomGameSettings;
         private readonly BunkerResourceService _bunkerResources;
         private readonly GmPanelStateBuilder _gmPanelStateBuilder;
+        private readonly ScenarioSchedulerService _scenarioScheduler;
+        private readonly ScenarioRunnerService _scenarioRunner;
+        private readonly BunkerIntelService _bunkerIntel;
+        private readonly EventSpecialCardService _eventSpecialCards;
+        private readonly IScenarioContentRegistry _scenarioContent;
         private readonly IAuthorizationService? _authorizationService;
         private GmCapability? _activeDirectorCapability;
         private readonly ILogger<GameHub> _logger;
@@ -63,7 +68,12 @@ namespace Bunker.Hubs
             IRoomRecoveryCoordinator? roomRecovery = null,
             GmPanelStateBuilder? gmPanelStateBuilder = null,
             IAuthorizationService? authorizationService = null,
-            BunkerResourceService? bunkerResources = null)
+            BunkerResourceService? bunkerResources = null,
+            ScenarioSchedulerService? scenarioScheduler = null,
+            ScenarioRunnerService? scenarioRunner = null,
+            BunkerIntelService? bunkerIntel = null,
+            EventSpecialCardService? eventSpecialCards = null,
+            IScenarioContentRegistry? scenarioContent = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -98,6 +108,25 @@ namespace Bunker.Hubs
 			_gmPanelStateBuilder = gmPanelStateBuilder ??
 				throw new ArgumentNullException(nameof(gmPanelStateBuilder));
 			_authorizationService = authorizationService;
+            _bunkerIntel = bunkerIntel ?? new BunkerIntelService();
+            if (scenarioScheduler == null || scenarioRunner == null || eventSpecialCards == null || scenarioContent == null)
+            {
+                var fallbackContent = scenarioContent ?? new ScenarioContentRegistry(Path.Combine(
+                    Directory.GetCurrentDirectory(), "wwwroot", "data", "scenario"));
+                _scenarioContent = fallbackContent;
+                _scenarioScheduler = scenarioScheduler ?? new ScenarioSchedulerService(fallbackContent, TimeProvider.System);
+                _eventSpecialCards = eventSpecialCards ?? new EventSpecialCardService(
+                    fallbackContent, _bunkerResources, _bunkerIntel, generator, TimeProvider.System);
+                _scenarioRunner = scenarioRunner ?? new ScenarioRunnerService(
+                    _scenarioScheduler, _eventSpecialCards, _bunkerIntel, TimeProvider.System);
+            }
+            else
+            {
+                _scenarioContent = scenarioContent;
+                _scenarioScheduler = scenarioScheduler;
+                _scenarioRunner = scenarioRunner;
+                _eventSpecialCards = eventSpecialCards;
+            }
 			_logger = logger;
         }
 

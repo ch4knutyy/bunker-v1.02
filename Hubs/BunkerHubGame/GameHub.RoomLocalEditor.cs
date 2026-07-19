@@ -71,7 +71,7 @@ public partial class GameHub
     private async Task BroadcastRoomLocalEdit(Room room, string category, string? targetPlayerId, string fieldId)
     {
         if (category == RoomLocalEditorCategories.Bunker && room.Bunker != null)
-            await Clients.Group(room.Id).SendAsync("BunkerChanged", new { bunker = room.Bunker.ToClientInfo() });
+            await BroadcastBunkerIntelProjection(room);
         else if (category == RoomLocalEditorCategories.Apocalypse && room.Apocalypse != null)
             await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
         else if (category == RoomLocalEditorCategories.Player && !string.IsNullOrWhiteSpace(targetPlayerId) &&

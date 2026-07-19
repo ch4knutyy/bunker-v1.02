@@ -325,8 +325,27 @@ namespace Bunker.Hubs
                 player.HasRevealedAllAfterElimination = false;
                 eliminatedName = player.Name;
                 _roomService.UpdatePlayer(eliminatedConnectionId, player);
-                TryMarkGameFinishedAfterElimination(room, "vote", out gameCompletion);
-                resultMessage = $"Гравець {eliminatedName} елімінований за рішенням ведучого";
+                var guaranteeAvailable = RoomService.GetGameplayPlayersSnapshot(room)
+                    .Select(entry => entry.Value)
+                    .Any(owner => owner.Id != player.Id && owner.EventSpecialCards.Any(card =>
+                        card.RemainingUses > 0 &&
+                        string.Equals(card.DefinitionId, "anonymous_guarantee", StringComparison.OrdinalIgnoreCase)));
+                if (guaranteeAvailable)
+                {
+                    room.PendingElimination = new PendingEliminationState
+                    {
+                        PlayerId = player.Id.ToString("N"),
+                        PlayerName = player.Name,
+                        Round = room.CurrentRound,
+                        ExpiresAtUtc = DateTimeOffset.UtcNow.AddSeconds(ScenarioRules.PrivateChoiceTimeoutSeconds)
+                    };
+                    resultMessage = $"Гравець {eliminatedName} очікує завершення вікна гарантії";
+                }
+                else
+                {
+                    TryMarkGameFinishedAfterElimination(room, "vote", out gameCompletion);
+                    resultMessage = $"Гравець {eliminatedName} елімінований за рішенням ведучого";
+                }
                 eliminateConnectionId = eliminatedConnectionId;
             }
             else
