@@ -1,0 +1,159 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "status": "bunker_intel_foundation_v1",
+    "languages": [
+      "uk",
+      "en",
+      "ru"
+    ]
+  },
+  "modes": [
+    {
+      "id": "all_visible",
+      "label": {
+        "uk": "Усе відомо одразу",
+        "en": "All visible immediately",
+        "ru": "Всё известно сразу"
+      }
+    },
+    {
+      "id": "progressive",
+      "label": {
+        "uk": "Поступове розкриття",
+        "en": "Progressive reveal",
+        "ru": "Постепенное раскрытие"
+      }
+    },
+    {
+      "id": "events_only",
+      "label": {
+        "uk": "Лише через події",
+        "en": "Events only",
+        "ru": "Только через события"
+      }
+    }
+  ],
+  "defaultMode": "progressive",
+  "legacyRoomFallbackMode": "all_visible",
+  "alwaysPublicFields": [
+    "name",
+    "description",
+    "capacity",
+    "location"
+  ],
+  "categories": [
+    {
+      "id": "condition",
+      "label": {
+        "uk": "Стан",
+        "en": "Condition",
+        "ru": "Состояние"
+      },
+      "hiddenPlaceholder": {
+        "uk": "Не досліджено",
+        "en": "Not inspected",
+        "ru": "Не исследовано"
+      },
+      "progressiveOrder": 1
+    },
+    {
+      "id": "food",
+      "label": {
+        "uk": "Їжа",
+        "en": "Food",
+        "ru": "Еда"
+      },
+      "hiddenPlaceholder": {
+        "uk": "Невідомо",
+        "en": "Unknown",
+        "ru": "Неизвестно"
+      },
+      "progressiveOrder": 2,
+      "runtimeSource": "SuppliesMonths"
+    },
+    {
+      "id": "water",
+      "label": {
+        "uk": "Вода",
+        "en": "Water",
+        "ru": "Вода"
+      },
+      "hiddenPlaceholder": {
+        "uk": "Невідомо",
+        "en": "Unknown",
+        "ru": "Неизвестно"
+      },
+      "progressiveOrder": 3,
+      "runtimeSource": "WaterMonths"
+    },
+    {
+      "id": "facilities",
+      "label": {
+        "uk": "Приміщення",
+        "en": "Facilities",
+        "ru": "Помещения"
+      },
+      "hiddenPlaceholder": {
+        "uk": "Не досліджено",
+        "en": "Not inspected",
+        "ru": "Не исследовано"
+      },
+      "progressiveOrder": 4
+    },
+    {
+      "id": "resources",
+      "label": {
+        "uk": "Ресурси",
+        "en": "Resources",
+        "ru": "Ресурсы"
+      },
+      "hiddenPlaceholder": {
+        "uk": "Не досліджено",
+        "en": "Not inspected",
+        "ru": "Не исследовано"
+      },
+      "progressiveOrder": 5
+    },
+    {
+      "id": "problems",
+      "label": {
+        "uk": "Проблеми",
+        "en": "Problems",
+        "ru": "Проблемы"
+      },
+      "hiddenPlaceholder": {
+        "uk": "Не виявлено",
+        "en": "Not identified",
+        "ru": "Не выявлено"
+      },
+      "progressiveOrder": 6
+    }
+  ],
+  "visibilityStates": [
+    {
+      "id": "hidden",
+      "label": {
+        "uk": "Приховано",
+        "en": "Hidden",
+        "ru": "Скрыто"
+      }
+    },
+    {
+      "id": "private",
+      "label": {
+        "uk": "Відомо лише вам",
+        "en": "Known only to you",
+        "ru": "Известно только вам"
+      }
+    },
+    {
+      "id": "public",
+      "label": {
+        "uk": "Відомо всім",
+        "en": "Known to everyone",
+        "ru": "Известно всем"
+      }
+    }
+  ]
+}
