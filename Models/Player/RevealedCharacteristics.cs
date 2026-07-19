@@ -12,6 +12,7 @@ namespace Bunker.Models
         public bool CharacterTrait { get; set; } = false;
         public bool Phobia { get; set; } = false;
         public bool Inventory { get; set; } = false;
+        public bool Property { get; set; } = false;
 		public bool Fact { get; set; } = false;
         public bool SpecialCard { get; set; } = false;
 

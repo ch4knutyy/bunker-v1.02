@@ -40,6 +40,7 @@ namespace Bunker.Models
 		public HashSet<string> ProcessedOmniscientCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		public HashSet<string> ProcessedLobbyCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		public HashSet<string> ProcessedGameResetCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+		public HashSet<string> ProcessedSpecialCardCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		[System.Text.Json.Serialization.JsonIgnore]
 		public object GameSettingsSyncRoot { get; } = new();
 		[System.Text.Json.Serialization.JsonIgnore]

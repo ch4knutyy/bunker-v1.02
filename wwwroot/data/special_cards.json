@@ -1209,6 +1209,72 @@
           "ru": "Владелец карты и выбранный игрок обмениваются одной случайной уже раскрытой характеристикой."
         }
       }
+    },
+    {
+      "id": "property_swap",
+      "name": "Обмін майном",
+      "description": "Власник карти обмінюється майном з іншим активним гравцем.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "property_swap",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Обмін майном",
+          "en": "Property Exchange",
+          "ru": "Обмен имуществом"
+        },
+        "description": {
+          "uk": "Власник карти обмінюється майном з іншим активним гравцем.",
+          "en": "The card owner exchanges property with another active player.",
+          "ru": "Владелец карты обменивается имуществом с другим активным игроком."
+        }
+      }
+    },
+    {
+      "id": "property_reroll",
+      "name": "Нове придбання",
+      "description": "Власник карти отримує нове випадкове майно.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "property_reroll",
+      "requiresTarget": false,
+      "_i18n": {
+        "name": {
+          "uk": "Нове придбання",
+          "en": "New Acquisition",
+          "ru": "Новое приобретение"
+        },
+        "description": {
+          "uk": "Власник карти отримує нове випадкове майно.",
+          "en": "The card owner receives new random property.",
+          "ru": "Владелец карты получает новое случайное имущество."
+        }
+      }
+    },
+    {
+      "id": "property_reveal",
+      "name": "Інспекція майна",
+      "description": "Власник карти публічно розкриває майно іншого активного гравця.",
+      "isSecret": false,
+      "isOneTimeUse": true,
+      "phase": "discussion",
+      "effectType": "property_reveal",
+      "requiresTarget": true,
+      "_i18n": {
+        "name": {
+          "uk": "Інспекція майна",
+          "en": "Property Inspection",
+          "ru": "Инспекция имущества"
+        },
+        "description": {
+          "uk": "Власник карти публічно розкриває майно іншого активного гравця.",
+          "en": "The card owner publicly reveals another active player's property.",
+          "ru": "Владелец карты публично раскрывает имущество другого активного игрока."
+        }
+      }
     }
   ]
 }

@@ -46,7 +46,8 @@ public sealed class OmniscientHiddenStateService(TimeProvider timeProvider, Game
             new("phobia", player.Phobia.Name, r.Phobia, player.Phobia.Description),
             new("fact", First(player.Fact.Name, player.Fact.Description) ?? "", r.Fact, First(player.Fact.Description, player.Fact.Tooltip)),
             new("professionItem", player.ProfessionItem.Name, r.Profession),
-            new("inventory", string.Join("; ", player.Inventory.Items.Select(i => i.Name)), r.Inventory)
+            new("inventory", string.Join("; ", player.Inventory.Items.Select(i => i.Name)), r.Inventory),
+            new("property", player.Property?.GetDisplayText("uk") ?? "Майно відсутнє", r.Property)
         };
         var specialCards = player.SpecialCards.Append(player.SpecialCard)
             .Where(card => card != null && (!string.IsNullOrWhiteSpace(card.Id) || !string.IsNullOrWhiteSpace(card.Name)))

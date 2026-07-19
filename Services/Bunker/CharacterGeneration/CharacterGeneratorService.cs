@@ -112,6 +112,7 @@ namespace Bunker.Services
                 PhysicalHealth = GeneratePhysicalHealth(existingRoomPlayers),
                 MentalHealth = GenerateMentalHealth(existingRoomPlayers),
                 Inventory = GenerateInventory(),
+                Property = GenerateProperty(existingRoomPlayers),
                 CharacterTrait = GenerateCharacterTrait(),
                 Phobia = GeneratePhobia(),
 				Fact = GenerateFact(),
@@ -134,15 +135,159 @@ namespace Bunker.Services
                 "MentalHealth" => generated.MentalHealth,
                 "Hobby" => generated.Hobby,
                 "CharacterTrait" => generated.CharacterTrait,
+                "Property" => generated.Property,
                 "Fact" => generated.Fact,
                 _ => null
             };
         }
 
+		#region Property Generation
 
-        #region Age Generation
+		public GeneratedProperty? GenerateProperty(
+            IEnumerable<Player>? existingRoomPlayers = null,
+            string? excludedDefinitionId = null)
+        {
+            var definitions = _gameData.Properties;
+            if (definitions.Count == 0)
+            {
+                _logger.LogError("Неможливо згенерувати Property: каталог property.json порожній");
+                return null;
+            }
 
-        private int GenerateRealisticAge(Random random)
+            var usedIds = (existingRoomPlayers ?? [])
+                .Where(player => !player.IsEliminated && player.Property != null)
+                .Select(player => player.Property!.DefinitionId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(excludedDefinitionId))
+            {
+                usedIds.Add(excludedDefinitionId);
+            }
+
+            var candidates = definitions
+                .Where(definition => !usedIds.Contains(definition.Id))
+                .ToList();
+            if (candidates.Count == 0)
+            {
+                candidates = definitions.ToList();
+            }
+
+            var definition = candidates[_random.Next(candidates.Count)];
+            var generatedValues = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (var field in definition.RandomProperties ?? [])
+            {
+                if (!string.Equals(field.Type, "integer", StringComparison.OrdinalIgnoreCase) ||
+                    string.IsNullOrWhiteSpace(field.Key) ||
+                    field.Min > field.Max)
+                {
+                    _logger.LogError(
+                        "Property {PropertyId} має некоректне random field {PropertyKey} ({PropertyType}, {Min}..{Max})",
+                        definition.Id,
+                        field.Key,
+                        field.Type,
+                        field.Min,
+                        field.Max);
+                    return null;
+                }
+
+                if (!TryGeneratePropertyInteger(definition, field, out var generatedValue))
+                {
+                    return null;
+                }
+                generatedValues[field.Key] = generatedValue;
+            }
+
+            var generated = new GeneratedProperty
+            {
+                DefinitionId = definition.Id,
+                GeneratedValues = generatedValues,
+                Category = definition.Category,
+                SizeClass = definition.SizeClass,
+                ResourceTags = definition.ResourceTags?.ToList() ?? new(),
+                ProtectionTags = definition.ProtectionTags?.ToList() ?? new(),
+                ThreatUsage = definition.ThreatUsage == null
+                    ? null
+                    : new Dictionary<string, JsonElement>(
+                        definition.ThreatUsage,
+                        StringComparer.OrdinalIgnoreCase)
+            };
+            generated.LocalizedDisplay = _gameData.FormatPropertyAllLanguages(generated);
+            return generated;
+        }
+
+        private bool TryGeneratePropertyInteger(
+            PropertyDefinition definition,
+            PropertyRandomFieldDefinition field,
+            out int value)
+        {
+            if (!field.WeightsFromProfile)
+            {
+                value = checked((int)_random.NextInt64(field.Min, (long)field.Max + 1));
+                return true;
+            }
+
+            if (string.IsNullOrWhiteSpace(definition.ConditionProfile) ||
+                !_gameData.PropertyConditionProfiles.TryGetValue(
+                    definition.ConditionProfile,
+                    out var profile))
+            {
+                _logger.LogError(
+                    "Property {PropertyId} не може згенерувати {PropertyKey}: conditionProfile {ProfileName} відсутній",
+                    definition.Id,
+                    field.Key,
+                    definition.ConditionProfile);
+                value = default;
+                return false;
+            }
+
+            var weightedLevels = new List<(int Level, int Weight)>();
+            foreach (var weight in profile.Weights ?? [])
+            {
+                if (int.TryParse(
+                        weight.Key,
+                        System.Globalization.NumberStyles.Integer,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out var level) &&
+                    level >= field.Min &&
+                    level <= field.Max &&
+                    weight.Value > 0)
+                {
+                    weightedLevels.Add((level, weight.Value));
+                }
+            }
+
+            var totalWeight = weightedLevels.Sum(entry => (long)entry.Weight);
+            if (totalWeight <= 0)
+            {
+                _logger.LogError(
+                    "Property {PropertyId} не може згенерувати {PropertyKey}: сума доступних weights дорівнює нулю",
+                    definition.Id,
+                    field.Key);
+                value = default;
+                return false;
+            }
+
+            var roll = _random.NextInt64(totalWeight);
+            long cumulative = 0;
+            foreach (var entry in weightedLevels.OrderBy(entry => entry.Level))
+            {
+                cumulative += entry.Weight;
+                if (roll < cumulative)
+                {
+                    value = entry.Level;
+                    return true;
+                }
+            }
+
+            value = weightedLevels[^1].Level;
+            return true;
+        }
+
+		#endregion
+
+		#region Age Generation
+
+		private int GenerateRealisticAge(Random random)
         {
             int roll = random.Next(100);
 

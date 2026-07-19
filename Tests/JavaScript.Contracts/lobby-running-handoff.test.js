@@ -9,10 +9,13 @@ const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 
 test('lobby start uses one ordered canonical running handoff', () => {
   const start = lobbyHub.slice(lobbyHub.indexOf('public async Task StartGameFromLobby'));
-  const stateTransition = start.indexOf('_roomService.StartGame(room.Id');
-  const freeze = start.indexOf('_roomGameSettings.FreezeForStart(room');
+  const stateTransition = start.search(/_roomService\.StartGame\(\s*room\.Id/);
+  const freeze = start.search(/_roomGameSettings\.FreezeForStart\(\s*room/);
   const preparation = start.indexOf('PrepareLobbyGameplayCharacters(room)');
-  assert.ok(stateTransition < freeze && freeze < preparation, 'validation/state transition must precede freeze and generation');
+  assert.ok(
+    stateTransition >= 0 && freeze >= 0 && preparation >= 0 &&
+    stateTransition < freeze && freeze < preparation,
+    'validation/state transition must precede freeze and generation');
   assert.match(start, /lock \(room\.GameSettingsSyncRoot\)/);
 
   const handoff = roomsHub.slice(roomsHub.indexOf('private async Task CompleteLobbyStart'));
@@ -39,12 +42,12 @@ test('lobby start uses one ordered canonical running handoff', () => {
 test('personal snapshots use verified current connections and public payload does not generate characters', () => {
   const preparation = roomsHub.slice(roomsHub.indexOf('private void PrepareLobbyGameplayCharacters'), roomsHub.indexOf('private async Task CompleteLobbyStart'));
   assert.match(preparation, /GetGameplayPlayersSnapshot\(room\)/);
-  assert.match(preparation, /EnsurePlayerHasGeneratedData\(player\)/);
+  assert.match(preparation, /EnsurePlayerHasGeneratedData\(player, room, initializeProperty: true\)/);
   assert.match(roomsHub, /GetCurrentConnectionId\(room, RoomService\.GetPlayerKey\(player\)\)/);
   assert.match(roomsHub, /GetPlayerRoomId\(currentConnectionId\)/);
   assert.match(roomsHub, /foreach \(var entry in RoomService\.GetGameplayPlayersSnapshot\(room\)\)/);
   assert.match(gameMasterHub, /SendPersonalPlayerSnapshot[\s\S]*?new \{ player, reason \}/);
-  for (const field of ['Profession', 'PhysicalHealth', 'MentalHealth', 'Hobby', 'CharacterTrait', 'Phobia', 'Fact', 'Inventory', 'SpecialCard']) {
+  for (const field of ['Profession', 'PhysicalHealth', 'MentalHealth', 'Hobby', 'CharacterTrait', 'Phobia', 'Fact', 'Inventory', 'Property', 'SpecialCard']) {
     assert.match(roomsHub, new RegExp(`Has[^\\n]*${field}|player\\.${field}`), `${field} must be part of the generated personal player state`);
   }
 

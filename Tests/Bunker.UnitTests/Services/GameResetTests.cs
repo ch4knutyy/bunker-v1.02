@@ -36,6 +36,7 @@ public class GameResetTests
         Assert.Null(room.FrozenGameSettings);
         Assert.Empty(room.CurrentRoundReveals);
         Assert.Empty(room.RoundDiceRolls);
+        Assert.Empty(room.ProcessedSpecialCardCommandIds);
         Assert.Empty(room.VotingReadyResponses);
         Assert.Equal(GameTimerStatus.Stopped, room.GameTimer.Status);
     }
@@ -62,9 +63,11 @@ public class GameResetTests
         Assert.Equal(0, player.SeatNumber);
         Assert.Empty(player.Profession.Name);
         Assert.Empty(player.Inventory.Items);
+        Assert.Null(player.Property);
         Assert.Empty(player.SpecialCards);
         Assert.Empty(player.AdditionalConditionEffects);
         Assert.False(player.Revealed.Profession);
+        Assert.False(player.Revealed.Property);
     }
 
     [Fact]
@@ -111,8 +114,14 @@ public class GameResetTests
             SeatNumber = 1,
             Profession = new Profession { Name = "Doctor" },
             Inventory = new Inventory { Items = [new Item { Name = "Radio" }] },
+            Property = new GeneratedProperty
+            {
+                DefinitionId = "property-reset",
+                GeneratedValues = new() { ["value"] = 5 },
+                LocalizedDisplay = new() { ["uk"] = "Майно 5" }
+            },
             SpecialCards = [new SpecialCard { Name = "Card" }],
-            Revealed = new RevealedCharacteristics { Profession = true },
+            Revealed = new RevealedCharacteristics { Profession = true, Property = true },
             AdditionalConditionEffects = [new PlayerConditionEffect { Name = "Condition" }]
         };
         var sessionId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
@@ -148,6 +157,7 @@ public class GameResetTests
             GameTimer = new GameTimerState { Status = GameTimerStatus.Running }
         };
         room.Players[player.ConnectionId] = player;
+        room.ProcessedSpecialCardCommandIds.Add("property-card-command");
         return room;
     }
 }

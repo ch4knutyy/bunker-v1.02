@@ -77,6 +77,7 @@ public sealed class GmPanelStateTests
 		room.ResolvedBunkerCapacity = 5;
 		player.Revealed.Profession = true;
 		player.Revealed.Hobby = true;
+		player.Revealed.Property = true;
 		room.CurrentTurnPlayerId = player.StablePlayerId;
 
 		var state = builder.TryBuild(room, host)!;
@@ -94,7 +95,7 @@ public sealed class GmPanelStateTests
 		var playerSummary = Assert.Single(
 			state.Players,
 			item => item.PlayerId == player.StablePlayerId);
-		Assert.Equal(2, playerSummary.RevealedCount);
+		Assert.Equal(3, playerSummary.RevealedCount);
 		Assert.True(playerSummary.IsCurrentTurn);
 	}
 

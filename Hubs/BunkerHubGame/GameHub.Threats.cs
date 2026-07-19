@@ -191,6 +191,62 @@ namespace Bunker.Hubs
             }
 
             var (itemSource, itemToken) = ParseThreatItemToken(itemInstanceIdOrName);
+            if (itemSource == "property")
+            {
+                var property = player.Property;
+                if (property == null ||
+                    !string.Equals(property.DefinitionId, itemToken, StringComparison.OrdinalIgnoreCase))
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", "property_not_available");
+                    return;
+                }
+
+                const string propertySourceType = "property";
+                if (FindActiveThreatContributionBySource(threatState, propertySourceType, property.DefinitionId) != null)
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", "Це майно вже зарезервовано для загрози");
+                    return;
+                }
+
+                if (!player.Revealed.Property)
+                {
+                    var revealedData = GetRevealedDataForCharacteristic(player, "Property");
+                    if (revealedData == null)
+                    {
+                        await Clients.Caller.SendAsync("ReceiveError", "property_definition_not_found");
+                        return;
+                    }
+
+                    SetCharacteristicRevealed(player, "Property");
+                    await Clients.Group(context.Room.Id).SendAsync("CharacteristicRevealed", new
+                    {
+                        playerName = player.Name,
+                        connectionId = player.ConnectionId,
+                        characteristicKey = "Property",
+                        data = revealedData,
+                        forcedByThreatContribution = true
+                    });
+                }
+
+                var propertyTags = property.ResourceTags
+                    .Concat(property.ProtectionTags)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                AddThreatContribution(
+                    context.Room,
+                    threatState,
+                    propertySourceType,
+                    property.DefinitionId,
+                    RoomService.GetPlayerKey(player),
+                    true,
+                    true,
+                    propertyTags,
+                    property.GetDisplayText("uk"));
+                await Clients.Caller.SendAsync("ThreatPrivateMessage", new { message = "Майно додано до операції" });
+                await BroadcastThreatState(context.Room, context.RoomId);
+                return;
+            }
+
             var item = ResolvePlayerThreatItem(player, itemSource, itemToken);
             if (item == null)
             {
@@ -521,7 +577,7 @@ namespace Bunker.Hubs
                 HasAny(c.TagsSnapshot, GetRadiationSolverTags()));
             var hasControl = threatState.Contributions.Any(c =>
                 c.IsAccepted &&
-                (c.SourceType == "personal_inventory" || c.SourceType == "profession_item" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility") &&
+                (c.SourceType == "personal_inventory" || c.SourceType == "profession_item" || c.SourceType == "property" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility") &&
                 (HasAny(c.TagsSnapshot, GetRadiationResourceTags()) || HasAny(c.TagsSnapshot, GetRadiationFacilityTags())));
             var protectedVolunteer = hasVolunteer && threatState.Contributions.Any(c =>
                 c.IsAccepted &&
@@ -1124,6 +1180,7 @@ namespace Bunker.Hubs
 
                 if (contribution.SourceType == "personal_inventory" ||
                     contribution.SourceType == "profession_item" ||
+                    contribution.SourceType == "property" ||
                     contribution.SourceType == "bunker_resource" ||
                     contribution.SourceType == "bunker_facility")
                 {
@@ -1168,7 +1225,9 @@ namespace Bunker.Hubs
                 {
                     usefulContributionIds.Add(contribution.ContributionId);
                 }
-                else if (contribution.SourceType == "personal_inventory" || contribution.SourceType == "profession_item")
+                else if (contribution.SourceType == "personal_inventory" ||
+                         contribution.SourceType == "profession_item" ||
+                         contribution.SourceType == "property")
                 {
                     bonuses.IneffectiveItemContributionIds.Add(contribution.ContributionId);
                 }
@@ -1423,7 +1482,7 @@ namespace Bunker.Hubs
             var protectedPlayers = GetThreatParticipantIds(state).Count(id => state.Contributions.Any(c =>
                 IsActiveThreatContribution(c) && c.OwnerPlayerId == id && c.TagsSnapshot.Any(tag => protectionTags.Contains(tag, StringComparer.OrdinalIgnoreCase))));
             return new PlanChoiceScoreRequest(planModel, capabilities, limits, assetScores, thresholds,
-                Count("personal_inventory", resourceTags), Count("bunker_resource", resourceTags),
+                Count("personal_inventory", resourceTags) + Count("property", resourceTags), Count("bunker_resource", resourceTags),
                 Count("bunker_facility", facilityTags), protectedPlayers);
         }
 
@@ -1658,7 +1717,7 @@ namespace Bunker.Hubs
                 {
                     team = $"{participantIds.Count}/{teamMax}",
                     professionContributions = threatState.Contributions.Count(c => IsActiveThreatContribution(c) && c.SourceType == "profession"),
-                    equipmentContributions = threatState.Contributions.Count(c => IsActiveThreatContribution(c) && (c.SourceType == "personal_inventory" || c.SourceType == "profession_item" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility")),
+                    equipmentContributions = threatState.Contributions.Count(c => IsActiveThreatContribution(c) && (c.SourceType == "personal_inventory" || c.SourceType == "profession_item" || c.SourceType == "property" || c.SourceType == "bunker_resource" || c.SourceType == "bunker_facility")),
                     protectedParticipants = protectedIds.Count,
                     hints = threatState.OperationScaling.IsCalculated
                         ? threatState.OperationScaling.HintTokens + threatState.OperationBonuses.HintTokens
@@ -1868,7 +1927,7 @@ namespace Bunker.Hubs
 
             var source = trimmed[..separatorIndex].Trim().ToLowerInvariant();
             var token = trimmed[(separatorIndex + 1)..].Trim();
-            return source is "profession" or "inventory"
+            return source is "profession" or "inventory" or "property"
                 ? (source, token)
                 : ("inventory", trimmed);
         }

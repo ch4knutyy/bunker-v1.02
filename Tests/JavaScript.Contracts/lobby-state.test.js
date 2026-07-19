@@ -5,7 +5,7 @@ const dto = fs.readFileSync('Models/Game/Lobby/LobbyState.cs','utf8');
 const client = fs.readFileSync('wwwroot/js/game.js','utf8');
 test('lobby uses one safe canonical event and preview-token start', () => {
   assert.match(hub,/LobbyStateUpdated/); assert.match(hub,/PreviewStartGameFromLobby/); assert.match(hub,/StartGameFromLobby/);
-  assert.match(rooms,/lobby_preview_required/); assert.doesNotMatch(dto,/ConnectionId|HostToken|Inventory|SpecialCard|Profession/);
+  assert.match(rooms,/lobby_preview_required/); assert.doesNotMatch(dto,/ConnectionId|HostToken|Inventory|Property|SpecialCard|Profession/);
 });
 test('character generation is deferred and excludes spectators', () => {
   assert.match(rooms,/room\?\.State == RoomState\.Lobby/); assert.match(rooms,/GetGameplayPlayersSnapshot\(room\)/);

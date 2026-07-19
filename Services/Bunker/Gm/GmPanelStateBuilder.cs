@@ -152,6 +152,7 @@ public sealed class GmPanelStateBuilder
 			revealed.CharacterTrait,
 			revealed.Phobia,
 			revealed.Inventory,
+			revealed.Property,
 			revealed.Fact,
 			revealed.SpecialCard
 		}.Count(value => value);

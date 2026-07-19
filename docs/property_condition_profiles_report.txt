@@ -1,0 +1,38 @@
+PROPERTY CONDITION PROFILES V3
+
+Records processed: 300
+Unique IDs: 300
+Legacy conditionPercent fields removed: 280
+conditionLevel fields added: 300
+Condition profiles defined: 16
+
+Profiles used by current 300 records:
+- collectibles: 16
+- construction_materials: 20
+- fresh_food: 8
+- general_item: 8
+- shelter: 20
+- stored_food: 12
+- stored_goods: 8
+- technical: 148
+- tool_set: 20
+- transport: 40
+
+Reserved profiles for future records:
+- water_quality
+- fuel_quality
+- medical_supplies
+- seeds
+- textiles
+- living
+
+Special restrictions:
+- Старий ...: levels 1-4
+- Покинутий ...: levels 1-3
+- Колекційний ...: levels 3-6
+
+Runtime compatibility:
+- GeneratedValues remains integer-based.
+- conditionLevel stores a value from 1 to 6.
+- conditionProfile determines localized text.
+- Codex patch is required before replacing production property.json.

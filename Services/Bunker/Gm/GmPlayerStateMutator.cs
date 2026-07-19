@@ -6,7 +6,7 @@ public static class GmPlayerStateMutator
 {
     public static bool CanHideCharacteristic(string key) => key is
         "Personality" or "Body" or "Profession" or "PhysicalHealth" or "MentalHealth" or "Hobby" or
-        "CharacterTrait" or "Phobia" or "Inventory" or "Fact" or "SpecialCard";
+        "CharacterTrait" or "Phobia" or "Inventory" or "Property" or "Fact" or "SpecialCard";
 
     public static bool HideCharacteristic(Player player, string key)
     {
@@ -22,6 +22,7 @@ public static class GmPlayerStateMutator
             case "CharacterTrait": player.Revealed.CharacterTrait = false; break;
             case "Phobia": player.Revealed.Phobia = false; break;
             case "Inventory": player.Revealed.Inventory = false; break;
+            case "Property": player.Revealed.Property = false; break;
             case "Fact": player.Revealed.Fact = false; break;
             case "SpecialCard": player.Revealed.SpecialCard = false; break;
             default: return false;

@@ -12,12 +12,22 @@ namespace Bunker.Hubs
             return UseSpecialCardCore(null, targetConnectionId, null);
         }
 
-        public Task UseSpecialCardById(string cardId, string? targetConnectionId, string? useMode = null, string? selectedCharacteristic = null)
+        public Task UseSpecialCardById(
+            string cardId,
+            string? targetConnectionId,
+            string? useMode = null,
+            string? selectedCharacteristic = null,
+            string? commandId = null)
         {
-            return UseSpecialCardCore(cardId, targetConnectionId, useMode, selectedCharacteristic);
+            return UseSpecialCardCore(cardId, targetConnectionId, useMode, selectedCharacteristic, commandId);
         }
 
-        private async Task UseSpecialCardCore(string? cardId, string? targetConnectionId, string? requestedUseMode, string? selectedCharacteristic = null)
+        private async Task UseSpecialCardCore(
+            string? cardId,
+            string? targetConnectionId,
+            string? requestedUseMode,
+            string? selectedCharacteristic = null,
+            string? commandId = null)
         {
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
             var player = _roomService.GetPlayer(Context.ConnectionId);
@@ -42,6 +52,38 @@ namespace Bunker.Hubs
             {
                 await Clients.Caller.SendAsync("ReceiveError", "У вас немає спеціальної карти");
                 return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(commandId))
+            {
+                commandId = commandId.Trim();
+                if (commandId.Length > 100)
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", "invalid_command_id");
+                    return;
+                }
+
+                lock (room.ProcessedSpecialCardCommandIds)
+                {
+                    if (room.ProcessedSpecialCardCommandIds.Contains(commandId))
+                    {
+                        commandId = null;
+                    }
+                }
+                if (commandId == null)
+                {
+                    await Clients.Caller.SendAsync("SpecialCardStateUpdated", new
+                    {
+                        card,
+                        cards = GetPlayerSpecialCards(player),
+                        inventory = player.Inventory,
+                        property = BuildPropertyClientState(player.Property),
+                        result = card.EffectResult,
+                        roundState = BuildRoundState(room),
+                        idempotent = true
+                    });
+                    return;
+                }
             }
 
             if (card.IsUsed || card.IsActive)
@@ -76,9 +118,39 @@ namespace Bunker.Hubs
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(commandId))
+            {
+                bool commandAdded;
+                lock (room.ProcessedSpecialCardCommandIds)
+                {
+                    commandAdded = room.ProcessedSpecialCardCommandIds.Add(commandId);
+                }
+                if (!commandAdded)
+                {
+                    await Clients.Caller.SendAsync("SpecialCardStateUpdated", new
+                    {
+                        card,
+                        cards = GetPlayerSpecialCards(player),
+                        inventory = player.Inventory,
+                        property = BuildPropertyClientState(player.Property),
+                        result = card.EffectResult,
+                        roundState = BuildRoundState(room),
+                        idempotent = true
+                    });
+                    return;
+                }
+            }
+
             var resolution = await ApplySpecialCardEffect(room, player, card, targetPlayer, useMode, selectedCharacteristic);
             if (!resolution.Success)
             {
+                if (!string.IsNullOrWhiteSpace(commandId))
+                {
+                    lock (room.ProcessedSpecialCardCommandIds)
+                    {
+                        room.ProcessedSpecialCardCommandIds.Remove(commandId);
+                    }
+                }
                 await Clients.Caller.SendAsync("ReceiveError", resolution.Error);
                 return;
             }
@@ -110,6 +182,7 @@ namespace Bunker.Hubs
                 card,
                 cards = GetPlayerSpecialCards(player),
                 inventory = player.Inventory,
+                property = BuildPropertyClientState(player.Property),
                 result = resolution.OwnerResult,
                 roundState
             });
@@ -127,6 +200,7 @@ namespace Bunker.Hubs
                 {
                     message = resolution.TargetResult,
                     inventory = targetPlayer.Inventory,
+                    property = BuildPropertyClientState(targetPlayer.Property),
                     specialCards = GetPlayerSpecialCards(targetPlayer)
                 });
             }
@@ -148,6 +222,15 @@ namespace Bunker.Hubs
             }
 
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            _gmAudit.Append(
+                room,
+                RoomService.GetPlayerKey(player),
+                $"special_card_{card.EffectType}",
+                GmAuditResult.Success,
+                "Special card effect applied.",
+                targetPlayer == null ? null : RoomService.GetPlayerKey(targetPlayer),
+                commandId);
+            QueueRoomRecovery(room, "special_card_applied");
 
             _logger.LogInformation(
                 "Гравець {PlayerName} використав спеціальну карту {CardName} у режимі {UseMode} проти {TargetName} у кімнаті {RoomName}",
@@ -225,6 +308,12 @@ namespace Bunker.Hubs
                     return await RevealCharacteristics(room, owner, card, target!, new[] { "Fact" }, publicUse);
                 case "forceRevealAllInventory":
                     return await RevealCharacteristics(room, owner, card, target!, new[] { "Inventory" }, publicUse);
+                case "property_reveal":
+                    return target == null ||
+                           !RoomService.IsGameplayParticipant(target) ||
+                           target.Property == null
+                        ? SpecialCardResolution.Fail("property_target_not_available")
+                        : await RevealCharacteristics(room, owner, card, target, new[] { "Property" }, publicUse);
                 case "forceRevealRandomCharacteristic":
                     return await RevealRandomCharacteristics(room, owner, card, target!, 1, publicUse);
                 case "forceRevealTwoRandomCharacteristics":
@@ -250,6 +339,8 @@ namespace Bunker.Hubs
 
                 case "swapInventoryWithTarget":
                     return SwapInventories(owner, target!, publicUse);
+                case "property_swap":
+                    return await SwapProperties(room, owner, target!, publicUse);
                 case "swapOneRandomInventoryItem":
                     return SwapRandomInventoryItems(owner, target!, publicUse);
                 case "stealRandomSpecialCard":
@@ -306,6 +397,8 @@ namespace Bunker.Hubs
                     return await RerollRandomCharacteristic(room, GetNeighbor(room, owner, 1)!, publicUse);
                 case "rerollTargetSelectedCharacteristic":
                     return await RerollCharacteristic(room, target!, RequireSelectedCharacteristic(selectedCharacteristic), publicUse);
+                case "property_reroll":
+                    return await RerollProperty(room, owner, publicUse);
                 case "copyTargetProfessionUntilRoundEnd":
                     return await CopyProfessionUntilRoundEnd(room, owner, card, target!, publicUse);
                 case "copyTargetHobby":
@@ -513,6 +606,50 @@ namespace Bunker.Hubs
                 $"Інвентар обміняно з гравцем {target.Name}.",
                 publicLog,
                 $"Ваш інвентар обміняно з гравцем {owner.Name}.");
+        }
+
+        private async Task<SpecialCardResolution> SwapProperties(
+            Room room,
+            Player owner,
+            Player target,
+            string? publicLog)
+        {
+            if (owner.Property == null)
+            {
+                return SpecialCardResolution.Fail("property_not_available");
+            }
+            if (!RoomService.IsGameplayParticipant(target) || target.Property == null)
+            {
+                return SpecialCardResolution.Fail("property_target_not_available");
+            }
+
+            (owner.Property, target.Property) = (target.Property, owner.Property);
+            await BroadcastCharacteristicChangedIfRevealed(room, owner, "Property");
+            await BroadcastCharacteristicChangedIfRevealed(room, target, "Property");
+            return SpecialCardResolution.Ok(
+                $"Майно обміняно з гравцем {target.Name}.",
+                publicLog,
+                $"Ваше майно обміняно з гравцем {owner.Name}.");
+        }
+
+        private async Task<SpecialCardResolution> RerollProperty(
+            Room room,
+            Player owner,
+            string? publicLog)
+        {
+            var generated = _generator.GenerateProperty(
+                RoomService.GetGameplayPlayersSnapshot(room)
+                    .Select(entry => entry.Value)
+                    .Where(player => !ReferenceEquals(player, owner)),
+                owner.Property?.DefinitionId);
+            if (generated == null)
+            {
+                return SpecialCardResolution.Fail("property_definition_not_found");
+            }
+
+            owner.Property = generated;
+            await BroadcastCharacteristicChangedIfRevealed(room, owner, "Property");
+            return SpecialCardResolution.Ok("Ви отримали нове майно.", publicLog);
         }
 
         private SpecialCardResolution SwapRandomInventoryItems(Player owner, Player target, string? publicLog)
@@ -907,6 +1044,7 @@ namespace Bunker.Hubs
             "MentalHealth",
             "Hobby",
             "CharacterTrait",
+            "Property",
             "Fact"
         };
 
@@ -944,6 +1082,7 @@ namespace Bunker.Hubs
                 "MentalHealth" => player.MentalHealth,
                 "Hobby" => player.Hobby,
                 "CharacterTrait" => player.CharacterTrait,
+                "Property" => player.Property,
                 "Fact" => player.Fact,
                 _ => null
             };
@@ -960,6 +1099,7 @@ namespace Bunker.Hubs
                 case "MentalHealth": player.MentalHealth = (Bunker.Models.Сharacteristics.MentalHealth)value; break;
                 case "Hobby": player.Hobby = (Bunker.Models.Сharacteristics.Hobby)value; break;
                 case "CharacterTrait": player.CharacterTrait = (Bunker.Models.Сharacteristics.CharacterTrait)value; break;
+                case "Property": player.Property = (GeneratedProperty)value; break;
                 case "Fact": player.Fact = (Bunker.Models.Сharacteristics.Fact)value; break;
             }
         }
@@ -1039,6 +1179,7 @@ namespace Bunker.Hubs
             "CharacterTrait",
             "Phobia",
             "Inventory",
+            "Property",
             "Fact"
         };
 
@@ -1054,6 +1195,7 @@ namespace Bunker.Hubs
             "CharacterTrait" => "Риса характеру",
             "Phobia" => "Фобія",
             "Inventory" => "Інвентар",
+            "Property" => "Майно",
             "Fact" => "Факт",
             _ => key
         };

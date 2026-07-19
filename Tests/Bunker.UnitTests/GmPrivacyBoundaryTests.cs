@@ -29,7 +29,7 @@ public sealed class GmPrivacyBoundaryTests
         {
             "Personality", "Body", "Profession", "ProfessionItem", "PhysicalHealth",
             "AdditionalConditionEffects", "MentalHealth", "Hobby", "CharacterTrait",
-            "Phobia", "Inventory", "Fact", "SpecialCardCount"
+            "Phobia", "Inventory", "Property", "Fact", "SpecialCardCount"
         };
 
         Assert.DoesNotContain(forbidden, names.Contains);

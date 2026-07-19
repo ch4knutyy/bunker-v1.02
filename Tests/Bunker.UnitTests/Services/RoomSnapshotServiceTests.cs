@@ -94,6 +94,37 @@ public sealed class RoomSnapshotServiceTests
     }
 
     [Fact]
+    public void PropertyGeneratedValuesSurviveSnapshotRestoreExactly()
+    {
+        var context = CreateContext();
+        context.Target.Property = new GeneratedProperty
+        {
+            DefinitionId = "property-test",
+            GeneratedValues = new() { ["capacity"] = 17 },
+            LocalizedDisplay = new() { ["uk"] = "Сховище на 17 місць", ["en"] = "Shelter for 17" },
+            ResourceTags = ["shelter"],
+            ProtectionTags = ["radiation_protection"]
+        };
+        context.Target.Revealed.Property = true;
+        var snapshot = context.Snapshots.CreateSnapshot(context.Room, "host-player", "property");
+
+        context.Target.Property.GeneratedValues["capacity"] = 99;
+        context.Target.Property.LocalizedDisplay["uk"] = "mutated";
+        context.Target.Revealed.Property = false;
+
+        Assert.True(context.Snapshots.RestoreSnapshot(
+            context.Room,
+            snapshot.SnapshotId,
+            "host-player",
+            "restore-property").Success);
+        var restored = context.Room.Players[context.Target.ConnectionId];
+        Assert.Equal("property-test", restored.Property!.DefinitionId);
+        Assert.Equal(17, restored.Property.GeneratedValues["capacity"]);
+        Assert.Equal("Сховище на 17 місць", restored.Property.GetDisplayText("uk"));
+        Assert.True(restored.Revealed.Property);
+    }
+
+    [Fact]
     public void Snapshot_DoesNotSerializeRuntimeOrHistories()
     {
         var context = CreateContext();

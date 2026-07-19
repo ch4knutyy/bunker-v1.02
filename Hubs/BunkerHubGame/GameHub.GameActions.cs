@@ -77,6 +77,7 @@ namespace Bunker.Hubs
                 "CharacterTrait" => player.Revealed.CharacterTrait,
                 "Phobia" => player.Revealed.Phobia,
                 "Inventory" => player.Revealed.Inventory,
+                "Property" => player.Revealed.Property,
 				"Fact" => player.Revealed.Fact,
 				_ => true
             };
@@ -219,6 +220,7 @@ namespace Bunker.Hubs
                 "CharacterTrait",
                 "Phobia",
                 "Inventory",
+                "Property",
                 "Fact"
             };
 
@@ -362,6 +364,12 @@ namespace Bunker.Hubs
                         : "Порожній",
                     source = player.Inventory
                 },
+                "Property" => player.Property == null ? null : new
+                {
+                    label = "Майно",
+                    value = _gameData.FormatProperty(player.Property, "uk"),
+                    source = player.Property
+                },
 				"Fact" => new
 				{
 					label = "Факт",
@@ -400,6 +408,7 @@ namespace Bunker.Hubs
             if (player.Revealed.CharacterTrait) sources["CharacterTrait"] = player.CharacterTrait;
             if (player.Revealed.Phobia) sources["Phobia"] = player.Phobia;
             if (player.Revealed.Inventory) sources["Inventory"] = player.Inventory;
+            if (player.Revealed.Property && player.Property != null) sources["Property"] = player.Property;
             if (player.Revealed.Fact) sources["Fact"] = player.Fact;
             return sources;
         }
@@ -488,6 +497,7 @@ namespace Bunker.Hubs
                 case "CharacterTrait": player.Revealed.CharacterTrait = true; break;
                 case "Phobia": player.Revealed.Phobia = true; break;
                 case "Inventory": player.Revealed.Inventory = true; break;
+                case "Property": player.Revealed.Property = true; break;
 				case "Fact": player.Revealed.Fact = true; break;
             }
         }

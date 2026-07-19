@@ -1227,6 +1227,16 @@
     --card-detail-label:#beb9a5; --card-category-tracking:.1em;
 }
 
+.vault-characteristic-card[data-characteristic-type="Property"] {
+    --card-accent:#6f9b8a; --card-accent-strong:#9dc8b6; --card-accent-soft:rgba(86,139,119,.18);
+    --card-tint:rgba(55,111,91,.16);
+    --card-border:rgba(92,145,125,.82); --card-inner-border:rgba(127,178,158,.5); --card-glow:rgba(46,103,82,.22);
+    --card-pattern:linear-gradient(transparent,transparent);
+    --card-divider:rgba(102,157,136,.84); --card-button-border:rgba(91,146,124,.82); --card-button-text:#9fc9b8;
+    --card-medallion-border:rgba(112,168,146,.78); --card-medallion-surface:linear-gradient(145deg,rgba(62,126,101,.28),rgba(5,10,8,.94));
+    --card-detail-label:#b3c4bc; --card-category-tracking:.09em;
+}
+
 .vault-characteristic-card[data-characteristic-type="Fact"] {
     --card-accent:#c6a66a; --card-accent-strong:#e3c993; --card-accent-soft:rgba(170,133,69,.17);
     --card-tint:rgba(180,139,66,.14);

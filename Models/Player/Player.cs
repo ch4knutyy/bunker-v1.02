@@ -29,6 +29,7 @@ namespace Bunker.Models
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();
         public Inventory Inventory { get; set; } = new();
+        public GeneratedProperty? Property { get; set; }
         public PersonalInfo PersonalInfo { get; set; } = new();
         public CharacterTrait CharacterTrait { get; set; } = new();
         public Phobia Phobia { get; set; } = new();
