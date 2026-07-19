@@ -105,10 +105,13 @@ namespace Bunker.Hubs
             return clientPlayer;
         }
 
-        private Task SendPersonalPlayerSnapshot(string connectionId, Player player, string reason) =>
-            Clients.Client(connectionId).SendAsync(
+        private async Task SendPersonalPlayerSnapshot(string connectionId, Player player, string reason)
+        {
+            await Clients.Client(connectionId).SendAsync(
                 "PlayerStateResynced",
                 new { player = BuildPlayerClientState(player), reason });
+            await SendEventSpecialCardsUpdate(connectionId, player, reason);
+        }
 
         private async Task SendPublicPlayersUpdate(Room room)
         {
@@ -463,6 +466,8 @@ namespace Bunker.Hubs
             });
             _gameTimerService.Stop(room);
             room.VotingReadyResponses.Clear();
+
+            await ProcessEventCardRoundBoundary(room, completedRound);
 
             var configuredThreatDue = ShouldTriggerThreat(room, completedRound);
             var scenarioResult = await TryRunScenarioAfterRound(room, completedRound, configuredThreatDue);

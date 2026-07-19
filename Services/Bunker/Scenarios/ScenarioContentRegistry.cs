@@ -31,7 +31,9 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
             "reveal_bunker_intel_public", "reveal_bunker_intel_private", "reveal_random_bunker_intel_private",
             "reveal_random_characteristic", "grant_inventory_card", "grant_property_reroll",
             "grant_profession_retraining", "heal_physical_severity", "worsen_physical_severity",
-            "heal_mental_severity", "worsen_mental_severity", "cancel_other_player_elimination", "no_effect"
+            "heal_mental_severity", "worsen_mental_severity", "cancel_other_player_elimination",
+            "steal_all_bunker_supplies", "keep_stolen_supplies", "return_stolen_supplies",
+            "frame_supply_theft", "no_effect"
         ], StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> KnownTargets =
         new([
@@ -175,7 +177,13 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
             ValidateLocalized(item, "title", file, path, id);
             ValidateLocalized(item, "publicText", file, path, id);
             ValidateGenericTree(item, file, path, id);
-            ValidateCardReferences(item, file, path, id, cards);
+            ValidateCardReferences(
+                item,
+                file,
+                path,
+                id,
+                cards,
+                OptionalBool(item, "enabled", true));
             ValidateResourceEligibility(item, file, path, id);
             ValidateEventTargetSelection(item, mode, file, path, id);
 
@@ -241,7 +249,8 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
         string file,
         string path,
         string id,
-        IReadOnlyDictionary<string, EventSpecialCardDefinition> cards)
+        IReadOnlyDictionary<string, EventSpecialCardDefinition> cards,
+        bool requireEnabledReferences)
     {
         if (element.ValueKind == JsonValueKind.Object)
         {
@@ -257,17 +266,17 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
                         Fail(file, childPath, id, $"referenced card '{cardId}' does not exist");
                         continue;
                     }
-                    if (OptionalBool(element, "enabled", true) && !card.Enabled)
+                    if (requireEnabledReferences && !card.Enabled)
                         Fail(file, childPath, id, $"active event references disabled card '{cardId}'");
                 }
-                ValidateCardReferences(property.Value, file, childPath, id, cards);
+                ValidateCardReferences(property.Value, file, childPath, id, cards, requireEnabledReferences);
             }
         }
         else if (element.ValueKind == JsonValueKind.Array)
         {
             var index = 0;
             foreach (var child in element.EnumerateArray())
-                ValidateCardReferences(child, file, $"{path}[{index++}]", id, cards);
+                ValidateCardReferences(child, file, $"{path}[{index++}]", id, cards, requireEnabledReferences);
         }
     }
 

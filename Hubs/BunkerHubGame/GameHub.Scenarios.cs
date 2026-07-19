@@ -70,22 +70,16 @@ public partial class GameHub
 
         await Clients.Group(room.Id).SendAsync("ScenarioStarted", new
         {
-            scenario = result.Public,
-            resourceDelta = new
-            {
-                foodBefore = result.FoodBefore,
-                foodAfter = result.FoodAfter,
-                waterBefore = result.WaterBefore,
-                waterAfter = result.WaterAfter
-            },
-            recipientCount = result.Private.Count,
-            hasUnknownRecipients = result.Private.Count > 0
+            scenario = result.Public
         });
         foreach (var message in result.Private)
         {
             var connectionId = _roomService.GetCurrentConnectionId(room, RoomService.GetPlayerKey(message.Player));
             if (!string.IsNullOrWhiteSpace(connectionId))
+            {
                 await Clients.Client(connectionId).SendAsync("ScenarioPrivateOpened", message.Payload);
+                await SendEventSpecialCardsUpdate(connectionId, message.Player, "scenario_card_granted");
+            }
         }
         await BroadcastBunkerIntelProjection(room);
         await AppendGmAudit(room, "system", "scenario_started", GmAuditResult.Success,
@@ -169,6 +163,7 @@ public partial class GameHub
 
     private async Task SendPendingScenarioState(Room room, Player player, string connectionId)
     {
+        await SendEventSpecialCardsUpdate(connectionId, player, "scenario_reconnect");
         var pending = room.ScenarioSituations?.PendingPrivateChoices.Values.FirstOrDefault(choice =>
             string.Equals(choice.PlayerId, player.Id.ToString("N"), StringComparison.OrdinalIgnoreCase));
         if (pending == null) return;
@@ -319,6 +314,7 @@ public partial class GameHub
             choiceId, selectedOptionId, commandId);
         if (!result.Success)
         {
+            RoomSnapshotService.ApplyState(room, snapshot.State);
             await Clients.Caller.SendAsync("ReceiveError", result.ErrorCode ?? "event_card_use_failed");
             return;
         }
@@ -344,6 +340,16 @@ public partial class GameHub
                 playerName = target.Name,
                 source = "anonymous_guarantee"
             });
+        if (string.Equals(actionId, "steal_all_supplies", StringComparison.OrdinalIgnoreCase))
+            await Clients.Group(room.Id).SendAsync("EventCardPublicNotice", new
+            {
+                code = "supplies_stolen"
+            });
+        else if (string.Equals(actionId, "return_supplies", StringComparison.OrdinalIgnoreCase))
+            await Clients.Group(room.Id).SendAsync("EventCardPublicNotice", new
+            {
+                code = "supplies_returned"
+            });
         await BroadcastBunkerIntelProjection(room);
         await AppendGmAudit(room, "system", "event_card_used", GmAuditResult.Success,
             "A private event card was used.", commandId: commandId, snapshot: snapshot);
@@ -365,6 +371,7 @@ public partial class GameHub
         var result = _eventSpecialCards.Transfer(room, owner, runtimeCardId, target, commandId);
         if (!result.Success)
         {
+            RoomSnapshotService.ApplyState(room, snapshot.State);
             await Clients.Caller.SendAsync("ReceiveError", result.ErrorCode ?? "event_card_transfer_failed");
             return;
         }
@@ -545,7 +552,7 @@ public partial class GameHub
         if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
             return Task.FromResult<object>(new { canApply = false, errorCode = "gm_capability_required" });
         var definition = _scenarioContent.FindEvent(scenarioId);
-        if (definition == null)
+        if (definition is not { Enabled: true })
             return Task.FromResult<object>(new { canApply = false, errorCode = "scenario_not_found" });
         return Task.FromResult<object>(new
         {
@@ -561,7 +568,7 @@ public partial class GameHub
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
         var definition = _scenarioContent.FindEvent(scenarioId);
-        if (room == null || definition == null ||
+        if (room == null || definition is not { Enabled: true } ||
             !HasGmCapability(room, GmCapability.ManagePublicGameState) ||
             room.ScenarioSituations?.ActiveScenario is { IsResolved: false } ||
             !RememberPlayerCommand(room, commandId))
@@ -580,27 +587,64 @@ public partial class GameHub
         }
         await Clients.Group(room.Id).SendAsync("ScenarioStarted", new
         {
-            scenario = result.Public,
-            resourceDelta = new
-            {
-                foodBefore = result.FoodBefore,
-                foodAfter = result.FoodAfter,
-                waterBefore = result.WaterBefore,
-                waterAfter = result.WaterAfter
-            },
-            recipientCount = result.Private.Count,
-            hasUnknownRecipients = result.Private.Count > 0
+            scenario = result.Public
         });
         foreach (var message in result.Private)
         {
             var connection = _roomService.GetCurrentConnectionId(room, RoomService.GetPlayerKey(message.Player));
             if (!string.IsNullOrWhiteSpace(connection))
+            {
                 await Clients.Client(connection).SendAsync("ScenarioPrivateOpened", message.Payload);
+                await SendEventSpecialCardsUpdate(connection, message.Player, "scenario_card_granted");
+            }
         }
         await AppendGmAudit(room, GetGmActorId(room), "scenario_started", GmAuditResult.Success,
             $"Scenario {definition.Id} was forced.", commandId: commandId, snapshot: snapshot);
         await BroadcastBunkerIntelProjection(room);
         QueueRoomRecovery(room, "scenario_forced");
+    }
+
+    private Task SendEventSpecialCardsUpdate(string connectionId, Player player, string reason) =>
+        Clients.Client(connectionId).SendAsync("EventSpecialCardsUpdated", new
+        {
+            cards = _eventSpecialCards.ProjectForOwner(player),
+            reason
+        });
+
+    private async Task ProcessEventCardRoundBoundary(Room room, int completedRound)
+    {
+        var snapshot = CreateMutationSnapshot(
+            room,
+            "system",
+            "event_card_expiration",
+            $"event-card-expiration-{room.Id}-{completedRound}",
+            "Before event card round-boundary processing");
+        var result = _eventSpecialCards.ProcessRoundBoundary(room, completedRound);
+        if (result.ChangedPlayers.Count == 0 && result.PublicNotices.Count == 0)
+            return;
+
+        foreach (var player in result.ChangedPlayers)
+        {
+            var connectionId = _roomService.GetCurrentConnectionId(room, RoomService.GetPlayerKey(player));
+            if (!string.IsNullOrWhiteSpace(connectionId))
+                await SendEventSpecialCardsUpdate(connectionId, player, "event_card_expired");
+        }
+        foreach (var notice in result.PublicNotices)
+            await Clients.Group(room.Id).SendAsync("EventCardPublicNotice", new
+            {
+                code = notice.Code,
+                accusedPlayerName = notice.AccusedPlayerName
+            });
+
+        await AppendGmAudit(
+            room,
+            "system",
+            "event_card_expiration",
+            GmAuditResult.Success,
+            $"Processed event card expiration after round {completedRound}.",
+            commandId: $"event-card-expiration-{room.Id}-{completedRound}",
+            snapshot: snapshot);
+        QueueRoomRecovery(room, "event_card_expiration");
     }
 
     private static Player? ResolveScenarioPlayer(Room room, string? playerId) =>

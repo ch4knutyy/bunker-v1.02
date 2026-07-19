@@ -17,6 +17,8 @@ public static class ScenarioRules
 {
     public const int MajorSituationLimitPerRound = 1;
     public const int PrivateChoiceTimeoutSeconds = 180;
+    public static bool BunkerIntelEnabled => false;
+    public const int EarliestSocialScenarioRound = 2;
     public static readonly IReadOnlyDictionary<ScenarioType, int> TypeWeights =
         new Dictionary<ScenarioType, int>
         {
@@ -30,7 +32,7 @@ public static class ScenarioRules
 public sealed class ScenarioScheduleSettings
 {
     public bool Enabled { get; set; } = true;
-    public int FirstScenarioAfterRound { get; set; } = 3;
+    public int FirstScenarioAfterRound { get; set; } = ScenarioRules.EarliestSocialScenarioRound;
     public int IntervalRounds { get; set; } = 3;
     public string TriggerPhase { get; set; } = "after_round_before_voting";
     public HashSet<string> EnabledTypes { get; set; } =
@@ -40,13 +42,13 @@ public sealed class ScenarioScheduleSettings
 public sealed class ScenarioSituationState
 {
     public bool Enabled { get; set; }
-    public int FirstScenarioAfterRound { get; set; } = 3;
+    public int FirstScenarioAfterRound { get; set; } = ScenarioRules.EarliestSocialScenarioRound;
     public int IntervalRounds { get; set; } = 3;
     public string TriggerPhase { get; set; } = "after_round_before_voting";
     public HashSet<string> EnabledTypes { get; set; } =
         new(["threat", "event", "secret_event"], StringComparer.OrdinalIgnoreCase);
     public int? LastActualScenarioRound { get; set; }
-    public int NextDueAfterRound { get; set; } = 3;
+    public int NextDueAfterRound { get; set; } = ScenarioRules.EarliestSocialScenarioRound;
     public string? LastScenarioId { get; set; }
     public string? LastScenarioType { get; set; }
     public string? LastCooldownGroup { get; set; }

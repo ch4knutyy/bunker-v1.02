@@ -38,7 +38,7 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
             settings.BonusInventoryCount, settings.StartingInventoryCount,
             settings.CharacterGenerationMode.ToString(),
             settings.ScenarioSchedule?.Enabled == true,
-            settings.ScenarioSchedule?.FirstScenarioAfterRound ?? 3,
+            settings.ScenarioSchedule?.FirstScenarioAfterRound ?? ScenarioRules.EarliestSocialScenarioRound,
             settings.ScenarioSchedule?.IntervalRounds ?? 3,
             settings.ScenarioSchedule?.TriggerPhase ?? "after_round_before_voting",
             settings.ScenarioSchedule?.EnabledTypes.ToList(),
@@ -72,6 +72,8 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
         if (request.Settings == null || request.Settings.Version != RoomGameSettings.CurrentVersion)
             return Failure(room, "unsupported_settings_version", "unsupported_settings_version");
         var candidate = Clone(request.Settings);
+        if (!ScenarioRules.BunkerIntelEnabled)
+            candidate.BunkerIntelMode = BunkerIntelMode.AllVisible;
         var errors = Validate(candidate, RoomService.GetGameplayPlayersSnapshot(room).Count);
         if (errors.Count > 0)
         {
@@ -224,6 +226,8 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
         if (source == null || source.Version <= 0) return Preset(GamePreset.Classic);
         var wasLegacy = source.Version < 2;
         var result = Clone(source);
+        if (!ScenarioRules.BunkerIntelEnabled)
+            result.BunkerIntelMode = BunkerIntelMode.AllVisible;
         if (wasLegacy)
         {
             result.ScenarioSchedule = new ScenarioScheduleSettings { Enabled = false };
@@ -257,7 +261,7 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
         if (settings.BonusInventoryRound is < 2 or > 5 || settings.BonusInventoryCount is < 1 or > 2 || settings.StartingInventoryCount is < 0 or > 2) errors.Add("invalid_inventory_settings");
         if (settings.CharacterGenerationMode != CharacterGenerationMode.Classic) errors.Add("unsupported_character_generation_mode");
         if (settings.ScenarioSchedule == null ||
-            settings.ScenarioSchedule.FirstScenarioAfterRound is < 3 or > 6 ||
+            settings.ScenarioSchedule.FirstScenarioAfterRound is < ScenarioRules.EarliestSocialScenarioRound or > 6 ||
             settings.ScenarioSchedule.IntervalRounds is < 2 or > 5 ||
             settings.ScenarioSchedule.TriggerPhase is not ("after_round_before_voting" or "after_voting") ||
             settings.ScenarioSchedule.EnabledTypes.Any(type => type is not ("threat" or "event" or "secret_event")))
@@ -282,7 +286,9 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
     {
         settings.Preset = preset;
         settings.ScenarioSchedule ??= new ScenarioScheduleSettings();
-        settings.BunkerIntelMode ??= BunkerIntelMode.Progressive;
+        settings.BunkerIntelMode = ScenarioRules.BunkerIntelEnabled
+            ? settings.BunkerIntelMode ?? BunkerIntelMode.Progressive
+            : BunkerIntelMode.AllVisible;
         configure(settings);
         return settings;
     }

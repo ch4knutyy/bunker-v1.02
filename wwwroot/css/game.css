@@ -6182,18 +6182,56 @@ body.gm-panel-v2-open .modal {
 	letter-spacing: .12em;
 }
 .scenario-situation-badge-private { border-color: #588ec7; color: #89b9ec; }
-.scenario-situation-effects {
-	margin-top: 1rem;
-	padding: .75rem;
-	border-left: 3px solid #c7a554;
-	background: rgb(255 255 255 / 4%);
-}
 .scenario-choice-actions,
 .event-card-action {
 	display: flex;
 	flex-wrap: wrap;
 	gap: .5rem;
 	margin-top: .75rem;
+}
+.event-special-card {
+	min-height: 0;
+	padding: .9rem;
+	gap: .6rem;
+}
+.event-special-card .special-card-header {
+	align-items: flex-start;
+	gap: .75rem;
+}
+.event-special-card .special-card-effect {
+	min-height: 0;
+	padding: .6rem .75rem;
+}
+.event-special-card .special-card-effect p,
+.event-special-card .special-card-footer {
+	margin: 0;
+}
+.event-card-status {
+	flex: 0 0 auto;
+	padding: .2rem .55rem;
+	border: 1px solid rgb(199 165 84 / 55%);
+	border-radius: 999px;
+	color: #e5c873;
+	font-size: .72rem;
+}
+.event-card-timing,
+.event-card-result {
+	margin: 0;
+	color: var(--color-text-muted, #aeb2ba);
+	font-size: .82rem;
+}
+.event-special-card.state-resolved,
+.event-special-card.state-expired {
+	opacity: .7;
+	filter: saturate(.65);
+}
+.event-special-card.state-pending_choice .event-card-status {
+	border-color: #588ec7;
+	color: #89b9ec;
+}
+.event-special-card.state-expired .event-card-status {
+	border-color: #8f5c5c;
+	color: #d89b9b;
 }
 .lobby-scenario-settings {
 	margin-top: 1rem;

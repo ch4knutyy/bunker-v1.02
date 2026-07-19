@@ -15,10 +15,14 @@ public sealed class ScenarioContentRegistryTests
     {
         var registry = new ScenarioContentRegistry(ScenarioTestData.ContentDirectory);
 
-        Assert.Equal(27, registry.Cards.Length);
-        Assert.Equal(29, registry.Events.Length);
-        Assert.Equal(27, registry.Cards.Select(card => card.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(29, registry.Events.Select(item => item.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(29, registry.Cards.Length);
+        Assert.Equal(30, registry.Events.Length);
+        Assert.Equal(29, registry.Cards.Select(card => card.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(30, registry.Events.Select(item => item.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(13, registry.Cards.Count(card => card.Enabled));
+        Assert.Equal(14, registry.Events.Count(item => item.Enabled));
+        Assert.DoesNotContain(registry.Events.Where(item => item.Enabled),
+            item => item.Id.Contains("archive", StringComparison.OrdinalIgnoreCase));
         Assert.All(registry.Cards, card => Assert.All(new[] { "uk", "en", "ru" },
             language => Assert.False(string.IsNullOrWhiteSpace(card.Title[language]))));
         Assert.All(registry.Events, item => Assert.All(new[] { "uk", "en", "ru" },
@@ -83,7 +87,7 @@ public sealed class ScenarioContentRegistryTests
 public sealed class ScenarioSchedulerTests
 {
     [Fact]
-    public void NewScheduleIsDueAfterRoundThreeBeforeVotingAndUsesActualRoundForNextInterval()
+    public void NewScheduleCanBeDueAfterRoundTwoBeforeVotingAndUsesActualRoundForNextInterval()
     {
         var scheduler = new ScenarioSchedulerService(new FakeRegistry(), TimeProvider.System, new Random(1));
         var room = ScenarioTestData.Room(twoPlayers: true);
@@ -92,18 +96,17 @@ public sealed class ScenarioSchedulerTests
             ScenarioSchedule = new ScenarioScheduleSettings
             {
                 Enabled = true,
-                FirstScenarioAfterRound = 3,
+                FirstScenarioAfterRound = 2,
                 IntervalRounds = 4,
                 EnabledTypes = new(["event"], StringComparer.OrdinalIgnoreCase)
             }
         });
 
         Assert.False(scheduler.SelectForCompletedRound(room, 1).IsDue);
-        Assert.False(scheduler.SelectForCompletedRound(room, 2).IsDue);
-        var due = scheduler.SelectForCompletedRound(room, 3);
+        var due = scheduler.SelectForCompletedRound(room, 2);
         Assert.True(due.IsDue);
         Assert.NotNull(due.Scenario);
-        Assert.Equal(3, due.Scenario!.MinRound);
+        Assert.Equal(2, due.Scenario!.MinRound);
         scheduler.MarkStarted(room, due.Scenario!, 4);
         Assert.Equal(8, room.ScenarioSituations.NextDueAfterRound);
     }
@@ -135,7 +138,7 @@ public sealed class ScenarioSchedulerTests
             new()
             {
                 Id = "event_1", Enabled = true, Type = "event",
-                ResolutionMode = "automatic_public_event", MinRound = 3, Weight = 1,
+                ResolutionMode = "automatic_public_event", MinRound = 2, Weight = 1,
                 Title = new Dictionary<string, string> { ["uk"] = "u", ["en"] = "e", ["ru"] = "r" },
                 PublicText = new Dictionary<string, string> { ["uk"] = "u", ["en"] = "e", ["ru"] = "r" },
                 Source = Source
@@ -154,6 +157,10 @@ public sealed class ScenarioRunnerTests
     {
         var runtime = ScenarioTestData.Runtime();
         var room = ScenarioTestData.Room(twoPlayers: true);
+        room.Players["three"] = new Player
+        {
+            Id = Guid.NewGuid(), Name = "Three", ConnectionId = "three", StablePlayerId = "three"
+        };
         room.ScenarioSituations = runtime.Scheduler.InitializeForNewGame(new RoomGameSettings
         {
             ScenarioSchedule = new ScenarioScheduleSettings
@@ -162,7 +169,7 @@ public sealed class ScenarioRunnerTests
                 FirstScenarioAfterRound = 3,
                 IntervalRounds = 3,
                 TriggerPhase = "after_voting",
-                EnabledTypes = new(["event"], StringComparer.OrdinalIgnoreCase)
+                EnabledTypes = new(["secret_event"], StringComparer.OrdinalIgnoreCase)
             }
         });
 
@@ -280,15 +287,9 @@ public sealed class ScenarioRunnerTests
 public sealed class BunkerIntelTests
 {
     [Fact]
-    public void LegacyIsAllVisibleAndProgressiveUsesScalarThenStableListUnits()
+    public void FeatureGateKeepsStandardBunkerProjectionFullyVisible()
     {
         var service = new BunkerIntelService();
-        var legacy = ScenarioTestData.Room();
-        legacy.BunkerIntel = null;
-        var legacyProjection = JsonSerializer.Serialize(service.Project(legacy, legacy.Players.Values.First()));
-        Assert.Contains("\"suppliesMonths\":12", legacyProjection, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Workshop", legacyProjection);
-
         var room = ScenarioTestData.Room();
         room.BunkerIntel = service.InitializeForNewGame(new RoomGameSettings
         {
@@ -296,33 +297,32 @@ public sealed class BunkerIntelTests
             BunkerIntelIntervalRounds = 2
         });
         var player = room.Players.Values.First();
-        var hidden = JsonSerializer.Serialize(service.Project(room, player));
-        Assert.Contains("\"suppliesMonths\":null", hidden, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("Workshop", hidden);
-
-        Assert.Equal("condition", service.RevealNextPublic(room, 1).Category);
+        var projection = JsonSerializer.Serialize(service.Project(room, player));
+        Assert.Equal(BunkerIntelMode.AllVisible, room.BunkerIntel.Mode);
+        Assert.Contains("\"suppliesMonths\":12", projection, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\"waterMonths\":8", projection, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Workshop", projection);
+        Assert.Contains("Tools", projection);
+        Assert.Contains("Leak", projection);
         Assert.False(service.RevealNextPublic(room, 2).Success);
-        Assert.Equal("food", service.RevealNextPublic(room, 3).Category);
-        Assert.Equal("water", service.RevealNextPublic(room, 5).Category);
-        var listReveal = service.RevealNextPublic(room, 7);
-        Assert.Equal("facilities", listReveal.Category);
-        Assert.NotNull(listReveal.ItemId);
+        Assert.Empty(service.GetHiddenCategories(room, player));
+        Assert.Equal(0, BunkerIntelService.CountHiddenUnits(room));
     }
 
     [Fact]
-    public void PrivateIntelIsBoundToPlayerIdAndNotPresentInPublicProjection()
+    public void DisabledIntelCannotCreatePrivateRevealOrPendingHiddenState()
     {
         var service = new BunkerIntelService();
         var room = ScenarioTestData.Room(twoPlayers: true);
         room.BunkerIntel = service.InitializeForNewGame(new RoomGameSettings());
         var players = room.Players.Values.ToList();
 
-        Assert.True(service.RevealPrivate(room, players[0], "food").Success);
+        Assert.False(service.RevealPrivate(room, players[0], "food").Success);
         Assert.Contains("\"suppliesMonths\":12", JsonSerializer.Serialize(service.Project(room, players[0])),
             StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("\"suppliesMonths\":null", JsonSerializer.Serialize(service.Project(room, players[1])),
+        Assert.Contains("\"suppliesMonths\":12", JsonSerializer.Serialize(service.Project(room, players[1])),
             StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("\"suppliesMonths\":null", JsonSerializer.Serialize(service.Project(room, null)),
+        Assert.Contains("\"suppliesMonths\":12", JsonSerializer.Serialize(service.Project(room, null)),
             StringComparison.OrdinalIgnoreCase);
     }
 }
@@ -330,44 +330,150 @@ public sealed class BunkerIntelTests
 public sealed class EventSpecialCardTests
 {
     [Fact]
-    public void StolenResourceTransfersOwnershipReturnsExactAmountAndDuplicateIsNoOp()
+    public void GrantCreatesCanonicalPrivateLifecycleProjection()
     {
-        var registry = new ScenarioContentRegistry(ScenarioTestData.ContentDirectory);
-        var intel = new BunkerIntelService();
-        var resources = new BunkerResourceService();
-        var gameData = new GameDataService(new TestEnvironment(ScenarioTestData.Root),
-            NullLogger<GameDataService>.Instance);
-        var cards = new EventSpecialCardService(registry, resources, intel,
-            new CharacterGeneratorService(gameData, NullLogger<CharacterGeneratorService>.Instance),
-            TimeProvider.System);
-        var room = ScenarioTestData.Room(twoPlayers: true);
-        room.Bunker!.SuppliesMonths = 10;
+        var cards = CreateService();
+        var room = ScenarioTestData.Room();
+        room.CurrentRound = 2;
         var owner = room.Players.Values.First();
-        var recipient = room.Players.Values.Last();
-        var theft = registry.FindEvent("unknown_food_thief_6")!;
+        var runtime = cards.Grant(room, owner, "main_store_access", "main_store_access_event");
+        var projection = JsonSerializer.Serialize(cards.ProjectForOwner(owner));
 
-        var removed = cards.ApplyEffects(room, owner, owner, null, theft.Source.GetProperty("effects"));
-        Assert.True(removed.Success);
-        Assert.Equal(4, room.Bunker.SuppliesMonths);
-        var runtime = cards.Grant(room, owner, "hidden_food_cache_6", theft.Id);
-        Assert.Equal(6, runtime.StoredResource!.Amount);
+        Assert.Equal(owner.Id.ToString("N"), runtime.OriginalOwnerPlayerId);
+        Assert.Equal(runtime.OriginalOwnerPlayerId, runtime.OwnerPlayerId);
+        Assert.Equal(3, runtime.ExpiresAfterRound);
+        Assert.Equal(EventSpecialCardStatus.Available, runtime.Status);
+        Assert.Contains("steal_all_supplies", projection);
+        Assert.DoesNotContain("OriginalOwnerPlayerId", projection);
+        Assert.DoesNotContain("StoredRuntimeValues", projection);
+    }
 
-        var transfer = cards.Transfer(room, owner, runtime.RuntimeCardId, recipient, "transfer-1");
-        Assert.True(transfer.Success);
-        Assert.Empty(owner.EventSpecialCards);
-        Assert.Single(recipient.EventSpecialCards);
+    [Fact]
+    public void TheftAndReturnUseExactValuesAndDuplicateCommandsAreNoOps()
+    {
+        var cards = CreateService();
+        var room = ScenarioTestData.Room();
+        room.CurrentRound = 3;
+        room.Bunker!.SuppliesMonths = 17;
+        room.Bunker.WaterMonths = 11;
+        var owner = room.Players.Values.First();
+        var runtime = cards.Grant(room, owner, "main_store_access", "main_store_access_event");
 
-        var used = cards.Use(room, recipient, runtime.RuntimeCardId, "return_to_bunker",
-            null, null, null, "return-1");
-        Assert.True(used.Success);
-        Assert.Equal(10, room.Bunker.SuppliesMonths);
-        Assert.Equal(0, runtime.RemainingUses);
+        var stolen = cards.Use(room, owner, runtime.RuntimeCardId, "steal_all_supplies",
+            null, null, null, "steal-1");
+        Assert.True(stolen.Success);
+        Assert.Equal(0, room.Bunker.SuppliesMonths);
+        Assert.Equal(0, room.Bunker.WaterMonths);
+        Assert.Equal(17, runtime.StoredRuntimeValues["food"]);
+        Assert.Equal(11, runtime.StoredRuntimeValues["water"]);
+        Assert.Equal(EventSpecialCardStatus.PendingChoice, runtime.Status);
 
-        var duplicate = cards.Use(room, recipient, runtime.RuntimeCardId, "return_to_bunker",
-            null, null, null, "return-1");
+        var recoveredState = RoomSnapshotService.CaptureState(room);
+        RoomSnapshotService.ApplyState(room, recoveredState);
+        owner = room.Players.Values.First();
+        runtime = owner.EventSpecialCards.Single();
+        var duplicate = cards.Use(room, owner, runtime.RuntimeCardId, "steal_all_supplies",
+            null, null, null, "steal-1");
         Assert.True(duplicate.Success);
         Assert.True(duplicate.IsDuplicate);
-        Assert.Equal(10, room.Bunker.SuppliesMonths);
+        Assert.Equal(0, room.Bunker.SuppliesMonths);
+        Assert.Equal(0, room.Bunker.WaterMonths);
+
+        var returned = cards.Use(room, owner, runtime.RuntimeCardId, "return_supplies",
+            null, null, null, "return-1");
+        Assert.True(returned.Success);
+        Assert.Equal(17, room.Bunker.SuppliesMonths);
+        Assert.Equal(11, room.Bunker.WaterMonths);
+        Assert.Equal(EventSpecialCardStatus.Resolved, runtime.Status);
+        Assert.Equal(EventSpecialCardResult.Returned, runtime.Result);
+        Assert.DoesNotContain("return_supplies", JsonSerializer.Serialize(cards.Project(runtime)));
+    }
+
+    [Fact]
+    public void FrameMovesExactRuntimePayloadOnceAndAccusesCurrentOwnerAtBoundary()
+    {
+        var cards = CreateService();
+        var room = ScenarioTestData.Room(twoPlayers: true);
+        room.Players["three"] = new Player
+        {
+            Id = Guid.NewGuid(), Name = "Three", ConnectionId = "three", StablePlayerId = "three"
+        };
+        room.CurrentRound = 2;
+        var owner = room.Players["one"];
+        var framedPlayer = room.Players["two"];
+        var runtime = cards.Grant(room, owner, "main_store_access", "main_store_access_event");
+        room.CurrentRound = 3;
+
+        Assert.True(cards.Use(room, owner, runtime.RuntimeCardId, "steal_all_supplies",
+            null, null, null, "steal-frame").Success);
+        Assert.True(cards.Use(room, owner, runtime.RuntimeCardId, "frame_player",
+            framedPlayer, null, null, "frame-1").Success);
+
+        var framed = Assert.Single(framedPlayer.EventSpecialCards);
+        Assert.Equal(EventSpecialCardResult.Framed, runtime.Result);
+        Assert.Equal(runtime.OriginalOwnerPlayerId, framed.OriginalOwnerPlayerId);
+        Assert.Equal(framedPlayer.Id.ToString("N"), framed.OwnerPlayerId);
+        Assert.Equal(1, framed.TransferDepth);
+        Assert.Equal(runtime.StoredRuntimeValues, framed.StoredRuntimeValues);
+        Assert.DoesNotContain("frame_player", JsonSerializer.Serialize(cards.Project(framed)));
+
+        Assert.True(cards.Use(room, framedPlayer, framed.RuntimeCardId, "keep_supplies",
+            null, null, null, "keep-framed").Success);
+        Assert.Contains(framedPlayer.EventSpecialCards,
+            card => card.DefinitionId == "stolen_bunker_cache" &&
+                    card.StoredRuntimeValues["food"] == 12 &&
+                    card.StoredRuntimeValues["water"] == 8);
+        var boundary = cards.ProcessRoundBoundary(room, 3);
+        var notice = Assert.Single(boundary.PublicNotices);
+        Assert.Equal("supplies_missing_accusation", notice.Code);
+        Assert.Equal(framedPlayer.Name, notice.AccusedPlayerName);
+        Assert.Empty(cards.ProcessRoundBoundary(room, 3).PublicNotices);
+    }
+
+    [Fact]
+    public void OpportunityExpiresWithoutTheftWhilePendingDecisionAutoKeeps()
+    {
+        var cards = CreateService();
+        var untouchedRoom = ScenarioTestData.Room();
+        untouchedRoom.CurrentRound = 2;
+        var untouchedOwner = untouchedRoom.Players.Values.First();
+        var untouched = cards.Grant(
+            untouchedRoom, untouchedOwner, "main_store_access", "main_store_access_event");
+        untouchedRoom.CurrentRound = 3;
+
+        var unusedBoundary = cards.ProcessRoundBoundary(untouchedRoom, 3);
+        Assert.Equal(EventSpecialCardStatus.Expired, untouched.Status);
+        Assert.Equal(EventSpecialCardResult.OpportunityMissed, untouched.Result);
+        Assert.Equal(12, untouchedRoom.Bunker!.SuppliesMonths);
+        Assert.Equal(8, untouchedRoom.Bunker.WaterMonths);
+        Assert.Empty(unusedBoundary.PublicNotices);
+
+        var pendingRoom = ScenarioTestData.Room();
+        pendingRoom.CurrentRound = 2;
+        var pendingOwner = pendingRoom.Players.Values.First();
+        var pending = cards.Grant(pendingRoom, pendingOwner, "main_store_access", "main_store_access_event");
+        pendingRoom.CurrentRound = 3;
+        Assert.True(cards.Use(pendingRoom, pendingOwner, pending.RuntimeCardId, "steal_all_supplies",
+            null, null, null, "steal-pending").Success);
+
+        var pendingBoundary = cards.ProcessRoundBoundary(pendingRoom, 3);
+        Assert.Equal(EventSpecialCardStatus.Expired, pending.Status);
+        Assert.Equal(EventSpecialCardResult.Kept, pending.Result);
+        Assert.Contains(pendingOwner.EventSpecialCards, card => card.DefinitionId == "stolen_bunker_cache");
+        Assert.Single(pendingBoundary.PublicNotices);
+    }
+
+    private static EventSpecialCardService CreateService()
+    {
+        var registry = new ScenarioContentRegistry(ScenarioTestData.ContentDirectory);
+        var gameData = new GameDataService(new TestEnvironment(ScenarioTestData.Root),
+            NullLogger<GameDataService>.Instance);
+        return new(
+            registry,
+            new BunkerResourceService(),
+            new BunkerIntelService(),
+            new CharacterGeneratorService(gameData, NullLogger<CharacterGeneratorService>.Instance),
+            TimeProvider.System);
     }
 }
 
