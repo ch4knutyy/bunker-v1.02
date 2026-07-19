@@ -1,0 +1,450 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "status": "event_special_cards_foundation_v1",
+    "recordsTotal": 16,
+    "languages": [
+      "uk",
+      "en",
+      "ru"
+    ],
+    "note": "Event cards are never part of starting special-card generation. They are granted only by scenario events."
+  },
+  "cards": [
+    {
+      "id": "hidden_food_cache_2",
+      "category": "resource_leverage",
+      "visibility": "private",
+      "title": {
+        "uk": "Приховані пайки",
+        "en": "Hidden Food Cache",
+        "ru": "Скрытые пайки"
+      },
+      "description": {
+        "uk": "Ви контролюєте запас їжі на 2 місяці. Можете повернути його бункеру або передати іншому гравцю як таємний важіль.",
+        "en": "You control two months of food. You may return it to the bunker or secretly transfer it to another player.",
+        "ru": "Вы контролируете запас еды на 2 месяца. Можете вернуть его бункеру или тайно передать другому игроку."
+      },
+      "targetMode": "self_or_other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "add_bunker_food",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "hidden_water_cache_2",
+      "category": "resource_leverage",
+      "visibility": "private",
+      "title": {
+        "uk": "Прихований запас води",
+        "en": "Hidden Water Cache",
+        "ru": "Скрытый запас воды"
+      },
+      "description": {
+        "uk": "Ви контролюєте запас води на 2 місяці. Можете повернути його бункеру або передати іншому гравцю.",
+        "en": "You control two months of water. You may return it to the bunker or transfer it to another player.",
+        "ru": "Вы контролируете запас воды на 2 месяца. Можете вернуть его бункеру или передать другому игроку."
+      },
+      "targetMode": "self_or_other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "add_bunker_water",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "anonymous_guarantee",
+      "category": "political_leverage",
+      "visibility": "private",
+      "title": {
+        "uk": "Анонімна гарантія",
+        "en": "Anonymous Guarantee",
+        "ru": "Анонимная гарантия"
+      },
+      "description": {
+        "uk": "Один раз після голосування скасуйте вигнання іншого гравця. На себе використати не можна.",
+        "en": "Once after a vote, cancel another player's elimination. It cannot be used on yourself.",
+        "ru": "Один раз после голосования отмените изгнание другого игрока. На себя использовать нельзя."
+      },
+      "targetMode": "other_player",
+      "useWindow": "after_elimination_vote",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {
+        "cannotTargetSelf": true
+      },
+      "effects": [
+        {
+          "type": "cancel_other_player_elimination"
+        }
+      ]
+    },
+    {
+      "id": "emergency_retraining",
+      "category": "character_change",
+      "visibility": "private",
+      "title": {
+        "uk": "Аварійна перекваліфікація",
+        "en": "Emergency Retraining",
+        "ru": "Аварийная переквалификация"
+      },
+      "description": {
+        "uk": "Отримайте 3 корисні професії на вибір і назавжди замініть свою поточну професію на одну з них.",
+        "en": "Receive three useful professions to choose from and permanently replace your current profession with one of them.",
+        "ru": "Получите три полезные профессии на выбор и навсегда замените текущую профессию на одну из них."
+      },
+      "targetMode": "self",
+      "useWindow": "before_round_end",
+      "consumeOnUse": true,
+      "expiresAfterRounds": 2,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "grant_profession_retraining",
+          "optionsCount": 3,
+          "pool": "useful"
+        }
+      ]
+    },
+    {
+      "id": "bunker_archive_access",
+      "category": "information",
+      "visibility": "private",
+      "title": {
+        "uk": "Доступ до архіву бункера",
+        "en": "Bunker Archive Access",
+        "ru": "Доступ к архиву бункера"
+      },
+      "description": {
+        "uk": "Таємно дізнайтеся одну ще приховану категорію інформації про бункер.",
+        "en": "Secretly learn one bunker information category that is still hidden.",
+        "ru": "Тайно узнайте одну ещё скрытую категорию информации о бункере."
+      },
+      "targetMode": "self",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "reveal_random_bunker_intel_private"
+        }
+      ]
+    },
+    {
+      "id": "choose_bunker_intel",
+      "category": "information",
+      "visibility": "private",
+      "title": {
+        "uk": "Право на перевірку",
+        "en": "Inspection Right",
+        "ru": "Право на проверку"
+      },
+      "description": {
+        "uk": "Оберіть одну приховану категорію бункера й дізнайтеся її лише для себе.",
+        "en": "Choose one hidden bunker category and learn it privately.",
+        "ru": "Выберите одну скрытую категорию бункера и узнайте её только для себя."
+      },
+      "targetMode": "self",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "reveal_bunker_intel_private",
+          "category": "player_choice"
+        }
+      ]
+    },
+    {
+      "id": "sealed_inventory_case",
+      "category": "personal_resource",
+      "visibility": "private",
+      "title": {
+        "uk": "Запечатаний комплект",
+        "en": "Sealed Supply Case",
+        "ru": "Запечатанный комплект"
+      },
+      "description": {
+        "uk": "Отримайте одну випадкову карту Інвентарю. Ви самі вирішуєте, коли її розкрити.",
+        "en": "Receive one random Inventory card. You decide when to reveal it.",
+        "ru": "Получите одну случайную карту Инвентаря. Вы сами решаете, когда её раскрыть."
+      },
+      "targetMode": "self",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "grant_inventory_card",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "property_replacement_token",
+      "category": "character_change",
+      "visibility": "private",
+      "title": {
+        "uk": "Право на нове майно",
+        "en": "Property Replacement Right",
+        "ru": "Право на новое имущество"
+      },
+      "description": {
+        "uk": "Один раз перегенеруйте своє Майно. Нове Майно не розкривається автоматично.",
+        "en": "Reroll your Property once. The new Property is not revealed automatically.",
+        "ru": "Один раз перегенерируйте своё Имущество. Новое Имущество не раскрывается автоматически."
+      },
+      "targetMode": "self",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "grant_property_reroll",
+          "preserveRevealState": true
+        }
+      ]
+    },
+    {
+      "id": "private_medical_course",
+      "category": "health",
+      "visibility": "private",
+      "title": {
+        "uk": "Приватний курс лікування",
+        "en": "Private Medical Course",
+        "ru": "Частный курс лечения"
+      },
+      "description": {
+        "uk": "Зменште тяжкість свого фізичного стану на один рівень або передайте лікування іншому гравцю.",
+        "en": "Reduce your physical condition severity by one level or transfer the treatment to another player.",
+        "ru": "Уменьшите тяжесть физического состояния на один уровень или передайте лечение другому игроку."
+      },
+      "targetMode": "self_or_other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "heal_physical_severity",
+          "levels": 1
+        }
+      ]
+    },
+    {
+      "id": "private_psychological_support",
+      "category": "health",
+      "visibility": "private",
+      "title": {
+        "uk": "Приватна психологічна допомога",
+        "en": "Private Psychological Support",
+        "ru": "Частная психологическая помощь"
+      },
+      "description": {
+        "uk": "Зменште тяжкість ментального стану на один рівень собі або іншому гравцю.",
+        "en": "Reduce mental condition severity by one level for yourself or another player.",
+        "ru": "Уменьшите тяжесть ментального состояния на один уровень себе или другому игроку."
+      },
+      "targetMode": "self_or_other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "heal_mental_severity",
+          "levels": 1
+        }
+      ]
+    },
+    {
+      "id": "evidence_fragment",
+      "category": "information",
+      "visibility": "private",
+      "title": {
+        "uk": "Фрагмент доказу",
+        "en": "Evidence Fragment",
+        "ru": "Фрагмент доказательства"
+      },
+      "description": {
+        "uk": "Оберіть гравця і таємно дізнайтеся одну випадкову ще приховану характеристику про нього.",
+        "en": "Choose a player and privately learn one random characteristic that is still hidden.",
+        "ru": "Выберите игрока и тайно узнайте одну случайную ещё скрытую характеристику о нём."
+      },
+      "targetMode": "other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "reveal_random_characteristic",
+          "visibility": "private_to_owner"
+        }
+      ]
+    },
+    {
+      "id": "public_bunker_disclosure",
+      "category": "information",
+      "visibility": "public",
+      "title": {
+        "uk": "Публічне розкриття бункера",
+        "en": "Public Bunker Disclosure",
+        "ru": "Публичное раскрытие бункера"
+      },
+      "description": {
+        "uk": "Оберіть одну приховану категорію бункера та розкрийте її всім.",
+        "en": "Choose one hidden bunker category and reveal it to everyone.",
+        "ru": "Выберите одну скрытую категорию бункера и раскройте её всем."
+      },
+      "targetMode": "self",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": true,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "reveal_bunker_intel_public",
+          "category": "player_choice"
+        }
+      ]
+    },
+    {
+      "id": "food_transfer_order",
+      "category": "resource_leverage",
+      "visibility": "private",
+      "title": {
+        "uk": "Таємна передача пайків",
+        "en": "Secret Ration Transfer",
+        "ru": "Тайная передача пайков"
+      },
+      "description": {
+        "uk": "Передайте іншому гравцю карту «Приховані пайки». Група не дізнається, хто її отримав.",
+        "en": "Give another player a Hidden Food Cache card. The group will not learn who received it.",
+        "ru": "Передайте другому игроку карту «Скрытые пайки». Группа не узнает, кто её получил."
+      },
+      "targetMode": "other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "grant_event_card_to_other_player",
+          "cardId": "hidden_food_cache_2"
+        }
+      ]
+    },
+    {
+      "id": "water_transfer_order",
+      "category": "resource_leverage",
+      "visibility": "private",
+      "title": {
+        "uk": "Таємна передача води",
+        "en": "Secret Water Transfer",
+        "ru": "Тайная передача воды"
+      },
+      "description": {
+        "uk": "Передайте іншому гравцю карту «Прихований запас води».",
+        "en": "Give another player a Hidden Water Cache card.",
+        "ru": "Передайте другому игроку карту «Скрытый запас воды»."
+      },
+      "targetMode": "other_player",
+      "useWindow": "any_time",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "grant_event_card_to_other_player",
+          "cardId": "hidden_water_cache_2"
+        }
+      ]
+    },
+    {
+      "id": "delayed_immunity_promise",
+      "category": "political_leverage",
+      "visibility": "private",
+      "title": {
+        "uk": "Обіцянка захисту",
+        "en": "Protection Promise",
+        "ru": "Обещание защиты"
+      },
+      "description": {
+        "uk": "Ви можете публічно пообіцяти захист іншому гравцю. Сама карта не розкривається, доки ви її не використаєте.",
+        "en": "You may publicly promise protection to another player. The card remains hidden until used.",
+        "ru": "Вы можете публично обещать защиту другому игроку. Карта остаётся скрытой до использования."
+      },
+      "targetMode": "other_player",
+      "useWindow": "after_elimination_vote",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {
+        "cannotTargetSelf": true
+      },
+      "effects": [
+        {
+          "type": "cancel_other_player_elimination"
+        }
+      ]
+    },
+    {
+      "id": "hidden_generator_manual",
+      "category": "future_threat",
+      "visibility": "private",
+      "title": {
+        "uk": "Секретна інструкція",
+        "en": "Secret Technical Manual",
+        "ru": "Секретная инструкция"
+      },
+      "description": {
+        "uk": "Під час майбутньої технічної загрози ви можете заявити, що маєте рішення. Карта додає один технічний бонус.",
+        "en": "During a future technical threat, you may claim to have the solution. The card grants one technical bonus.",
+        "ru": "Во время будущей технической угрозы вы можете заявить, что знаете решение. Карта даёт один технический бонус."
+      },
+      "targetMode": "self",
+      "useWindow": "during_threat",
+      "consumeOnUse": true,
+      "expiresAfterRounds": null,
+      "publicOnReceive": false,
+      "constraints": {},
+      "effects": [
+        {
+          "type": "future_threat_bonus",
+          "tag": "technical_solution",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

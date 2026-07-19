@@ -1,0 +1,159 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "status": "scenario_foundation_v1",
+    "languages": [
+      "uk",
+      "en",
+      "ru"
+    ],
+    "note": "Data-only foundation. Existing threat system remains separate and can later be scheduled through the same major-situation slot."
+  },
+  "defaults": {
+    "enabled": true,
+    "firstScenarioRound": 5,
+    "intervalRounds": 3,
+    "majorSituationLimitPerRound": 1,
+    "collisionPolicy": "postpone_to_next_free_round",
+    "recalculateIntervalFromActualRound": true,
+    "avoidSameTypeTwice": true,
+    "avoidSameEventUntilPoolExhausted": true,
+    "typeWeights": {
+      "event": 45,
+      "crisis_decision": 30,
+      "secret_event": 25
+    }
+  },
+  "lobbyOptions": {
+    "frequency": [
+      {
+        "value": 0,
+        "label": {
+          "uk": "Вимкнено",
+          "en": "Disabled",
+          "ru": "Отключено"
+        }
+      },
+      {
+        "value": 2,
+        "label": {
+          "uk": "Кожні 2 раунди",
+          "en": "Every 2 rounds",
+          "ru": "Каждые 2 раунда"
+        }
+      },
+      {
+        "value": 3,
+        "label": {
+          "uk": "Кожні 3 раунди",
+          "en": "Every 3 rounds",
+          "ru": "Каждые 3 раунда"
+        }
+      },
+      {
+        "value": 4,
+        "label": {
+          "uk": "Кожні 4 раунди",
+          "en": "Every 4 rounds",
+          "ru": "Каждые 4 раунда"
+        }
+      },
+      {
+        "value": 5,
+        "label": {
+          "uk": "Кожні 5 раундів",
+          "en": "Every 5 rounds",
+          "ru": "Каждые 5 раундов"
+        }
+      }
+    ],
+    "firstScenarioRound": [
+      {
+        "value": 4,
+        "label": {
+          "uk": "Після 4-го раунду",
+          "en": "After round 4",
+          "ru": "После 4-го раунда"
+        }
+      },
+      {
+        "value": 5,
+        "label": {
+          "uk": "Після 5-го раунду",
+          "en": "After round 5",
+          "ru": "После 5-го раунда"
+        }
+      },
+      {
+        "value": 6,
+        "label": {
+          "uk": "Після 6-го раунду",
+          "en": "After round 6",
+          "ru": "После 6-го раунда"
+        }
+      }
+    ]
+  },
+  "scenarioTypes": [
+    {
+      "id": "event",
+      "label": {
+        "uk": "Подія",
+        "en": "Event",
+        "ru": "Событие"
+      },
+      "description": {
+        "uk": "Позитивна, негативна або неоднозначна ситуація без обов’язкової технічної загрози.",
+        "en": "A positive, negative, or ambiguous situation that is not necessarily a technical threat.",
+        "ru": "Положительная, отрицательная или неоднозначная ситуация, не обязательно являющаяся технической угрозой."
+      }
+    },
+    {
+      "id": "crisis_decision",
+      "label": {
+        "uk": "Кризове рішення",
+        "en": "Crisis Decision",
+        "ru": "Кризисное решение"
+      },
+      "description": {
+        "uk": "Публічний вибір групи, що створює торг, конфлікт або боротьбу за довіру.",
+        "en": "A public group choice that creates bargaining, conflict, or a struggle for trust.",
+        "ru": "Публичный выбор группы, создающий торг, конфликт или борьбу за доверие."
+      }
+    },
+    {
+      "id": "secret_event",
+      "label": {
+        "uk": "Секретна подія",
+        "en": "Secret Event",
+        "ru": "Секретное событие"
+      },
+      "description": {
+        "uk": "Один або кілька гравців отримують приховану можливість, інформацію чи карту.",
+        "en": "One or more players receive a hidden opportunity, information, or card.",
+        "ru": "Один или несколько игроков получают скрытую возможность, информацию или карту."
+      }
+    }
+  ],
+  "supportedEffectTypes": [
+    "grant_event_card",
+    "grant_event_card_to_other_player",
+    "remove_bunker_food",
+    "remove_bunker_water",
+    "add_bunker_food",
+    "add_bunker_water",
+    "reveal_bunker_intel_public",
+    "reveal_bunker_intel_private",
+    "reveal_random_bunker_intel_private",
+    "reveal_random_characteristic",
+    "grant_inventory_card",
+    "grant_property_reroll",
+    "grant_profession_retraining",
+    "heal_physical_severity",
+    "worsen_physical_severity",
+    "heal_mental_severity",
+    "worsen_mental_severity",
+    "schedule_delayed_effect",
+    "no_effect"
+  ]
+}
