@@ -65,10 +65,13 @@
 
     async function request(url, options) {
         const response = await fetch(url, options);
-        const payload = await response.json().catch(() => ({ code: "invalid_response" }));
+        const contentType = response.headers.get("content-type") || "";
+        const payload = contentType.includes("application/json")
+            ? await response.json()
+            : { code: `http_${response.status}` };
         if (!response.ok) {
             const error = new Error(payload.code || `http_${response.status}`);
-            error.code = payload.code;
+            error.code = payload.code || `http_${response.status}`;
             error.status = response.status;
             throw error;
         }
