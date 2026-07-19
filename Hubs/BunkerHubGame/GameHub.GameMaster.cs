@@ -481,23 +481,16 @@ namespace Bunker.Hubs
                 threatTriggered = await StartCanonicalScenarioThreat(room, completedRound);
             }
 
-            var additionalInventory = GrantConfiguredBonusInventory(room, completedRound);
-            if (threatTriggered || additionalInventory.Count > 0)
+            if (threatTriggered)
             {
                 room.CurrentPhase = GamePhase.ExtraInventory;
                 var extraInventoryState = BuildRoundState(room);
-                await Clients.Group(roomId).SendAsync("AdditionalInventoryGranted", new
-                {
-                    completedRound,
-                    grants = additionalInventory,
-                    roundState = extraInventoryState
-                });
                 await Clients.Group(roomId).SendAsync("RoundStateUpdated", extraInventoryState);
             }
 
             if (IsVotingRound(room, completedRound))
             {
-                if (!threatTriggered && additionalInventory.Count == 0)
+                if (!threatTriggered)
                 {
                     room.CurrentPhase = GamePhase.PreVotingReadyCheck;
                     var postRoundState = BuildRoundState(room);
