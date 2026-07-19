@@ -1,0 +1,38 @@
+PROPERTY SEMANTIC AUDIT V4
+
+Records: 300
+Unique IDs: 300
+Main changes:
+- Item name is a separate title.
+- Numeric properties are separate detail rows.
+- Condition is a separate detail row, like health severity.
+- Generic units/day were removed.
+- Singleton equipment no longer receives absurd counts.
+- Medical refrigerators use liters instead of item count.
+- Irrigation modules use covered square meters per day.
+- Reservoirs use liters; pumps use liters per minute.
+- Aquariums use liters.
+
+Fields by category:
+- їжа: weightKg=20, condition=20
+- вода: capacityLitersPerHour=8, condition=20, flowLitersPerMinute=4, capacityLiters=8
+- паливо та енергія: powerKw=16, condition=20, capacityKwh=4
+- інструменти: count=20, condition=20
+- будівництво: weightKg=4, condition=20, count=12, areaSquareMeters=4
+- медицина: capacityLiters=8, condition=20, flowLitersPerMinute=4
+- сільське господарство: workingWidthCm=4, condition=20, eggCapacity=4, grainKgPerHour=4, milkLitersPerHour=4, coverageSquareMetersPerDay=4
+- наземний транспорт: seatCount=16, fuelLiters=20, condition=20, cargoKg=12
+- спеціальний транспорт: seatCount=20, fuelLiters=20, condition=20, cargoKg=4
+- електроніка: storageTb=4, condition=20, buildVolumeLiters=4, flightMinutes=4, memoryGb=4
+- зв’язок: rangeKm=20, condition=20
+- промислове обладнання: pressForceTons=8, condition=20, powerKw=4, flowLitersPerMinute=4, conveyorLengthMeters=4
+- житло та побут: peopleCapacity=4, condition=20, toiletCount=4, mealCapacityPerDay=4, showerCount=4, storageCubicMeters=4
+- дозвілля та мораль: count=20, condition=20
+- незвичайне майно: cashAmount=4, condition=20, safeVolumeLiters=4, capacityLiters=4, servingCount=4
+
+Representative fixes:
+- Резервний поливний модуль: Площа поливу, м²/день + Стан.
+- Промисловий медичний холодильник: Об’єм, л + Стан.
+- Дефібрилятор/сканер: only Стан, without artificial quantity.
+- Акваріум: Об’єм, л + Стан.
+- Пакет теплоізоляції: Площа, м² + Стан.
