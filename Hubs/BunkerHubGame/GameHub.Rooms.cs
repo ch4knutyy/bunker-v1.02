@@ -319,11 +319,14 @@ namespace Bunker.Hubs
 				currentPhase = room.CurrentPhase.ToString(),
 				completion = room.Completion,
 				apocalypse = room.Apocalypse?.ToClientInfo(),
-				bunker = room.Bunker?.ToClientInfo(),
+				bunker = _bunkerIntel.Project(room, player,
+					player.GmRole is GmMode.TechnicalGm or GmMode.OmniscientGm ||
+					player.IsSpectatorGm && player.HasSeenOmniscientState),
 				voting = BuildVotingReconnectInfo(room, player),
 				players = BuildRoomPlayersPayload(room),
 				roundState = BuildRoundState(room)
 			});
+			await SendPendingScenarioState(room, player, Context.ConnectionId);
 
 			await Clients.OthersInGroup(roomId).SendAsync("PlayerReconnected", new
 			{
@@ -653,6 +656,8 @@ namespace Bunker.Hubs
                 room.ResolvedBunkerCapacity ??= room.Bunker.Capacity;
                 room.Bunker.Capacity = room.ResolvedBunkerCapacity.Value;
             }
+            room.ScenarioSituations = _scenarioScheduler.InitializeForNewGame(settings);
+            room.BunkerIntel = _bunkerIntel.InitializeForNewGame(settings);
 
             if (settings.RoundTimerEnabled && settings.AutoStartRoundTimer)
                 _gameTimerService.Start(room, settings.RoundTimerDurationSeconds, GameTimerPurpose.Round, $"Round {room.CurrentRound}");
@@ -684,7 +689,7 @@ namespace Bunker.Hubs
             var roundState = BuildRoundState(room);
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
             if (room.Bunker != null)
-                await Clients.Group(roomId).SendAsync("BunkerChanged", new { bunker = room.Bunker.ToClientInfo() });
+                await BroadcastBunkerIntelProjection(room);
             if (room.Apocalypse != null)
                 await Clients.Group(roomId).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
             await SendPlayerHostControlData(room);
@@ -697,7 +702,7 @@ namespace Bunker.Hubs
                 currentRound = room.CurrentRound,
                 currentTurnPlayerId = room.CurrentTurnPlayerId,
                 apocalypse = room.Apocalypse?.ToClientInfo(),
-                bunker = room.Bunker?.ToClientInfo(),
+                bunker = _bunkerIntel.Project(room, null),
                 roundState,
                 players = playersSnapshot.Select(entry =>
                 {

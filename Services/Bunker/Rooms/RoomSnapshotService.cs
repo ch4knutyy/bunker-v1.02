@@ -199,7 +199,10 @@ public sealed class RoomSnapshotService
             VotingReadyResponses = Clone(room.VotingReadyResponses) ?? new(StringComparer.OrdinalIgnoreCase),
             CurrentVoting = Clone(room.CurrentVoting),
             Apocalypse = Clone(room.Apocalypse),
-            Bunker = Clone(room.Bunker)
+            Bunker = Clone(room.Bunker),
+            ScenarioSituations = Clone(room.ScenarioSituations),
+            BunkerIntel = Clone(room.BunkerIntel),
+            PendingElimination = Clone(room.PendingElimination)
         };
         lock (room.ThreatSyncRoot)
         {
@@ -263,6 +266,9 @@ public sealed class RoomSnapshotService
         room.CurrentVoting = state.CurrentVoting;
         room.Apocalypse = state.Apocalypse;
         room.Bunker = state.Bunker;
+        room.ScenarioSituations = state.ScenarioSituations;
+        room.BunkerIntel = state.BunkerIntel;
+        room.PendingElimination = state.PendingElimination;
 
         lock (room.Players)
         {
@@ -374,6 +380,9 @@ public sealed class RoomSnapshotService
         Add("bunker", Json(current.Bunker) != Json(state.Bunker) || Json(current.Apocalypse) != Json(state.Apocalypse) ? 1 : 0);
         Add("voting", Json(current.CurrentVoting) != Json(state.CurrentVoting) || Json(current.VotingReadyResponses) != Json(state.VotingReadyResponses) ? 1 : 0);
         Add("threat_state", Json(current.CurrentThreat) != Json(state.CurrentThreat) || Json(current.ThreatState) != Json(state.ThreatState) ? 1 : 0);
+        Add("scenario_state", Json(current.ScenarioSituations) != Json(state.ScenarioSituations) ||
+            Json(current.BunkerIntel) != Json(state.BunkerIntel) ? 1 : 0);
+        Add("pending_elimination", Json(current.PendingElimination) != Json(state.PendingElimination) ? 1 : 0);
         return result;
     }
 

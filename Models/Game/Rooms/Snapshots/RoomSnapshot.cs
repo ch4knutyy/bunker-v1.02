@@ -57,6 +57,9 @@ public sealed class RoomSnapshotState
     public VotingSession? CurrentVoting { get; set; }
     public Apocalypse? Apocalypse { get; set; }
     public BunkerInfo? Bunker { get; set; }
+    public ScenarioSituationState? ScenarioSituations { get; set; }
+    public BunkerIntelState? BunkerIntel { get; set; }
+    public PendingEliminationState? PendingElimination { get; set; }
     public Dictionary<string, Player> PlayersByStableId { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 

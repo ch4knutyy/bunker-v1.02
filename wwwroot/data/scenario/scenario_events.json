@@ -1,0 +1,1544 @@
+{
+  "schemaVersion": 3,
+  "events": [
+    {
+      "id": "unknown_food_thief_6",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Невідомий крадій",
+        "en": "Unknown Thief",
+        "ru": "Неизвестный вор"
+      },
+      "publicText": {
+        "uk": "Під час перевірки складу виявлено нестачу. З бункера зникло 6 місяців їжі. Слідів злому немає — крадій перебуває серед мешканців.",
+        "en": "A storage inspection found a shortage. Six months of food disappeared from the bunker. There are no signs of forced entry—the thief is among the residents.",
+        "ru": "Во время проверки склада обнаружена недостача. Из бункера исчезло 6 месяцев еды. Следов взлома нет — вор находится среди жителей."
+      },
+      "publicEffectsSummary": {
+        "uk": "Їжа бункера зменшилася на 6 місяців. Особа крадія невідома.",
+        "en": "The bunker's food reserve decreased by six months. The thief is unknown.",
+        "ru": "Запас еды в бункере уменьшился на 6 месяцев. Личность вора неизвестна."
+      },
+      "minRound": 3,
+      "weight": 9,
+      "oncePerGame": true,
+      "cooldownGroup": "resource_theft",
+      "cooldownRounds": 8,
+      "eligibility": {
+        "minimumFoodMonths": 8,
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenExistingOwnedCard": "hidden_food_cache_6"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "effects": [
+        {
+          "type": "remove_bunker_food",
+          "amount": 6
+        }
+      ],
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "hidden_food_cache_6",
+          "message": {
+            "uk": "Ви отримали контроль над викраденими пайками. Інші не знають, що запас у вас.",
+            "en": "You gained control of the stolen rations. The others do not know you hold them.",
+            "ru": "Вы получили контроль над украденными пайками. Остальные не знают, что запас у вас."
+          }
+        }
+      ],
+      "tags": [
+        "theft",
+        "food",
+        "secret",
+        "suspicion",
+        "leverage"
+      ]
+    },
+    {
+      "id": "unknown_water_thief_4",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Таємний доступ до резервуара",
+        "en": "Secret Reservoir Access",
+        "ru": "Тайный доступ к резервуару"
+      },
+      "publicText": {
+        "uk": "Рівень води впав без ознак витоку. Зникло 4 місяці запасу. Хтось із мешканців отримав таємний доступ до резервуара.",
+        "en": "The water level dropped with no sign of a leak. Four months of reserves are missing. Someone gained secret access to the reservoir.",
+        "ru": "Уровень воды снизился без признаков утечки. Исчезло 4 месяца запаса. Кто-то из жителей получил тайный доступ к резервуару."
+      },
+      "publicEffectsSummary": {
+        "uk": "Вода бункера зменшилася на 4 місяці. Отримувач запасу невідомий.",
+        "en": "The bunker's water reserve decreased by four months. The recipient is unknown.",
+        "ru": "Запас воды в бункере уменьшился на 4 месяца. Получатель неизвестен."
+      },
+      "minRound": 3,
+      "weight": 8,
+      "oncePerGame": true,
+      "cooldownGroup": "resource_theft",
+      "cooldownRounds": 8,
+      "eligibility": {
+        "minimumWaterMonths": 6,
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenExistingOwnedCard": "hidden_water_cache_4"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "effects": [
+        {
+          "type": "remove_bunker_water",
+          "amount": 4
+        }
+      ],
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "hidden_water_cache_4",
+          "message": {
+            "uk": "Ви контролюєте викрадений запас води. Інші гравці не знають, що він у вас.",
+            "en": "You control the stolen water reserve. The other players do not know you hold it.",
+            "ru": "Вы контролируете украденный запас воды. Другие игроки не знают, что он у вас."
+          }
+        }
+      ],
+      "tags": [
+        "theft",
+        "water",
+        "secret",
+        "suspicion",
+        "leverage"
+      ]
+    },
+    {
+      "id": "personal_food_offer",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "secret_player_choice",
+      "title": {
+        "uk": "Особиста пропозиція",
+        "en": "Personal Offer",
+        "ru": "Личное предложение"
+      },
+      "publicText": {
+        "uk": "Один із мешканців отримав таємну пропозицію, пов’язану із запасами їжі. Його рішення поки невідоме.",
+        "en": "One resident received a secret offer involving the food reserve. Their decision is not yet known.",
+        "ru": "Один из жителей получил тайное предложение, связанное с запасами еды. Его решение пока неизвестно."
+      },
+      "minRound": 3,
+      "weight": 8,
+      "oncePerGame": true,
+      "cooldownGroup": "secret_resource_offer",
+      "cooldownRounds": 7,
+      "eligibility": {
+        "minimumFoodMonths": 8,
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenExistingOwnedCard": "hidden_food_cache_6"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true
+      },
+      "privateChoice": {
+        "target": "selected",
+        "message": {
+          "uk": "Ви можете викрасти 6 місяців їжі й таємно передати їх іншому гравцю. Також можете розкрити пропозицію групі або відмовитися.",
+          "en": "You may steal six months of food and secretly give it to another player. You may also expose the offer to the group or refuse.",
+          "ru": "Вы можете украсть 6 месяцев еды и тайно передать их другому игроку. Также можете раскрыть предложение группе или отказаться."
+        },
+        "choices": [
+          {
+            "id": "steal_and_transfer",
+            "label": {
+              "uk": "Вкрасти й передати іншому",
+              "en": "Steal and transfer to another player",
+              "ru": "Украсть и передать другому"
+            },
+            "requiresTarget": "other_active_player",
+            "publicResult": {
+              "uk": "Зі складу зникло 6 місяців їжі. Отримувач невідомий.",
+              "en": "Six months of food disappeared from storage. The recipient is unknown.",
+              "ru": "Со склада исчезло 6 месяцев еды. Получатель неизвестен."
+            },
+            "effects": [
+              {
+                "type": "remove_bunker_food",
+                "amount": 6
+              },
+              {
+                "type": "grant_event_card_to_other_player",
+                "cardId": "hidden_food_cache_6",
+                "target": "owner_selected_player"
+              }
+            ]
+          },
+          {
+            "id": "expose_offer",
+            "label": {
+              "uk": "Розповісти групі",
+              "en": "Tell the group",
+              "ru": "Рассказать группе"
+            },
+            "publicResult": {
+              "uk": "Таємну пропозицію розкрито. Їжу не було викрадено.",
+              "en": "The secret offer was exposed. No food was stolen.",
+              "ru": "Тайное предложение раскрыто. Еда не была украдена."
+            },
+            "effects": [
+              {
+                "type": "reveal_bunker_intel_public",
+                "category": "food",
+                "scopePolicy": "entire_category"
+              }
+            ]
+          },
+          {
+            "id": "refuse",
+            "label": {
+              "uk": "Відмовитися",
+              "en": "Refuse",
+              "ru": "Отказаться"
+            },
+            "effects": [
+              {
+                "type": "no_effect"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "secret_offer",
+        "food",
+        "betrayal",
+        "alliance"
+      ]
+    },
+    {
+      "id": "personal_water_offer",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "secret_player_choice",
+      "title": {
+        "uk": "Доступ до водяної лінії",
+        "en": "Water-Line Access",
+        "ru": "Доступ к водяной линии"
+      },
+      "publicText": {
+        "uk": "Один із мешканців отримав можливість непомітно втрутитися в систему водопостачання.",
+        "en": "One resident gained an opportunity to interfere with the water system unnoticed.",
+        "ru": "Один из жителей получил возможность незаметно вмешаться в систему водоснабжения."
+      },
+      "minRound": 3,
+      "weight": 7,
+      "oncePerGame": true,
+      "cooldownGroup": "secret_resource_offer",
+      "cooldownRounds": 7,
+      "eligibility": {
+        "minimumWaterMonths": 6,
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenExistingOwnedCard": "hidden_water_cache_4"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true
+      },
+      "privateChoice": {
+        "target": "selected",
+        "message": {
+          "uk": "Ви можете викрасти 4 місяці води й таємно передати їх іншому гравцю, повідомити групі або відмовитися.",
+          "en": "You may steal four months of water and secretly give it to another player, inform the group, or refuse.",
+          "ru": "Вы можете украсть 4 месяца воды и тайно передать их другому игроку, сообщить группе или отказаться."
+        },
+        "choices": [
+          {
+            "id": "steal_and_transfer",
+            "label": {
+              "uk": "Вкрасти й передати іншому",
+              "en": "Steal and transfer to another player",
+              "ru": "Украсть и передать другому"
+            },
+            "requiresTarget": "other_active_player",
+            "publicResult": {
+              "uk": "З резервуара зникло 4 місяці води. Отримувач невідомий.",
+              "en": "Four months of water disappeared from the reservoir. The recipient is unknown.",
+              "ru": "Из резервуара исчезло 4 месяца воды. Получатель неизвестен."
+            },
+            "effects": [
+              {
+                "type": "remove_bunker_water",
+                "amount": 4
+              },
+              {
+                "type": "grant_event_card_to_other_player",
+                "cardId": "hidden_water_cache_4",
+                "target": "owner_selected_player"
+              }
+            ]
+          },
+          {
+            "id": "expose_access",
+            "label": {
+              "uk": "Повідомити групі",
+              "en": "Inform the group",
+              "ru": "Сообщить группе"
+            },
+            "publicResult": {
+              "uk": "Таємний доступ закрито. Вода не була викрадена.",
+              "en": "The secret access was closed. No water was stolen.",
+              "ru": "Тайный доступ закрыт. Вода не была украдена."
+            },
+            "effects": [
+              {
+                "type": "reveal_bunker_intel_public",
+                "category": "water",
+                "scopePolicy": "entire_category"
+              }
+            ]
+          },
+          {
+            "id": "refuse",
+            "label": {
+              "uk": "Відмовитися",
+              "en": "Refuse",
+              "ru": "Отказаться"
+            },
+            "effects": [
+              {
+                "type": "no_effect"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "secret_offer",
+        "water",
+        "betrayal",
+        "alliance"
+      ]
+    },
+    {
+      "id": "torn_bunker_report",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "split_private_information",
+      "title": {
+        "uk": "Розірваний звіт",
+        "en": "Torn Report",
+        "ru": "Разорванный отчёт"
+      },
+      "publicText": {
+        "uk": "Знайдено пошкоджений технічний звіт. Дві його частини потрапили до різних мешканців.",
+        "en": "A damaged technical report was found. Two fragments reached different residents.",
+        "ru": "Найден повреждённый технический отчёт. Два фрагмента попали к разным жителям."
+      },
+      "publicEffectsSummary": {
+        "uk": "Двоє невідомих мешканців отримали різні частини звіту.",
+        "en": "Two unknown residents received different report fragments.",
+        "ru": "Два неизвестных жителя получили разные части отчёта."
+      },
+      "minRound": 3,
+      "weight": 10,
+      "oncePerGame": false,
+      "cooldownGroup": "bunker_intel",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "requiresHiddenBunkerIntelUnits": 2
+      },
+      "targetSelection": {
+        "mode": "two_distinct_random_active_players",
+        "excludeHostRoleOnlySpectators": true
+      },
+      "privatePayloads": [
+        {
+          "target": "selected_1",
+          "effect": {
+            "type": "reveal_random_bunker_intel_private",
+            "scopePolicy": "category_default"
+          },
+          "message": {
+            "uk": "Ви отримали першу частину звіту з одним правдивим фактом про бункер.",
+            "en": "You received the first fragment containing one true fact about the bunker.",
+            "ru": "Вы получили первую часть отчёта с одним правдивым фактом о бункере."
+          }
+        },
+        {
+          "target": "selected_2",
+          "grantCardId": "bunker_archive_access",
+          "message": {
+            "uk": "Ви отримали другу частину звіту — доступ до ще одного прихованого факту.",
+            "en": "You received the second fragment—access to another hidden fact.",
+            "ru": "Вы получили вторую часть отчёта — доступ к ещё одному скрытому факту."
+          }
+        }
+      ],
+      "tags": [
+        "information",
+        "trust",
+        "two_players",
+        "bluff"
+      ]
+    },
+    {
+      "id": "anonymous_guarantee_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Анонімна гарантія",
+        "en": "Anonymous Guarantee",
+        "ru": "Анонимная гарантия"
+      },
+      "publicText": {
+        "uk": "Один із мешканців отримав право один раз урятувати іншу людину від вигнання. Його особа невідома.",
+        "en": "One resident gained the right to save another person from elimination once. Their identity is unknown.",
+        "ru": "Один из жителей получил право один раз спасти другого человека от изгнания. Его личность неизвестна."
+      },
+      "publicEffectsSummary": {
+        "uk": "Власник гарантії невідомий. Карту не можна використати на себе.",
+        "en": "The guarantee holder is unknown. The card cannot be used on oneself.",
+        "ru": "Владелец гарантии неизвестен. Карту нельзя использовать на себя."
+      },
+      "minRound": 3,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "political_leverage",
+      "cooldownRounds": 99,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 4,
+        "excludeWhenAnyPlayerOwnsCard": "anonymous_guarantee"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "anonymous_guarantee"
+        }
+      ],
+      "tags": [
+        "vote",
+        "alliance",
+        "secret",
+        "political"
+      ]
+    },
+    {
+      "id": "emergency_retraining_signal",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Сигнал перекваліфікації",
+        "en": "Retraining Signal",
+        "ru": "Сигнал переквалификации"
+      },
+      "publicText": {
+        "uk": "Отримано доступ до короткої програми аварійної підготовки. Один мешканець зможе змінити професію.",
+        "en": "Access was gained to a short emergency-training program. One resident will be able to change profession.",
+        "ru": "Получен доступ к короткой программе аварийной подготовки. Один житель сможет сменить профессию."
+      },
+      "publicEffectsSummary": {
+        "uk": "Особа отримувача та можливі професії залишаються невідомими.",
+        "en": "The recipient and available professions remain unknown.",
+        "ru": "Получатель и доступные профессии остаются неизвестными."
+      },
+      "minRound": 3,
+      "weight": 7,
+      "oncePerGame": true,
+      "cooldownGroup": "profession_change",
+      "cooldownRounds": 99,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "emergency_retraining"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "professionUtility": "low",
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "emergency_retraining"
+        }
+      ],
+      "tags": [
+        "profession",
+        "secret",
+        "bluff",
+        "character_change"
+      ]
+    },
+    {
+      "id": "private_archive_key",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Ключ від архіву",
+        "en": "Archive Key",
+        "ru": "Ключ от архива"
+      },
+      "publicText": {
+        "uk": "Один із мешканців знайшов ключ від закритого архіву бункера. Особа власника невідома.",
+        "en": "One resident found a key to the bunker's sealed archive. The holder is unknown.",
+        "ru": "Один из жителей нашёл ключ от закрытого архива бункера. Личность владельца неизвестна."
+      },
+      "publicEffectsSummary": {
+        "uk": "Хтось отримав можливість таємно перевірити одну частину бункера.",
+        "en": "Someone gained the ability to privately inspect one part of the bunker.",
+        "ru": "Кто-то получил возможность тайно проверить одну часть бункера."
+      },
+      "minRound": 3,
+      "weight": 9,
+      "oncePerGame": false,
+      "cooldownGroup": "bunker_intel",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresHiddenBunkerIntelUnits": 1,
+        "excludeWhenAnyPlayerOwnsCard": "choose_bunker_intel"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "choose_bunker_intel"
+        }
+      ],
+      "tags": [
+        "information",
+        "secret",
+        "bunker"
+      ]
+    },
+    {
+      "id": "personal_sealed_case",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Особистий контейнер",
+        "en": "Personal Sealed Case",
+        "ru": "Личный контейнер"
+      },
+      "publicText": {
+        "uk": "До шлюзу доставлено запечатаний контейнер з ім’ям одного мешканця. Вміст відомий лише отримувачу.",
+        "en": "A sealed container bearing one resident's name arrived at the airlock. Only the recipient knows its contents.",
+        "ru": "К шлюзу доставлен запечатанный контейнер с именем одного жителя. Содержимое известно только получателю."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий гравець отримав запечатаний комплект.",
+        "en": "One unknown player received a sealed supply case.",
+        "ru": "Один неизвестный игрок получил запечатанный комплект."
+      },
+      "minRound": 3,
+      "weight": 10,
+      "oncePerGame": false,
+      "cooldownGroup": "inventory_grant",
+      "cooldownRounds": 4,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "sealed_inventory_case"
+        }
+      ],
+      "tags": [
+        "inventory",
+        "secret",
+        "personal_resource"
+      ]
+    },
+    {
+      "id": "supply_cache_for_everyone",
+      "enabled": true,
+      "type": "event",
+      "resolutionMode": "automatic_public_event",
+      "title": {
+        "uk": "Відкрито склад спорядження",
+        "en": "Equipment Cache Opened",
+        "ru": "Открыт склад снаряжения"
+      },
+      "publicText": {
+        "uk": "У технічному секторі знайдено достатньо вцілілого спорядження для всіх активних мешканців.",
+        "en": "Enough intact equipment was found in the technical sector for every active resident.",
+        "ru": "В техническом секторе найдено достаточно уцелевшего снаряжения для всех активных жителей."
+      },
+      "publicEffectsSummary": {
+        "uk": "Кожен активний гравець отримав одну приховану карту Інвентарю.",
+        "en": "Every active player received one hidden Inventory card.",
+        "ru": "Каждый активный игрок получил одну скрытую карту Инвентаря."
+      },
+      "minRound": 3,
+      "weight": 7,
+      "oncePerGame": true,
+      "cooldownGroup": "inventory_grant",
+      "cooldownRounds": 99,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2
+      },
+      "effects": [
+        {
+          "type": "grant_inventory_card",
+          "count": 1,
+          "targets": "all_active_players",
+          "revealGrantedInventory": false
+        }
+      ],
+      "tags": [
+        "inventory",
+        "all_players",
+        "positive"
+      ]
+    },
+    {
+      "id": "bunker_archive_scan",
+      "enabled": true,
+      "type": "event",
+      "resolutionMode": "automatic_public_event",
+      "title": {
+        "uk": "Автоматичне сканування бункера",
+        "en": "Automatic Bunker Scan",
+        "ru": "Автоматическое сканирование бункера"
+      },
+      "publicText": {
+        "uk": "Система діагностики завершила перевірку одного раніше невідомого сектора.",
+        "en": "The diagnostic system completed an inspection of one previously unknown bunker sector.",
+        "ru": "Система диагностики завершила проверку одного ранее неизвестного сектора."
+      },
+      "publicEffectsSummary": {
+        "uk": "Групі відкрито одну нову одиницю інформації про бункер.",
+        "en": "One new bunker information unit was revealed to the group.",
+        "ru": "Группе раскрыта одна новая единица информации о бункере."
+      },
+      "minRound": 3,
+      "weight": 9,
+      "oncePerGame": false,
+      "cooldownGroup": "bunker_intel",
+      "cooldownRounds": 4,
+      "eligibility": {
+        "requiresHiddenBunkerIntelUnits": 1
+      },
+      "effects": [
+        {
+          "type": "reveal_bunker_intel_public",
+          "categorySelection": "random_hidden_category",
+          "scopePolicy": "category_default"
+        }
+      ],
+      "tags": [
+        "information",
+        "bunker",
+        "public"
+      ]
+    },
+    {
+      "id": "medical_aerosol_release",
+      "enabled": true,
+      "type": "event",
+      "resolutionMode": "automatic_public_event",
+      "title": {
+        "uk": "Відновлено медичну систему",
+        "en": "Medical System Restored",
+        "ru": "Медицинская система восстановлена"
+      },
+      "publicText": {
+        "uk": "Стара медична система випустила обмежену дозу відновлювального аерозолю по житловому сектору.",
+        "en": "The old medical system released a limited dose of restorative aerosol through the living sector.",
+        "ru": "Старая медицинская система выпустила ограниченную дозу восстанавливающего аэрозоля в жилой сектор."
+      },
+      "publicEffectsSummary": {
+        "uk": "Фізичний стан усіх постраждалих активних гравців покращився на один рівень.",
+        "en": "The physical condition of all affected active players improved by one level.",
+        "ru": "Физическое состояние всех затронутых активных игроков улучшилось на один уровень."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "health_positive",
+      "cooldownRounds": 99,
+      "eligibility": {
+        "requiresAtLeastOnePlayerWithPhysicalSeverityAbove": "stable"
+      },
+      "effects": [
+        {
+          "type": "heal_physical_severity",
+          "levels": 1,
+          "targets": "all_active_affected_players"
+        }
+      ],
+      "tags": [
+        "health",
+        "physical",
+        "positive",
+        "public"
+      ]
+    },
+    {
+      "id": "apocalypse_aftershock",
+      "enabled": true,
+      "type": "event",
+      "resolutionMode": "automatic_public_event",
+      "title": {
+        "uk": "Нова хвиля апокаліпсису",
+        "en": "Apocalypse Aftershock",
+        "ru": "Новая волна апокалипсиса"
+      },
+      "publicText": {
+        "uk": "Нова хвиля зовнішнього впливу досягла бункера. Частина мешканців відчула різке погіршення стану.",
+        "en": "A new wave of external effects reached the bunker. Some residents experienced a sudden deterioration.",
+        "ru": "Новая волна внешнего воздействия достигла бункера. Часть жителей почувствовала резкое ухудшение состояния."
+      },
+      "publicEffectsSummary": {
+        "uk": "Фізичний стан двох випадкових активних гравців погіршився на один рівень.",
+        "en": "The physical condition of two random active players worsened by one level.",
+        "ru": "Физическое состояние двух случайных активных игроков ухудшилось на один уровень."
+      },
+      "minRound": 5,
+      "weight": 5,
+      "oncePerGame": false,
+      "cooldownGroup": "health_negative",
+      "cooldownRounds": 7,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3
+      },
+      "targetSelection": {
+        "mode": "two_random_active_players",
+        "excludePlayersAtMaximumPhysicalSeverity": true
+      },
+      "effects": [
+        {
+          "type": "worsen_physical_severity",
+          "levels": 1,
+          "targets": "selected_players"
+        }
+      ],
+      "tags": [
+        "apocalypse",
+        "health",
+        "negative",
+        "public"
+      ]
+    },
+    {
+      "id": "property_reassessment",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Перереєстрація особистих речей",
+        "en": "Personal Property Reassessment",
+        "ru": "Переоценка личного имущества"
+      },
+      "publicText": {
+        "uk": "У старому архіві знайдено документи, які дозволяють одному мешканцю переглянути право на особисте майно.",
+        "en": "Old archive documents allow one resident to reassess their personal property entitlement.",
+        "ru": "В старом архиве найдены документы, позволяющие одному жителю пересмотреть право на личное имущество."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав право змінити своє Майно.",
+        "en": "One unknown resident gained the right to replace their Property.",
+        "ru": "Один неизвестный житель получил право заменить своё Имущество."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "character_change",
+      "cooldownRounds": 99,
+      "eligibility": {
+        "excludeWhenAnyPlayerOwnsCard": "property_replacement_token"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "propertyUtility": "low",
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "property_replacement_token"
+        }
+      ],
+      "tags": [
+        "property",
+        "secret",
+        "character_change"
+      ]
+    },
+    {
+      "id": "ration_coupon_found",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Знайдено продовольчий талон",
+        "en": "Food Voucher Found",
+        "ru": "Найден продовольственный талон"
+      },
+      "publicText": {
+        "uk": "Під час перевірки старих документів знайдено право на отримання частини аварійного запасу. Талон дістався одному мешканцю.",
+        "en": "Old documents revealed a claim to part of the emergency food reserve. One resident received the voucher.",
+        "ru": "В старых документах найдено право на получение части аварийного запаса еды. Талон достался одному жителю."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав можливість повернути до бункера 3 місяці їжі.",
+        "en": "One unknown resident can restore three months of food to the bunker.",
+        "ru": "Один неизвестный житель получил возможность вернуть в бункер 3 месяца еды."
+      },
+      "minRound": 3,
+      "weight": 8,
+      "oncePerGame": true,
+      "cooldownGroup": "resource_support",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "emergency_food_voucher_3"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "emergency_food_voucher_3"
+        }
+      ],
+      "tags": [
+        "food",
+        "resource_support",
+        "secret"
+      ]
+    },
+    {
+      "id": "water_coupon_found",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Знайдено водний талон",
+        "en": "Water Voucher Found",
+        "ru": "Найден водный талон"
+      },
+      "publicText": {
+        "uk": "У документації резервуара знайдено невикористаний аварійний ліміт. Право на нього отримав один мешканець.",
+        "en": "Reservoir records revealed an unused emergency allowance. One resident received the right to claim it.",
+        "ru": "В документации резервуара обнаружен неиспользованный аварийный лимит. Право на него получил один житель."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець може повернути до запасів 2 місяці води.",
+        "en": "One unknown resident can restore two months of water.",
+        "ru": "Один неизвестный житель может вернуть в запасы 2 месяца воды."
+      },
+      "minRound": 3,
+      "weight": 8,
+      "oncePerGame": true,
+      "cooldownGroup": "resource_support",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "emergency_water_voucher_2"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "emergency_water_voucher_2"
+        }
+      ],
+      "tags": [
+        "water",
+        "resource_support",
+        "secret"
+      ]
+    },
+    {
+      "id": "reserve_access_code",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Код аварійного резерву",
+        "en": "Emergency Reserve Code",
+        "ru": "Код аварийного резерва"
+      },
+      "publicText": {
+        "uk": "Система відновила один код доступу до резервного сховища. Власник коду зможе сам вирішити, який ресурс повернути.",
+        "en": "The system recovered one access code for reserve storage. Its holder may choose which resource to restore.",
+        "ru": "Система восстановила один код доступа к резервному хранилищу. Владелец кода сам решит, какой ресурс вернуть."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав вибір між додатковою їжею та водою.",
+        "en": "One unknown resident received a choice between additional food and water.",
+        "ru": "Один неизвестный житель получил выбор между дополнительной едой и водой."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "resource_support",
+      "cooldownRounds": 6,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "resource_recovery_choice"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "resource_recovery_choice"
+        }
+      ],
+      "tags": [
+        "food",
+        "water",
+        "choice",
+        "secret"
+      ]
+    },
+    {
+      "id": "reinforced_supply_case_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Посилений контейнер",
+        "en": "Reinforced Supply Case",
+        "ru": "Усиленный контейнер"
+      },
+      "publicText": {
+        "uk": "До шлюзу доставлено важкий контейнер із двома комплектами спорядження. Ім’я отримувача не оголошено.",
+        "en": "A heavy case containing two equipment sets arrived at the airlock. The recipient was not announced.",
+        "ru": "К шлюзу доставлен тяжёлый контейнер с двумя комплектами снаряжения. Имя получателя не объявлено."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий гравець отримав право на дві карти Інвентарю.",
+        "en": "One unknown player received access to two Inventory cards.",
+        "ru": "Один неизвестный игрок получил право на две карты Инвентаря."
+      },
+      "minRound": 3,
+      "weight": 7,
+      "oncePerGame": true,
+      "cooldownGroup": "inventory_support",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "double_inventory_case"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "double_inventory_case"
+        }
+      ],
+      "tags": [
+        "inventory",
+        "secret",
+        "personal_resource"
+      ]
+    },
+    {
+      "id": "patronage_manifest_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Маніфест підтримки",
+        "en": "Support Manifest",
+        "ru": "Манифест поддержки"
+      },
+      "publicText": {
+        "uk": "Знайдено документ, що дозволяє одному мешканцю передати комплект спорядження будь-кому іншому.",
+        "en": "A document was found allowing one resident to grant an equipment set to anyone else.",
+        "ru": "Найден документ, позволяющий одному жителю передать комплект снаряжения любому другому."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав можливість подарувати іншому карту Інвентарю.",
+        "en": "One unknown resident can grant another player an Inventory card.",
+        "ru": "Один неизвестный житель получил возможность подарить другому карту Инвентаря."
+      },
+      "minRound": 4,
+      "weight": 7,
+      "oncePerGame": true,
+      "cooldownGroup": "inventory_support",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "inventory_gift_order"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "inventory_gift_order"
+        }
+      ],
+      "tags": [
+        "inventory",
+        "alliance",
+        "trade",
+        "secret"
+      ]
+    },
+    {
+      "id": "shared_archive_invitation_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Запрошення до архіву",
+        "en": "Archive Invitation",
+        "ru": "Приглашение в архив"
+      },
+      "publicText": {
+        "uk": "Старий термінал дозволить двом людям одночасно переглянути різні частини архіву. Право вибору партнера отримав один мешканець.",
+        "en": "An old terminal will allow two people to inspect different archive sections. One resident may choose the partner.",
+        "ru": "Старый терминал позволит двум людям изучить разные части архива. Право выбрать партнёра получил один житель."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець зможе поділитися доступом до архіву з іншою людиною.",
+        "en": "One unknown resident can share archive access with another person.",
+        "ru": "Один неизвестный житель сможет поделиться доступом к архиву с другим человеком."
+      },
+      "minRound": 3,
+      "weight": 9,
+      "oncePerGame": true,
+      "cooldownGroup": "bunker_intel",
+      "cooldownRounds": 5,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "shared_archive_pass",
+        "requiresHiddenBunkerIntelUnits": 2
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "shared_archive_pass"
+        }
+      ],
+      "tags": [
+        "information",
+        "alliance",
+        "bunker",
+        "secret"
+      ]
+    },
+    {
+      "id": "deep_archive_terminal_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Глибокий архівний термінал",
+        "en": "Deep Archive Terminal",
+        "ru": "Терминал глубокого архива"
+      },
+      "publicText": {
+        "uk": "У закритому секторі активувався термінал із доступом до двох різних фрагментів документації.",
+        "en": "A terminal in a sealed sector activated with access to two different documentation fragments.",
+        "ru": "В закрытом секторе активировался терминал с доступом к двум разным фрагментам документации."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав розширений приватний доступ до даних бункера.",
+        "en": "One unknown resident received expanded private access to bunker data.",
+        "ru": "Один неизвестный житель получил расширенный личный доступ к данным бункера."
+      },
+      "minRound": 4,
+      "weight": 7,
+      "oncePerGame": true,
+      "cooldownGroup": "bunker_intel",
+      "cooldownRounds": 6,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "deep_archive_access",
+        "requiresHiddenBunkerIntelUnits": 2
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "deep_archive_access"
+        }
+      ],
+      "tags": [
+        "information",
+        "bunker",
+        "secret"
+      ]
+    },
+    {
+      "id": "personnel_file_leak_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Витік особових справ",
+        "en": "Personnel File Leak",
+        "ru": "Утечка личных дел"
+      },
+      "publicText": {
+        "uk": "Частина захищеного кадрового архіву стала доступною. Один мешканець отримав запечатане досьє на інших людей.",
+        "en": "Part of the protected personnel archive became accessible. One resident received a sealed dossier on the others.",
+        "ru": "Часть защищённого кадрового архива стала доступна. Один житель получил запечатанное досье на других людей."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець зможе таємно перевірити дві характеристики іншого гравця.",
+        "en": "One unknown resident can privately inspect two characteristics of another player.",
+        "ru": "Один неизвестный житель сможет тайно проверить две характеристики другого игрока."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "player_intel",
+      "cooldownRounds": 6,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "sealed_personnel_dossier"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "sealed_personnel_dossier"
+        }
+      ],
+      "tags": [
+        "information",
+        "characteristics",
+        "suspicion",
+        "secret"
+      ]
+    },
+    {
+      "id": "intensive_treatment_slot_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Пріоритетне лікування",
+        "en": "Priority Treatment",
+        "ru": "Приоритетное лечение"
+      },
+      "publicText": {
+        "uk": "Медичний блок звільнив один слот для інтенсивного курсу. Право вирішити, кого лікувати, отримав один мешканець.",
+        "en": "The medical block opened one intensive-treatment slot. One resident may decide who receives it.",
+        "ru": "Медицинский блок освободил одно место для интенсивного курса. Один житель решит, кого лечить."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав сильний курс фізичного лікування.",
+        "en": "One unknown resident received access to an intensive physical treatment course.",
+        "ru": "Один неизвестный житель получил доступ к интенсивному физическому лечению."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "health_support",
+      "cooldownRounds": 6,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "intensive_medical_course"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "intensive_medical_course"
+        }
+      ],
+      "tags": [
+        "health",
+        "physical",
+        "trade",
+        "secret"
+      ]
+    },
+    {
+      "id": "crisis_counseling_slot_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Закритий сеанс терапії",
+        "en": "Private Therapy Session",
+        "ru": "Закрытый сеанс терапии"
+      },
+      "publicText": {
+        "uk": "Психологічний модуль може провести один інтенсивний курс. Право вибрати пацієнта отримав один мешканець.",
+        "en": "The psychological module can provide one intensive course. One resident may choose the patient.",
+        "ru": "Психологический модуль может провести один интенсивный курс. Один житель выберет пациента."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець отримав доступ до сильної психологічної терапії.",
+        "en": "One unknown resident received access to intensive psychological therapy.",
+        "ru": "Один неизвестный житель получил доступ к интенсивной психологической терапии."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "health_support",
+      "cooldownRounds": 6,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "intensive_psychological_course"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "intensive_psychological_course"
+        }
+      ],
+      "tags": [
+        "health",
+        "mental",
+        "trade",
+        "secret"
+      ]
+    },
+    {
+      "id": "archive_release_authority_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Право оприлюднення архіву",
+        "en": "Archive Release Authority",
+        "ru": "Право публикации архива"
+      },
+      "publicText": {
+        "uk": "Знайдено службовий дозвіл на публікацію двох фрагментів архіву. Документ потрапив до одного мешканця.",
+        "en": "An authorization to publish two archive fragments was found. One resident received the document.",
+        "ru": "Найдено служебное разрешение на публикацию двух фрагментов архива. Документ попал к одному жителю."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець зможе відкрити групі дві частини інформації про бункер.",
+        "en": "One unknown resident can reveal two bunker information units to the group.",
+        "ru": "Один неизвестный житель сможет раскрыть группе две части информации о бункере."
+      },
+      "minRound": 5,
+      "weight": 5,
+      "oncePerGame": true,
+      "cooldownGroup": "bunker_intel",
+      "cooldownRounds": 7,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 2,
+        "excludeWhenAnyPlayerOwnsCard": "public_archive_release",
+        "requiresHiddenBunkerIntelUnits": 2
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "public_archive_release"
+        }
+      ],
+      "tags": [
+        "information",
+        "public_reveal",
+        "bunker",
+        "secret_owner"
+      ]
+    },
+    {
+      "id": "corrupted_medical_terminal_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Пошкоджений медичний термінал",
+        "en": "Corrupted Medical Terminal",
+        "ru": "Повреждённый медицинский терминал"
+      },
+      "publicText": {
+        "uk": "У медичній мережі знайдено інструмент для підробки висновків. Доступ отримав один мешканець.",
+        "en": "A tool for falsifying medical reports was found in the medical network. One resident gained access.",
+        "ru": "В медицинской сети найден инструмент для подделки заключений. Доступ получил один житель."
+      },
+      "publicEffectsSummary": {
+        "uk": "Хтось отримав небезпечний засіб впливу на фізичний стан іншої людини. Використання розкриє власника.",
+        "en": "Someone received a dangerous way to affect another person's physical condition. Use will reveal the owner.",
+        "ru": "Кто-то получил опасный способ повлиять на физическое состояние другого человека. Использование раскроет владельца."
+      },
+      "minRound": 5,
+      "weight": 4,
+      "oncePerGame": true,
+      "cooldownGroup": "sabotage",
+      "cooldownRounds": 8,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "contaminated_medical_record"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "contaminated_medical_record"
+        }
+      ],
+      "tags": [
+        "sabotage",
+        "physical",
+        "risk",
+        "secret"
+      ]
+    },
+    {
+      "id": "pressure_protocol_cache_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Архів протоколів тиску",
+        "en": "Pressure Protocol Archive",
+        "ru": "Архив протоколов давления"
+      },
+      "publicText": {
+        "uk": "У службовій базі знайдено методику психологічного тиску. Копія потрапила до одного мешканця.",
+        "en": "A psychological-pressure protocol was found in the service database. One resident received a copy.",
+        "ru": "В служебной базе найдена методика психологического давления. Копия попала к одному жителю."
+      },
+      "publicEffectsSummary": {
+        "uk": "Хтось отримав засіб погіршити ментальний стан іншої людини. Використання розкриє власника.",
+        "en": "Someone received a way to worsen another person's mental condition. Use will reveal the owner.",
+        "ru": "Кто-то получил способ ухудшить ментальное состояние другого человека. Использование раскроет владельца."
+      },
+      "minRound": 5,
+      "weight": 4,
+      "oncePerGame": true,
+      "cooldownGroup": "sabotage",
+      "cooldownRounds": 8,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "psychological_pressure_file"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "psychological_pressure_file"
+        }
+      ],
+      "tags": [
+        "sabotage",
+        "mental",
+        "risk",
+        "secret"
+      ]
+    },
+    {
+      "id": "specialist_sponsorship_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Програма підготовки спеціаліста",
+        "en": "Specialist Training Program",
+        "ru": "Программа подготовки специалиста"
+      },
+      "publicText": {
+        "uk": "Бункерна навчальна система готова підготувати одного нового спеціаліста. Право обрати кандидата отримав один мешканець.",
+        "en": "The bunker training system can prepare one new specialist. One resident may choose the candidate.",
+        "ru": "Учебная система бункера готова подготовить одного нового специалиста. Один житель выберет кандидата."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець зможе надати іншому гравцю перекваліфікацію.",
+        "en": "One unknown resident can grant another player a profession retraining opportunity.",
+        "ru": "Один неизвестный житель сможет предоставить другому игроку переквалификацию."
+      },
+      "minRound": 5,
+      "weight": 5,
+      "oncePerGame": true,
+      "cooldownGroup": "profession_change",
+      "cooldownRounds": 8,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "profession_sponsorship"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "profession_sponsorship"
+        }
+      ],
+      "tags": [
+        "profession",
+        "alliance",
+        "trade",
+        "secret"
+      ]
+    },
+    {
+      "id": "property_sponsorship_program_event",
+      "enabled": true,
+      "type": "secret_event",
+      "resolutionMode": "automatic_secret_grant",
+      "title": {
+        "uk": "Програма перерозподілу майна",
+        "en": "Property Redistribution Program",
+        "ru": "Программа перераспределения имущества"
+      },
+      "publicText": {
+        "uk": "Старі документи дозволяють одному мешканцю надати іншій людині право на перегляд особистого Майна.",
+        "en": "Old documents allow one resident to grant another person the right to reassess their Property.",
+        "ru": "Старые документы позволяют одному жителю дать другому право пересмотреть личное Имущество."
+      },
+      "publicEffectsSummary": {
+        "uk": "Один невідомий мешканець зможе подарувати іншому право на нове Майно.",
+        "en": "One unknown resident can grant another player the right to reroll their Property.",
+        "ru": "Один неизвестный житель сможет подарить другому право на новое Имущество."
+      },
+      "minRound": 4,
+      "weight": 6,
+      "oncePerGame": true,
+      "cooldownGroup": "character_change",
+      "cooldownRounds": 7,
+      "eligibility": {
+        "requiresAtLeastActivePlayers": 3,
+        "excludeWhenAnyPlayerOwnsCard": "property_sponsorship"
+      },
+      "targetSelection": {
+        "mode": "random_active_player",
+        "excludeHostRoleOnlySpectators": true,
+        "prefer": {
+          "hasNoEventCards": true
+        }
+      },
+      "privatePayloads": [
+        {
+          "target": "selected",
+          "grantCardId": "property_sponsorship"
+        }
+      ],
+      "tags": [
+        "property",
+        "alliance",
+        "trade",
+        "secret"
+      ]
+    }
+  ]
+}

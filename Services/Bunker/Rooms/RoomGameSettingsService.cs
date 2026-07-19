@@ -36,7 +36,14 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
             settings.VotingStartRound, settings.VotingFrequency.ToString(), settings.SpecialCardsEnabled,
             settings.SpecialCardsPerPlayer, settings.BonusInventoryEnabled, settings.BonusInventoryRound,
             settings.BonusInventoryCount, settings.StartingInventoryCount,
-            settings.CharacterGenerationMode.ToString());
+            settings.CharacterGenerationMode.ToString(),
+            settings.ScenarioSchedule?.Enabled == true,
+            settings.ScenarioSchedule?.FirstScenarioAfterRound ?? 3,
+            settings.ScenarioSchedule?.IntervalRounds ?? 3,
+            settings.ScenarioSchedule?.TriggerPhase ?? "after_round_before_voting",
+            settings.ScenarioSchedule?.EnabledTypes.ToList(),
+            (settings.BunkerIntelMode ?? BunkerIntelMode.AllVisible).ToString(),
+            settings.BunkerIntelIntervalRounds);
     }
 
     public LobbySettingsApplyResult Apply(Room room, Player actor, LobbySettingsUpdateRequest? request)
@@ -215,7 +222,13 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
     public static RoomGameSettings Migrate(RoomGameSettings? source)
     {
         if (source == null || source.Version <= 0) return Preset(GamePreset.Classic);
+        var wasLegacy = source.Version < 2;
         var result = Clone(source);
+        if (wasLegacy)
+        {
+            result.ScenarioSchedule = new ScenarioScheduleSettings { Enabled = false };
+            result.BunkerIntelMode = BunkerIntelMode.AllVisible;
+        }
         result.Version = RoomGameSettings.CurrentVersion;
         return result;
     }
@@ -243,6 +256,15 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
         if (settings.SpecialCardsPerPlayer is < 0 or > 2 || (settings.SpecialCardsEnabled && settings.SpecialCardsPerPlayer == 0)) errors.Add("invalid_special_card_count");
         if (settings.BonusInventoryRound is < 2 or > 5 || settings.BonusInventoryCount is < 1 or > 2 || settings.StartingInventoryCount is < 0 or > 2) errors.Add("invalid_inventory_settings");
         if (settings.CharacterGenerationMode != CharacterGenerationMode.Classic) errors.Add("unsupported_character_generation_mode");
+        if (settings.ScenarioSchedule == null ||
+            settings.ScenarioSchedule.FirstScenarioAfterRound is < 3 or > 6 ||
+            settings.ScenarioSchedule.IntervalRounds is < 2 or > 5 ||
+            settings.ScenarioSchedule.TriggerPhase is not ("after_round_before_voting" or "after_voting") ||
+            settings.ScenarioSchedule.EnabledTypes.Any(type => type is not ("threat" or "event" or "secret_event")))
+            errors.Add("invalid_scenario_settings");
+        if (settings.BunkerIntelMode is null || !Enum.IsDefined(settings.BunkerIntelMode.Value) ||
+            settings.BunkerIntelIntervalRounds is < 1 or > 3)
+            errors.Add("invalid_bunker_intel_settings");
         return errors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
@@ -259,6 +281,8 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
     private static RoomGameSettings With(RoomGameSettings settings, GamePreset preset, Action<RoomGameSettings> configure)
     {
         settings.Preset = preset;
+        settings.ScenarioSchedule ??= new ScenarioScheduleSettings();
+        settings.BunkerIntelMode ??= BunkerIntelMode.Progressive;
         configure(settings);
         return settings;
     }

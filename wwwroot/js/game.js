@@ -72,6 +72,7 @@ let lobbyStartPreview = null;
 let lobbyCommandPending = false;
 let pendingGuestWarningStorageKey = '';
 let lobbySettingsDraft = null;
+let currentPendingScenarioChoice = null;
 let lobbySettingsBaseRevision = 0;
 let lobbySettingsDirty = false;
 let lobbySettingsPending = false;
@@ -2224,6 +2225,7 @@ function renderCurrentGameUI() {
 		try {
 			renderMyPlayerCards(myPlayerData);
 			renderMySpecialCards(myPlayerData);
+			renderMyEventCards(myPlayerData);
 		} catch (error) {
 			console.warn("Failed to render current player character cards", error);
 			const container = document.getElementById("myPlayerCards");
@@ -3062,6 +3064,8 @@ function normalizePlayer(player) {
 			player.specialCard || player.SpecialCard
 		),
 		specialCard: normalizeSpecialCard(player.specialCard || player.SpecialCard),
+		eventSpecialCards: player.eventSpecialCards || player.EventSpecialCards || [],
+		privateInspectedFacts: player.privateInspectedFacts || player.PrivateInspectedFacts || [],
 
 		// Personality
 		personality: {
@@ -4407,6 +4411,49 @@ function registerSignalREvents() {
 		console.log("New game event:", eventData);
 		showCurrentEvent(eventData);
 		addEventToHistory(`<strong>${eventData.name || eventData.Name}</strong>: ${eventData.description || eventData.Description}`, 'game');
+	});
+
+	connection.off("ScenarioStarted");
+	connection.on("ScenarioStarted", function (data) {
+		const scenario = data.scenario || data.Scenario;
+		if (!scenario) return;
+		const modal = document.getElementById('scenarioPublicModal');
+		document.getElementById('scenarioPublicType').textContent = scenario.type || scenario.Type || 'EVENT';
+		document.getElementById('scenarioPublicTitle').textContent = scenario.title || scenario.Title || '';
+		document.getElementById('scenarioPublicText').textContent = scenario.text || scenario.Text || '';
+		const delta = data.resourceDelta || data.ResourceDelta || {};
+		const effects = document.getElementById('scenarioPublicEffects');
+		if (effects) effects.textContent = `Food: ${delta.foodBefore ?? '—'} → ${delta.foodAfter ?? '—'} · Water: ${delta.waterBefore ?? '—'} → ${delta.waterAfter ?? '—'}${(data.hasUnknownRecipients ?? data.HasUnknownRecipients) ? ' · Одержувач невідомий' : ''}`;
+		if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
+		addEventToHistory(`<strong>${escapeHtml(scenario.title || scenario.Title || '')}</strong>: ${escapeHtml(scenario.text || scenario.Text || '')}`, 'special');
+	});
+
+	connection.off("ScenarioPrivateOpened");
+	connection.on("ScenarioPrivateOpened", function (data) {
+		currentPendingScenarioChoice = data.choice || data.Choice || null;
+		const modal = document.getElementById('scenarioPrivateModal');
+		document.getElementById('scenarioPrivateTitle').textContent = data.title || data.Title || 'Приватна подія';
+		document.getElementById('scenarioPrivateMessage').textContent = data.message || data.Message || '';
+		const card = data.card || data.Card;
+		document.getElementById('scenarioPrivateCard').textContent = card ? eventCardLocalized(card.title || card.Title) : '';
+		renderScenarioPrivateChoices();
+		const expiry = data.expiresAtUtc || data.ExpiresAtUtc;
+		document.getElementById('scenarioPrivateExpiry').textContent = expiry ? `До ${new Date(expiry).toLocaleTimeString()}` : '';
+		if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
+	});
+
+	connection.off("ScenarioResolved");
+	connection.on("ScenarioResolved", function () {
+		currentPendingScenarioChoice = null;
+		closeScenarioPrivateModal();
+	});
+
+	connection.off("BunkerIntelRevealed");
+	connection.on("BunkerIntelRevealed", function (data) {
+		const panel = document.getElementById('bunkerPanel');
+		panel?.classList.add('bunker-intel-highlight');
+		setTimeout(() => panel?.classList.remove('bunker-intel-highlight'), 2200);
+		addEventMessage(`🔎 Відкрито нові дані бункера: ${escapeHtml(data.category || data.Category || '')}`);
 	});
 
 	// Ефект події застосовано
@@ -6292,6 +6339,57 @@ function openCurrentBunkerImage() {
 let currentEvent = null;
 let eventsHistory = [];
 
+function closeScenarioPublicModal() {
+	const modal = document.getElementById('scenarioPublicModal');
+	if (modal) { modal.hidden = true; modal.style.display = 'none'; }
+}
+
+function closeScenarioPrivateModal() {
+	const modal = document.getElementById('scenarioPrivateModal');
+	if (modal) { modal.hidden = true; modal.style.display = 'none'; }
+}
+
+function renderScenarioPrivateChoices() {
+	const container = document.getElementById('scenarioPrivateChoices');
+	if (!container) return;
+	const choice = currentPendingScenarioChoice;
+	const choices = choice?.choices || choice?.Choices || [];
+	if (!choice || !choices.length) { container.innerHTML = ''; return; }
+	const players = eventCardPlayerOptions(getMyStablePlayerId()).filter(option => !option.isOwner);
+	container.innerHTML = `<select id="scenarioChoiceTarget" class="special-card-target-select"><option value="">${escapeHtml(t('choosePlayer'))}</option>${players.map(player => `<option value="${escapeHtml(player.id)}">${escapeHtml(player.name)}</option>`).join('')}</select>
+		<div class="scenario-choice-actions">${choices.map(option => `<button type="button" class="btn-primary" onclick="resolveScenarioPrivateChoice('${escapeHtml(option.id || option.Id)}')">${escapeHtml(eventCardLocalized(option.label || option.Label))}</button>`).join('')}</div>`;
+}
+
+async function resolveScenarioPrivateChoice(optionId) {
+	if (!currentPendingScenarioChoice) return;
+	const choiceId = currentPendingScenarioChoice.choiceId || currentPendingScenarioChoice.ChoiceId;
+	const target = document.getElementById('scenarioChoiceTarget')?.value || null;
+	try {
+		await connection.invoke('ResolveScenarioChoice', choiceId, optionId, target, crypto.randomUUID());
+	} catch (error) {
+		console.error('Scenario choice failed', error);
+	}
+}
+
+async function gmRevealNextBunkerIntel() {
+	try { await connection.invoke('RevealNextBunkerIntel', crypto.randomUUID()); }
+	catch (error) { console.error('Bunker intel reveal failed', error); }
+}
+
+async function gmGrantPrivateBunkerIntel() {
+	const target = document.getElementById('gmPlayerSelect')?.value;
+	if (!target) return;
+	try { await connection.invoke('GrantNextPrivateBunkerIntel', target, crypto.randomUUID()); }
+	catch (error) { console.error('Private bunker intel grant failed', error); }
+}
+
+async function gmSkipScenarioChoice() {
+	const choiceId = currentPendingScenarioChoice?.choiceId || currentPendingScenarioChoice?.ChoiceId;
+	if (!choiceId) return;
+	try { await connection.invoke('SkipPendingScenarioChoice', choiceId, crypto.randomUUID()); }
+	catch (error) { console.error('Scenario skip failed', error); }
+}
+
 function showCurrentEvent(event) {
 	currentEvent = event;
 
@@ -7891,14 +7989,14 @@ function renderRoomPlayers() {
 }
 
 const lobbyGet = (object, camel, pascal) => object?.[camel] ?? object?.[pascal];
-const lobbySettingNumberKeys = new Set(['maxGameplayPlayers','minGameplayPlayers','manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','firstThreatRound','maxThreatsPerGame','roundTimerDurationSeconds','votingStartRound','specialCardsPerPlayer','bonusInventoryRound','bonusInventoryCount','startingInventoryCount']);
+const lobbySettingNumberKeys = new Set(['maxGameplayPlayers','minGameplayPlayers','manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','firstThreatRound','maxThreatsPerGame','roundTimerDurationSeconds','votingStartRound','specialCardsPerPlayer','bonusInventoryRound','bonusInventoryCount','startingInventoryCount','scenarioFirstAfterRound','scenarioIntervalRounds','bunkerIntelIntervalRounds']);
 const lobbySettingNullableNumberKeys = new Set(['manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','maxThreatsPerGame']);
-const lobbySettingBooleanKeys = new Set(['spectatorsAllowed','allowSpectatorsAfterStart','allowLateGameplayJoin','lockRoomOnStart','joinsLocked','hostCanStartWithoutAllReady','resetReadinessAfterSettingsChange','apocalypseEnabled','bunkerScenarioEnabled','threatsEnabled','avoidRepeatedThreats','roundTimerEnabled','autoStartRoundTimer','pauseTimerOnHostDisconnect','votingEnabled','specialCardsEnabled','bonusInventoryEnabled']);
+const lobbySettingBooleanKeys = new Set(['spectatorsAllowed','allowSpectatorsAfterStart','allowLateGameplayJoin','lockRoomOnStart','joinsLocked','hostCanStartWithoutAllReady','resetReadinessAfterSettingsChange','apocalypseEnabled','bunkerScenarioEnabled','threatsEnabled','avoidRepeatedThreats','roundTimerEnabled','autoStartRoundTimer','pauseTimerOnHostDisconnect','votingEnabled','specialCardsEnabled','bonusInventoryEnabled','scenarioEnabled','scenarioThreatEnabled','scenarioEventEnabled','scenarioSecretEventEnabled']);
 
 function normalizeLobbySettings(source) {
 	const get = key => source?.[key] ?? source?.[key.charAt(0).toUpperCase() + key.slice(1)];
 	return {
-		version:Number(get('version') ?? 1), preset:String(get('preset') ?? 'Classic'),
+		version:Number(get('version') ?? 2), preset:String(get('preset') ?? 'Classic'),
 		maxGameplayPlayers:Number(get('maxGameplayPlayers') ?? 12), minGameplayPlayers:Number(get('minGameplayPlayers') ?? 2),
 		spectatorsAllowed:Boolean(get('spectatorsAllowed') ?? true), allowSpectatorsAfterStart:Boolean(get('allowSpectatorsAfterStart') ?? false),
 		allowLateGameplayJoin:Boolean(get('allowLateGameplayJoin') ?? false), lockRoomOnStart:Boolean(get('lockRoomOnStart') ?? true), joinsLocked:Boolean(get('joinsLocked') ?? false),
@@ -7908,7 +8006,10 @@ function normalizeLobbySettings(source) {
 		threatsEnabled:Boolean(get('threatsEnabled') ?? true), interactiveThreatRate:String(get('interactiveThreatRate') ?? 'Rare'), firstThreatRound:Number(get('firstThreatRound') ?? 3), threatFrequency:String(get('threatFrequency') ?? 'OncePerGame'), maxThreatsPerGame:get('maxThreatsPerGame') == null ? null : Number(get('maxThreatsPerGame')), avoidRepeatedThreats:Boolean(get('avoidRepeatedThreats') ?? true),
 		roundTimerEnabled:Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds:Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer:Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect:Boolean(get('pauseTimerOnHostDisconnect') ?? false),
 		votingEnabled:Boolean(get('votingEnabled') ?? true), votingStartRound:Number(get('votingStartRound') ?? 3), votingFrequency:String(get('votingFrequency') ?? 'EveryRound'),
-		specialCardsEnabled:Boolean(get('specialCardsEnabled') ?? true), specialCardsPerPlayer:Number(get('specialCardsPerPlayer') ?? 1), bonusInventoryEnabled:Boolean(get('bonusInventoryEnabled') ?? true), bonusInventoryRound:Number(get('bonusInventoryRound') ?? 3), bonusInventoryCount:Number(get('bonusInventoryCount') ?? 1), startingInventoryCount:Number(get('startingInventoryCount') ?? 1), characterGenerationMode:String(get('characterGenerationMode') ?? 'Classic')
+		specialCardsEnabled:Boolean(get('specialCardsEnabled') ?? true), specialCardsPerPlayer:Number(get('specialCardsPerPlayer') ?? 1), bonusInventoryEnabled:Boolean(get('bonusInventoryEnabled') ?? true), bonusInventoryRound:Number(get('bonusInventoryRound') ?? 3), bonusInventoryCount:Number(get('bonusInventoryCount') ?? 1), startingInventoryCount:Number(get('startingInventoryCount') ?? 1), characterGenerationMode:String(get('characterGenerationMode') ?? 'Classic'),
+		scenarioEnabled:Boolean(get('scenarioEnabled') ?? true), scenarioFirstAfterRound:Number(get('scenarioFirstAfterRound') ?? 3), scenarioIntervalRounds:Number(get('scenarioIntervalRounds') ?? 3), scenarioTriggerPhase:String(get('scenarioTriggerPhase') ?? 'after_round_before_voting'),
+		scenarioThreatEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('threat'), scenarioEventEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('event'), scenarioSecretEventEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('secret_event'),
+		bunkerIntelMode:String(get('bunkerIntelMode') ?? 'Progressive'), bunkerIntelIntervalRounds:Number(get('bunkerIntelIntervalRounds') ?? 2)
 	};
 }
 
@@ -8027,7 +8128,15 @@ function lobbySettingsHubPayload(settings) {
 		bunkerCapacityMode:enumValue(settings.bunkerCapacityMode,['Automatic','Manual','RandomRange']),
 		interactiveThreatRate:enumValue(settings.interactiveThreatRate,['Off','Rare','Standard','Often','Always']),
 		threatFrequency:enumValue(settings.threatFrequency,['OncePerGame','EveryOtherRound','EveryRound','RandomEligibleRounds']),
-		votingFrequency:enumValue(settings.votingFrequency,['EveryRound','EveryTwoRounds']), characterGenerationMode:0
+		votingFrequency:enumValue(settings.votingFrequency,['EveryRound','EveryTwoRounds']), characterGenerationMode:0,
+		scenarioSchedule:{
+			enabled:settings.scenarioEnabled,
+			firstScenarioAfterRound:settings.scenarioFirstAfterRound,
+			intervalRounds:settings.scenarioIntervalRounds,
+			triggerPhase:settings.scenarioTriggerPhase,
+			enabledTypes:['threat','event','secret_event'].filter(type => settings[type === 'threat' ? 'scenarioThreatEnabled' : type === 'event' ? 'scenarioEventEnabled' : 'scenarioSecretEventEnabled'])
+		},
+		bunkerIntelMode:enumValue(settings.bunkerIntelMode,['AllVisible','Progressive','EventsOnly'])
 	};
 }
 
@@ -8051,7 +8160,7 @@ function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLo
 function loadLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; const entry = readLobbyLocalPresets()[name]; if (!entry || entry.version !== 1) return setLobbySettingsFeedback('lobbyPresetImportError', true); lobbySettingsDraft = normalizeLobbySettings(entry.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); renderLobbyGameSetup(); }
 function deleteLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; if (!name) return; const presets = readLobbyLocalPresets(); delete presets[name]; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetDeleted'); }
 function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema:'bunker-room-game-settings', version:1, name, settings:normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'})); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi,'-')}.json`; link.click(); URL.revokeObjectURL(url); }
-async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || data?.settings?.version !== 1) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
+async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 2; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
 
 async function updateLobbyPassword() { if (lobbySettingsPending) return; lobbySettingsPending = true; renderLobbyGameSetup(); try { await connection.invoke('SetLobbyPassword', document.getElementById('lobbyPasswordInput')?.value || null, crypto.randomUUID()); document.getElementById('lobbyPasswordInput').value = ''; setLobbySettingsFeedback('lobbyPasswordUpdated'); } catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); } finally { lobbySettingsPending = false; renderLobbyGameSetup(); } }
 async function resetLobbyMemberReady(playerId) { if (lobbyCommandPending) return; lobbyCommandPending = true; try { await connection.invoke('ResetLobbyReady', playerId, crypto.randomUUID()); } finally { lobbyCommandPending = false; } }
@@ -8569,6 +8678,78 @@ function renderMySpecialCards(player) {
 	container.innerHTML = cards.map((card, index) => renderSpecialCard(buildSpecialCardModel(card, index))).join('');
 	renderedSpecialCardKeys = cards.map((card, index) => getSpecialCardSelectionKey(card, index));
 	window.reinitTooltips?.();
+}
+
+function eventCardLocalized(value) {
+	if (!value) return '';
+	const language = getCurrentLanguage();
+	return value[language] || value[language.toUpperCase()] || value.uk || value.Uk || value.en || value.En || '';
+}
+
+function eventCardPlayerOptions(ownerId, includeEliminated = false) {
+	return Object.values(roomPlayers)
+		.filter(player => (includeEliminated || !player.isEliminated) && !player.isSpectatorGm)
+		.map(player => {
+			const stableId = player.stablePlayerId || player.id || '';
+			return { id: stableId, name: player.name || t('unknown'), isOwner: stableId === ownerId };
+		});
+}
+
+function renderMyEventCards(player) {
+	const section = document.getElementById('myEventCardsSection');
+	const container = document.getElementById('myEventCardsList');
+	if (!section || !container) return;
+	const cards = player?.eventSpecialCards || player?.EventSpecialCards || [];
+	section.hidden = cards.length === 0;
+	if (cards.length === 0) { container.innerHTML = ''; return; }
+	section.style.display = '';
+	container.innerHTML = cards.map((card, cardIndex) => {
+		const runtimeId = card.runtimeCardId || card.RuntimeCardId;
+		const ownerId = card.ownerPlayerId || card.OwnerPlayerId || '';
+		const actions = card.actions || card.Actions || [];
+		const professionOptions = card.pendingProfessionOptions || card.PendingProfessionOptions || [];
+		const actionMarkup = actions.map((action, actionIndex) => {
+			const targetMode = action.targetMode || action.TargetMode || 'room';
+			const operation = action.operation || action.Operation || 'apply_effects';
+			const needsTarget = ['other_active_player','self_or_other_active_player','eliminated_other_player'].includes(targetMode);
+			const targetSelect = needsTarget ? `<select id="eventCardTarget-${cardIndex}-${actionIndex}" class="special-card-target-select">
+				<option value="">${escapeHtml(t('choosePlayer'))}</option>
+				${eventCardPlayerOptions(ownerId, targetMode === 'eliminated_other_player').filter(option => !option.isOwner).map(option => `<option value="${escapeHtml(option.id)}">${escapeHtml(option.name)}</option>`).join('')}
+			</select>` : '';
+			const choices = action.choices || action.Choices || [];
+			const choiceSelect = choices.length ? `<select id="eventCardChoice-${cardIndex}-${actionIndex}" class="special-card-target-select">${choices.map(choice => `<option value="${escapeHtml(choice.id || choice.Id)}">${escapeHtml(eventCardLocalized(choice.label || choice.Label))}</option>`).join('')}</select>` : '';
+			const professionSelect = professionOptions.length ? `<select id="eventCardProfession-${cardIndex}-${actionIndex}" class="special-card-target-select"><option value="">${escapeHtml(t('choosePlayer'))}</option>${professionOptions.map(option => `<option value="${escapeHtml(option.name || option.Name)}">${escapeHtml(option.name || option.Name)}</option>`).join('')}</select>` : '';
+			return `<div class="event-card-action">${targetSelect}${choiceSelect}${professionSelect}<button type="button" class="special-card-use-btn" onclick="useEventSpecialCard(${cardIndex},${actionIndex},'${escapeHtml(operation)}')">${escapeHtml(eventCardLocalized(action.label || action.Label) || t('use'))}</button></div>`;
+		}).join('');
+		return `<article class="my-special-card special-card-shell variant-secret state-hand">
+			<header class="special-card-header"><div class="special-card-heading"><span class="special-card-category">EVENT</span><h3 class="special-card-title">${escapeHtml(eventCardLocalized(card.title || card.Title))}</h3></div></header>
+			<section class="special-card-effect"><p>${escapeHtml(eventCardLocalized(card.description || card.Description))}</p></section>
+			${card.storedResource || card.StoredResource ? `<p class="special-card-note">${escapeHtml(String((card.storedResource || card.StoredResource).amount ?? (card.storedResource || card.StoredResource).Amount))}</p>` : ''}
+			<footer class="special-card-footer">${actionMarkup}</footer>
+		</article>`;
+	}).join('');
+}
+
+async function useEventSpecialCard(cardIndex, actionIndex, operation) {
+	const cards = myPlayerData?.eventSpecialCards || [];
+	const card = cards[cardIndex];
+	const action = (card?.actions || card?.Actions || [])[actionIndex];
+	if (!card || !action) return;
+	const runtimeId = card.runtimeCardId || card.RuntimeCardId;
+	const actionId = action.id || action.Id;
+	const target = document.getElementById(`eventCardTarget-${cardIndex}-${actionIndex}`)?.value || null;
+	const choice = document.getElementById(`eventCardChoice-${cardIndex}-${actionIndex}`)?.value || null;
+	const profession = document.getElementById(`eventCardProfession-${cardIndex}-${actionIndex}`)?.value || null;
+	const commandId = crypto.randomUUID();
+	try {
+		if (operation === 'transfer_owned_card')
+			await connection.invoke('TransferEventSpecialCard', runtimeId, target, commandId);
+		else
+			await connection.invoke('UseEventSpecialCard', runtimeId, actionId, target, choice, profession, commandId);
+	} catch (error) {
+		console.error('Event special card action failed', error);
+		addEventMessage(t('unavailableNow'));
+	}
 }
 
 function buildSpecialCardRows() {

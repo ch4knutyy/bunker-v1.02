@@ -464,34 +464,21 @@ namespace Bunker.Hubs
             _gameTimerService.Stop(room);
             room.VotingReadyResponses.Clear();
 
-            var threatTriggered = false;
-            if (ShouldTriggerThreat(room, completedRound))
+            var configuredThreatDue = ShouldTriggerThreat(room, completedRound);
+            var scenarioResult = await TryRunScenarioAfterRound(room, completedRound, configuredThreatDue);
+            var scenarioThreat = string.Equals(
+                scenarioResult?.Public?.ResolutionMode,
+                "existing_threat_flow",
+                StringComparison.OrdinalIgnoreCase);
+            if (scenarioResult is { Success: true, BlocksVoting: true } && !scenarioThreat)
             {
-                lock (room.ThreatSyncRoot)
-                {
-                    room.CurrentThreat = DrawThreatForRound(room, completedRound);
-                    room.ThreatState = null;
-                    room.IsThreatRevealed = true;
-                    room.ThreatRevealedAtRound = completedRound;
-                    room.ThreatsTriggeredCount++;
-                    room.ThreatRoundsTriggered.Add(completedRound);
-                    if (!string.IsNullOrWhiteSpace(room.CurrentThreat?.Id)) room.TriggeredThreatIds.Add(room.CurrentThreat.Id);
-                    EnsureRadiationThreatState(room);
-                    room.CurrentPhase = GamePhase.Threat;
-                    _threatAudit.Append(room, ThreatAuditEventType.Revealed, deduplicateTransition: true);
-                    threatTriggered = true;
-                }
+                return;
+            }
 
-                var threatState = BuildRoundState(room);
-                await Clients.Group(roomId).SendAsync("ThreatRevealed", new
-                {
-                    completedRound,
-                    threat = room.CurrentThreat,
-                    roundState = threatState
-                });
-                await Clients.Group(roomId).SendAsync("RoundStateUpdated", threatState);
-                if (!string.IsNullOrWhiteSpace(room.HostConnectionId))
-                    await Clients.Client(room.HostConnectionId).SendAsync("GMThreatControlData", BuildGMThreatControlData(room));
+            var threatTriggered = false;
+            if (configuredThreatDue || scenarioThreat)
+            {
+                threatTriggered = await StartCanonicalScenarioThreat(room, completedRound);
             }
 
             var additionalInventory = GrantConfiguredBonusInventory(room, completedRound);
@@ -531,6 +518,12 @@ namespace Bunker.Hubs
             room.VotingReadyResponses.Clear();
             room.CurrentPhase = GamePhase.RoundReveal;
             StartConfiguredRoundTimer(room);
+            var bunkerReveal = _bunkerIntel.RevealNextPublic(room, completedRound);
+            if (bunkerReveal.Success)
+            {
+                await Clients.Group(roomId).SendAsync("BunkerIntelRevealed", bunkerReveal);
+                await BroadcastBunkerIntelProjection(room);
+            }
 
             var nextRoundState = BuildRoundState(room);
             await Clients.Group(roomId).SendAsync("RoundAdvanced", new
@@ -657,7 +650,31 @@ namespace Bunker.Hubs
                 return;
             }
 
+            if (room.ScenarioSituations is
+                { TriggerPhase: "after_voting", ActiveScenario:
+                    { ResolutionMode: "existing_threat_flow", IsResolved: false } afterVotingThreat })
+            {
+                _scenarioScheduler.MarkResolved(room, "threat_resolved");
+                await Clients.Group(room.Id).SendAsync("ScenarioResolved", new
+                {
+                    scenarioId = afterVotingThreat.ScenarioId,
+                    result = "threat_resolved"
+                });
+                await AdvanceRoundAfterVotingScenario(room, afterVotingThreat.TriggeredAfterRound);
+                return;
+            }
+
             room.CurrentPhase = GamePhase.PreVotingReadyCheck;
+            if (room.ScenarioSituations?.ActiveScenario is
+                { ResolutionMode: "existing_threat_flow", IsResolved: false })
+            {
+                _scenarioScheduler.MarkResolved(room, "threat_resolved");
+                await Clients.Group(room.Id).SendAsync("ScenarioResolved", new
+                {
+                    scenarioId = room.ScenarioSituations.ActiveScenario.ScenarioId,
+                    result = "threat_resolved"
+                });
+            }
             room.VotingReadyResponses.Clear();
             var roundState = BuildRoundState(room);
 
@@ -687,15 +704,46 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Готовність доступна тільки під час гри");
                 return;
             }
+            if (room.PendingElimination != null)
+            {
+                if (!await FinalizePendingEliminationInternal(room, force: false))
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", "pending_elimination_window");
+                    return;
+                }
+                if (room.State == RoomState.Finished) return;
+            }
 
             if (room.CurrentPhase == GamePhase.VotingResults)
             {
+                var postVotingScenario = await TryRunScenarioAfterRound(
+                    room,
+                    room.CurrentRound,
+                    configuredThreatAlreadyDue: false,
+                    triggerPhase: "after_voting");
+                if (postVotingScenario is { Success: true })
+                {
+                    if (postVotingScenario.Public?.ResolutionMode == "existing_threat_flow")
+                    {
+                        await StartCanonicalScenarioThreat(room, room.CurrentRound);
+                        room.CurrentPhase = GamePhase.ExtraInventory;
+                        await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
+                        return;
+                    }
+                    if (postVotingScenario.BlocksVoting) return;
+                }
                 RestoreExpiredTemporarySpecialCardEffects(room, room.CurrentRound);
                 room.CurrentRound++;
                 room.CurrentRoundReveals.Clear();
                 room.VotingReadyResponses.Clear();
                 room.CurrentPhase = GamePhase.RoundReveal;
                 StartConfiguredRoundTimer(room);
+                var bunkerReveal = _bunkerIntel.RevealNextPublic(room, room.CurrentRound - 1);
+                if (bunkerReveal.Success)
+                {
+                    await Clients.Group(room.Id).SendAsync("BunkerIntelRevealed", bunkerReveal);
+                    await BroadcastBunkerIntelProjection(room);
+                }
                 var nextRoundState = BuildRoundState(room);
                 await Clients.Group(room.Id).SendAsync("RoundAdvanced", new
                 {
@@ -816,8 +864,9 @@ namespace Bunker.Hubs
             await Clients.Group(roomId).SendAsync("BunkerCapacityUpdated", new
             {
                 capacity = newCapacity,
-                bunker = room.Bunker.ToClientInfo()
+                bunker = _bunkerIntel.Project(room, null)
             });
+            await BroadcastBunkerIntelProjection(room);
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "bunker_capacity", capacity = newCapacity });
             await AppendGmAudit(room, GetGmActorId(room), "bunker_capacity", GmAuditResult.Success,
                 $"Bunker capacity was set to {newCapacity}.", snapshot: capacitySnapshot);
@@ -852,10 +901,7 @@ namespace Bunker.Hubs
             room.Bunker = CloneBunkerInfo(_gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)]);
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
-            await Clients.Group(roomId).SendAsync("BunkerChanged", new
-            {
-                bunker = room.Bunker.ToClientInfo()
-            });
+            await BroadcastBunkerIntelProjection(room);
 
             _logger.LogInformation($"GM змінив бункер на {room.Bunker.Name} в кімнаті {room.Name}");
         }
@@ -955,7 +1001,7 @@ namespace Bunker.Hubs
             {
                 eventId = eventId,
                 effectDescription = effectDescription,
-                bunker = room.Bunker?.ToClientInfo()
+                bunker = _bunkerIntel.Project(room, null)
             });
 
             _logger.LogInformation($"Ефект події {eventId} застосовано в кімнаті {room.Name}");
@@ -1009,7 +1055,7 @@ namespace Bunker.Hubs
 			{
 				await Clients.Caller.SendAsync("BunkerUpdated", new
 				{
-					bunker = room.Bunker.ToClientInfo(),
+					bunker = _bunkerIntel.Project(room, actor),
 					idempotent = true
 				});
 				return;
@@ -1053,14 +1099,14 @@ namespace Bunker.Hubs
 						? new
 						{
 							addedMonths = mutation.AppliedMonths,
-							totalWaterMonths = mutation.TotalMonths,
-							bunker = room.Bunker.ToClientInfo()
+							totalWaterMonths = _bunkerIntel.IsPublic(room, "water") ? mutation.TotalMonths : (int?)null,
+							bunker = _bunkerIntel.Project(room, null)
 						}
 						: (object)new
 						{
 							removedMonths = mutation.AppliedMonths,
-							totalWaterMonths = mutation.TotalMonths,
-							bunker = room.Bunker.ToClientInfo()
+							totalWaterMonths = _bunkerIntel.IsPublic(room, "water") ? mutation.TotalMonths : (int?)null,
+							bunker = _bunkerIntel.Project(room, null)
 						});
 			}
 			else
@@ -1071,22 +1117,23 @@ namespace Bunker.Hubs
 						? new
 						{
 							addedMonths = mutation.AppliedMonths,
-							totalSuppliesMonths = mutation.TotalMonths,
-							bunker = room.Bunker.ToClientInfo()
+							totalSuppliesMonths = _bunkerIntel.IsPublic(room, "food") ? mutation.TotalMonths : (int?)null,
+							bunker = _bunkerIntel.Project(room, null)
 						}
 						: (object)new
 						{
 							removedMonths = mutation.AppliedMonths,
-							totalSuppliesMonths = mutation.TotalMonths,
-							bunker = room.Bunker.ToClientInfo()
+							totalSuppliesMonths = _bunkerIntel.IsPublic(room, "food") ? mutation.TotalMonths : (int?)null,
+							bunker = _bunkerIntel.Project(room, null)
 						});
 			}
 
 			await Clients.Group(room.Id).SendAsync("BunkerUpdated", new
 			{
-				bunker = room.Bunker.ToClientInfo(),
+				bunker = _bunkerIntel.Project(room, null),
 				action
 			});
+			await BroadcastBunkerIntelProjection(room);
 			QueueRoomRecovery(room, action);
 			await AppendGmAudit(
 				room,

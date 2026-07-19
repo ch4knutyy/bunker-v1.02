@@ -1,0 +1,1123 @@
+{
+  "schemaVersion": 3,
+  "cards": [
+    {
+      "id": "hidden_food_cache_6",
+      "enabled": true,
+      "category": "resource_leverage",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Приховані пайки",
+        "en": "Hidden Food Cache",
+        "ru": "Скрытые пайки"
+      },
+      "description": {
+        "uk": "Ви контролюєте запас їжі на 6 місяців. Можете повернути його бункеру або таємно передати іншому гравцю.",
+        "en": "You control six months of food. You may return it to the bunker or secretly transfer it to another player.",
+        "ru": "Вы контролируете запас еды на 6 месяцев. Можете вернуть его бункеру или тайно передать другому игроку."
+      },
+      "actions": [
+        {
+          "id": "return_to_bunker",
+          "label": {
+            "uk": "Повернути їжу бункеру",
+            "en": "Return food to the bunker",
+            "ru": "Вернуть еду бункеру"
+          },
+          "operation": "apply_effects",
+          "targetMode": "room",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "add_bunker_food",
+              "amountFromStoredAsset": true
+            }
+          ]
+        },
+        {
+          "id": "transfer_to_player",
+          "label": {
+            "uk": "Таємно передати іншому",
+            "en": "Secretly transfer to another player",
+            "ru": "Тайно передать другому"
+          },
+          "operation": "transfer_owned_card",
+          "targetMode": "other_active_player",
+          "consumeCard": false,
+          "constraints": {
+            "cannotTargetSelf": true,
+            "recipientMustBelongToRoom": true
+          }
+        }
+      ],
+      "storedResource": {
+        "type": "food",
+        "amount": 6
+      }
+    },
+    {
+      "id": "hidden_water_cache_4",
+      "enabled": true,
+      "category": "resource_leverage",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Прихований запас води",
+        "en": "Hidden Water Cache",
+        "ru": "Скрытый запас воды"
+      },
+      "description": {
+        "uk": "Ви контролюєте запас води на 4 місяці. Можете повернути його бункеру або таємно передати іншому гравцю.",
+        "en": "You control four months of water. You may return it to the bunker or secretly transfer it to another player.",
+        "ru": "Вы контролируете запас воды на 4 месяца. Можете вернуть его бункеру или тайно передать другому игроку."
+      },
+      "actions": [
+        {
+          "id": "return_to_bunker",
+          "label": {
+            "uk": "Повернути воду бункеру",
+            "en": "Return water to the bunker",
+            "ru": "Вернуть воду бункеру"
+          },
+          "operation": "apply_effects",
+          "targetMode": "room",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "add_bunker_water",
+              "amountFromStoredAsset": true
+            }
+          ]
+        },
+        {
+          "id": "transfer_to_player",
+          "label": {
+            "uk": "Таємно передати іншому",
+            "en": "Secretly transfer to another player",
+            "ru": "Тайно передать другому"
+          },
+          "operation": "transfer_owned_card",
+          "targetMode": "other_active_player",
+          "consumeCard": false,
+          "constraints": {
+            "cannotTargetSelf": true,
+            "recipientMustBelongToRoom": true
+          }
+        }
+      ],
+      "storedResource": {
+        "type": "water",
+        "amount": 4
+      }
+    },
+    {
+      "id": "anonymous_guarantee",
+      "enabled": true,
+      "category": "political_leverage",
+      "rarity": "legendary",
+      "visibility": "private",
+      "title": {
+        "uk": "Анонімна гарантія",
+        "en": "Anonymous Guarantee",
+        "ru": "Анонимная гарантия"
+      },
+      "description": {
+        "uk": "Один раз після завершення голосування скасуйте вигнання іншого гравця. Використати на себе не можна.",
+        "en": "Once after voting ends, cancel another player's elimination. It cannot be used on yourself.",
+        "ru": "Один раз после завершения голосования отмените изгнание другого игрока. На себя использовать нельзя."
+      },
+      "actions": [
+        {
+          "id": "save_other_player",
+          "label": {
+            "uk": "Скасувати вигнання",
+            "en": "Cancel elimination",
+            "ru": "Отменить изгнание"
+          },
+          "operation": "apply_effects",
+          "useWindow": "after_elimination_result_before_removal",
+          "targetMode": "eliminated_other_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true,
+            "targetMustBePendingElimination": true
+          },
+          "effects": [
+            {
+              "type": "cancel_other_player_elimination"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emergency_retraining",
+      "enabled": true,
+      "category": "character_change",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Аварійна перекваліфікація",
+        "en": "Emergency Retraining",
+        "ru": "Аварийная переквалификация"
+      },
+      "description": {
+        "uk": "Отримайте три корисні професії на вибір і назавжди замініть поточну професію на одну з них.",
+        "en": "Receive three useful professions to choose from and permanently replace your current profession with one of them.",
+        "ru": "Получите три полезные профессии на выбор и навсегда замените текущую профессию на одну из них."
+      },
+      "expiresAfterRounds": 2,
+      "actions": [
+        {
+          "id": "choose_new_profession",
+          "label": {
+            "uk": "Обрати нову професію",
+            "en": "Choose a new profession",
+            "ru": "Выбрать новую профессию"
+          },
+          "operation": "select_and_apply",
+          "useWindow": "before_round_end",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "grant_profession_retraining",
+              "optionsCount": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bunker_archive_access",
+      "enabled": true,
+      "category": "information",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Доступ до архіву бункера",
+        "en": "Bunker Archive Access",
+        "ru": "Доступ к архиву бункера"
+      },
+      "description": {
+        "uk": "Таємно дізнайтеся одну випадкову ще приховану одиницю інформації про бункер.",
+        "en": "Secretly learn one random bunker information unit that is still hidden.",
+        "ru": "Тайно узнайте одну случайную ещё скрытую единицу информации о бункере."
+      },
+      "actions": [
+        {
+          "id": "read_random_intel",
+          "label": {
+            "uk": "Прочитати архів",
+            "en": "Read the archive",
+            "ru": "Прочитать архив"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "reveal_random_bunker_intel_private",
+              "scopePolicy": "category_default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "choose_bunker_intel",
+      "enabled": true,
+      "category": "information",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Право на перевірку",
+        "en": "Inspection Right",
+        "ru": "Право на проверку"
+      },
+      "description": {
+        "uk": "Оберіть одну приховану категорію бункера та дізнайтеся її стандартну одиницю лише для себе.",
+        "en": "Choose one hidden bunker category and privately learn its default information unit.",
+        "ru": "Выберите одну скрытую категорию бункера и узнайте её стандартную единицу только для себя."
+      },
+      "actions": [
+        {
+          "id": "choose_intel_category",
+          "label": {
+            "uk": "Обрати категорію",
+            "en": "Choose category",
+            "ru": "Выбрать категорию"
+          },
+          "operation": "select_and_apply",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "reveal_bunker_intel_private",
+              "categorySelection": "owner_choice",
+              "scopePolicy": "category_default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sealed_inventory_case",
+      "enabled": true,
+      "category": "personal_resource",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Запечатаний комплект",
+        "en": "Sealed Supply Case",
+        "ru": "Запечатанный комплект"
+      },
+      "description": {
+        "uk": "Отримайте одну випадкову карту Інвентарю. Новий предмет не розкривається автоматично.",
+        "en": "Receive one random Inventory card. The new item is not revealed automatically.",
+        "ru": "Получите одну случайную карту Инвентаря. Новый предмет не раскрывается автоматически."
+      },
+      "actions": [
+        {
+          "id": "open_case",
+          "label": {
+            "uk": "Відкрити комплект",
+            "en": "Open the case",
+            "ru": "Открыть комплект"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "grant_inventory_card",
+              "count": 1,
+              "revealGrantedInventory": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "property_replacement_token",
+      "enabled": true,
+      "category": "character_change",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Право на нове майно",
+        "en": "Property Replacement Right",
+        "ru": "Право на новое имущество"
+      },
+      "description": {
+        "uk": "Один раз перегенеруйте своє Майно. Нове Майно залишається прихованим, якщо старе ще не було розкрито.",
+        "en": "Reroll your Property once. The new Property remains hidden if the old one was not revealed.",
+        "ru": "Один раз перегенерируйте своё Имущество. Новое Имущество остаётся скрытым, если старое не было раскрыто."
+      },
+      "actions": [
+        {
+          "id": "reroll_property",
+          "label": {
+            "uk": "Замінити Майно",
+            "en": "Replace Property",
+            "ru": "Заменить Имущество"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "grant_property_reroll",
+              "preserveRevealState": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "private_medical_course",
+      "enabled": true,
+      "category": "health",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Приватний курс лікування",
+        "en": "Private Medical Course",
+        "ru": "Частный курс лечения"
+      },
+      "description": {
+        "uk": "Зменште тяжкість фізичного стану на один рівень собі або іншому активному гравцю.",
+        "en": "Reduce physical-condition severity by one level for yourself or another active player.",
+        "ru": "Уменьшите тяжесть физического состояния на один уровень себе или другому активному игроку."
+      },
+      "actions": [
+        {
+          "id": "apply_treatment",
+          "label": {
+            "uk": "Застосувати лікування",
+            "en": "Apply treatment",
+            "ru": "Применить лечение"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self_or_other_active_player",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "heal_physical_severity",
+              "levels": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "private_psychological_support",
+      "enabled": true,
+      "category": "health",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Приватна психологічна допомога",
+        "en": "Private Psychological Support",
+        "ru": "Частная психологическая помощь"
+      },
+      "description": {
+        "uk": "Зменште тяжкість ментального стану на один рівень собі або іншому активному гравцю.",
+        "en": "Reduce mental-condition severity by one level for yourself or another active player.",
+        "ru": "Уменьшите тяжесть ментального состояния на один уровень себе или другому активному игроку."
+      },
+      "actions": [
+        {
+          "id": "apply_support",
+          "label": {
+            "uk": "Надати допомогу",
+            "en": "Provide support",
+            "ru": "Оказать помощь"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self_or_other_active_player",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "heal_mental_severity",
+              "levels": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evidence_fragment",
+      "enabled": true,
+      "category": "information",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Фрагмент доказу",
+        "en": "Evidence Fragment",
+        "ru": "Фрагмент доказательства"
+      },
+      "description": {
+        "uk": "Оберіть іншого гравця та таємно дізнайтеся одну випадкову ще приховану характеристику про нього.",
+        "en": "Choose another player and privately learn one random characteristic that is still hidden.",
+        "ru": "Выберите другого игрока и тайно узнайте одну случайную ещё скрытую характеристику о нём."
+      },
+      "actions": [
+        {
+          "id": "inspect_player",
+          "label": {
+            "uk": "Перевірити гравця",
+            "en": "Inspect player",
+            "ru": "Проверить игрока"
+          },
+          "operation": "select_and_apply",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true,
+            "onlyStillHiddenCharacteristics": true
+          },
+          "effects": [
+            {
+              "type": "reveal_random_characteristic",
+              "visibility": "private_to_card_owner"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "public_bunker_disclosure",
+      "enabled": true,
+      "category": "information",
+      "rarity": "rare",
+      "visibility": "public",
+      "title": {
+        "uk": "Публічне розкриття бункера",
+        "en": "Public Bunker Disclosure",
+        "ru": "Публичное раскрытие бункера"
+      },
+      "description": {
+        "uk": "Оберіть приховану категорію бункера та розкрийте її стандартну одиницю всім.",
+        "en": "Choose a hidden bunker category and reveal its default information unit to everyone.",
+        "ru": "Выберите скрытую категорию бункера и раскройте её стандартную единицу всем."
+      },
+      "actions": [
+        {
+          "id": "reveal_category_publicly",
+          "label": {
+            "uk": "Розкрити інформацію",
+            "en": "Reveal information",
+            "ru": "Раскрыть информацию"
+          },
+          "operation": "select_and_apply",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "room",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "reveal_bunker_intel_public",
+              "categorySelection": "owner_choice",
+              "scopePolicy": "category_default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emergency_food_voucher_3",
+      "enabled": true,
+      "category": "resource_support",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Аварійний продовольчий талон",
+        "en": "Emergency Food Voucher",
+        "ru": "Аварийный продовольственный талон"
+      },
+      "description": {
+        "uk": "Одноразово поверніть до запасів бункера 3 місяці їжі.",
+        "en": "Return three months of food to the bunker once.",
+        "ru": "Одноразово верните в запасы бункера 3 месяца еды."
+      },
+      "actions": [
+        {
+          "id": "restore_food",
+          "label": {
+            "uk": "Повернути 3 місяці їжі",
+            "en": "Restore 3 months of food",
+            "ru": "Вернуть 3 месяца еды"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "room",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "add_bunker_food",
+              "amount": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emergency_water_voucher_2",
+      "enabled": true,
+      "category": "resource_support",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Аварійний водний талон",
+        "en": "Emergency Water Voucher",
+        "ru": "Аварийный водный талон"
+      },
+      "description": {
+        "uk": "Одноразово поверніть до запасів бункера 2 місяці води.",
+        "en": "Return two months of water to the bunker once.",
+        "ru": "Одноразово верните в запасы бункера 2 месяца воды."
+      },
+      "actions": [
+        {
+          "id": "restore_water",
+          "label": {
+            "uk": "Повернути 2 місяці води",
+            "en": "Restore 2 months of water",
+            "ru": "Вернуть 2 месяца воды"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "room",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "add_bunker_water",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "resource_recovery_choice",
+      "enabled": true,
+      "category": "resource_support",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Право на аварійний резерв",
+        "en": "Emergency Reserve Right",
+        "ru": "Право на аварийный резерв"
+      },
+      "description": {
+        "uk": "Оберіть один варіант: повернути 3 місяці їжі або 2 місяці води.",
+        "en": "Choose one option: restore three months of food or two months of water.",
+        "ru": "Выберите один вариант: вернуть 3 месяца еды или 2 месяца воды."
+      },
+      "actions": [
+        {
+          "id": "choose_resource",
+          "label": {
+            "uk": "Обрати ресурс",
+            "en": "Choose resource",
+            "ru": "Выбрать ресурс"
+          },
+          "operation": "choose_effect",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "room",
+          "consumeCard": true,
+          "choices": [
+            {
+              "id": "food",
+              "label": {
+                "uk": "Їжа: +3 міс.",
+                "en": "Food: +3 months",
+                "ru": "Еда: +3 мес."
+              },
+              "effects": [
+                {
+                  "type": "add_bunker_food",
+                  "amount": 3
+                }
+              ]
+            },
+            {
+              "id": "water",
+              "label": {
+                "uk": "Вода: +2 міс.",
+                "en": "Water: +2 months",
+                "ru": "Вода: +2 мес."
+              },
+              "effects": [
+                {
+                  "type": "add_bunker_water",
+                  "amount": 2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "double_inventory_case",
+      "enabled": true,
+      "category": "personal_resource",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Посилений комплект спорядження",
+        "en": "Reinforced Equipment Case",
+        "ru": "Усиленный комплект снаряжения"
+      },
+      "description": {
+        "uk": "Отримайте дві випадкові карти Інвентарю. Вони не розкриваються автоматично.",
+        "en": "Receive two random Inventory cards. They are not revealed automatically.",
+        "ru": "Получите две случайные карты Инвентаря. Они не раскрываются автоматически."
+      },
+      "actions": [
+        {
+          "id": "open_case",
+          "label": {
+            "uk": "Відкрити комплект",
+            "en": "Open the case",
+            "ru": "Открыть комплект"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "grant_inventory_card",
+              "count": 2,
+              "target": "self",
+              "revealGrantedInventory": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inventory_gift_order",
+      "enabled": true,
+      "category": "political_leverage",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Ордер на передачу спорядження",
+        "en": "Equipment Gift Order",
+        "ru": "Ордер на передачу снаряжения"
+      },
+      "description": {
+        "uk": "Оберіть іншого активного гравця. Він отримає одну приховану карту Інвентарю.",
+        "en": "Choose another active player. They receive one hidden Inventory card.",
+        "ru": "Выберите другого активного игрока. Он получит одну скрытую карту Инвентаря."
+      },
+      "actions": [
+        {
+          "id": "grant_inventory",
+          "label": {
+            "uk": "Передати спорядження",
+            "en": "Grant equipment",
+            "ru": "Передать снаряжение"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true
+          },
+          "effects": [
+            {
+              "type": "grant_inventory_card",
+              "count": 1,
+              "target": "selected_player",
+              "revealGrantedInventory": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shared_archive_pass",
+      "enabled": true,
+      "category": "information",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Спільний доступ до архіву",
+        "en": "Shared Archive Pass",
+        "ru": "Совместный доступ к архиву"
+      },
+      "description": {
+        "uk": "Оберіть іншого гравця. Ви обоє окремо дізнаєтеся по одному випадковому прихованому факту про бункер.",
+        "en": "Choose another player. Each of you privately learns one random hidden bunker fact.",
+        "ru": "Выберите другого игрока. Каждый из вас отдельно узнает по одному случайному скрытому факту о бункере."
+      },
+      "actions": [
+        {
+          "id": "share_archive",
+          "label": {
+            "uk": "Обрати партнера",
+            "en": "Choose partner",
+            "ru": "Выбрать партнёра"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true
+          },
+          "effects": [
+            {
+              "type": "reveal_random_bunker_intel_private",
+              "count": 1,
+              "target": "self"
+            },
+            {
+              "type": "reveal_random_bunker_intel_private",
+              "count": 1,
+              "target": "selected_player"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deep_archive_access",
+      "enabled": true,
+      "category": "information",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Глибокий доступ до архіву",
+        "en": "Deep Archive Access",
+        "ru": "Глубокий доступ к архиву"
+      },
+      "description": {
+        "uk": "Таємно дізнайтеся дві різні ще приховані одиниці інформації про бункер.",
+        "en": "Privately learn two different bunker information units that are still hidden.",
+        "ru": "Тайно узнайте две разные ещё скрытые единицы информации о бункере."
+      },
+      "actions": [
+        {
+          "id": "read_deep_archive",
+          "label": {
+            "uk": "Відкрити архів",
+            "en": "Open the archive",
+            "ru": "Открыть архив"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "reveal_random_bunker_intel_private",
+              "count": 2,
+              "target": "self",
+              "distinct": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sealed_personnel_dossier",
+      "enabled": true,
+      "category": "information",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Запечатане особове досьє",
+        "en": "Sealed Personnel Dossier",
+        "ru": "Запечатанное личное досье"
+      },
+      "description": {
+        "uk": "Оберіть іншого гравця та таємно дізнайтеся дві різні ще приховані характеристики про нього.",
+        "en": "Choose another player and privately learn two different characteristics about them that are still hidden.",
+        "ru": "Выберите другого игрока и тайно узнайте две разные ещё скрытые характеристики о нём."
+      },
+      "actions": [
+        {
+          "id": "inspect_dossier",
+          "label": {
+            "uk": "Перевірити гравця",
+            "en": "Inspect player",
+            "ru": "Проверить игрока"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true,
+            "onlyStillHiddenCharacteristics": true
+          },
+          "effects": [
+            {
+              "type": "reveal_random_characteristic",
+              "count": 2,
+              "target": "selected_player",
+              "visibility": "private_to_card_owner",
+              "distinct": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intensive_medical_course",
+      "enabled": true,
+      "category": "health",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Інтенсивний курс лікування",
+        "en": "Intensive Medical Course",
+        "ru": "Интенсивный курс лечения"
+      },
+      "description": {
+        "uk": "Зменште тяжкість фізичного стану собі або іншому активному гравцю на два рівні.",
+        "en": "Reduce physical-condition severity by two levels for yourself or another active player.",
+        "ru": "Уменьшите тяжесть физического состояния себе или другому активному игроку на два уровня."
+      },
+      "actions": [
+        {
+          "id": "apply_intensive_treatment",
+          "label": {
+            "uk": "Застосувати лікування",
+            "en": "Apply treatment",
+            "ru": "Применить лечение"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self_or_other_active_player",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "heal_physical_severity",
+              "levels": 2,
+              "target": "selected_or_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intensive_psychological_course",
+      "enabled": true,
+      "category": "health",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Інтенсивна психологічна терапія",
+        "en": "Intensive Psychological Therapy",
+        "ru": "Интенсивная психологическая терапия"
+      },
+      "description": {
+        "uk": "Зменште тяжкість ментального стану собі або іншому активному гравцю на два рівні.",
+        "en": "Reduce mental-condition severity by two levels for yourself or another active player.",
+        "ru": "Уменьшите тяжесть ментального состояния себе или другому активному игроку на два уровня."
+      },
+      "actions": [
+        {
+          "id": "apply_intensive_support",
+          "label": {
+            "uk": "Застосувати терапію",
+            "en": "Apply therapy",
+            "ru": "Применить терапию"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "self_or_other_active_player",
+          "consumeCard": true,
+          "effects": [
+            {
+              "type": "heal_mental_severity",
+              "levels": 2,
+              "target": "selected_or_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "public_archive_release",
+      "enabled": true,
+      "category": "information",
+      "rarity": "legendary",
+      "visibility": "private",
+      "title": {
+        "uk": "Дозвіл на публікацію архіву",
+        "en": "Archive Release Authorization",
+        "ru": "Разрешение на публикацию архива"
+      },
+      "description": {
+        "uk": "Розкрийте всім дві різні ще приховані одиниці інформації про бункер.",
+        "en": "Reveal two different bunker information units that are still hidden to everyone.",
+        "ru": "Раскройте всем две разные ещё скрытые единицы информации о бункере."
+      },
+      "actions": [
+        {
+          "id": "release_archive",
+          "label": {
+            "uk": "Опублікувати архів",
+            "en": "Release archive",
+            "ru": "Опубликовать архив"
+          },
+          "operation": "apply_effects",
+          "useWindow": "any_time_outside_blocking_phase",
+          "targetMode": "room",
+          "consumeCard": true,
+          "revealCardOnUse": true,
+          "effects": [
+            {
+              "type": "reveal_bunker_intel_public",
+              "count": 2,
+              "categorySelection": "random_hidden",
+              "distinct": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contaminated_medical_record",
+      "enabled": true,
+      "category": "sabotage",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Підроблений медичний висновок",
+        "en": "Falsified Medical Report",
+        "ru": "Поддельное медицинское заключение"
+      },
+      "description": {
+        "uk": "Оберіть іншого активного гравця. Його фізичний стан погіршиться на один рівень. Після використання власник карти буде розкритий.",
+        "en": "Choose another active player. Their physical condition worsens by one level. The card owner is revealed after use.",
+        "ru": "Выберите другого активного игрока. Его физическое состояние ухудшится на один уровень. После использования владелец карты будет раскрыт."
+      },
+      "actions": [
+        {
+          "id": "falsify_record",
+          "label": {
+            "uk": "Підробити висновок",
+            "en": "Falsify report",
+            "ru": "Подделать заключение"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "revealCardOnUse": true,
+          "constraints": {
+            "cannotTargetSelf": true
+          },
+          "effects": [
+            {
+              "type": "worsen_physical_severity",
+              "levels": 1,
+              "target": "selected_player"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psychological_pressure_file",
+      "enabled": true,
+      "category": "sabotage",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Файл психологічного тиску",
+        "en": "Psychological Pressure File",
+        "ru": "Файл психологического давления"
+      },
+      "description": {
+        "uk": "Оберіть іншого активного гравця. Його ментальний стан погіршиться на один рівень. Після використання власник карти буде розкритий.",
+        "en": "Choose another active player. Their mental condition worsens by one level. The card owner is revealed after use.",
+        "ru": "Выберите другого активного игрока. Его ментальное состояние ухудшится на один уровень. После использования владелец карты будет раскрыт."
+      },
+      "actions": [
+        {
+          "id": "apply_pressure",
+          "label": {
+            "uk": "Застосувати тиск",
+            "en": "Apply pressure",
+            "ru": "Оказать давление"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "revealCardOnUse": true,
+          "constraints": {
+            "cannotTargetSelf": true
+          },
+          "effects": [
+            {
+              "type": "worsen_mental_severity",
+              "levels": 1,
+              "target": "selected_player"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "profession_sponsorship",
+      "enabled": true,
+      "category": "political_leverage",
+      "rarity": "rare",
+      "visibility": "private",
+      "title": {
+        "uk": "Спонсорство перекваліфікації",
+        "en": "Retraining Sponsorship",
+        "ru": "Спонсорство переквалификации"
+      },
+      "description": {
+        "uk": "Оберіть іншого активного гравця. Він отримає три нові професії на вибір і зможе замінити свою поточну професію.",
+        "en": "Choose another active player. They receive three new professions to choose from and may replace their current profession.",
+        "ru": "Выберите другого активного игрока. Он получит три новые профессии на выбор и сможет заменить текущую профессию."
+      },
+      "actions": [
+        {
+          "id": "sponsor_retraining",
+          "label": {
+            "uk": "Обрати отримувача",
+            "en": "Choose recipient",
+            "ru": "Выбрать получателя"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true
+          },
+          "effects": [
+            {
+              "type": "grant_profession_retraining",
+              "target": "selected_player",
+              "optionsCount": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "property_sponsorship",
+      "enabled": true,
+      "category": "political_leverage",
+      "rarity": "uncommon",
+      "visibility": "private",
+      "title": {
+        "uk": "Спонсорство нового майна",
+        "en": "Property Sponsorship",
+        "ru": "Спонсорство нового имущества"
+      },
+      "description": {
+        "uk": "Оберіть іншого активного гравця. Він зможе один раз перегенерувати своє Майно зі збереженням стану розкриття.",
+        "en": "Choose another active player. They may reroll their Property once while preserving its reveal state.",
+        "ru": "Выберите другого активного игрока. Он сможет один раз перегенерировать своё Имущество с сохранением состояния раскрытия."
+      },
+      "actions": [
+        {
+          "id": "sponsor_property",
+          "label": {
+            "uk": "Обрати отримувача",
+            "en": "Choose recipient",
+            "ru": "Выбрать получателя"
+          },
+          "operation": "apply_effects",
+          "useWindow": "before_round_end",
+          "targetMode": "other_active_player",
+          "consumeCard": true,
+          "constraints": {
+            "cannotTargetSelf": true
+          },
+          "effects": [
+            {
+              "type": "grant_property_reroll",
+              "target": "selected_player",
+              "preserveRevealState": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
