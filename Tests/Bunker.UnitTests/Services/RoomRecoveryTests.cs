@@ -100,6 +100,41 @@ public sealed class RoomRecoveryTests
 	}
 
 	[Fact]
+	public void PropertyGeneratedValuesSurvivePersistentRecoveryExactly()
+	{
+		var rooms = new RoomService(NullLogger<RoomService>.Instance);
+		var room = rooms.CreateRoom("Property recovery", "host-connection", "Host");
+		var player = new Player
+		{
+			Name = "Host",
+			ConnectionId = "host-connection",
+			StablePlayerId = "host-stable",
+			Property = new GeneratedProperty
+			{
+				DefinitionId = "property-recovery",
+				GeneratedValues = new() { ["area"] = 42 },
+				LocalizedDisplay = new() { ["uk"] = "Ділянка 42 м²", ["en"] = "Lot 42 m²" },
+				Category = "land",
+				SizeClass = "large",
+				ResourceTags = ["land"],
+				ProtectionTags = ["shelter"]
+			}
+		};
+		player.Revealed.Property = true;
+		Assert.True(rooms.JoinRoom(room.Id, player.ConnectionId, player).success);
+
+		var captureService = new RoomRecoveryCaptureService();
+		var capture = captureService.Capture(room);
+		Assert.True(captureService.TryRestore(capture.StateJson, out var restored, out var error), error);
+
+		var restoredPlayer = Assert.Single(restored!.Players.Values);
+		Assert.Equal("property-recovery", restoredPlayer.Property!.DefinitionId);
+		Assert.Equal(42, restoredPlayer.Property.GeneratedValues["area"]);
+		Assert.Equal("Ділянка 42 м²", restoredPlayer.Property.GetDisplayText("uk"));
+		Assert.True(restoredPlayer.Revealed.Property);
+	}
+
+	[Fact]
 	public void CorruptFingerprintIsRejected()
 	{
 		var json = "{\"id\":\"ROOM\"}";

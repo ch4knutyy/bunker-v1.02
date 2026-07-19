@@ -89,7 +89,7 @@
 						<option value="threat_restart">Restart threat</option>
 						<option value="threat_resync">Threat resync</option>
 					</select>
-					<select id="directorCategory" class="input-field"><option>Profession</option><option>PhysicalHealth</option><option>MentalHealth</option><option>Hobby</option><option>CharacterTrait</option><option>Phobia</option><option>Inventory</option><option>Fact</option><option>SpecialCard</option></select>
+					<select id="directorCategory" class="input-field"><option>Profession</option><option>PhysicalHealth</option><option>MentalHealth</option><option>Hobby</option><option>CharacterTrait</option><option>Phobia</option><option>Inventory</option><option>Property</option><option>Fact</option><option>SpecialCard</option></select>
 					<input id="directorOption" class="input-field" maxlength="80" data-gm-i18n-placeholder="directorOption" placeholder="Option / severity / round" />
 				</div>
 				<button id="directorPreviewButton" class="btn-gm-action director-command" data-gm-i18n="directorPreview" onclick="previewDirectorAction()">Preview</button>
@@ -265,6 +265,7 @@
 						<option value="CharacterTrait">Риса характеру</option>
 						<option value="Phobia">Фобія</option>
 						<option value="Inventory">Інвентар</option>
+						<option value="Property">Майно</option>
 						<option value="Fact">Факт</option>
 					</select>
 					<button class="btn-gm-action gm-player-command" data-gm-i18n="gmHide" onclick="hideSelectedCharacteristic()">Сховати</button>
@@ -366,6 +367,15 @@
 						<button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
 						<button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
 						<button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
+					</div>
+				</div>
+				<div class="gm-char-item">
+					<span class="gm-char-name">Майно:</span>
+					<span class="gm-char-value gm-char-hidden" id="gmProperty">Приховано</span>
+					<div class="gm-char-actions">
+						<button onclick="peekCharacteristic('Property')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button onclick="regenerateCharacteristic('Property')" title="Регенерувати">🔄</button>
+						<button onclick="forceReveal('Property')" title="Розкрити для всіх">📢</button>
 					</div>
 				</div>
 				<div class="gm-char-item">

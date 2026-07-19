@@ -144,6 +144,8 @@ const uiTranslations = {
 };
 
 Object.assign(uiTranslations.uk, {
+	property: "Майно",
+	propertyUnavailable: "Майно відсутнє",
 	useSpecialCard: "Використати карту",
 	activateSpecialCard: "Активувати карту",
 	cardWasUsed: "Карту використано",
@@ -460,6 +462,8 @@ Object.assign(uiTranslations.uk, {
 	, guestWarningTitle: 'Ви граєте без акаунта', guestWarningPrimary: 'Звичайне перепідключення після оновлення сторінки підтримується. Проте після очищення даних браузера, зміни пристрою або повного перезапуску сервера відновлення вашого персонажа поки не гарантується.', guestWarningSecondary: 'Акаунт створює стабільну прив’язку до користувача та буде використаний для надійнішого відновлення й історії партій.', guestWarningContinue: 'Продовжити як гість', guestWarningRegister: 'Зареєструватися', guestWarningCurrentPlayerRemainsGuest: 'Поточний гравець залишиться гостьовим до повторного входу в кімнату з авторизованим акаунтом.', lobbyGuestCount: 'У кімнаті є гостьові гравці: {count}', lobbyGuestRisk: 'Вони можуть грати без реєстрації. Оновлення сторінки та звичайне перепідключення підтримуються, але після втрати даних браузера або повного перезапуску сервера відновлення поточної гри поки не гарантується.'
 });
 Object.assign(uiTranslations.en, {
+	property: "Property",
+	propertyUnavailable: "Property unavailable",
 	lobbyTitle: 'Room lobby', lobbyHint: 'Choose roles, confirm readiness, and start the game.', lobbyMembersTitle: 'Members', lobbyParticipants: 'Participants',
 	lobbyActivePlayers: 'Active players', lobbySpectators: 'Spectators', lobbyReadySummary: 'Readiness', lobbyRoomState: 'Room state', lobbyLifecycleLobby: 'Lobby', lobbyLifecycleRunning: 'Game running', lobbyLifecycleFinished: 'Game finished',
 	lobbyRoleHostPlayer: 'Host and player', lobbyRolePlayer: 'Player', lobbyRoleSpectator: 'Spectator', lobbyRoleTechnicalGm: 'Technical GM', lobbyRoleOmniscientGm: 'Omniscient GM',
@@ -470,6 +474,8 @@ Object.assign(uiTranslations.en, {
 	, guestWarningTitle: 'You are playing without an account', guestWarningPrimary: 'Normal reconnection after refreshing the page is supported. However, after clearing browser data, changing devices, or a full server restart, recovery of your character is not currently guaranteed.', guestWarningSecondary: 'An account creates a stable user binding and will be used for more reliable recovery and game history.', guestWarningContinue: 'Continue as guest', guestWarningRegister: 'Register', guestWarningCurrentPlayerRemainsGuest: 'The current player will remain a guest until you re-enter the room with an authenticated account.', lobbyGuestCount: 'Guest players in the room: {count}', lobbyGuestRisk: 'They can play without registering. Page refresh and normal reconnection are supported, but recovery of the current game after browser data loss or a full server restart is not currently guaranteed.'
 });
 Object.assign(uiTranslations.ru, {
+	property: "Имущество",
+	propertyUnavailable: "Имущество отсутствует",
 	lobbyTitle: 'Лобби комнаты', lobbyHint: 'Выберите роли, подтвердите готовность и начните игру.', lobbyMembersTitle: 'Участники', lobbyParticipants: 'Участники',
 	lobbyActivePlayers: 'Активные игроки', lobbySpectators: 'Наблюдатели', lobbyReadySummary: 'Готовность', lobbyRoomState: 'Состояние комнаты', lobbyLifecycleLobby: 'Лобби', lobbyLifecycleRunning: 'Игра продолжается', lobbyLifecycleFinished: 'Игра завершена',
 	lobbyRoleHostPlayer: 'Хост и игрок', lobbyRolePlayer: 'Игрок', lobbyRoleSpectator: 'Наблюдатель', lobbyRoleTechnicalGm: 'Технический GM', lobbyRoleOmniscientGm: 'Всезнающий GM',
@@ -1872,6 +1878,7 @@ function getThreatSourceLabel(sourceType) {
 		hobby: 'Хобі',
 		personal_inventory: 'Предмет',
 		profession_item: 'Професійний предмет',
+		property: t('property'),
 		bunker_resource: 'Ресурс бункера',
 		bunker_facility: 'Система бункера'
 	};
@@ -1886,7 +1893,13 @@ function renderThreatItemSelect(buttonLabel = null) {
 	}));
 	const professionItem = myPlayerData?.professionItem;
 	const professionItems = professionItem?.name ? [{ item: professionItem, source: 'profession', fallbackId: 'profession' }] : [];
-	const items = [...professionItems, ...inventoryItems];
+	const property = myPlayerData?.property;
+	const propertyItems = property?.definitionId ? [{
+		item: { name: getPropertyDisplay(property), instanceId: property.definitionId },
+		source: 'property',
+		fallbackId: property.definitionId
+	}] : [];
+	const items = [...professionItems, ...inventoryItems, ...propertyItems];
 	if (!items.length) return '';
 	const options = items.map(({ item, source, fallbackId }) => {
 		const rawValue = item.instanceId || item.name || fallbackId;
@@ -2697,6 +2710,7 @@ function normalizeRevealedState(revealed) {
 		characterTrait: !!(src.characterTrait ?? src.CharacterTrait),
 		phobia: !!(src.phobia ?? src.Phobia),
 		inventory: !!(src.inventory ?? src.Inventory),
+		property: !!(src.property ?? src.Property),
 		fact: !!(src.fact ?? src.Fact),
 		specialCard: !!(src.specialCard ?? src.SpecialCard)
 	};
@@ -2753,6 +2767,9 @@ function getLocalizedRevealedValue(player, charKey) {
 		const items = source?.items || source?.Items || [];
 		const names = items.map(item => getLocalizedValue(item, 'item') || getLocalizedValue(item, 'name') || item.name || item.Name).filter(Boolean);
 		return names.length ? names.join(', ') : t('empty');
+	}
+	if (charKey === 'property') {
+		return getPropertyDisplay(source);
 	}
 	if (charKey === 'profession') {
 		const name = getProfessionDisplayName(source);
@@ -2827,6 +2844,28 @@ function normalizeInventoryData(source) {
 			? items.map(normalizeItemData)
 			: []
 	};
+}
+
+function normalizePropertyData(source) {
+	const src = source || {};
+	return {
+		definitionId: src.definitionId ?? src.DefinitionId ?? "",
+		generatedValues: src.generatedValues ?? src.GeneratedValues ?? {},
+		localizedDisplay: src.localizedDisplay ?? src.LocalizedDisplay ?? {},
+		category: src.category ?? src.Category ?? "",
+		sizeClass: src.sizeClass ?? src.SizeClass ?? "",
+		resourceTags: src.resourceTags ?? src.ResourceTags ?? [],
+		protectionTags: src.protectionTags ?? src.ProtectionTags ?? [],
+		threatUsage: src.threatUsage ?? src.ThreatUsage ?? null
+	};
+}
+
+function getPropertyDisplay(source) {
+	const property = normalizePropertyData(source);
+	const language = getCurrentLanguage();
+	return property.localizedDisplay?.[language] ||
+		property.localizedDisplay?.uk ||
+		t('propertyUnavailable');
 }
 
 function normalizeItemData(item) {
@@ -3049,6 +3088,7 @@ function normalizePlayer(player) {
 
 		// Inventory
 		inventory: normalizeInventoryData(player.inventory || player.Inventory),
+		property: normalizePropertyData(player.property || player.Property),
 	};
 
 	normalized.additionalConditionEffects = normalized.additionalPhysicalConditions;
@@ -3742,6 +3782,9 @@ function registerSignalREvents() {
 			if (data.inventory || data.Inventory) {
 				myPlayerData.inventory = normalizeInventoryData(data.inventory || data.Inventory);
 			}
+			if (data.property || data.Property) {
+				myPlayerData.property = normalizePropertyData(data.property || data.Property);
+			}
 		}
 		applyRoundState(data.roundState || data.RoundState);
 		renderCurrentGameUI();
@@ -3767,6 +3810,9 @@ function registerSignalREvents() {
 		if (myPlayerData) {
 			if (data.inventory || data.Inventory) {
 				myPlayerData.inventory = normalizeInventoryData(data.inventory || data.Inventory);
+			}
+			if (data.property || data.Property) {
+				myPlayerData.property = normalizePropertyData(data.property || data.Property);
 			}
 			const cards = data.specialCards || data.SpecialCards;
 			if (cards) {
@@ -5271,6 +5317,10 @@ function revealCharInGMPanel(charName) {
 			value = getCharValue(playerData, 'inventory', 'Inventory') || t('unknown');
 			elementId = 'gmInventory';
 			break;
+		case 'Property':
+			value = getCharValue(playerData, 'property', 'Property') || t('propertyUnavailable');
+			elementId = 'gmProperty';
+			break;
 		case 'Fact':
 			const fact = playerData.fact ?? playerData.Fact;
 			value = fact ? (getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || fact.Name || t('unknown')) : t('unknown');
@@ -6398,7 +6448,7 @@ function syncDirectorControls() {
 			const conditions = get(player, 'additionalPhysicalConditions', 'AdditionalPhysicalConditions') || [];
 			category.innerHTML = conditions.map(item => `<option value="${escapeHtml(String(get(item, 'conditionId', 'ConditionId') || ''))}">${escapeHtml(String(get(item, 'name', 'Name') || ''))}</option>`).join('');
 		} else if (action === 'reveal' || action === 'hide') {
-			const characteristics = ['Personality', 'Body', 'Profession', 'PhysicalHealth', 'MentalHealth', 'Hobby', 'CharacterTrait', 'Phobia', 'Inventory', 'Fact', 'SpecialCard'];
+			const characteristics = ['Personality', 'Body', 'Profession', 'PhysicalHealth', 'MentalHealth', 'Hobby', 'CharacterTrait', 'Phobia', 'Inventory', 'Property', 'Fact', 'SpecialCard'];
 			category.innerHTML = characteristics.map(key => `<option value="${key}">${escapeHtml(t(key) || key)}</option>`).join('');
 		}
 		if ([...category.options].some(option => option.value === previous)) category.value = previous;
@@ -7368,7 +7418,7 @@ function loadPlayerDataForGM() {
 
 	// Всі характеристики
 	const charElements = ['gmPersonality', 'gmBody', 'gmProfession', 'gmPhysicalHealth', 'gmMentalHealth',
-		'gmHobby', 'gmCharacterTrait', 'gmPhobia', 'gmInventory', 'gmFact'];
+		'gmHobby', 'gmCharacterTrait', 'gmPhobia', 'gmInventory', 'gmProperty', 'gmFact'];
 	charElements.forEach(id => {
 		const el = document.getElementById(id);
 		if (el) {
@@ -7457,6 +7507,7 @@ function getCharValue(obj, camelKey, pascalKey) {
 		const items = src.items ?? src.Items ?? [];
 		if (Array.isArray(items)) return items.map(item => getLocalizedValue(item, 'item') || item.name || item.Name || '').filter(Boolean).join(', ');
 	}
+	if (camelKey === 'property') return getPropertyDisplay(src);
 	return src.name ?? src.Name ?? src.goal ?? src.Goal ?? src;
 }
 
@@ -8451,7 +8502,8 @@ function useSpecialCardFromCard(cardIndex = 0, useMode = null) {
 	const resolvedUseMode = card.isSecret ? (useMode || 'silent') : 'public';
 	pendingSpecialCardUses.add(pendingKey);
 	renderMySpecialCards(myPlayerData);
-	connection.invoke("UseSpecialCardById", card.id, targetConnectionId || null, resolvedUseMode, selectedCharacteristic || null)
+	const commandId = globalThis.crypto?.randomUUID?.() || `special-card-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	connection.invoke("UseSpecialCardById", card.id, targetConnectionId || null, resolvedUseMode, selectedCharacteristic || null, commandId)
 		.catch(err => {
 			console.error("UseSpecialCard error:", err);
 			addEventMessage(t('unavailableNow'));
@@ -8596,6 +8648,7 @@ const publicCharacteristicDefinitions = Object.freeze([
 	{ key: 'characterTrait', labelKey: 'characterTrait', icon: 'mask' },
 	{ key: 'phobia', labelKey: 'phobia', icon: 'eye' },
 	{ key: 'inventory', labelKey: 'inventory', icon: 'backpack' },
+	{ key: 'property', labelKey: 'property', icon: 'home' },
 	{ key: 'fact', labelKey: 'fact', icon: 'document' }
 ]);
 
@@ -8981,7 +9034,7 @@ function getTooltipTypeClass(charKey) {
 
 const characteristicIconRegistry = Object.freeze({
 	personality: 'user', body: 'body', profession: 'briefcase', physicalHealth: 'heart', mentalHealth: 'brain',
-	hobby: 'star', characterTrait: 'mask', phobia: 'eye', inventory: 'backpack', fact: 'document'
+	hobby: 'star', characterTrait: 'mask', phobia: 'eye', inventory: 'backpack', property: 'home', fact: 'document'
 });
 
 const professionIconRegistry = Object.freeze({
@@ -9018,6 +9071,7 @@ const characteristicIconSvgRegistry = Object.freeze({
 	mask:'<path d="M3 5c6-3 12-3 18 0v7c0 6-5 10-9 10S3 18 3 12V5Z"/><path d="M6 10c2-2 4-2 5 0M13 10c2-2 4-2 5 0M9 16c2 1 4 1 6 0"/>',
 	eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
 	backpack:'<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
+	home:'<path d="m3 11 9-8 9 8v10H3V11Z"/><path d="M9 21v-7h6v7M7 10h10"/>',
 	document:'<path d="M6 2h9l4 4v16H6V2Z"/><path d="M14 2v5h5M9 12h7M9 16h7"/>'
 	,lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>'
 });
@@ -9207,6 +9261,7 @@ function renderMyPlayerCards(player) {
 	const characterTrait = player.characterTrait || {};
 	const phobia = player.phobia || {};
 	const inventory = player.inventory || {};
+	const property = player.property || {};
 	const fact = normalizeFactFromPlayer(player);
 	const professionItem = profession.professionItem || player.professionItem || {};
 	const localizedProfessionItem = getLocalizedValue(professionItem, 'item') || getLocalizedValue(professionItem, 'name') || professionItem.name || professionItem.Name || profession.selectedItem || '';
@@ -9228,6 +9283,7 @@ function renderMyPlayerCards(player) {
 		{ type:'CharacterTrait', categoryLabel:t('characterTrait'), value:getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || t('characterTrait'), iconKey:characteristicIconRegistry.characterTrait, details:[], tooltip:characterTrait.description || characterTrait.gameEffect || characterTrait.bunkerEffect || characterTrait.tooltip, variantSource:characterTrait, isRevealed:revealed.characterTrait, canReveal:true, revealAction:'CharacterTrait' },
 		{ type:'Phobia', categoryLabel:t('phobia'), value:getLocalizedValue(phobia, 'phobia') || getLocalizedValue(phobia, 'name') || phobia.name || t('phobia'), iconKey:characteristicIconRegistry.phobia, details:[], tooltip:getLocalizedValue(phobia, 'description') || phobia.description || phobia.gameEffect || phobia.tooltip, variantSource:phobia, isRevealed:revealed.phobia, canReveal:true, revealAction:'Phobia' },
 		{ type:'Inventory', categoryLabel:t('inventory'), value:inventoryItems.join(', ') || t('empty'), iconKey:characteristicIconRegistry.inventory, details:[], tooltip:inventoryTooltip, variantSource:inventory, isRevealed:revealed.inventory, canReveal:true, revealAction:'Inventory' },
+		{ type:'Property', categoryLabel:t('property'), value:getPropertyDisplay(property), iconKey:characteristicIconRegistry.property, details:[], tooltip:'', variantSource:property, isRevealed:revealed.property, canReveal:!!property.definitionId, revealAction:'Property' },
 		{ type:'Fact', categoryLabel:t('fact'), value:getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey:characteristicIconRegistry.fact, details:[], tooltip:fact.description || fact.tooltip || '', variantSource:fact, isRevealed:revealed.fact || revealed.Fact, canReveal:true, revealAction:'Fact' }
 	];
 

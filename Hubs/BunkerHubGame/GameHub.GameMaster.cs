@@ -5,6 +5,7 @@ using Bunker.Services;
 using Bunker.Models.ViewModels;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
+using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bunker.Hubs
@@ -82,8 +83,30 @@ namespace Bunker.Hubs
                 return room.ProcessedGmPlayerCommandIds.Add(commandId);
         }
 
+        private GeneratedProperty? BuildPropertyClientState(GeneratedProperty? property)
+        {
+            if (property == null)
+            {
+                return null;
+            }
+
+            var clientProperty = JsonSerializer.Deserialize<GeneratedProperty>(
+                JsonSerializer.Serialize(property))!;
+            clientProperty.LocalizedDisplay = _gameData.FormatPropertyAllLanguages(clientProperty);
+            return clientProperty;
+        }
+
+        private Player BuildPlayerClientState(Player player)
+        {
+            var clientPlayer = JsonSerializer.Deserialize<Player>(JsonSerializer.Serialize(player))!;
+            clientPlayer.Property = BuildPropertyClientState(clientPlayer.Property);
+            return clientPlayer;
+        }
+
         private Task SendPersonalPlayerSnapshot(string connectionId, Player player, string reason) =>
-            Clients.Client(connectionId).SendAsync("PlayerStateResynced", new { player, reason });
+            Clients.Client(connectionId).SendAsync(
+                "PlayerStateResynced",
+                new { player = BuildPlayerClientState(player), reason });
 
         private async Task SendPublicPlayersUpdate(Room room)
         {
@@ -158,7 +181,7 @@ namespace Bunker.Hubs
             {
                 characteristicName = characteristicName,
                 newValue = newValue,
-                player = player
+                player = BuildPlayerClientState(player)
             });
 
             // Повідомляємо хоста про успіх
@@ -223,7 +246,7 @@ namespace Bunker.Hubs
             await Clients.Client(targetCurrentConnectionId).SendAsync("CharacteristicCleared", new
             {
                 characteristicName = characteristicName,
-                player = player
+                player = BuildPlayerClientState(player)
             });
 
             await Clients.Caller.SendAsync("GMActionSuccess", new
@@ -288,7 +311,7 @@ namespace Bunker.Hubs
             await Clients.Client(targetCurrentConnectionId).SendAsync("CharacteristicRegenerated", new
             {
                 characteristicName = characteristicName,
-                player = player
+                player = BuildPlayerClientState(player)
             });
 
             await Clients.Caller.SendAsync("GMActionSuccess", new
@@ -1747,6 +1770,7 @@ namespace Bunker.Hubs
                 "CharacterTrait" => player.Revealed.CharacterTrait,
                 "Phobia" => player.Revealed.Phobia,
                 "Inventory" => player.Revealed.Inventory,
+                "Property" => player.Revealed.Property,
                 "Fact" => player.Revealed.Fact,
                 "SpecialCard" => player.Revealed.SpecialCard,
 				_ => false
@@ -1875,6 +1899,9 @@ namespace Bunker.Hubs
                         break;
                     case "Inventory":
                         target.Inventory = source.Inventory;
+                        break;
+                    case "Property":
+                        target.Property = source.Property;
                         break;
                     case "Fact":
 						target.Fact = source.Fact;

@@ -19,7 +19,7 @@ test('one reusable renderer supports all canonical characteristic cards', () => 
   assert.match(game, /function renderCharacteristicCard\(model\)/);
   const personalRenderer = game.slice(game.indexOf('function renderMyPlayerCards'), game.indexOf('function renderEliminatedRevealAllPanel'));
   assert.match(personalRenderer, /models\.map\(renderCharacteristicCard\)/);
-  for (const type of ['Personality','Body','Profession','PhysicalHealth','MentalHealth','Hobby','CharacterTrait','Phobia','Inventory','Fact']) {
+  for (const type of ['Personality','Body','Profession','PhysicalHealth','MentalHealth','Hobby','CharacterTrait','Phobia','Inventory','Property','Fact']) {
     assert.match(personalRenderer, new RegExp(`type:'${type}'`));
   }
   assert.match(game, /data-characteristic-type="\$\{escapeHtml\(model\.type\)\}"/);
@@ -115,8 +115,8 @@ test('shared shell uses variables, fixed geometry, inner border and footer ancho
   assert.match(css, /\.vault-card-header\.has-tooltip\s*\{\s*padding-inline:\s*0/);
 });
 
-test('all ten card types keep one shell and expose distinct CSS-only identities', () => {
-  const types = ['Personality','Body','Profession','PhysicalHealth','MentalHealth','Hobby','CharacterTrait','Phobia','Inventory','Fact'];
+test('all eleven card types keep one shell and expose distinct CSS-only identities', () => {
+  const types = ['Personality','Body','Profession','PhysicalHealth','MentalHealth','Hobby','CharacterTrait','Phobia','Inventory','Property','Fact'];
   const patterns = new Set();
   const accents = new Set();
   const tints = new Set();

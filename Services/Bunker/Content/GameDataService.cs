@@ -25,6 +25,8 @@ namespace Bunker.Services
         private List<BunkerInfo>? _bunkers;
         private List<ThreatData>? _threats;
         private List<SpecialCardData>? _specialCards;
+        private List<PropertyDefinition>? _properties;
+        private Dictionary<string, PropertyConditionProfile>? _propertyConditionProfiles;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -57,17 +59,387 @@ namespace Bunker.Services
             _bunkers = LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers");
             _threats = LoadJsonArray<ThreatData>(Path.Combine(dataPath, "threats.json"), "threats");
             _specialCards = LoadJsonArray<SpecialCardData>(Path.Combine(dataPath, "special_cards.json"), "special_cards");
+            var propertyData = LoadPropertyData(Path.Combine(dataPath, "property.json"));
+            _propertyConditionProfiles = ValidatePropertyConditionProfiles(propertyData.ConditionProfiles);
+            _properties = ValidatePropertyDefinitions(propertyData.Properties, _propertyConditionProfiles);
 
             _logger.LogInformation($"Завантажено: {_hobbies.Count} хобі, {_professions.Count} професій, " +
                                    $"{_mentalConditions.Count} ментальних станів, {_physicalConditions.Count} фізичних станів, " +
                                    $"{_items.Count} предметів, {_characterTraits.Count} рис характеру, " +
                                    $"{_phobias.Count} фобій, {_facts.Count} фактів, " +
                                    $"{_apocalypses.Count} апокаліпсисів, {_bunkers.Count} бункерів, " +
-                                   $"{_threats.Count} загроз, {_specialCards.Count} спеціальних карт");
+                                   $"{_threats.Count} загроз, {_specialCards.Count} спеціальних карт, " +
+                                   $"{_properties.Count} варіантів майна");
 
             ValidateHealthConditions(_physicalConditions, "physical");
             ValidateHealthConditions(_mentalConditions, "mental");
         }
+
+        private Dictionary<string, PropertyConditionProfile> ValidatePropertyConditionProfiles(
+            IReadOnlyDictionary<string, PropertyConditionProfile> profiles)
+        {
+            var valid = new Dictionary<string, PropertyConditionProfile>(StringComparer.OrdinalIgnoreCase);
+            foreach (var entry in profiles)
+            {
+                if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null)
+                {
+                    _logger.LogError("property.json містить condition profile з порожнім ім'ям або значенням");
+                    continue;
+                }
+
+                var configurationValid = true;
+                foreach (var weight in entry.Value.Weights ?? [])
+                {
+                    if (!int.TryParse(
+                            weight.Key,
+                            System.Globalization.NumberStyles.Integer,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out _))
+                    {
+                        _logger.LogError(
+                            "Condition profile {ProfileName} містить нечисловий weight level {Level}",
+                            entry.Key,
+                            weight.Key);
+                        configurationValid = false;
+                    }
+                    if (weight.Value < 0)
+                    {
+                        _logger.LogError(
+                            "Condition profile {ProfileName} містить від'ємну вагу для level {Level}",
+                            entry.Key,
+                            weight.Key);
+                        configurationValid = false;
+                    }
+                }
+
+                foreach (var value in entry.Value.Values ?? [])
+                {
+                    if (!int.TryParse(
+                            value.Key,
+                            System.Globalization.NumberStyles.Integer,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out _))
+                    {
+                        _logger.LogError(
+                            "Condition profile {ProfileName} містить нечисловий value level {Level}",
+                            entry.Key,
+                            value.Key);
+                        configurationValid = false;
+                    }
+                }
+
+                if (configurationValid)
+                {
+                    valid[entry.Key.Trim()] = entry.Value;
+                }
+            }
+
+            return valid;
+        }
+
+        private List<PropertyDefinition> ValidatePropertyDefinitions(
+            IReadOnlyList<PropertyDefinition> definitions,
+            IReadOnlyDictionary<string, PropertyConditionProfile> conditionProfiles)
+        {
+            if (definitions.Count == 0)
+            {
+                _logger.LogError("property.json не містить жодного коректного запису property");
+                return new();
+            }
+
+            var valid = new List<PropertyDefinition>(definitions.Count);
+            var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var definition in definitions)
+            {
+                if (string.IsNullOrWhiteSpace(definition.Id))
+                {
+                    _logger.LogError("property.json містить запис із порожнім id");
+                    continue;
+                }
+
+                definition.Id = definition.Id.Trim();
+                if (!ids.Add(definition.Id))
+                {
+                    _logger.LogError("property.json містить duplicate id {PropertyId}", definition.Id);
+                    continue;
+                }
+
+                var configurationValid = true;
+                foreach (var field in definition.RandomProperties ?? [])
+                {
+                    if (string.IsNullOrWhiteSpace(field.Key))
+                    {
+                        _logger.LogError("Property {PropertyId} містить randomProperties із порожнім key", definition.Id);
+                        configurationValid = false;
+                        continue;
+                    }
+
+                    if (!string.Equals(field.Type, "integer", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _logger.LogError(
+                            "Property {PropertyId} field {PropertyKey} має непідтримуваний type {PropertyType}",
+                            definition.Id,
+                            field.Key,
+                            field.Type);
+                        configurationValid = false;
+                        continue;
+                    }
+
+                    if (field.Min > field.Max)
+                    {
+                        _logger.LogError(
+                            "Property {PropertyId} field {PropertyKey} має min {Min} більше за max {Max}",
+                            definition.Id,
+                            field.Key,
+                            field.Min,
+                            field.Max);
+                        configurationValid = false;
+                    }
+                }
+
+                var conditionFields = (definition.RandomProperties ?? [])
+                    .Where(field => string.Equals(
+                        field.Key,
+                        "conditionLevel",
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                var templateUsesCondition = (definition.DisplayTemplate ?? [])
+                    .Values.Any(template => template?.Contains(
+                        "{condition}",
+                        StringComparison.Ordinal) == true);
+                if (string.IsNullOrWhiteSpace(definition.ConditionProfile) ||
+                    !conditionProfiles.TryGetValue(definition.ConditionProfile, out var conditionProfile))
+                {
+                    _logger.LogError(
+                        "Property {PropertyId} посилається на відсутній conditionProfile {ProfileName}",
+                        definition.Id,
+                        definition.ConditionProfile);
+                    configurationValid = false;
+                }
+                else if (conditionFields.Count != 1)
+                {
+                    _logger.LogError(
+                        "Property {PropertyId} повинно містити рівно одне поле conditionLevel",
+                        definition.Id);
+                    configurationValid = false;
+                }
+                else
+                {
+                    var conditionField = conditionFields[0];
+                    for (var level = conditionField.Min; level <= conditionField.Max; level++)
+                    {
+                        if (!TryGetProfileLevel(conditionProfile.Values, level, out var localized) ||
+                            localized.Count == 0)
+                        {
+                            _logger.LogError(
+                                "Condition profile {ProfileName} не містить value для level {Level}, потрібного Property {PropertyId}",
+                                definition.ConditionProfile,
+                                level,
+                                definition.Id);
+                            configurationValid = false;
+                        }
+                    }
+
+                    if (conditionField.WeightsFromProfile)
+                    {
+                        long totalWeight = 0;
+                        for (var level = conditionField.Min; level <= conditionField.Max; level++)
+                        {
+                            if (TryGetProfileLevel(conditionProfile.Weights, level, out var weight))
+                            {
+                                totalWeight += weight;
+                            }
+                        }
+
+                        if (totalWeight <= 0)
+                        {
+                            _logger.LogError(
+                                "Condition profile {ProfileName} має нульову суму доступних weights для Property {PropertyId}",
+                                definition.ConditionProfile,
+                                definition.Id);
+                            configurationValid = false;
+                        }
+                    }
+                }
+
+                if (templateUsesCondition && string.IsNullOrWhiteSpace(definition.ConditionProfile))
+                {
+                    _logger.LogError(
+                        "Property {PropertyId} використовує placeholder {ConditionPlaceholder} без conditionProfile",
+                        definition.Id,
+                        "{condition}");
+                    configurationValid = false;
+                }
+
+                if (configurationValid)
+                {
+                    valid.Add(definition);
+                }
+            }
+
+            return valid;
+        }
+
+        public string FormatProperty(GeneratedProperty? property, string? language)
+        {
+            if (property == null)
+            {
+                return PropertyUnavailable(language);
+            }
+
+            var definition = Properties.FirstOrDefault(item =>
+                string.Equals(item.Id, property.DefinitionId, StringComparison.OrdinalIgnoreCase));
+            if (definition == null)
+            {
+                var cached = property.GetDisplayText(language);
+                return string.IsNullOrWhiteSpace(cached) ? PropertyUnavailable(language) : cached;
+            }
+
+            var normalizedLanguage = NormalizePropertyLanguage(language);
+            var item = TryGetLocalized(definition.I18n?.Item, normalizedLanguage) ??
+                       TryGetLocalized(definition.I18n?.Item, "uk") ??
+                       definition.Item;
+            var template = TryGetLocalized(definition.DisplayTemplate, normalizedLanguage) ??
+                           TryGetLocalized(definition.DisplayTemplate, "uk") ??
+                           "{item}";
+            var display = template.Replace("{item}", item ?? "", StringComparison.Ordinal);
+            foreach (var generatedValue in property.GeneratedValues ?? [])
+            {
+                display = display.Replace(
+                    $"{{{generatedValue.Key}}}",
+                    generatedValue.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    StringComparison.Ordinal);
+            }
+
+            if (display.Contains("{condition}", StringComparison.Ordinal))
+            {
+                display = display.Replace(
+                    "{condition}",
+                    ResolvePropertyCondition(property, definition, normalizedLanguage),
+                    StringComparison.Ordinal);
+            }
+
+            return display;
+        }
+
+        public Dictionary<string, string> FormatPropertyAllLanguages(GeneratedProperty property) =>
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["uk"] = FormatProperty(property, "uk"),
+                ["en"] = FormatProperty(property, "en"),
+                ["ru"] = FormatProperty(property, "ru")
+            };
+
+        private string ResolvePropertyCondition(
+            GeneratedProperty property,
+            PropertyDefinition definition,
+            string language)
+        {
+            if (!TryResolvePropertyConditionLevel(property.GeneratedValues, out var level) ||
+                string.IsNullOrWhiteSpace(definition.ConditionProfile) ||
+                !PropertyConditionProfiles.TryGetValue(definition.ConditionProfile, out var profile) ||
+                !TryGetProfileLevel(profile.Values, level, out var localized))
+            {
+                return UnknownPropertyCondition(language);
+            }
+
+            return TryGetLocalized(localized, language) ??
+                   TryGetLocalized(localized, "uk") ??
+                   UnknownPropertyCondition(language);
+        }
+
+        public static bool TryResolvePropertyConditionLevel(
+            IReadOnlyDictionary<string, int>? generatedValues,
+            out int level)
+        {
+            level = 0;
+            if (generatedValues == null)
+            {
+                return false;
+            }
+
+            if (generatedValues.TryGetValue("conditionLevel", out level))
+            {
+                return level is >= 1 and <= 6;
+            }
+
+            if (!generatedValues.TryGetValue("conditionPercent", out var percent) ||
+                percent is < 0 or > 100)
+            {
+                return false;
+            }
+
+            level = percent switch
+            {
+                <= 19 => 1,
+                <= 39 => 2,
+                <= 59 => 3,
+                <= 74 => 4,
+                <= 89 => 5,
+                _ => 6
+            };
+            return true;
+        }
+
+        private static bool TryGetProfileLevel<T>(
+            IReadOnlyDictionary<string, T>? source,
+            int level,
+            out T value)
+        {
+            if (source != null)
+            {
+                foreach (var entry in source)
+                {
+                    if (int.TryParse(
+                            entry.Key,
+                            System.Globalization.NumberStyles.Integer,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out var parsed) &&
+                        parsed == level)
+                    {
+                        value = entry.Value;
+                        return true;
+                    }
+                }
+            }
+
+            value = default!;
+            return false;
+        }
+
+        private static string? TryGetLocalized(
+            IReadOnlyDictionary<string, string>? source,
+            string language) =>
+            source != null &&
+            source.TryGetValue(language, out var value) &&
+            !string.IsNullOrWhiteSpace(value)
+                ? value
+                : null;
+
+        private static string NormalizePropertyLanguage(string? language)
+        {
+            var normalized = string.IsNullOrWhiteSpace(language)
+                ? "uk"
+                : language.Trim().ToLowerInvariant();
+            return normalized is "uk" or "en" or "ru" ? normalized : "uk";
+        }
+
+        private static string UnknownPropertyCondition(string? language) =>
+            NormalizePropertyLanguage(language) switch
+            {
+                "en" => "Condition unknown",
+                "ru" => "Состояние неизвестно",
+                _ => "Стан невідомий"
+            };
+
+        private static string PropertyUnavailable(string? language) =>
+            NormalizePropertyLanguage(language) switch
+            {
+                "en" => "Property unavailable",
+                "ru" => "Имущество отсутствует",
+                _ => "Майно відсутнє"
+            };
 
         private void ValidateHealthConditions<T>(IReadOnlyList<T> conditions, string kind)
         {
@@ -337,6 +709,37 @@ namespace Bunker.Services
             }
         }
 
+        private PropertyDataRoot LoadPropertyData(string path)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    _logger.LogWarning("Файл не знайдено: {PropertyPath}", path);
+                    return new();
+                }
+
+                var data = JsonSerializer.Deserialize<PropertyDataRoot>(
+                    File.ReadAllText(path),
+                    _jsonOptions);
+                if (data == null)
+                {
+                    _logger.LogError("property.json не містить коректного root object");
+                    return new();
+                }
+
+                data.Properties ??= new();
+                data.ConditionProfiles ??=
+                    new Dictionary<string, PropertyConditionProfile>(StringComparer.OrdinalIgnoreCase);
+                return data;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка завантаження property.json з {PropertyPath}", path);
+                return new();
+            }
+        }
+
         private List<T> LoadJsonArray<T>(string path, params string[] possibleKeys)
         {
             try
@@ -390,5 +793,9 @@ namespace Bunker.Services
         public IReadOnlyList<BunkerInfo> Bunkers => _bunkers ?? new();
         public IReadOnlyList<ThreatData> Threats => _threats ?? new();
         public IReadOnlyList<SpecialCardData> SpecialCards => _specialCards ?? new();
+        public IReadOnlyList<PropertyDefinition> Properties => _properties ?? new();
+        public IReadOnlyDictionary<string, PropertyConditionProfile> PropertyConditionProfiles =>
+            _propertyConditionProfiles ??
+            new Dictionary<string, PropertyConditionProfile>(StringComparer.OrdinalIgnoreCase);
     }
 }

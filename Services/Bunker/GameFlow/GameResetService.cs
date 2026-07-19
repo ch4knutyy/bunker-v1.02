@@ -99,6 +99,7 @@ internal static class GameResetService
 			room.ProcessedRoomIntegrityCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedSnapshotCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedRoomEditorCommandIds = new(StringComparer.OrdinalIgnoreCase);
+			room.ProcessedSpecialCardCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ThreatAuditLog = new();
 			room.NextThreatAuditSequenceId = 0;
 			room.GmAuditLog = new();
@@ -128,6 +129,7 @@ internal static class GameResetService
 		player.Profession = new Profession();
 		player.ProfessionItem = new Item();
 		player.Inventory = new Inventory();
+		player.Property = null;
 		player.PersonalInfo = new PersonalInfo();
 		player.CharacterTrait = new CharacterTrait();
 		player.Phobia = new Phobia();

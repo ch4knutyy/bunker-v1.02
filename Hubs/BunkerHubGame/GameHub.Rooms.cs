@@ -58,7 +58,7 @@ namespace Bunker.Hubs
 				await Clients.Caller.SendAsync("RoomCreated", new
 				{
 					room = joinedRoom.ToPublicInfo(),
-					player = player,
+					player = BuildPlayerClientState(player),
 					isHost = true,
 					hostToken = joinedRoom.HostToken,
 					reconnectToken,
@@ -152,7 +152,7 @@ namespace Bunker.Hubs
 				await Clients.Caller.SendAsync("RoomJoined", new
 				{
 					room = room.ToPublicInfo(),
-					player = player,
+					player = BuildPlayerClientState(player),
 					isHost = room.IsHost(Context.ConnectionId),
 					hostToken = room.IsHost(Context.ConnectionId) ? room.HostToken : null,
 					reconnectToken,
@@ -312,7 +312,7 @@ namespace Bunker.Hubs
 			await Clients.Caller.SendAsync("RejoinSuccess", new
 			{
 				room = room.ToPublicInfo(),
-				player = player,
+				player = BuildPlayerClientState(player),
 				isHost = wasHost,
 				hostToken = wasHost ? room.HostToken : null,
 				roomState = room.State.ToString(),
@@ -410,10 +410,20 @@ namespace Bunker.Hubs
 			return token;
 		}
 
-		private void EnsurePlayerHasGeneratedData(Player player, Room? room = null)
+		private void EnsurePlayerHasGeneratedData(Player player, Room? room = null, bool initializeProperty = false)
 		{
-			if (player.IsSpectatorGm || player.IsLobbySpectator || player.GmRole == GmMode.TechnicalGm || room?.State == RoomState.Lobby) return;
-			var generated = HasCompleteCharacterData(player) ? null : _generator.Generate(player.Name);
+			if (player.IsSpectatorGm || player.IsLobbySpectator || player.GmRole == GmMode.TechnicalGm ||
+				(room?.State == RoomState.Lobby && !initializeProperty)) return;
+			var needsGeneratedCharacter = !HasCompleteCharacterData(player);
+			var generated = needsGeneratedCharacter || (initializeProperty && player.Property == null)
+				? _generator.Generate(
+					player.Name,
+					room == null
+						? null
+						: RoomService.GetGameplayPlayersSnapshot(room)
+							.Select(entry => entry.Value)
+							.Where(candidate => !ReferenceEquals(candidate, player)))
+				: null;
 
 			if (!HasPersonality(player)) player.Personality = generated!.Personality;
 			if (!HasBody(player)) player.Body = generated!.Body;
@@ -434,6 +444,7 @@ namespace Bunker.Hubs
 				};
 			}
 			if (!HasInventory(player)) player.Inventory = generated!.Inventory;
+			if (initializeProperty && player.Property == null) player.Property = generated!.Property;
 			if (!HasNamedCharacteristic(player.PhysicalHealth)) player.PhysicalHealth = generated!.PhysicalHealth;
 			if (!HasNamedCharacteristic(player.MentalHealth)) player.MentalHealth = generated!.MentalHealth;
 			if (!HasNamedCharacteristic(player.Hobby)) player.Hobby = generated!.Hobby;
@@ -574,7 +585,7 @@ namespace Bunker.Hubs
 			var settings = _roomGameSettings.GetCanonical(room);
 			foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
 			{
-				EnsurePlayerHasGeneratedData(player);
+				EnsurePlayerHasGeneratedData(player, room, initializeProperty: true);
 				ConfigureGeneratedPlayerForLobby(player, settings);
 			}
 		}

@@ -8,7 +8,7 @@ namespace Bunker.Hubs;
 public partial class GameHub
 {
     private static readonly string[] DirectorCharacteristics =
-        ["Personality", "Body", "Profession", "PhysicalHealth", "MentalHealth", "Hobby", "CharacterTrait", "Phobia", "Inventory", "Fact", "SpecialCard"];
+        ["Personality", "Body", "Profession", "PhysicalHealth", "MentalHealth", "Hobby", "CharacterTrait", "Phobia", "Inventory", "Property", "Fact", "SpecialCard"];
 
     public Task<DirectorActionPreviewDto> PreviewDirectorAction(DirectorActionRequestDto request)
     {
