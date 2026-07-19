@@ -26,6 +26,8 @@
     let selectedStablePlayerId = null;
     let refreshTimer = null;
     let commandPending = false;
+    let propertyEditorData = null;
+    let propertyEditorPending = false;
 
     function value(source, camel, pascal) {
         return source?.[camel] ?? source?.[pascal];
@@ -255,6 +257,13 @@
                 "canOpenContentEditor",
                 "CanOpenContentEditor"));
         }
+        const propertyEditButton = document.getElementById("gmEditPropertyButton");
+        if (propertyEditButton) {
+            propertyEditButton.hidden = !Boolean(value(
+                permissions(),
+                "canManagePlayers",
+                "CanManagePlayers"));
+        }
     }
 
     function summaryCard(label, content) {
@@ -360,6 +369,235 @@
                 button.disabled = false;
                 button.classList.remove("is-pending");
             }
+        }
+    };
+
+    function propertyDefinitions() {
+        return value(propertyEditorData, "definitions", "Definitions") || [];
+    }
+
+    function selectedPropertyDefinition() {
+        const definitionId = document.getElementById("gmPropertyDefinitionSelect")?.value;
+        return propertyDefinitions().find(definition =>
+            value(definition, "id", "Id") === definitionId);
+    }
+
+    function setPropertyEditorPending(pending) {
+        propertyEditorPending = pending;
+        ["gmPropertySaveButton", "gmPropertyRegenerateButton", "gmPropertyDefinitionSelect"]
+            .forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.disabled = pending;
+            });
+    }
+
+    function propertyEditorFeedback(message) {
+        const feedback = document.getElementById("gmPropertyEditorFeedback");
+        if (feedback) feedback.textContent = message || "";
+    }
+
+    function renderPropertyEditorPreview(presentation) {
+        const target = document.getElementById("gmPropertyEditorPreview");
+        if (!target) return;
+        target.replaceChildren();
+        if (!presentation) return;
+        const title = document.createElement("strong");
+        title.textContent = value(presentation, "title", "Title") || "—";
+        target.append(title);
+        const details = value(presentation, "details", "Details") || [];
+        details.slice(0, 4).forEach(detail => {
+            const row = document.createElement("div");
+            row.className = "gm-property-editor-preview-row";
+            const label = document.createElement("span");
+            label.textContent = value(detail, "label", "Label") || "";
+            const content = document.createElement("span");
+            content.textContent = value(detail, "value", "Value") || "—";
+            row.append(label, content);
+            target.append(row);
+        });
+    }
+
+    function renderPropertyEditorFields(generatedValues) {
+        const target = document.getElementById("gmPropertyEditorFields");
+        const definition = selectedPropertyDefinition();
+        if (!target || !definition) return;
+        target.replaceChildren();
+        const values = generatedValues || {};
+        const fields = value(definition, "fields", "Fields") || [];
+        fields.forEach(field => {
+            const key = value(field, "key", "Key");
+            const wrapper = document.createElement("label");
+            wrapper.className = "gm-field";
+            const caption = document.createElement("span");
+            caption.textContent = value(field, "label", "Label") || key;
+            let input;
+            if (value(field, "isCondition", "IsCondition")) {
+                input = document.createElement("select");
+                const options = value(field, "options", "Options") || [];
+                options.forEach(optionData => {
+                    const option = document.createElement("option");
+                    option.value = String(value(optionData, "level", "Level"));
+                    option.textContent = value(optionData, "label", "Label") || option.value;
+                    input.append(option);
+                });
+            } else {
+                input = document.createElement("input");
+                input.type = "number";
+                input.min = String(value(field, "min", "Min"));
+                input.max = String(value(field, "max", "Max"));
+                input.step = "1";
+            }
+            input.className = "gm-select gm-property-value";
+            input.dataset.propertyKey = key;
+            const currentValue = values[key];
+            if (Number.isInteger(currentValue)) input.value = String(currentValue);
+            wrapper.append(caption, input);
+            target.append(wrapper);
+        });
+
+        const conditionProfile = document.getElementById("gmPropertyConditionProfile");
+        if (conditionProfile) {
+            conditionProfile.textContent =
+                `Профіль стану: ${value(definition, "conditionProfile", "ConditionProfile") || "—"}`;
+        }
+    }
+
+    function collectPropertyEditorValues() {
+        const values = {};
+        document.querySelectorAll("#gmPropertyEditorFields [data-property-key]")
+            .forEach(input => {
+                const parsed = Number(input.value);
+                if (!Number.isInteger(parsed)) {
+                    throw new Error("property_values_invalid");
+                }
+                values[input.dataset.propertyKey] = parsed;
+            });
+        return values;
+    }
+
+    window.openGmPropertyEditor = async function openGmPropertyEditor() {
+        if (propertyEditorPending ||
+            !selectedStablePlayerId ||
+            !Boolean(value(permissions(), "canManagePlayers", "CanManagePlayers"))) {
+            return;
+        }
+        setPropertyEditorPending(true);
+        propertyEditorFeedback("");
+        try {
+            propertyEditorData = await connection.invoke(
+                "GetPlayerPropertyEditor",
+                selectedStablePlayerId,
+                getCurrentLanguage());
+            const player = document.getElementById("gmPropertyEditorPlayer");
+            if (player) {
+                player.textContent = value(propertyEditorData, "playerName", "PlayerName") || "—";
+            }
+            const select = document.getElementById("gmPropertyDefinitionSelect");
+            if (!select) return;
+            select.replaceChildren(...propertyDefinitions().map(definition => {
+                const option = document.createElement("option");
+                option.value = value(definition, "id", "Id");
+                option.textContent = value(definition, "title", "Title") || option.value;
+                return option;
+            }));
+            const currentDefinitionId = value(
+                propertyEditorData,
+                "currentDefinitionId",
+                "CurrentDefinitionId");
+            if ([...select.options].some(option => option.value === currentDefinitionId)) {
+                select.value = currentDefinitionId;
+            }
+            const dialog = document.getElementById("gmPropertyEditorDialog");
+            if (!dialog?.open) dialog?.showModal();
+            if (currentDefinitionId) {
+                renderPropertyEditorFields(value(
+                    propertyEditorData,
+                    "currentValues",
+                    "CurrentValues") || {});
+                renderPropertyEditorPreview(value(
+                    propertyEditorData,
+                    "currentPresentation",
+                    "CurrentPresentation"));
+            } else {
+                setPropertyEditorPending(false);
+                await window.regenerateGmPropertyPreview();
+            }
+        } catch (error) {
+            propertyEditorFeedback(String(error?.message || error));
+        } finally {
+            setPropertyEditorPending(false);
+        }
+    };
+
+    window.closeGmPropertyEditor = function closeGmPropertyEditor() {
+        if (propertyEditorPending) return;
+        document.getElementById("gmPropertyEditorDialog")?.close();
+        propertyEditorData = null;
+        const search = document.getElementById("gmPropertyDefinitionSearch");
+        if (search) search.value = "";
+    };
+
+    window.filterGmPropertyDefinitions = function filterGmPropertyDefinitions() {
+        const query = document.getElementById("gmPropertyDefinitionSearch")
+            ?.value.trim().toLocaleLowerCase() || "";
+        const select = document.getElementById("gmPropertyDefinitionSelect");
+        if (!select) return;
+        [...select.options].forEach(option => {
+            option.hidden = Boolean(query) &&
+                !option.textContent.toLocaleLowerCase().includes(query);
+        });
+        if (select.selectedOptions[0]?.hidden) {
+            const firstVisible = [...select.options].find(option => !option.hidden);
+            if (firstVisible) {
+                select.value = firstVisible.value;
+                window.regenerateGmPropertyPreview();
+            }
+        }
+    };
+
+    window.regenerateGmPropertyPreview = async function regenerateGmPropertyPreview() {
+        const definition = selectedPropertyDefinition();
+        if (!definition || propertyEditorPending) return;
+        setPropertyEditorPending(true);
+        propertyEditorFeedback("");
+        try {
+            const preview = await connection.invoke(
+                "PreviewPlayerProperty",
+                value(definition, "id", "Id"),
+                getCurrentLanguage());
+            renderPropertyEditorFields(value(
+                preview,
+                "generatedValues",
+                "GeneratedValues") || {});
+            renderPropertyEditorPreview(value(preview, "presentation", "Presentation"));
+        } catch (error) {
+            propertyEditorFeedback(String(error?.message || error));
+        } finally {
+            setPropertyEditorPending(false);
+        }
+    };
+
+    window.saveGmPropertyEdit = async function saveGmPropertyEdit() {
+        const definition = selectedPropertyDefinition();
+        if (!definition || propertyEditorPending || !selectedStablePlayerId) return;
+        setPropertyEditorPending(true);
+        propertyEditorFeedback("");
+        try {
+            const generatedValues = collectPropertyEditorValues();
+            await connection.invoke(
+                "UpdatePlayerProperty",
+                selectedStablePlayerId,
+                value(definition, "id", "Id"),
+                generatedValues,
+                crypto.randomUUID());
+            document.getElementById("gmPropertyEditorDialog")?.close();
+            propertyEditorData = null;
+            await connection.invoke("GetAllPlayersData");
+            scheduleGmPanelV2Refresh();
+        } catch (error) {
+            propertyEditorFeedback(String(error?.message || error));
+        } finally {
+            setPropertyEditorPending(false);
         }
     };
 

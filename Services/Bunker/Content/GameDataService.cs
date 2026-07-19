@@ -208,6 +208,18 @@ namespace Bunker.Services
                     .Values.Any(template => template?.Contains(
                         "{condition}",
                         StringComparison.Ordinal) == true);
+                var duplicateDisplayFields = (definition.DisplayFields ?? [])
+                    .Where(field => !string.IsNullOrWhiteSpace(field.Key))
+                    .GroupBy(field => field.Key, StringComparer.OrdinalIgnoreCase)
+                    .FirstOrDefault(group => group.Count() > 1);
+                if (duplicateDisplayFields != null)
+                {
+                    _logger.LogError(
+                        "Property {PropertyId} містить duplicate display field {FieldKey}",
+                        definition.Id,
+                        duplicateDisplayFields.Key);
+                    configurationValid = false;
+                }
                 if (string.IsNullOrWhiteSpace(definition.ConditionProfile) ||
                     !conditionProfiles.TryGetValue(definition.ConditionProfile, out var conditionProfile))
                 {
@@ -308,7 +320,7 @@ namespace Bunker.Services
             {
                 display = display.Replace(
                     $"{{{generatedValue.Key}}}",
-                    generatedValue.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    FormatPropertyInteger(generatedValue.Value, normalizedLanguage),
                     StringComparison.Ordinal);
             }
 
@@ -330,6 +342,139 @@ namespace Bunker.Services
                 ["en"] = FormatProperty(property, "en"),
                 ["ru"] = FormatProperty(property, "ru")
             };
+
+        public PropertyPresentationDto BuildPropertyPresentation(
+            GeneratedProperty? property,
+            string? language)
+        {
+            if (property == null)
+            {
+                return new(PropertyUnavailable(language), []);
+            }
+
+            var definition = Properties.FirstOrDefault(item =>
+                string.Equals(item.Id, property.DefinitionId, StringComparison.OrdinalIgnoreCase));
+            if (definition == null || definition.DisplayFields == null || definition.DisplayFields.Count == 0)
+            {
+                return new(FormatProperty(property, language), []);
+            }
+
+            var normalizedLanguage = NormalizePropertyLanguage(language);
+            var title = TryGetLocalized(definition.I18n?.Item, normalizedLanguage) ??
+                        TryGetLocalized(definition.I18n?.Item, "uk") ??
+                        definition.Item;
+            var details = new List<PropertyPresentationDetailDto>(definition.DisplayFields.Count);
+            foreach (var field in definition.DisplayFields.Take(4))
+            {
+                if (string.IsNullOrWhiteSpace(field.Key))
+                {
+                    continue;
+                }
+
+                var label = TryGetLocalized(field.Label, normalizedLanguage) ??
+                            TryGetLocalized(field.Label, "uk") ??
+                            field.Key;
+                string value;
+                if (string.Equals(field.Source, "conditionProfile", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(field.Key, "condition", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = ResolvePropertyCondition(property, definition, normalizedLanguage);
+                }
+                else if (property.GeneratedValues.TryGetValue(field.Key, out var generatedValue))
+                {
+                    var formatted = FormatPropertyInteger(generatedValue, normalizedLanguage);
+                    var valueTemplate = TryGetLocalized(field.ValueTemplate, normalizedLanguage) ??
+                                        TryGetLocalized(field.ValueTemplate, "uk") ??
+                                        $"{{{field.Key}}}";
+                    value = valueTemplate.Replace(
+                        $"{{{field.Key}}}",
+                        formatted,
+                        StringComparison.Ordinal);
+                }
+                else
+                {
+                    value = "—";
+                }
+
+                details.Add(new(field.Key, label, value));
+            }
+
+            return new(title ?? PropertyUnavailable(normalizedLanguage), details);
+        }
+
+        public Dictionary<string, PropertyPresentationDto> BuildPropertyPresentationsAllLanguages(
+            GeneratedProperty property) =>
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["uk"] = BuildPropertyPresentation(property, "uk"),
+                ["en"] = BuildPropertyPresentation(property, "en"),
+                ["ru"] = BuildPropertyPresentation(property, "ru")
+            };
+
+        public bool TryCreateProperty(
+            string? definitionId,
+            IReadOnlyDictionary<string, int>? generatedValues,
+            out GeneratedProperty property,
+            out string errorCode)
+        {
+            property = null!;
+            errorCode = "property_values_invalid";
+            var definition = Properties.FirstOrDefault(item =>
+                string.Equals(item.Id, definitionId, StringComparison.OrdinalIgnoreCase));
+            if (definition == null)
+            {
+                errorCode = "property_definition_not_found";
+                return false;
+            }
+
+            generatedValues ??= new Dictionary<string, int>();
+            var requiredFields = definition.RandomProperties ?? [];
+            var allowedKeys = requiredFields
+                .Select(field => field.Key)
+                .ToHashSet(StringComparer.Ordinal);
+            if (generatedValues.Count != requiredFields.Count ||
+                generatedValues.Keys.Any(key => !allowedKeys.Contains(key)))
+            {
+                return false;
+            }
+
+            foreach (var field in requiredFields)
+            {
+                if (!generatedValues.TryGetValue(field.Key, out var value) ||
+                    value < field.Min ||
+                    value > field.Max)
+                {
+                    return false;
+                }
+
+                if (string.Equals(field.Key, "conditionLevel", StringComparison.Ordinal) &&
+                    (!PropertyConditionProfiles.TryGetValue(definition.ConditionProfile, out var profile) ||
+                     !TryGetProfileLevel(profile.Values, value, out _)))
+                {
+                    errorCode = "property_condition_invalid";
+                    return false;
+                }
+            }
+
+            property = new GeneratedProperty
+            {
+                DefinitionId = definition.Id,
+                GeneratedValues = new Dictionary<string, int>(generatedValues, StringComparer.Ordinal),
+                Category = definition.Category,
+                SizeClass = definition.SizeClass,
+                ResourceTags = definition.ResourceTags?.ToList() ?? [],
+                ProtectionTags = definition.ProtectionTags?.ToList() ?? [],
+                ThreatUsage = definition.ThreatUsage == null
+                    ? null
+                    : new Dictionary<string, JsonElement>(
+                        definition.ThreatUsage,
+                        StringComparer.OrdinalIgnoreCase)
+            };
+            property.LocalizedDisplay = FormatPropertyAllLanguages(property);
+            property.LocalizedPresentation = BuildPropertyPresentationsAllLanguages(property);
+            errorCode = "";
+            return true;
+        }
 
         private string ResolvePropertyCondition(
             GeneratedProperty property,
@@ -423,6 +568,14 @@ namespace Bunker.Services
                 ? "uk"
                 : language.Trim().ToLowerInvariant();
             return normalized is "uk" or "en" or "ru" ? normalized : "uk";
+        }
+
+        private static string FormatPropertyInteger(int value, string language)
+        {
+            var formatted = value.ToString(
+                "N0",
+                System.Globalization.CultureInfo.InvariantCulture);
+            return language == "en" ? formatted : formatted.Replace(",", " ", StringComparison.Ordinal);
         }
 
         private static string UnknownPropertyCondition(string? language) =>

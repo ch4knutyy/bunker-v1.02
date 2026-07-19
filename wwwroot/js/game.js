@@ -2769,7 +2769,7 @@ function getLocalizedRevealedValue(player, charKey) {
 		return names.length ? names.join(', ') : t('empty');
 	}
 	if (charKey === 'property') {
-		return getPropertyDisplay(source);
+		return getPropertyPresentation(source).title;
 	}
 	if (charKey === 'profession') {
 		const name = getProfessionDisplayName(source);
@@ -2852,11 +2852,34 @@ function normalizePropertyData(source) {
 		definitionId: src.definitionId ?? src.DefinitionId ?? "",
 		generatedValues: src.generatedValues ?? src.GeneratedValues ?? {},
 		localizedDisplay: src.localizedDisplay ?? src.LocalizedDisplay ?? {},
+		localizedPresentation: src.localizedPresentation ?? src.LocalizedPresentation ?? {},
 		category: src.category ?? src.Category ?? "",
 		sizeClass: src.sizeClass ?? src.SizeClass ?? "",
 		resourceTags: src.resourceTags ?? src.ResourceTags ?? [],
 		protectionTags: src.protectionTags ?? src.ProtectionTags ?? [],
 		threatUsage: src.threatUsage ?? src.ThreatUsage ?? null
+	};
+}
+
+function getPropertyPresentation(source) {
+	const property = normalizePropertyData(source);
+	const language = getCurrentLanguage();
+	const presentation = property.localizedPresentation?.[language] ||
+		property.localizedPresentation?.uk ||
+		null;
+	if (!presentation) {
+		return { title: getPropertyDisplay(property), details: [] };
+	}
+	const rawDetails = presentation.details ?? presentation.Details ?? [];
+	return {
+		title: presentation.title ?? presentation.Title ?? getPropertyDisplay(property),
+		details: Array.isArray(rawDetails)
+			? rawDetails.slice(0, 4).map(detail => ({
+				key: detail.key ?? detail.Key ?? "",
+				label: detail.label ?? detail.Label ?? "",
+				value: detail.value ?? detail.Value ?? ""
+			}))
+			: []
 	};
 }
 
@@ -8798,11 +8821,24 @@ function renderPublicCharacteristicCard(player, definition) {
 	const value = getLocalizedRevealedValue(player, key) || t('noData');
 	const tooltipData = getLocalizedRevealedTooltip(player, key);
 	const tooltip = tooltipData ? `<span class="characteristic-with-tooltip public-characteristic-tooltip"><button type="button" class="tooltip-trigger ${getTooltipTypeClass(key)}" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button><span class="tooltip-content">${escapeHtml(tooltipData)}</span></span>` : '';
-	const additional = key === 'physicalHealth' ? renderAdditionalPhysicalConditionsForOverview(player) : '';
+	const additional = key === 'physicalHealth'
+		? renderAdditionalPhysicalConditionsForOverview(player)
+		: key === 'property'
+			? renderPublicPropertyDetails(player)
+			: '';
 	return `<article class="public-characteristic-card is-revealed type-${key}" data-characteristic="${key}" data-revealed="true">
 		<header><span class="public-characteristic-icon">${renderCharacteristicIcon(icon)}</span><h4>${escapeHtml(label)}</h4>${tooltip}</header>
 		<div class="public-characteristic-value">${escapeHtml(value)}</div>${additional}
 	</article>`;
+}
+
+function renderPublicPropertyDetails(player) {
+	const presentation = getPropertyPresentation(getRevealedSource(player, 'property'));
+	return presentation.details.length
+		? `<div class="public-property-details">${presentation.details.map(detail =>
+			`<div class="public-property-detail"><span>${escapeHtml(detail.label)}</span><strong>${escapeHtml(detail.value)}</strong></div>`
+		).join('')}</div>`
+		: '';
 }
 
 function getPublicRevealedCount(player) {
@@ -8836,7 +8872,11 @@ function renderComparisonCharacteristic(player, definition) {
 	const value = getLocalizedRevealedValue(player, key) || t('noData');
 	const tooltipData = getLocalizedRevealedTooltip(player, key);
 	const tooltip = tooltipData ? `<span class="characteristic-with-tooltip comparison-tooltip"><button type="button" class="tooltip-trigger ${getTooltipTypeClass(key)}" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button><span class="tooltip-content">${escapeHtml(tooltipData)}</span></span>` : '';
-	const additional = key === 'physicalHealth' ? renderAdditionalPhysicalConditionsForOverview(player) : '';
+	const additional = key === 'physicalHealth'
+		? renderAdditionalPhysicalConditionsForOverview(player)
+		: key === 'property'
+			? renderPublicPropertyDetails(player)
+			: '';
 	return `<div class="comparison-characteristic is-revealed type-${key}" data-characteristic="${key}" data-revealed="true">
 		<span class="comparison-characteristic-icon" aria-hidden="true">${renderCharacteristicIcon(icon)}</span>
 		<span class="comparison-characteristic-copy"><strong>${escapeHtml(label)}</strong><span class="comparison-public-value">${escapeHtml(value)}</span>${additional}</span>${tooltip}
@@ -9273,6 +9313,7 @@ function renderMyPlayerCards(player) {
 	const physicalPresentation = buildHealthCardPresentation(physicalHealth);
 	const mentalPresentation = buildHealthCardPresentation(mentalHealth);
 	const hobbyCardDetails = buildHobbyCardDetails(hobby);
+	const propertyPresentation = getPropertyPresentation(property);
 	const models = [
 		{ type:'Personality', categoryLabel:t('personality'), value:`${personality.age} ${t('years')}`, iconKey:characteristicIconRegistry.personality, details:[nonEmptyCardDetail(t('sex'), `${personality.sex || ''}${personality.isChildfree ? ` · ${t('cardChildfree')}` : ''}`), nonEmptyCardDetail(t('orientation'), personality.sexOrientation)], tooltip:'', isRevealed:revealed.personality, canReveal:true, revealAction:'Personality' },
 		{ type:'Body', categoryLabel:t('body'), value:body.bodyType || t('body'), iconKey:characteristicIconRegistry.body, details:[nonEmptyCardDetail(t('height'), body.height ? `${body.height} см` : ''), nonEmptyCardDetail(t('weight'), body.weight ? `${body.weight} кг` : '')], tooltip:'', isRevealed:revealed.body, canReveal:true, revealAction:'Body' },
@@ -9283,7 +9324,7 @@ function renderMyPlayerCards(player) {
 		{ type:'CharacterTrait', categoryLabel:t('characterTrait'), value:getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || t('characterTrait'), iconKey:characteristicIconRegistry.characterTrait, details:[], tooltip:characterTrait.description || characterTrait.gameEffect || characterTrait.bunkerEffect || characterTrait.tooltip, variantSource:characterTrait, isRevealed:revealed.characterTrait, canReveal:true, revealAction:'CharacterTrait' },
 		{ type:'Phobia', categoryLabel:t('phobia'), value:getLocalizedValue(phobia, 'phobia') || getLocalizedValue(phobia, 'name') || phobia.name || t('phobia'), iconKey:characteristicIconRegistry.phobia, details:[], tooltip:getLocalizedValue(phobia, 'description') || phobia.description || phobia.gameEffect || phobia.tooltip, variantSource:phobia, isRevealed:revealed.phobia, canReveal:true, revealAction:'Phobia' },
 		{ type:'Inventory', categoryLabel:t('inventory'), value:inventoryItems.join(', ') || t('empty'), iconKey:characteristicIconRegistry.inventory, details:[], tooltip:inventoryTooltip, variantSource:inventory, isRevealed:revealed.inventory, canReveal:true, revealAction:'Inventory' },
-		{ type:'Property', categoryLabel:t('property'), value:getPropertyDisplay(property), iconKey:characteristicIconRegistry.property, details:[], tooltip:'', variantSource:property, isRevealed:revealed.property, canReveal:!!property.definitionId, revealAction:'Property' },
+		{ type:'Property', categoryLabel:t('property'), value:propertyPresentation.title, iconKey:characteristicIconRegistry.property, details:propertyPresentation.details, tooltip:'', variantSource:property, isRevealed:revealed.property, canReveal:!!property.definitionId, revealAction:'Property' },
 		{ type:'Fact', categoryLabel:t('fact'), value:getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey:characteristicIconRegistry.fact, details:[], tooltip:fact.description || fact.tooltip || '', variantSource:fact, isRevealed:revealed.fact || revealed.Fact, canReveal:true, revealAction:'Fact' }
 	];
 

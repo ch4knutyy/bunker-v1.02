@@ -173,6 +173,23 @@ namespace Bunker.Services
             }
 
             var definition = candidates[_random.Next(candidates.Count)];
+            return GenerateProperty(definition);
+        }
+
+        public GeneratedProperty? GeneratePropertyForDefinition(string definitionId)
+        {
+            var definition = _gameData.Properties.FirstOrDefault(item =>
+                string.Equals(item.Id, definitionId, StringComparison.OrdinalIgnoreCase));
+            if (definition == null)
+            {
+                return null;
+            }
+
+            return GenerateProperty(definition);
+        }
+
+        private GeneratedProperty? GenerateProperty(PropertyDefinition definition)
+        {
             var generatedValues = new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (var field in definition.RandomProperties ?? [])
             {
@@ -197,21 +214,19 @@ namespace Bunker.Services
                 generatedValues[field.Key] = generatedValue;
             }
 
-            var generated = new GeneratedProperty
+            if (!_gameData.TryCreateProperty(
+                    definition.Id,
+                    generatedValues,
+                    out var generated,
+                    out var errorCode))
             {
-                DefinitionId = definition.Id,
-                GeneratedValues = generatedValues,
-                Category = definition.Category,
-                SizeClass = definition.SizeClass,
-                ResourceTags = definition.ResourceTags?.ToList() ?? new(),
-                ProtectionTags = definition.ProtectionTags?.ToList() ?? new(),
-                ThreatUsage = definition.ThreatUsage == null
-                    ? null
-                    : new Dictionary<string, JsonElement>(
-                        definition.ThreatUsage,
-                        StringComparer.OrdinalIgnoreCase)
-            };
-            generated.LocalizedDisplay = _gameData.FormatPropertyAllLanguages(generated);
+                _logger.LogError(
+                    "Property {PropertyId} не пройшло canonical runtime validation: {ErrorCode}",
+                    definition.Id,
+                    errorCode);
+                return null;
+            }
+
             return generated;
         }
 

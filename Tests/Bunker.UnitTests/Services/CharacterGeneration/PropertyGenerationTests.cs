@@ -28,6 +28,7 @@ public sealed class PropertyGenerationTests
         Assert.All(gameData.Properties, definition =>
         {
             Assert.True(gameData.PropertyConditionProfiles.ContainsKey(definition.ConditionProfile));
+            Assert.NotEmpty(definition.DisplayFields);
             var conditionField = Assert.Single(
                 definition.RandomProperties,
                 field => field.Key == "conditionLevel");
@@ -65,6 +66,103 @@ public sealed class PropertyGenerationTests
                 activePlayers.Add(new Player { Property = generated });
             }
         }
+    }
+
+    [Fact]
+    public void StructuredPresentationSeparatesTitleDetailsAndLocalizedCondition()
+    {
+        var gameData = CreateGameData();
+        Assert.True(gameData.TryCreateProperty(
+            "medical_industrial_medical_refrigerator",
+            new Dictionary<string, int>
+            {
+                ["capacityLiters"] = 620,
+                ["conditionLevel"] = 5
+            },
+            out var refrigerator,
+            out var refrigeratorError));
+        Assert.Equal("", refrigeratorError);
+
+        var uk = gameData.BuildPropertyPresentation(refrigerator, "uk");
+        var en = gameData.BuildPropertyPresentation(refrigerator, "en");
+        var ru = gameData.BuildPropertyPresentation(refrigerator, "ru");
+
+        Assert.Equal("Промисловий медичний холодильник", uk.Title);
+        Assert.DoesNotContain("620", uk.Title, StringComparison.Ordinal);
+        Assert.Equal(2, uk.Details.Count);
+        Assert.Contains(uk.Details, detail =>
+            detail.Key == "capacityLiters" &&
+            detail.Label == "Об’єм" &&
+            detail.Value == "620 л");
+        Assert.Contains(uk.Details, detail =>
+            detail.Key == "condition" &&
+            detail.Label == "Стан" &&
+            !string.IsNullOrWhiteSpace(detail.Value));
+        Assert.Contains(en.Details, detail =>
+            detail.Key == "capacityLiters" &&
+            detail.Value == "620 L");
+        Assert.Contains(ru.Details, detail =>
+            detail.Key == "capacityLiters" &&
+            detail.Value == "620 л");
+        Assert.DoesNotContain(uk.Details, detail => detail.Value.Contains("шт.", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void StructuredPresentationFormatsThousandsAndUsesAuditedIrrigationUnits()
+    {
+        var gameData = CreateGameData();
+        Assert.True(gameData.TryCreateProperty(
+            "agriculture_industrial_irrigation_module",
+            new Dictionary<string, int>
+            {
+                ["coverageSquareMetersPerDay"] = 1988,
+                ["conditionLevel"] = 4
+            },
+            out var property,
+            out var errorCode));
+        Assert.Equal("", errorCode);
+
+        var uk = gameData.BuildPropertyPresentation(property, "uk");
+        var en = gameData.BuildPropertyPresentation(property, "en");
+        var ru = gameData.BuildPropertyPresentation(property, "ru");
+
+        Assert.Contains(uk.Details, detail =>
+            detail.Key == "coverageSquareMetersPerDay" &&
+            detail.Label == "Площа поливу" &&
+            detail.Value == "1 988 м²/день");
+        Assert.Contains(en.Details, detail =>
+            detail.Key == "coverageSquareMetersPerDay" &&
+            detail.Value == "1,988 m²/day");
+        Assert.Contains(ru.Details, detail =>
+            detail.Key == "coverageSquareMetersPerDay" &&
+            detail.Value == "1 988 м²/день");
+        Assert.DoesNotContain(uk.Title, "1 988", StringComparison.Ordinal);
+        Assert.DoesNotContain(uk.Details, detail =>
+            detail.Value.Contains("од./день", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void LegacyDefinitionWithoutDisplayFieldsUsesExistingDisplayFallback()
+    {
+        var gameData = CreateGameData();
+        var definition = gameData.Properties.First();
+        var originalFields = definition.DisplayFields;
+        definition.DisplayFields = [];
+        var values = definition.RandomProperties.ToDictionary(
+            field => field.Key,
+            field => field.Min,
+            StringComparer.Ordinal);
+        Assert.True(gameData.TryCreateProperty(
+            definition.Id,
+            values,
+            out var property,
+            out _));
+
+        var presentation = gameData.BuildPropertyPresentation(property, "uk");
+
+        Assert.Equal(gameData.FormatProperty(property, "uk"), presentation.Title);
+        Assert.Empty(presentation.Details);
+        definition.DisplayFields = originalFields;
     }
 
     [Fact]

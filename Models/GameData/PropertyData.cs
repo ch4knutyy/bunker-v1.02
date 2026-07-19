@@ -29,6 +29,9 @@ public sealed class PropertyDefinition
     [JsonPropertyName("displayTemplate")]
     public Dictionary<string, string> DisplayTemplate { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    [JsonPropertyName("displayFields")]
+    public List<PropertyDisplayFieldDefinition> DisplayFields { get; set; } = new();
+
     [JsonPropertyName("resourceTags")]
     public List<string> ResourceTags { get; set; } = new();
 
@@ -37,6 +40,21 @@ public sealed class PropertyDefinition
 
     [JsonPropertyName("threatUsage")]
     public Dictionary<string, JsonElement>? ThreatUsage { get; set; }
+}
+
+public sealed class PropertyDisplayFieldDefinition
+{
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = "";
+
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
+
+    [JsonPropertyName("label")]
+    public Dictionary<string, string> Label { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    [JsonPropertyName("valueTemplate")]
+    public Dictionary<string, string> ValueTemplate { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 public sealed class PropertyLocalization

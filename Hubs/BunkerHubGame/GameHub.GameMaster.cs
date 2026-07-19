@@ -93,6 +93,8 @@ namespace Bunker.Hubs
             var clientProperty = JsonSerializer.Deserialize<GeneratedProperty>(
                 JsonSerializer.Serialize(property))!;
             clientProperty.LocalizedDisplay = _gameData.FormatPropertyAllLanguages(clientProperty);
+            clientProperty.LocalizedPresentation =
+                _gameData.BuildPropertyPresentationsAllLanguages(clientProperty);
             return clientProperty;
         }
 
