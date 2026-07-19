@@ -368,7 +368,7 @@ namespace Bunker.Hubs
                 {
                     label = "Майно",
                     value = _gameData.FormatProperty(player.Property, "uk"),
-                    source = player.Property
+                    source = BuildPropertyClientState(player.Property)
                 },
 				"Fact" => new
 				{

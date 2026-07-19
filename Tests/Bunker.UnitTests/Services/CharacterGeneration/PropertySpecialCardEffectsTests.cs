@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.Json;
 using Bunker.Hubs;
 using Bunker.Models;
 using Bunker.Services;
@@ -15,6 +16,155 @@ namespace Bunker.UnitTests.Services.CharacterGeneration;
 
 public sealed class PropertySpecialCardEffectsTests
 {
+    [Fact]
+    public async Task PropertyEditorHostUpdateIsCanonicalAuditedIdempotentAndUndoable()
+    {
+        var context = CreateContext();
+        context.Target.Property = Property("target-property", 3);
+        context.Target.Revealed.Property = true;
+        var values = new Dictionary<string, int>
+        {
+            ["capacityLiters"] = 620,
+            ["conditionLevel"] = 5
+        };
+
+        await context.Hub.UpdatePlayerProperty(
+            context.Target.StablePlayerId,
+            "medical_industrial_medical_refrigerator",
+            values,
+            "property-edit-command");
+
+        Assert.Equal(
+            "medical_industrial_medical_refrigerator",
+            context.Target.Property!.DefinitionId);
+        Assert.Equal(620, context.Target.Property.GeneratedValues["capacityLiters"]);
+        Assert.True(context.Target.Revealed.Property);
+        var definition = Assert.Single(
+            context.GameData.Properties,
+            item => item.Id == context.Target.Property.DefinitionId);
+        Assert.Equal(definition.ResourceTags, context.Target.Property.ResourceTags);
+        Assert.Equal(definition.ProtectionTags, context.Target.Property.ProtectionTags);
+        var audit = Assert.Single(
+            context.Room.GmAuditLog,
+            entry => entry.ActionType == "player_property_update" &&
+                     entry.Result == GmAuditResult.Success);
+        Assert.False(string.IsNullOrWhiteSpace(audit.RelatedSnapshotId));
+        Assert.Contains("property-edit-command", context.Room.ProcessedGmPlayerCommandIds);
+        Assert.Contains(context.Clients.Calls, call =>
+            call.Method == "PlayerStateResynced");
+        Assert.Contains(context.Clients.Calls, call =>
+            call.Method == "CharacteristicUpdated");
+        Assert.Contains(context.Recovery.Snapshots, entry =>
+            entry.RoomCode == context.Room.Id &&
+            entry.Reason == "public_players");
+
+        values["capacityLiters"] = 700;
+        await context.Hub.UpdatePlayerProperty(
+            context.Target.StablePlayerId,
+            "medical_industrial_medical_refrigerator",
+            values,
+            "property-edit-command");
+        Assert.Equal(620, context.Target.Property.GeneratedValues["capacityLiters"]);
+        Assert.Single(
+            context.Room.GmAuditLog,
+            entry => entry.ActionType == "player_property_update" &&
+                     entry.Result == GmAuditResult.Success);
+
+        var serialized = JsonSerializer.Serialize(context.Target.Property);
+        var recovered = JsonSerializer.Deserialize<GeneratedProperty>(serialized);
+        Assert.Equal(
+            context.Target.Property.GeneratedValues,
+            Assert.IsType<GeneratedProperty>(recovered).GeneratedValues);
+
+        var restore = context.Snapshots.RestoreSnapshot(
+            context.Room,
+            audit.RelatedSnapshotId!,
+            context.Owner.StablePlayerId,
+            "restore-property-edit");
+        Assert.True(restore.Success);
+        var restoredTarget = context.Room.Players.Values.First(player =>
+            player.StablePlayerId == context.Target.StablePlayerId);
+        Assert.Equal("target-property", restoredTarget.Property!.DefinitionId);
+        Assert.Equal(3, restoredTarget.Property.GeneratedValues["conditionLevel"]);
+        Assert.True(restoredTarget.Revealed.Property);
+    }
+
+    [Fact]
+    public async Task PropertyEditorRejectsNonHostOmniscientUnknownAndInvalidValues()
+    {
+        var context = CreateContext();
+        context.Hub.Context = new TestHubCallerContext(context.Target.ConnectionId);
+
+        var nonHost = await Assert.ThrowsAsync<HubException>(() =>
+            context.Hub.UpdatePlayerProperty(
+                context.Target.StablePlayerId,
+                "medical_industrial_medical_refrigerator",
+                new Dictionary<string, int>
+                {
+                    ["capacityLiters"] = 620,
+                    ["conditionLevel"] = 5
+                },
+                "non-host-property-edit"));
+        Assert.Contains("gm_panel_access_denied", nonHost.Message);
+
+        context.Hub.Context = new TestHubCallerContext(context.Owner.ConnectionId);
+        context.Owner.GmRole = GmMode.OmniscientGm;
+        var omniscient = await Assert.ThrowsAsync<HubException>(() =>
+            context.Hub.UpdatePlayerProperty(
+                context.Target.StablePlayerId,
+                "medical_industrial_medical_refrigerator",
+                new Dictionary<string, int>
+                {
+                    ["capacityLiters"] = 620,
+                    ["conditionLevel"] = 5
+                },
+                "omniscient-property-edit"));
+        Assert.Contains("gm_panel_access_denied", omniscient.Message);
+        context.Owner.GmRole = GmMode.PlayerHost;
+
+        var unknown = await Assert.ThrowsAsync<HubException>(() =>
+            context.Hub.UpdatePlayerProperty(
+                context.Target.StablePlayerId,
+                "missing-property-definition",
+                new Dictionary<string, int>(),
+                "unknown-property-edit"));
+        Assert.Contains("property_definition_not_found", unknown.Message);
+
+        var invalidSets = new[]
+        {
+            new Dictionary<string, int>
+            {
+                ["capacityLiters"] = 620
+            },
+            new Dictionary<string, int>
+            {
+                ["capacityLiters"] = 620,
+                ["conditionLevel"] = 5,
+                ["clientControlledTag"] = 1
+            },
+            new Dictionary<string, int>
+            {
+                ["capacityLiters"] = 2001,
+                ["conditionLevel"] = 5
+            },
+            new Dictionary<string, int>
+            {
+                ["capacityLiters"] = 620,
+                ["conditionLevel"] = 1
+            }
+        };
+        for (var index = 0; index < invalidSets.Length; index++)
+        {
+            var invalid = await Assert.ThrowsAsync<HubException>(() =>
+                context.Hub.UpdatePlayerProperty(
+                    context.Target.StablePlayerId,
+                    "medical_industrial_medical_refrigerator",
+                    invalidSets[index],
+                    $"invalid-property-edit-{index}"));
+            Assert.Contains("property_values_invalid", invalid.Message);
+        }
+    }
+
     [Fact]
     public async Task PropertySwapMovesWholeRuntimeValueButKeepsRevealFlagsOnPlayerSlots()
     {
@@ -226,6 +376,12 @@ public sealed class PropertySpecialCardEffectsTests
         var roomService = new RoomService(NullLogger<RoomService>.Instance);
         var audit = new GmAuditService(TimeProvider.System);
         var timer = new GameTimerService(TimeProvider.System);
+        var integrity = new RoomIntegrityService(roomService, gameData, TimeProvider.System);
+        var snapshots = new RoomSnapshotService(
+            integrity,
+            audit,
+            TimeProvider.System);
+        var recovery = new RecordingRoomRecoveryCoordinator();
         var clients = new RecordingHubCallerClients();
         var hub = new GameHub(
             new CharacterGeneratorService(gameData, NullLogger<CharacterGeneratorService>.Instance),
@@ -244,7 +400,10 @@ public sealed class PropertySpecialCardEffectsTests
                 TimeProvider.System,
                 null!,
                 NullLogger<PlayerDisconnectCleanupCoordinator>.Instance),
+            roomIntegrity: integrity,
             gmAudit: audit,
+            roomSnapshots: snapshots,
+            roomRecovery: recovery,
             gmPanelStateBuilder: new GmPanelStateBuilder(TimeProvider.System))
         {
             Clients = clients,
@@ -271,7 +430,7 @@ public sealed class PropertySpecialCardEffectsTests
         room.State = RoomState.Playing;
         room.CurrentPhase = GamePhase.RoundReveal;
         room.CurrentRound = 1;
-        return new(hub, room, owner, target, clients, gameData);
+        return new(hub, room, owner, target, clients, gameData, snapshots, recovery);
     }
 
     private static string FindRepositoryRoot()
@@ -291,7 +450,19 @@ public sealed class PropertySpecialCardEffectsTests
         Player Owner,
         Player Target,
         RecordingHubCallerClients Clients,
-        GameDataService GameData);
+        GameDataService GameData,
+        RoomSnapshotService Snapshots,
+        RecordingRoomRecoveryCoordinator Recovery);
+
+    private sealed class RecordingRoomRecoveryCoordinator : IRoomRecoveryCoordinator
+    {
+        public List<(string RoomCode, string Reason)> Snapshots { get; } = [];
+        public void QueueSnapshot(string roomCode, string reason) =>
+            Snapshots.Add((roomCode, reason));
+        public void QueueDelete(string roomCode)
+        {
+        }
+    }
 
     private sealed record HubCall(string Method, IReadOnlyList<object?> Arguments);
 

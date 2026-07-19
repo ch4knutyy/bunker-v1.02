@@ -15,7 +15,10 @@ test('property is an initially hidden canonical card rendered after inventory wi
   assert.match(
     game,
     /type:'Inventory'[\s\S]*type:'Property'[\s\S]*type:'Fact'/);
-  assert.match(game, /type:'Property'[\s\S]*value:getPropertyDisplay\(property\)/);
+  assert.match(game, /const propertyPresentation = getPropertyPresentation\(property\)/);
+  assert.match(
+    game,
+    /type:'Property'[\s\S]*value:propertyPresentation\.title[\s\S]*details:propertyPresentation\.details/);
   const renderer = game.slice(
     game.indexOf('function renderMyPlayerCards'),
     game.indexOf('function renderEliminatedRevealAllPanel'));

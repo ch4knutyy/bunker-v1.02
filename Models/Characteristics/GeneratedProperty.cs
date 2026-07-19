@@ -7,6 +7,8 @@ public sealed class GeneratedProperty
     public string DefinitionId { get; set; } = "";
     public Dictionary<string, int> GeneratedValues { get; set; } = new(StringComparer.Ordinal);
     public Dictionary<string, string> LocalizedDisplay { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, PropertyPresentationDto> LocalizedPresentation { get; set; } =
+        new(StringComparer.OrdinalIgnoreCase);
     public string Category { get; set; } = "";
     public string SizeClass { get; set; } = "";
     public List<string> ResourceTags { get; set; } = new();
@@ -21,3 +23,12 @@ public sealed class GeneratedProperty
             : LocalizedDisplay.TryGetValue("uk", out var fallback) ? fallback : "";
     }
 }
+
+public sealed record PropertyPresentationDto(
+    string Title,
+    IReadOnlyList<PropertyPresentationDetailDto> Details);
+
+public sealed record PropertyPresentationDetailDto(
+    string Key,
+    string Label,
+    string Value);

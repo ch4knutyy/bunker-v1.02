@@ -374,6 +374,11 @@
 					<span class="gm-char-value gm-char-hidden" id="gmProperty">Приховано</span>
 					<div class="gm-char-actions">
 						<button onclick="peekCharacteristic('Property')" title="Підглянути" class="btn-peek">&#128065;</button>
+						<button id="gmEditPropertyButton"
+								class="gm-property-edit-command"
+								onclick="openGmPropertyEditor()"
+								title="Редагувати майно"
+								hidden>✏️</button>
 						<button onclick="regenerateCharacteristic('Property')" title="Регенерувати">🔄</button>
 						<button onclick="forceReveal('Property')" title="Розкрити для всіх">📢</button>
 					</div>
@@ -564,4 +569,54 @@
 			</details>
 		</div>
 	</div>
+
+	<dialog id="gmPropertyEditorDialog"
+			class="gm-property-editor"
+			aria-labelledby="gmPropertyEditorTitle">
+		<form method="dialog" class="gm-property-editor-shell">
+			<header class="gm-property-editor-header">
+				<div>
+					<h4 id="gmPropertyEditorTitle">Редагувати майно</h4>
+					<p id="gmPropertyEditorPlayer">—</p>
+				</div>
+				<button type="button"
+						class="btn-close"
+						aria-label="Скасувати"
+						onclick="closeGmPropertyEditor()">×</button>
+			</header>
+			<label class="gm-field" for="gmPropertyDefinitionSearch">
+				<span>Пошук майна</span>
+				<input id="gmPropertyDefinitionSearch"
+					   class="gm-select"
+					   type="search"
+					   maxlength="100"
+					   oninput="filterGmPropertyDefinitions()" />
+			</label>
+			<label class="gm-field" for="gmPropertyDefinitionSelect">
+				<span>Варіант майна</span>
+				<select id="gmPropertyDefinitionSelect"
+						class="gm-select"
+						onchange="regenerateGmPropertyPreview()"></select>
+			</label>
+			<p id="gmPropertyConditionProfile" class="gm-round-hint"></p>
+			<div id="gmPropertyEditorFields" class="gm-property-editor-fields"></div>
+			<div id="gmPropertyEditorPreview" class="gm-property-editor-preview"></div>
+			<p id="gmPropertyEditorFeedback"
+			   class="gm-round-hint"
+			   aria-live="polite"></p>
+			<footer class="gm-property-editor-actions">
+				<button id="gmPropertySaveButton"
+						type="button"
+						class="btn-gm-action gm-action-primary"
+						onclick="saveGmPropertyEdit()">Зберегти</button>
+				<button id="gmPropertyRegenerateButton"
+						type="button"
+						class="btn-gm-action"
+						onclick="regenerateGmPropertyPreview()">Перегенерувати значення</button>
+				<button type="button"
+						class="btn-gm-action"
+						onclick="closeGmPropertyEditor()">Скасувати</button>
+			</footer>
+		</form>
+	</dialog>
 </aside>

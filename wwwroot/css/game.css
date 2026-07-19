@@ -1427,6 +1427,51 @@
 .vault-characteristic-card.variant-dark .vault-card-value { letter-spacing: min(var(--card-value-tracking), -0.012em); }
 .vault-characteristic-card[data-characteristic-type="Profession"] .vault-card-category { font-weight: 850; }
 .vault-characteristic-card[data-characteristic-type="Fact"] .vault-card-value { font-size: clamp(1.28rem, 2.05vw, 1.85rem); }
+.vault-characteristic-card[data-characteristic-type="Property"] .vault-card-value {
+    min-height: 62px;
+    padding-bottom: 0.45rem;
+    font-size: clamp(1.15rem, 1.9vw, 1.7rem);
+    line-height: 1.22;
+}
+.vault-characteristic-card[data-characteristic-type="Property"] .vault-card-details {
+    width: 100%;
+}
+.vault-characteristic-card[data-characteristic-type="Property"] .vault-card-detail .char-value {
+    font-family: inherit;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.public-characteristic-card.type-property .public-characteristic-value,
+.comparison-characteristic.type-property .comparison-public-value {
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+
+.public-property-details {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid rgba(203, 166, 79, 0.2);
+}
+
+.public-property-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 0.65rem;
+    font-size: 0.78rem;
+}
+
+.public-property-detail span {
+    color: var(--color-text-muted);
+}
+
+.public-property-detail strong {
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
 .vault-card-separator { display: flex; align-items: center; align-self: center; width: 76%; gap: 0.65rem; margin: 0.15rem 0 1.05rem; }
 .vault-card-separator span { height: 2px; flex: 1; background: linear-gradient(90deg, transparent, var(--card-divider) 56%, var(--card-accent-strong)); box-shadow: 0 0 8px var(--card-glow); }
 .vault-card-separator span:last-child { transform: scaleX(-1); }
@@ -5982,6 +6027,78 @@ body.gm-panel-v2-open .modal {
     opacity: 0.65;
 }
 
+.gm-property-editor {
+    width: min(620px, calc(100vw - 2rem));
+    max-height: min(820px, calc(100dvh - 2rem));
+    padding: 0;
+    color: #e8e3d7;
+    border: 1px solid rgba(208, 172, 82, 0.65);
+    border-radius: 12px;
+    background: #11110f;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.72);
+}
+
+.gm-property-editor::backdrop {
+    background: rgba(0, 0, 0, 0.68);
+}
+
+.gm-property-editor-shell {
+    display: grid;
+    gap: 0.8rem;
+    max-height: inherit;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.gm-property-editor-header,
+.gm-property-editor-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+}
+
+.gm-property-editor-header h4,
+.gm-property-editor-header p {
+    margin: 0;
+}
+
+.gm-property-editor-header p {
+    margin-top: 0.2rem;
+    color: #aaa499;
+}
+
+.gm-property-editor-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.gm-property-editor-preview {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(208, 172, 82, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.gm-property-editor-preview strong {
+    overflow-wrap: anywhere;
+}
+
+.gm-property-editor-preview-row {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 0.7rem;
+    font-size: 0.85rem;
+}
+
+.gm-property-editor-preview-row span:last-child {
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
 @media (min-width: 1200px) {
     body.gm-panel-v2-open .game-container {
         padding-right: 440px;
@@ -6018,6 +6135,24 @@ body.gm-panel-v2-open .modal {
     .gm-panel-v2-drawer .gm-round-actions > *,
     .gm-panel-v2-drawer .gm-quick-actions > * {
         flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .gm-property-editor {
+        width: calc(100vw - 1rem);
+        max-height: calc(100dvh - 1rem);
+    }
+
+    .gm-property-editor-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .gm-property-editor-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .gm-property-editor-actions > * {
         width: 100%;
     }
 }
