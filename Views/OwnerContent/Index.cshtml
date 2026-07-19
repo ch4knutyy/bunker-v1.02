@@ -6,13 +6,13 @@
 
 <section id="ownerContentEditor"
          class="owner-content-shell"
-         data-files-url="@Url.Action("Files", "OwnerContent")"
-         data-document-url="@Url.Action("Document", "OwnerContent")"
-         data-validate-url="@Url.Action("Validate", "OwnerContent")"
-         data-preview-url="@Url.Action("Preview", "OwnerContent")"
-         data-save-url="@Url.Action("Save", "OwnerContent")"
-         data-backups-url="@Url.Action("Backups", "OwnerContent")"
-         data-restore-url="@Url.Action("Restore", "OwnerContent")">
+         data-files-url="@Url.Content("~/owner/content/files")"
+         data-document-url="@Url.Content("~/owner/content/document")"
+         data-validate-url="@Url.Content("~/owner/content/validate")"
+         data-preview-url="@Url.Content("~/owner/content/preview")"
+         data-save-url="@Url.Content("~/owner/content/save")"
+         data-backups-url="@Url.Content("~/owner/content/backups")"
+         data-restore-url="@Url.Content("~/owner/content/restore")">
     @Html.AntiForgeryToken()
 
     <header class="owner-content-header">

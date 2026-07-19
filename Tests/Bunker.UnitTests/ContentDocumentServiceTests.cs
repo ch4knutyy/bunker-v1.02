@@ -20,6 +20,11 @@ public sealed class ContentDocumentServiceTests
 		await File.WriteAllTextAsync(
 			Path.Combine(fixture.Root, "outside.json"),
 			"""{"outside":true}""");
+		var nestedDirectory = Directory.CreateDirectory(
+			Path.Combine(fixture.ContentRoot, "nested"));
+		await File.WriteAllTextAsync(
+			Path.Combine(nestedDirectory.FullName, "nested.json"),
+			"""{"nested":true}""");
 		var linkedOutside = false;
 		try
 		{
@@ -36,8 +41,12 @@ public sealed class ContentDocumentServiceTests
 		var registry = fixture.CreateRegistry();
 		var documents = registry.List();
 
-		Assert.Single(documents);
-		Assert.Equal("sample.json", documents[0].DisplayName);
+		Assert.Equal(2, documents.Count);
+		Assert.Contains(documents, item => item.DisplayName == "sample.json");
+		Assert.Contains(
+			documents,
+			item => item.DisplayName == "nested.json" &&
+				item.RelativePath.Contains("nested/nested.json"));
 		Assert.DoesNotContain(documents, item => item.RelativePath.Contains("outside"));
 		if (linkedOutside)
 		{
