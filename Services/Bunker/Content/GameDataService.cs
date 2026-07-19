@@ -56,7 +56,8 @@ namespace Bunker.Services
             _phobias = LoadJsonArray<PhobiaData>(Path.Combine(dataPath, "phobias.json"), "phobias");
             _facts = LoadJsonArray<FactData>(Path.Combine(dataPath, "facts.json"), "facts");
             _apocalypses = LoadJsonArray<Apocalypse>(Path.Combine(dataPath, "apocalypses.json"), "apocalypses");
-            _bunkers = LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers");
+            _bunkers = ValidateBunkers(
+                LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers"));
             _threats = LoadJsonArray<ThreatData>(Path.Combine(dataPath, "threats.json"), "threats");
             _specialCards = LoadJsonArray<SpecialCardData>(Path.Combine(dataPath, "special_cards.json"), "special_cards");
             var propertyData = LoadPropertyData(Path.Combine(dataPath, "property.json"));
@@ -73,6 +74,51 @@ namespace Bunker.Services
 
             ValidateHealthConditions(_physicalConditions, "physical");
             ValidateHealthConditions(_mentalConditions, "mental");
+        }
+
+        private List<BunkerInfo> ValidateBunkers(List<BunkerInfo> bunkers)
+        {
+            var errors = new List<string>();
+            if (bunkers.Count != 205)
+                errors.Add($"expected 205 bunker records, found {bunkers.Count}");
+            var duplicateIds = bunkers
+                .Where(bunker => !string.IsNullOrWhiteSpace(bunker.Id))
+                .GroupBy(bunker => bunker.Id, StringComparer.OrdinalIgnoreCase)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .ToList();
+
+            if (bunkers.Any(bunker => string.IsNullOrWhiteSpace(bunker.Id)))
+                errors.Add("one or more bunker IDs are empty");
+            if (duplicateIds.Count > 0)
+                errors.Add($"duplicate bunker IDs: {string.Join(", ", duplicateIds)}");
+            if (bunkers.Any(bunker => bunker.SuppliesMonths is < 0 or > 120))
+                errors.Add("suppliesMonths must be in range 0..120");
+            if (bunkers.Any(bunker => !bunker.HasExplicitWaterMonths))
+                errors.Add("waterMonths is required for every production bunker");
+            if (bunkers.Any(bunker => bunker.WaterMonths is < 0 or > 120))
+                errors.Add("waterMonths must be in range 0..120");
+
+            var requiredWaterBunkerIds = new[]
+            {
+                "glacial_meltwater_bunker",
+                "artesian_aquifer_bunker",
+                "hydroelectric_dam_tunnels",
+                "rainwater_harvesting_bunker",
+                "desalination_plant_bunker"
+            };
+            var ids = bunkers.Select(bunker => bunker.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var missingRequiredIds = requiredWaterBunkerIds.Where(id => !ids.Contains(id)).ToList();
+            if (missingRequiredIds.Count > 0)
+                errors.Add($"required water-focused bunker IDs are missing: {string.Join(", ", missingRequiredIds)}");
+
+            if (errors.Count > 0)
+            {
+                throw new InvalidDataException(
+                    $"bunkers.json validation failed: {string.Join("; ", errors)}");
+            }
+
+            return bunkers;
         }
 
         private Dictionary<string, PropertyConditionProfile> ValidatePropertyConditionProfiles(

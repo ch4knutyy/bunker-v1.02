@@ -1,9 +1,9 @@
 {
   "_i18n_meta": {
-    "status": "bunkers_full_i18n_reworked_from_ukrainian",
+    "status": "bunkers_food_and_water_v1",
     "source_file": "bunkers.json",
-    "records_total": 200,
-    "records_translated": 200,
+    "records_total": 205,
+    "records_translated": 205,
     "languages": [
       "uk",
       "en",
@@ -19,7 +19,8 @@
       "condition"
     ],
     "note_uk": "Переклад перероблений: українські поля взяті за основу. Описи en/ru перекладені напряму з українського description, без шаблонів shelter scenario.",
-    "fallback_rule": "Якщо selected language value порожній/null, використовувати uk."
+    "fallback_rule": "Якщо selected language value порожній/null, використовувати uk.",
+    "water_field_note_uk": "До кожного бункера додано waterMonths — окремий запас питної води в місяцях. suppliesMonths збережено для сумісності та надалі означає запас їжі."
   },
   "bunkers": [
     {
@@ -299,7 +300,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 15
     },
     {
       "id": "luxury_bunker",
@@ -568,7 +570,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 43
     },
     {
       "id": "metro_bunker",
@@ -802,7 +805,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 31
     },
     {
       "id": "farm_bunker",
@@ -1071,7 +1075,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 41
     },
     {
       "id": "hospital_bunker",
@@ -1344,7 +1349,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 0
     },
     {
       "id": "school_bunker",
@@ -1605,7 +1611,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 1
     },
     {
       "id": "research_bunker",
@@ -1886,7 +1893,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "church_bunker",
@@ -2159,7 +2167,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "submarine_base",
@@ -2439,7 +2448,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "mining_bunker",
@@ -2710,7 +2720,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "mall_bunker",
@@ -2988,7 +2999,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "bank_vault_bunker",
@@ -3250,7 +3262,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "office_bunker",
@@ -3527,7 +3540,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 1
     },
     {
       "id": "parking_bunker",
@@ -3789,7 +3803,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "hotel_bunker",
@@ -4067,7 +4082,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "library_bunker",
@@ -4323,7 +4339,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "theater_bunker",
@@ -4598,7 +4615,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 8
     },
     {
       "id": "subway_station_b",
@@ -4869,7 +4887,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "casino_bunker",
@@ -5137,7 +5156,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "stadium_bunker",
@@ -5410,7 +5430,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "airport_bunker",
@@ -5683,7 +5704,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "museum_bunker",
@@ -5945,7 +5967,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 4
     },
     {
       "id": "prison_bunker",
@@ -6226,7 +6249,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "hospital_wing",
@@ -6504,7 +6528,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "university_lab",
@@ -6774,7 +6799,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 1
     },
     {
       "id": "factory_bunker",
@@ -7046,7 +7072,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 4
     },
     {
       "id": "power_plant_bunker",
@@ -7320,7 +7347,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "oil_depot_bunker",
@@ -7595,7 +7623,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "data_center_bunker",
@@ -7865,7 +7894,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "warehouse_bunker",
@@ -8137,7 +8167,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "chemical_plant_bunker",
@@ -8413,7 +8444,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 2
     },
     {
       "id": "brewery_bunker",
@@ -8685,7 +8717,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "steel_mill_bunker",
@@ -8958,7 +8991,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 8
     },
     {
       "id": "cold_storage_bunker",
@@ -9231,7 +9265,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 28
     },
     {
       "id": "textile_factory_bunker",
@@ -9505,7 +9540,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "shipyard_bunker",
@@ -9771,7 +9807,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "biolab_bunker",
@@ -10058,7 +10095,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 25
     },
     {
       "id": "ai_bunker",
@@ -10342,7 +10380,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 41
     },
     {
       "id": "space_research_bunker",
@@ -10613,7 +10652,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 32
     },
     {
       "id": "nuclear_research_bunker",
@@ -10898,7 +10938,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 50
     },
     {
       "id": "genetics_lab_bunker",
@@ -11169,7 +11210,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 26
     },
     {
       "id": "quantum_lab_bunker",
@@ -11444,7 +11486,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 29
     },
     {
       "id": "weather_station_bunker",
@@ -11715,7 +11758,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "oceanographic_bunker",
@@ -11992,7 +12036,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 32
     },
     {
       "id": "missile_silo_bunker",
@@ -12270,7 +12315,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 30
     },
     {
       "id": "nato_base_bunker",
@@ -12544,7 +12590,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 27
     },
     {
       "id": "special_forces_bunker",
@@ -12818,7 +12865,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 20
     },
     {
       "id": "coast_guard_bunker",
@@ -13097,7 +13145,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 17
     },
     {
       "id": "anti_aircraft_bunker",
@@ -13367,7 +13416,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "border_fortress_bunker",
@@ -13647,7 +13697,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "underground_command_center",
@@ -13923,7 +13974,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 48
     },
     {
       "id": "tank_depot_bunker",
@@ -14194,7 +14246,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "cave_bunker",
@@ -14475,7 +14528,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "lava_tube_bunker",
@@ -14747,7 +14801,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 28
     },
     {
       "id": "glacier_bunker",
@@ -15018,7 +15073,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 36
     },
     {
       "id": "island_bunker",
@@ -15287,7 +15343,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 35
     },
     {
       "id": "jungle_shelter",
@@ -15566,7 +15623,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 27
     },
     {
       "id": "desert_bunker",
@@ -15845,7 +15903,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 17
     },
     {
       "id": "underwater_cave",
@@ -16119,7 +16178,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 26
     },
     {
       "id": "salt_mine_bunker",
@@ -16390,7 +16450,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "thermal_spring_bunker",
@@ -16665,7 +16726,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 28
     },
     {
       "id": "underground_city",
@@ -16938,7 +17000,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 35
     },
     {
       "id": "cryogenic_bunker",
@@ -17214,7 +17277,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 72
     },
     {
       "id": "experimental_bunker",
@@ -17491,7 +17555,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "ark_bunker",
@@ -17769,7 +17834,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 45
     },
     {
       "id": "time_capsule_bunker",
@@ -18044,7 +18110,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 59
     },
     {
       "id": "biodome_bunker",
@@ -18319,7 +18386,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 44
     },
     {
       "id": "chernobyl_bunker",
@@ -18600,7 +18668,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 21
     },
     {
       "id": "plague_hospital_bunker",
@@ -18889,7 +18958,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "flooded_bunker",
@@ -19166,7 +19236,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 8
     },
     {
       "id": "collapsed_bunker",
@@ -19447,7 +19518,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "toxic_waste_bunker",
@@ -19729,7 +19801,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 18
     },
     {
       "id": "abandoned_bunker",
@@ -20008,7 +20081,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "quarantine_zone_bunker",
@@ -20286,7 +20360,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 15
     },
     {
       "id": "volcano_bunker",
@@ -20569,7 +20644,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "tsunami_zone_bunker",
@@ -20844,7 +20920,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "monastery_bunker",
@@ -21119,7 +21196,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "masonic_lodge_bunker",
@@ -21393,7 +21471,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "catacombs_bunker",
@@ -21668,7 +21747,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "pyramid_bunker",
@@ -21939,7 +22019,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "ancient_fortress_bunker",
@@ -22221,7 +22302,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 31
     },
     {
       "id": "highway_tunnel_bunker",
@@ -22501,7 +22583,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 2
     },
     {
       "id": "railway_station_bunker",
@@ -22777,7 +22860,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 8
     },
     {
       "id": "canal_tunnel_bunker",
@@ -23055,7 +23139,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 18
     },
     {
       "id": "cable_car_base_bunker",
@@ -23332,7 +23417,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "lighthouse_bunker",
@@ -23613,7 +23699,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "pipeline_station_bunker",
@@ -23889,7 +23976,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "wine_cellar_bunker",
@@ -24163,7 +24251,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "grain_silo_bunker",
@@ -24443,7 +24532,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 21
     },
     {
       "id": "greenhouse_bunker",
@@ -24721,7 +24811,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "dairy_farm_bunker",
@@ -24993,7 +25084,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 29
     },
     {
       "id": "orchard_bunker",
@@ -25266,7 +25358,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 30
     },
     {
       "id": "fish_processing_bunker",
@@ -25543,7 +25636,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "government_shelter",
@@ -25827,7 +25921,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 29
     },
     {
       "id": "police_headquarters_bunker",
@@ -26110,7 +26205,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "fire_station_bunker",
@@ -26380,7 +26476,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "embassy_bunker",
@@ -26655,7 +26752,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 19
     },
     {
       "id": "intelligence_bunker",
@@ -26936,7 +27034,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "weather_control_bunker",
@@ -27219,7 +27318,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 18
     },
     {
       "id": "arctic_station_bunker",
@@ -27500,7 +27600,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 25
     },
     {
       "id": "antarctic_base_bunker",
@@ -27782,7 +27883,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 27
     },
     {
       "id": "permafrost_bunker",
@@ -28062,7 +28164,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 26
     },
     {
       "id": "submarine_bunker",
@@ -28339,7 +28442,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "oil_rig_bunker",
@@ -28617,7 +28721,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "underwater_habitat",
@@ -28893,7 +28998,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "harbor_fortress_bunker",
@@ -29172,7 +29278,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 27
     },
     {
       "id": "alpine_chalet_bunker",
@@ -29450,7 +29557,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "mountain_monastery_bunker",
@@ -29728,7 +29836,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 35
     },
     {
       "id": "ski_resort_bunker",
@@ -30008,7 +30117,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 4
     },
     {
       "id": "observatory_bunker",
@@ -30289,7 +30399,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 19
     },
     {
       "id": "fallout_shelter_50s",
@@ -30579,7 +30690,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "nuclear_power_shelter",
@@ -30860,7 +30972,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 26
     },
     {
       "id": "emp_hardened_bunker",
@@ -31145,7 +31258,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "radiation_lab_bunker",
@@ -31424,7 +31538,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "blockchain_vault_bunker",
@@ -31705,7 +31820,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "cybersecurity_bunker",
@@ -31989,7 +32105,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "satellite_control_bunker",
@@ -32274,7 +32391,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "ham_radio_bunker",
@@ -32555,7 +32673,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "prison_island_bunker",
@@ -32834,7 +32953,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "ghost_town_bunker",
@@ -33114,7 +33234,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 27
     },
     {
       "id": "carnival_bunker",
@@ -33390,7 +33511,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "theme_park_underground",
@@ -33671,7 +33793,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "zoo_underground_bunker",
@@ -33947,7 +34070,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "aquarium_bunker",
@@ -34225,7 +34349,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "emergency_fema_bunker",
@@ -34513,7 +34638,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "civil_defense_bunker",
@@ -34797,7 +34923,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 2
     },
     {
       "id": "disaster_relief_bunker",
@@ -35077,7 +35204,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 2
     },
     {
       "id": "shelter_in_place_bunker",
@@ -35364,7 +35492,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "prepper_compound",
@@ -35647,7 +35776,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 40
     },
     {
       "id": "startup_bunker",
@@ -35931,7 +36061,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "influencer_bunker",
@@ -36204,7 +36335,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "hackerspace_bunker",
@@ -36487,7 +36619,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "boxing_club_bunker",
@@ -36762,7 +36895,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "shooting_range_bunker",
@@ -37043,7 +37177,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "martial_arts_dojo_bunker",
@@ -37318,7 +37453,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 2
     },
     {
       "id": "pharmaceutical_bunker",
@@ -37604,7 +37740,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "blood_bank_bunker",
@@ -37886,7 +38023,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "dental_clinic_bunker",
@@ -38157,7 +38295,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "soviet_era_bunker",
@@ -38443,7 +38582,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "kgb_safe_house_bunker",
@@ -38721,7 +38861,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 15
     },
     {
       "id": "warsaw_pact_bunker",
@@ -39003,7 +39144,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "mangrove_bunker",
@@ -39277,7 +39419,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "coral_reef_station",
@@ -39553,7 +39696,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "rainforest_research_bunker",
@@ -39838,7 +39982,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 33
     },
     {
       "id": "billionaire_doomsday_bunker",
@@ -40109,7 +40254,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 53
     },
     {
       "id": "underground_nightclub",
@@ -40386,7 +40532,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "underground_monastery_zen",
@@ -40656,7 +40803,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 17
     },
     {
       "id": "survivalist_commune_bunker",
@@ -40938,7 +41086,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "doomsday_cult_bunker",
@@ -41211,7 +41360,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "anarchist_bunker",
@@ -41492,7 +41642,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "train_tunnel_bunker",
@@ -41775,7 +41926,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "diamond_mine_bunker",
@@ -42051,7 +42203,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 16
     },
     {
       "id": "copper_mine_bunker",
@@ -42336,7 +42489,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "gold_vault_bunker",
@@ -42619,7 +42773,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "brewery_underground",
@@ -42903,7 +43058,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "printing_house_bunker",
@@ -43174,7 +43330,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "auction_house_vault",
@@ -43457,7 +43614,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "car_dealership_bunker",
@@ -43733,7 +43891,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 5
     },
     {
       "id": "swimming_pool_bunker",
@@ -44012,7 +44171,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 10
     },
     {
       "id": "wine_museum_cellar",
@@ -44282,7 +44442,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "geology_survey_bunker",
@@ -44564,7 +44725,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "embassy_district_tunnel",
@@ -44847,7 +45009,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "seed_vault_bunker",
@@ -45132,7 +45295,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 47
     },
     {
       "id": "water_treatment_bunker",
@@ -45415,7 +45579,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 21
     },
     {
       "id": "sewage_system_bunker",
@@ -45704,7 +45869,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 18
     },
     {
       "id": "electric_substation_bunker",
@@ -45984,7 +46150,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "telecom_hub_bunker",
@@ -46273,7 +46440,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "natural_gas_storage",
@@ -46549,7 +46717,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "hydroelectric_bunker",
@@ -46826,7 +46995,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 12
     },
     {
       "id": "solar_farm_bunker",
@@ -47107,7 +47277,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "wind_farm_bunker",
@@ -47388,7 +47559,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "geothermal_plant_bunker",
@@ -47662,7 +47834,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 30
     },
     {
       "id": "old_prison_basement",
@@ -47940,7 +48113,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "shopping_center_parking",
@@ -48218,7 +48392,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 1
     },
     {
       "id": "science_park_lab",
@@ -48503,7 +48678,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 9
     },
     {
       "id": "archaeological_dig_bunker",
@@ -48781,7 +48957,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "grain_elevator_bunker",
@@ -49058,7 +49235,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 22
     },
     {
       "id": "container_terminal_bunker",
@@ -49332,7 +49510,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "aircraft_hangar_bunker",
@@ -49609,7 +49788,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "sports_complex_bunker",
@@ -49889,7 +50069,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "telecommunications_tower_bunker",
@@ -50175,7 +50356,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "luxury_yacht_marina_bunker",
@@ -50451,7 +50633,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 11
     },
     {
       "id": "botanical_garden_greenhouse_bunker",
@@ -50733,7 +50916,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 13
     },
     {
       "id": "national_archive_bunker",
@@ -51011,7 +51195,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 6
     },
     {
       "id": "mountain_rescue_base",
@@ -51291,7 +51476,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 7
     },
     {
       "id": "refugee_camp_underground",
@@ -51571,7 +51757,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 3
     },
     {
       "id": "monastery_wine_cellar",
@@ -51854,7 +52041,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 31
     },
     {
       "id": "high_rise_basement",
@@ -52135,7 +52323,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 2
     },
     {
       "id": "underground_lake_shelter",
@@ -52413,7 +52602,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "old_fort_underground",
@@ -52695,7 +52885,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 30
     },
     {
       "id": "radio_telescope_bunker",
@@ -52979,7 +53170,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 14
     },
     {
       "id": "sewage_treatment_plant",
@@ -53267,7 +53459,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 18
     },
     {
       "id": "mountain_water_reservoir",
@@ -53550,7 +53743,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 4
     },
     {
       "id": "natural_salt_cave",
@@ -53820,7 +54014,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "old_brewery_cellars",
@@ -54093,7 +54288,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 36
     },
     {
       "id": "underground_art_gallery",
@@ -54371,7 +54567,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 5
     },
     {
       "id": "geothermal_cave_shelter",
@@ -54637,7 +54834,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 24
     },
     {
       "id": "decommissioned_reactor_bunker",
@@ -54919,7 +55117,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 38
     },
     {
       "id": "concert_hall_basement",
@@ -55202,7 +55401,8 @@
             "defaultState": "available"
           }
         ]
-      }
+      },
+      "waterMonths": 5
     },
     {
       "id": "polar_research_station_bunker",
@@ -55484,12 +55684,1447 @@
             "defaultState": "available"
           }
         ]
+      },
+      "waterMonths": 28
+    },
+    {
+      "id": "glacial_meltwater_bunker",
+      "name": "Льодовиковий водозбір",
+      "description": "Технічне укриття під льодовиком, де воду отримують шляхом контрольованого танення та очищення льоду.",
+      "capacity": 9,
+      "location": "Гірський льодовик, 70 метрів під поверхнею",
+      "suppliesMonths": 5,
+      "waterMonths": 60,
+      "facilities": [
+        "Камера танення льоду",
+        "Ізольовані резервуари",
+        "Станція очищення",
+        "Житловий модуль",
+        "Генераторна"
+      ],
+      "resources": [
+        "Льодовиковий лід",
+        "Фільтрувальні картриджі",
+        "Аварійні пайки",
+        "Теплове обладнання",
+        "Медкомплект"
+      ],
+      "problems": [
+        "Екстремальний холод",
+        "Залежність від електроенергії",
+        "Рух льодовика",
+        "Дуже складний доступ"
+      ],
+      "condition": "fair",
+      "_i18n": {
+        "name": {
+          "uk": "Льодовиковий водозбір",
+          "en": "Glacial Meltwater Shelter",
+          "ru": "Ледниковое водосборное убежище"
+        },
+        "location": {
+          "uk": "Гірський льодовик, 70 метрів під поверхнею",
+          "en": "Mountain glacier, 70 meters below the surface",
+          "ru": "Горный ледник, 70 метров под поверхностью"
+        },
+        "description": {
+          "uk": "Технічне укриття під льодовиком, де воду отримують шляхом контрольованого танення та очищення льоду.",
+          "en": "A technical shelter beneath a glacier where water is produced by controlled melting and purification of ice.",
+          "ru": "Техническое убежище под ледником, где воду получают контролируемым таянием и очисткой льда."
+        },
+        "condition": {
+          "uk": "задовільний",
+          "en": "fair",
+          "ru": "удовлетворительный"
+        },
+        "facilities": [
+          {
+            "uk": "Камера танення льоду",
+            "en": "Ice Melting Chamber",
+            "ru": "Камера плавления льда"
+          },
+          {
+            "uk": "Ізольовані резервуари",
+            "en": "Insulated Reservoirs",
+            "ru": "Изолированные резервуары"
+          },
+          {
+            "uk": "Станція очищення",
+            "en": "Water Treatment Station",
+            "ru": "Станция очистки"
+          },
+          {
+            "uk": "Житловий модуль",
+            "en": "Living Module",
+            "ru": "Жилой модуль"
+          },
+          {
+            "uk": "Генераторна",
+            "en": "Generator Room",
+            "ru": "Генераторная"
+          }
+        ],
+        "resources": [
+          {
+            "uk": "Льодовиковий лід",
+            "en": "Glacial Ice",
+            "ru": "Ледниковый лёд"
+          },
+          {
+            "uk": "Фільтрувальні картриджі",
+            "en": "Filter Cartridges",
+            "ru": "Фильтрующие картриджи"
+          },
+          {
+            "uk": "Аварійні пайки",
+            "en": "Emergency Rations",
+            "ru": "Аварийные пайки"
+          },
+          {
+            "uk": "Теплове обладнання",
+            "en": "Heating Equipment",
+            "ru": "Тепловое оборудование"
+          },
+          {
+            "uk": "Медкомплект",
+            "en": "Medical Kit",
+            "ru": "Медкомплект"
+          }
+        ],
+        "problems": [
+          {
+            "uk": "Екстремальний холод",
+            "en": "Extreme Cold",
+            "ru": "Экстремальный холод"
+          },
+          {
+            "uk": "Залежність від електроенергії",
+            "en": "Dependence on Electricity",
+            "ru": "Зависимость от электроэнергии"
+          },
+          {
+            "uk": "Рух льодовика",
+            "en": "Glacier Movement",
+            "ru": "Движение ледника"
+          },
+          {
+            "uk": "Дуже складний доступ",
+            "en": "Very Difficult Access",
+            "ru": "Очень сложный доступ"
+          }
+        ]
+      },
+      "bunkerTags": [
+        "air_system",
+        "cold_environment",
+        "condition_fair",
+        "isolated_location",
+        "low_supplies",
+        "power_system",
+        "structural_risk",
+        "water_system"
+      ],
+      "threatAssets": {
+        "resources": [
+          {
+            "assetId": "glacial_meltwater_bunker_resource_01",
+            "name": {
+              "uk": "Льодовиковий лід",
+              "en": "Glacial Ice",
+              "ru": "Ледниковый лёд"
+            },
+            "resourceTags": [
+              "clean_water"
+            ],
+            "facilityTags": [
+              "water_system"
+            ],
+            "protectionTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_resource_02",
+            "name": {
+              "uk": "Фільтрувальні картриджі",
+              "en": "Filter Cartridges",
+              "ru": "Фильтрующие картриджи"
+            },
+            "resourceTags": [
+              "water_filters"
+            ],
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_resource_03",
+            "name": {
+              "uk": "Аварійні пайки",
+              "en": "Emergency Rations",
+              "ru": "Аварийные пайки"
+            },
+            "resourceTags": [
+              "food_supply"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_resource_04",
+            "name": {
+              "uk": "Теплове обладнання",
+              "en": "Heating Equipment",
+              "ru": "Тепловое оборудование"
+            },
+            "resourceTags": [
+              "heating_equipment"
+            ],
+            "facilityTags": [
+              "heating_system"
+            ],
+            "protectionTags": [
+              "cold_protection"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_resource_05",
+            "name": {
+              "uk": "Медкомплект",
+              "en": "Medical Kit",
+              "ru": "Медкомплект"
+            },
+            "resourceTags": [
+              "medical_supplies",
+              "medicine"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          }
+        ],
+        "facilities": [
+          {
+            "assetId": "glacial_meltwater_bunker_facility_01",
+            "name": {
+              "uk": "Камера танення льоду",
+              "en": "Ice Melting Chamber",
+              "ru": "Камера плавления льда"
+            },
+            "facilityTags": [
+              "water_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_facility_02",
+            "name": {
+              "uk": "Ізольовані резервуари",
+              "en": "Insulated Reservoirs",
+              "ru": "Изолированные резервуары"
+            },
+            "facilityTags": [
+              "water_storage"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_facility_03",
+            "name": {
+              "uk": "Станція очищення",
+              "en": "Water Treatment Station",
+              "ru": "Станция очистки"
+            },
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_facility_04",
+            "name": {
+              "uk": "Житловий модуль",
+              "en": "Living Module",
+              "ru": "Жилой модуль"
+            },
+            "facilityTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "glacial_meltwater_bunker_facility_05",
+            "name": {
+              "uk": "Генераторна",
+              "en": "Generator Room",
+              "ru": "Генераторная"
+            },
+            "facilityTags": [
+              "generator_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          }
+        ]
+      }
+    },
+    {
+      "id": "artesian_aquifer_bunker",
+      "name": "Станція артезіанського водозабору",
+      "description": "Підземний комплекс водоканалу над глибоким артезіанським горизонтом з великим резервуаром чистої води.",
+      "capacity": 12,
+      "location": "Степова місцевість, промислова зона водоканалу",
+      "suppliesMonths": 8,
+      "waterMonths": 72,
+      "facilities": [
+        "Артезіанські свердловини",
+        "Насосний зал",
+        "Станція знезараження",
+        "Головний резервуар",
+        "Контрольна кімната"
+      ],
+      "resources": [
+        "Артезіанська вода",
+        "Запасні насоси",
+        "Фільтри та реагенти",
+        "Дизельний генератор",
+        "Консерви"
+      ],
+      "problems": [
+        "Залежність від насосів",
+        "Мінеральне забруднення",
+        "Зношені труби",
+        "Помітні наземні споруди"
+      ],
+      "condition": "good",
+      "_i18n": {
+        "name": {
+          "uk": "Станція артезіанського водозабору",
+          "en": "Artesian Aquifer Station",
+          "ru": "Станция артезианского водозабора"
+        },
+        "location": {
+          "uk": "Степова місцевість, промислова зона водоканалу",
+          "en": "Steppe region, municipal waterworks zone",
+          "ru": "Степная местность, промышленная зона водоканала"
+        },
+        "description": {
+          "uk": "Підземний комплекс водоканалу над глибоким артезіанським горизонтом з великим резервуаром чистої води.",
+          "en": "An underground water utility complex above a deep artesian aquifer with a large clean-water reservoir.",
+          "ru": "Подземный комплекс водоканала над глубоким артезианским горизонтом с большим резервуаром чистой воды."
+        },
+        "condition": {
+          "uk": "добрий",
+          "en": "good",
+          "ru": "хороший"
+        },
+        "facilities": [
+          {
+            "uk": "Артезіанські свердловини",
+            "en": "Artesian Wells",
+            "ru": "Артезианские скважины"
+          },
+          {
+            "uk": "Насосний зал",
+            "en": "Pump Hall",
+            "ru": "Насосный зал"
+          },
+          {
+            "uk": "Станція знезараження",
+            "en": "Disinfection Station",
+            "ru": "Станция обеззараживания"
+          },
+          {
+            "uk": "Головний резервуар",
+            "en": "Main Reservoir",
+            "ru": "Главный резервуар"
+          },
+          {
+            "uk": "Контрольна кімната",
+            "en": "Control Room",
+            "ru": "Контрольная комната"
+          }
+        ],
+        "resources": [
+          {
+            "uk": "Артезіанська вода",
+            "en": "Artesian Water",
+            "ru": "Артезианская вода"
+          },
+          {
+            "uk": "Запасні насоси",
+            "en": "Spare Pumps",
+            "ru": "Запасные насосы"
+          },
+          {
+            "uk": "Фільтри та реагенти",
+            "en": "Filters and Reagents",
+            "ru": "Фильтры и реагенты"
+          },
+          {
+            "uk": "Дизельний генератор",
+            "en": "Diesel Generator",
+            "ru": "Дизельный генератор"
+          },
+          {
+            "uk": "Консерви",
+            "en": "Canned Food",
+            "ru": "Консервы"
+          }
+        ],
+        "problems": [
+          {
+            "uk": "Залежність від насосів",
+            "en": "Dependence on Pumps",
+            "ru": "Зависимость от насосов"
+          },
+          {
+            "uk": "Мінеральне забруднення",
+            "en": "Mineral Contamination",
+            "ru": "Минеральное загрязнение"
+          },
+          {
+            "uk": "Зношені труби",
+            "en": "Worn Pipes",
+            "ru": "Изношенные трубы"
+          },
+          {
+            "uk": "Помітні наземні споруди",
+            "en": "Visible Surface Structures",
+            "ru": "Заметные наземные сооружения"
+          }
+        ]
+      },
+      "bunkerTags": [
+        "condition_good",
+        "high_tech",
+        "long_supplies",
+        "power_system",
+        "rural_location",
+        "water_system"
+      ],
+      "threatAssets": {
+        "resources": [
+          {
+            "assetId": "artesian_aquifer_bunker_resource_01",
+            "name": {
+              "uk": "Артезіанська вода",
+              "en": "Artesian Water",
+              "ru": "Артезианская вода"
+            },
+            "resourceTags": [
+              "clean_water"
+            ],
+            "facilityTags": [
+              "water_system"
+            ],
+            "protectionTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_resource_02",
+            "name": {
+              "uk": "Запасні насоси",
+              "en": "Spare Pumps",
+              "ru": "Запасные насосы"
+            },
+            "resourceTags": [
+              "mechanical_parts",
+              "spare_equipment"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "reusable",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_resource_03",
+            "name": {
+              "uk": "Фільтри та реагенти",
+              "en": "Filters and Reagents",
+              "ru": "Фильтры и реагенты"
+            },
+            "resourceTags": [
+              "water_filters",
+              "chemicals"
+            ],
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_resource_04",
+            "name": {
+              "uk": "Дизельний генератор",
+              "en": "Diesel Generator",
+              "ru": "Дизельный генератор"
+            },
+            "resourceTags": [
+              "power_supply"
+            ],
+            "facilityTags": [
+              "generator_system"
+            ],
+            "protectionTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_resource_05",
+            "name": {
+              "uk": "Консерви",
+              "en": "Canned Food",
+              "ru": "Консервы"
+            },
+            "resourceTags": [
+              "food_supply"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          }
+        ],
+        "facilities": [
+          {
+            "assetId": "artesian_aquifer_bunker_facility_01",
+            "name": {
+              "uk": "Артезіанські свердловини",
+              "en": "Artesian Wells",
+              "ru": "Артезианские скважины"
+            },
+            "facilityTags": [
+              "water_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_facility_02",
+            "name": {
+              "uk": "Насосний зал",
+              "en": "Pump Hall",
+              "ru": "Насосный зал"
+            },
+            "facilityTags": [
+              "water_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_facility_03",
+            "name": {
+              "uk": "Станція знезараження",
+              "en": "Disinfection Station",
+              "ru": "Станция обеззараживания"
+            },
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_facility_04",
+            "name": {
+              "uk": "Головний резервуар",
+              "en": "Main Reservoir",
+              "ru": "Главный резервуар"
+            },
+            "facilityTags": [
+              "water_storage"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "artesian_aquifer_bunker_facility_05",
+            "name": {
+              "uk": "Контрольна кімната",
+              "en": "Control Room",
+              "ru": "Контрольная комната"
+            },
+            "facilityTags": [
+              "command_center"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hydroelectric_dam_tunnels",
+      "name": "Сервісні тунелі гідроелектростанції",
+      "description": "Глибокі технічні тунелі всередині греблі з доступом до енергії, водозабору та ремонтних систем.",
+      "capacity": 14,
+      "location": "Усередині великої гірської греблі",
+      "suppliesMonths": 10,
+      "waterMonths": 42,
+      "facilities": [
+        "Сервісні тунелі",
+        "Турбінний зал",
+        "Водозабірна камера",
+        "Контрольний центр",
+        "Аварійні житлові кімнати"
+      ],
+      "resources": [
+        "Гідроелектроенергія",
+        "Система очищення води",
+        "Ремонтні інструменти",
+        "Запасні турбінні деталі",
+        "Сухпайки"
+      ],
+      "problems": [
+        "Катастрофічний ризик затоплення",
+        "Сильні вібрації",
+        "Складне високовольтне обладнання",
+        "Обмежені шляхи евакуації"
+      ],
+      "condition": "fair",
+      "_i18n": {
+        "name": {
+          "uk": "Сервісні тунелі гідроелектростанції",
+          "en": "Hydroelectric Dam Service Tunnels",
+          "ru": "Сервисные тоннели гидроэлектростанции"
+        },
+        "location": {
+          "uk": "Усередині великої гірської греблі",
+          "en": "Inside a large mountain dam",
+          "ru": "Внутри крупной горной плотины"
+        },
+        "description": {
+          "uk": "Глибокі технічні тунелі всередині греблі з доступом до енергії, водозабору та ремонтних систем.",
+          "en": "Deep technical tunnels inside a dam with access to power, water intake, and repair systems.",
+          "ru": "Глубокие технические тоннели внутри плотины с доступом к энергии, водозабору и ремонтным системам."
+        },
+        "condition": {
+          "uk": "задовільний",
+          "en": "fair",
+          "ru": "удовлетворительный"
+        },
+        "facilities": [
+          {
+            "uk": "Сервісні тунелі",
+            "en": "Service Tunnels",
+            "ru": "Сервисные тоннели"
+          },
+          {
+            "uk": "Турбінний зал",
+            "en": "Turbine Hall",
+            "ru": "Турбинный зал"
+          },
+          {
+            "uk": "Водозабірна камера",
+            "en": "Intake Chamber",
+            "ru": "Водозаборная камера"
+          },
+          {
+            "uk": "Контрольний центр",
+            "en": "Control Center",
+            "ru": "Центр управления"
+          },
+          {
+            "uk": "Аварійні житлові кімнати",
+            "en": "Emergency Living Quarters",
+            "ru": "Аварийные жилые помещения"
+          }
+        ],
+        "resources": [
+          {
+            "uk": "Гідроелектроенергія",
+            "en": "Hydroelectric Power",
+            "ru": "Гидроэлектроэнергия"
+          },
+          {
+            "uk": "Система очищення води",
+            "en": "Water Purification System",
+            "ru": "Система очистки воды"
+          },
+          {
+            "uk": "Ремонтні інструменти",
+            "en": "Repair Tools",
+            "ru": "Ремонтные инструменты"
+          },
+          {
+            "uk": "Запасні турбінні деталі",
+            "en": "Spare Turbine Parts",
+            "ru": "Запасные детали турбин"
+          },
+          {
+            "uk": "Сухпайки",
+            "en": "Field Rations",
+            "ru": "Сухпайки"
+          }
+        ],
+        "problems": [
+          {
+            "uk": "Катастрофічний ризик затоплення",
+            "en": "Catastrophic Flooding Risk",
+            "ru": "Катастрофический риск затопления"
+          },
+          {
+            "uk": "Сильні вібрації",
+            "en": "Severe Vibrations",
+            "ru": "Сильные вибрации"
+          },
+          {
+            "uk": "Складне високовольтне обладнання",
+            "en": "Complex High-Voltage Equipment",
+            "ru": "Сложное высоковольтное оборудование"
+          },
+          {
+            "uk": "Обмежені шляхи евакуації",
+            "en": "Limited Evacuation Routes",
+            "ru": "Ограниченные пути эвакуации"
+          }
+        ]
+      },
+      "bunkerTags": [
+        "condition_fair",
+        "flooding_risk",
+        "high_tech",
+        "mountain_location",
+        "power_system",
+        "structural_risk",
+        "water_system"
+      ],
+      "threatAssets": {
+        "resources": [
+          {
+            "assetId": "hydroelectric_dam_tunnels_resource_01",
+            "name": {
+              "uk": "Гідроелектроенергія",
+              "en": "Hydroelectric Power",
+              "ru": "Гидроэлектроэнергия"
+            },
+            "resourceTags": [
+              "power_supply"
+            ],
+            "facilityTags": [
+              "generator_system"
+            ],
+            "protectionTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_resource_02",
+            "name": {
+              "uk": "Система очищення води",
+              "en": "Water Purification System",
+              "ru": "Система очистки воды"
+            },
+            "resourceTags": [
+              "clean_water"
+            ],
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "protectionTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_resource_03",
+            "name": {
+              "uk": "Ремонтні інструменти",
+              "en": "Repair Tools",
+              "ru": "Ремонтные инструменты"
+            },
+            "resourceTags": [
+              "repair_tools"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "reusable",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_resource_04",
+            "name": {
+              "uk": "Запасні турбінні деталі",
+              "en": "Spare Turbine Parts",
+              "ru": "Запасные детали турбин"
+            },
+            "resourceTags": [
+              "mechanical_parts",
+              "spare_equipment"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "reusable",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_resource_05",
+            "name": {
+              "uk": "Сухпайки",
+              "en": "Field Rations",
+              "ru": "Сухпайки"
+            },
+            "resourceTags": [
+              "food_supply"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          }
+        ],
+        "facilities": [
+          {
+            "assetId": "hydroelectric_dam_tunnels_facility_01",
+            "name": {
+              "uk": "Сервісні тунелі",
+              "en": "Service Tunnels",
+              "ru": "Сервисные тоннели"
+            },
+            "facilityTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_facility_02",
+            "name": {
+              "uk": "Турбінний зал",
+              "en": "Turbine Hall",
+              "ru": "Турбинный зал"
+            },
+            "facilityTags": [
+              "generator_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_facility_03",
+            "name": {
+              "uk": "Водозабірна камера",
+              "en": "Intake Chamber",
+              "ru": "Водозаборная камера"
+            },
+            "facilityTags": [
+              "water_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_facility_04",
+            "name": {
+              "uk": "Контрольний центр",
+              "en": "Control Center",
+              "ru": "Центр управления"
+            },
+            "facilityTags": [
+              "command_center"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "hydroelectric_dam_tunnels_facility_05",
+            "name": {
+              "uk": "Аварійні житлові кімнати",
+              "en": "Emergency Living Quarters",
+              "ru": "Аварийные жилые помещения"
+            },
+            "facilityTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rainwater_harvesting_bunker",
+      "name": "Підземний центр збору дощової води",
+      "description": "Комплекс великих підземних басейнів, який збирає, фільтрує та зберігає дощову воду для міського району.",
+      "capacity": 12,
+      "location": "Під дощовим прибережним містом",
+      "suppliesMonths": 12,
+      "waterMonths": 30,
+      "facilities": [
+        "Підземні накопичувальні басейни",
+        "Піщані фільтри",
+        "Ультрафіолетове знезараження",
+        "Метеорологічний пункт",
+        "Житлові кімнати"
+      ],
+      "resources": [
+        "Запаси дощової води",
+        "Фільтрувальний пісок",
+        "Змінні ультрафіолетові лампи",
+        "Консервовані продукти",
+        "Метеорологічне обладнання"
+      ],
+      "problems": [
+        "Залежність від опадів",
+        "Ризик біологічного забруднення",
+        "Переповнення під час злив",
+        "Нестабільна якість води"
+      ],
+      "condition": "good",
+      "_i18n": {
+        "name": {
+          "uk": "Підземний центр збору дощової води",
+          "en": "Underground Rainwater Harvesting Center",
+          "ru": "Подземный центр сбора дождевой воды"
+        },
+        "location": {
+          "uk": "Під дощовим прибережним містом",
+          "en": "Beneath a rainy coastal city",
+          "ru": "Под дождливым прибрежным городом"
+        },
+        "description": {
+          "uk": "Комплекс великих підземних басейнів, який збирає, фільтрує та зберігає дощову воду для міського району.",
+          "en": "A complex of large underground basins that collects, filters, and stores rainwater for an urban district.",
+          "ru": "Комплекс крупных подземных бассейнов, который собирает, фильтрует и хранит дождевую воду для городского района."
+        },
+        "condition": {
+          "uk": "добрий",
+          "en": "good",
+          "ru": "хороший"
+        },
+        "facilities": [
+          {
+            "uk": "Підземні накопичувальні басейни",
+            "en": "Underground Collection Basins",
+            "ru": "Подземные накопительные бассейны"
+          },
+          {
+            "uk": "Піщані фільтри",
+            "en": "Sand Filters",
+            "ru": "Песчаные фильтры"
+          },
+          {
+            "uk": "Ультрафіолетове знезараження",
+            "en": "Ultraviolet Disinfection",
+            "ru": "Ультрафиолетовое обеззараживание"
+          },
+          {
+            "uk": "Метеорологічний пункт",
+            "en": "Meteorological Station",
+            "ru": "Метеорологический пункт"
+          },
+          {
+            "uk": "Житлові кімнати",
+            "en": "Living Quarters",
+            "ru": "Жилые помещения"
+          }
+        ],
+        "resources": [
+          {
+            "uk": "Запаси дощової води",
+            "en": "Rainwater Reserves",
+            "ru": "Запасы дождевой воды"
+          },
+          {
+            "uk": "Фільтрувальний пісок",
+            "en": "Filter Sand",
+            "ru": "Фильтрующий песок"
+          },
+          {
+            "uk": "Змінні ультрафіолетові лампи",
+            "en": "Replacement UV Lamps",
+            "ru": "Сменные ультрафиолетовые лампы"
+          },
+          {
+            "uk": "Консервовані продукти",
+            "en": "Canned Food",
+            "ru": "Консервированные продукты"
+          },
+          {
+            "uk": "Метеорологічне обладнання",
+            "en": "Meteorological Equipment",
+            "ru": "Метеорологическое оборудование"
+          }
+        ],
+        "problems": [
+          {
+            "uk": "Залежність від опадів",
+            "en": "Dependence on Rainfall",
+            "ru": "Зависимость от осадков"
+          },
+          {
+            "uk": "Ризик біологічного забруднення",
+            "en": "Biological Contamination Risk",
+            "ru": "Риск биологического загрязнения"
+          },
+          {
+            "uk": "Переповнення під час злив",
+            "en": "Overflow During Heavy Rain",
+            "ru": "Переполнение во время ливней"
+          },
+          {
+            "uk": "Нестабільна якість води",
+            "en": "Unstable Water Quality",
+            "ru": "Нестабильное качество воды"
+          }
+        ]
+      },
+      "bunkerTags": [
+        "condition_good",
+        "flooding_risk",
+        "food_supply",
+        "urban_location",
+        "water_system"
+      ],
+      "threatAssets": {
+        "resources": [
+          {
+            "assetId": "rainwater_harvesting_bunker_resource_01",
+            "name": {
+              "uk": "Запаси дощової води",
+              "en": "Rainwater Reserves",
+              "ru": "Запасы дождевой воды"
+            },
+            "resourceTags": [
+              "clean_water"
+            ],
+            "facilityTags": [
+              "water_system"
+            ],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_resource_02",
+            "name": {
+              "uk": "Фільтрувальний пісок",
+              "en": "Filter Sand",
+              "ru": "Фильтрующий песок"
+            },
+            "resourceTags": [
+              "water_filters"
+            ],
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_resource_03",
+            "name": {
+              "uk": "Змінні ультрафіолетові лампи",
+              "en": "Replacement UV Lamps",
+              "ru": "Сменные ультрафиолетовые лампы"
+            },
+            "resourceTags": [
+              "spare_equipment"
+            ],
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_resource_04",
+            "name": {
+              "uk": "Консервовані продукти",
+              "en": "Canned Food",
+              "ru": "Консервированные продукты"
+            },
+            "resourceTags": [
+              "food_supply"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_resource_05",
+            "name": {
+              "uk": "Метеорологічне обладнання",
+              "en": "Meteorological Equipment",
+              "ru": "Метеорологическое оборудование"
+            },
+            "resourceTags": [
+              "scientific_equipment"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "reusable",
+            "defaultState": "available"
+          }
+        ],
+        "facilities": [
+          {
+            "assetId": "rainwater_harvesting_bunker_facility_01",
+            "name": {
+              "uk": "Підземні накопичувальні басейни",
+              "en": "Underground Collection Basins",
+              "ru": "Подземные накопительные бассейны"
+            },
+            "facilityTags": [
+              "water_storage"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_facility_02",
+            "name": {
+              "uk": "Піщані фільтри",
+              "en": "Sand Filters",
+              "ru": "Песчаные фильтры"
+            },
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_facility_03",
+            "name": {
+              "uk": "Ультрафіолетове знезараження",
+              "en": "Ultraviolet Disinfection",
+              "ru": "Ультрафиолетовое обеззараживание"
+            },
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_facility_04",
+            "name": {
+              "uk": "Метеорологічний пункт",
+              "en": "Meteorological Station",
+              "ru": "Метеорологический пункт"
+            },
+            "facilityTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "rainwater_harvesting_bunker_facility_05",
+            "name": {
+              "uk": "Житлові кімнати",
+              "en": "Living Quarters",
+              "ru": "Жилые помещения"
+            },
+            "facilityTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          }
+        ]
+      }
+    },
+    {
+      "id": "desalination_plant_bunker",
+      "name": "Підземна опріснювальна станція",
+      "description": "Прибережний підземний комплекс, здатний перетворювати морську воду на питну за наявності енергії та справних мембран.",
+      "capacity": 8,
+      "location": "Скелясте морське узбережжя",
+      "suppliesMonths": 6,
+      "waterMonths": 48,
+      "facilities": [
+        "Зал зворотного осмосу",
+        "Резервуари прісної води",
+        "Насосна станція",
+        "Енергетичний блок",
+        "Житловий сектор"
+      ],
+      "resources": [
+        "Опріснена вода",
+        "Мембрани зворотного осмосу",
+        "Запасні насоси",
+        "Дизельне паливо",
+        "Аварійні пайки"
+      ],
+      "problems": [
+        "Критична залежність від енергії",
+        "Корозія від солі",
+        "Обмежений запас мембран",
+        "Загроза штормового затоплення"
+      ],
+      "condition": "good",
+      "_i18n": {
+        "name": {
+          "uk": "Підземна опріснювальна станція",
+          "en": "Underground Desalination Plant",
+          "ru": "Подземная опреснительная станция"
+        },
+        "location": {
+          "uk": "Скелясте морське узбережжя",
+          "en": "Rocky seacoast",
+          "ru": "Скалистое морское побережье"
+        },
+        "description": {
+          "uk": "Прибережний підземний комплекс, здатний перетворювати морську воду на питну за наявності енергії та справних мембран.",
+          "en": "A coastal underground complex capable of turning seawater into drinking water while power and membranes remain available.",
+          "ru": "Прибрежный подземный комплекс, способный превращать морскую воду в питьевую при наличии энергии и исправных мембран."
+        },
+        "condition": {
+          "uk": "добрий",
+          "en": "good",
+          "ru": "хороший"
+        },
+        "facilities": [
+          {
+            "uk": "Зал зворотного осмосу",
+            "en": "Reverse Osmosis Hall",
+            "ru": "Зал обратного осмоса"
+          },
+          {
+            "uk": "Резервуари прісної води",
+            "en": "Freshwater Reservoirs",
+            "ru": "Резервуары пресной воды"
+          },
+          {
+            "uk": "Насосна станція",
+            "en": "Pumping Station",
+            "ru": "Насосная станция"
+          },
+          {
+            "uk": "Енергетичний блок",
+            "en": "Power Unit",
+            "ru": "Энергетический блок"
+          },
+          {
+            "uk": "Житловий сектор",
+            "en": "Living Sector",
+            "ru": "Жилой сектор"
+          }
+        ],
+        "resources": [
+          {
+            "uk": "Опріснена вода",
+            "en": "Desalinated Water",
+            "ru": "Опреснённая вода"
+          },
+          {
+            "uk": "Мембрани зворотного осмосу",
+            "en": "Reverse Osmosis Membranes",
+            "ru": "Мембраны обратного осмоса"
+          },
+          {
+            "uk": "Запасні насоси",
+            "en": "Spare Pumps",
+            "ru": "Запасные насосы"
+          },
+          {
+            "uk": "Дизельне паливо",
+            "en": "Diesel Fuel",
+            "ru": "Дизельное топливо"
+          },
+          {
+            "uk": "Аварійні пайки",
+            "en": "Emergency Rations",
+            "ru": "Аварийные пайки"
+          }
+        ],
+        "problems": [
+          {
+            "uk": "Критична залежність від енергії",
+            "en": "Critical Dependence on Power",
+            "ru": "Критическая зависимость от энергии"
+          },
+          {
+            "uk": "Корозія від солі",
+            "en": "Salt Corrosion",
+            "ru": "Коррозия от соли"
+          },
+          {
+            "uk": "Обмежений запас мембран",
+            "en": "Limited Membrane Supply",
+            "ru": "Ограниченный запас мембран"
+          },
+          {
+            "uk": "Загроза штормового затоплення",
+            "en": "Storm Flooding Risk",
+            "ru": "Угроза штормового затопления"
+          }
+        ]
+      },
+      "bunkerTags": [
+        "condition_good",
+        "flooding_risk",
+        "high_tech",
+        "isolated_location",
+        "low_supplies",
+        "power_system",
+        "water_system"
+      ],
+      "threatAssets": {
+        "resources": [
+          {
+            "assetId": "desalination_plant_bunker_resource_01",
+            "name": {
+              "uk": "Опріснена вода",
+              "en": "Desalinated Water",
+              "ru": "Опреснённая вода"
+            },
+            "resourceTags": [
+              "clean_water"
+            ],
+            "facilityTags": [
+              "water_system"
+            ],
+            "protectionTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_resource_02",
+            "name": {
+              "uk": "Мембрани зворотного осмосу",
+              "en": "Reverse Osmosis Membranes",
+              "ru": "Мембраны обратного осмоса"
+            },
+            "resourceTags": [
+              "water_filters"
+            ],
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_resource_03",
+            "name": {
+              "uk": "Запасні насоси",
+              "en": "Spare Pumps",
+              "ru": "Запасные насосы"
+            },
+            "resourceTags": [
+              "mechanical_parts",
+              "spare_equipment"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "reusable",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_resource_04",
+            "name": {
+              "uk": "Дизельне паливо",
+              "en": "Diesel Fuel",
+              "ru": "Дизельное топливо"
+            },
+            "resourceTags": [
+              "fuel"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_resource_05",
+            "name": {
+              "uk": "Аварійні пайки",
+              "en": "Emergency Rations",
+              "ru": "Аварийные пайки"
+            },
+            "resourceTags": [
+              "food_supply"
+            ],
+            "facilityTags": [],
+            "protectionTags": [],
+            "useMode": "limited",
+            "defaultState": "available"
+          }
+        ],
+        "facilities": [
+          {
+            "assetId": "desalination_plant_bunker_facility_01",
+            "name": {
+              "uk": "Зал зворотного осмосу",
+              "en": "Reverse Osmosis Hall",
+              "ru": "Зал обратного осмоса"
+            },
+            "facilityTags": [
+              "water_filtration_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_facility_02",
+            "name": {
+              "uk": "Резервуари прісної води",
+              "en": "Freshwater Reservoirs",
+              "ru": "Резервуары пресной воды"
+            },
+            "facilityTags": [
+              "water_storage"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_facility_03",
+            "name": {
+              "uk": "Насосна станція",
+              "en": "Pumping Station",
+              "ru": "Насосная станция"
+            },
+            "facilityTags": [
+              "water_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_facility_04",
+            "name": {
+              "uk": "Енергетичний блок",
+              "en": "Power Unit",
+              "ru": "Энергетический блок"
+            },
+            "facilityTags": [
+              "generator_system"
+            ],
+            "useMode": "system",
+            "defaultState": "available"
+          },
+          {
+            "assetId": "desalination_plant_bunker_facility_05",
+            "name": {
+              "uk": "Житловий сектор",
+              "en": "Living Sector",
+              "ru": "Жилой сектор"
+            },
+            "facilityTags": [],
+            "useMode": "system",
+            "defaultState": "available"
+          }
+        ]
       }
     }
   ],
   "_threat_linking_meta": {
     "version": "bunker_tags_for_round3_threats_v1",
-    "note_uk": "До кожного бункера додано bunkerTags для звʼязку з threats.json. Теги генеруються з location, facilities, resources, problems, condition, capacity і suppliesMonths.",
+    "note_uk": "До кожного бункера додано bunkerTags для звʼязку з threats.json. Теги генеруються з location, facilities, resources, problems, condition, capacity, suppliesMonths і waterMonths.",
     "fields_added": [
       "bunkerTags"
     ]
@@ -55497,11 +57132,11 @@
   "_threat_tagging_meta": {
     "schemaVersion": 1,
     "dictionaryFile": "threat_mechanics_tag_dictionary_v2.json",
-    "bunkersTotal": 200,
-    "resourceAssetsTotal": 999,
-    "resourceAssetsWithTags": 827,
-    "facilityAssetsTotal": 994,
-    "facilityAssetsWithTags": 507,
+    "bunkersTotal": 205,
+    "resourceAssetsTotal": 1024,
+    "resourceAssetsWithTags": 853,
+    "facilityAssetsTotal": 1019,
+    "facilityAssetsWithTags": 526,
     "importantRule_uk": "bunkerTags залишаються тегами вибору загрози. Для вирішення загрози використовуються лише threatAssets.resources і threatAssets.facilities."
   }
 }

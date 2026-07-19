@@ -24,7 +24,7 @@ public sealed class OmniscientHiddenStateService(TimeProvider timeProvider, Game
             ResolveStableId(room, room.CurrentTurnPlayerId), room.GameplayPlayerCount,
             players.Where(p => p.IsSpectatorGm).Select(p => p.PlayerId).ToList(),
             room.Bunker == null ? null : new(room.Bunker.Id, room.Bunker.Name, room.Bunker.Description, room.Bunker.Capacity,
-                room.Bunker.Location, room.Bunker.SuppliesMonths, room.Bunker.Facilities.ToList(), room.Bunker.Resources.ToList(), room.Bunker.Problems.ToList(), room.Bunker.Condition),
+                room.Bunker.Location, room.Bunker.SuppliesMonths, room.Bunker.WaterMonths, room.Bunker.Facilities.ToList(), room.Bunker.Resources.ToList(), room.Bunker.Problems.ToList(), room.Bunker.Condition),
             room.Apocalypse == null ? null : new(room.Apocalypse.Id, room.Apocalypse.Name, room.Apocalypse.Description, room.Apocalypse.Severity,
                 room.Apocalypse.Duration, room.Apocalypse.Threats.ToList(), room.Apocalypse.Requirements.ToList()),
             new(timer.Status, timer.Purpose, timer.DurationSeconds, timer.DeadlineUtc, timer.RemainingSeconds),

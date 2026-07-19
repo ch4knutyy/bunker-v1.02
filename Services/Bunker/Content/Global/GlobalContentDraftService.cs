@@ -218,7 +218,7 @@ public sealed class GlobalContentDraftService
         var expected = field switch
         {
             "isSecret" or "isOneTimeUse" or "requiresTarget" or "hasSeverity" or "isUniversalFallback" => JsonValueKind.True,
-            "capacity" or "suppliesMonths" or "round" or "survivalChance" => JsonValueKind.Number,
+            "capacity" or "suppliesMonths" or "waterMonths" or "round" or "survivalChance" => JsonValueKind.Number,
             "skills" or "items" or "capabilityTags" or "tags" or "facilities" or "resources" or "problems" or "threats" or "requirements" or "apocalypseTags" or "relatedApocalypseIds" or "resourceTags" or "protectionTags" => JsonValueKind.Array,
             "_i18n" or "localization" or "mechanics" or "threatUsage" => JsonValueKind.Object,
             _ => JsonValueKind.String
@@ -293,7 +293,7 @@ public sealed class GlobalContentDraftService
             ["phobias"] = Set("name","description","bunkerEffect","_i18n"), ["facts"] = Set("source","type","category","fact","description","_i18n"),
             ["special_cards"] = Set("name","description","isSecret","isOneTimeUse","phase","effectType","requiresTarget","_i18n"),
             ["apocalypses"] = Set("name","description","severity","survivalChance","duration","threats","requirements","_i18n","tags"),
-            ["bunkers"] = Set("name","description","capacity","location","suppliesMonths","facilities","resources","problems","condition","_i18n","tags"),
+            ["bunkers"] = Set("name","description","capacity","location","suppliesMonths","waterMonths","facilities","resources","problems","condition","_i18n","tags"),
             ["items"] = Set("item","category","_i18n","resourceTags","protectionTags","threatUsage"),
             ["threats"] = Set("name","description","severity","round","category","apocalypseTags","relatedApocalypseIds","isUniversalFallback","tags","_i18n","mechanics")
         };

@@ -67,6 +67,7 @@ builder.Services.AddSingleton<RoomRecoveryCoordinator>();
 builder.Services.AddSingleton<IRoomRecoveryCoordinator>(services => services.GetRequiredService<RoomRecoveryCoordinator>());
 builder.Services.AddHostedService(services => services.GetRequiredService<RoomRecoveryCoordinator>());
 builder.Services.AddSingleton<RoomLocalEditorService>();
+builder.Services.AddSingleton<BunkerResourceService>();
 builder.Services.Configure<GlobalContentCatalogOptions>(builder.Configuration.GetSection(GlobalContentCatalogOptions.SectionName));
 builder.Services.AddSingleton<GlobalContentAccessPolicy>();
 builder.Services.AddSingleton<GlobalContentCatalogService>();

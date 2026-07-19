@@ -29,11 +29,12 @@ test('one universal bunker renderer owns the complete technical facility shell',
   assert.equal((game.match(/function renderBunkerFacility\(/g) || []).length, 1);
 });
 
-test('four canonical metrics render and empty content sections are omitted', () => {
+test('five canonical metrics render and empty content sections are omitted', () => {
   const renderer = method(game, 'renderBunkerFacility');
-  for (const metric of ['metric-capacity','metric-condition','metric-supplies','metric-location']) assert.match(renderer, new RegExp(metric));
+  for (const metric of ['metric-capacity','metric-condition','metric-supplies','metric-water','metric-location']) assert.match(renderer, new RegExp(metric));
   assert.match(renderer, /model\.capacity/);
   assert.match(renderer, /model\.supplies/);
+  assert.match(renderer, /model\.water/);
   assert.match(renderer, /model\.location/);
   assert.match(game, /function renderBunkerContentSection[\s\S]*if \(!Array\.isArray\(items\) \|\| !items\.length\) return ''/);
   assert.match(renderer, /renderBunkerContentSection\('rooms'/);
@@ -71,7 +72,7 @@ test('canonical resolver supports facility variants and condition overrides', ()
 
 test('complete public model retains metadata while raw ids and tags never enter DOM', () => {
   const model = method(game, 'buildBunkerFacilityModel');
-  for (const field of ['id','name','shortDescription','description','capacity','condition','supplies','location','rooms','resources','problems','imageUrl','tags','category','visualVariant']) assert.match(model, new RegExp(`${field}(?::|,|\\s*=)|model\\.${field}`));
+  for (const field of ['id','name','shortDescription','description','capacity','condition','supplies','water','location','rooms','resources','problems','imageUrl','tags','category','visualVariant']) assert.match(model, new RegExp(`${field}(?::|,|\\s*=)|model\\.${field}`));
   assert.match(model, /source\.bunkerTags \|\| source\.BunkerTags/);
   assert.match(model, /getLocalizedValue/);
   assert.match(model, /getLocalizedArray/);
@@ -119,7 +120,7 @@ test('shared CSS variables drive variants, condition states and responsive geome
   for (const variable of ['--bunker-accent','--bunker-accent-strong','--bunker-border','--bunker-inner-border','--bunker-surface','--bunker-overlay','--bunker-glow','--bunker-metric-surface','--bunker-divider','--bunker-problem','--bunker-resource','--bunker-room']) assert.match(css, new RegExp(variable));
   for (const variant of ['military','industrial','underground','scientific','medical','civilian','luxury','emergency','natural','remote','damaged','critical']) assert.match(css, new RegExp(`bunker-facility-shell\\.variant-${variant}`));
   for (const condition of ['positive','warning-soft','damaged','critical']) assert.match(css, new RegExp(`condition-${condition}`));
-  assert.match(css, /\.bunker-metrics\s*\{[\s\S]*repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.bunker-metrics\s*\{[\s\S]*repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(css, /@media \(max-width:900px\)[\s\S]*bunker-metrics[^}]*repeat\(2/);
   assert.match(css, /@media \(max-width:620px\)[\s\S]*bunker-content-grid[^}]*grid-template-columns:1fr/);
   assert.match(css, /@media \(max-width:420px\)[\s\S]*bunker-metrics[^}]*grid-template-columns:1fr/);

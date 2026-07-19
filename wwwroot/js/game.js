@@ -604,19 +604,19 @@ Object.assign(uiTranslations.ru, {
 });
 Object.assign(uiTranslations.uk, {
 	bunkerBadge: "Бункер", bunkerRooms: "Приміщення", bunkerResources: "Ресурси", bunkerProblems: "Проблеми",
-	bunkerFacilityRecord: "Технічний паспорт укриття", bunkerOpenImage: "Відкрити зображення бункера", bunkerMonths: "міс.",
+	bunkerFacilityRecord: "Технічний паспорт укриття", bunkerOpenImage: "Відкрити зображення бункера", bunkerMonths: "міс.", supplies: "Їжа", water: "Вода",
 	conditionExcellent: "Відмінний", conditionGood: "Хороший", conditionStable: "Стабільний", conditionWorn: "Зношений",
 	conditionDamaged: "Пошкоджений", conditionPoor: "Поганий", conditionCritical: "Критичний", conditionUnknown: "Невідомо"
 });
 Object.assign(uiTranslations.en, {
 	bunkerBadge: "Bunker", bunkerRooms: "Rooms", bunkerResources: "Resources", bunkerProblems: "Problems",
-	bunkerFacilityRecord: "Shelter technical record", bunkerOpenImage: "Open bunker image", bunkerMonths: "mo.",
+	bunkerFacilityRecord: "Shelter technical record", bunkerOpenImage: "Open bunker image", bunkerMonths: "mo.", supplies: "Food", water: "Water",
 	conditionExcellent: "Excellent", conditionGood: "Good", conditionStable: "Stable", conditionWorn: "Worn",
 	conditionDamaged: "Damaged", conditionPoor: "Poor", conditionCritical: "Critical", conditionUnknown: "Unknown"
 });
 Object.assign(uiTranslations.ru, {
 	bunkerBadge: "Бункер", bunkerRooms: "Помещения", bunkerResources: "Ресурсы", bunkerProblems: "Проблемы",
-	bunkerFacilityRecord: "Технический паспорт убежища", bunkerOpenImage: "Открыть изображение бункера", bunkerMonths: "мес.",
+	bunkerFacilityRecord: "Технический паспорт убежища", bunkerOpenImage: "Открыть изображение бункера", bunkerMonths: "мес.", supplies: "Еда", water: "Вода",
 	conditionExcellent: "Отличный", conditionGood: "Хороший", conditionStable: "Стабильный", conditionWorn: "Изношенный",
 	conditionDamaged: "Повреждённый", conditionPoor: "Плохой", conditionCritical: "Критический", conditionUnknown: "Неизвестно"
 });
@@ -4374,6 +4374,15 @@ function registerSignalREvents() {
 		addEventMessage(`<span class="event-bunker">🏠 ${escapeHtml(t('bunker'))}:</span> ${escapeHtml(getLocalizedValue(bunker, 'name'))}`);
 	});
 
+	connection.off("BunkerUpdated");
+	connection.on("BunkerUpdated", function (data) {
+		const bunker = data.bunker || data.Bunker;
+		if (!bunker) return;
+		currentBunker = bunker;
+		currentBunkerCapacity = getBunkerCapacityValue(bunker, currentBunkerCapacity);
+		renderBunker(currentBunker);
+	});
+
 	// Апокаліпсис змінено
 	connection.off("ApocalypseChanged");
 	connection.on("ApocalypseChanged", function (data) {
@@ -4892,9 +4901,8 @@ function registerSignalREvents() {
 		}
 	});
 
-	// ==================== BUNKER SUPPLIES HANDLERS ====================
+	// ==================== BUNKER FOOD/WATER HANDLERS ====================
 
-	// Запаси бункера додано
 	connection.off("BunkerSuppliesAdded");
 	connection.on("BunkerSuppliesAdded", function (data) {
 		console.log("[BunkerSuppliesAdded]", data);
@@ -4906,10 +4914,9 @@ function registerSignalREvents() {
 			renderBunker(currentBunker);
 		}
 
-		addEventMessage(`<span class="event-success">📦 GM додав запаси їжі: +${data.addedMonths} місяців</span>`);
+		addEventMessage(`<span class="event-success">📦 ${escapeHtml(t('supplies'))}: +${data.addedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
 	});
 
-	// Запаси бункера зменшено
 	connection.off("BunkerSuppliesRemoved");
 	connection.on("BunkerSuppliesRemoved", function (data) {
 		console.log("[BunkerSuppliesRemoved]", data);
@@ -4921,7 +4928,29 @@ function registerSignalREvents() {
 			renderBunker(currentBunker);
 		}
 
-		addEventMessage(`<span class="event-warning">📦 Запаси бункера зменшено на ${data.removedMonths} місяців</span>`);
+		addEventMessage(`<span class="event-warning">📦 ${escapeHtml(t('supplies'))}: −${data.removedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
+	});
+
+	connection.off("BunkerWaterAdded");
+	connection.on("BunkerWaterAdded", function (data) {
+		if (currentBunker) {
+			const water = data.totalWaterMonths ?? data.TotalWaterMonths;
+			currentBunker.waterMonths = water;
+			if ('WaterMonths' in currentBunker) currentBunker.WaterMonths = water;
+			renderBunker(currentBunker);
+		}
+		addEventMessage(`<span class="event-success">💧 ${escapeHtml(t('water'))}: +${data.addedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
+	});
+
+	connection.off("BunkerWaterRemoved");
+	connection.on("BunkerWaterRemoved", function (data) {
+		if (currentBunker) {
+			const water = data.totalWaterMonths ?? data.TotalWaterMonths;
+			currentBunker.waterMonths = water;
+			if ('WaterMonths' in currentBunker) currentBunker.WaterMonths = water;
+			renderBunker(currentBunker);
+		}
+		addEventMessage(`<span class="event-warning">💧 ${escapeHtml(t('water'))}: −${data.removedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
 	});
 
 } // End of registerSignalREvents()
@@ -5026,84 +5055,43 @@ function closeImageModal() {
 	}
 }
 
-// ==================== BUNKER SUPPLIES FUNCTIONS ====================
+// ==================== BUNKER FOOD/WATER FUNCTIONS ====================
 
-// Додати запаси до бункера
-async function addBunkerSupplies(months = null) {
+function bunkerResourceCommandId() {
+	return globalThis.crypto?.randomUUID?.() || `bunker-resource-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function mutateBunkerResource(method, resourceKey, months = null) {
 	if (!isHost) {
-		alert("Тільки хост може додавати запаси");
+		alert("Тільки хост може змінювати ресурси бункера");
 		return;
 	}
-
 	if (!currentBunker) {
 		alert("Бункер не визначено. Спочатку почніть гру.");
 		return;
 	}
-
 	let amount = months;
-
 	if (amount === null || amount === undefined) {
-		const input = prompt(
-			"Скільки місяців запасів додати?",
-			"3"
-		);
-
-		if (input === null) {
-			return;
-		}
-
+		const input = prompt(`${t(resourceKey)} (${t('bunkerMonths')})`, "3");
+		if (input === null) return;
 		amount = Number.parseInt(input, 10);
 	}
-
 	if (!Number.isInteger(amount) || amount < 1 || amount > 120) {
 		alert("Вкажіть ціле число від 1 до 120");
 		return;
 	}
-
 	try {
-		console.log("[addBunkerSupplies] Invoking with:", amount);
-
-		await connection.invoke(
-			"AddBunkerSupplies",
-			amount
-		);
-
-		console.log("[addBunkerSupplies] Success");
+		await connection.invoke(method, amount, bunkerResourceCommandId());
 	} catch (err) {
-		console.error("[addBunkerSupplies] Error:", err);
-
-		alert(
-			"Помилка додавання запасів:\n" +
-			(err?.message ?? String(err))
-		);
+		console.error(`[${method}] Error:`, err);
+		alert(`Помилка зміни ресурсу:\n${err?.message ?? String(err)}`);
 	}
 }
-// Зменшити запаси бункера
-function removeBunkerSupplies(months) {
-	if (!isHost) {
-		alert('Тільки хост може змінювати запаси');
-		return;
-	}
 
-	if (!currentBunker) {
-		alert('Бункер не визначено');
-		return;
-	}
-
-	const amount = months || parseInt(prompt('Скільки місяців забрати?', '3'));
-	if (isNaN(amount) || amount <= 0) return;
-
-	console.log("[removeBunkerSupplies] Invoking with:", amount);
-
-	connection.invoke("RemoveBunkerSupplies", amount)
-		.then(() => {
-			console.log("[removeBunkerSupplies] Success");
-		})
-		.catch(err => {
-			console.error("[removeBunkerSupplies] Error:", err);
-			alert('Помилка зменшення запасів');
-		});
-}
+function addBunkerSupplies(months = null) { return mutateBunkerResource("AddBunkerSupplies", "supplies", months); }
+function removeBunkerSupplies(months = null) { return mutateBunkerResource("RemoveBunkerSupplies", "supplies", months); }
+function addBunkerWater(months = null) { return mutateBunkerResource("AddBunkerWater", "water", months); }
+function removeBunkerWater(months = null) { return mutateBunkerResource("RemoveBunkerWater", "water", months); }
 
 // ==================== BUTTON EVENT BINDING ====================
 
@@ -6176,6 +6164,7 @@ function buildBunkerFacilityModel(source) {
 	const condition = resolveBunkerCondition(rawCondition);
 	const tags = source.bunkerTags || source.BunkerTags || source.tags || source.Tags || [];
 	const supplies = source.supplies ?? source.Supplies ?? source.suppliesMonths ?? source.SuppliesMonths ?? '';
+	const water = source.waterMonths ?? source.WaterMonths ?? supplies;
 	const model = {
 		id: source.id || source.Id || '',
 		name: getLocalizedValue(source, 'name') || t('unknown'),
@@ -6186,6 +6175,7 @@ function buildBunkerFacilityModel(source) {
 		conditionKey: condition.key,
 		conditionSemantic: condition.semantic,
 		supplies,
+		water,
 		location: getLocalizedValue(source, 'location') || '',
 		locationMetadata: source.location || source.Location || '',
 		rooms: getLocalizedArray(source, 'rooms').length ? getLocalizedArray(source, 'rooms') : getLocalizedArray(source, 'facilities'),
@@ -6231,6 +6221,9 @@ function renderBunkerFacility(model) {
 	const suppliesValue = model.supplies === '' || model.supplies == null
 		? t('unknown')
 		: `${escapeHtml(model.supplies)}${typeof model.supplies === 'number' ? ` ${escapeHtml(t('bunkerMonths'))}` : ''}`;
+	const waterValue = model.water === '' || model.water == null
+		? t('unknown')
+		: `${escapeHtml(model.water)}${typeof model.water === 'number' ? ` ${escapeHtml(t('bunkerMonths'))}` : ''}`;
 	const locationValue = model.location || t('unknown');
 	const media = model.imageUrl ? `<div class="bunker-hero-media" aria-hidden="true">
 		<img class="bunker-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleBunkerHeroImageError(this)">
@@ -6258,6 +6251,7 @@ function renderBunkerFacility(model) {
 			<div class="bunker-metric metric-capacity"><span class="bunker-metric-label">${escapeHtml(t('capacity'))}</span><strong>${escapeHtml(capacityValue)}</strong></div>
 			<div class="bunker-metric metric-condition"><span class="bunker-metric-label">${escapeHtml(t('condition'))}</span><strong>${escapeHtml(getBunkerConditionLabel(model.conditionKey))}</strong></div>
 			<div class="bunker-metric metric-supplies"><span class="bunker-metric-label">${escapeHtml(t('supplies'))}</span><strong>${suppliesValue}</strong></div>
+			<div class="bunker-metric metric-water"><span class="bunker-metric-label">${escapeHtml(t('water'))}</span><strong>${waterValue}</strong></div>
 			<div class="bunker-metric metric-location"><span class="bunker-metric-label">${escapeHtml(t('location'))}</span><strong>${escapeHtml(locationValue)}</strong></div>
 		</section>
 		<div class="bunker-content-grid">
