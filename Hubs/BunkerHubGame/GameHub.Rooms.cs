@@ -643,7 +643,7 @@ namespace Bunker.Hubs
             if (!settings.BunkerScenarioEnabled) room.Bunker = null;
             else if (room.Bunker == null && _gameData.Bunkers.Count > 0)
             {
-                room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
+                room.Bunker = CloneBunkerInfo(_gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)]);
                 // Оновлюємо URL зображення з кешу
                 _imageService.UpdateBunkerImageUrl(room.Bunker);
             }

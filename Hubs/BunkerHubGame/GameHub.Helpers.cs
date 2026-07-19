@@ -4,6 +4,7 @@ using Bunker.Services;
 using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
+using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bunker.Hubs
@@ -263,6 +264,10 @@ namespace Bunker.Hubs
                 I18n = source.I18n
             };
         }
+
+        private static BunkerInfo CloneBunkerInfo(BunkerInfo source) =>
+            JsonSerializer.Deserialize<BunkerInfo>(JsonSerializer.Serialize(source)) ??
+            throw new InvalidOperationException("Unable to clone bunker state.");
 
         private Item? DrawRandomInventoryItem()
         {

@@ -21,7 +21,7 @@ public sealed record OmniscientThreatStateDto(string? ThreatId, string? Type, st
     IReadOnlyList<string> ParticipantPlayerIds, string? LeaderPlayerId, string? SelectedPlanId,
     string? TerminalStatus, bool EffectsApplied, OmniscientThreatAttemptDto? CurrentAttempt);
 public sealed record OmniscientBunkerStateDto(string Id, string Name, string Description, int Capacity, string Location,
-    int SuppliesMonths, IReadOnlyList<string> Facilities, IReadOnlyList<string> Resources, IReadOnlyList<string> Problems, string Condition);
+    int SuppliesMonths, int WaterMonths, IReadOnlyList<string> Facilities, IReadOnlyList<string> Resources, IReadOnlyList<string> Problems, string Condition);
 public sealed record OmniscientApocalypseStateDto(string Id, string Name, string Description, string Severity, string Duration,
     IReadOnlyList<string> Threats, IReadOnlyList<string> Requirements);
 public sealed record OmniscientTimerStateDto(string Status, string Purpose, int DurationSeconds, DateTimeOffset? DeadlineUtc, int RemainingSeconds);

@@ -849,7 +849,7 @@ namespace Bunker.Hubs
                 return;
             }
 
-            room.Bunker = _gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)];
+            room.Bunker = CloneBunkerInfo(_gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)]);
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
             await Clients.Group(roomId).SendAsync("BunkerChanged", new
@@ -962,102 +962,37 @@ namespace Bunker.Hubs
         }
 
 		/// <summary>
-		/// Додати запаси до бункера — тільки для хоста.
+		/// Додати їжу до бункера — тільки для хоста з правом змінювати стан гри.
 		/// </summary>
-		public async Task AddBunkerSupplies(int months)
-		{
-			if (!IsCallerHost())
-			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Тільки хост може змінювати запаси"
-				);
-				return;
-			}
+		public Task AddBunkerSupplies(int months, string? commandId = null) =>
+			MutateBunkerResource(BunkerResourceKind.Food, add: true, months, commandId);
 
-			if (months <= 0 || months > 120)
-			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Кількість місяців має бути від 1 до 120"
-				);
-				return;
-			}
-
-			var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-			if (room == null)
-			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Кімнату не знайдено"
-				);
-				return;
-			}
-			if (room.State == RoomState.Finished)
-			{
-				await Clients.Caller.SendAsync("ReceiveError", "game_finished");
-				return;
-			}
-
-			if (room.Bunker == null)
-			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Бункер не визначено"
-				);
-				return;
-			}
-
-			room.Bunker.SuppliesMonths += months;
-
-			_logger.LogInformation(
-				"GM додав {AddedMonths} місяців запасів у кімнаті {RoomName}. " +
-				"Усього залишилось: {TotalSuppliesMonths}",
-				months,
-				room.Name,
-				room.Bunker.SuppliesMonths
-			);
-
-			await Clients.Group(room.Id).SendAsync(
-				"BunkerSuppliesAdded",
-				new
-				{
-					addedMonths = months,
-					totalSuppliesMonths = room.Bunker.SuppliesMonths,
-					bunker = room.Bunker.ToClientInfo()
-				}
-			);
-		}
 		/// <summary>
-		/// Зменшити запаси бункера — тільки для хоста.
+		/// Зменшити запас їжі — тільки для хоста з правом змінювати стан гри.
 		/// </summary>
-		public async Task RemoveBunkerSupplies(int months)
+		public Task RemoveBunkerSupplies(int months, string? commandId = null) =>
+			MutateBunkerResource(BunkerResourceKind.Food, add: false, months, commandId);
+
+		public Task AddBunkerWater(int months, string? commandId = null) =>
+			MutateBunkerResource(BunkerResourceKind.Water, add: true, months, commandId);
+
+		public Task RemoveBunkerWater(int months, string? commandId = null) =>
+			MutateBunkerResource(BunkerResourceKind.Water, add: false, months, commandId);
+
+		private async Task MutateBunkerResource(
+			BunkerResourceKind resource,
+			bool add,
+			int months,
+			string? commandId)
 		{
-			if (!IsCallerHost())
+			if (!TryGetBunkerResourceMutationContext(out var room, out var actor))
 			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Тільки хост може змінювати запаси"
-				);
+				await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав для зміни ресурсів бункера");
 				return;
 			}
-
-			if (months <= 0)
+			if (!_bunkerResources.IsValidMutationAmount(months))
 			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Кількість місяців має бути більшою за нуль"
-				);
-				return;
-			}
-
-			var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-			if (room == null)
-			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Кімнату не знайдено"
-				);
+				await Clients.Caller.SendAsync("ReceiveError", "Кількість місяців має бути від 1 до 120");
 				return;
 			}
 			if (room.State == RoomState.Finished)
@@ -1065,40 +1000,128 @@ namespace Bunker.Hubs
 				await Clients.Caller.SendAsync("ReceiveError", "game_finished");
 				return;
 			}
-
 			if (room.Bunker == null)
 			{
-				await Clients.Caller.SendAsync(
-					"ReceiveError",
-					"Бункер не визначено"
-				);
+				await Clients.Caller.SendAsync("ReceiveError", "Бункер не визначено");
+				return;
+			}
+			if (!RememberPlayerCommand(room, commandId))
+			{
+				await Clients.Caller.SendAsync("BunkerUpdated", new
+				{
+					bunker = room.Bunker.ToClientInfo(),
+					idempotent = true
+				});
 				return;
 			}
 
-			int removedMonths = Math.Min(
-				months,
-				room.Bunker.SuppliesMonths
-			);
+			var action = resource switch
+			{
+				BunkerResourceKind.Water when add => "water_added",
+				BunkerResourceKind.Water => "water_removed",
+				BunkerResourceKind.Food when add => "food_added",
+				_ => "food_removed"
+			};
+			RoomSnapshot? snapshot;
+			BunkerResourceMutation mutation;
+			lock (room.SnapshotSyncRoot)
+			{
+				var currentTotal = resource == BunkerResourceKind.Water
+					? room.Bunker.WaterMonths
+					: room.Bunker.SuppliesMonths;
+				var willChange = add
+					? currentTotal < BunkerResourceService.MaxMonths
+					: currentTotal > 0;
+				snapshot = willChange
+					? CreateMutationSnapshot(
+						room,
+						RoomService.GetPlayerKey(actor),
+						action,
+						commandId,
+						$"Before bunker {action.Replace('_', ' ')}")
+					: null;
+				mutation = add
+					? _bunkerResources.Add(room.Bunker, resource, months)
+					: _bunkerResources.Remove(room.Bunker, resource, months);
+			}
 
-			room.Bunker.SuppliesMonths -= removedMonths;
+			if (resource == BunkerResourceKind.Water)
+			{
+				await Clients.Group(room.Id).SendAsync(
+					add ? "BunkerWaterAdded" : "BunkerWaterRemoved",
+					add
+						? new
+						{
+							addedMonths = mutation.AppliedMonths,
+							totalWaterMonths = mutation.TotalMonths,
+							bunker = room.Bunker.ToClientInfo()
+						}
+						: (object)new
+						{
+							removedMonths = mutation.AppliedMonths,
+							totalWaterMonths = mutation.TotalMonths,
+							bunker = room.Bunker.ToClientInfo()
+						});
+			}
+			else
+			{
+				await Clients.Group(room.Id).SendAsync(
+					add ? "BunkerSuppliesAdded" : "BunkerSuppliesRemoved",
+					add
+						? new
+						{
+							addedMonths = mutation.AppliedMonths,
+							totalSuppliesMonths = mutation.TotalMonths,
+							bunker = room.Bunker.ToClientInfo()
+						}
+						: (object)new
+						{
+							removedMonths = mutation.AppliedMonths,
+							totalSuppliesMonths = mutation.TotalMonths,
+							bunker = room.Bunker.ToClientInfo()
+						});
+			}
+
+			await Clients.Group(room.Id).SendAsync("BunkerUpdated", new
+			{
+				bunker = room.Bunker.ToClientInfo(),
+				action
+			});
+			QueueRoomRecovery(room, action);
+			await AppendGmAudit(
+				room,
+				RoomService.GetPlayerKey(actor),
+				action,
+				GmAuditResult.Success,
+				$"Bunker {(resource == BunkerResourceKind.Water ? "water" : "food")} was {(add ? "increased" : "decreased")} by {mutation.AppliedMonths} month(s).",
+				commandId: commandId,
+				snapshot: snapshot);
+			await Clients.Caller.SendAsync("GMActionSuccess", new
+			{
+				action,
+				appliedMonths = mutation.AppliedMonths,
+				totalMonths = mutation.TotalMonths
+			});
+			await BroadcastOmniscientStateToAuthorizedSpectators(room);
 
 			_logger.LogInformation(
-				"GM зняв {RemovedMonths} місяців запасів у кімнаті {RoomName}. " +
-				"Залишилось: {TotalSuppliesMonths}",
-				removedMonths,
+				"GM bunker resource mutation {Action} applied {AppliedMonths} month(s) in room {RoomName}. Total: {TotalMonths}",
+				action,
+				mutation.AppliedMonths,
 				room.Name,
-				room.Bunker.SuppliesMonths
-			);
+				mutation.TotalMonths);
+		}
 
-			await Clients.Group(room.Id).SendAsync(
-				"BunkerSuppliesRemoved",
-				new
-				{
-					removedMonths,
-					totalSuppliesMonths = room.Bunker.SuppliesMonths,
-					bunker = room.Bunker.ToClientInfo()
-				}
-			);
+		private bool TryGetBunkerResourceMutationContext(out Room room, out Player actor)
+		{
+			room = _roomService.GetPlayerRoom(Context.ConnectionId)!;
+			actor = null!;
+			return room != null &&
+				_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out actor) &&
+				room.IsHost(actor) &&
+				!actor.IsSpectatorGm &&
+				actor.GmRole != GmMode.OmniscientGm &&
+				GmCapabilities.Allows(room.GmMode, GmCapability.ManagePublicGameState);
 		}
 		/// <summary>
 		/// Відправити нову подію з ефектом всім гравцям

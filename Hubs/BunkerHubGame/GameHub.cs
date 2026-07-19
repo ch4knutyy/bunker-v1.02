@@ -38,6 +38,7 @@ namespace Bunker.Hubs
         private readonly DirectorControlService _directorControls;
         private readonly LobbyStartService _lobbyStart;
         private readonly RoomGameSettingsService _roomGameSettings;
+        private readonly BunkerResourceService _bunkerResources;
         private readonly GmPanelStateBuilder _gmPanelStateBuilder;
         private readonly IAuthorizationService? _authorizationService;
         private GmCapability? _activeDirectorCapability;
@@ -61,7 +62,8 @@ namespace Bunker.Hubs
             IGameSessionHistoryService? gameSessionHistoryService = null,
             IRoomRecoveryCoordinator? roomRecovery = null,
             GmPanelStateBuilder? gmPanelStateBuilder = null,
-            IAuthorizationService? authorizationService = null)
+            IAuthorizationService? authorizationService = null,
+            BunkerResourceService? bunkerResources = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -89,6 +91,7 @@ namespace Bunker.Hubs
             _omniscientRequestRateLimits = omniscientRequestRateLimits ?? new OmniscientRequestRateLimitService(TimeProvider.System);
             _directorControls = directorControls ?? new DirectorControlService(TimeProvider.System);
             _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit);
+            _bunkerResources = bunkerResources ?? new BunkerResourceService();
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;

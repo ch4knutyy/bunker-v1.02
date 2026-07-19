@@ -118,6 +118,8 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
         AddThreatIssues(room, validIds, issues, language);
 
         if (room.Bunker is { Capacity: < 1 or > 99 }) Add("bunker_capacity_invalid", RoomIntegritySeverity.Error);
+        if (room.Bunker is { SuppliesMonths: < 0 or > 120 }) Add("bunker_food_invalid", RoomIntegritySeverity.Error);
+        if (room.Bunker is { WaterMonths: < 0 or > 120 }) Add("bunker_water_invalid", RoomIntegritySeverity.Error);
         if (!Enum.IsDefined(room.GmMode)) Add("gm_mode_invalid", RoomIntegritySeverity.Error);
         return issues;
     }
@@ -242,7 +244,8 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
             ["effects_applied_non_terminal"]="Effects are marked applied for a non-terminal threat.", ["threat_participant_missing"]="Threat participant is absent from the room.",
             ["terminal_effects_not_applied"]="Terminal threat is not marked as having applied its effects.",
             ["operation_leader_invalid"]="Operation leader is not a valid participant.", ["selected_plan_invalid"]="Selected plan does not exist in the active threat.",
-            ["duplicate_additional_condition"]="Duplicate additional physical condition detected.", ["bunker_capacity_invalid"]="Bunker capacity must be between 1 and 99.", ["gm_mode_invalid"]="GM mode is invalid."
+            ["duplicate_additional_condition"]="Duplicate additional physical condition detected.", ["bunker_capacity_invalid"]="Bunker capacity must be between 1 and 99.",
+            ["bunker_food_invalid"]="Bunker food must be between 0 and 120 months.", ["bunker_water_invalid"]="Bunker water must be between 0 and 120 months.", ["gm_mode_invalid"]="GM mode is invalid."
         };
         var uk = new Dictionary<string, string>(en, StringComparer.OrdinalIgnoreCase) {
             ["host_missing"]="Кімната не має хоста.", ["host_player_missing"]="Хост відсутній серед гравців кімнати.", ["duplicate_player_id"]="Виявлено дублікат ID гравця.",

@@ -1,0 +1,26 @@
+BUNKER FOOD + WATER AUDIT V1
+
+Records before: 200
+Records after: 205
+Unique IDs: 205
+Food range (suppliesMonths): 3..100 months
+Water range (waterMonths): 0..72 months
+
+Water assignment classes for existing records:
+- purification_system: 11
+- renewable_and_purified: 1
+- renewable_source: 27
+- stored_water: 137
+- weak_or_unspecified: 24
+
+New water-focused bunkers:
+- glacial_meltwater_bunker — food 5, water 60
+- artesian_aquifer_bunker — food 8, water 72
+- hydroelectric_dam_tunnels — food 10, water 42
+- rainwater_harvesting_bunker — food 12, water 30
+- desalination_plant_bunker — food 6, water 48
+
+Naming decision:
+- Keep suppliesMonths as the persisted/internal compatibility field.
+- Display it to users as Їжа / Food / Еда.
+- Add waterMonths as the new separate field.

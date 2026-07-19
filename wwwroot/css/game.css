@@ -2454,6 +2454,15 @@
     text-align: center;
 }
 
+.gm-bunker-resource-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gm-bunker-resource-controls .btn-gm-action {
+    width: 100%;
+}
+
 .gm-capacity-input:disabled { opacity: 0.65; }
 
 .public-game-timer {
@@ -3754,7 +3763,7 @@
     position:relative;
     z-index:2;
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(5,minmax(0,1fr));
     gap:1px;
     border-top:1px solid var(--bunker-divider);
     border-bottom:1px solid var(--bunker-divider);

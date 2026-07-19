@@ -63,7 +63,27 @@ namespace Bunker.Models
         public string Description { get; set; } = "";
         public int Capacity { get; set; } = 6; // Максимальна кількість людей
         public string Location { get; set; } = "";
-        public int SuppliesMonths { get; set; } = 12; // Запаси на місяців
+        [JsonPropertyName("suppliesMonths")]
+        public int SuppliesMonths { get; set; } = 12; // Запас їжі у місяцях
+        private int? _waterMonths;
+
+        [JsonIgnore]
+        public int WaterMonths
+        {
+            get => _waterMonths ?? SuppliesMonths;
+            set => _waterMonths = value;
+        }
+
+        [JsonPropertyName("waterMonths")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? SerializedWaterMonths
+        {
+            get => _waterMonths;
+            set => _waterMonths = value;
+        }
+
+        [JsonIgnore]
+        public bool HasExplicitWaterMonths => _waterMonths.HasValue;
         public List<string> Facilities { get; set; } = new(); // Доступні приміщення
         public List<string> Resources { get; set; } = new(); // Наявні ресурси
         public List<string> Problems { get; set; } = new(); // Проблеми бункера
@@ -85,6 +105,7 @@ namespace Bunker.Models
                 capacity = Capacity,
                 location = Location,
                 suppliesMonths = SuppliesMonths,
+                waterMonths = WaterMonths,
                 facilities = Facilities,
                 resources = Resources,
                 threatAssets = ThreatAssets.ToClientInfo(),

@@ -412,6 +412,12 @@
 					<button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
 					<button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
 				</div>
+				<div class="gm-control-row gm-bunker-resource-controls">
+					<button type="button" class="btn-gm-action btn-gm-supplies-add" onclick="addBunkerSupplies()">+ Їжа</button>
+					<button type="button" class="btn-gm-action btn-gm-supplies-remove" onclick="removeBunkerSupplies()">− Їжа</button>
+					<button type="button" class="btn-gm-action btn-gm-water-add" onclick="addBunkerWater()">+ Вода</button>
+					<button type="button" class="btn-gm-action btn-gm-water-remove" onclick="removeBunkerWater()">− Вода</button>
+				</div>
 			</div>
 		</div>
 
@@ -452,18 +458,6 @@
 					'catastrophe'
 					)">
 					Землетрус
-				</button>
-
-				<button type="button"
-						class="btn-gm-quick btn-gm-supplies-add"
-						onclick="addBunkerSupplies()">
-					+ Запаси
-				</button>
-
-				<button type="button"
-						class="btn-gm-quick btn-gm-supplies-remove"
-						onclick="removeBunkerSupplies()">
-					− Запаси
 				</button>
 
 				<button type="button"
