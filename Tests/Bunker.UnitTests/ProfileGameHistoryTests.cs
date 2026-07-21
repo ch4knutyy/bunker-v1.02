@@ -57,6 +57,25 @@ public sealed class ProfileGameHistoryTests
 	}
 
 	[Fact]
+	public async Task LeftEarlyAndAbandonedParticipationsAreNeitherActiveNorLosses()
+	{
+		await using var database = await TestDatabase.CreateAsync();
+		database.AddSession(database.UserAId, "LEFT", "Started", false, false, leftAtUtc: DateTime.UtcNow);
+		database.AddSession(database.UserAId, "ABANDONED", "Abandoned", false, false,
+			endedAtUtc: new DateTime(2026, 1, 1, 12, 20, 0, DateTimeKind.Utc));
+		await database.Context.SaveChangesAsync();
+
+		var statistics = await database.Service.GetStatisticsAsync(database.UserAId);
+		var history = await database.Service.GetHistoryAsync(database.UserAId, 1, 20);
+
+		Assert.Equal(0, statistics.ActiveGames);
+		Assert.Equal(0, statistics.CompletedGames);
+		Assert.Equal(0, statistics.Losses);
+		Assert.Contains(history.Items, item => item.RoomCode == "LEFT" && item.LeftAtUtc.HasValue);
+		Assert.Equal(TimeSpan.FromMinutes(20), history.Items.Single(item => item.RoomCode == "ABANDONED").Duration);
+	}
+
+	[Fact]
 	public async Task HistoryIsNewestFirstPaginatedInSqlAndCalculatesCompletedDurationOnly()
 	{
 		await using var database = await TestDatabase.CreateAsync();
@@ -158,7 +177,8 @@ public sealed class ProfileGameHistoryTests
 			bool isHost,
 			bool isWinner,
 			DateTime? startedAtUtc = null,
-			DateTime? endedAtUtc = null)
+			DateTime? endedAtUtc = null,
+			DateTime? leftAtUtc = null)
 		{
 			var sessionId = Guid.NewGuid();
 			var start = startedAtUtc ?? new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
@@ -182,7 +202,8 @@ public sealed class ProfileGameHistoryTests
 				IsHost = isHost,
 				IsWinner = isWinner,
 				WasEliminated = status == "Completed" && !isWinner,
-				EliminatedAtRound = status == "Completed" && !isWinner ? 2 : null
+				EliminatedAtRound = status == "Completed" && !isWinner ? 2 : null,
+				LeftAtUtc = leftAtUtc
 			});
 		}
 

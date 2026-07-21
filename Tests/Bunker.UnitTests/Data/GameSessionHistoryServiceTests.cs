@@ -133,5 +133,82 @@ namespace Bunker.UnitTests.Data
 			Assert.Equal("Completed", savedSession.Status);
 			Assert.NotNull(savedSession.EndedAtUtc);
 		}
+
+		[Fact]
+		public async Task AbandonSessionAsync_OnlyTransitionsStartedAndIsIdempotent()
+		{
+			await using var connection = new SqliteConnection("Data Source=:memory:");
+			await connection.OpenAsync();
+			var options = new DbContextOptionsBuilder<BunkerDbContext>().UseSqlite(connection).Options;
+
+			await using (var setup = new BunkerDbContext(options))
+			{
+				await setup.Database.EnsureCreatedAsync();
+				setup.GameSessions.AddRange(
+					Session(Guid.Parse("10000000-0000-0000-0000-000000000001"), GameSessionStatuses.Started),
+					Session(Guid.Parse("10000000-0000-0000-0000-000000000002"), GameSessionStatuses.Completed));
+				await setup.SaveChangesAsync();
+			}
+
+			await using (var update = new BunkerDbContext(options))
+			{
+				var service = new GameSessionHistoryService(update);
+				Assert.True(await service.AbandonSessionAsync(
+					Guid.Parse("10000000-0000-0000-0000-000000000001"), "last_player_left"));
+				Assert.True(await service.AbandonSessionAsync(
+					Guid.Parse("10000000-0000-0000-0000-000000000001"), "retry"));
+				Assert.False(await service.AbandonSessionAsync(
+					Guid.Parse("10000000-0000-0000-0000-000000000002"), "must_not_overwrite"));
+			}
+
+			await using var read = new BunkerDbContext(options);
+			var abandoned = await read.GameSessions.FindAsync(Guid.Parse("10000000-0000-0000-0000-000000000001"));
+			var completed = await read.GameSessions.FindAsync(Guid.Parse("10000000-0000-0000-0000-000000000002"));
+			Assert.Equal(GameSessionStatuses.Abandoned, abandoned!.Status);
+			Assert.NotNull(abandoned.EndedAtUtc);
+			Assert.Equal(GameSessionStatuses.Completed, completed!.Status);
+		}
+
+		[Fact]
+		public async Task AbandonStartedSessionsAsync_ClosesOnlySessionsFromBeforeStartup()
+		{
+			await using var connection = new SqliteConnection("Data Source=:memory:");
+			await connection.OpenAsync();
+			var options = new DbContextOptionsBuilder<BunkerDbContext>().UseSqlite(connection).Options;
+			var startupUtc = new DateTime(2026, 7, 21, 12, 0, 0, DateTimeKind.Utc);
+
+			await using (var setup = new BunkerDbContext(options))
+			{
+				await setup.Database.EnsureCreatedAsync();
+				var stale = Session(Guid.NewGuid(), GameSessionStatuses.Started);
+				stale.CreatedAtUtc = startupUtc.AddMinutes(-1);
+				var current = Session(Guid.NewGuid(), GameSessionStatuses.Started);
+				current.CreatedAtUtc = startupUtc.AddMinutes(1);
+				setup.GameSessions.AddRange(stale, current);
+				await setup.SaveChangesAsync();
+			}
+
+			await using (var update = new BunkerDbContext(options))
+			{
+				var count = await new GameSessionHistoryService(update)
+					.AbandonStartedSessionsAsync(startupUtc, "startup_recovery");
+				Assert.Equal(1, count);
+			}
+
+			await using var read = new BunkerDbContext(options);
+			Assert.Equal(1, await read.GameSessions.CountAsync(item => item.Status == GameSessionStatuses.Abandoned));
+			Assert.Equal(1, await read.GameSessions.CountAsync(item => item.Status == GameSessionStatuses.Started));
+		}
+
+		private static GameSessionEntity Session(Guid id, string status) => new()
+		{
+			Id = id,
+			RoomCode = id.ToString("N")[..8],
+			CreatedAtUtc = DateTime.UtcNow.AddMinutes(-5),
+			StartedAtUtc = DateTime.UtcNow.AddMinutes(-5),
+			EndedAtUtc = status == GameSessionStatuses.Completed ? DateTime.UtcNow : null,
+			Status = status,
+			PlayerCount = 2
+		};
 	}
 }

@@ -299,7 +299,13 @@ namespace Bunker.Services
                     }
                     else if (oldRoom.HostConnectionId == connectionId)
                     {
-                        TryAssignNewHost(oldRoom, "LeaveCurrentRoom", out _);
+						if (!TryAssignNewHost(oldRoom, "LeaveCurrentRoom", out _))
+						{
+							RemoveRoom(oldRoomId);
+							_logger.LogWarning(
+								"Кімната {RoomId} видалена: не вдалося призначити нового хоста",
+								oldRoomId);
+						}
                     }
                 }
                 _playerToRoom.TryRemove(connectionId, out _);

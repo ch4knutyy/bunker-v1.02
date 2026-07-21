@@ -15,4 +15,5 @@ public sealed class GameSessionPlayerEntity
 	public bool IsWinner { get; set; }
 	public bool WasEliminated { get; set; }
 	public int? EliminatedAtRound { get; set; }
+	public DateTime? LeftAtUtc { get; set; }
 }

@@ -2,11 +2,15 @@ const { test, expect } = require('@playwright/test');
 const { createTwoPlayerRoom, createRoom, joinRoom } = require('./game-test-helpers');
 
 async function startRoom(room) {
+  await expect(room.host.locator('body')).not.toHaveAttribute('data-apocalypse-theme', /.+/);
+  await expect(room.guest.locator('body')).not.toHaveAttribute('data-apocalypse-theme', /.+/);
   await room.host.locator('#lobbyReadyButton').click();
   await room.guest.locator('#lobbyReadyButton').click();
   await expect(room.host.locator('#lobbySummary')).toContainText(/2 (із|of|из) 2/, { timeout: 15000 });
   await room.host.locator('#lobbyStartPreviewButton').click();
   await expect(room.host.locator('#lobbyStartPreview')).toContainText(/готова до старту|ready to start|готова к старту/i);
+  const guestWarning = room.host.locator('#guestAccountWarningModal');
+  if (await guestWarning.isVisible()) await room.host.locator('#guestWarningContinueButton').click();
   await room.host.locator('#startGameBtn').click();
   await expect(room.host.locator('#apocalypseContent .apocalypse-scenario-shell')).toHaveCount(1, { timeout: 15000 });
 }
@@ -24,6 +28,8 @@ function fixture(name = 'Контрольований атмосферний с�
     requirements: ['Герметичне укриття', 'Запас чистої води'],
     consequences: ['Зруйнована інфраструктура', 'Тривала ядерна зима'],
     tags: ['radiation', 'structural_damage'],
+    categoryId: 'armageddon',
+    visualThemeId: 'extinction-red',
     imageUrl: '/uploads/apocalypses/alien_terraforming.png'
   };
 }
@@ -32,6 +38,10 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
   const room = await createTwoPlayerRoom(browser, `Apocalypse desktop ${Date.now()}`);
   try {
     await startRoom(room);
+    const appliedTheme = await room.host.locator('body').getAttribute('data-apocalypse-theme');
+    expect(['extinction-red', 'storm-blue', 'biohazard-green', 'seismic-amber', 'cosmic-violet', 'machine-cyan', 'wasteland-olive', 'collapse-rust', 'glitch-magenta', 'occult-indigo']).toContain(appliedTheme);
+    await expect(room.host.locator('body')).toHaveClass(/apocalypse-theme-active/);
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-category', /.+/);
     const shell = room.host.locator('#apocalypseContent .apocalypse-scenario-shell');
     await expect(shell.locator('.apocalypse-hero')).toBeVisible();
     await expect(shell.locator('.apocalypse-title')).not.toBeEmpty();
@@ -46,6 +56,7 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
     await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
     await expect(room.host.locator('#apocalypseContent .apocalypse-scenario-shell')).toHaveCount(1, { timeout: 15000 });
     await expect(room.host.locator('.apocalypse-title')).toHaveText(originalTitle);
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-theme', appliedTheme);
 
     await room.host.evaluate(nextScenario => {
       // Apply the same current-snapshot + renderer pair used by ApocalypseChanged.
@@ -59,6 +70,8 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
     await expect(room.host.locator('.content-requirements')).toBeVisible();
     await expect(room.host.locator('.content-consequences')).toBeVisible();
     await expect(room.host.locator('.apocalypse-scenario-shell')).toHaveClass(/variant-nuclear/);
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-theme', 'extinction-red');
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-category', 'armageddon');
     const heroImage = room.host.locator('.apocalypse-hero-media .apocalypse-hero-image');
     await expect(heroImage).toBeVisible();
     await expect.poll(() => heroImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
@@ -96,6 +109,10 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
     await expect(room.host.locator('.apocalypse-metric-label').first()).toHaveText('Danger');
     await expect(room.host.locator('.content-threats .apocalypse-content-title')).toContainText('Main threats');
     await room.host.evaluate(() => { setCurrentLanguage('uk'); renderCurrentGameUI(); });
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-theme', 'extinction-red');
+    await room.host.evaluate(() => { currentApocalypse = null; renderApocalypse(null); });
+    await expect(room.host.locator('body')).not.toHaveAttribute('data-apocalypse-theme', /.+/);
+    await expect(room.host.locator('body')).not.toHaveClass(/apocalypse-theme-active/);
   } finally {
     await room.close();
   }

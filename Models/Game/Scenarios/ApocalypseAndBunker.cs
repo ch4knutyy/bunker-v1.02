@@ -22,6 +22,10 @@ namespace Bunker.Models
         [JsonPropertyName("_i18n")]
         public Dictionary<string, JsonElement>? I18n { get; set; }
 
+        public string CategoryId { get; set; } = "";
+        public string VisualThemeId { get; set; } = "default-dark";
+        public ApocalypseGameplayDefinition? Gameplay { get; set; }
+
         public object ToClientInfo()
         {
             return new
@@ -36,7 +40,19 @@ namespace Bunker.Models
                 requirements = Requirements,
                 tags = Tags,
                 imageUrl = ImageUrl,
-                _i18n = I18n
+                _i18n = I18n,
+                categoryId = CategoryId,
+                visualThemeId = VisualThemeId,
+                interactive = Gameplay?.Interactive == true,
+                gameplay = Gameplay == null ? null : new
+                {
+                    interactive = Gameplay.Interactive,
+                    activationMode = Gameplay.Activation?.Mode,
+                    activationTrigger = Gameplay.Activation?.Trigger,
+                    firstRound = Gameplay.Activation?.FirstRound,
+                    intervalRounds = Gameplay.Activation?.IntervalRounds,
+                    configurable = Gameplay.Activation?.Configurable == true
+                }
             };
         }
         
@@ -139,6 +155,18 @@ namespace Bunker.Models
     /// </summary>
     public class ApocalypsesRoot
     {
+        [JsonPropertyName("_i18n_meta")]
+        public JsonElement? I18nMeta { get; set; }
+
+        [JsonPropertyName("_apocalypseCategoryCatalog")]
+        public List<ApocalypseCategoryDefinition> CategoryCatalog { get; set; } = new();
+
+        [JsonPropertyName("_visualThemeProfiles")]
+        public List<ApocalypseVisualThemeDefinition> VisualThemeProfiles { get; set; } = new();
+
+        [JsonPropertyName("_interactiveEffectSchema")]
+        public ApocalypseInteractiveSchemaDefinition? InteractiveEffectSchema { get; set; }
+
         public List<Apocalypse> Apocalypses { get; set; } = new();
     }
 

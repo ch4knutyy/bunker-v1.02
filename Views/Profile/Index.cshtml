@@ -88,8 +88,8 @@
                                 </time>
                             </div>
                             <div class="profile-game-badges">
-                                <span class="profile-badge profile-badge-status" data-i18n="@(game.Status == "Started" ? "profileGameInProgress" : "profileCompletedStatus")">
-                                    @(game.Status == "Started" ? "Партія триває" : "Завершено")
+								<span class="profile-badge profile-badge-status" data-i18n="@StatusKey(game)">
+									@StatusText(game)
                                 </span>
                                 <span class="profile-badge" data-i18n="@(game.IsHost ? "profileHost" : "profilePlayer")">
                                     @(game.IsHost ? "Хост" : "Гравець")
@@ -126,22 +126,39 @@
             : null;
 
     private static string ResultKey(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
-        game.Status == "Started" ? "profileGameInProgress" :
+		game.LeftAtUtc.HasValue ? "profileLeftEarly" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Abandoned ? "profileGameAbandoned" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Started ? "profileGameInProgress" :
         game.IsWinner ? "profileVictory" :
         game.WasEliminated ? "profileEliminated" :
         "profileCompletedWithoutVictory";
 
     private static string ResultText(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
-        game.Status == "Started" ? "Партія триває" :
+		game.LeftAtUtc.HasValue ? "Покинуто достроково" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Abandoned ? "Партію перервано" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Started ? "Партія триває" :
         game.IsWinner ? "Перемога" :
         game.WasEliminated ? "Елімінований" :
         "Завершено без перемоги";
 
     private static string ResultClass(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
-        game.Status == "Started" ? "profile-badge-active" :
+		game.LeftAtUtc.HasValue || game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Abandoned ? "profile-badge-neutral" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Started ? "profile-badge-active" :
         game.IsWinner ? "profile-badge-win" :
         game.WasEliminated ? "profile-badge-eliminated" :
         "profile-badge-neutral";
+
+	private static string StatusKey(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+		game.LeftAtUtc.HasValue ? "profileLeftEarly" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Abandoned ? "profileGameAbandoned" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Started ? "profileGameInProgress" :
+		"profileCompletedStatus";
+
+	private static string StatusText(Bunker.Models.ViewModels.Account.ProfileGameHistoryItem game) =>
+		game.LeftAtUtc.HasValue ? "Покинуто достроково" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Abandoned ? "Партію перервано" :
+		game.Status == Bunker.Services.Bunker.GameSessions.GameSessionStatuses.Started ? "Партія триває" :
+		"Завершено";
 
     private static string FormatDuration(TimeSpan duration)
     {

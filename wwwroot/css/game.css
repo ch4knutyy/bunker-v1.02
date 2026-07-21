@@ -9725,3 +9725,257 @@ body.gm-panel-v2-open .modal {
         transition: none;
     }
 }
+
+/* ==================== APOCALYPSE SITE THEMES ==================== */
+body.apocalypse-theme-active {
+    --apocalypse-page-bg: #090b10;
+    --apocalypse-page-glow: rgba(116, 130, 160, .14);
+    --apocalypse-accent: #9aa6bd;
+    --apocalypse-accent-strong: #d7deea;
+    --apocalypse-border: rgba(154, 166, 189, .42);
+    --apocalypse-panel-surface: rgba(18, 22, 31, .9);
+    --apocalypse-panel-surface-strong: rgba(24, 29, 40, .96);
+    --apocalypse-overlay: repeating-linear-gradient(135deg, transparent 0 24px, rgba(255,255,255,.025) 25px 26px);
+    --apocalypse-muted: #aeb7c8;
+    --apocalypse-warning: #e6bd69;
+    --apocalypse-shadow: rgba(0, 0, 0, .58);
+    --apocalypse-pattern-opacity: .08;
+    background-color: var(--apocalypse-page-bg);
+    background-image: radial-gradient(circle at 50% 0, var(--apocalypse-page-glow), transparent 58%);
+    background-attachment: fixed;
+    transition: background-color 750ms ease, background-image 750ms ease;
+}
+
+body[data-apocalypse-theme="extinction-red"] {
+    --apocalypse-page-bg: #100809;
+    --apocalypse-page-glow: rgba(222, 54, 45, .23);
+    --apocalypse-accent: #d85a4f;
+    --apocalypse-accent-strong: #ff8d7e;
+    --apocalypse-border: rgba(226, 91, 77, .48);
+    --apocalypse-panel-surface: rgba(31, 14, 15, .9);
+    --apocalypse-panel-surface-strong: rgba(42, 17, 18, .96);
+    --apocalypse-overlay: radial-gradient(circle at 75% 12%, rgba(255,56,40,.19), transparent 27%), repeating-linear-gradient(112deg, transparent 0 33px, rgba(218,104,80,.055) 34px 35px);
+    --apocalypse-muted: #c8aaa7;
+    --apocalypse-warning: #efb15e;
+    --apocalypse-shadow: rgba(103, 9, 5, .48);
+    --apocalypse-pattern-opacity: .11;
+}
+
+body[data-apocalypse-theme="storm-blue"] {
+    --apocalypse-page-bg: #07101a;
+    --apocalypse-page-glow: rgba(65, 137, 210, .22);
+    --apocalypse-accent: #559ad2;
+    --apocalypse-accent-strong: #9bd2ff;
+    --apocalypse-border: rgba(91, 157, 211, .48);
+    --apocalypse-panel-surface: rgba(10, 25, 39, .91);
+    --apocalypse-panel-surface-strong: rgba(12, 34, 53, .96);
+    --apocalypse-overlay: radial-gradient(circle at 82% 8%, rgba(196,226,255,.15), transparent 16%), repeating-linear-gradient(112deg, transparent 0 18px, rgba(135,196,239,.07) 19px 20px);
+    --apocalypse-muted: #a5bccc;
+    --apocalypse-warning: #e7bb68;
+    --apocalypse-shadow: rgba(0, 29, 62, .55);
+    --apocalypse-pattern-opacity: .12;
+}
+
+body[data-apocalypse-theme="biohazard-green"] {
+    --apocalypse-page-bg: #08110c;
+    --apocalypse-page-glow: rgba(73, 171, 91, .2);
+    --apocalypse-accent: #64ad68;
+    --apocalypse-accent-strong: #a0e69d;
+    --apocalypse-border: rgba(104, 180, 105, .45);
+    --apocalypse-panel-surface: rgba(12, 29, 18, .91);
+    --apocalypse-panel-surface-strong: rgba(16, 39, 23, .96);
+    --apocalypse-overlay: radial-gradient(circle at 18% 22%, rgba(129,220,124,.12) 0 2px, transparent 3px), radial-gradient(circle at 72% 62%, rgba(129,220,124,.09) 0 3px, transparent 4px);
+    --apocalypse-muted: #a7c1aa;
+    --apocalypse-warning: #d9bd61;
+    --apocalypse-shadow: rgba(2, 55, 16, .48);
+    --apocalypse-pattern-opacity: .13;
+}
+
+body[data-apocalypse-theme="seismic-amber"] {
+    --apocalypse-page-bg: #120d07;
+    --apocalypse-page-glow: rgba(213, 139, 45, .2);
+    --apocalypse-accent: #c58a43;
+    --apocalypse-accent-strong: #efbd72;
+    --apocalypse-border: rgba(202, 143, 67, .47);
+    --apocalypse-panel-surface: rgba(34, 24, 13, .91);
+    --apocalypse-panel-surface-strong: rgba(45, 31, 15, .96);
+    --apocalypse-overlay: linear-gradient(117deg, transparent 0 47%, rgba(236,178,93,.08) 47.4% 48%, transparent 48.4%), repeating-linear-gradient(24deg, transparent 0 42px, rgba(183,130,66,.045) 43px 44px);
+    --apocalypse-muted: #c6b49d;
+    --apocalypse-warning: #e8b45d;
+    --apocalypse-shadow: rgba(74, 38, 0, .5);
+    --apocalypse-pattern-opacity: .11;
+}
+
+body[data-apocalypse-theme="cosmic-violet"] {
+    --apocalypse-page-bg: #0b0817;
+    --apocalypse-page-glow: rgba(130, 80, 216, .24);
+    --apocalypse-accent: #916bd0;
+    --apocalypse-accent-strong: #c7a7ff;
+    --apocalypse-border: rgba(151, 109, 220, .48);
+    --apocalypse-panel-surface: rgba(21, 15, 40, .91);
+    --apocalypse-panel-surface-strong: rgba(29, 19, 54, .96);
+    --apocalypse-overlay: radial-gradient(circle at 18% 18%, rgba(255,255,255,.22) 0 1px, transparent 2px), radial-gradient(circle at 78% 38%, rgba(204,183,255,.18) 0 1px, transparent 2px), radial-gradient(circle at 45% 76%, rgba(178,146,255,.16) 0 1px, transparent 2px);
+    --apocalypse-muted: #b9aed0;
+    --apocalypse-warning: #dbb966;
+    --apocalypse-shadow: rgba(39, 9, 85, .55);
+    --apocalypse-pattern-opacity: .15;
+}
+
+body[data-apocalypse-theme="machine-cyan"] {
+    --apocalypse-page-bg: #061014;
+    --apocalypse-page-glow: rgba(40, 181, 201, .2);
+    --apocalypse-accent: #42aebc;
+    --apocalypse-accent-strong: #8be8ee;
+    --apocalypse-border: rgba(62, 181, 194, .48);
+    --apocalypse-panel-surface: rgba(8, 27, 32, .92);
+    --apocalypse-panel-surface-strong: rgba(9, 38, 44, .96);
+    --apocalypse-overlay: repeating-linear-gradient(0deg, transparent 0 5px, rgba(94,219,229,.065) 6px 7px), linear-gradient(90deg, transparent 0 72%, rgba(66,205,216,.07) 72.5% 73%, transparent 73.5%);
+    --apocalypse-muted: #9fbfc3;
+    --apocalypse-warning: #ddbd63;
+    --apocalypse-shadow: rgba(0, 56, 64, .53);
+    --apocalypse-pattern-opacity: .11;
+}
+
+body[data-apocalypse-theme="wasteland-olive"] {
+    --apocalypse-page-bg: #0f1008;
+    --apocalypse-page-glow: rgba(139, 145, 62, .18);
+    --apocalypse-accent: #94934e;
+    --apocalypse-accent-strong: #cfcc83;
+    --apocalypse-border: rgba(151, 151, 80, .45);
+    --apocalypse-panel-surface: rgba(27, 28, 14, .92);
+    --apocalypse-panel-surface-strong: rgba(37, 37, 17, .96);
+    --apocalypse-overlay: radial-gradient(ellipse at 50% 110%, rgba(129,119,52,.16), transparent 60%), repeating-linear-gradient(25deg, transparent 0 29px, rgba(185,170,91,.04) 30px 31px);
+    --apocalypse-muted: #babb9d;
+    --apocalypse-warning: #dbaf58;
+    --apocalypse-shadow: rgba(48, 49, 5, .5);
+    --apocalypse-pattern-opacity: .12;
+}
+
+body[data-apocalypse-theme="collapse-rust"] {
+    --apocalypse-page-bg: #120b08;
+    --apocalypse-page-glow: rgba(168, 78, 42, .2);
+    --apocalypse-accent: #ad6848;
+    --apocalypse-accent-strong: #e0a17d;
+    --apocalypse-border: rgba(179, 101, 68, .46);
+    --apocalypse-panel-surface: rgba(34, 21, 16, .92);
+    --apocalypse-panel-surface-strong: rgba(46, 27, 19, .96);
+    --apocalypse-overlay: repeating-linear-gradient(7deg, transparent 0 37px, rgba(208,126,91,.05) 38px 39px), radial-gradient(ellipse at 0 50%, rgba(150,66,35,.14), transparent 34%);
+    --apocalypse-muted: #c3aaa0;
+    --apocalypse-warning: #e0b05f;
+    --apocalypse-shadow: rgba(78, 26, 8, .52);
+    --apocalypse-pattern-opacity: .12;
+}
+
+body[data-apocalypse-theme="glitch-magenta"] {
+    --apocalypse-page-bg: #120816;
+    --apocalypse-page-glow: rgba(202, 50, 182, .2);
+    --apocalypse-accent: #c24caf;
+    --apocalypse-accent-strong: #f295e3;
+    --apocalypse-border: rgba(205, 78, 185, .48);
+    --apocalypse-panel-surface: rgba(35, 13, 39, .92);
+    --apocalypse-panel-surface-strong: rgba(47, 16, 52, .96);
+    --apocalypse-overlay: linear-gradient(90deg, transparent 0 19%, rgba(241,83,214,.08) 19.5% 20%, transparent 20.5% 68%, rgba(77,207,225,.055) 68.5% 69%, transparent 69.5%), repeating-linear-gradient(0deg, transparent 0 17px, rgba(222,91,200,.04) 18px 19px);
+    --apocalypse-muted: #c5a9c3;
+    --apocalypse-warning: #e1b65e;
+    --apocalypse-shadow: rgba(82, 6, 76, .54);
+    --apocalypse-pattern-opacity: .12;
+}
+
+body[data-apocalypse-theme="occult-indigo"] {
+    --apocalypse-page-bg: #090918;
+    --apocalypse-page-glow: rgba(78, 73, 167, .23);
+    --apocalypse-accent: #7772bd;
+    --apocalypse-accent-strong: #aaa4ed;
+    --apocalypse-border: rgba(119, 113, 191, .48);
+    --apocalypse-panel-surface: rgba(17, 17, 40, .92);
+    --apocalypse-panel-surface-strong: rgba(23, 22, 54, .96);
+    --apocalypse-overlay: radial-gradient(circle at 22% 32%, transparent 0 31px, rgba(132,124,211,.065) 32px 33px, transparent 34px), radial-gradient(circle at 76% 67%, transparent 0 46px, rgba(132,124,211,.05) 47px 48px, transparent 49px);
+    --apocalypse-muted: #aaa9c6;
+    --apocalypse-warning: #d7b762;
+    --apocalypse-shadow: rgba(20, 16, 78, .55);
+    --apocalypse-pattern-opacity: .13;
+}
+
+body.apocalypse-theme-active::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    background-image: var(--apocalypse-overlay);
+    background-size: 220px 220px, auto;
+    opacity: var(--apocalypse-pattern-opacity);
+    animation: apocalypse-ambient-drift 24s linear infinite alternate, apocalypse-ambient-pulse 9s ease-in-out infinite;
+}
+
+body.apocalypse-theme-active :is(#gameSection, .site-command-bar, .site-round-hud, .site-hud-module, .player-overview-section, .scenario-immersive-panel, .special-cards-section, .voting-panel, .events-section-main, .events-panel, .gm-panel-v2-drawer, .modal-content) {
+    border-color: var(--apocalypse-border);
+    box-shadow: 0 18px 45px var(--apocalypse-shadow), inset 0 1px 0 rgba(255,255,255,.025);
+    transition: border-color 650ms ease, box-shadow 650ms ease, background-color 650ms ease;
+}
+
+body.apocalypse-theme-active :is(.site-command-bar, .site-round-hud, .site-hud-module, .scenario-immersive-panel, .voting-panel, .events-section-main, .events-panel, .gm-panel-v2-drawer, .modal-content) {
+    background-color: var(--apocalypse-panel-surface);
+}
+
+body.apocalypse-theme-active :is(.site-section-heading, .scenario-section-header, .round-status-label, .apocalypse-panel-title, .bunker-panel-title, .threat-panel-title, .gm-panel-v2-header) {
+    border-color: var(--apocalypse-border);
+    text-shadow: 0 0 20px var(--apocalypse-page-glow);
+}
+
+body.apocalypse-theme-active :is(.section-header-line, .voting-progress, .room-state.state-playing) {
+    background-color: var(--apocalypse-accent);
+}
+
+body.apocalypse-theme-active :is(.player-dossier-card, .characteristic-card, .characteristic-item, .player-overview-shell, .player-comparison-shell, .apocalypse-scenario-shell, .bunker-scenario-shell) {
+    border-color: var(--apocalypse-border);
+}
+
+body.apocalypse-theme-active :is(.btn-primary, .btn-secondary, .btn-gm, .btn-vote, .char-btn):not(:disabled) {
+    border-color: var(--apocalypse-accent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--apocalypse-accent) 22%, transparent);
+}
+
+body.apocalypse-theme-active :is(.btn-primary, .btn-secondary, .btn-gm, .btn-vote, .char-btn):focus-visible {
+    outline: 3px solid var(--apocalypse-accent-strong);
+    outline-offset: 3px;
+}
+
+body.apocalypse-theme-revealing :is(.site-command-bar, .site-round-hud, #gameSection) {
+    animation: apocalypse-theme-reveal 900ms ease-out both;
+}
+
+@keyframes apocalypse-theme-reveal {
+    from { border-color: rgba(255,255,255,.12); filter: saturate(.65); }
+    to { border-color: var(--apocalypse-border); filter: saturate(1); }
+}
+
+@keyframes apocalypse-ambient-drift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 34px 54px, -24px 18px; }
+}
+
+@keyframes apocalypse-ambient-pulse {
+    0%, 100% { opacity: .045; }
+    50% { opacity: var(--apocalypse-pattern-opacity); }
+}
+
+@media (max-width: 760px) {
+    body.apocalypse-theme-active::before {
+        background-size: 170px 170px, auto;
+        opacity: .06;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.apocalypse-theme-active,
+    body.apocalypse-theme-active::before,
+    body.apocalypse-theme-revealing :is(.site-command-bar, .site-round-hud, #gameSection) {
+        animation: none;
+        transition: none;
+    }
+}

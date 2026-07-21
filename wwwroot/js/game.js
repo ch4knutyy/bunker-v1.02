@@ -967,6 +967,7 @@ function clearGameFinishedStateForLobby() {
 	gameTimerClockAnchor = null;
 	myVote = null;
 	currentApocalypse = null;
+	if (typeof renderApocalypse === "function") renderApocalypse(null);
 	currentBunker = null;
 	['myPlayerCards', 'mySpecialCardsList', 'votingCandidates', 'votingResultsContent', 'threatContent'].forEach(id => {
 		const element = document.getElementById(id);
@@ -2258,7 +2259,7 @@ function renderCurrentGameUI() {
 			if (container) container.innerHTML = `<p style="color: var(--color-text-muted);">${t('noData')}</p>`;
 		}
 	}
-	if (currentApocalypse && typeof renderApocalypse === "function") renderApocalypse(currentApocalypse);
+	if (typeof renderApocalypse === "function") renderApocalypse(currentApocalypse);
 	if (currentBunker && typeof renderBunker === "function") renderBunker(currentBunker);
 	if (typeof renderThreatPanel === "function") renderThreatPanel(currentThreat);
 	if (typeof updateRoundStatusUI === "function") updateRoundStatusUI();
@@ -2282,6 +2283,7 @@ function resetClientGameStateForNewRoom() {
 	pendingJoinRoomId = null;
 	hostToken = null;
 	currentApocalypse = null;
+	if (typeof renderApocalypse === "function") renderApocalypse(null);
 	currentBunker = null;
 	currentThreat = null;
 	currentVoting = null;
@@ -3555,7 +3557,8 @@ function registerSignalREvents() {
 	connection.off("PlayerKicked");
 	connection.on("PlayerKicked", function (data) {
 		alert(data.message || data.Message || 'Вас виключено з кімнати');
-		currentRoom = null; myPlayerData = null; isHost = false; roomPlayers = {};
+		currentRoom = null; myPlayerData = null; isHost = false; roomPlayers = {}; currentApocalypse = null;
+		renderApocalypse(null);
 		clearSession(); showLobbySection();
 	});
 
@@ -3594,6 +3597,8 @@ function registerSignalREvents() {
 		myPlayerData = null;
 		isHost = false;
 		roomPlayers = {};
+		currentApocalypse = null;
+		renderApocalypse(null);
 		clearSession();
 		showLobbySection();
 		addEventMessage(`Ви покинули кімнату`);
@@ -5863,11 +5868,102 @@ const apocalypseIconSvgRegistry = Object.freeze({
 	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 55H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
 });
 
+const apocalypseVisualThemeRegistry = Object.freeze({
+	'extinction-red': Object.freeze({ categoryId: 'armageddon', cardVariant: 'nuclear' }),
+	'storm-blue': Object.freeze({ categoryId: 'weather', cardVariant: 'climate' }),
+	'biohazard-green': Object.freeze({ categoryId: 'biological', cardVariant: 'biological' }),
+	'seismic-amber': Object.freeze({ categoryId: 'geological', cardVariant: 'collapse' }),
+	'cosmic-violet': Object.freeze({ categoryId: 'cosmic', cardVariant: 'cosmic' }),
+	'machine-cyan': Object.freeze({ categoryId: 'technology', cardVariant: 'ai' }),
+	'wasteland-olive': Object.freeze({ categoryId: 'ecological', cardVariant: 'collapse' }),
+	'collapse-rust': Object.freeze({ categoryId: 'social', cardVariant: 'collapse' }),
+	'glitch-magenta': Object.freeze({ categoryId: 'anomaly', cardVariant: 'anomaly' }),
+	'occult-indigo': Object.freeze({ categoryId: 'supernatural', cardVariant: 'mystical' })
+});
+
+const apocalypseCategoryThemeRegistry = Object.freeze(Object.fromEntries(
+	Object.entries(apocalypseVisualThemeRegistry).map(([themeId, definition]) => [definition.categoryId, themeId])
+));
+
+function normalizeApocalypseVisualThemeId(value) {
+	const normalized = String(value ?? '').trim().toLowerCase();
+	return Object.prototype.hasOwnProperty.call(apocalypseVisualThemeRegistry, normalized)
+		? normalized
+		: 'default-dark';
+}
+
+function resolveApocalypseVisualTheme(apocalypse) {
+	if (!apocalypse) return 'default-dark';
+	const hasThemeField = Object.prototype.hasOwnProperty.call(apocalypse, 'visualThemeId') ||
+		Object.prototype.hasOwnProperty.call(apocalypse, 'VisualThemeId');
+	if (hasThemeField) {
+		return normalizeApocalypseVisualThemeId(apocalypse.visualThemeId ?? apocalypse.VisualThemeId);
+	}
+
+	const category = normalizeApocalypseMetadataValue(
+		apocalypse.categoryId ?? apocalypse.CategoryId ?? apocalypse.category ?? apocalypse.Category
+	);
+	if (apocalypseCategoryThemeRegistry[category]) return apocalypseCategoryThemeRegistry[category];
+
+	const tags = (Array.isArray(apocalypse.tags ?? apocalypse.Tags) ? (apocalypse.tags ?? apocalypse.Tags) : [])
+		.map(normalizeApocalypseMetadataValue)
+		.join(' ');
+	const tagRules = [
+		['extinction-red', /armageddon|nuclear|radiation|fallout/],
+		['storm-blue', /weather|climate|storm|flood|winter_cold/],
+		['biohazard-green', /biological|biohazard|infection|virus|fungal|zombie/],
+		['seismic-amber', /geological|earthquake|seismic|volcanic/],
+		['cosmic-violet', /cosmic|space|asteroid|meteor|solar/],
+		['machine-cyan', /technology|ai_machines|cyber|robot|machine/],
+		['wasteland-olive', /ecological|drought|toxic_contamination|wasteland/],
+		['collapse-rust', /social_conflict|structural_damage|collapse|infrastructure/],
+		['glitch-magenta', /anomaly|reality_distortion|dimensional/],
+		['occult-indigo', /supernatural|mystical|occult|magic/]
+	];
+	return tagRules.find(([, pattern]) => pattern.test(tags))?.[0] || 'default-dark';
+}
+
+function clearApocalypseVisualTheme() {
+	const root = document.body;
+	if (!root) return;
+	root.classList.remove('apocalypse-theme-active', 'apocalypse-theme-revealing');
+	delete root.dataset.apocalypseTheme;
+	delete root.dataset.apocalypseCategory;
+}
+
+function applyApocalypseVisualTheme(apocalypse) {
+	const root = document.body;
+	if (!root) return 'default-dark';
+	const themeId = resolveApocalypseVisualTheme(apocalypse);
+	if (themeId === 'default-dark') {
+		clearApocalypseVisualTheme();
+		return themeId;
+	}
+
+	const definition = apocalypseVisualThemeRegistry[themeId];
+	if (root.dataset.apocalypseTheme === themeId &&
+		root.dataset.apocalypseCategory === definition.categoryId &&
+		root.classList.contains('apocalypse-theme-active')) return themeId;
+
+	clearApocalypseVisualTheme();
+	root.dataset.apocalypseTheme = themeId;
+	root.dataset.apocalypseCategory = definition.categoryId;
+	root.classList.add('apocalypse-theme-active', 'apocalypse-theme-revealing');
+	window.setTimeout(() => root.classList.remove('apocalypse-theme-revealing'), 900);
+	return themeId;
+}
+
+function syncApocalypseVisualTheme(apocalypse) {
+	return apocalypse ? applyApocalypseVisualTheme(apocalypse) : (clearApocalypseVisualTheme(), 'default-dark');
+}
+
 function normalizeApocalypseMetadataValue(value) {
 	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
 
 function resolveApocalypseVisualVariant(model) {
+	const themeId = normalizeApocalypseVisualThemeId(model?.visualThemeId);
+	if (themeId !== 'default-dark') return apocalypseVisualThemeRegistry[themeId].cardVariant;
 	const metadata = [
 		...(Array.isArray(model?.tags) ? model.tags : []),
 		model?.category, model?.type, model?.classification, model?.imageCategory, model?.imageType
@@ -5925,7 +6021,9 @@ function buildApocalypseScenarioModel(source) {
 		consequences: getLocalizedArray(source, 'consequences'),
 		imageUrl: normalizeLocalScenarioImageUrl(source.imageUrl || source.ImageUrl || source.uploadedImagePath || source.UploadedImagePath),
 		tags: Array.isArray(rawTags) ? rawTags : [],
-		category: source.category || source.Category || '',
+		categoryId: source.categoryId || source.CategoryId || '',
+		visualThemeId: source.visualThemeId ?? source.VisualThemeId,
+		category: source.categoryId || source.CategoryId || source.category || source.Category || '',
 		type: source.type || source.Type || '',
 		classification: source.classification || source.Classification || '',
 		imageCategory: source.imageCategory || source.ImageCategory || '',
@@ -6000,12 +6098,18 @@ function renderApocalypseScenario(model) {
 
 function renderApocalypse(apocalypse) {
 	const container = document.getElementById('apocalypseContent');
-	if (!container) return;
 	const panel = document.getElementById('apocalypsePanel');
 	const enabled = isLobbyConfiguredSystemEnabled('apocalypseEnabled');
 	if (panel) { panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none'; }
-	if (!enabled) { container.innerHTML = ''; updateScenarioSectionVisibility(); return; }
+	if (!apocalypse || !enabled) {
+		if (container) container.innerHTML = '';
+		clearApocalypseVisualTheme();
+		updateScenarioSectionVisibility();
+		return;
+	}
+	if (!container) { syncApocalypseVisualTheme(apocalypse); return; }
 	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse));
+	syncApocalypseVisualTheme(apocalypse);
 	updateScenarioSectionVisibility();
 }
 

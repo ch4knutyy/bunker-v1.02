@@ -56,5 +56,5 @@ test('return event clears post-game state and restores the canonical lobby rende
   assert.match(returnedHandler, /renderLobbyState\(\)/);
   assert.match(lobbyHub, /"GameReturnedToLobby"/);
   assert.match(lobbyHub, /"game_returned_to_lobby"/);
-  assert.match(lobbyHub, /CompleteSessionAsync\(previousSessionId\)/);
+  assert.match(lobbyHub, /CompleteSessionAsync\(previousSessionId,\s*result\.ParticipantResults\)/);
 });

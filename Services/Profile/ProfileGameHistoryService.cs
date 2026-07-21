@@ -1,13 +1,12 @@
 using Bunker.Data.Persistence;
 using Bunker.Models.ViewModels.Account;
+using Bunker.Services.Bunker.GameSessions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bunker.Services.Profile;
 
 public sealed class ProfileGameHistoryService : IProfileGameHistoryService
 {
-	private const string CompletedStatus = "Completed";
-	private const string StartedStatus = "Started";
 	private const int MaximumPageSize = 50;
 	private readonly BunkerDbContext _dbContext;
 
@@ -24,12 +23,18 @@ public sealed class ProfileGameHistoryService : IProfileGameHistoryService
 			.GroupBy(_ => 1)
 			.Select(group => new
 			{
-				CompletedGames = group.Count(item => item.GameSession.Status == CompletedStatus),
-				ActiveGames = group.Count(item => item.GameSession.Status == StartedStatus),
+				CompletedGames = group.Count(item =>
+					item.GameSession.Status == GameSessionStatuses.Completed &&
+					item.LeftAtUtc == null),
+				ActiveGames = group.Count(item =>
+					item.GameSession.Status == GameSessionStatuses.Started &&
+					item.LeftAtUtc == null),
 				Wins = group.Count(item =>
-					item.GameSession.Status == CompletedStatus && item.IsWinner),
+					item.GameSession.Status == GameSessionStatuses.Completed &&
+					item.LeftAtUtc == null && item.IsWinner),
 				Losses = group.Count(item =>
-					item.GameSession.Status == CompletedStatus && !item.IsWinner),
+					item.GameSession.Status == GameSessionStatuses.Completed &&
+					item.LeftAtUtc == null && !item.IsWinner),
 				HostedGames = group.Count(item => item.IsHost)
 			})
 			.SingleOrDefaultAsync(cancellationToken);
@@ -126,13 +131,16 @@ public sealed class ProfileGameHistoryService : IProfileGameHistoryService
 			item.IsWinner,
 			item.WasEliminated,
 			item.EliminatedAtRound,
+			item.LeftAtUtc,
 			item.GameSession.ApocalypseId,
 			item.GameSession.BunkerId));
 	}
 
 	private static ProfileGameHistoryItem WithDuration(ProfileGameHistoryItem item)
 	{
-		TimeSpan? duration = item.Status == CompletedStatus &&
+		TimeSpan? duration =
+			(item.Status == GameSessionStatuses.Completed ||
+			 item.Status == GameSessionStatuses.Abandoned) &&
 			item.StartedAtUtc.HasValue &&
 			item.EndedAtUtc.HasValue
 				? item.EndedAtUtc.Value - item.StartedAtUtc.Value

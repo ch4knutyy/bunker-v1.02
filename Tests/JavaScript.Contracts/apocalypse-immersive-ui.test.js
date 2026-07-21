@@ -19,6 +19,14 @@ function method(source, name) {
   throw new Error(`unclosed ${name}`);
 }
 
+function constant(source, name) {
+  const start = source.indexOf(`const ${name} =`);
+  assert.notEqual(start, -1, `missing ${name}`);
+  const match = source.slice(start).match(/;\r?\n\r?\n/);
+  assert(match, `unclosed ${name}`);
+  return source.slice(start, start + match.index + 1);
+}
+
 test('one universal renderer owns the full immersive scenario structure', () => {
   const renderer = method(game, 'renderApocalypseScenario');
   assert.match(game, /container\.innerHTML = renderApocalypseScenario\(buildApocalypseScenarioModel\(apocalypse\)\)/);
@@ -44,8 +52,10 @@ test('metrics use canonical values and missing content sections are omitted', ()
 
 test('canonical metadata resolver supports every requested variant and generic fallback', () => {
   const normalize = method(game, 'normalizeApocalypseMetadataValue');
+  const themeRegistry = constant(game, 'apocalypseVisualThemeRegistry');
+  const normalizeTheme = method(game, 'normalizeApocalypseVisualThemeId');
   const resolver = method(game, 'resolveApocalypseVisualVariant');
-  const resolve = new Function(`${normalize}; ${resolver}; return resolveApocalypseVisualVariant;`)();
+  const resolve = new Function(`${themeRegistry}; ${normalize}; ${normalizeTheme}; ${resolver}; return resolveApocalypseVisualVariant;`)();
   const cases = [
     ['nuclear', { tags: ['radiation'] }],
     ['biological', { category: 'biological' }],
@@ -66,7 +76,7 @@ test('canonical metadata resolver supports every requested variant and generic f
 
 test('model preserves canonical fields while renderer exposes no ids or tags', () => {
   const model = method(game, 'buildApocalypseScenarioModel');
-  for (const field of ['id', 'name', 'shortDescription', 'description', 'dangerLevel', 'survivalChance', 'duration', 'threats', 'requirements', 'consequences', 'imageUrl', 'tags', 'category', 'visualVariant']) {
+  for (const field of ['id', 'name', 'shortDescription', 'description', 'dangerLevel', 'survivalChance', 'duration', 'threats', 'requirements', 'consequences', 'imageUrl', 'tags', 'categoryId', 'visualThemeId', 'category', 'visualVariant']) {
     assert.match(model, new RegExp(`${field}(?::|,|\\s*=)|model\\.${field}`));
   }
   assert.match(model, /getLocalizedValue/);
