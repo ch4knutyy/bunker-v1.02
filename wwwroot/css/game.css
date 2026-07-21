@@ -9462,3 +9462,266 @@ body.gm-panel-v2-open .modal {
         width: 100%;
     }
 }
+
+/* Контейнер повідомлень */
+.special-card-impact-toasts {
+    position: fixed;
+    top: 26px;
+    left: 50%;
+    z-index: 50000;
+    display: grid;
+    gap: 14px;
+    width: min(620px, calc(100vw - 32px));
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+
+/* Саме повідомлення */
+.special-card-impact-toast {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 18px;
+    min-height: 104px;
+    padding: 20px 18px;
+    color: #fff8ed;
+    background: radial-gradient( circle at 10% 50%, rgba(213, 49, 40, 0.32), transparent 34% ), linear-gradient( 135deg, rgba(72, 16, 18, 0.99), rgba(20, 13, 14, 0.99) 58%, rgba(10, 9, 10, 0.99) );
+    border: 2px solid #d65348;
+    border-left: 7px solid #f36c5c;
+    border-radius: 7px;
+    box-shadow: 0 0 0 1px rgba(255, 126, 105, 0.22), 0 0 30px rgba(218, 54, 45, 0.42), 0 22px 70px rgba(0, 0, 0, 0.88), inset 0 0 35px rgba(170, 36, 31, 0.16);
+    opacity: 0;
+    transform: translateY(-55px) scale(0.92);
+    pointer-events: auto;
+    transition: opacity 260ms ease, transform 360ms cubic-bezier(0.2, 1.35, 0.35, 1);
+}
+
+
+    /* Текстурне світіння */
+    .special-card-impact-toast::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient( 110deg, transparent 20%, rgba(255, 255, 255, 0.06) 45%, transparent 70% );
+        transform: translateX(-100%);
+        animation: special-card-impact-shine 1.4s ease 300ms forwards;
+        pointer-events: none;
+    }
+
+
+    /* Смуга часу знизу */
+    .special-card-impact-toast::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 5px;
+        background: linear-gradient( 90deg, #ff4d40, #ff9a72 );
+        transform-origin: left;
+        animation: special-card-impact-timer 7.5s linear forwards;
+        box-shadow: 0 0 14px rgba(255, 75, 60, 0.75);
+    }
+
+
+    /* Поява */
+    .special-card-impact-toast.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        animation: special-card-impact-hit 520ms ease;
+    }
+
+
+    /* Зникнення */
+    .special-card-impact-toast.is-removing {
+        opacity: 0;
+        transform: translateY(-28px) scale(0.96);
+    }
+
+
+/* Велика іконка */
+.special-card-impact-icon {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    color: #fff5e9;
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1;
+    background: radial-gradient( circle, rgba(245, 84, 68, 0.56), rgba(103, 23, 25, 0.72) );
+    border: 2px solid #ff7968;
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px rgba(219, 64, 52, 0.13), 0 0 24px rgba(255, 73, 58, 0.55);
+    animation: special-card-impact-icon-pulse 1.15s ease-in-out infinite;
+}
+
+
+/* Текстова частина */
+.special-card-impact-content {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+}
+
+
+/* Заголовок */
+.special-card-impact-title {
+    display: block;
+    margin-bottom: 9px;
+    color: #ff8b79;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(255, 72, 55, 0.4);
+}
+
+
+/* Основний текст */
+.special-card-impact-message {
+    margin: 0;
+    color: #fffaf1;
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+
+/* Кнопка закриття */
+.special-card-impact-close {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: rgba(255, 243, 232, 0.72);
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+    .special-card-impact-close:hover {
+        color: #ffffff;
+        background: rgba(222, 63, 50, 0.3);
+        transform: scale(1.08);
+    }
+
+
+/* Удар під час появи */
+@keyframes special-card-impact-hit {
+    0% {
+        filter: brightness(1.8);
+    }
+
+    30% {
+        transform: translateX(-7px) scale(1.015);
+    }
+
+    45% {
+        transform: translateX(6px) scale(1);
+    }
+
+    60% {
+        transform: translateX(-3px);
+    }
+
+    100% {
+        filter: brightness(1);
+        transform: translateX(0);
+    }
+}
+
+
+/* Пульсація іконки */
+@keyframes special-card-impact-icon-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 5px rgba(219, 64, 52, 0.13), 0 0 20px rgba(255, 73, 58, 0.42);
+    }
+
+    50% {
+        box-shadow: 0 0 0 9px rgba(219, 64, 52, 0.06), 0 0 34px rgba(255, 73, 58, 0.78);
+    }
+}
+
+
+/* Блиск */
+@keyframes special-card-impact-shine {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(130%);
+    }
+}
+
+
+/* Таймер */
+@keyframes special-card-impact-timer {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+
+/* Телефон */
+@media (max-width: 650px) {
+    .special-card-impact-toasts {
+        top: 12px;
+        width: calc(100vw - 20px);
+    }
+
+    .special-card-impact-toast {
+        grid-template-columns: 48px minmax(0, 1fr) 30px;
+        gap: 12px;
+        min-height: 90px;
+        padding: 16px 12px;
+        border-left-width: 5px;
+    }
+
+    .special-card-impact-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 29px;
+    }
+
+    .special-card-impact-title {
+        font-size: 0.77rem;
+        letter-spacing: 0.08em;
+    }
+
+    .special-card-impact-message {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    .special-card-impact-toast,
+    .special-card-impact-icon,
+    .special-card-impact-toast::before,
+    .special-card-impact-toast::after {
+        animation: none;
+        transition: none;
+    }
+}

@@ -142,7 +142,7 @@ const uiTranslations = {
 	ru: {
 		createRoom: "Создать комнату", availableRooms: "Доступные комнаты", loadingRooms: "Загрузка комнат...", noRooms: "Нет доступных комнат. Создайте свою!", playerNamePlaceholder: "Ваше имя...", roomNamePlaceholder: "Название комнаты...", maxPlayersPlaceholder: "Макс. игроков", passwordOptionalPlaceholder: "Пароль (необязательно)", passwordIfAnyPlaceholder: "Пароль (если есть)", room: "Комната", lobby: "Лобби", game: "Игра", gmPanel: "🎮 GM Панель", voting: "🗳️ Голосование", startGame: "Начать игру", leaveRoom: "Покинуть комнату", players: "Игроки", host: "Ведущий", you: "Вы", eliminated: "ВЫБЫЛ", myCharacteristics: "Мои характеристики (вижу только я)", bunkerAndApocalypse: "🎭 Бункер и Апокалипсис", apocalypse: "Апокалипсис", bunker: "Бункер", playersInBunker: "Игроки в бункере:", gameEvents: "Игровые события", eventsHistory: "История событий", eventsPlaceholder: "Здесь будут отображаться события игры...", reveal: "Раскрыть всем", revealed: "Открыто для всех", hidden: "Скрыто", unknown: "Неизвестно", profession: "Профессия", inventory: "Инвентарь", vote: "Голосовать", roomCode: "Код комнаты", name: "Название", age: "Возраст", years: "лет", sex: "Пол", orientation: "Ориентация", personality: "Личность", body: "Телосложение", height: "Рост", weight: "Вес", bodyType: "Тип тела", physicalHealth: "Физическое здоровье", mentalHealth: "Психическое здоровье", state: "Состояние", hobby: "Хобби", activity: "Занятие", characterTrait: "Черта характера", trait: "Черта", phobia: "Фобия", fear: "Страх", items: "Предметы", fact: "Факт", empty: "Пусто", noFact: "Нет факта", noData: "Нет данных игрока", use: "Использовать", close: "Закрыть", capacity: "Вместимость", condition: "Состояние", supplies: "Запасы", location: "Локация", threats: "⚠️ Угрозы:", requirements: "✓ Нужно:", facilities: "🏗️ Помещения:", resources: "📦 Ресурсы:", problems: "⚠️ Проблемы:", survivalChance: "Шанс выживания", duration: "Длительность", threatLevel: "Угроза", uploadImage: "📤 Загрузить изображение", generatePrompt: "✨ Сгенерировать промпт", remove: "🗑️ Удалить", specialCards: "Специальные карты", mySpecialCards: "Мои специальные карты", revealedSpecialCards: "Раскрытые специальные карты", noRevealedSpecialCards: "Пока нет раскрытых специальных карт.", cardInHand: "В руке", cardRevealed: "Раскрыта", cardUsed: "Использована", cardActive: "Активна", specialCard: "Специальная карта", description: "Описание", effect: "Эффект", target: "Цель", status: "Статус", threat: "Угроза", threatUnknownDescription: "Угроза ещё не раскрыта."
 	}
-};
+};	
 
 Object.assign(uiTranslations.uk, {
 	property: "Майно",
@@ -180,6 +180,7 @@ Object.assign(uiTranslations.uk, {
 	secretRevealedBadge: "Секретна, розкрита",
 	useSecretly: "Використати тихо",
 	usePublicly: "Використати публічно",
+	specialCardAffectedYou: 'На вас подіяла спеціальна карта',
 	activeUntilRoundEnd: "Активна до кінця раунду",
 	effectEnded: "Ефект завершено",
 	specialPending: "Виконується…", specialAvailableNow: "Доступна зараз", specialTargetRequired: "Потрібно обрати ціль",
@@ -271,6 +272,7 @@ Object.assign(uiTranslations.en, {
 	round: "Round",
 	revealThreat: "Reveal threat",
 	hiddenSecretCard: "Hidden secret card",
+	specialCardAffectedYou: 'A special card affected you',
 	hiddenDetails: "Details are hidden",
 	secretCardBadge: "Secret",
 	publicCardBadge: "Public",
@@ -367,6 +369,7 @@ Object.assign(uiTranslations.ru, {
 	round: "Раунд",
 	revealThreat: "Раскрыть угрозу",
 	hiddenSecretCard: "Скрытая секретная карта",
+	specialCardAffectedYou: 'На вас подействовала специальная карта',
 	hiddenDetails: "Детали скрыты",
 	secretCardBadge: "Секретная",
 	publicCardBadge: "Публичная",
@@ -3108,14 +3111,55 @@ function normalizePlayer(player) {
 		// Profession
 		profession: (() => {
 			const src = player.profession || player.Profession || {};
-			const professionItem = normalizeItemData(player.professionItem || player.ProfessionItem || src.professionItem || src.ProfessionItem);
+
+			const professionItem = normalizeItemData(
+				player.professionItem
+				|| player.ProfessionItem
+				|| src.professionItem
+				|| src.ProfessionItem
+			);
+
 			return {
-				name: cleanProfessionName(src.name ?? src.Name ?? 'Безробітний'),
-				tooltip: cleanTooltipText(src.tooltip ?? src.Tooltip ?? null),
-				experienceYears: src.experienceYears ?? src.ExperienceYears ?? 0,
-				selectedItem: src.selectedItem ?? src.SelectedItem ?? null,
-				selectedItemIndex: src.selectedItemIndex ?? src.SelectedItemIndex ?? null,
-				capabilityTags: src.capabilityTags ?? src.CapabilityTags ?? src.tags ?? src.Tags ?? [],
+				name: cleanProfessionName(
+					src.name
+					?? src.Name
+					?? 'Безробітний'
+				),
+
+				tooltip: cleanTooltipText(
+					src.tooltip
+					?? src.Tooltip
+					?? null
+				),
+
+				professionalLevel:
+					src.professionalLevel
+					?? src.ProfessionalLevel
+					?? '',
+
+				// Тимчасово залишаємо для сумісності зі старими даними.
+				experienceYears:
+					src.experienceYears
+					?? src.ExperienceYears
+					?? 0,
+
+				selectedItem:
+					src.selectedItem
+					?? src.SelectedItem
+					?? null,
+
+				selectedItemIndex:
+					src.selectedItemIndex
+					?? src.SelectedItemIndex
+					?? null,
+
+				capabilityTags:
+					src.capabilityTags
+					?? src.CapabilityTags
+					?? src.tags
+					?? src.Tags
+					?? [],
+
 				professionItem,
 				_i18n: getI18n(src)
 			};
@@ -3862,6 +3906,71 @@ function registerSignalREvents() {
 		addEventMessage(`<span class="event-success">${escapeHtml(message)}</span>`);
 	});
 
+	window.showSpecialCardImpactToast = function (message) {
+		const normalizedMessage = String(message || '').trim();
+		if (!normalizedMessage) return;
+
+		let container = document.getElementById('specialCardImpactToasts');
+
+		if (!container) {
+			container = document.createElement('div');
+			container.id = 'specialCardImpactToasts';
+			container.className = 'special-card-impact-toasts';
+			container.setAttribute('aria-live', 'assertive');
+			document.body.appendChild(container);
+		}
+
+		const toast = document.createElement('article');
+		toast.className = 'special-card-impact-toast';
+
+		toast.innerHTML = `
+		<div class="special-card-impact-icon" aria-hidden="true">!</div>
+
+		<div class="special-card-impact-content">
+			<strong class="special-card-impact-title">
+				${escapeHtml(t('specialCardAffectedYou'))}
+			</strong>
+
+			<p class="special-card-impact-message">
+				${escapeHtml(normalizedMessage)}
+			</p>
+		</div>
+
+		<button
+			type="button"
+			class="special-card-impact-close"
+			aria-label="Закрити">
+			×
+		</button>
+	`;
+
+		container.appendChild(toast);
+
+		const removeToast = () => {
+			if (toast.classList.contains('is-removing')) return;
+
+			toast.classList.add('is-removing');
+
+			setTimeout(() => {
+				toast.remove();
+
+				if (container.children.length === 0) {
+					container.remove();
+				}
+			}, 260);
+		};
+
+		toast
+			.querySelector('.special-card-impact-close')
+			?.addEventListener('click', removeToast);
+
+		requestAnimationFrame(() => {
+			toast.classList.add('is-visible');
+		});
+
+		setTimeout(removeToast, 7500);
+	};
+
 	connection.off("SpecialCardTargetStateUpdated");
 	connection.on("SpecialCardTargetStateUpdated", function (data) {
 		if (myPlayerData) {
@@ -3879,7 +3988,13 @@ function registerSignalREvents() {
 		}
 		renderCurrentGameUI();
 		const message = data.message || data.Message;
-		if (message) addEventMessage(`<span class="event-warning">${escapeHtml(message)}</span>`);
+		if (message) {
+			addEventMessage(
+				`<span class="event-warning">${escapeHtml(message)}</span>`
+			);
+
+			window.showSpecialCardImpactToast(message);
+		}
 	});
 
 	connection.off("CharacteristicHidden");
