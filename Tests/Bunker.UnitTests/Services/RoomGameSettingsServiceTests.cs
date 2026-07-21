@@ -33,15 +33,17 @@ public sealed class RoomGameSettingsServiceTests
         Assert.True(settings.AllowInteractiveApocalypses);
         Assert.Equal(10, settings.InteractiveApocalypseChancePercent);
         Assert.True(settings.ApocalypseThemeEnabled);
+        Assert.True(settings.ApocalypseActivation.EffectsEnabled);
+        Assert.Equal(ApocalypseActivationPolicyMode.DefinitionDefault, settings.ApocalypseActivation.PolicyMode);
     }
 
     [Fact]
-    public void VersionTwoMigratesToVersionThreeApocalypseDefaultsIdempotently()
+    public void VersionTwoMigratesThroughVersionFourDefaultsIdempotently()
     {
         var versionTwo = new RoomGameSettings { Version = 2, ApocalypseSelectionMode = ApocalypseSelectionMode.Specific, SelectedApocalypseId = "legacy" };
         var migrated = RoomGameSettingsService.Migrate(versionTwo);
         var twice = RoomGameSettingsService.Migrate(migrated);
-        Assert.Equal(3, migrated.Version); Assert.Equal(ApocalypseSelectionMode.RandomAll, migrated.ApocalypseSelectionMode);
+        Assert.Equal(4, migrated.Version); Assert.Equal(ApocalypseSelectionMode.RandomAll, migrated.ApocalypseSelectionMode);
         Assert.Null(migrated.SelectedApocalypseId); Assert.Equal(10, migrated.AllowedApocalypseCategoryIds.Count);
         Assert.Equal(JsonSerializer.Serialize(migrated), JsonSerializer.Serialize(twice));
     }
@@ -52,10 +54,13 @@ public sealed class RoomGameSettingsServiceTests
         var context = CreateContext(); var settings = RoomGameSettingsService.Clone(context.Room.GameSettings);
         settings.ApocalypseSelectionMode = ApocalypseSelectionMode.CustomPool;
         settings.ApocalypseCustomPoolIds = ["one", "two"]; settings.ApocalypseThemeEnabled = false;
+        settings.ApocalypseActivation = new() { PolicyMode = ApocalypseActivationPolicyMode.Custom, Trigger = ApocalypseActivationTriggerMode.AfterRound, IntervalRounds = 2 };
         context.Room.GameSettings = settings; context.Service.FreezeForStart(context.Room, (min, max) => min);
         settings.ApocalypseCustomPoolIds.Clear();
         Assert.Equal(["one", "two"], context.Room.FrozenGameSettings!.ApocalypseCustomPoolIds);
         Assert.False(context.Room.FrozenGameSettings.ApocalypseThemeEnabled);
+        Assert.Equal(ApocalypseActivationTriggerMode.AfterRound, context.Room.FrozenGameSettings.ApocalypseActivation.Trigger);
+        Assert.Equal(2, context.Room.FrozenGameSettings.ApocalypseActivation.IntervalRounds);
     }
 
     [Fact]
@@ -88,6 +93,16 @@ public sealed class RoomGameSettingsServiceTests
         settings.MaxGameplayPlayers = 7;
         var frozen = context.Service.Apply(context.Room, context.Host, Request(context.Room, settings, "running"));
         Assert.False(frozen.Success); Assert.Equal("settings_frozen", frozen.ErrorCode); Assert.Equal(6, context.Room.MaxPlayers);
+    }
+
+    [Fact]
+    public void ManualActivationChangeMakesPresetCustom()
+    {
+        var context = CreateContext(); var settings = RoomGameSettingsService.Clone(context.Room.GameSettings);
+        settings.ApocalypseActivation.PolicyMode = ApocalypseActivationPolicyMode.Custom;
+        settings.ApocalypseActivation.Trigger = ApocalypseActivationTriggerMode.AfterRound;
+        var result = context.Service.Apply(context.Room, context.Host, Request(context.Room, settings, "activation-custom"));
+        Assert.True(result.Success); Assert.Equal(GamePreset.Custom, context.Room.GameSettings.Preset);
     }
 
     [Fact]

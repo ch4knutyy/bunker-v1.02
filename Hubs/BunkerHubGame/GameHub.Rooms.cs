@@ -667,6 +667,7 @@ namespace Bunker.Hubs
             var settings = _roomGameSettings.GetEffective(room);
             // Генеруємо лише увімкнені room-local сценарії.
             _apocalypseSelection.ResolveForStart(room, settings, _random.Next);
+            _apocalypseActivation.ResolveForStart(room, settings);
             _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
             
             if (!settings.BunkerScenarioEnabled) room.Bunker = null;
@@ -759,7 +760,14 @@ namespace Bunker.Hubs
 		private object BuildPublicGameSettings(Room room)
 		{
 			var settings = _roomGameSettings.GetEffective(room);
-			return new { apocalypseThemeEnabled = settings.ApocalypseThemeEnabled };
+			var policy = room.ApocalypseActivationPolicy;
+			return new
+			{
+				apocalypseThemeEnabled = settings.ApocalypseThemeEnabled,
+				apocalypseActivation = policy == null ? null : new PublicApocalypseActivationPolicyDto(
+					policy.Enabled, policy.ScheduleMode, policy.Trigger, policy.FirstRound,
+					policy.IntervalRounds, policy.MaxActivations)
+			};
 		}
 
         #endregion

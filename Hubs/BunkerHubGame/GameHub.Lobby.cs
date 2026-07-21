@@ -158,6 +158,7 @@ public partial class GameHub
 		string roomCode = room.Id;
 		IReadOnlyCollection<GameSessionParticipantSnapshot> participantSnapshots =
 			Array.Empty<GameSessionParticipantSnapshot>();
+		Apocalypse? apocalypseBeforeStart = null;
 
 		lock (room.GameSettingsSyncRoot)
 		{
@@ -201,6 +202,7 @@ public partial class GameHub
 						!entry.Value.IsLobbyReady);
 
 			_roomGameSettings.FreezeForStart(room, _random.Next);
+			apocalypseBeforeStart = room.Apocalypse;
 
 			var result =
 				_roomService.StartGame(
@@ -210,9 +212,7 @@ public partial class GameHub
 
 			if (!result.success)
 			{
-				room.SettingsFrozen = false;
-				room.FrozenGameSettings = null;
-				room.ResolvedBunkerCapacity = null;
+				RollbackFailedLobbyStart(room, apocalypseBeforeStart);
 				throw new HubException(
 					result.error ?? "lobby_start_failed");
 			}
@@ -237,7 +237,18 @@ public partial class GameHub
 		}
 
 		// Спочатку повідомляємо клієнтів про старт.
-		await CompleteLobbyStart(room);
+		try
+		{
+			await CompleteLobbyStart(room);
+		}
+		catch
+		{
+			lock (room.GameSettingsSyncRoot)
+			{
+				RollbackFailedLobbyStart(room, apocalypseBeforeStart);
+			}
+			throw;
+		}
 
 		await AppendGmAudit(
 			room,
@@ -282,6 +293,15 @@ public partial class GameHub
 					roomCode);
 			}
 		}
+	}
+
+	internal static void RollbackFailedLobbyStart(Room room, Apocalypse? apocalypseBeforeStart)
+	{
+		room.SettingsFrozen = false;
+		room.FrozenGameSettings = null;
+		room.ResolvedBunkerCapacity = null;
+		room.ApocalypseActivationPolicy = null;
+		if (!ReferenceEquals(room.Apocalypse, apocalypseBeforeStart)) room.Apocalypse = apocalypseBeforeStart;
 	}
 
 	public async Task ReturnFinishedGameToLobby(

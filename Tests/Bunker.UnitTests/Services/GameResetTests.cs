@@ -11,6 +11,7 @@ public class GameResetTests
     public void FinishedRoomReturnsToCleanLobbyAndPreservesRoomIdentity()
     {
         var room = FinishedRoom();
+        room.ApocalypseActivationPolicy = new() { Enabled = true, ApocalypseId = "resolved", EffectProfileId = "profile" };
         var roomId = room.Id;
         var hostToken = room.HostToken;
         var sessionId = room.GameSessionId;
@@ -32,6 +33,7 @@ public class GameResetTests
         Assert.Null(room.ThreatState);
         Assert.Null(room.Bunker);
         Assert.Null(room.Apocalypse);
+        Assert.Null(room.ApocalypseActivationPolicy);
         Assert.False(room.SettingsFrozen);
         Assert.Null(room.FrozenGameSettings);
         Assert.Empty(room.CurrentRoundReveals);

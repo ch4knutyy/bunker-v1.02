@@ -49,6 +49,7 @@ namespace Bunker.Models
 		public long RecoveryRevision { get; set; }
 		public RoomGameSettings GameSettings { get; set; } = new();
 		public RoomGameSettings? FrozenGameSettings { get; set; }
+		public ResolvedApocalypseActivationPolicy? ApocalypseActivationPolicy { get; set; }
 		public ScenarioSituationState? ScenarioSituations { get; set; }
 		public BunkerIntelState? BunkerIntel { get; set; }
 		public PendingEliminationState? PendingElimination { get; set; }
