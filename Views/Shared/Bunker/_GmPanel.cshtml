@@ -356,351 +356,352 @@
 					Виключити з кімнати
 				</button>
 			</details>
-
-			@* Характеристики вибраного гравця *@
-			<div class="gm-characteristics">
-				<div class="gm-char-item">
-					<span class="gm-char-name">Особистість:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Статура:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Професія:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Profession')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Profession')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Фіз. здоров'я:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('PhysicalHealth')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('PhysicalHealth')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Псих. здоров'я:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('MentalHealth')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('MentalHealth')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Хобі:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Hobby')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Hobby')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Риса характеру:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('CharacterTrait')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('CharacterTrait')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Фобія:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Phobia')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Phobia')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Інвентар:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmInventory">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Inventory')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Майно:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmProperty">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Property')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button id="gmEditPropertyButton"
-								class="gm-property-edit-command"
-								onclick="openGmPropertyEditor()"
-								title="Редагувати майно"
-								hidden>
-							✏️
-						</button>
-						<button onclick="regenerateCharacteristic('Property')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Property')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-				<div class="gm-char-item">
-					<span class="gm-char-name">Факт:</span>
-					<span class="gm-char-value gm-char-hidden" id="gmFact">Приховано</span>
-					<div class="gm-char-actions">
-						<button onclick="peekCharacteristic('Fact')" title="Підглянути" class="btn-peek">&#128065;</button>
-						<button onclick="editCharacteristic('Fact')" title="Редагувати">✏️</button>
-						<button onclick="regenerateCharacteristic('Fact')" title="Регенерувати">🔄</button>
-						<button onclick="forceReveal('Fact')" title="Розкрити для всіх">📢</button>
-					</div>
-				</div>
-			</div>
 		</div>
 
-		@* Керування бункером та апокаліпсисом *@
-		<div class="gm-section" id="gmBunkerScenarioSection" data-gm-tab="bunker" style="display: none;">
-			<h4 class="gm-section-title">Сценарій гри</h4>
-			<div class="gm-scenario-controls">
-				<div class="gm-control-row">
-					<label class="gm-label" for="gmBunkerCapacity" data-gm-i18n="gmBunkerCapacityLabel">Місткість бункера</label>
-					<div class="gm-capacity-control">
-						<input id="gmBunkerCapacity" class="gm-capacity-input" type="number" min="1" max="99" step="1" value="6" onkeydown="handleBunkerCapacityKeydown(event)" />
-						<button id="gmBunkerCapacitySubmit" class="btn-gm-action" data-gm-i18n="gmCapacitySubmit" onclick="submitBunkerCapacity()">ОК</button>
-					</div>
-					<small id="gmBunkerCapacityFeedback" class="gm-round-hint" aria-live="polite"></small>
-				</div>
-				<div class="gm-control-row">
-					<button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
-					<button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
-				</div>
-				<div class="gm-control-row gm-bunker-resource-controls">
-					<button type="button" class="btn-gm-action btn-gm-supplies-add" onclick="addBunkerSupplies()">+ Їжа</button>
-					<button type="button" class="btn-gm-action btn-gm-supplies-remove" onclick="removeBunkerSupplies()">− Їжа</button>
-					<button type="button" class="btn-gm-action btn-gm-water-add" onclick="addBunkerWater()">+ Вода</button>
-					<button type="button" class="btn-gm-action btn-gm-water-remove" onclick="removeBunkerWater()">− Вода</button>
+		@* Характеристики вибраного гравця *@
+		<div class="gm-characteristics">
+			<div class="gm-char-item">
+				<span class="gm-char-name">Особистість:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmPersonality">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Personality')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Personality')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Personality')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Personality')" title="Розкрити для всіх">📢</button>
 				</div>
 			</div>
-		</div>
-
-		@* Система ігрових подій *@
-		<div class="gm-section"
-			 id="gmEventsSection"
-			 data-gm-tab="events"
-			 style="display: none;">
-
-			<h4 class="gm-section-title">Ігрові події</h4>
-
-			<div class="gm-event-form">
-				<select id="gmEventType" class="gm-select">
-					<option value="info">Інформація</option>
-					<option value="warning">Попередження</option>
-					<option value="danger">Небезпека</option>
-					<option value="success">Позитив</option>
-					<option value="catastrophe">Катастрофа</option>
-				</select>
-
-				<textarea id="gmEventText"
-						  class="input-field gm-event-textarea"
-						  placeholder="Текст події..."
-						  rows="2"></textarea>
-
-				<button type="button"
-						class="btn-gm-action btn-send-event"
-						onclick="sendGameEvent()">
-					Відправити подію
-				</button>
-			</div>
-
-			<div class="gm-quick-events">
-				<button type="button"
-						class="btn-gm-quick"
-						onclick="sendQuickEvent(
-					'Землетрус! Частина бункера пошкоджена.',
-					'catastrophe'
-					)">
-					Землетрус
-				</button>
-
-				<button type="button"
-						class="btn-gm-quick"
-						onclick="sendQuickEvent(
-					'Загроза зараження! Потрібна дезінфекція.',
-					'warning'
-					)">
-					Зараження
-				</button>
-
-				<button type="button"
-						class="btn-gm-quick"
-						onclick="sendQuickEvent(
-					'Зовнішні виживальці просять допомоги.',
-					'info'
-					)">
-					Виживальці
-				</button>
-
-				<button type="button"
-						class="btn-gm-quick"
-						onclick="sendQuickEvent(
-					'Генератор зламався! Світла немає.',
-					'danger'
-					)">
-					Генератор
-				</button>
-			</div>
-		</div>
-
-		<div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="technical" style="display: none;">
-			<h4 class="gm-section-title" data-gm-i18n="gmDiagnostics">Діагностика</h4>
-			<a id="gmOwnerContentEditorLink" class="btn-gm-action gm-owner-content-link" href="/owner/content" hidden>Редактор контенту</a>
-			<div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
-			<p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
-			<div class="gm-diagnostics-actions">
-				<button id="gmRunDiagnostics" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRunDiagnostics" onclick="runRoomIntegrityCheck()">Перевірити кімнату</button>
-				<button id="gmPreviewAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmPreviewAutoFix" onclick="previewRoomAutoFix()">Preview auto-fix</button>
-				<button id="gmApplyAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmApplyAutoFix" onclick="applyRoomAutoFix()" disabled>Застосувати безпечні виправлення</button>
-			</div>
-			<p id="gmDiagnosticsFeedback" class="gm-round-hint" aria-live="polite"></p>
-			<div class="gm-diagnostics-toolbar">
-				<label for="gmIssueSeverity" data-gm-i18n="gmIssueFilter">Фільтр issues</label>
-				<select id="gmIssueSeverity" class="input-field" onchange="renderRoomDiagnostics()">
-					<option value="all" data-gm-i18n="gmAll">Усі</option>
-					<option value="error">Error</option>
-					<option value="warning">Warning</option>
-					<option value="info">Info</option>
-				</select>
-			</div>
-			<div id="gmDiagnosticsIssues" class="gm-diagnostics-list" aria-live="polite"></div>
-			<details id="gmSnapshotsSection" class="gm-threat-audit">
-				<summary data-gm-i18n="gmSnapshotsTitle">Snapshots / Undo</summary>
-				<div class="gm-diagnostics-toolbar">
-					<input id="gmSnapshotReason" class="input-field" maxlength="120" data-gm-i18n-placeholder="gmSnapshotReason" placeholder="Назва контрольної точки" />
-					<button id="gmCreateSnapshot" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmCreateSnapshot" onclick="createManualRoomSnapshot()">Створити контрольну точку</button>
-					<button id="gmUndoLastAction" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Скасувати останню GM-дію</button>
-					<button type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmRefreshSnapshots" onclick="refreshRoomSnapshots()">Оновити snapshots</button>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Статура:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmBody">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Body')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Body')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Body')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Body')" title="Розкрити для всіх">📢</button>
 				</div>
-				<p id="gmSnapshotFeedback" class="gm-round-hint" aria-live="polite"></p>
-				<div id="gmSnapshotPreview" class="gm-snapshot-preview" aria-live="polite"></div>
-				<div id="gmSnapshotsList" class="gm-snapshots-list" aria-live="polite"></div>
-			</details>
-			<details id="gmRoomLocalEditor" class="gm-threat-audit">
-				<summary data-gm-i18n="gmRoomLocalEditor">Редактор поточної кімнати</summary>
-				<p data-gm-i18n="gmRoomLocalWarning">Зміни діють лише в цій кімнаті.</p>
-				<div class="gm-editor-grid">
-					<select id="gmEditorCategory" class="input-field" onchange="renderRoomLocalEditor()"><option value="bunker">Bunker</option><option value="apocalypse">Apocalypse</option><option value="player">Player</option></select>
-					<select id="gmEditorPlayer" class="input-field" onchange="renderRoomLocalEditor()"></select>
-					<select id="gmEditorField" class="input-field" onchange="syncRoomLocalEditorField()"></select>
-					<input id="gmEditorCurrent" class="input-field" readonly data-gm-i18n-placeholder="gmCurrentPublicValue" placeholder="Поточне публічне значення" />
-					<textarea id="gmEditorValue" class="input-field" rows="3" data-gm-i18n-placeholder="gmNewPublicValue" placeholder="Нове значення"></textarea>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Професія:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmProfession">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Profession')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Profession')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Profession')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Profession')" title="Розкрити для всіх">📢</button>
 				</div>
-				<div class="gm-diagnostics-actions">
-					<button id="gmEditorPreviewButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmSnapshotPreview" onclick="previewRoomLocalEdit()">Preview</button>
-					<button id="gmEditorApplyButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmEditorApply" onclick="applyRoomLocalEdit()" disabled>Застосувати</button>
-					<button class="btn-gm-action gm-editor-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Undo</button>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Фіз. здоров'я:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmPhysicalHealth">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('PhysicalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('PhysicalHealth')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('PhysicalHealth')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('PhysicalHealth')" title="Розкрити для всіх">📢</button>
 				</div>
-				<p id="gmEditorFeedback" class="gm-round-hint" aria-live="polite"></p>
-			</details>
-			<details id="gmOmniscientMode" class="gm-threat-audit">
-				<summary data-gm-i18n="omniscientModeTitle">Режим GM-спостерігача</summary>
-				<p data-gm-i18n="omniscientModeWarning">Незворотно для цієї кімнати: GM перестане бути учасником гри.</p>
-				<input id="omniscientBootstrapKey" class="input-field" type="password" maxlength="200" autocomplete="off" data-gm-i18n-placeholder="omniscientBootstrapKey" placeholder="Development bootstrap key" />
-				<button id="omniscientPreviewButton" type="button" class="btn-gm-action omniscient-command" data-gm-i18n="omniscientPreview" onclick="previewEnterOmniscientGm()">Preview</button>
-				<button id="omniscientEnterButton" type="button" class="btn-danger omniscient-command" data-gm-i18n="omniscientEnter" onclick="enterOmniscientGm()" disabled>Увійти</button>
-				<pre id="omniscientPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
-			</details>
-			<details id="gmThreatAudit" class="gm-threat-audit">
-				<summary data-gm-i18n="gmAuditLog">GM audit log</summary>
-				<div class="gm-diagnostics-toolbar">
-					<input id="gmAuditSearch" class="input-field" type="search" data-gm-i18n-placeholder="gmAuditSearch" placeholder="Пошук action" oninput="renderUnifiedGmAudit()" />
-					<select id="gmAuditResult" class="input-field" onchange="renderUnifiedGmAudit()">
-						<option value="all" data-gm-i18n="gmAll">Усі</option>
-						<option value="success">Success</option>
-						<option value="rejected">Rejected</option>
-						<option value="failed">Failed</option>
-					</select>
-					<button type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRefreshAudit" onclick="refreshGmAudit()">Оновити журнал</button>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Псих. здоров'я:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmMentalHealth">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('MentalHealth')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('MentalHealth')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('MentalHealth')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('MentalHealth')" title="Розкрити для всіх">📢</button>
 				</div>
-				<div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
-			</details>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Хобі:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmHobby">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Hobby')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Hobby')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Hobby')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Hobby')" title="Розкрити для всіх">📢</button>
+				</div>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Риса характеру:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmCharacterTrait">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('CharacterTrait')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('CharacterTrait')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('CharacterTrait')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('CharacterTrait')" title="Розкрити для всіх">📢</button>
+				</div>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Фобія:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmPhobia">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Phobia')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Phobia')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Phobia')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Phobia')" title="Розкрити для всіх">📢</button>
+				</div>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Інвентар:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmInventory">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Inventory')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Inventory')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Inventory')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Inventory')" title="Розкрити для всіх">📢</button>
+				</div>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Майно:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmProperty">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Property')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button id="gmEditPropertyButton"
+							class="gm-property-edit-command"
+							onclick="openGmPropertyEditor()"
+							title="Редагувати майно"
+							hidden>
+						✏️
+					</button>
+					<button onclick="regenerateCharacteristic('Property')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Property')" title="Розкрити для всіх">📢</button>
+				</div>
+			</div>
+			<div class="gm-char-item">
+				<span class="gm-char-name">Факт:</span>
+				<span class="gm-char-value gm-char-hidden" id="gmFact">Приховано</span>
+				<div class="gm-char-actions">
+					<button onclick="peekCharacteristic('Fact')" title="Підглянути" class="btn-peek">&#128065;</button>
+					<button onclick="editCharacteristic('Fact')" title="Редагувати">✏️</button>
+					<button onclick="regenerateCharacteristic('Fact')" title="Регенерувати">🔄</button>
+					<button onclick="forceReveal('Fact')" title="Розкрити для всіх">📢</button>
+				</div>
+			</div>
 		</div>
 	</div>
 
-	<dialog id="gmPropertyEditorDialog"
-			class="gm-property-editor"
-			aria-labelledby="gmPropertyEditorTitle">
-		<form method="dialog" class="gm-property-editor-shell">
-			<header class="gm-property-editor-header">
-				<div>
-					<h4 id="gmPropertyEditorTitle">Редагувати майно</h4>
-					<p id="gmPropertyEditorPlayer">—</p>
+	@* Керування бункером та апокаліпсисом *@
+	<div class="gm-section" id="gmBunkerScenarioSection" data-gm-tab="bunker" style="display: none;">
+		<h4 class="gm-section-title">Сценарій гри</h4>
+		<div class="gm-scenario-controls">
+			<div class="gm-control-row">
+				<label class="gm-label" for="gmBunkerCapacity" data-gm-i18n="gmBunkerCapacityLabel">Місткість бункера</label>
+				<div class="gm-capacity-control">
+					<input id="gmBunkerCapacity" class="gm-capacity-input" type="number" min="1" max="99" step="1" value="6" onkeydown="handleBunkerCapacityKeydown(event)" />
+					<button id="gmBunkerCapacitySubmit" class="btn-gm-action" data-gm-i18n="gmCapacitySubmit" onclick="submitBunkerCapacity()">ОК</button>
 				</div>
-				<button type="button"
-						class="btn-close"
-						aria-label="Скасувати"
-						onclick="closeGmPropertyEditor()">
-					×
-				</button>
-			</header>
-			<label class="gm-field" for="gmPropertyDefinitionSearch">
-				<span>Пошук майна</span>
-				<input id="gmPropertyDefinitionSearch"
-					   class="gm-select"
-					   type="search"
-					   maxlength="100"
-					   oninput="filterGmPropertyDefinitions()" />
-			</label>
-			<label class="gm-field" for="gmPropertyDefinitionSelect">
-				<span>Варіант майна</span>
-				<select id="gmPropertyDefinitionSelect"
-						class="gm-select"
-						onchange="regenerateGmPropertyPreview()"></select>
-			</label>
-			<p id="gmPropertyConditionProfile" class="gm-round-hint"></p>
-			<div id="gmPropertyEditorFields" class="gm-property-editor-fields"></div>
-			<div id="gmPropertyEditorPreview" class="gm-property-editor-preview"></div>
-			<p id="gmPropertyEditorFeedback"
-			   class="gm-round-hint"
-			   aria-live="polite"></p>
-			<footer class="gm-property-editor-actions">
-				<button id="gmPropertySaveButton"
-						type="button"
-						class="btn-gm-action gm-action-primary"
-						onclick="saveGmPropertyEdit()">
-					Зберегти
-				</button>
-				<button id="gmPropertyRegenerateButton"
-						type="button"
-						class="btn-gm-action"
-						onclick="regenerateGmPropertyPreview()">
-					Перегенерувати значення
-				</button>
-				<button type="button"
-						class="btn-gm-action"
-						onclick="closeGmPropertyEditor()">
-					Скасувати
-				</button>
-			</footer>
-		</form>
-	</dialog>
+				<small id="gmBunkerCapacityFeedback" class="gm-round-hint" aria-live="polite"></small>
+			</div>
+			<div class="gm-control-row">
+				<button class="btn-gm-action" onclick="regenerateBunker()">🔄 Новий бункер</button>
+				<button class="btn-gm-action" onclick="regenerateApocalypse()">🔄 Новий апокаліпсис</button>
+			</div>
+			<div class="gm-control-row gm-bunker-resource-controls">
+				<button type="button" class="btn-gm-action btn-gm-supplies-add" onclick="addBunkerSupplies()">+ Їжа</button>
+				<button type="button" class="btn-gm-action btn-gm-supplies-remove" onclick="removeBunkerSupplies()">− Їжа</button>
+				<button type="button" class="btn-gm-action btn-gm-water-add" onclick="addBunkerWater()">+ Вода</button>
+				<button type="button" class="btn-gm-action btn-gm-water-remove" onclick="removeBunkerWater()">− Вода</button>
+			</div>
+		</div>
+	</div>
+
+	@* Система ігрових подій *@
+	<div class="gm-section"
+		 id="gmEventsSection"
+		 data-gm-tab="events"
+		 style="display: none;">
+
+		<h4 class="gm-section-title">Ігрові події</h4>
+
+		<div class="gm-event-form">
+			<select id="gmEventType" class="gm-select">
+				<option value="info">Інформація</option>
+				<option value="warning">Попередження</option>
+				<option value="danger">Небезпека</option>
+				<option value="success">Позитив</option>
+				<option value="catastrophe">Катастрофа</option>
+			</select>
+
+			<textarea id="gmEventText"
+					  class="input-field gm-event-textarea"
+					  placeholder="Текст події..."
+					  rows="2"></textarea>
+
+			<button type="button"
+					class="btn-gm-action btn-send-event"
+					onclick="sendGameEvent()">
+				Відправити подію
+			</button>
+		</div>
+
+		<div class="gm-quick-events">
+			<button type="button"
+					class="btn-gm-quick"
+					onclick="sendQuickEvent(
+				'Землетрус! Частина бункера пошкоджена.',
+				'catastrophe'
+				)">
+				Землетрус
+			</button>
+
+			<button type="button"
+					class="btn-gm-quick"
+					onclick="sendQuickEvent(
+				'Загроза зараження! Потрібна дезінфекція.',
+				'warning'
+				)">
+				Зараження
+			</button>
+
+			<button type="button"
+					class="btn-gm-quick"
+					onclick="sendQuickEvent(
+				'Зовнішні виживальці просять допомоги.',
+				'info'
+				)">
+				Виживальці
+			</button>
+
+			<button type="button"
+					class="btn-gm-quick"
+					onclick="sendQuickEvent(
+				'Генератор зламався! Світла немає.',
+				'danger'
+				)">
+				Генератор
+			</button>
+		</div>
+	</div>
+
+	<div class="gm-section" id="gmDiagnosticsSection" data-gm-tab="technical" style="display: none;">
+		<h4 class="gm-section-title" data-gm-i18n="gmDiagnostics">Діагностика</h4>
+		<a id="gmOwnerContentEditorLink" class="btn-gm-action gm-owner-content-link" href="/owner/content" hidden>Редактор контенту</a>
+		<div id="gmDiagnosticsSummary" class="gm-status-grid"></div>
+		<p id="gmLastCommandError" class="gm-diagnostic-error" style="display: none;"></p>
+		<div class="gm-diagnostics-actions">
+			<button id="gmRunDiagnostics" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRunDiagnostics" onclick="runRoomIntegrityCheck()">Перевірити кімнату</button>
+			<button id="gmPreviewAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmPreviewAutoFix" onclick="previewRoomAutoFix()">Preview auto-fix</button>
+			<button id="gmApplyAutoFix" type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmApplyAutoFix" onclick="applyRoomAutoFix()" disabled>Застосувати безпечні виправлення</button>
+		</div>
+		<p id="gmDiagnosticsFeedback" class="gm-round-hint" aria-live="polite"></p>
+		<div class="gm-diagnostics-toolbar">
+			<label for="gmIssueSeverity" data-gm-i18n="gmIssueFilter">Фільтр issues</label>
+			<select id="gmIssueSeverity" class="input-field" onchange="renderRoomDiagnostics()">
+				<option value="all" data-gm-i18n="gmAll">Усі</option>
+				<option value="error">Error</option>
+				<option value="warning">Warning</option>
+				<option value="info">Info</option>
+			</select>
+		</div>
+		<div id="gmDiagnosticsIssues" class="gm-diagnostics-list" aria-live="polite"></div>
+		<details id="gmSnapshotsSection" class="gm-threat-audit">
+			<summary data-gm-i18n="gmSnapshotsTitle">Snapshots / Undo</summary>
+			<div class="gm-diagnostics-toolbar">
+				<input id="gmSnapshotReason" class="input-field" maxlength="120" data-gm-i18n-placeholder="gmSnapshotReason" placeholder="Назва контрольної точки" />
+				<button id="gmCreateSnapshot" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmCreateSnapshot" onclick="createManualRoomSnapshot()">Створити контрольну точку</button>
+				<button id="gmUndoLastAction" type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Скасувати останню GM-дію</button>
+				<button type="button" class="btn-gm-action gm-snapshot-command" data-gm-i18n="gmRefreshSnapshots" onclick="refreshRoomSnapshots()">Оновити snapshots</button>
+			</div>
+			<p id="gmSnapshotFeedback" class="gm-round-hint" aria-live="polite"></p>
+			<div id="gmSnapshotPreview" class="gm-snapshot-preview" aria-live="polite"></div>
+			<div id="gmSnapshotsList" class="gm-snapshots-list" aria-live="polite"></div>
+		</details>
+		<details id="gmRoomLocalEditor" class="gm-threat-audit">
+			<summary data-gm-i18n="gmRoomLocalEditor">Редактор поточної кімнати</summary>
+			<p data-gm-i18n="gmRoomLocalWarning">Зміни діють лише в цій кімнаті.</p>
+			<div class="gm-editor-grid">
+				<select id="gmEditorCategory" class="input-field" onchange="renderRoomLocalEditor()"><option value="bunker">Bunker</option><option value="apocalypse">Apocalypse</option><option value="player">Player</option></select>
+				<select id="gmEditorPlayer" class="input-field" onchange="renderRoomLocalEditor()"></select>
+				<select id="gmEditorField" class="input-field" onchange="syncRoomLocalEditorField()"></select>
+				<input id="gmEditorCurrent" class="input-field" readonly data-gm-i18n-placeholder="gmCurrentPublicValue" placeholder="Поточне публічне значення" />
+				<textarea id="gmEditorValue" class="input-field" rows="3" data-gm-i18n-placeholder="gmNewPublicValue" placeholder="Нове значення"></textarea>
+			</div>
+			<div class="gm-diagnostics-actions">
+				<button id="gmEditorPreviewButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmSnapshotPreview" onclick="previewRoomLocalEdit()">Preview</button>
+				<button id="gmEditorApplyButton" class="btn-gm-action gm-editor-command" data-gm-i18n="gmEditorApply" onclick="applyRoomLocalEdit()" disabled>Застосувати</button>
+				<button class="btn-gm-action gm-editor-command" data-gm-i18n="gmUndoLastAction" onclick="undoLastGmAction()">Undo</button>
+			</div>
+			<p id="gmEditorFeedback" class="gm-round-hint" aria-live="polite"></p>
+		</details>
+		<details id="gmOmniscientMode" class="gm-threat-audit">
+			<summary data-gm-i18n="omniscientModeTitle">Режим GM-спостерігача</summary>
+			<p data-gm-i18n="omniscientModeWarning">Незворотно для цієї кімнати: GM перестане бути учасником гри.</p>
+			<input id="omniscientBootstrapKey" class="input-field" type="password" maxlength="200" autocomplete="off" data-gm-i18n-placeholder="omniscientBootstrapKey" placeholder="Development bootstrap key" />
+			<button id="omniscientPreviewButton" type="button" class="btn-gm-action omniscient-command" data-gm-i18n="omniscientPreview" onclick="previewEnterOmniscientGm()">Preview</button>
+			<button id="omniscientEnterButton" type="button" class="btn-danger omniscient-command" data-gm-i18n="omniscientEnter" onclick="enterOmniscientGm()" disabled>Увійти</button>
+			<pre id="omniscientPreviewResult" class="global-catalog-details" aria-live="polite"></pre>
+		</details>
+		<details id="gmThreatAudit" class="gm-threat-audit">
+			<summary data-gm-i18n="gmAuditLog">GM audit log</summary>
+			<div class="gm-diagnostics-toolbar">
+				<input id="gmAuditSearch" class="input-field" type="search" data-gm-i18n-placeholder="gmAuditSearch" placeholder="Пошук action" oninput="renderUnifiedGmAudit()" />
+				<select id="gmAuditResult" class="input-field" onchange="renderUnifiedGmAudit()">
+					<option value="all" data-gm-i18n="gmAll">Усі</option>
+					<option value="success">Success</option>
+					<option value="rejected">Rejected</option>
+					<option value="failed">Failed</option>
+				</select>
+				<button type="button" class="btn-gm-action gm-diagnostics-command" data-gm-i18n="gmRefreshAudit" onclick="refreshGmAudit()">Оновити журнал</button>
+			</div>
+			<div id="gmThreatAuditList" class="gm-threat-audit-list" aria-live="polite"></div>
+		</details>
+	</div>
+</div>
+
+<dialog id="gmPropertyEditorDialog"
+		class="gm-property-editor"
+		aria-labelledby="gmPropertyEditorTitle">
+	<form method="dialog" class="gm-property-editor-shell">
+		<header class="gm-property-editor-header">
+			<div>
+				<h4 id="gmPropertyEditorTitle">Редагувати майно</h4>
+				<p id="gmPropertyEditorPlayer">—</p>
+			</div>
+			<button type="button"
+					class="btn-close"
+					aria-label="Скасувати"
+					onclick="closeGmPropertyEditor()">
+				×
+			</button>
+		</header>
+		<label class="gm-field" for="gmPropertyDefinitionSearch">
+			<span>Пошук майна</span>
+			<input id="gmPropertyDefinitionSearch"
+				   class="gm-select"
+				   type="search"
+				   maxlength="100"
+				   oninput="filterGmPropertyDefinitions()" />
+		</label>
+		<label class="gm-field" for="gmPropertyDefinitionSelect">
+			<span>Варіант майна</span>
+			<select id="gmPropertyDefinitionSelect"
+					class="gm-select"
+					onchange="regenerateGmPropertyPreview()"></select>
+		</label>
+		<p id="gmPropertyConditionProfile" class="gm-round-hint"></p>
+		<div id="gmPropertyEditorFields" class="gm-property-editor-fields"></div>
+		<div id="gmPropertyEditorPreview" class="gm-property-editor-preview"></div>
+		<p id="gmPropertyEditorFeedback"
+		   class="gm-round-hint"
+		   aria-live="polite"></p>
+		<footer class="gm-property-editor-actions">
+			<button id="gmPropertySaveButton"
+					type="button"
+					class="btn-gm-action gm-action-primary"
+					onclick="saveGmPropertyEdit()">
+				Зберегти
+			</button>
+			<button id="gmPropertyRegenerateButton"
+					type="button"
+					class="btn-gm-action"
+					onclick="regenerateGmPropertyPreview()">
+				Перегенерувати значення
+			</button>
+			<button type="button"
+					class="btn-gm-action"
+					onclick="closeGmPropertyEditor()">
+				Скасувати
+			</button>
+		</footer>
+	</form>
+</dialog>
 </aside>
