@@ -516,16 +516,39 @@ Object.assign(uiTranslations.en, { gameFinishedTitle:'Game finished', gameFinish
 Object.assign(uiTranslations.ru, { gameFinishedTitle:'Игра завершена', gameFinishedReason:'Вместимость бункера достигнута.', gameFinishedCapacity:'Вместимость бункера', gameFinishedSurvivors:'Победителей', gameFinishedRound:'Раунд завершения', gameFinishedTime:'Время завершения', gameFinishedWinners:'Победители', gameFinishedNoWinners:'Победителей нет', gameFinishedNewGame:'Новая игра', gameFinishedCopy:'Скопировать итог', gameFinishedWaitHost:'Ожидаем, пока хост начнёт новую игру.', gameFinishedCopied:'Итог скопирован', gameFinishedCopyFailed:'Не удалось скопировать итог', gameFinishedConfirmReturn:'Вернуть эту комнату в lobby для новой игры?', gameFinishedReturning:'Возвращаем комнату в lobby…' });
 
 Object.assign(uiTranslations.uk, {
-	cardExperience:'Досвід', cardAdditionalItem:'Додатково має', cardSeverity:'Тяжкість', cardTooltipLabel:'Пояснення характеристики',
-	cardPrivateTooltip:'Це ваша приватна характеристика. Її можна розкрити іншим гравцям.', cardRevealPending:'Розкриваємо…', cardRevealed:'Розкрито', cardChildfree:'Чайлдфрі'
+	cardExperience: 'Досвід',
+	cardQualification: 'Кваліфікація',
+	cardAdditionalItem: 'Додатково має',
+	cardSeverity: 'Тяжкість',
+	cardTooltipLabel: 'Пояснення характеристики',
+	cardPrivateTooltip: 'Це ваша приватна характеристика. Її можна розкрити іншим гравцям.',
+	cardRevealPending: 'Розкриваємо…',
+	cardRevealed: 'Розкрито',
+	cardChildfree: 'Чайлдфрі'
 });
+
 Object.assign(uiTranslations.en, {
-	cardExperience:'Experience', cardAdditionalItem:'Also has', cardSeverity:'Severity', cardTooltipLabel:'Characteristic details',
-	cardPrivateTooltip:'This is your private characteristic. You can reveal it to the other players.', cardRevealPending:'Revealing…', cardRevealed:'Revealed', cardChildfree:'Childfree'
+	cardExperience: 'Experience',
+	cardQualification: 'Qualification',
+	cardAdditionalItem: 'Also has',
+	cardSeverity: 'Severity',
+	cardTooltipLabel: 'Characteristic details',
+	cardPrivateTooltip: 'This is your private characteristic. You can reveal it to the other players.',
+	cardRevealPending: 'Revealing…',
+	cardRevealed: 'Revealed',
+	cardChildfree: 'Childfree'
 });
+
 Object.assign(uiTranslations.ru, {
-	cardExperience:'Опыт', cardAdditionalItem:'Дополнительно имеет', cardSeverity:'Тяжесть', cardTooltipLabel:'Описание характеристики',
-	cardPrivateTooltip:'Это ваша приватная характеристика. Её можно раскрыть другим игрокам.', cardRevealPending:'Раскрываем…', cardRevealed:'Раскрыто', cardChildfree:'Чайлдфри'
+	cardExperience: 'Опыт',
+	cardQualification: 'Квалификация',
+	cardAdditionalItem: 'Дополнительно имеет',
+	cardSeverity: 'Тяжесть',
+	cardTooltipLabel: 'Описание характеристики',
+	cardPrivateTooltip: 'Это ваша приватная характеристика. Её можно раскрыть другим игрокам.',
+	cardRevealPending: 'Раскрываем…',
+	cardRevealed: 'Раскрыто',
+	cardChildfree: 'Чайлдфри'
 });
 
 Object.assign(uiTranslations.uk, {
@@ -9586,10 +9609,38 @@ function renderMyPlayerCards(player) {
 	const mentalPresentation = buildHealthCardPresentation(mentalHealth);
 	const hobbyCardDetails = buildHobbyCardDetails(hobby);
 	const propertyPresentation = getPropertyPresentation(property);
+	const professionalLevel =
+		getLocalizedValue(profession, 'professionalLevel')
+		|| profession.professionalLevel
+		|| profession.ProfessionalLevel
+		|| '';
 	const models = [
 		{ type:'Personality', categoryLabel:t('personality'), value:`${personality.age} ${t('years')}`, iconKey:characteristicIconRegistry.personality, details:[nonEmptyCardDetail(t('sex'), `${personality.sex || ''}${personality.isChildfree ? ` · ${t('cardChildfree')}` : ''}`), nonEmptyCardDetail(t('orientation'), personality.sexOrientation)], tooltip:'', isRevealed:revealed.personality, canReveal:true, revealAction:'Personality' },
 		{ type:'Body', categoryLabel:t('body'), value:body.bodyType || t('body'), iconKey:characteristicIconRegistry.body, details:[nonEmptyCardDetail(t('height'), body.height ? `${body.height} см` : ''), nonEmptyCardDetail(t('weight'), body.weight ? `${body.weight} кг` : '')], tooltip:'', isRevealed:revealed.body, canReveal:true, revealAction:'Body' },
-		{ type:'Profession', categoryLabel:t('profession'), value:getLocalizedValue(profession, 'profession') || getLocalizedValue(profession, 'name') || profession.name || t('profession'), iconKey:resolveProfessionIconKey(profession), details:[nonEmptyCardDetail(t('cardExperience'), Number(profession.experienceYears) > 0 ? `${profession.experienceYears} ${t('years')}` : ''), nonEmptyCardDetail(t('cardAdditionalItem'), localizedProfessionItem)], tooltip:profession.tooltip, variantSource:profession, isRevealed:revealed.profession, canReveal:true, revealAction:'Profession' },
+		{
+			type: 'Profession',
+			categoryLabel: t('profession'),
+			value: getLocalizedValue(profession, 'profession')
+				|| getLocalizedValue(profession, 'name')
+				|| profession.name
+				|| t('profession'),
+			iconKey: resolveProfessionIconKey(profession),
+			details: [
+				nonEmptyCardDetail(
+					t('cardQualification'),
+					professionalLevel
+				),
+				nonEmptyCardDetail(
+					t('cardAdditionalItem'),
+					localizedProfessionItem
+				)
+			],
+			tooltip: profession.tooltip,
+			variantSource: profession,
+			isRevealed: revealed.profession,
+			canReveal: true,
+			revealAction: 'Profession'
+		},
 		{ type:'PhysicalHealth', categoryLabel:t('physicalHealth'), value:physicalPresentation.value || t('physicalHealth'), iconKey:characteristicIconRegistry.physicalHealth, details:[nonEmptyCardDetail(t('cardSeverity'), physicalPresentation.severity)], tooltipHtml:buildSharedHealthTooltip(physicalHealth, { requireExplanation:true }), variantSource:physicalHealth, visualFamily:'medical', isRevealed:revealed.physicalHealth, canReveal:true, revealAction:'PhysicalHealth', supplementalHtml:additionalConditionsHtml },
 		{ type:'MentalHealth', categoryLabel:t('mentalHealth'), value:mentalPresentation.value || t('mentalHealth'), iconKey:characteristicIconRegistry.mentalHealth, details:[nonEmptyCardDetail(t('cardSeverity'), mentalPresentation.severity)], tooltipHtml:buildSharedHealthTooltip(mentalHealth, { requireExplanation:true }), variantSource:mentalHealth, visualFamily:'mental', isRevealed:revealed.mentalHealth, canReveal:true, revealAction:'MentalHealth' },
 		{ type:'Hobby', categoryLabel:t('hobby'), value:getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || t('hobby'), iconKey:characteristicIconRegistry.hobby, details:hobbyCardDetails.details, tooltip:resolveHobbyCardTooltip(hobby, hobbyCardDetails.item), variantSource:hobby, isRevealed:revealed.hobby, canReveal:true, revealAction:'Hobby' },

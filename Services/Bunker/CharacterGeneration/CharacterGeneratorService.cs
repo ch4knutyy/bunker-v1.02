@@ -520,47 +520,63 @@ namespace Bunker.Services
             return valueElement.GetString() ?? "";
         }
 
-        #endregion
+		#endregion
 
-        #region Profession Generation
+		#region Profession Generation
 
-        private Profession GenerateProfession()
-        {
-            if (_gameData.Professions.Count == 0)
-                return new Profession { Name = "Безробітний" };
+		private Profession GenerateProfession()
+		{
+			// Якщо список професій порожній або випав шанс 1 із 95.
+			if (_gameData.Professions.Count == 0 || _random.Next(95) == 0)
+			{
+				return new Profession
+				{
+					Name = "Безробітний",
+					ProfessionalLevel = "Відсутня",
+					SelectedItem = "",
+					SelectedItemIndex = null,
+					Tooltip = "Не має професії та професійного предмета."
+				};
+			}
 
-            var data = _gameData.Professions[_random.Next(_gameData.Professions.Count)];
-            var parsedProfession = ParseProfessionNameAndItem(data.Profession);
-            
-            // Вибираємо ОДИН випадковий предмет з масиву items
-            string selectedItem = parsedProfession.Item;
-            int? selectedItemIndex = null;
-            if (data.Items.Count > 0)
-            {
-                selectedItemIndex = _random.Next(data.Items.Count);
-                selectedItem = data.Items[selectedItemIndex.Value];
-            }
+			var data = _gameData.Professions[
+				_random.Next(_gameData.Professions.Count)
+			];
 
-            // Формуємо tooltip без предмета: предмет показується тільки в характеристиці "Інвентар".
-            var tooltip = BuildProfessionTooltip(data.Bonus);
+			var parsedProfession = ParseProfessionNameAndItem(data.Profession);
 
-            return new Profession
-            {
-                Name = parsedProfession.Name,
-                Type = data.Type,
-                ExperienceYears = _random.Next(1, 30),
-                Skills = data.Skills.ToList(),
-                AllItems = data.Items.ToList(),
-                SelectedItem = selectedItem,
-                SelectedItemIndex = selectedItemIndex,
-                Bonus = data.Bonus,
-                CapabilityTags = data.CapabilityTags.ToList(),
-                Tooltip = tooltip,
-                I18n = data.I18n
-            };
-        }
+			// Вибираємо один випадковий предмет із масиву items.
+			string selectedItem = parsedProfession.Item;
+			int? selectedItemIndex = null;
 
-        private static string BuildProfessionTooltip(string bonus)
+			if (data.Items.Count > 0)
+			{
+				selectedItemIndex = _random.Next(data.Items.Count);
+				selectedItem = data.Items[selectedItemIndex.Value];
+			}
+
+			// Предмет показується окремо в характеристиці.
+			var tooltip = BuildProfessionTooltip(data.Bonus);
+
+			return new Profession
+			{
+				Name = parsedProfession.Name,
+				Type = data.Type,
+
+				ProfessionalLevel = GenerateProfessionalLevel(),
+
+				Skills = data.Skills.ToList(),
+				AllItems = data.Items.ToList(),
+				SelectedItem = selectedItem,
+				SelectedItemIndex = selectedItemIndex,
+				Bonus = data.Bonus,
+				CapabilityTags = data.CapabilityTags.ToList(),
+				Tooltip = tooltip,
+				I18n = data.I18n
+			};
+		}
+
+		private static string BuildProfessionTooltip(string bonus)
         {
             if (string.IsNullOrEmpty(bonus))
                 return "";
@@ -618,11 +634,28 @@ namespace Bunker.Services
             return cleaned.Trim().Trim('.').Trim();
         }
 
-        #endregion
+		private string GenerateProfessionalLevel()
+		{
+			int roll = _random.Next(100);
 
-        #region Hobby Generation
+			return roll switch
+			{
+				< 15 => "Стажер",
+				< 33 => "Початківець",
+				< 43 => "Самоук",
+				< 67 => "Спеціаліст",
+				< 84 => "Професіонал",
+				< 93 => "Експерт",
+				< 97 => "Майстер",
+				< 99 => "Ветеран професії",
+				_ => "Легенда професії"
+			};
+		}
+		#endregion
 
-        private Hobby GenerateHobby()
+		#region Hobby Generation
+
+		private Hobby GenerateHobby()
         {
             if (_gameData.Hobbies.Count == 0)
                 return new Hobby { Name = "Немає хобі" };
