@@ -7,8 +7,8 @@ const root = path.resolve(__dirname, '..', '..');
 const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
 
-test('GM panel exposes five focused tabs and diagnostics', () => {
-  for (const tab of ['state', 'round', 'threat', 'content', 'diagnostics']) {
+test('GM panel exposes the current role-safe tabs and diagnostics', () => {
+  for (const tab of ['game', 'players', 'voting', 'threats', 'bunker', 'events', 'technical', 'overview']) {
     assert.match(view, new RegExp(`data-gm-tab-button="${tab}"`));
   }
   assert.match(view, /gmDiagnosticsSummary/);
