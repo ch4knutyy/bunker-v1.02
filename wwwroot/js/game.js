@@ -488,32 +488,32 @@ Object.assign(uiTranslations.ru, {
 });
 
 Object.assign(uiTranslations.uk, {
-	lobbySetupTitle:'Налаштування гри', lobbyRevision:'Ревізія', lobbyUnsaved:'Незбережені зміни', lobbyPreset:'Пресет', lobbyPresetClassic:'Класичний', lobbyPresetCalm:'Спокійний', lobbyPresetDangerous:'Небезпечний', lobbyPresetHardcore:'Хардкор', lobbyPresetQuick:'Швидка гра', lobbyPresetLong:'Довга гра', lobbyPresetCustom:'Власний',
-	lobbyTabBasic:'Основне', lobbyTabThreats:'Загрози', lobbyTabRounds:'Раунди', lobbyTabAccess:'Доступ', lobbyMaxPlayers:'Максимум гравців', lobbyMinPlayers:'Мінімум гравців', lobbyBunkerCapacityMode:'Місткість бункера', lobbyAutomatic:'Автоматично', lobbyManual:'Вручну', lobbyRandomRange:'Випадковий діапазон', lobbyManualCapacity:'Місць', lobbyRangeMin:'Мінімум місць', lobbyRangeMax:'Максимум місць', lobbyStartingItems:'Стартові предмети', lobbySpecialCardsCount:'Спеціальних карт на гравця', lobbyApocalypseEnabled:'Апокаліпсис', lobbyBunkerEnabled:'Бункер', lobbySpecialCardsEnabled:'Спеціальні карти',
-	lobbyInteractiveRate:'Інтерактивні загрози', lobbyFirstThreatRound:'Перший раунд загрози', lobbyThreatFrequency:'Частота загроз', lobbyOnce:'Один раз', lobbyEveryOther:'Через раунд', lobbyEveryRound:'Щораунду', lobbyRandomRounds:'Випадково', lobbyMaxThreats:'Максимум загроз', lobbyUnlimited:'Без обмеження', lobbyThreatsEnabled:'Загрози увімкнено', lobbyAvoidThreatRepeats:'Не повторювати ID загроз', lobbyTimerDuration:'Таймер раунду', lobbyVotingStart:'Голосування з раунду', lobbyVotingFrequency:'Частота голосувань', lobbyBonusRound:'Бонусний інвентар у раунді', lobbyBonusCount:'Бонусних предметів', lobbyTimerEnabled:'Таймер увімкнено', lobbyTimerAutoStart:'Автостарт таймера', lobbyTimerPauseDisconnect:'Пауза при відключенні host', lobbyVotingEnabled:'Голосування увімкнено', lobbyBonusEnabled:'Бонусний інвентар',
-	lobbyReadyPolicy:'Політика готовності', lobbyAllReady:'Усі гравці', lobbyHostDecides:'Вирішує host', lobbyRoomPassword:'Пароль кімнати', lobbyPasswordPlaceholder:'Порожньо — вимкнути захист', lobbyPasswordApply:'Оновити пароль', lobbySpectatorsAllowed:'Дозволити спостерігачів', lobbyHostOverride:'Host може стартувати без усіх ready', lobbyResetReady:'Скидати ready після змін', lobbyLockJoins:'Заблокувати нові входи', lobbyPresetName:'Назва локального пресету', lobbyPresetSave:'Зберегти локально', lobbyPresetLoad:'Завантажити', lobbyPresetDelete:'Видалити', lobbyPresetExport:'Export JSON', lobbyPresetImport:'Import JSON', lobbyReset:'Скинути', lobbyResetClassic:'Класичний', lobbyApply:'Застосувати', lobbyAuditTitle:'Останні події лобі',
-	lobbySettingsApplied:'Налаштування застосовано.', lobbySettingsConflict:'Налаштування змінилися в іншій вкладці. Завантажено актуальні значення.', lobbySettingsInvalid:'Перевірте значення налаштувань.', lobbyPresetSaved:'Локальний пресет збережено.', lobbyPresetLoaded:'Пресет завантажено в чернетку.', lobbyPresetDeleted:'Локальний пресет видалено.', lobbyPresetImportOk:'JSON імпортовано в чернетку.', lobbyPresetImportError:'Некоректний або застарілий JSON-пресет.', lobbyPasswordUpdated:'Захист кімнати оновлено.', lobbyResetMemberReady:'Скинути ready', lobbyKickMember:'Видалити', lobbyKicked:'Host видалив вас із кімнати.', lobbyNoAudit:'Подій ще немає.', lobbySettingsReadOnly:'Налаштування доступні лише для перегляду.', lobbySummaryThreats:'Загрози', lobbySummaryTimer:'Таймер', lobbySummaryVoting:'Голосування', lobbySummaryBunker:'Бункер', lobbySummaryCards:'Карти', lobbyOff:'Вимкнено', lobbyFromRound:'з раунду'
+	lobbySetupTitle: 'Налаштування гри', lobbyRevision: 'Ревізія', lobbyUnsaved: 'Незбережені зміни', lobbyPreset: 'Пресет', lobbyPresetClassic: 'Класичний', lobbyPresetCalm: 'Спокійний', lobbyPresetDangerous: 'Небезпечний', lobbyPresetHardcore: 'Хардкор', lobbyPresetQuick: 'Швидка гра', lobbyPresetLong: 'Довга гра', lobbyPresetCustom: 'Власний',
+	lobbyTabBasic: 'Основне', lobbyTabThreats: 'Загрози', lobbyTabRounds: 'Раунди', lobbyTabAccess: 'Доступ', lobbyMaxPlayers: 'Максимум гравців', lobbyMinPlayers: 'Мінімум гравців', lobbyBunkerCapacityMode: 'Місткість бункера', lobbyAutomatic: 'Автоматично', lobbyManual: 'Вручну', lobbyRandomRange: 'Випадковий діапазон', lobbyManualCapacity: 'Місць', lobbyRangeMin: 'Мінімум місць', lobbyRangeMax: 'Максимум місць', lobbyStartingItems: 'Стартові предмети', lobbySpecialCardsCount: 'Спеціальних карт на гравця', lobbyApocalypseEnabled: 'Апокаліпсис', lobbyBunkerEnabled: 'Бункер', lobbySpecialCardsEnabled: 'Спеціальні карти',
+	lobbyInteractiveRate: 'Інтерактивні загрози', lobbyFirstThreatRound: 'Перший раунд загрози', lobbyThreatFrequency: 'Частота загроз', lobbyOnce: 'Один раз', lobbyEveryOther: 'Через раунд', lobbyEveryRound: 'Щораунду', lobbyRandomRounds: 'Випадково', lobbyMaxThreats: 'Максимум загроз', lobbyUnlimited: 'Без обмеження', lobbyThreatsEnabled: 'Загрози увімкнено', lobbyAvoidThreatRepeats: 'Не повторювати ID загроз', lobbyTimerDuration: 'Таймер раунду', lobbyVotingStart: 'Голосування з раунду', lobbyVotingFrequency: 'Частота голосувань', lobbyBonusRound: 'Бонусний інвентар у раунді', lobbyBonusCount: 'Бонусних предметів', lobbyTimerEnabled: 'Таймер увімкнено', lobbyTimerAutoStart: 'Автостарт таймера', lobbyTimerPauseDisconnect: 'Пауза при відключенні host', lobbyVotingEnabled: 'Голосування увімкнено', lobbyBonusEnabled: 'Бонусний інвентар',
+	lobbyReadyPolicy: 'Політика готовності', lobbyAllReady: 'Усі гравці', lobbyHostDecides: 'Вирішує host', lobbyRoomPassword: 'Пароль кімнати', lobbyPasswordPlaceholder: 'Порожньо — вимкнути захист', lobbyPasswordApply: 'Оновити пароль', lobbySpectatorsAllowed: 'Дозволити спостерігачів', lobbyHostOverride: 'Host може стартувати без усіх ready', lobbyResetReady: 'Скидати ready після змін', lobbyLockJoins: 'Заблокувати нові входи', lobbyPresetName: 'Назва локального пресету', lobbyPresetSave: 'Зберегти локально', lobbyPresetLoad: 'Завантажити', lobbyPresetDelete: 'Видалити', lobbyPresetExport: 'Export JSON', lobbyPresetImport: 'Import JSON', lobbyReset: 'Скинути', lobbyResetClassic: 'Класичний', lobbyApply: 'Застосувати', lobbyAuditTitle: 'Останні події лобі',
+	lobbySettingsApplied: 'Налаштування застосовано.', lobbySettingsConflict: 'Налаштування змінилися в іншій вкладці. Завантажено актуальні значення.', lobbySettingsInvalid: 'Перевірте значення налаштувань.', lobbyPresetSaved: 'Локальний пресет збережено.', lobbyPresetLoaded: 'Пресет завантажено в чернетку.', lobbyPresetDeleted: 'Локальний пресет видалено.', lobbyPresetImportOk: 'JSON імпортовано в чернетку.', lobbyPresetImportError: 'Некоректний або застарілий JSON-пресет.', lobbyPasswordUpdated: 'Захист кімнати оновлено.', lobbyResetMemberReady: 'Скинути ready', lobbyKickMember: 'Видалити', lobbyKicked: 'Host видалив вас із кімнати.', lobbyNoAudit: 'Подій ще немає.', lobbySettingsReadOnly: 'Налаштування доступні лише для перегляду.', lobbySummaryThreats: 'Загрози', lobbySummaryTimer: 'Таймер', lobbySummaryVoting: 'Голосування', lobbySummaryBunker: 'Бункер', lobbySummaryCards: 'Карти', lobbyOff: 'Вимкнено', lobbyFromRound: 'з раунду'
 });
 Object.assign(uiTranslations.en, {
-	lobbySetupTitle:'Game setup', lobbyRevision:'Revision', lobbyUnsaved:'Unsaved changes', lobbyPreset:'Preset', lobbyPresetClassic:'Classic', lobbyPresetCalm:'Calm', lobbyPresetDangerous:'Dangerous', lobbyPresetHardcore:'Hardcore', lobbyPresetQuick:'Quick game', lobbyPresetLong:'Long game', lobbyPresetCustom:'Custom',
-	lobbyTabBasic:'Basic', lobbyTabThreats:'Threats', lobbyTabRounds:'Rounds', lobbyTabAccess:'Access', lobbyMaxPlayers:'Maximum players', lobbyMinPlayers:'Minimum players', lobbyBunkerCapacityMode:'Bunker capacity', lobbyAutomatic:'Automatic', lobbyManual:'Manual', lobbyRandomRange:'Random range', lobbyManualCapacity:'Seats', lobbyRangeMin:'Minimum seats', lobbyRangeMax:'Maximum seats', lobbyStartingItems:'Starting items', lobbySpecialCardsCount:'Special cards per player', lobbyApocalypseEnabled:'Apocalypse', lobbyBunkerEnabled:'Bunker', lobbySpecialCardsEnabled:'Special cards',
-	lobbyInteractiveRate:'Interactive threats', lobbyFirstThreatRound:'First threat round', lobbyThreatFrequency:'Threat frequency', lobbyOnce:'Once', lobbyEveryOther:'Every other round', lobbyEveryRound:'Every round', lobbyRandomRounds:'Random', lobbyMaxThreats:'Maximum threats', lobbyUnlimited:'Unlimited', lobbyThreatsEnabled:'Threats enabled', lobbyAvoidThreatRepeats:'Avoid repeated threat IDs', lobbyTimerDuration:'Round timer', lobbyVotingStart:'Voting from round', lobbyVotingFrequency:'Voting frequency', lobbyBonusRound:'Bonus items round', lobbyBonusCount:'Bonus item count', lobbyTimerEnabled:'Timer enabled', lobbyTimerAutoStart:'Auto-start timer', lobbyTimerPauseDisconnect:'Pause when host disconnects', lobbyVotingEnabled:'Voting enabled', lobbyBonusEnabled:'Bonus items',
-	lobbyReadyPolicy:'Readiness policy', lobbyAllReady:'All players', lobbyHostDecides:'Host decides', lobbyRoomPassword:'Room password', lobbyPasswordPlaceholder:'Empty disables protection', lobbyPasswordApply:'Update password', lobbySpectatorsAllowed:'Allow spectators', lobbyHostOverride:'Host may start without everyone ready', lobbyResetReady:'Reset readiness after changes', lobbyLockJoins:'Lock new joins', lobbyPresetName:'Local preset name', lobbyPresetSave:'Save locally', lobbyPresetLoad:'Load', lobbyPresetDelete:'Delete', lobbyPresetExport:'Export JSON', lobbyPresetImport:'Import JSON', lobbyReset:'Reset', lobbyResetClassic:'Classic', lobbyApply:'Apply', lobbyAuditTitle:'Recent lobby events',
-	lobbySettingsApplied:'Settings applied.', lobbySettingsConflict:'Settings changed in another tab. Current values were loaded.', lobbySettingsInvalid:'Check the settings values.', lobbyPresetSaved:'Local preset saved.', lobbyPresetLoaded:'Preset loaded into the draft.', lobbyPresetDeleted:'Local preset deleted.', lobbyPresetImportOk:'JSON imported into the draft.', lobbyPresetImportError:'Invalid or outdated JSON preset.', lobbyPasswordUpdated:'Room protection updated.', lobbyResetMemberReady:'Reset ready', lobbyKickMember:'Remove', lobbyKicked:'The host removed you from the room.', lobbyNoAudit:'No events yet.', lobbySettingsReadOnly:'Settings are read-only.', lobbySummaryThreats:'Threats', lobbySummaryTimer:'Timer', lobbySummaryVoting:'Voting', lobbySummaryBunker:'Bunker', lobbySummaryCards:'Cards', lobbyOff:'Off', lobbyFromRound:'from round'
+	lobbySetupTitle: 'Game setup', lobbyRevision: 'Revision', lobbyUnsaved: 'Unsaved changes', lobbyPreset: 'Preset', lobbyPresetClassic: 'Classic', lobbyPresetCalm: 'Calm', lobbyPresetDangerous: 'Dangerous', lobbyPresetHardcore: 'Hardcore', lobbyPresetQuick: 'Quick game', lobbyPresetLong: 'Long game', lobbyPresetCustom: 'Custom',
+	lobbyTabBasic: 'Basic', lobbyTabThreats: 'Threats', lobbyTabRounds: 'Rounds', lobbyTabAccess: 'Access', lobbyMaxPlayers: 'Maximum players', lobbyMinPlayers: 'Minimum players', lobbyBunkerCapacityMode: 'Bunker capacity', lobbyAutomatic: 'Automatic', lobbyManual: 'Manual', lobbyRandomRange: 'Random range', lobbyManualCapacity: 'Seats', lobbyRangeMin: 'Minimum seats', lobbyRangeMax: 'Maximum seats', lobbyStartingItems: 'Starting items', lobbySpecialCardsCount: 'Special cards per player', lobbyApocalypseEnabled: 'Apocalypse', lobbyBunkerEnabled: 'Bunker', lobbySpecialCardsEnabled: 'Special cards',
+	lobbyInteractiveRate: 'Interactive threats', lobbyFirstThreatRound: 'First threat round', lobbyThreatFrequency: 'Threat frequency', lobbyOnce: 'Once', lobbyEveryOther: 'Every other round', lobbyEveryRound: 'Every round', lobbyRandomRounds: 'Random', lobbyMaxThreats: 'Maximum threats', lobbyUnlimited: 'Unlimited', lobbyThreatsEnabled: 'Threats enabled', lobbyAvoidThreatRepeats: 'Avoid repeated threat IDs', lobbyTimerDuration: 'Round timer', lobbyVotingStart: 'Voting from round', lobbyVotingFrequency: 'Voting frequency', lobbyBonusRound: 'Bonus items round', lobbyBonusCount: 'Bonus item count', lobbyTimerEnabled: 'Timer enabled', lobbyTimerAutoStart: 'Auto-start timer', lobbyTimerPauseDisconnect: 'Pause when host disconnects', lobbyVotingEnabled: 'Voting enabled', lobbyBonusEnabled: 'Bonus items',
+	lobbyReadyPolicy: 'Readiness policy', lobbyAllReady: 'All players', lobbyHostDecides: 'Host decides', lobbyRoomPassword: 'Room password', lobbyPasswordPlaceholder: 'Empty disables protection', lobbyPasswordApply: 'Update password', lobbySpectatorsAllowed: 'Allow spectators', lobbyHostOverride: 'Host may start without everyone ready', lobbyResetReady: 'Reset readiness after changes', lobbyLockJoins: 'Lock new joins', lobbyPresetName: 'Local preset name', lobbyPresetSave: 'Save locally', lobbyPresetLoad: 'Load', lobbyPresetDelete: 'Delete', lobbyPresetExport: 'Export JSON', lobbyPresetImport: 'Import JSON', lobbyReset: 'Reset', lobbyResetClassic: 'Classic', lobbyApply: 'Apply', lobbyAuditTitle: 'Recent lobby events',
+	lobbySettingsApplied: 'Settings applied.', lobbySettingsConflict: 'Settings changed in another tab. Current values were loaded.', lobbySettingsInvalid: 'Check the settings values.', lobbyPresetSaved: 'Local preset saved.', lobbyPresetLoaded: 'Preset loaded into the draft.', lobbyPresetDeleted: 'Local preset deleted.', lobbyPresetImportOk: 'JSON imported into the draft.', lobbyPresetImportError: 'Invalid or outdated JSON preset.', lobbyPasswordUpdated: 'Room protection updated.', lobbyResetMemberReady: 'Reset ready', lobbyKickMember: 'Remove', lobbyKicked: 'The host removed you from the room.', lobbyNoAudit: 'No events yet.', lobbySettingsReadOnly: 'Settings are read-only.', lobbySummaryThreats: 'Threats', lobbySummaryTimer: 'Timer', lobbySummaryVoting: 'Voting', lobbySummaryBunker: 'Bunker', lobbySummaryCards: 'Cards', lobbyOff: 'Off', lobbyFromRound: 'from round'
 });
 Object.assign(uiTranslations.ru, {
-	lobbySetupTitle:'Настройки игры', lobbyRevision:'Ревизия', lobbyUnsaved:'Несохранённые изменения', lobbyPreset:'Пресет', lobbyPresetClassic:'Классический', lobbyPresetCalm:'Спокойный', lobbyPresetDangerous:'Опасный', lobbyPresetHardcore:'Хардкор', lobbyPresetQuick:'Быстрая игра', lobbyPresetLong:'Долгая игра', lobbyPresetCustom:'Свой',
-	lobbyTabBasic:'Основное', lobbyTabThreats:'Угрозы', lobbyTabRounds:'Раунды', lobbyTabAccess:'Доступ', lobbyMaxPlayers:'Максимум игроков', lobbyMinPlayers:'Минимум игроков', lobbyBunkerCapacityMode:'Вместимость бункера', lobbyAutomatic:'Автоматически', lobbyManual:'Вручную', lobbyRandomRange:'Случайный диапазон', lobbyManualCapacity:'Мест', lobbyRangeMin:'Минимум мест', lobbyRangeMax:'Максимум мест', lobbyStartingItems:'Стартовые предметы', lobbySpecialCardsCount:'Специальных карт на игрока', lobbyApocalypseEnabled:'Апокалипсис', lobbyBunkerEnabled:'Бункер', lobbySpecialCardsEnabled:'Специальные карты',
-	lobbyInteractiveRate:'Интерактивные угрозы', lobbyFirstThreatRound:'Первый раунд угрозы', lobbyThreatFrequency:'Частота угроз', lobbyOnce:'Один раз', lobbyEveryOther:'Через раунд', lobbyEveryRound:'Каждый раунд', lobbyRandomRounds:'Случайно', lobbyMaxThreats:'Максимум угроз', lobbyUnlimited:'Без ограничения', lobbyThreatsEnabled:'Угрозы включены', lobbyAvoidThreatRepeats:'Не повторять ID угроз', lobbyTimerDuration:'Таймер раунда', lobbyVotingStart:'Голосование с раунда', lobbyVotingFrequency:'Частота голосований', lobbyBonusRound:'Бонусный инвентарь в раунде', lobbyBonusCount:'Бонусных предметов', lobbyTimerEnabled:'Таймер включён', lobbyTimerAutoStart:'Автозапуск таймера', lobbyTimerPauseDisconnect:'Пауза при отключении host', lobbyVotingEnabled:'Голосование включено', lobbyBonusEnabled:'Бонусный инвентарь',
-	lobbyReadyPolicy:'Политика готовности', lobbyAllReady:'Все игроки', lobbyHostDecides:'Решает host', lobbyRoomPassword:'Пароль комнаты', lobbyPasswordPlaceholder:'Пусто — отключить защиту', lobbyPasswordApply:'Обновить пароль', lobbySpectatorsAllowed:'Разрешить наблюдателей', lobbyHostOverride:'Host может начать без всех ready', lobbyResetReady:'Сбрасывать ready после изменений', lobbyLockJoins:'Заблокировать новые входы', lobbyPresetName:'Название локального пресета', lobbyPresetSave:'Сохранить локально', lobbyPresetLoad:'Загрузить', lobbyPresetDelete:'Удалить', lobbyPresetExport:'Export JSON', lobbyPresetImport:'Import JSON', lobbyReset:'Сбросить', lobbyResetClassic:'Классический', lobbyApply:'Применить', lobbyAuditTitle:'Последние события лобби',
-	lobbySettingsApplied:'Настройки применены.', lobbySettingsConflict:'Настройки изменились в другой вкладке. Загружены актуальные значения.', lobbySettingsInvalid:'Проверьте значения настроек.', lobbyPresetSaved:'Локальный пресет сохранён.', lobbyPresetLoaded:'Пресет загружен в черновик.', lobbyPresetDeleted:'Локальный пресет удалён.', lobbyPresetImportOk:'JSON импортирован в черновик.', lobbyPresetImportError:'Некорректный или устаревший JSON-пресет.', lobbyPasswordUpdated:'Защита комнаты обновлена.', lobbyResetMemberReady:'Сбросить ready', lobbyKickMember:'Удалить', lobbyKicked:'Host удалил вас из комнаты.', lobbyNoAudit:'Событий пока нет.', lobbySettingsReadOnly:'Настройки доступны только для просмотра.', lobbySummaryThreats:'Угрозы', lobbySummaryTimer:'Таймер', lobbySummaryVoting:'Голосование', lobbySummaryBunker:'Бункер', lobbySummaryCards:'Карты', lobbyOff:'Выключено', lobbyFromRound:'с раунда'
+	lobbySetupTitle: 'Настройки игры', lobbyRevision: 'Ревизия', lobbyUnsaved: 'Несохранённые изменения', lobbyPreset: 'Пресет', lobbyPresetClassic: 'Классический', lobbyPresetCalm: 'Спокойный', lobbyPresetDangerous: 'Опасный', lobbyPresetHardcore: 'Хардкор', lobbyPresetQuick: 'Быстрая игра', lobbyPresetLong: 'Долгая игра', lobbyPresetCustom: 'Свой',
+	lobbyTabBasic: 'Основное', lobbyTabThreats: 'Угрозы', lobbyTabRounds: 'Раунды', lobbyTabAccess: 'Доступ', lobbyMaxPlayers: 'Максимум игроков', lobbyMinPlayers: 'Минимум игроков', lobbyBunkerCapacityMode: 'Вместимость бункера', lobbyAutomatic: 'Автоматически', lobbyManual: 'Вручную', lobbyRandomRange: 'Случайный диапазон', lobbyManualCapacity: 'Мест', lobbyRangeMin: 'Минимум мест', lobbyRangeMax: 'Максимум мест', lobbyStartingItems: 'Стартовые предметы', lobbySpecialCardsCount: 'Специальных карт на игрока', lobbyApocalypseEnabled: 'Апокалипсис', lobbyBunkerEnabled: 'Бункер', lobbySpecialCardsEnabled: 'Специальные карты',
+	lobbyInteractiveRate: 'Интерактивные угрозы', lobbyFirstThreatRound: 'Первый раунд угрозы', lobbyThreatFrequency: 'Частота угроз', lobbyOnce: 'Один раз', lobbyEveryOther: 'Через раунд', lobbyEveryRound: 'Каждый раунд', lobbyRandomRounds: 'Случайно', lobbyMaxThreats: 'Максимум угроз', lobbyUnlimited: 'Без ограничения', lobbyThreatsEnabled: 'Угрозы включены', lobbyAvoidThreatRepeats: 'Не повторять ID угроз', lobbyTimerDuration: 'Таймер раунда', lobbyVotingStart: 'Голосование с раунда', lobbyVotingFrequency: 'Частота голосований', lobbyBonusRound: 'Бонусный инвентарь в раунде', lobbyBonusCount: 'Бонусных предметов', lobbyTimerEnabled: 'Таймер включён', lobbyTimerAutoStart: 'Автозапуск таймера', lobbyTimerPauseDisconnect: 'Пауза при отключении host', lobbyVotingEnabled: 'Голосование включено', lobbyBonusEnabled: 'Бонусный инвентарь',
+	lobbyReadyPolicy: 'Политика готовности', lobbyAllReady: 'Все игроки', lobbyHostDecides: 'Решает host', lobbyRoomPassword: 'Пароль комнаты', lobbyPasswordPlaceholder: 'Пусто — отключить защиту', lobbyPasswordApply: 'Обновить пароль', lobbySpectatorsAllowed: 'Разрешить наблюдателей', lobbyHostOverride: 'Host может начать без всех ready', lobbyResetReady: 'Сбрасывать ready после изменений', lobbyLockJoins: 'Заблокировать новые входы', lobbyPresetName: 'Название локального пресета', lobbyPresetSave: 'Сохранить локально', lobbyPresetLoad: 'Загрузить', lobbyPresetDelete: 'Удалить', lobbyPresetExport: 'Export JSON', lobbyPresetImport: 'Import JSON', lobbyReset: 'Сбросить', lobbyResetClassic: 'Классический', lobbyApply: 'Применить', lobbyAuditTitle: 'Последние события лобби',
+	lobbySettingsApplied: 'Настройки применены.', lobbySettingsConflict: 'Настройки изменились в другой вкладке. Загружены актуальные значения.', lobbySettingsInvalid: 'Проверьте значения настроек.', lobbyPresetSaved: 'Локальный пресет сохранён.', lobbyPresetLoaded: 'Пресет загружен в черновик.', lobbyPresetDeleted: 'Локальный пресет удалён.', lobbyPresetImportOk: 'JSON импортирован в черновик.', lobbyPresetImportError: 'Некорректный или устаревший JSON-пресет.', lobbyPasswordUpdated: 'Защита комнаты обновлена.', lobbyResetMemberReady: 'Сбросить ready', lobbyKickMember: 'Удалить', lobbyKicked: 'Host удалил вас из комнаты.', lobbyNoAudit: 'Событий пока нет.', lobbySettingsReadOnly: 'Настройки доступны только для просмотра.', lobbySummaryThreats: 'Угрозы', lobbySummaryTimer: 'Таймер', lobbySummaryVoting: 'Голосование', lobbySummaryBunker: 'Бункер', lobbySummaryCards: 'Карты', lobbyOff: 'Выключено', lobbyFromRound: 'с раунда'
 });
-Object.assign(uiTranslations.uk, { lobbyWarningCapacity:'Місткість бункера не менша за поточну кількість активних гравців.', lobbyWarningSpectators:'У кімнаті вже є спостерігачі, хоча нові ролі спостерігачів вимкнено.', lobbyWarningPlayers:'Поточна кількість гравців перевищує максимум.', lobbyAuditSettings:'Host застосував налаштування гри.', lobbyAuditReady:'Учасник змінив готовність.', lobbyAuditReadyReset:'Host скинув готовність учасника.', lobbyAuditRole:'Host змінив роль учасника.', lobbyAuditHost:'Передано роль host.', lobbyAuditKick:'Host видалив учасника.', lobbyAuditJoined:'Учасник приєднався до лобі.', lobbyAuditReconnected:'Учасник відновив з’єднання.', lobbyAuditLeft:'Учасник залишив лобі.', lobbyAuditPassword:'Host змінив захист кімнати.', lobbyAuditStarted:'Гру запущено з лобі.', lobbyAuditGeneric:'Оновлено стан лобі.' });
-Object.assign(uiTranslations.en, { lobbyWarningCapacity:'Bunker capacity is not lower than the current active-player count.', lobbyWarningSpectators:'Spectators are already present although new spectator roles are disabled.', lobbyWarningPlayers:'The current player count exceeds the maximum.', lobbyAuditSettings:'The host applied game settings.', lobbyAuditReady:'A member changed readiness.', lobbyAuditReadyReset:'The host reset a member’s readiness.', lobbyAuditRole:'The host changed a member role.', lobbyAuditHost:'The host role was transferred.', lobbyAuditKick:'The host removed a member.', lobbyAuditJoined:'A member joined the lobby.', lobbyAuditReconnected:'A member reconnected.', lobbyAuditLeft:'A member left the lobby.', lobbyAuditPassword:'The host changed room protection.', lobbyAuditStarted:'The game was started from the lobby.', lobbyAuditGeneric:'Lobby state updated.' });
-Object.assign(uiTranslations.ru, { lobbyWarningCapacity:'Вместимость бункера не меньше текущего количества активных игроков.', lobbyWarningSpectators:'В комнате уже есть наблюдатели, хотя новые роли наблюдателей отключены.', lobbyWarningPlayers:'Текущее количество игроков превышает максимум.', lobbyAuditSettings:'Host применил настройки игры.', lobbyAuditReady:'Участник изменил готовность.', lobbyAuditReadyReset:'Host сбросил готовность участника.', lobbyAuditRole:'Host изменил роль участника.', lobbyAuditHost:'Передана роль host.', lobbyAuditKick:'Host удалил участника.', lobbyAuditJoined:'Участник присоединился к лобби.', lobbyAuditReconnected:'Участник восстановил соединение.', lobbyAuditLeft:'Участник покинул лобби.', lobbyAuditPassword:'Host изменил защиту комнаты.', lobbyAuditStarted:'Игра запущена из лобби.', lobbyAuditGeneric:'Состояние лобби обновлено.' });
-Object.assign(uiTranslations.uk, { gameFinishedTitle:'Гру завершено', gameFinishedReason:'Місткість бункера досягнута.', gameFinishedCapacity:'Місткість бункера', gameFinishedSurvivors:'Переможців', gameFinishedRound:'Раунд завершення', gameFinishedTime:'Час завершення', gameFinishedWinners:'Переможці', gameFinishedNoWinners:'Переможців немає', gameFinishedNewGame:'Нова гра', gameFinishedCopy:'Скопіювати підсумок', gameFinishedWaitHost:'Очікуємо, поки хост почне нову гру.', gameFinishedCopied:'Підсумок скопійовано', gameFinishedCopyFailed:'Не вдалося скопіювати підсумок', gameFinishedConfirmReturn:'Повернути цю кімнату в lobby для нової гри?', gameFinishedReturning:'Повертаємо кімнату в lobby…' });
-Object.assign(uiTranslations.en, { gameFinishedTitle:'Game finished', gameFinishedReason:'The bunker capacity has been reached.', gameFinishedCapacity:'Bunker capacity', gameFinishedSurvivors:'Winners', gameFinishedRound:'Completion round', gameFinishedTime:'Completed at', gameFinishedWinners:'Winners', gameFinishedNoWinners:'No winners', gameFinishedNewGame:'New game', gameFinishedCopy:'Copy summary', gameFinishedWaitHost:'Waiting for the host to start a new game.', gameFinishedCopied:'Summary copied', gameFinishedCopyFailed:'Could not copy the summary', gameFinishedConfirmReturn:'Return this room to the lobby for a new game?', gameFinishedReturning:'Returning the room to the lobby…' });
-Object.assign(uiTranslations.ru, { gameFinishedTitle:'Игра завершена', gameFinishedReason:'Вместимость бункера достигнута.', gameFinishedCapacity:'Вместимость бункера', gameFinishedSurvivors:'Победителей', gameFinishedRound:'Раунд завершения', gameFinishedTime:'Время завершения', gameFinishedWinners:'Победители', gameFinishedNoWinners:'Победителей нет', gameFinishedNewGame:'Новая игра', gameFinishedCopy:'Скопировать итог', gameFinishedWaitHost:'Ожидаем, пока хост начнёт новую игру.', gameFinishedCopied:'Итог скопирован', gameFinishedCopyFailed:'Не удалось скопировать итог', gameFinishedConfirmReturn:'Вернуть эту комнату в lobby для новой игры?', gameFinishedReturning:'Возвращаем комнату в lobby…' });
+Object.assign(uiTranslations.uk, { lobbyWarningCapacity: 'Місткість бункера не менша за поточну кількість активних гравців.', lobbyWarningSpectators: 'У кімнаті вже є спостерігачі, хоча нові ролі спостерігачів вимкнено.', lobbyWarningPlayers: 'Поточна кількість гравців перевищує максимум.', lobbyAuditSettings: 'Host застосував налаштування гри.', lobbyAuditReady: 'Учасник змінив готовність.', lobbyAuditReadyReset: 'Host скинув готовність учасника.', lobbyAuditRole: 'Host змінив роль учасника.', lobbyAuditHost: 'Передано роль host.', lobbyAuditKick: 'Host видалив учасника.', lobbyAuditJoined: 'Учасник приєднався до лобі.', lobbyAuditReconnected: 'Учасник відновив з’єднання.', lobbyAuditLeft: 'Учасник залишив лобі.', lobbyAuditPassword: 'Host змінив захист кімнати.', lobbyAuditStarted: 'Гру запущено з лобі.', lobbyAuditGeneric: 'Оновлено стан лобі.' });
+Object.assign(uiTranslations.en, { lobbyWarningCapacity: 'Bunker capacity is not lower than the current active-player count.', lobbyWarningSpectators: 'Spectators are already present although new spectator roles are disabled.', lobbyWarningPlayers: 'The current player count exceeds the maximum.', lobbyAuditSettings: 'The host applied game settings.', lobbyAuditReady: 'A member changed readiness.', lobbyAuditReadyReset: 'The host reset a member’s readiness.', lobbyAuditRole: 'The host changed a member role.', lobbyAuditHost: 'The host role was transferred.', lobbyAuditKick: 'The host removed a member.', lobbyAuditJoined: 'A member joined the lobby.', lobbyAuditReconnected: 'A member reconnected.', lobbyAuditLeft: 'A member left the lobby.', lobbyAuditPassword: 'The host changed room protection.', lobbyAuditStarted: 'The game was started from the lobby.', lobbyAuditGeneric: 'Lobby state updated.' });
+Object.assign(uiTranslations.ru, { lobbyWarningCapacity: 'Вместимость бункера не меньше текущего количества активных игроков.', lobbyWarningSpectators: 'В комнате уже есть наблюдатели, хотя новые роли наблюдателей отключены.', lobbyWarningPlayers: 'Текущее количество игроков превышает максимум.', lobbyAuditSettings: 'Host применил настройки игры.', lobbyAuditReady: 'Участник изменил готовность.', lobbyAuditReadyReset: 'Host сбросил готовность участника.', lobbyAuditRole: 'Host изменил роль участника.', lobbyAuditHost: 'Передана роль host.', lobbyAuditKick: 'Host удалил участника.', lobbyAuditJoined: 'Участник присоединился к лобби.', lobbyAuditReconnected: 'Участник восстановил соединение.', lobbyAuditLeft: 'Участник покинул лобби.', lobbyAuditPassword: 'Host изменил защиту комнаты.', lobbyAuditStarted: 'Игра запущена из лобби.', lobbyAuditGeneric: 'Состояние лобби обновлено.' });
+Object.assign(uiTranslations.uk, { gameFinishedTitle: 'Гру завершено', gameFinishedReason: 'Місткість бункера досягнута.', gameFinishedCapacity: 'Місткість бункера', gameFinishedSurvivors: 'Переможців', gameFinishedRound: 'Раунд завершення', gameFinishedTime: 'Час завершення', gameFinishedWinners: 'Переможці', gameFinishedNoWinners: 'Переможців немає', gameFinishedNewGame: 'Нова гра', gameFinishedCopy: 'Скопіювати підсумок', gameFinishedWaitHost: 'Очікуємо, поки хост почне нову гру.', gameFinishedCopied: 'Підсумок скопійовано', gameFinishedCopyFailed: 'Не вдалося скопіювати підсумок', gameFinishedConfirmReturn: 'Повернути цю кімнату в lobby для нової гри?', gameFinishedReturning: 'Повертаємо кімнату в lobby…' });
+Object.assign(uiTranslations.en, { gameFinishedTitle: 'Game finished', gameFinishedReason: 'The bunker capacity has been reached.', gameFinishedCapacity: 'Bunker capacity', gameFinishedSurvivors: 'Winners', gameFinishedRound: 'Completion round', gameFinishedTime: 'Completed at', gameFinishedWinners: 'Winners', gameFinishedNoWinners: 'No winners', gameFinishedNewGame: 'New game', gameFinishedCopy: 'Copy summary', gameFinishedWaitHost: 'Waiting for the host to start a new game.', gameFinishedCopied: 'Summary copied', gameFinishedCopyFailed: 'Could not copy the summary', gameFinishedConfirmReturn: 'Return this room to the lobby for a new game?', gameFinishedReturning: 'Returning the room to the lobby…' });
+Object.assign(uiTranslations.ru, { gameFinishedTitle: 'Игра завершена', gameFinishedReason: 'Вместимость бункера достигнута.', gameFinishedCapacity: 'Вместимость бункера', gameFinishedSurvivors: 'Победителей', gameFinishedRound: 'Раунд завершения', gameFinishedTime: 'Время завершения', gameFinishedWinners: 'Победители', gameFinishedNoWinners: 'Победителей нет', gameFinishedNewGame: 'Новая игра', gameFinishedCopy: 'Скопировать итог', gameFinishedWaitHost: 'Ожидаем, пока хост начнёт новую игру.', gameFinishedCopied: 'Итог скопирован', gameFinishedCopyFailed: 'Не удалось скопировать итог', gameFinishedConfirmReturn: 'Вернуть эту комнату в lobby для новой игры?', gameFinishedReturning: 'Возвращаем комнату в lobby…' });
 
 Object.assign(uiTranslations.uk, {
 	cardExperience: 'Досвід',
@@ -8028,27 +8028,27 @@ function renderRoomPlayers() {
 }
 
 const lobbyGet = (object, camel, pascal) => object?.[camel] ?? object?.[pascal];
-const lobbySettingNumberKeys = new Set(['maxGameplayPlayers','minGameplayPlayers','manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','firstThreatRound','maxThreatsPerGame','roundTimerDurationSeconds','votingStartRound','specialCardsPerPlayer','bonusInventoryRound','bonusInventoryCount','startingInventoryCount','scenarioFirstAfterRound','scenarioIntervalRounds','bunkerIntelIntervalRounds']);
-const lobbySettingNullableNumberKeys = new Set(['manualBunkerCapacity','randomBunkerCapacityMin','randomBunkerCapacityMax','maxThreatsPerGame']);
-const lobbySettingBooleanKeys = new Set(['spectatorsAllowed','allowSpectatorsAfterStart','allowLateGameplayJoin','lockRoomOnStart','joinsLocked','hostCanStartWithoutAllReady','resetReadinessAfterSettingsChange','apocalypseEnabled','bunkerScenarioEnabled','threatsEnabled','avoidRepeatedThreats','roundTimerEnabled','autoStartRoundTimer','pauseTimerOnHostDisconnect','votingEnabled','specialCardsEnabled','bonusInventoryEnabled','scenarioEnabled','scenarioThreatEnabled','scenarioEventEnabled','scenarioSecretEventEnabled']);
+const lobbySettingNumberKeys = new Set(['maxGameplayPlayers', 'minGameplayPlayers', 'manualBunkerCapacity', 'randomBunkerCapacityMin', 'randomBunkerCapacityMax', 'firstThreatRound', 'maxThreatsPerGame', 'roundTimerDurationSeconds', 'votingStartRound', 'specialCardsPerPlayer', 'bonusInventoryRound', 'bonusInventoryCount', 'startingInventoryCount', 'scenarioFirstAfterRound', 'scenarioIntervalRounds', 'bunkerIntelIntervalRounds']);
+const lobbySettingNullableNumberKeys = new Set(['manualBunkerCapacity', 'randomBunkerCapacityMin', 'randomBunkerCapacityMax', 'maxThreatsPerGame']);
+const lobbySettingBooleanKeys = new Set(['spectatorsAllowed', 'allowSpectatorsAfterStart', 'allowLateGameplayJoin', 'lockRoomOnStart', 'joinsLocked', 'hostCanStartWithoutAllReady', 'resetReadinessAfterSettingsChange', 'apocalypseEnabled', 'bunkerScenarioEnabled', 'threatsEnabled', 'avoidRepeatedThreats', 'roundTimerEnabled', 'autoStartRoundTimer', 'pauseTimerOnHostDisconnect', 'votingEnabled', 'specialCardsEnabled', 'bonusInventoryEnabled', 'scenarioEnabled', 'scenarioThreatEnabled', 'scenarioEventEnabled', 'scenarioSecretEventEnabled']);
 
 function normalizeLobbySettings(source) {
 	const get = key => source?.[key] ?? source?.[key.charAt(0).toUpperCase() + key.slice(1)];
 	return {
-		version:Number(get('version') ?? 2), preset:String(get('preset') ?? 'Classic'),
-		maxGameplayPlayers:Number(get('maxGameplayPlayers') ?? 12), minGameplayPlayers:Number(get('minGameplayPlayers') ?? 2),
-		spectatorsAllowed:Boolean(get('spectatorsAllowed') ?? true), allowSpectatorsAfterStart:Boolean(get('allowSpectatorsAfterStart') ?? false),
-		allowLateGameplayJoin:Boolean(get('allowLateGameplayJoin') ?? false), lockRoomOnStart:Boolean(get('lockRoomOnStart') ?? true), joinsLocked:Boolean(get('joinsLocked') ?? false),
-		readyRequirement:String(get('readyRequirement') ?? 'AllPlayers'), hostCanStartWithoutAllReady:Boolean(get('hostCanStartWithoutAllReady') ?? false), resetReadinessAfterSettingsChange:Boolean(get('resetReadinessAfterSettingsChange') ?? true),
-		bunkerCapacityMode:String(get('bunkerCapacityMode') ?? 'Automatic'), manualBunkerCapacity:get('manualBunkerCapacity') == null ? null : Number(get('manualBunkerCapacity')), randomBunkerCapacityMin:get('randomBunkerCapacityMin') == null ? null : Number(get('randomBunkerCapacityMin')), randomBunkerCapacityMax:get('randomBunkerCapacityMax') == null ? null : Number(get('randomBunkerCapacityMax')),
-		apocalypseEnabled:Boolean(get('apocalypseEnabled') ?? true), bunkerScenarioEnabled:Boolean(get('bunkerScenarioEnabled') ?? true),
-		threatsEnabled:Boolean(get('threatsEnabled') ?? true), interactiveThreatRate:String(get('interactiveThreatRate') ?? 'Rare'), firstThreatRound:Number(get('firstThreatRound') ?? 3), threatFrequency:String(get('threatFrequency') ?? 'OncePerGame'), maxThreatsPerGame:get('maxThreatsPerGame') == null ? null : Number(get('maxThreatsPerGame')), avoidRepeatedThreats:Boolean(get('avoidRepeatedThreats') ?? true),
-		roundTimerEnabled:Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds:Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer:Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect:Boolean(get('pauseTimerOnHostDisconnect') ?? false),
-		votingEnabled:Boolean(get('votingEnabled') ?? true), votingStartRound:Number(get('votingStartRound') ?? 3), votingFrequency:String(get('votingFrequency') ?? 'EveryRound'),
-		specialCardsEnabled:Boolean(get('specialCardsEnabled') ?? true), specialCardsPerPlayer:Number(get('specialCardsPerPlayer') ?? 1), bonusInventoryEnabled:Boolean(get('bonusInventoryEnabled') ?? true), bonusInventoryRound:Number(get('bonusInventoryRound') ?? 3), bonusInventoryCount:Number(get('bonusInventoryCount') ?? 1), startingInventoryCount:Number(get('startingInventoryCount') ?? 1), characterGenerationMode:String(get('characterGenerationMode') ?? 'Classic'),
-		scenarioEnabled:Boolean(get('scenarioEnabled') ?? true), scenarioFirstAfterRound:Number(get('scenarioFirstAfterRound') ?? 2), scenarioIntervalRounds:Number(get('scenarioIntervalRounds') ?? 3), scenarioTriggerPhase:String(get('scenarioTriggerPhase') ?? 'after_round_before_voting'),
-		scenarioThreatEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('threat'), scenarioEventEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('event'), scenarioSecretEventEnabled:(get('scenarioEnabledTypes') || ['threat','event','secret_event']).includes('secret_event'),
-		bunkerIntelMode:'AllVisible', bunkerIntelIntervalRounds:Number(get('bunkerIntelIntervalRounds') ?? 2)
+		version: Number(get('version') ?? 2), preset: String(get('preset') ?? 'Classic'),
+		maxGameplayPlayers: Number(get('maxGameplayPlayers') ?? 12), minGameplayPlayers: Number(get('minGameplayPlayers') ?? 2),
+		spectatorsAllowed: Boolean(get('spectatorsAllowed') ?? true), allowSpectatorsAfterStart: Boolean(get('allowSpectatorsAfterStart') ?? false),
+		allowLateGameplayJoin: Boolean(get('allowLateGameplayJoin') ?? false), lockRoomOnStart: Boolean(get('lockRoomOnStart') ?? true), joinsLocked: Boolean(get('joinsLocked') ?? false),
+		readyRequirement: String(get('readyRequirement') ?? 'AllPlayers'), hostCanStartWithoutAllReady: Boolean(get('hostCanStartWithoutAllReady') ?? false), resetReadinessAfterSettingsChange: Boolean(get('resetReadinessAfterSettingsChange') ?? true),
+		bunkerCapacityMode: String(get('bunkerCapacityMode') ?? 'Automatic'), manualBunkerCapacity: get('manualBunkerCapacity') == null ? null : Number(get('manualBunkerCapacity')), randomBunkerCapacityMin: get('randomBunkerCapacityMin') == null ? null : Number(get('randomBunkerCapacityMin')), randomBunkerCapacityMax: get('randomBunkerCapacityMax') == null ? null : Number(get('randomBunkerCapacityMax')),
+		apocalypseEnabled: Boolean(get('apocalypseEnabled') ?? true), bunkerScenarioEnabled: Boolean(get('bunkerScenarioEnabled') ?? true),
+		threatsEnabled: Boolean(get('threatsEnabled') ?? true), interactiveThreatRate: String(get('interactiveThreatRate') ?? 'Rare'), firstThreatRound: Number(get('firstThreatRound') ?? 3), threatFrequency: String(get('threatFrequency') ?? 'OncePerGame'), maxThreatsPerGame: get('maxThreatsPerGame') == null ? null : Number(get('maxThreatsPerGame')), avoidRepeatedThreats: Boolean(get('avoidRepeatedThreats') ?? true),
+		roundTimerEnabled: Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds: Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer: Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect: Boolean(get('pauseTimerOnHostDisconnect') ?? false),
+		votingEnabled: Boolean(get('votingEnabled') ?? true), votingStartRound: Number(get('votingStartRound') ?? 3), votingFrequency: String(get('votingFrequency') ?? 'EveryRound'),
+		specialCardsEnabled: Boolean(get('specialCardsEnabled') ?? true), specialCardsPerPlayer: Number(get('specialCardsPerPlayer') ?? 1), bonusInventoryEnabled: Boolean(get('bonusInventoryEnabled') ?? true), bonusInventoryRound: Number(get('bonusInventoryRound') ?? 3), bonusInventoryCount: Number(get('bonusInventoryCount') ?? 1), startingInventoryCount: Number(get('startingInventoryCount') ?? 1), characterGenerationMode: String(get('characterGenerationMode') ?? 'Classic'),
+		scenarioEnabled: Boolean(get('scenarioEnabled') ?? true), scenarioFirstAfterRound: Number(get('scenarioFirstAfterRound') ?? 2), scenarioIntervalRounds: Number(get('scenarioIntervalRounds') ?? 3), scenarioTriggerPhase: String(get('scenarioTriggerPhase') ?? 'after_round_before_voting'),
+		scenarioThreatEnabled: (get('scenarioEnabledTypes') || ['threat', 'event', 'secret_event']).includes('threat'), scenarioEventEnabled: (get('scenarioEnabledTypes') || ['threat', 'event', 'secret_event']).includes('event'), scenarioSecretEventEnabled: (get('scenarioEnabledTypes') || ['threat', 'event', 'secret_event']).includes('secret_event'),
+		bunkerIntelMode: 'AllVisible', bunkerIntelIntervalRounds: Number(get('bunkerIntelIntervalRounds') ?? 2)
 	};
 }
 
@@ -8060,7 +8060,7 @@ function isLobbyConfiguredSystemEnabled(key) {
 function updateScenarioSectionVisibility() {
 	const section = document.querySelector('#gameSection > .scenario-immersive-section');
 	if (!section) return;
-	const anyVisible = ['apocalypsePanel','bunkerPanel','threatPanel'].some(id => document.getElementById(id)?.style.display !== 'none');
+	const anyVisible = ['apocalypsePanel', 'bunkerPanel', 'threatPanel'].some(id => document.getElementById(id)?.style.display !== 'none');
 	section.hidden = !anyVisible; section.style.display = anyVisible ? '' : 'none';
 }
 
@@ -8079,8 +8079,8 @@ function syncLobbySettingsState(state) {
 	}
 }
 
-function lobbyPresetLabel(value) { return t({ Classic:'lobbyPresetClassic', Calm:'lobbyPresetCalm', Dangerous:'lobbyPresetDangerous', Hardcore:'lobbyPresetHardcore', Quick:'lobbyPresetQuick', Long:'lobbyPresetLong', Custom:'lobbyPresetCustom' }[value] || 'lobbyPresetCustom'); }
-function lobbyFrequencyLabel(value) { return t({ OncePerGame:'lobbyOnce', EveryOtherRound:'lobbyEveryOther', EveryRound:'lobbyEveryRound', RandomEligibleRounds:'lobbyRandomRounds', EveryTwoRounds:'lobbyEveryOther' }[value] || 'lobbyOnce'); }
+function lobbyPresetLabel(value) { return t({ Classic: 'lobbyPresetClassic', Calm: 'lobbyPresetCalm', Dangerous: 'lobbyPresetDangerous', Hardcore: 'lobbyPresetHardcore', Quick: 'lobbyPresetQuick', Long: 'lobbyPresetLong', Custom: 'lobbyPresetCustom' }[value] || 'lobbyPresetCustom'); }
+function lobbyFrequencyLabel(value) { return t({ OncePerGame: 'lobbyOnce', EveryOtherRound: 'lobbyEveryOther', EveryRound: 'lobbyEveryRound', RandomEligibleRounds: 'lobbyRandomRounds', EveryTwoRounds: 'lobbyEveryOther' }[value] || 'lobbyOnce'); }
 function lobbyCapacityLabel(settings) {
 	if (settings.bunkerCapacityMode === 'Manual') return `${t('lobbyManual')}: ${settings.manualBunkerCapacity ?? '—'}`;
 	if (settings.bunkerCapacityMode === 'RandomRange') return `${t('lobbyRandomRange')}: ${settings.randomBunkerCapacityMin ?? '—'}–${settings.randomBunkerCapacityMax ?? '—'}`;
@@ -8090,8 +8090,8 @@ function setLobbySettingsFeedback(key, error = false) {
 	const element = document.getElementById('lobbySettingsFeedback'); if (!element) return;
 	element.textContent = key ? t(key) : ''; element.className = `lobby-settings-feedback${key ? error ? ' error' : ' success' : ''}`;
 }
-function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive:'lobbyWarningCapacity', spectators_present:'lobbyWarningSpectators', player_count_exceeds_max:'lobbyWarningPlayers' }[code] || 'lobbySettingsInvalid'); }
-function lobbyAuditLabel(action) { return t({ lobby_settings_applied:'lobbyAuditSettings', lobby_readiness_changed:'lobbyAuditReady', lobby_readiness_reset:'lobbyAuditReadyReset', lobby_role_changed:'lobbyAuditRole', host_transfer:'lobbyAuditHost', lobby_player_kicked:'lobbyAuditKick', lobby_player_joined:'lobbyAuditJoined', lobby_player_reconnected:'lobbyAuditReconnected', lobby_player_left:'lobbyAuditLeft', lobby_password_changed:'lobbyAuditPassword', game_started_from_lobby:'lobbyAuditStarted' }[action] || 'lobbyAuditGeneric'); }
+function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive: 'lobbyWarningCapacity', spectators_present: 'lobbyWarningSpectators', player_count_exceeds_max: 'lobbyWarningPlayers' }[code] || 'lobbySettingsInvalid'); }
+function lobbyAuditLabel(action) { return t({ lobby_settings_applied: 'lobbyAuditSettings', lobby_readiness_changed: 'lobbyAuditReady', lobby_readiness_reset: 'lobbyAuditReadyReset', lobby_role_changed: 'lobbyAuditRole', host_transfer: 'lobbyAuditHost', lobby_player_kicked: 'lobbyAuditKick', lobby_player_joined: 'lobbyAuditJoined', lobby_player_reconnected: 'lobbyAuditReconnected', lobby_player_left: 'lobbyAuditLeft', lobby_password_changed: 'lobbyAuditPassword', game_started_from_lobby: 'lobbyAuditStarted' }[action] || 'lobbyAuditGeneric'); }
 
 function renderLobbyGameSetup() {
 	const state = lobbyState; const setup = document.getElementById('lobbyGameSetup'); if (!state || !setup) return;
@@ -8114,12 +8114,12 @@ function renderLobbyGameSetup() {
 	];
 	const chips = document.getElementById('lobbySettingsChips'); if (chips) chips.innerHTML = chipValues.map(value => `<span class="lobby-settings-chip">${escapeHtml(String(value))}</span>`).join('');
 	const warnings = lobbyGet(state, 'settingsWarnings', 'SettingsWarnings') || []; const warningsElement = document.getElementById('lobbySettingsWarnings');
-	if (warningsElement) warningsElement.innerHTML = warnings.map(warning => `<div class="lobby-settings-warning">${escapeHtml(lobbyWarningText(lobbyGet(warning,'code','Code')))}</div>`).join('');
+	if (warningsElement) warningsElement.innerHTML = warnings.map(warning => `<div class="lobby-settings-warning">${escapeHtml(lobbyWarningText(lobbyGet(warning, 'code', 'Code')))}</div>`).join('');
 
 	if (host) {
 		const preset = document.getElementById('lobbyPresetSelect');
 		if (preset && preset.dataset.language !== getCurrentLanguage()) {
-			preset.innerHTML = ['Classic','Calm','Dangerous','Hardcore','Quick','Long','Custom'].map(value => `<option value="${value}">${escapeHtml(lobbyPresetLabel(value))}</option>`).join(''); preset.dataset.language = getCurrentLanguage();
+			preset.innerHTML = ['Classic', 'Calm', 'Dangerous', 'Hardcore', 'Quick', 'Long', 'Custom'].map(value => `<option value="${value}">${escapeHtml(lobbyPresetLabel(value))}</option>`).join(''); preset.dataset.language = getCurrentLanguage();
 		}
 		setup.querySelectorAll('.lobby-setting-input[data-setting]').forEach(control => {
 			const key = control.dataset.setting; const value = displayed[key];
@@ -8127,17 +8127,17 @@ function renderLobbyGameSetup() {
 			control.disabled = lobbySettingsPending;
 		});
 		const mode = displayed.bunkerCapacityMode;
-		for (const [id, visible] of [['lobbyManualCapacityRow',mode === 'Manual'],['lobbyRandomCapacityMinRow',mode === 'RandomRange'],['lobbyRandomCapacityMaxRow',mode === 'RandomRange']]) { const row = document.getElementById(id); if (row) row.hidden = !visible; }
+		for (const [id, visible] of [['lobbyManualCapacityRow', mode === 'Manual'], ['lobbyRandomCapacityMinRow', mode === 'RandomRange'], ['lobbyRandomCapacityMaxRow', mode === 'RandomRange']]) { const row = document.getElementById(id); if (row) row.hidden = !visible; }
 		setup.querySelectorAll('[data-settings-tab]').forEach(button => { const active = button.dataset.settingsTab === lobbySettingsActiveTab; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); });
 		setup.querySelectorAll('[data-settings-pane]').forEach(pane => { const active = pane.dataset.settingsPane === lobbySettingsActiveTab; pane.classList.toggle('active', active); pane.hidden = !active; });
-		for (const id of ['lobbySettingsApply','lobbySettingsReset','lobbySettingsClassic','lobbyPresetSave','lobbyPresetLoad','lobbyPresetDelete','lobbyPresetExport','lobbyPresetImport','lobbyPasswordApply']) { const button = document.getElementById(id); if (button) button.disabled = lobbySettingsPending || (id === 'lobbySettingsApply' && !lobbySettingsDirty); }
+		for (const id of ['lobbySettingsApply', 'lobbySettingsReset', 'lobbySettingsClassic', 'lobbyPresetSave', 'lobbyPresetLoad', 'lobbyPresetDelete', 'lobbyPresetExport', 'lobbyPresetImport', 'lobbyPasswordApply']) { const button = document.getElementById(id); if (button) button.disabled = lobbySettingsPending || (id === 'lobbySettingsApply' && !lobbySettingsDirty); }
 		renderLobbyLocalPresetOptions();
 	} else if (readOnly) {
-		const rows = [[t('lobbyPreset'),lobbyPresetLabel(canonical.preset)],[t('lobbyBunkerCapacityMode'),lobbyCapacityLabel(canonical)],[t('lobbySummaryThreats'),canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')],[t('lobbySummaryTimer'),canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')],[t('lobbySummaryVoting'),canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')],[t('lobbySpecialCardsCount'),canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
-		readOnly.innerHTML = rows.map(([label,value]) => `<article><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
+		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
+		readOnly.innerHTML = rows.map(([label, value]) => `<article><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	}
 	const events = lobbyGet(state, 'recentEvents', 'RecentEvents') || []; const audit = document.getElementById('lobbyAuditEvents');
-	if (audit) audit.innerHTML = events.length ? events.map(event => `<div class="lobby-audit-event"><time>${escapeHtml(new Date(lobbyGet(event,'occurredAtUtc','OccurredAtUtc')).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}))}</time><span>${escapeHtml(lobbyAuditLabel(lobbyGet(event,'actionType','ActionType')))}</span></div>`).join('') : `<p>${escapeHtml(t('lobbyNoAudit'))}</p>`;
+	if (audit) audit.innerHTML = events.length ? events.map(event => `<div class="lobby-audit-event"><time>${escapeHtml(new Date(lobbyGet(event, 'occurredAtUtc', 'OccurredAtUtc')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</time><span>${escapeHtml(lobbyAuditLabel(lobbyGet(event, 'actionType', 'ActionType')))}</span></div>`).join('') : `<p>${escapeHtml(t('lobbyNoAudit'))}</p>`;
 }
 
 function updateLobbySettingsDraft(control) {
@@ -8161,21 +8161,22 @@ async function loadLobbyServerPreset(preset) {
 
 function lobbySettingsHubPayload(settings) {
 	const enumValue = (value, values) => Math.max(0, values.indexOf(value));
-	return { ...settings,
-		preset:enumValue(settings.preset,['Classic','Calm','Dangerous','Hardcore','Quick','Long','Custom']),
-		readyRequirement:enumValue(settings.readyRequirement,['AllPlayers','HostDecision']),
-		bunkerCapacityMode:enumValue(settings.bunkerCapacityMode,['Automatic','Manual','RandomRange']),
-		interactiveThreatRate:enumValue(settings.interactiveThreatRate,['Off','Rare','Standard','Often','Always']),
-		threatFrequency:enumValue(settings.threatFrequency,['OncePerGame','EveryOtherRound','EveryRound','RandomEligibleRounds']),
-		votingFrequency:enumValue(settings.votingFrequency,['EveryRound','EveryTwoRounds']), characterGenerationMode:0,
-		scenarioSchedule:{
-			enabled:settings.scenarioEnabled,
-			firstScenarioAfterRound:settings.scenarioFirstAfterRound,
-			intervalRounds:settings.scenarioIntervalRounds,
-			triggerPhase:settings.scenarioTriggerPhase,
-			enabledTypes:['threat','event','secret_event'].filter(type => settings[type === 'threat' ? 'scenarioThreatEnabled' : type === 'event' ? 'scenarioEventEnabled' : 'scenarioSecretEventEnabled'])
+	return {
+		...settings,
+		preset: enumValue(settings.preset, ['Classic', 'Calm', 'Dangerous', 'Hardcore', 'Quick', 'Long', 'Custom']),
+		readyRequirement: enumValue(settings.readyRequirement, ['AllPlayers', 'HostDecision']),
+		bunkerCapacityMode: enumValue(settings.bunkerCapacityMode, ['Automatic', 'Manual', 'RandomRange']),
+		interactiveThreatRate: enumValue(settings.interactiveThreatRate, ['Off', 'Rare', 'Standard', 'Often', 'Always']),
+		threatFrequency: enumValue(settings.threatFrequency, ['OncePerGame', 'EveryOtherRound', 'EveryRound', 'RandomEligibleRounds']),
+		votingFrequency: enumValue(settings.votingFrequency, ['EveryRound', 'EveryTwoRounds']), characterGenerationMode: 0,
+		scenarioSchedule: {
+			enabled: settings.scenarioEnabled,
+			firstScenarioAfterRound: settings.scenarioFirstAfterRound,
+			intervalRounds: settings.scenarioIntervalRounds,
+			triggerPhase: settings.scenarioTriggerPhase,
+			enabledTypes: ['threat', 'event', 'secret_event'].filter(type => settings[type === 'threat' ? 'scenarioThreatEnabled' : type === 'event' ? 'scenarioEventEnabled' : 'scenarioSecretEventEnabled'])
 		},
-		bunkerIntelMode:enumValue(settings.bunkerIntelMode,['AllVisible','Progressive','EventsOnly'])
+		bunkerIntelMode: enumValue(settings.bunkerIntelMode, ['AllVisible', 'Progressive', 'EventsOnly'])
 	};
 }
 
@@ -8183,7 +8184,7 @@ async function applyLobbySettings() {
 	if (!lobbySettingsDraft || !lobbySettingsDirty || lobbySettingsPending) return;
 	lobbySettingsPending = true; renderLobbyGameSetup();
 	try {
-		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision:lobbySettingsBaseRevision, commandId:crypto.randomUUID(), settings:lobbySettingsHubPayload(lobbySettingsDraft) });
+		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision: lobbySettingsBaseRevision, commandId: crypto.randomUUID(), settings: lobbySettingsHubPayload(lobbySettingsDraft) });
 		if (!(result?.success ?? result?.Success)) {
 			const code = result?.errorCode ?? result?.ErrorCode; setLobbySettingsFeedback(code === 'settings_revision_conflict' ? 'lobbySettingsConflict' : 'lobbySettingsInvalid', true);
 			lobbySettingsDraft = normalizeLobbySettings(result?.settings ?? result?.Settings); lobbySettingsBaseRevision = Number(result?.settingsRevision ?? result?.SettingsRevision ?? lobbySettingsBaseRevision); lobbySettingsDirty = false;
@@ -8195,10 +8196,10 @@ async function applyLobbySettings() {
 function readLobbyLocalPresets() { try { const value = JSON.parse(localStorage.getItem(lobbyLocalPresetStorageKey) || '{}'); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch (_) { return {}; } }
 function writeLobbyLocalPresets(value) { localStorage.setItem(lobbyLocalPresetStorageKey, JSON.stringify(value)); }
 function renderLobbyLocalPresetOptions() { const select = document.getElementById('lobbyLocalPresetSelect'); if (!select) return; const value = select.value; const presets = readLobbyLocalPresets(); select.innerHTML = Object.keys(presets).sort().map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join(''); if (presets[value]) select.value = value; }
-function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0,40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version:1, settings:normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
+function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0, 40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version: 1, settings: normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
 function loadLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; const entry = readLobbyLocalPresets()[name]; if (!entry || entry.version !== 1) return setLobbySettingsFeedback('lobbyPresetImportError', true); lobbySettingsDraft = normalizeLobbySettings(entry.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); renderLobbyGameSetup(); }
 function deleteLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; if (!name) return; const presets = readLobbyLocalPresets(); delete presets[name]; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetDeleted'); }
-function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema:'bunker-room-game-settings', version:1, name, settings:normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'})); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi,'-')}.json`; link.click(); URL.revokeObjectURL(url); }
+function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema: 'bunker-room-game-settings', version: 1, name, settings: normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi, '-')}.json`; link.click(); URL.revokeObjectURL(url); }
 async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 2; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
 
 async function updateLobbyPassword() { if (lobbySettingsPending) return; lobbySettingsPending = true; renderLobbyGameSetup(); try { await connection.invoke('SetLobbyPassword', document.getElementById('lobbyPasswordInput')?.value || null, crypto.randomUUID()); document.getElementById('lobbyPasswordInput').value = ''; setLobbySettingsFeedback('lobbyPasswordUpdated'); } catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); } finally { lobbySettingsPending = false; renderLobbyGameSetup(); } }
@@ -8209,7 +8210,7 @@ function bindLobbySettingsControls() {
 	const setup = document.getElementById('lobbyGameSetup'); if (!setup || setup.dataset.bound === 'true') return; setup.dataset.bound = 'true';
 	setup.addEventListener('input', event => { if (event.target.matches('.lobby-setting-input') && event.target.tagName === 'INPUT' && event.target.type !== 'checkbox') updateLobbySettingsDraft(event.target); });
 	setup.addEventListener('change', event => { if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
-	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; renderLobbyGameSetup(); return; } const actions = { lobbySettingsApply:applyLobbySettings, lobbySettingsReset:()=>{ lobbySettingsDraft=normalizeLobbySettings(lobbyGet(lobbyState,'settings','Settings')); lobbySettingsDirty=false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic:()=>loadLobbyServerPreset('Classic'), lobbyPresetSave:saveLobbyLocalPreset, lobbyPresetLoad:loadLobbyLocalPreset, lobbyPresetDelete:deleteLobbyLocalPreset, lobbyPresetExport:exportLobbyPreset, lobbyPresetImport:()=>document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply:updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
+	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; renderLobbyGameSetup(); return; } const actions = { lobbySettingsApply: applyLobbySettings, lobbySettingsReset: () => { lobbySettingsDraft = normalizeLobbySettings(lobbyGet(lobbyState, 'settings', 'Settings')); lobbySettingsDirty = false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic: () => loadLobbyServerPreset('Classic'), lobbyPresetSave: saveLobbyLocalPreset, lobbyPresetLoad: loadLobbyLocalPreset, lobbyPresetDelete: deleteLobbyLocalPreset, lobbyPresetExport: exportLobbyPreset, lobbyPresetImport: () => document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply: updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
 }
 function isLobbyRunning() {
 	const lifecycle = lobbyGet(lobbyState, 'lifecycle', 'Lifecycle');
@@ -8233,7 +8234,7 @@ function localizeLobbyLifecycle(value) { return t({ Lobby: 'lobbyLifecycleLobby'
 function localizeLobbyRole(value) { return t({ HostPlayer: 'lobbyRoleHostPlayer', Player: 'lobbyRolePlayer', Spectator: 'lobbyRoleSpectator', TechnicalGm: 'lobbyRoleTechnicalGm', OmniscientGm: 'lobbyRoleOmniscientGm' }[value] || 'lobbyRolePlayer'); }
 function lobbyRoleHelp(value) { return t(value === 'Spectator' ? 'lobbyRoleSpectatorHelp' : value === 'TechnicalGm' ? 'lobbyRoleTechnicalHelp' : value === 'OmniscientGm' ? 'lobbyRoleOmniscientHelp' : 'lobbyRolePlayerHelp'); }
 function localizeLobbyBlocker(code) {
-	const key = { minimum_gameplay_players: 'lobbyBlockMinimum', maximum_gameplay_players:'lobbyWarningPlayers', connected_members_not_ready: 'lobbyBlockReady', invalid_lobby_role: 'lobbyBlockRole', active_voting: 'lobbyBlockVoting', active_threat: 'lobbyBlockThreat', not_current_host: 'lobbyBlockHost', host_missing: 'lobbyBlockHost', bunker_capacity_exceeds_players:'lobbyWarningCapacity', settings_revision_conflict:'lobbySettingsConflict' }[code];
+	const key = { minimum_gameplay_players: 'lobbyBlockMinimum', maximum_gameplay_players: 'lobbyWarningPlayers', connected_members_not_ready: 'lobbyBlockReady', invalid_lobby_role: 'lobbyBlockRole', active_voting: 'lobbyBlockVoting', active_threat: 'lobbyBlockThreat', not_current_host: 'lobbyBlockHost', host_missing: 'lobbyBlockHost', bunker_capacity_exceeds_players: 'lobbyWarningCapacity', settings_revision_conflict: 'lobbySettingsConflict' }[code];
 	return t(key || 'lobbyBlockFallback');
 }
 function renderLobbyPreviewSummary(failed = false) {
@@ -8399,19 +8400,19 @@ function isMyPlayerRef(connectionId, stableId) {
 }
 
 const specialCardIconSvgRegistry = Object.freeze({
-	star:'<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
-	eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-	shield:'<path d="M12 2 4 5v6c0 5 3 9 8 11 5-2 8-6 8-11V5l-8-3Z"/><path d="m8 12 3 3 5-6"/>',
-	hand:'<path d="M6 12V7a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v6-4a2 2 0 0 1 4 0v7c0 5-3 8-8 8-4 0-7-2-8-6l-1-4a2 2 0 0 1 4-1l1 1Z"/>',
-	swap:'<path d="m7 7 3-3-3-3M10 4H5a3 3 0 0 0-3 3v3M17 17l-3 3 3 3M14 20h5a3 3 0 0 0 3-3v-3"/><path d="M5 14h14M19 10H5"/>',
-	dice:'<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/>',
-	refresh:'<path d="M20 7V3l-3 3a8 8 0 1 0 2 9M4 17v4l3-3"/>',
-	globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
-	warning:'<path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5M12 18h.01"/>',
-	backpack:'<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
-	briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
-	heart:'<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
-	brain:'<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>'
+	star: '<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
+	eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+	shield: '<path d="M12 2 4 5v6c0 5 3 9 8 11 5-2 8-6 8-11V5l-8-3Z"/><path d="m8 12 3 3 5-6"/>',
+	hand: '<path d="M6 12V7a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v6-4a2 2 0 0 1 4 0v7c0 5-3 8-8 8-4 0-7-2-8-6l-1-4a2 2 0 0 1 4-1l1 1Z"/>',
+	swap: '<path d="m7 7 3-3-3-3M10 4H5a3 3 0 0 0-3 3v3M17 17l-3 3 3 3M14 20h5a3 3 0 0 0 3-3v-3"/><path d="M5 14h14M19 10H5"/>',
+	dice: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/>',
+	refresh: '<path d="M20 7V3l-3 3a8 8 0 1 0 2 9M4 17v4l3-3"/>',
+	globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+	warning: '<path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5M12 18h.01"/>',
+	backpack: '<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
+	briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
+	heart: '<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
+	brain: '<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>'
 });
 
 function renderSpecialCardIcon(iconKey) {
@@ -8440,11 +8441,11 @@ function resolveSpecialCardIconKey(model, visualVariant = resolveSpecialCardVisu
 	if (/physical|health|heal/.test(effectType)) return 'heart';
 	if (/profession/.test(effectType)) return 'briefcase';
 	if (/inventory|item/.test(effectType) && !['steal', 'swap'].includes(visualVariant)) return 'backpack';
-	return { reveal:'eye', protect:'shield', steal:'hand', swap:'swap', reroll:'dice', change:'refresh', global:'globe', threat:'warning', inventory:'backpack', neutral:'star' }[visualVariant] || 'star';
+	return { reveal: 'eye', protect: 'shield', steal: 'hand', swap: 'swap', reroll: 'dice', change: 'refresh', global: 'globe', threat: 'warning', inventory: 'backpack', neutral: 'star' }[visualVariant] || 'star';
 }
 
 function getSpecialCardVariantLabel(variant) {
-	const key = { reveal:'specialVariantReveal', protect:'specialVariantProtect', steal:'specialVariantSteal', swap:'specialVariantSwap', reroll:'specialVariantReroll', change:'specialVariantChange', global:'specialVariantGlobal', threat:'specialVariantThreat', inventory:'specialVariantInventory', neutral:'specialVariantNeutral' }[variant] || 'specialVariantNeutral';
+	const key = { reveal: 'specialVariantReveal', protect: 'specialVariantProtect', steal: 'specialVariantSteal', swap: 'specialVariantSwap', reroll: 'specialVariantReroll', change: 'specialVariantChange', global: 'specialVariantGlobal', threat: 'specialVariantThreat', inventory: 'specialVariantInventory', neutral: 'specialVariantNeutral' }[variant] || 'specialVariantNeutral';
 	return t(key);
 }
 
@@ -8615,10 +8616,10 @@ function renderSpecialCardControls(card, cardIndex = 0, model = buildSpecialCard
 	const targetSelect = normalized.requiresTarget ? `<label class="special-card-target-block" for="${targetSelectId}"><span>${t('target')}</span><select id="${targetSelectId}" class="special-card-target-select" aria-label="${t('target')}" onchange="rememberSpecialCardSelection(${cardIndex})">
 		<option value="">${t('choosePlayer')}</option>
 		${targets.map((player, index) => {
-			const seat = player.seatNumber || player.SeatNumber || 0;
-			const name = player.name || player.Name || t('unknown');
-			return `<option value="${index}"${index === selectedTargetIndex ? ' selected' : ''}>${seat ? `#${seat} ` : ''}${escapeHtml(name)}</option>`;
-		}).join('')}
+		const seat = player.seatNumber || player.SeatNumber || 0;
+		const name = player.name || player.Name || t('unknown');
+		return `<option value="${index}"${index === selectedTargetIndex ? ' selected' : ''}>${seat ? `#${seat} ` : ''}${escapeHtml(name)}</option>`;
+	}).join('')}
 	</select></label>` : '';
 	const characteristicSelect = needsCharacteristicSelect ? `<label class="special-card-target-block" for="${characteristicSelectId}"><span>${t('specialCharacteristicLabel')}</span><select id="${characteristicSelectId}" class="special-card-target-select" aria-label="${t('specialCharacteristicLabel')}" onchange="rememberSpecialCardSelection(${cardIndex})">
 		<option value="">${t('specialChooseCharacteristic')}</option>
@@ -8683,8 +8684,8 @@ function renderSpecialCard(model) {
 	const tooltipId = `special-card-tooltip-${model.cardIndex}`;
 	const tooltip = model.tooltip ? `<span class="characteristic-with-tooltip special-card-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(t('cardTooltipLabel'))}" aria-controls="${tooltipId}" aria-expanded="false">?</button><span class="tooltip-content" id="${tooltipId}" role="tooltip">${escapeHtml(model.tooltip)}</span></span>` : '';
 	const metaRows = [
-		model.targetType ? { label:t('target'), value:model.targetLabel } : null,
-		model.stageRestriction ? { label:t('specialStageLabel'), value:model.stageRestriction } : null
+		model.targetType ? { label: t('target'), value: model.targetLabel } : null,
+		model.stageRestriction ? { label: t('specialStageLabel'), value: model.stageRestriction } : null
 	].filter(Boolean).map(row => `<div class="special-card-meta-row"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.value)}</strong></div>`).join('');
 	return `<article class="my-special-card special-card-shell variant-${model.visualVariant} state-${model.status}" data-testid="my-special-card">
 		${tooltip}
@@ -8819,7 +8820,7 @@ function renderMyEventCards(player) {
 		const actionMarkup = canUse ? actions.map((action, actionIndex) => {
 			const targetMode = action.targetMode || action.TargetMode || 'room';
 			const operation = action.operation || action.Operation || 'apply_effects';
-			const needsTarget = ['other_active_player','self_or_other_active_player','eliminated_other_player'].includes(targetMode);
+			const needsTarget = ['other_active_player', 'self_or_other_active_player', 'eliminated_other_player'].includes(targetMode);
 			const targetSelect = needsTarget ? `<select id="eventCardTarget-${cardIndex}-${actionIndex}" class="special-card-target-select">
 				<option value="">${escapeHtml(t('choosePlayer'))}</option>
 				${eventCardPlayerOptions(ownerId, targetMode === 'eliminated_other_player').filter(option => !option.isOwner).map(option => `<option value="${escapeHtml(option.id)}">${escapeHtml(option.name)}</option>`).join('')}
@@ -9012,7 +9013,7 @@ function resolveSelectedPublicPlayer(models) {
 	if (Number.isFinite(selectedPublicPlayerSeat)) {
 		return models.reduce((nearest, model) =>
 			Math.abs(model.seat - selectedPublicPlayerSeat) < Math.abs(nearest.seat - selectedPublicPlayerSeat) ? model : nearest,
-		models[0]);
+			models[0]);
 	}
 
 	const self = models.find(({ player }) =>
@@ -9380,35 +9381,35 @@ const professionIconRegistry = Object.freeze({
 });
 
 const characteristicIconSvgRegistry = Object.freeze({
-	user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-5 3.5-7 8-7s7.2 2 8 7"/>',
-	body:'<path d="M8 3h8l2 6-3 12H9L6 9l2-6Z"/><path d="M8 8h8M9 14h6"/>',
-	briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 12h18M10 12v2h4v-2"/>',
-	violin:'<path d="M15 3c-2 1-2 4-1 6l-4 4c-2-1-5-1-6 1s1 6 4 6c2 0 3-2 3-4l4-4c2 1 5 0 5-2 0-3-3-5-5-4"/><path d="m16 8 5-5M18 5l2 2"/>',
-	guitar:'<path d="m15 3 6 6-3 3-2-2-5 5c1 3-2 6-5 5s-3-5-1-7 4-2 6-1l5-5-2-2 1-3Z"/>',
-	music:'<path d="M9 18V5l11-2v13M9 8l11-2"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
-	medical:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z"/>',
-	engineering:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
-	shield:'<path d="M12 2 20 5v6c0 5-3 9-8 11-5-2-8-6-8-11V5l8-3Z"/>',
-	wheat:'<path d="M12 22V6M12 10C7 9 6 6 6 4c4 0 6 2 6 6ZM12 15c-5-1-6-4-6-6 4 0 6 2 6 6ZM12 10c5-1 6-4 6-6-4 0-6 2-6 6ZM12 15c5-1 6-4 6-6-4 0-6 2-6 6Z"/>',
-	steeringWheel:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3 11h18M12 14v7M10 10 6 6M14 10l4-4"/>',
-	flask:'<path d="M9 2h6M10 2v6l-6 11c-.5 1 .2 2 1.5 2h13c1.3 0 2-1 1.5-2L14 8V2M7 15h10"/>',
-	cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v5M15 1v5M9 18v5M15 18v5M1 9h5M18 9h5M1 15h5M18 15h5"/>',
-	book:'<path d="M3 4h7c2 0 2 2 2 2v15s0-2-2-2H3V4Zm18 0h-7c-2 0-2 2-2 2v15s0-2 2-2h7V4Z"/>',
-	hammer:'<path d="m4 20 9-9M10 4l3-2 7 7-2 3-8-8ZM2 18l4 4"/>',
-	scales:'<path d="M12 3v18M6 21h12M4 7h16M7 7 3 14h8L7 7Zm10 0-4 7h8l-4-7Z"/>',
-	utensils:'<path d="M6 2v8M3 2v5c0 2 6 2 6 0V2M6 10v12M16 2v20M16 2c5 3 5 9 0 11"/>',
-	cloche:'<path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 7V5M9 5h6"/>',
-	serviceBell:'<path d="M4 17h16M6 17c0-5 2-8 6-8s6 3 6 8M12 9V7M9 7h6M3 20h18"/>',
-	chefHat:'<path d="M7 11a4 4 0 1 1 2-7 4 4 0 0 1 7 0 4 4 0 1 1 2 7v9H6v-9M9 15v5M15 15v5"/>',
-	heart:'<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
-	brain:'<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>',
-	star:'<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
-	mask:'<path d="M3 5c6-3 12-3 18 0v7c0 6-5 10-9 10S3 18 3 12V5Z"/><path d="M6 10c2-2 4-2 5 0M13 10c2-2 4-2 5 0M9 16c2 1 4 1 6 0"/>',
-	eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-	backpack:'<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
-	home:'<path d="m3 11 9-8 9 8v10H3V11Z"/><path d="M9 21v-7h6v7M7 10h10"/>',
-	document:'<path d="M6 2h9l4 4v16H6V2Z"/><path d="M14 2v5h5M9 12h7M9 16h7"/>'
-	,lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>'
+	user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-5 3.5-7 8-7s7.2 2 8 7"/>',
+	body: '<path d="M8 3h8l2 6-3 12H9L6 9l2-6Z"/><path d="M8 8h8M9 14h6"/>',
+	briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 12h18M10 12v2h4v-2"/>',
+	violin: '<path d="M15 3c-2 1-2 4-1 6l-4 4c-2-1-5-1-6 1s1 6 4 6c2 0 3-2 3-4l4-4c2 1 5 0 5-2 0-3-3-5-5-4"/><path d="m16 8 5-5M18 5l2 2"/>',
+	guitar: '<path d="m15 3 6 6-3 3-2-2-5 5c1 3-2 6-5 5s-3-5-1-7 4-2 6-1l5-5-2-2 1-3Z"/>',
+	music: '<path d="M9 18V5l11-2v13M9 8l11-2"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+	medical: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z"/>',
+	engineering: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+	shield: '<path d="M12 2 20 5v6c0 5-3 9-8 11-5-2-8-6-8-11V5l8-3Z"/>',
+	wheat: '<path d="M12 22V6M12 10C7 9 6 6 6 4c4 0 6 2 6 6ZM12 15c-5-1-6-4-6-6 4 0 6 2 6 6ZM12 10c5-1 6-4 6-6-4 0-6 2-6 6ZM12 15c5-1 6-4 6-6-4 0-6 2-6 6Z"/>',
+	steeringWheel: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3 11h18M12 14v7M10 10 6 6M14 10l4-4"/>',
+	flask: '<path d="M9 2h6M10 2v6l-6 11c-.5 1 .2 2 1.5 2h13c1.3 0 2-1 1.5-2L14 8V2M7 15h10"/>',
+	cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v5M15 1v5M9 18v5M15 18v5M1 9h5M18 9h5M1 15h5M18 15h5"/>',
+	book: '<path d="M3 4h7c2 0 2 2 2 2v15s0-2-2-2H3V4Zm18 0h-7c-2 0-2 2-2 2v15s0-2 2-2h7V4Z"/>',
+	hammer: '<path d="m4 20 9-9M10 4l3-2 7 7-2 3-8-8ZM2 18l4 4"/>',
+	scales: '<path d="M12 3v18M6 21h12M4 7h16M7 7 3 14h8L7 7Zm10 0-4 7h8l-4-7Z"/>',
+	utensils: '<path d="M6 2v8M3 2v5c0 2 6 2 6 0V2M6 10v12M16 2v20M16 2c5 3 5 9 0 11"/>',
+	cloche: '<path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 7V5M9 5h6"/>',
+	serviceBell: '<path d="M4 17h16M6 17c0-5 2-8 6-8s6 3 6 8M12 9V7M9 7h6M3 20h18"/>',
+	chefHat: '<path d="M7 11a4 4 0 1 1 2-7 4 4 0 0 1 7 0 4 4 0 1 1 2 7v9H6v-9M9 15v5M15 15v5"/>',
+	heart: '<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
+	brain: '<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>',
+	star: '<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
+	mask: '<path d="M3 5c6-3 12-3 18 0v7c0 6-5 10-9 10S3 18 3 12V5Z"/><path d="M6 10c2-2 4-2 5 0M13 10c2-2 4-2 5 0M9 16c2 1 4 1 6 0"/>',
+	eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+	backpack: '<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
+	home: '<path d="m3 11 9-8 9 8v10H3V11Z"/><path d="M9 21v-7h6v7M7 10h10"/>',
+	document: '<path d="M6 2h9l4 4v16H6V2Z"/><path d="M14 2v5h5M9 12h7M9 16h7"/>'
+	, lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>'
 });
 
 function normalizeProfessionIconTags(profession) {
@@ -9418,7 +9419,7 @@ function normalizeProfessionIconTags(profession) {
 
 function resolveProfessionIconKey(profession) {
 	const tags = normalizeProfessionIconTags(profession);
-	const priority = ['violin','string_instrument','guitar','chef','waiter','restaurant','food_service','hospitality','service','music','medical','medicine','healthcare','engineering','engineer','military','agriculture','transport','science','technology','education','construction','law','food'];
+	const priority = ['violin', 'string_instrument', 'guitar', 'chef', 'waiter', 'restaurant', 'food_service', 'hospitality', 'service', 'music', 'medical', 'medicine', 'healthcare', 'engineering', 'engineer', 'military', 'agriculture', 'transport', 'science', 'technology', 'education', 'construction', 'law', 'food'];
 	const match = priority.find(tag => tags.includes(tag));
 	return professionIconRegistry[match] || professionIconRegistry.generic;
 }
@@ -9426,10 +9427,6 @@ function resolveProfessionIconKey(profession) {
 function renderCharacteristicIcon(iconKey) {
 	const body = characteristicIconSvgRegistry[iconKey] || characteristicIconSvgRegistry.briefcase;
 	return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
-}
-
-function nonEmptyCardDetail(label, value) {
-	return value !== null && value !== undefined && String(value).trim() !== '' ? { label, value: String(value) } : null;
 }
 
 function formatHobbyExperience(value, lang = getCurrentLanguage()) {
@@ -9445,9 +9442,9 @@ function formatHobbyExperience(value, lang = getCurrentLanguage()) {
 	const locale = language === 'uk' ? 'uk-UA' : language === 'ru' ? 'ru-RU' : 'en-US';
 	const plural = new Intl.PluralRules(locale).select(numericValue);
 	const labels = {
-		uk: { one:'рік', few:'роки', many:'років', other:'року' },
-		ru: { one:'год', few:'года', many:'лет', other:'года' },
-		en: { one:'year', few:'years', many:'years', other:'years' }
+		uk: { one: 'рік', few: 'роки', many: 'років', other: 'року' },
+		ru: { one: 'год', few: 'года', many: 'лет', other: 'года' },
+		en: { one: 'year', few: 'years', many: 'years', other: 'years' }
 	};
 	const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(numericValue);
 	return `${number} ${labels[language][plural] || labels[language].other}`;
@@ -9457,6 +9454,21 @@ function formatHobbyRelatedItem(value) {
 	if (value === null || value === undefined) return '';
 	if (typeof value !== 'object') return String(value).trim();
 	return cleanTooltipText(getLocalizedValue(value, 'item') || getLocalizedValue(value, 'name') || value.item || value.Item || value.name || value.Name || '');
+}
+
+function nonEmptyCardDetail(label, value) {
+	const normalizedValue = value == null
+		? ''
+		: String(value).trim();
+
+	if (!normalizedValue) {
+		return null;
+	}
+
+	return {
+		label: label || '',
+		value: normalizedValue
+	};
 }
 
 function buildHobbyCardDetails(hobby) {
@@ -9514,8 +9526,8 @@ function resolveCharacteristicVisualVariant(model) {
 	if (severity === 'heavy') return 'severe';
 	if (severity === 'medium') return 'warning';
 	if (severity === 'light') return 'warning-soft';
-	if (tags.some(tag => ['dark','violent','criminal','dangerous','disturbing','horror'].includes(tag))) return 'dark';
-	if (tags.some(tag => ['positive','supportive','beneficial','healing'].includes(tag))) return 'positive';
+	if (tags.some(tag => ['dark', 'violent', 'criminal', 'dangerous', 'disturbing', 'horror'].includes(tag))) return 'dark';
+	if (tags.some(tag => ['positive', 'supportive', 'beneficial', 'healing'].includes(tag))) return 'positive';
 	return 'neutral';
 }
 
@@ -9589,7 +9601,12 @@ function renderMyPlayerCards(player) {
 	const revealed = normalizeRevealedState(player.revealed || player.Revealed || {});
 	const personality = player.personality || {};
 	const body = player.body || {};
-	const profession = player.profession || {};
+	const profession = player.profession || player.Profession || {};
+	const professionalLevel = String(
+		profession.professionalLevel
+		?? profession.ProfessionalLevel
+		?? ''
+	).trim();
 	const physicalHealth = player.physicalHealth || {};
 	const mentalHealth = player.mentalHealth || {};
 	const hobby = player.hobby || {};
@@ -9598,8 +9615,20 @@ function renderMyPlayerCards(player) {
 	const inventory = player.inventory || {};
 	const property = player.property || {};
 	const fact = normalizeFactFromPlayer(player);
-	const professionItem = profession.professionItem || player.professionItem || {};
-	const localizedProfessionItem = getLocalizedValue(professionItem, 'item') || getLocalizedValue(professionItem, 'name') || professionItem.name || professionItem.Name || profession.selectedItem || '';
+	const professionItem =
+		profession.professionItem
+		|| profession.ProfessionItem
+		|| player.professionItem
+		|| player.ProfessionItem
+		|| {};
+	const localizedProfessionItem =
+		getLocalizedValue(professionItem, 'item')
+		|| getLocalizedValue(professionItem, 'name')
+		|| professionItem.name
+		|| professionItem.Name
+		|| profession.selectedItem
+		|| profession.SelectedItem
+		|| '';
 	const additionalConditionEffects = player.additionalPhysicalConditions || player.additionalConditionEffects || [];
 	const additionalConditionsHtml = additionalConditionEffects.length ? `<div class="additional-conditions"><span class="char-label">${escapeHtml(t('additionalConditions'))}</span>${additionalConditionEffects.map(effect => renderAdditionalPhysicalCondition(effect)).filter(Boolean).join('')}</div>` : '';
 	const inventorySourceItems = inventory.items || [];
@@ -9609,20 +9638,16 @@ function renderMyPlayerCards(player) {
 	const mentalPresentation = buildHealthCardPresentation(mentalHealth);
 	const hobbyCardDetails = buildHobbyCardDetails(hobby);
 	const propertyPresentation = getPropertyPresentation(property);
-	const professionalLevel =
-		getLocalizedValue(profession, 'professionalLevel')
-		|| profession.professionalLevel
-		|| profession.ProfessionalLevel
-		|| '';
 	const models = [
-		{ type:'Personality', categoryLabel:t('personality'), value:`${personality.age} ${t('years')}`, iconKey:characteristicIconRegistry.personality, details:[nonEmptyCardDetail(t('sex'), `${personality.sex || ''}${personality.isChildfree ? ` · ${t('cardChildfree')}` : ''}`), nonEmptyCardDetail(t('orientation'), personality.sexOrientation)], tooltip:'', isRevealed:revealed.personality, canReveal:true, revealAction:'Personality' },
-		{ type:'Body', categoryLabel:t('body'), value:body.bodyType || t('body'), iconKey:characteristicIconRegistry.body, details:[nonEmptyCardDetail(t('height'), body.height ? `${body.height} см` : ''), nonEmptyCardDetail(t('weight'), body.weight ? `${body.weight} кг` : '')], tooltip:'', isRevealed:revealed.body, canReveal:true, revealAction:'Body' },
+		{ type: 'Personality', categoryLabel: t('personality'), value: `${personality.age} ${t('years')}`, iconKey: characteristicIconRegistry.personality, details: [nonEmptyCardDetail(t('sex'), `${personality.sex || ''}${personality.isChildfree ? ` · ${t('cardChildfree')}` : ''}`), nonEmptyCardDetail(t('orientation'), personality.sexOrientation)], tooltip: '', isRevealed: revealed.personality, canReveal: true, revealAction: 'Personality' },
+		{ type: 'Body', categoryLabel: t('body'), value: body.bodyType || t('body'), iconKey: characteristicIconRegistry.body, details: [nonEmptyCardDetail(t('height'), body.height ? `${body.height} см` : ''), nonEmptyCardDetail(t('weight'), body.weight ? `${body.weight} кг` : '')], tooltip: '', isRevealed: revealed.body, canReveal: true, revealAction: 'Body' },
 		{
 			type: 'Profession',
 			categoryLabel: t('profession'),
 			value: getLocalizedValue(profession, 'profession')
 				|| getLocalizedValue(profession, 'name')
 				|| profession.name
+				|| profession.Name
 				|| t('profession'),
 			iconKey: resolveProfessionIconKey(profession),
 			details: [
@@ -9635,20 +9660,20 @@ function renderMyPlayerCards(player) {
 					localizedProfessionItem
 				)
 			],
-			tooltip: profession.tooltip,
+			tooltip: profession.tooltip || profession.Tooltip || '',
 			variantSource: profession,
 			isRevealed: revealed.profession,
 			canReveal: true,
 			revealAction: 'Profession'
 		},
-		{ type:'PhysicalHealth', categoryLabel:t('physicalHealth'), value:physicalPresentation.value || t('physicalHealth'), iconKey:characteristicIconRegistry.physicalHealth, details:[nonEmptyCardDetail(t('cardSeverity'), physicalPresentation.severity)], tooltipHtml:buildSharedHealthTooltip(physicalHealth, { requireExplanation:true }), variantSource:physicalHealth, visualFamily:'medical', isRevealed:revealed.physicalHealth, canReveal:true, revealAction:'PhysicalHealth', supplementalHtml:additionalConditionsHtml },
-		{ type:'MentalHealth', categoryLabel:t('mentalHealth'), value:mentalPresentation.value || t('mentalHealth'), iconKey:characteristicIconRegistry.mentalHealth, details:[nonEmptyCardDetail(t('cardSeverity'), mentalPresentation.severity)], tooltipHtml:buildSharedHealthTooltip(mentalHealth, { requireExplanation:true }), variantSource:mentalHealth, visualFamily:'mental', isRevealed:revealed.mentalHealth, canReveal:true, revealAction:'MentalHealth' },
-		{ type:'Hobby', categoryLabel:t('hobby'), value:getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || t('hobby'), iconKey:characteristicIconRegistry.hobby, details:hobbyCardDetails.details, tooltip:resolveHobbyCardTooltip(hobby, hobbyCardDetails.item), variantSource:hobby, isRevealed:revealed.hobby, canReveal:true, revealAction:'Hobby' },
-		{ type:'CharacterTrait', categoryLabel:t('characterTrait'), value:getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || t('characterTrait'), iconKey:characteristicIconRegistry.characterTrait, details:[], tooltip:characterTrait.description || characterTrait.gameEffect || characterTrait.bunkerEffect || characterTrait.tooltip, variantSource:characterTrait, isRevealed:revealed.characterTrait, canReveal:true, revealAction:'CharacterTrait' },
-		{ type:'Phobia', categoryLabel:t('phobia'), value:getLocalizedValue(phobia, 'phobia') || getLocalizedValue(phobia, 'name') || phobia.name || t('phobia'), iconKey:characteristicIconRegistry.phobia, details:[], tooltip:getLocalizedValue(phobia, 'description') || phobia.description || phobia.gameEffect || phobia.tooltip, variantSource:phobia, isRevealed:revealed.phobia, canReveal:true, revealAction:'Phobia' },
-		{ type:'Inventory', categoryLabel:t('inventory'), value:inventoryItems.join(', ') || t('empty'), iconKey:characteristicIconRegistry.inventory, details:[], tooltip:inventoryTooltip, variantSource:inventory, isRevealed:revealed.inventory, canReveal:true, revealAction:'Inventory' },
-		{ type:'Property', categoryLabel:t('property'), value:propertyPresentation.title, iconKey:characteristicIconRegistry.property, details:propertyPresentation.details, tooltip:'', variantSource:property, isRevealed:revealed.property, canReveal:!!property.definitionId, revealAction:'Property' },
-		{ type:'Fact', categoryLabel:t('fact'), value:getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey:characteristicIconRegistry.fact, details:[], tooltip:fact.description || fact.tooltip || '', variantSource:fact, isRevealed:revealed.fact || revealed.Fact, canReveal:true, revealAction:'Fact' }
+		{ type: 'PhysicalHealth', categoryLabel: t('physicalHealth'), value: physicalPresentation.value || t('physicalHealth'), iconKey: characteristicIconRegistry.physicalHealth, details: [nonEmptyCardDetail(t('cardSeverity'), physicalPresentation.severity)], tooltipHtml: buildSharedHealthTooltip(physicalHealth, { requireExplanation: true }), variantSource: physicalHealth, visualFamily: 'medical', isRevealed: revealed.physicalHealth, canReveal: true, revealAction: 'PhysicalHealth', supplementalHtml: additionalConditionsHtml },
+		{ type: 'MentalHealth', categoryLabel: t('mentalHealth'), value: mentalPresentation.value || t('mentalHealth'), iconKey: characteristicIconRegistry.mentalHealth, details: [nonEmptyCardDetail(t('cardSeverity'), mentalPresentation.severity)], tooltipHtml: buildSharedHealthTooltip(mentalHealth, { requireExplanation: true }), variantSource: mentalHealth, visualFamily: 'mental', isRevealed: revealed.mentalHealth, canReveal: true, revealAction: 'MentalHealth' },
+		{ type: 'Hobby', categoryLabel: t('hobby'), value: getLocalizedValue(hobby, 'hobby') || getLocalizedValue(hobby, 'name') || hobby.name || t('hobby'), iconKey: characteristicIconRegistry.hobby, details: hobbyCardDetails.details, tooltip: resolveHobbyCardTooltip(hobby, hobbyCardDetails.item), variantSource: hobby, isRevealed: revealed.hobby, canReveal: true, revealAction: 'Hobby' },
+		{ type: 'CharacterTrait', categoryLabel: t('characterTrait'), value: getLocalizedValue(characterTrait, 'trait') || getLocalizedValue(characterTrait, 'name') || characterTrait.name || t('characterTrait'), iconKey: characteristicIconRegistry.characterTrait, details: [], tooltip: characterTrait.description || characterTrait.gameEffect || characterTrait.bunkerEffect || characterTrait.tooltip, variantSource: characterTrait, isRevealed: revealed.characterTrait, canReveal: true, revealAction: 'CharacterTrait' },
+		{ type: 'Phobia', categoryLabel: t('phobia'), value: getLocalizedValue(phobia, 'phobia') || getLocalizedValue(phobia, 'name') || phobia.name || t('phobia'), iconKey: characteristicIconRegistry.phobia, details: [], tooltip: getLocalizedValue(phobia, 'description') || phobia.description || phobia.gameEffect || phobia.tooltip, variantSource: phobia, isRevealed: revealed.phobia, canReveal: true, revealAction: 'Phobia' },
+		{ type: 'Inventory', categoryLabel: t('inventory'), value: inventoryItems.join(', ') || t('empty'), iconKey: characteristicIconRegistry.inventory, details: [], tooltip: inventoryTooltip, variantSource: inventory, isRevealed: revealed.inventory, canReveal: true, revealAction: 'Inventory' },
+		{ type: 'Property', categoryLabel: t('property'), value: propertyPresentation.title, iconKey: characteristicIconRegistry.property, details: propertyPresentation.details, tooltip: '', variantSource: property, isRevealed: revealed.property, canReveal: !!property.definitionId, revealAction: 'Property' },
+		{ type: 'Fact', categoryLabel: t('fact'), value: getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey: characteristicIconRegistry.fact, details: [], tooltip: fact.description || fact.tooltip || '', variantSource: fact, isRevealed: revealed.fact || revealed.Fact, canReveal: true, revealAction: 'Fact' }
 	];
 
 	container.innerHTML = `${renderEliminatedRevealAllPanel(player)}${models.map(renderCharacteristicCard).join('')}`;
