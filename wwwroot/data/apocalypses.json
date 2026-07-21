@@ -21,7 +21,29 @@
     "note_uk": "Переклад оновлено від українського оригіналу. Опис кожного апокаліпсису перекладено вручну; списки загроз і вимог очищені від технічних заглушок та приведені до читабельного EN/RU вигляду.",
     "fallback_rule": "Якщо selected language value порожній/null, використовувати uk.",
     "tags_status": "generated_apocalypse_tags_for_threat_selection",
-    "tags_note_uk": "Додано поле tags[] до кожного апокаліпсису, щоб threats.json міг фільтрувати ігрові загрози 3 раунду за relatedApocalypseIds і спільними тегами. Теги згенеровані на основі українських оригінальних полів apocalypses[]."
+    "tags_note_uk": "Додано поле tags[] до кожного апокаліпсису, щоб threats.json міг фільтрувати ігрові загрози 3 раунду за relatedApocalypseIds і спільними тегами. Теги згенеровані на основі українських оригінальних полів apocalypses[].",
+    "visual_theme_status": "generated_from_ids_and_apocalypse_tags",
+    "visual_theme_note_uk": "Поле visualTheme визначає головну CSS-тему апокаліпсису. tags[] використовуються як додаткові візуальні модифікатори, а severity керує інтенсивністю ефектів.",
+    "visual_theme_values": [
+      "default",
+      "radiation",
+      "zombie",
+      "volcanic",
+      "technology",
+      "cosmic",
+      "anomaly",
+      "psychological",
+      "organic",
+      "infection",
+      "social_collapse",
+      "ruins",
+      "toxic",
+      "water",
+      "winter",
+      "heat",
+      "darkness",
+      "climate"
+    ]
   },
   "apocalypses": [
     {
@@ -117,7 +139,8 @@
         "structural_damage",
         "toxic_contamination",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "radiation"
     },
     {
       "id": "ai_takeover",
@@ -207,7 +230,8 @@
       "tags": [
         "ai_machines",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "zombie_pandemic",
@@ -299,7 +323,8 @@
         "infection",
         "structural_damage",
         "zombie"
-      ]
+      ],
+      "visualTheme": "zombie"
     },
     {
       "id": "supervolcano_eruption",
@@ -395,7 +420,8 @@
         "volcanic_ash",
         "weather_climate",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "volcanic"
     },
     {
       "id": "nanobot_plague",
@@ -488,7 +514,8 @@
         "infection",
         "nanotech",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "climate_collapse",
@@ -582,7 +609,8 @@
         "social_conflict",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "climate"
     },
     {
       "id": "simulation_failure",
@@ -672,7 +700,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "memory_loss_plague",
@@ -763,7 +792,8 @@
         "infection",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "ancient_gods_awakening",
@@ -853,7 +883,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "gravity_instability",
@@ -946,7 +977,8 @@
         "oxygen_air",
         "structural_damage",
         "water"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "pandemic_super_virus",
@@ -1037,7 +1069,8 @@
         "infection",
         "oxygen_air",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "infection"
     },
     {
       "id": "solar_radiation_storm",
@@ -1132,7 +1165,8 @@
         "radiation",
         "technology",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "radiation"
     },
     {
       "id": "dimension_tears",
@@ -1224,7 +1258,8 @@
         "fungal",
         "psychological",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "economic_total_collapse",
@@ -1314,7 +1349,8 @@
       "tags": [
         "food_agriculture",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "social_collapse"
     },
     {
       "id": "parasite_mind_control",
@@ -1407,7 +1443,8 @@
         "infection",
         "parasite",
         "psychological"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "language_breakdown",
@@ -1497,7 +1534,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "asteroid_storm",
@@ -1588,7 +1626,8 @@
         "structural_damage",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "reality_glitches",
@@ -1678,7 +1717,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "magnetic_pole_flip",
@@ -1770,7 +1810,8 @@
         "emp_magnetic",
         "radiation",
         "technology"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "fungal_apocalypse",
@@ -1863,7 +1904,8 @@
         "infection",
         "plants",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "ocean_collapse",
@@ -1958,7 +2000,8 @@
         "toxic_contamination",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "water"
     },
     {
       "id": "time_loop_collapse",
@@ -2048,7 +2091,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "mega_earthquake",
@@ -2142,7 +2186,8 @@
         "structural_damage",
         "toxic_contamination",
         "water"
-      ]
+      ],
+      "visualTheme": "ruins"
     },
     {
       "id": "black_hole_effect",
@@ -2234,7 +2279,8 @@
         "food_agriculture",
         "oxygen_air",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "water_depletion",
@@ -2328,7 +2374,8 @@
         "toxic_contamination",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "water"
     },
     {
       "id": "mutation_wave",
@@ -2420,7 +2467,8 @@
         "food_agriculture",
         "plants",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "cursed_world",
@@ -2510,7 +2558,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "resource_depletion",
@@ -2600,7 +2649,8 @@
       "tags": [
         "oxygen_air",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "social_collapse"
     },
     {
       "id": "bioterrorism_plague",
@@ -2689,7 +2739,8 @@
       },
       "tags": [
         "infection"
-      ]
+      ],
+      "visualTheme": "infection"
     },
     {
       "id": "solar_flare_emp",
@@ -2781,7 +2832,8 @@
         "food_agriculture",
         "technology",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "magnetic_reversal",
@@ -2872,7 +2924,8 @@
         "anomaly_reality",
         "emp_magnetic",
         "radiation"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "ice_age_rapid",
@@ -2963,7 +3016,8 @@
         "food_agriculture",
         "plants",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "winter"
     },
     {
       "id": "flesh_virus",
@@ -3053,7 +3107,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "sky_burning",
@@ -3149,7 +3204,8 @@
         "radiation",
         "toxic_contamination",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "anti_gravity_zones",
@@ -3241,7 +3297,8 @@
         "oxygen_air",
         "psychological",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "mass_insanity",
@@ -3335,7 +3392,8 @@
         "social_conflict",
         "structural_damage",
         "water"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "protein_collapse",
@@ -3428,7 +3486,8 @@
         "infection",
         "plants",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "iron_plague",
@@ -3519,7 +3578,8 @@
         "food_agriculture",
         "infection",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "sleep_plague",
@@ -3610,7 +3670,8 @@
         "anomaly_reality",
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "infection"
     },
     {
       "id": "second_moon",
@@ -3700,7 +3761,8 @@
       "tags": [
         "structural_damage",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "silicon_plague",
@@ -3791,7 +3853,8 @@
         "infection",
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "color_blindness_epidemic",
@@ -3884,7 +3947,8 @@
         "infection",
         "psychological",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "carbon_dioxide_surge",
@@ -3978,7 +4042,8 @@
         "structural_damage",
         "toxic_contamination",
         "volcanic_ash"
-      ]
+      ],
+      "visualTheme": "toxic"
     },
     {
       "id": "crystal_growth_virus",
@@ -4070,7 +4135,8 @@
         "infection",
         "toxic_contamination",
         "water"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "magic_collapse",
@@ -4160,7 +4226,8 @@
       "tags": [
         "anomaly_reality",
         "radiation"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "digital_virus_reality",
@@ -4252,7 +4319,8 @@
         "infection",
         "psychological",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "night_sun",
@@ -4343,7 +4411,8 @@
         "darkness_light",
         "heat_fire",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "insect_swarm_apocalypse",
@@ -4435,7 +4504,8 @@
         "food_agriculture",
         "plants",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "blood_rain",
@@ -4531,7 +4601,8 @@
         "toxic_contamination",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "toxic"
     },
     {
       "id": "shadow_plague",
@@ -4623,7 +4694,8 @@
         "infection",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "sound_plague",
@@ -4713,7 +4785,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "alien_terraforming",
@@ -4806,7 +4879,8 @@
         "plants",
         "structural_damage",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "quantum_uncertainty",
@@ -4897,7 +4971,8 @@
         "anomaly_reality",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "drought_permanent",
@@ -4990,7 +5065,8 @@
         "plants",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "heat"
     },
     {
       "id": "plant_revolt",
@@ -5083,7 +5159,8 @@
         "plants",
         "structural_damage",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "gravity_reversal",
@@ -5175,7 +5252,8 @@
         "social_conflict",
         "structural_damage",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "nano_gray_goo",
@@ -5266,7 +5344,8 @@
         "emp_magnetic",
         "nanotech",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "fungal_mind_hive",
@@ -5359,7 +5438,8 @@
         "infection",
         "psychological",
         "water"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "oxygen_depletion",
@@ -5450,7 +5530,8 @@
         "animals_insects",
         "oxygen_air",
         "water"
-      ]
+      ],
+      "visualTheme": "toxic"
     },
     {
       "id": "predator_evolution",
@@ -5541,7 +5622,8 @@
         "animals_insects",
         "heat_fire",
         "psychological"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "consciousness_transfer",
@@ -5632,7 +5714,8 @@
         "psychological",
         "social_conflict",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "perpetual_storm",
@@ -5724,7 +5807,8 @@
         "food_agriculture",
         "structural_damage",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "climate"
     },
     {
       "id": "anti_matter_leak",
@@ -5815,7 +5899,8 @@
         "anomaly_reality",
         "emp_magnetic",
         "oxygen_air"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "food_chain_reversal",
@@ -5907,7 +5992,8 @@
         "food_agriculture",
         "plants",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "soul_separation",
@@ -5996,7 +6082,8 @@
       },
       "tags": [
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "reverse_aging",
@@ -6086,7 +6173,8 @@
       "tags": [
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "volcano_chain",
@@ -6180,7 +6268,8 @@
         "volcanic_ash",
         "water",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "volcanic"
     },
     {
       "id": "hivemind_virus",
@@ -6270,7 +6359,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "photosynthesis_failure",
@@ -6363,7 +6453,8 @@
         "oxygen_air",
         "plants",
         "water"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "ghost_world",
@@ -6453,7 +6544,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "mega_drought",
@@ -6547,7 +6639,8 @@
         "plants",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "heat"
     },
     {
       "id": "nuclear_winter",
@@ -6642,7 +6735,8 @@
         "social_conflict",
         "toxic_contamination",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "radiation"
     },
     {
       "id": "emotion_plague",
@@ -6733,7 +6827,8 @@
         "infection",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "reverse_evolution",
@@ -6824,7 +6919,8 @@
         "animals_insects",
         "infection",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "temporal_storm",
@@ -6915,7 +7011,8 @@
         "anomaly_reality",
         "psychological",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "electromagnetic_life",
@@ -7005,7 +7102,8 @@
       "tags": [
         "emp_magnetic",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "collective_nightmare",
@@ -7095,7 +7193,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "stone_age_regression",
@@ -7186,7 +7285,8 @@
         "animals_insects",
         "social_conflict",
         "technology"
-      ]
+      ],
+      "visualTheme": "social_collapse"
     },
     {
       "id": "ice_wall_rising",
@@ -7278,7 +7378,8 @@
         "fungal",
         "social_conflict",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "winter"
     },
     {
       "id": "hollow_earth",
@@ -7368,7 +7469,8 @@
       "tags": [
         "emp_magnetic",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "immortality_curse",
@@ -7459,7 +7561,8 @@
         "anomaly_reality",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "color_sun",
@@ -7554,7 +7657,8 @@
         "psychological",
         "toxic_contamination",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "death_of_stars",
@@ -7649,7 +7753,8 @@
         "psychological",
         "social_conflict",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "cybernetic_rebellion",
@@ -7740,7 +7845,8 @@
         "ai_machines",
         "emp_magnetic",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "plague_of_truth",
@@ -7831,7 +7937,8 @@
         "infection",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "death_echo",
@@ -7920,7 +8027,8 @@
       },
       "tags": [
         "unclassified"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "age_acceleration",
@@ -8011,7 +8119,8 @@
         "anomaly_reality",
         "radiation",
         "technology"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "sound_silence",
@@ -8101,7 +8210,8 @@
       "tags": [
         "oxygen_air",
         "psychological"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "plague_of_forgetting",
@@ -8190,7 +8300,8 @@
       },
       "tags": [
         "infection"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "war_of_clones",
@@ -8281,7 +8392,8 @@
         "psychological",
         "social_conflict",
         "technology"
-      ]
+      ],
+      "visualTheme": "social_collapse"
     },
     {
       "id": "mind_upload_disaster",
@@ -8373,7 +8485,8 @@
         "social_conflict",
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "volcano_ocean",
@@ -8467,7 +8580,8 @@
         "toxic_contamination",
         "volcanic_ash",
         "water"
-      ]
+      ],
+      "visualTheme": "volcanic"
     },
     {
       "id": "dream_bleed",
@@ -8557,7 +8671,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "plague_empathy",
@@ -8648,7 +8763,8 @@
         "infection",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "tech_singularity_gone_wrong",
@@ -8739,7 +8855,8 @@
         "ai_machines",
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "endless_darkness",
@@ -8834,7 +8951,8 @@
         "psychological",
         "radiation",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "mass_teleportation",
@@ -8923,7 +9041,8 @@
       },
       "tags": [
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "fear_materialization",
@@ -9015,7 +9134,8 @@
         "darkness_light",
         "psychological",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "magnetic_storm_permanent",
@@ -9109,7 +9229,8 @@
         "radiation",
         "technology",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "genetic_lock",
@@ -9200,7 +9321,8 @@
         "infection",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "ancient_machine_war",
@@ -9291,7 +9413,8 @@
         "ai_machines",
         "social_conflict",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "invisible_plague",
@@ -9381,7 +9504,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "infection"
     },
     {
       "id": "weather_control_loss",
@@ -9474,7 +9598,8 @@
         "psychological",
         "structural_damage",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "climate"
     },
     {
       "id": "biological_robots",
@@ -9564,7 +9689,8 @@
       "tags": [
         "ai_machines",
         "infection"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "energy_drain",
@@ -9653,7 +9779,8 @@
       },
       "tags": [
         "unclassified"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "swarm_intelligence",
@@ -9746,7 +9873,8 @@
         "emp_magnetic",
         "nanotech",
         "psychological"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "pandemic_rage",
@@ -9836,7 +9964,8 @@
       "tags": [
         "infection",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "infection"
     },
     {
       "id": "perpetual_earthquake",
@@ -9927,7 +10056,8 @@
         "food_agriculture",
         "psychological",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "ruins"
     },
     {
       "id": "mirror_world",
@@ -10017,7 +10147,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "poison_atmosphere",
@@ -10107,7 +10238,8 @@
       "tags": [
         "oxygen_air",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "toxic"
     },
     {
       "id": "plague_of_plenty",
@@ -10199,7 +10331,8 @@
         "infection",
         "oxygen_air",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "social_collapse"
     },
     {
       "id": "sentient_weather",
@@ -10292,7 +10425,8 @@
         "structural_damage",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "climate"
     },
     {
       "id": "consciousness_epidemic",
@@ -10384,7 +10518,8 @@
         "psychological",
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "sky_ocean",
@@ -10478,7 +10613,8 @@
         "structural_damage",
         "water",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "plague_of_youth",
@@ -10572,7 +10708,8 @@
         "social_conflict",
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "reverse_death",
@@ -10662,7 +10799,8 @@
       "tags": [
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "mind_plague",
@@ -10753,7 +10891,8 @@
         "anomaly_reality",
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "iron_sky",
@@ -10845,7 +10984,8 @@
         "darkness_light",
         "structural_damage",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "plague_machines",
@@ -10937,7 +11077,8 @@
         "emp_magnetic",
         "infection",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "dimensional_overlap",
@@ -11028,7 +11169,8 @@
         "anomaly_reality",
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "plague_beauty",
@@ -11121,7 +11263,8 @@
         "infection",
         "psychological",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "war_of_beliefs",
@@ -11210,7 +11353,8 @@
       },
       "tags": [
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "social_collapse"
     },
     {
       "id": "reverse_entropy",
@@ -11302,7 +11446,8 @@
         "psychological",
         "social_conflict",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "volcanic_winter_forever",
@@ -11400,7 +11545,8 @@
         "volcanic_ash",
         "weather_climate",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "volcanic"
     },
     {
       "id": "dna_rewrite",
@@ -11489,7 +11635,8 @@
       },
       "tags": [
         "infection"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "storm_of_ideas",
@@ -11579,7 +11726,8 @@
       "tags": [
         "psychological",
         "weather_climate"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "bone_plague",
@@ -11669,7 +11817,8 @@
       "tags": [
         "infection",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "heat_death_local",
@@ -11760,7 +11909,8 @@
         "anomaly_reality",
         "toxic_contamination",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "pandemic_telepathy",
@@ -11850,7 +12000,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "plague_of_purpose",
@@ -11940,7 +12091,8 @@
       "tags": [
         "food_agriculture",
         "infection"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "color_drain",
@@ -12031,7 +12183,8 @@
         "anomaly_reality",
         "darkness_light",
         "psychological"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "weight_anomaly",
@@ -12121,7 +12274,8 @@
       "tags": [
         "anomaly_reality",
         "structural_damage"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "plague_transparency",
@@ -12213,7 +12367,8 @@
         "psychological",
         "radiation",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "fire_sky",
@@ -12307,7 +12462,8 @@
         "structural_damage",
         "weather_climate",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "cosmic"
     },
     {
       "id": "digital_to_real",
@@ -12397,7 +12553,8 @@
       "tags": [
         "anomaly_reality",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "ocean_rise_rapid",
@@ -12488,7 +12645,8 @@
         "infection",
         "social_conflict",
         "water"
-      ]
+      ],
+      "visualTheme": "water"
     },
     {
       "id": "plague_wisdom",
@@ -12578,7 +12736,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "light_eaters",
@@ -12673,7 +12832,8 @@
         "psychological",
         "toxic_contamination",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "plague_laughter",
@@ -12763,7 +12923,8 @@
       "tags": [
         "infection",
         "psychological"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "inversion_of_senses",
@@ -12856,7 +13017,8 @@
         "psychological",
         "social_conflict",
         "toxic_contamination"
-      ]
+      ],
+      "visualTheme": "psychological"
     },
     {
       "id": "temporal_decay",
@@ -12946,7 +13108,8 @@
       "tags": [
         "anomaly_reality",
         "psychological"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "anti_technology_field",
@@ -13038,7 +13201,8 @@
         "psychological",
         "social_conflict",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "plague_of_speed",
@@ -13130,7 +13294,8 @@
         "infection",
         "psychological",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "night_without_end",
@@ -13224,7 +13389,8 @@
         "oxygen_air",
         "weather_climate",
         "winter_cold"
-      ]
+      ],
+      "visualTheme": "darkness"
     },
     {
       "id": "sound_weaponization",
@@ -13314,7 +13480,8 @@
       "tags": [
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     },
     {
       "id": "rebirth_loop",
@@ -13404,7 +13571,8 @@
       "tags": [
         "psychological",
         "social_conflict"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "crystal_time",
@@ -13493,7 +13661,8 @@
       },
       "tags": [
         "anomaly_reality"
-      ]
+      ],
+      "visualTheme": "anomaly"
     },
     {
       "id": "plague_empowerment",
@@ -13584,7 +13753,8 @@
         "infection",
         "social_conflict",
         "technology"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "mind_parasite_spores",
@@ -13679,7 +13849,8 @@
         "parasite",
         "plants",
         "psychological"
-      ]
+      ],
+      "visualTheme": "organic"
     },
     {
       "id": "internet_collapse",
@@ -13770,7 +13941,8 @@
         "social_conflict",
         "structural_damage",
         "technology"
-      ]
+      ],
+      "visualTheme": "technology"
     }
   ]
 }
