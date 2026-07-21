@@ -1595,6 +1595,9 @@
 .lobby-apocalypse-option span { color: var(--color-text-muted); font-size: .78rem; }
 .lobby-apocalypse-selected-pool { display: flex; flex-wrap: wrap; gap: .45rem; }
 .lobby-apocalypse-selected-pool button { padding: .4rem .6rem; color: var(--color-text-primary); background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: 999px; cursor: pointer; }
+.lobby-apocalypse-activation { margin-top: .9rem; padding-top: .9rem; border-top: 1px solid rgba(255,255,255,.12); }
+.lobby-apocalypse-activation h4 { margin: 0 0 .65rem; }
+.lobby-apocalypse-activation .lobby-settings-grid { margin-top: .6rem; }
 @media (max-width: 620px) { .lobby-apocalypse-category-chips, .lobby-apocalypse-results { grid-template-columns: 1fr; } .lobby-apocalypse-filters > * { width: 100%; } }
 
 @media (max-width: 1050px) {

@@ -76,6 +76,22 @@
 						</section>
 						<section id="lobbyApocalypsePool" class="lobby-apocalypse-mode-panel" hidden><div class="lobby-apocalypse-actions"><strong data-lobby-i18n="lobbyApocalypseSelected">Обрано</strong><button type="button" class="btn-secondary" data-apocalypse-action="clear-pool" data-lobby-i18n="lobbyApocalypseClear">Очистити</button></div><div id="lobbyApocalypseSelectedPool" class="lobby-apocalypse-selected-pool"></div></section>
 						<div id="lobbyApocalypsePreview" class="lobby-preview-summary" aria-live="polite"></div>
+						<section id="lobbyApocalypseActivation" class="lobby-apocalypse-activation" aria-labelledby="lobbyApocalypseActivationTitle">
+							<h4 id="lobbyApocalypseActivationTitle" data-lobby-i18n="lobbyActivationTitle">Інтерактивний ефект</h4>
+							<div id="lobbyActivationUnavailable" class="lobby-preview-summary" hidden></div>
+							<div class="lobby-settings-grid">
+								<label><input id="lobbyActivationEffectsEnabled" data-activation-setting="effectsEnabled" type="checkbox"><span data-lobby-i18n="lobbyActivationEffectsEnabled">Застосовувати інтерактивні ефекти</span></label>
+								<label class="lobby-setting-row"><span data-lobby-i18n="lobbyActivationPolicy">Розклад</span><select id="lobbyActivationPolicyMode" class="input-field" data-activation-setting="policyMode"><option value="DefinitionDefault" data-lobby-i18n="lobbyActivationDefinitionDefault">Стандартний розклад апокаліпсиса</option><option value="Custom" data-lobby-i18n="lobbyActivationCustom">Власний розклад</option></select></label>
+							</div>
+							<div id="lobbyActivationCustomControls" class="lobby-settings-grid" hidden>
+								<label class="lobby-setting-row"><span data-lobby-i18n="lobbyActivationScheduleMode">Режим</span><select id="lobbyActivationScheduleMode" class="input-field" data-activation-setting="scheduleMode"></select></label>
+								<label class="lobby-setting-row"><span data-lobby-i18n="lobbyActivationTrigger">Момент</span><select id="lobbyActivationTrigger" class="input-field" data-activation-setting="trigger"></select></label>
+								<label id="lobbyActivationFirstRoundRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyActivationFirstRound">Перший раунд</span><select id="lobbyActivationFirstRound" class="input-field" data-activation-setting="firstRound"></select></label>
+								<label id="lobbyActivationIntervalRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyActivationInterval">Інтервал</span><select id="lobbyActivationIntervalRounds" class="input-field" data-activation-setting="intervalRounds"></select></label>
+								<label id="lobbyActivationMaxRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyActivationMaximum">Максимум активацій</span><select id="lobbyActivationMaxActivations" class="input-field" data-activation-setting="maxActivations"></select></label>
+							</div>
+							<div id="lobbyActivationSummary" class="lobby-preview-summary" aria-live="polite"></div>
+						</section>
 					</div>
 					<div id="lobbySettingsThreats" class="lobby-settings-pane" role="tabpanel" data-settings-pane="threats" hidden>
 						<div class="lobby-setting-grid">

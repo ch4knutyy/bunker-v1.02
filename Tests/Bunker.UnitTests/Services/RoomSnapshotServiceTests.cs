@@ -75,6 +75,7 @@ public sealed class RoomSnapshotServiceTests
         context.Room.FrozenGameSettings.ApocalypseCustomPoolIds = context.GameData.Apocalypses.Take(2).Select(item => item.Id).ToList();
         context.Room.FrozenGameSettings.ApocalypseThemeEnabled = false;
         context.Room.Apocalypse = context.GameData.Apocalypses.First();
+        context.Room.ApocalypseActivationPolicy = new() { Enabled = true, ApocalypseId = context.Room.Apocalypse.Id, EffectProfileId = "snapshot-profile", GameplaySchemaVersion = 2, Source = "custom", Trigger = "after_round" };
         var resolvedApocalypseId = context.Room.Apocalypse.Id;
         context.Room.ResolvedBunkerCapacity = 2;
         context.Room.ThreatsTriggeredCount = 1;
@@ -88,6 +89,7 @@ public sealed class RoomSnapshotServiceTests
         context.Room.TriggeredThreatIds.Clear();
         context.Room.ThreatRoundsTriggered.Clear();
         context.Room.Apocalypse = null;
+        context.Room.ApocalypseActivationPolicy = null;
         context.Room.FrozenGameSettings!.ApocalypseCustomPoolIds.Clear();
 
         Assert.True(context.Snapshots.RestoreSnapshot(context.Room, snapshot.SnapshotId, "host-player", "restore-settings").Success);
@@ -99,6 +101,8 @@ public sealed class RoomSnapshotServiceTests
         Assert.Contains(2, context.Room.ThreatRoundsTriggered);
         Assert.Equal(GamePreset.Dangerous, context.Room.FrozenGameSettings!.Preset);
         Assert.Equal(resolvedApocalypseId, context.Room.Apocalypse!.Id);
+        Assert.Equal("snapshot-profile", context.Room.ApocalypseActivationPolicy!.EffectProfileId);
+        Assert.Equal("after_round", context.Room.ApocalypseActivationPolicy.Trigger);
         Assert.Equal(ApocalypseSelectionMode.CustomPool, context.Room.FrozenGameSettings.ApocalypseSelectionMode);
         Assert.Equal(2, context.Room.FrozenGameSettings.ApocalypseCustomPoolIds.Count);
         Assert.False(context.Room.FrozenGameSettings.ApocalypseThemeEnabled);

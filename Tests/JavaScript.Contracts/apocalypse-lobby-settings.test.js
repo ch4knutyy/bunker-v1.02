@@ -35,12 +35,12 @@ test('host-only catalog and public lobby projection protect hidden apocalypse id
   assert.doesNotMatch(publicDto, /SelectedApocalypseId|AllowedApocalypseCategoryIds|ApocalypseCustomPoolIds/);
 });
 
-test('draft normalization and import export preserve only v3 apocalypse settings', () => {
+test('draft normalization and import export preserve only v4 apocalypse settings', () => {
   const normalize = client.slice(client.indexOf('function normalizeLobbySettings'), client.indexOf('function isLobbyConfiguredSystemEnabled'));
   for (const field of ['apocalypseSelectionMode', 'selectedApocalypseId', 'allowedApocalypseCategoryIds', 'apocalypseCustomPoolIds', 'allowInteractiveApocalypses', 'interactiveApocalypseChancePercent', 'apocalypseThemeEnabled']) assert.match(normalize, new RegExp(field));
   assert.match(client, /settings:lobbySettingsHubPayload\(lobbySettingsDraft\)/);
-  assert.match(client, /lobbySettingsDraft\.version = 3/);
-  assert.doesNotMatch(normalize, /apocalypseEffects|apocalypseGameplay|roomId|connectionId/i);
+  assert.match(client, /lobbySettingsDraft\.version = 4/);
+  assert.doesNotMatch(normalize, /Gameplay\.Effects|effectPayload|apocalypseGameplay|roomId|connectionId/i);
 });
 
 test('apply stays on existing revision command flow and theme manager is not duplicated', () => {

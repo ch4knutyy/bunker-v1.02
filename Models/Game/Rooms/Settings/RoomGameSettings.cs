@@ -8,10 +8,24 @@ public enum ThreatFrequencyMode { OncePerGame, EveryOtherRound, EveryRound, Rand
 public enum VotingFrequencyMode { EveryRound, EveryTwoRounds }
 public enum CharacterGenerationMode { Classic }
 public enum ApocalypseSelectionMode { RandomAll, RandomCategories, Specific, CustomPool }
+public enum ApocalypseActivationPolicyMode { DefinitionDefault, Custom }
+public enum ApocalypseActivationScheduleMode { Once, Recurring }
+public enum ApocalypseActivationTriggerMode { GameStart, AfterVoting, AfterRound }
+
+public sealed class ApocalypseActivationSettings
+{
+    public bool EffectsEnabled { get; set; } = true;
+    public ApocalypseActivationPolicyMode PolicyMode { get; set; } = ApocalypseActivationPolicyMode.DefinitionDefault;
+    public ApocalypseActivationScheduleMode ScheduleMode { get; set; } = ApocalypseActivationScheduleMode.Recurring;
+    public ApocalypseActivationTriggerMode Trigger { get; set; } = ApocalypseActivationTriggerMode.AfterVoting;
+    public int FirstRound { get; set; } = 3;
+    public int? IntervalRounds { get; set; } = 3;
+    public int? MaxActivations { get; set; }
+}
 
 public sealed class RoomGameSettings
 {
-    public const int CurrentVersion = 3;
+    public const int CurrentVersion = 4;
     public static readonly IReadOnlyList<string> ProductionApocalypseCategoryIds =
         ["armageddon", "weather", "biological", "geological", "cosmic", "technology", "ecological", "social", "anomaly", "supernatural"];
     public int Version { get; set; } = CurrentVersion;
@@ -42,6 +56,7 @@ public sealed class RoomGameSettings
     public bool AllowInteractiveApocalypses { get; set; } = true;
     public int InteractiveApocalypseChancePercent { get; set; } = 10;
     public bool ApocalypseThemeEnabled { get; set; } = true;
+    public ApocalypseActivationSettings ApocalypseActivation { get; set; } = new();
     public bool BunkerScenarioEnabled { get; set; } = true;
 
     public bool ThreatsEnabled { get; set; } = true;
@@ -98,6 +113,13 @@ public sealed record LobbyGameSettingsDto(
     bool AllowInteractiveApocalypses,
     int InteractiveApocalypseChancePercent,
     bool ApocalypseThemeEnabled,
+    bool ApocalypseEffectsEnabled,
+    string ApocalypseActivationPolicyMode,
+    string ApocalypseActivationScheduleMode,
+    string ApocalypseActivationTrigger,
+    int ApocalypseActivationFirstRound,
+    int? ApocalypseActivationIntervalRounds,
+    int? ApocalypseActivationMaxActivations,
     bool BunkerScenarioEnabled,
     bool ThreatsEnabled,
     string InteractiveThreatRate,

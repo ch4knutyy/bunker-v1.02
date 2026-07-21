@@ -52,6 +52,7 @@ builder.Services.AddSignalR(options =>
 
 builder.Services.AddSingleton<GameDataService>();
 builder.Services.AddSingleton<ApocalypseSelectionService>();
+builder.Services.AddSingleton<ApocalypseActivationPolicyResolver>();
 builder.Services.AddSingleton<CharacterGeneratorService>();
 builder.Services.AddSingleton<PlayerStorageService>();
 builder.Services.AddSingleton<RoomService>();

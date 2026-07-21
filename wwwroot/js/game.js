@@ -109,7 +109,7 @@ let pendingJoinRoomId = null; // Для закриття модалки післ
 let hostToken = null;
 let reconnectToken = null;
 let currentApocalypse = null;
-let currentPublicGameSettings = { apocalypseThemeEnabled: true };
+let currentPublicGameSettings = { apocalypseThemeEnabled: true, apocalypseActivation: null };
 let currentBunker = null;
 let currentThreat = null;
 let currentThreatState = null;
@@ -974,7 +974,7 @@ function clearGameFinishedStateForLobby() {
 	gameTimerClockAnchor = null;
 	myVote = null;
 	currentApocalypse = null;
-	currentPublicGameSettings = { apocalypseThemeEnabled: true };
+	currentPublicGameSettings = { apocalypseThemeEnabled: true, apocalypseActivation: null };
 	if (typeof renderApocalypse === "function") renderApocalypse(null);
 	currentBunker = null;
 	['myPlayerCards', 'mySpecialCardsList', 'votingCandidates', 'votingResultsContent', 'threatContent'].forEach(id => {
@@ -5889,6 +5889,16 @@ Object.assign(uiTranslations.ru, {
 	lobbyTabApocalypse: 'Апокалипсис', lobbyApocalypseMode: 'Режим выбора', lobbyApocalypseRandomAll: 'Случайный из всех', lobbyApocalypseRandomCategories: 'Случайный из категорий', lobbyApocalypseSpecific: 'Конкретный', lobbyApocalypseCustomPool: 'Собственный набор', lobbyApocalypseAllowInteractive: 'Разрешить интерактивные апокалипсисы', lobbyApocalypseChance: 'Шанс интерактивного апокалипсиса', lobbyApocalypseTheme: 'Тематическое оформление апокалипсиса', lobbyApocalypseSearch: 'Поиск апокалипсиса', lobbyApocalypseSelectAll: 'Выбрать все', lobbyApocalypseClear: 'Очистить', lobbyApocalypseSelected: 'Выбрано', lobbyApocalypseInteractive: 'Интерактивный', lobbyApocalypseOrdinary: 'Обычный', lobbyApocalypseLoadMore: 'Показать ещё', lobbyWarningApocalypseCategoriesEmpty: 'Выберите хотя бы одну категорию апокалипсисов.', lobbyWarningApocalypsePoolEmpty: 'Собственный набор апокалипсисов пуст.', lobbyWarningApocalypseSpecificMissing: 'Выберите конкретный апокалипсис.', lobbyWarningApocalypseCandidateEmpty: 'Для этих настроек нет доступных апокалипсисов.', lobbyWarningApocalypseInteractiveUnavailable: 'В выборе нет интерактивных апокалипсисов.', lobbyWarningApocalypseOnlyInteractive: 'В выборе остались только интерактивные апокалипсисы.', lobbyWarningApocalypseThemeDisabled: 'Тематическое оформление апокалипсиса выключено.', lobbyWarningApocalypsePoolSmall: 'Собственный набор апокалипсисов очень мал.', lobbyWarningApocalypseSpecificInteractive: 'Выбранный апокалипсис является интерактивным.'
 });
 
+Object.assign(uiTranslations.uk, {
+	lobbyActivationTitle: 'Інтерактивний ефект', lobbyActivationEffectsEnabled: 'Застосовувати інтерактивні ефекти', lobbyActivationPolicy: 'Розклад', lobbyActivationDefinitionDefault: 'Стандартний розклад апокаліпсиса', lobbyActivationCustom: 'Власний розклад', lobbyActivationScheduleMode: 'Режим', lobbyActivationTrigger: 'Момент', lobbyActivationFirstRound: 'Перший раунд', lobbyActivationInterval: 'Інтервал у раундах', lobbyActivationMaximum: 'Максимум активацій', lobbyActivationOnce: 'Одноразово', lobbyActivationRecurring: 'Повторювано', lobbyActivationGameStart: 'На початку гри', lobbyActivationAfterVoting: 'Після голосування', lobbyActivationAfterRound: 'Після раунду', lobbyActivationUnlimited: 'Без обмеження', lobbyActivationOrdinary: 'Вибраний апокаліпсис не має інтерактивного ефекту.', lobbyActivationUnavailable: 'За поточними налаштуваннями інтерактивний апокаліпсис не може випасти.', lobbyActivationInactiveSummary: 'Інтерактивна активація неактивна.', lobbyActivationEffectsOffSummary: 'Апокаліпсис буде показаний без зміни характеристик.', lobbyActivationGameStartSummary: 'Ефект буде застосований один раз після початку гри.', lobbyActivationFromRound: 'з раунду', lobbyActivationEvery: 'кожні раунди', lobbyActivationVotingRequired: 'Потрібно увімкнути голосування.', lobbyWarningActivationEffectsDisabled: 'Інтерактивні ефекти вимкнено.', lobbyWarningActivationInactive: 'Інтерактивна активація зараз неактивна.', lobbyWarningActivationDefaultMixed: 'Можливі апокаліпсиси мають різні стандартні розклади.', lobbyWarningActivationCandidateIncompatible: 'Один або більше кандидатів не підтримують власний розклад.', lobbyWarningActivationRequiresVoting: 'Активація після голосування потребує ввімкненого голосування.', lobbyWarningActivationUnlimited: 'Кількість активацій не обмежена.', lobbyWarningActivationGameStartOnce: 'Активація на початку гри виконується один раз.', lobbyWarningActivationNoCandidates: 'Немає можливих інтерактивних кандидатів.'
+});
+Object.assign(uiTranslations.en, {
+	lobbyActivationTitle: 'Interactive effect', lobbyActivationEffectsEnabled: 'Apply interactive effects', lobbyActivationPolicy: 'Schedule', lobbyActivationDefinitionDefault: 'Apocalypse default schedule', lobbyActivationCustom: 'Custom schedule', lobbyActivationScheduleMode: 'Mode', lobbyActivationTrigger: 'Trigger', lobbyActivationFirstRound: 'First round', lobbyActivationInterval: 'Round interval', lobbyActivationMaximum: 'Maximum activations', lobbyActivationOnce: 'Once', lobbyActivationRecurring: 'Recurring', lobbyActivationGameStart: 'At game start', lobbyActivationAfterVoting: 'After voting', lobbyActivationAfterRound: 'After round', lobbyActivationUnlimited: 'Unlimited', lobbyActivationOrdinary: 'The selected apocalypse has no interactive effect.', lobbyActivationUnavailable: 'An interactive apocalypse cannot be selected with the current settings.', lobbyActivationInactiveSummary: 'Interactive activation is inactive.', lobbyActivationEffectsOffSummary: 'The apocalypse will be shown without changing characteristics.', lobbyActivationGameStartSummary: 'The effect will be applied once after the game starts.', lobbyActivationFromRound: 'from round', lobbyActivationEvery: 'every rounds', lobbyActivationVotingRequired: 'Voting must be enabled.', lobbyWarningActivationEffectsDisabled: 'Interactive effects are disabled.', lobbyWarningActivationInactive: 'Interactive activation is currently inactive.', lobbyWarningActivationDefaultMixed: 'Possible apocalypses have different default schedules.', lobbyWarningActivationCandidateIncompatible: 'One or more candidates do not support the custom schedule.', lobbyWarningActivationRequiresVoting: 'After-voting activation requires voting.', lobbyWarningActivationUnlimited: 'The number of activations is unlimited.', lobbyWarningActivationGameStartOnce: 'Game-start activation runs once.', lobbyWarningActivationNoCandidates: 'No interactive candidates are available.'
+});
+Object.assign(uiTranslations.ru, {
+	lobbyActivationTitle: 'Интерактивный эффект', lobbyActivationEffectsEnabled: 'Применять интерактивные эффекты', lobbyActivationPolicy: 'Расписание', lobbyActivationDefinitionDefault: 'Стандартное расписание апокалипсиса', lobbyActivationCustom: 'Собственное расписание', lobbyActivationScheduleMode: 'Режим', lobbyActivationTrigger: 'Момент', lobbyActivationFirstRound: 'Первый раунд', lobbyActivationInterval: 'Интервал в раундах', lobbyActivationMaximum: 'Максимум активаций', lobbyActivationOnce: 'Однократно', lobbyActivationRecurring: 'Повторяемо', lobbyActivationGameStart: 'В начале игры', lobbyActivationAfterVoting: 'После голосования', lobbyActivationAfterRound: 'После раунда', lobbyActivationUnlimited: 'Без ограничения', lobbyActivationOrdinary: 'Выбранный апокалипсис не имеет интерактивного эффекта.', lobbyActivationUnavailable: 'При текущих настройках интерактивный апокалипсис не может выпасть.', lobbyActivationInactiveSummary: 'Интерактивная активация неактивна.', lobbyActivationEffectsOffSummary: 'Апокалипсис будет показан без изменения характеристик.', lobbyActivationGameStartSummary: 'Эффект будет применён один раз после начала игры.', lobbyActivationFromRound: 'с раунда', lobbyActivationEvery: 'каждые раунды', lobbyActivationVotingRequired: 'Необходимо включить голосование.', lobbyWarningActivationEffectsDisabled: 'Интерактивные эффекты выключены.', lobbyWarningActivationInactive: 'Интерактивная активация сейчас неактивна.', lobbyWarningActivationDefaultMixed: 'Возможные апокалипсисы имеют разные стандартные расписания.', lobbyWarningActivationCandidateIncompatible: 'Один или несколько кандидатов не поддерживают собственное расписание.', lobbyWarningActivationRequiresVoting: 'Активация после голосования требует включённого голосования.', lobbyWarningActivationUnlimited: 'Количество активаций не ограничено.', lobbyWarningActivationGameStartOnce: 'Активация в начале игры выполняется один раз.', lobbyWarningActivationNoCandidates: 'Нет возможных интерактивных кандидатов.'
+});
+
 const apocalypseVisualThemeRegistry = Object.freeze({
 	'extinction-red': Object.freeze({ categoryId: 'armageddon', cardVariant: 'nuclear' }),
 	'storm-blue': Object.freeze({ categoryId: 'weather', cardVariant: 'climate' }),
@@ -5983,8 +5993,17 @@ function syncApocalypseVisualTheme(apocalypse) {
 function syncPublicGameSettings(payload) {
 	const source = payload?.gameSettings ?? payload?.GameSettings;
 	if (!source) return currentPublicGameSettings;
+	const rawActivation = source.apocalypseActivation ?? source.ApocalypseActivation;
 	currentPublicGameSettings = {
-		apocalypseThemeEnabled: Boolean(source.apocalypseThemeEnabled ?? source.ApocalypseThemeEnabled ?? true)
+		apocalypseThemeEnabled: Boolean(source.apocalypseThemeEnabled ?? source.ApocalypseThemeEnabled ?? true),
+		apocalypseActivation: rawActivation == null ? null : {
+			effectsEnabled: Boolean(rawActivation.effectsEnabled ?? rawActivation.EffectsEnabled),
+			scheduleMode: String(rawActivation.scheduleMode ?? rawActivation.ScheduleMode ?? ''),
+			trigger: String(rawActivation.trigger ?? rawActivation.Trigger ?? ''),
+			firstRound: Number(rawActivation.firstRound ?? rawActivation.FirstRound ?? 1),
+			intervalRounds: rawActivation.intervalRounds ?? rawActivation.IntervalRounds ?? null,
+			maxActivations: rawActivation.maxActivations ?? rawActivation.MaxActivations ?? null
+		}
 	};
 	return currentPublicGameSettings;
 }
@@ -8285,8 +8304,16 @@ const lobbySettingBooleanKeys = new Set(['spectatorsAllowed', 'allowSpectatorsAf
 
 function normalizeLobbySettings(source) {
 	const get = key => source?.[key] ?? source?.[key.charAt(0).toUpperCase() + key.slice(1)];
+	const rawActivation = get('apocalypseActivation') || {};
+	const activation = key => rawActivation?.[key] ?? rawActivation?.[key.charAt(0).toUpperCase() + key.slice(1)];
+	const activationNullable = (key, publicKey, fallback) => {
+		const upper = key.charAt(0).toUpperCase() + key.slice(1);
+		if (Object.prototype.hasOwnProperty.call(rawActivation, key)) return rawActivation[key];
+		if (Object.prototype.hasOwnProperty.call(rawActivation, upper)) return rawActivation[upper];
+		const publicValue = get(publicKey); return publicValue === undefined ? fallback : publicValue;
+	};
 	return {
-		version: 3, preset: String(get('preset') ?? 'Classic'),
+		version: 4, preset: String(get('preset') ?? 'Classic'),
 		maxGameplayPlayers: Number(get('maxGameplayPlayers') ?? 12), minGameplayPlayers: Number(get('minGameplayPlayers') ?? 2),
 		spectatorsAllowed: Boolean(get('spectatorsAllowed') ?? true), allowSpectatorsAfterStart: Boolean(get('allowSpectatorsAfterStart') ?? false),
 		allowLateGameplayJoin: Boolean(get('allowLateGameplayJoin') ?? false), lockRoomOnStart: Boolean(get('lockRoomOnStart') ?? true), joinsLocked: Boolean(get('joinsLocked') ?? false),
@@ -8298,6 +8325,15 @@ function normalizeLobbySettings(source) {
 		apocalypseCustomPoolIds: Array.isArray(get('apocalypseCustomPoolIds')) ? [...new Set(get('apocalypseCustomPoolIds').map(String))] : [],
 		allowedApocalypseCategoryCount: Number(get('allowedApocalypseCategoryCount') ?? 10), apocalypseCustomPoolCount: Number(get('apocalypseCustomPoolCount') ?? 0),
 		allowInteractiveApocalypses: Boolean(get('allowInteractiveApocalypses') ?? true), interactiveApocalypseChancePercent: Number(get('interactiveApocalypseChancePercent') ?? 10), apocalypseThemeEnabled: Boolean(get('apocalypseThemeEnabled') ?? true),
+		apocalypseActivation: {
+			effectsEnabled: Boolean(activation('effectsEnabled') ?? get('apocalypseEffectsEnabled') ?? true),
+			policyMode: String(activation('policyMode') ?? get('apocalypseActivationPolicyMode') ?? 'DefinitionDefault'),
+			scheduleMode: String(activation('scheduleMode') ?? get('apocalypseActivationScheduleMode') ?? 'Recurring'),
+			trigger: String(activation('trigger') ?? get('apocalypseActivationTrigger') ?? 'AfterVoting'),
+			firstRound: Number(activation('firstRound') ?? get('apocalypseActivationFirstRound') ?? 3),
+			intervalRounds: activationNullable('intervalRounds', 'apocalypseActivationIntervalRounds', 3) == null ? null : Number(activationNullable('intervalRounds', 'apocalypseActivationIntervalRounds', 3)),
+			maxActivations: activationNullable('maxActivations', 'apocalypseActivationMaxActivations', null) == null ? null : Number(activationNullable('maxActivations', 'apocalypseActivationMaxActivations', null))
+		},
 		bunkerScenarioEnabled: Boolean(get('bunkerScenarioEnabled') ?? true),
 		threatsEnabled: Boolean(get('threatsEnabled') ?? true), interactiveThreatRate: String(get('interactiveThreatRate') ?? 'Rare'), firstThreatRound: Number(get('firstThreatRound') ?? 3), threatFrequency: String(get('threatFrequency') ?? 'OncePerGame'), maxThreatsPerGame: get('maxThreatsPerGame') == null ? null : Number(get('maxThreatsPerGame')), avoidRepeatedThreats: Boolean(get('avoidRepeatedThreats') ?? true),
 		roundTimerEnabled: Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds: Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer: Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect: Boolean(get('pauseTimerOnHostDisconnect') ?? false),
@@ -8348,7 +8384,7 @@ function setLobbySettingsFeedback(key, error = false) {
 	const element = document.getElementById('lobbySettingsFeedback'); if (!element) return;
 	element.textContent = key ? t(key) : ''; element.className = `lobby-settings-feedback${key ? error ? ' error' : ' success' : ''}`;
 }
-function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive: 'lobbyWarningCapacity', spectators_present: 'lobbyWarningSpectators', player_count_exceeds_max: 'lobbyWarningPlayers', apocalypse_categories_empty: 'lobbyWarningApocalypseCategoriesEmpty', apocalypse_pool_empty: 'lobbyWarningApocalypsePoolEmpty', apocalypse_specific_missing: 'lobbyWarningApocalypseSpecificMissing', apocalypse_candidate_set_empty: 'lobbyWarningApocalypseCandidateEmpty', apocalypse_interactive_unavailable: 'lobbyWarningApocalypseInteractiveUnavailable', apocalypse_only_interactive_candidates: 'lobbyWarningApocalypseOnlyInteractive', apocalypse_theme_disabled: 'lobbyWarningApocalypseThemeDisabled', apocalypse_custom_pool_small: 'lobbyWarningApocalypsePoolSmall', apocalypse_specific_is_interactive: 'lobbyWarningApocalypseSpecificInteractive' }[code] || 'lobbySettingsInvalid'); }
+function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive: 'lobbyWarningCapacity', spectators_present: 'lobbyWarningSpectators', player_count_exceeds_max: 'lobbyWarningPlayers', apocalypse_categories_empty: 'lobbyWarningApocalypseCategoriesEmpty', apocalypse_pool_empty: 'lobbyWarningApocalypsePoolEmpty', apocalypse_specific_missing: 'lobbyWarningApocalypseSpecificMissing', apocalypse_candidate_set_empty: 'lobbyWarningApocalypseCandidateEmpty', apocalypse_interactive_unavailable: 'lobbyWarningApocalypseInteractiveUnavailable', apocalypse_only_interactive_candidates: 'lobbyWarningApocalypseOnlyInteractive', apocalypse_theme_disabled: 'lobbyWarningApocalypseThemeDisabled', apocalypse_custom_pool_small: 'lobbyWarningApocalypsePoolSmall', apocalypse_specific_is_interactive: 'lobbyWarningApocalypseSpecificInteractive', apocalypse_effects_disabled: 'lobbyWarningActivationEffectsDisabled', apocalypse_activation_inactive: 'lobbyWarningActivationInactive', apocalypse_activation_default_mixed: 'lobbyWarningActivationDefaultMixed', apocalypse_activation_candidate_incompatible: 'lobbyWarningActivationCandidateIncompatible', apocalypse_activation_requires_voting: 'lobbyWarningActivationRequiresVoting', apocalypse_activation_unlimited: 'lobbyWarningActivationUnlimited', apocalypse_activation_game_start_once: 'lobbyWarningActivationGameStartOnce', apocalypse_activation_no_interactive_candidates: 'lobbyWarningActivationNoCandidates' }[code] || 'lobbySettingsInvalid'); }
 function lobbyAuditLabel(action) { return t({ lobby_settings_applied: 'lobbyAuditSettings', lobby_readiness_changed: 'lobbyAuditReady', lobby_readiness_reset: 'lobbyAuditReadyReset', lobby_role_changed: 'lobbyAuditRole', host_transfer: 'lobbyAuditHost', lobby_player_kicked: 'lobbyAuditKick', lobby_player_joined: 'lobbyAuditJoined', lobby_player_reconnected: 'lobbyAuditReconnected', lobby_player_left: 'lobbyAuditLeft', lobby_password_changed: 'lobbyAuditPassword', game_started_from_lobby: 'lobbyAuditStarted' }[action] || 'lobbyAuditGeneric'); }
 
 async function ensureLobbyApocalypseCatalog() {
@@ -8361,6 +8397,8 @@ async function ensureLobbyApocalypseCatalog() {
 			lobbySettingsDraft.selectedApocalypseId = lobbyGet(config, 'selectedApocalypseId', 'SelectedApocalypseId');
 			lobbySettingsDraft.allowedApocalypseCategoryIds = [...(lobbyGet(config, 'allowedApocalypseCategoryIds', 'AllowedApocalypseCategoryIds') || [])];
 			lobbySettingsDraft.apocalypseCustomPoolIds = [...(lobbyGet(config, 'apocalypseCustomPoolIds', 'ApocalypseCustomPoolIds') || [])];
+			const activation = lobbyGet(config, 'activation', 'Activation');
+			if (activation) lobbySettingsDraft.apocalypseActivation = normalizeLobbySettings({ apocalypseActivation: activation }).apocalypseActivation;
 		}
 	} catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); }
 	finally { lobbyApocalypseCatalogPending = false; renderLobbyGameSetup(); }
@@ -8371,6 +8409,70 @@ function markLobbyApocalypseDraftChanged() {
 	lobbySettingsDraft.allowedApocalypseCategoryCount = lobbySettingsDraft.allowedApocalypseCategoryIds.length;
 	lobbySettingsDraft.apocalypseCustomPoolCount = lobbySettingsDraft.apocalypseCustomPoolIds.length;
 	lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback(''); renderLobbyGameSetup();
+}
+
+function updateLobbyActivationDraft(control) {
+	if (!lobbySettingsDraft?.apocalypseActivation) return;
+	const key = control.dataset.activationSetting;
+	let value = control.type === 'checkbox' ? control.checked : control.value;
+	if (['firstRound', 'intervalRounds', 'maxActivations'].includes(key)) value = value === '' ? null : Number(value);
+	lobbySettingsDraft.apocalypseActivation[key] = value;
+	if (key === 'trigger' && value === 'GameStart') {
+		lobbySettingsDraft.apocalypseActivation.scheduleMode = 'Once';
+		lobbySettingsDraft.apocalypseActivation.intervalRounds = null;
+		lobbySettingsDraft.apocalypseActivation.maxActivations = 1;
+	}
+	if (key === 'scheduleMode' && value === 'Once') {
+		lobbySettingsDraft.apocalypseActivation.intervalRounds = null;
+		lobbySettingsDraft.apocalypseActivation.maxActivations = 1;
+	}
+	if (key === 'scheduleMode' && value === 'Recurring' && lobbySettingsDraft.apocalypseActivation.intervalRounds == null)
+		lobbySettingsDraft.apocalypseActivation.intervalRounds = 3;
+	lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback(''); renderLobbyGameSetup();
+}
+
+function renderLobbyApocalypseActivation(settings, apocalypses) {
+	const activation = settings.apocalypseActivation; if (!activation) return;
+	const contract = lobbyGet(lobbyApocalypseCatalog, 'activationContract', 'ActivationContract') || {};
+	const candidateIds = settings.apocalypseSelectionMode === 'Specific' ? [settings.selectedApocalypseId].filter(Boolean) : settings.apocalypseSelectionMode === 'CustomPool' ? settings.apocalypseCustomPoolIds : settings.apocalypseSelectionMode === 'RandomCategories' ? apocalypses.filter(item => settings.allowedApocalypseCategoryIds.includes(lobbyGet(item, 'categoryId', 'CategoryId'))).map(item => lobbyGet(item, 'id', 'Id')) : apocalypses.map(item => lobbyGet(item, 'id', 'Id'));
+	const candidates = apocalypses.filter(item => candidateIds.includes(lobbyGet(item, 'id', 'Id')));
+	const interactive = candidates.filter(item => Boolean(lobbyGet(item, 'interactive', 'Interactive')));
+	const specific = settings.apocalypseSelectionMode === 'Specific' ? candidates[0] : null;
+	const specificOrdinary = specific && !lobbyGet(specific, 'interactive', 'Interactive');
+	const activeChance = settings.apocalypseSelectionMode === 'Specific' ? !specificOrdinary : settings.interactiveApocalypseChancePercent > 0;
+	const inactive = !settings.apocalypseEnabled || !settings.allowInteractiveApocalypses || !activeChance || interactive.length === 0;
+	const effects = document.getElementById('lobbyActivationEffectsEnabled'); if (effects) { effects.checked = activation.effectsEnabled; effects.disabled = lobbySettingsPending || inactive; }
+	const policy = document.getElementById('lobbyActivationPolicyMode'); if (policy) { policy.value = activation.policyMode; policy.disabled = lobbySettingsPending || inactive || !activation.effectsEnabled; }
+	const unavailable = document.getElementById('lobbyActivationUnavailable');
+	if (unavailable) { unavailable.hidden = !inactive; unavailable.textContent = specificOrdinary ? t('lobbyActivationOrdinary') : t('lobbyActivationUnavailable'); }
+	const custom = activation.policyMode === 'Custom';
+	const controls = document.getElementById('lobbyActivationCustomControls'); if (controls) controls.hidden = !custom;
+	const setOptions = (id, values, selected, label) => { const select = document.getElementById(id); if (!select) return; select.replaceChildren(...values.map(value => new Option(label(value), value))); select.value = selected == null ? '' : String(selected); select.disabled = lobbySettingsPending || inactive || !activation.effectsEnabled || !custom; };
+	const modes = (lobbyGet(contract, 'supportedModes', 'SupportedModes') || ['once','recurring']).map(value => value === 'once' ? 'Once' : 'Recurring');
+	const triggers = (lobbyGet(contract, 'supportedTriggers', 'SupportedTriggers') || ['game_start','after_voting','after_round']).map(value => value === 'game_start' ? 'GameStart' : value === 'after_round' ? 'AfterRound' : 'AfterVoting');
+	const firstRounds = lobbyGet(contract, 'allowedFirstRounds', 'AllowedFirstRounds') || [1,2,3,4,5];
+	const intervals = lobbyGet(contract, 'allowedIntervalRounds', 'AllowedIntervalRounds') || [1,2,3,4,5];
+	setOptions('lobbyActivationScheduleMode', modes, activation.scheduleMode, value => t(value === 'Once' ? 'lobbyActivationOnce' : 'lobbyActivationRecurring'));
+	setOptions('lobbyActivationTrigger', triggers, activation.trigger, value => t(value === 'GameStart' ? 'lobbyActivationGameStart' : value === 'AfterRound' ? 'lobbyActivationAfterRound' : 'lobbyActivationAfterVoting'));
+	setOptions('lobbyActivationFirstRound', firstRounds, activation.firstRound, value => String(value));
+	setOptions('lobbyActivationIntervalRounds', intervals, activation.intervalRounds, value => String(value));
+	const maximum = Number(lobbyGet(contract, 'maximumAllowedActivations', 'MaximumAllowedActivations') || 20);
+	setOptions('lobbyActivationMaxActivations', ['', ...Array.from({ length: maximum }, (_, index) => index + 1)], activation.maxActivations, value => value === '' ? t('lobbyActivationUnlimited') : String(value));
+	const gameStart = activation.trigger === 'GameStart'; const once = activation.scheduleMode === 'Once' || gameStart;
+	const firstRow = document.getElementById('lobbyActivationFirstRoundRow'); if (firstRow) firstRow.hidden = gameStart;
+	const intervalRow = document.getElementById('lobbyActivationIntervalRow'); if (intervalRow) intervalRow.hidden = once;
+	const maxRow = document.getElementById('lobbyActivationMaxRow'); if (maxRow) maxRow.hidden = once;
+	const summary = document.getElementById('lobbyActivationSummary');
+	if (summary) {
+		if (inactive) summary.textContent = t('lobbyActivationInactiveSummary');
+		else if (!activation.effectsEnabled) summary.textContent = t('lobbyActivationEffectsOffSummary');
+		else if (!custom) {
+			const definition = specific ? lobbyGet(specific, 'activation', 'Activation') : null;
+			summary.textContent = definition ? `${t('lobbyActivationDefinitionDefault')}: ${lobbyGet(definition, 'defaultTrigger', 'DefaultTrigger')} · ${lobbyGet(definition, 'defaultFirstRound', 'DefaultFirstRound')}` : `${t('lobbyActivationDefinitionDefault')} · ${interactive.length} ${t('lobbyApocalypseInteractive').toLowerCase()}`;
+		} else if (gameStart) summary.textContent = t('lobbyActivationGameStartSummary');
+		else summary.textContent = `${activation.trigger === 'AfterVoting' ? t('lobbyActivationAfterVoting') : t('lobbyActivationAfterRound')} · ${t('lobbyActivationFromRound')} ${activation.firstRound} · ${once ? t('lobbyActivationOnce') : `${t('lobbyActivationEvery')} ${activation.intervalRounds}`} · ${activation.maxActivations == null ? t('lobbyActivationUnlimited') : activation.maxActivations}`;
+		if (custom && activation.trigger === 'AfterVoting' && !settings.votingEnabled) summary.textContent += ` · ${t('lobbyActivationVotingRequired')}`;
+	}
 }
 
 function renderLobbyApocalypseEditor(settings) {
@@ -8424,6 +8526,7 @@ function renderLobbyApocalypseEditor(settings) {
 		const candidates = apocalypses.filter(item => candidateIds.includes(lobbyGet(item, 'id', 'Id'))); const interactive = candidates.filter(item => lobbyGet(item, 'interactive', 'Interactive')).length;
 		preview.textContent = `${candidates.length} possible · ${candidates.length - interactive} ${t('lobbyApocalypseOrdinary').toLowerCase()} · ${interactive} ${t('lobbyApocalypseInteractive').toLowerCase()} · ${settings.interactiveApocalypseChancePercent}%`;
 	}
+	renderLobbyApocalypseActivation(settings, apocalypses);
 }
 
 function renderLobbyGameSetup() {
@@ -8468,7 +8571,10 @@ function renderLobbyGameSetup() {
 		for (const id of ['lobbySettingsApply', 'lobbySettingsReset', 'lobbySettingsClassic', 'lobbyPresetSave', 'lobbyPresetLoad', 'lobbyPresetDelete', 'lobbyPresetExport', 'lobbyPresetImport', 'lobbyPasswordApply']) { const button = document.getElementById(id); if (button) button.disabled = lobbySettingsPending || (id === 'lobbySettingsApply' && !lobbySettingsDirty); }
 		renderLobbyLocalPresetOptions();
 	} else if (readOnly) {
-		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('apocalypse'), canonical.apocalypseEnabled ? `${canonical.apocalypseSelectionMode} · ${canonical.allowedApocalypseCategoryCount} categories · ${canonical.apocalypseCustomPoolCount} pool · ${canonical.interactiveApocalypseChancePercent}%` : t('lobbyOff')], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
+		const activation = canonical.apocalypseActivation;
+		const activationTiming = `${activation.policyMode} · ${activation.scheduleMode} · ${activation.trigger} · ${t('lobbyActivationFromRound')} ${activation.firstRound}${activation.intervalRounds == null ? '' : ` · ${t('lobbyActivationEvery')} ${activation.intervalRounds}`}`;
+		const activationSummary = activation.effectsEnabled ? activationTiming : `${t('lobbyActivationEffectsOffSummary')} · ${activationTiming}`;
+		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('apocalypse'), canonical.apocalypseEnabled ? `${canonical.apocalypseSelectionMode} · ${canonical.allowedApocalypseCategoryCount} categories · ${canonical.apocalypseCustomPoolCount} pool · ${canonical.interactiveApocalypseChancePercent}%` : t('lobbyOff')], [t('lobbyActivationTitle'), activationSummary], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
 		readOnly.innerHTML = rows.map(([label, value]) => `<article><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	}
 	const events = lobbyGet(state, 'recentEvents', 'RecentEvents') || []; const audit = document.getElementById('lobbyAuditEvents');
@@ -8502,6 +8608,12 @@ function lobbySettingsHubPayload(settings) {
 		readyRequirement: enumValue(settings.readyRequirement, ['AllPlayers', 'HostDecision']),
 		bunkerCapacityMode: enumValue(settings.bunkerCapacityMode, ['Automatic', 'Manual', 'RandomRange']),
 		apocalypseSelectionMode: enumValue(settings.apocalypseSelectionMode, ['RandomAll', 'RandomCategories', 'Specific', 'CustomPool']),
+		apocalypseActivation: {
+			...settings.apocalypseActivation,
+			policyMode: enumValue(settings.apocalypseActivation.policyMode, ['DefinitionDefault', 'Custom']),
+			scheduleMode: enumValue(settings.apocalypseActivation.scheduleMode, ['Once', 'Recurring']),
+			trigger: enumValue(settings.apocalypseActivation.trigger, ['GameStart', 'AfterVoting', 'AfterRound'])
+		},
 		interactiveThreatRate: enumValue(settings.interactiveThreatRate, ['Off', 'Rare', 'Standard', 'Often', 'Always']),
 		threatFrequency: enumValue(settings.threatFrequency, ['OncePerGame', 'EveryOtherRound', 'EveryRound', 'RandomEligibleRounds']),
 		votingFrequency: enumValue(settings.votingFrequency, ['EveryRound', 'EveryTwoRounds']), characterGenerationMode: 0,
@@ -8536,7 +8648,7 @@ function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLo
 function loadLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; const entry = readLobbyLocalPresets()[name]; if (!entry || entry.version !== 1) return setLobbySettingsFeedback('lobbyPresetImportError', true); lobbySettingsDraft = normalizeLobbySettings(entry.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); renderLobbyGameSetup(); }
 function deleteLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; if (!name) return; const presets = readLobbyLocalPresets(); delete presets[name]; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetDeleted'); }
 function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema:'bunker-room-game-settings', version:1, name, settings:normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi, '-')}.json`; link.click(); URL.revokeObjectURL(url); }
-async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2, 3].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 3; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
+async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2, 3, 4].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 4; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
 
 async function updateLobbyPassword() { if (lobbySettingsPending) return; lobbySettingsPending = true; renderLobbyGameSetup(); try { await connection.invoke('SetLobbyPassword', document.getElementById('lobbyPasswordInput')?.value || null, crypto.randomUUID()); document.getElementById('lobbyPasswordInput').value = ''; setLobbySettingsFeedback('lobbyPasswordUpdated'); } catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); } finally { lobbySettingsPending = false; renderLobbyGameSetup(); } }
 async function resetLobbyMemberReady(playerId) { if (lobbyCommandPending) return; lobbyCommandPending = true; try { await connection.invoke('ResetLobbyReady', playerId, crypto.randomUUID()); } finally { lobbyCommandPending = false; } }
@@ -8545,7 +8657,7 @@ async function kickLobbyMember(playerId) { if (lobbyCommandPending || !confirm(t
 function bindLobbySettingsControls() {
 	const setup = document.getElementById('lobbyGameSetup'); if (!setup || setup.dataset.bound === 'true') return; setup.dataset.bound = 'true';
 	setup.addEventListener('input', event => { if (event.target.id === 'lobbyApocalypseSearch') { lobbyApocalypseSearch = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('.lobby-setting-input') && event.target.tagName === 'INPUT' && event.target.type !== 'checkbox') updateLobbySettingsDraft(event.target); });
-	setup.addEventListener('change', event => { if (event.target.id === 'lobbyApocalypseCategoryFilter') { lobbyApocalypseCategoryFilter = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.id === 'lobbyApocalypseInteractiveFilter') { lobbyApocalypseInteractiveFilter = event.target.value; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
+	setup.addEventListener('change', event => { if (event.target.id === 'lobbyApocalypseCategoryFilter') { lobbyApocalypseCategoryFilter = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.id === 'lobbyApocalypseInteractiveFilter') { lobbyApocalypseInteractiveFilter = event.target.value; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('[data-activation-setting]')) { updateLobbyActivationDraft(event.target); return; } if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
 	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; if (lobbySettingsActiveTab === 'apocalypse') ensureLobbyApocalypseCatalog(); renderLobbyGameSetup(); return; } const apocalypseAction = event.target.closest('[data-apocalypse-action]'); if (apocalypseAction && lobbySettingsDraft) { const id = apocalypseAction.dataset.id; const action = apocalypseAction.dataset.apocalypseAction; if (action === 'toggle-category') lobbySettingsDraft.allowedApocalypseCategoryIds = lobbySettingsDraft.allowedApocalypseCategoryIds.includes(id) ? lobbySettingsDraft.allowedApocalypseCategoryIds.filter(value => value !== id) : [...lobbySettingsDraft.allowedApocalypseCategoryIds, id]; if (action === 'select-specific') lobbySettingsDraft.selectedApocalypseId = id; if (action === 'toggle-pool') lobbySettingsDraft.apocalypseCustomPoolIds = lobbySettingsDraft.apocalypseCustomPoolIds.includes(id) ? lobbySettingsDraft.apocalypseCustomPoolIds.filter(value => value !== id) : [...lobbySettingsDraft.apocalypseCustomPoolIds, id]; if (action === 'all-categories') lobbySettingsDraft.allowedApocalypseCategoryIds = (lobbyGet(lobbyApocalypseCatalog, 'categories', 'Categories') || []).map(item => lobbyGet(item, 'id', 'Id')); if (action === 'clear-categories') lobbySettingsDraft.allowedApocalypseCategoryIds = []; if (action === 'clear-pool') lobbySettingsDraft.apocalypseCustomPoolIds = []; if (action === 'load-more') { lobbyApocalypseVisibleCount += 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } markLobbyApocalypseDraftChanged(); return; } const actions = { lobbySettingsApply: applyLobbySettings, lobbySettingsReset: () => { lobbySettingsDraft = normalizeLobbySettings(lobbyGet(lobbyState, 'settings', 'Settings')); lobbySettingsDirty = false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic: () => loadLobbyServerPreset('Classic'), lobbyPresetSave: saveLobbyLocalPreset, lobbyPresetLoad: loadLobbyLocalPreset, lobbyPresetDelete: deleteLobbyLocalPreset, lobbyPresetExport: exportLobbyPreset, lobbyPresetImport: () => document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply: updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
 }
 function isLobbyRunning() {

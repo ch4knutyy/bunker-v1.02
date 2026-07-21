@@ -7,12 +7,15 @@ public sealed class RoomGameSettingsService
 {
     private readonly GmAuditService audit;
     private readonly ApocalypseSelectionService? apocalypseSelection;
+    private readonly ApocalypseActivationPolicyResolver? apocalypseActivation;
     private static readonly HashSet<int> TimerDurations = [120, 180, 300, 420, 600, 900];
 
-    public RoomGameSettingsService(GmAuditService audit, ApocalypseSelectionService? apocalypseSelection = null)
+    public RoomGameSettingsService(GmAuditService audit, ApocalypseSelectionService? apocalypseSelection = null,
+        ApocalypseActivationPolicyResolver? apocalypseActivation = null)
     {
         this.audit = audit;
         this.apocalypseSelection = apocalypseSelection;
+        this.apocalypseActivation = apocalypseActivation;
     }
 
     public RoomGameSettings GetCanonical(Room room)
@@ -39,6 +42,10 @@ public sealed class RoomGameSettingsService
             settings.ApocalypseEnabled, settings.ApocalypseSelectionMode.ToString(),
             settings.AllowedApocalypseCategoryIds?.Count ?? 0, settings.ApocalypseCustomPoolIds?.Count ?? 0,
             settings.AllowInteractiveApocalypses, settings.InteractiveApocalypseChancePercent, settings.ApocalypseThemeEnabled,
+            settings.ApocalypseActivation.EffectsEnabled, settings.ApocalypseActivation.PolicyMode.ToString(),
+            settings.ApocalypseActivation.ScheduleMode.ToString(), settings.ApocalypseActivation.Trigger.ToString(),
+            settings.ApocalypseActivation.FirstRound, settings.ApocalypseActivation.IntervalRounds,
+            settings.ApocalypseActivation.MaxActivations,
             settings.BunkerScenarioEnabled, settings.ThreatsEnabled,
             settings.InteractiveThreatRate.ToString(), InteractivePercent(settings.InteractiveThreatRate),
             settings.FirstThreatRound, settings.ThreatFrequency.ToString(), settings.MaxThreatsPerGame,
@@ -182,6 +189,29 @@ public sealed class RoomGameSettingsService
         if (settings.ApocalypseSelectionMode == ApocalypseSelectionMode.Specific && apocalypseSelection != null &&
             apocalypseSelection.BuildPreview(settings).Specific?.Interactive == true)
             warnings.Add(new("apocalypse_specific_is_interactive", "The selected apocalypse is interactive."));
+        var activation = settings.ApocalypseActivation;
+        var interactiveCandidates = apocalypseSelection?.GetPossibleInteractiveCandidates(settings) ?? [];
+        var possibleInteractive = interactiveCandidates.Count;
+        var activationInactive = !settings.ApocalypseEnabled || !settings.AllowInteractiveApocalypses ||
+            (settings.ApocalypseSelectionMode != ApocalypseSelectionMode.Specific && settings.InteractiveApocalypseChancePercent == 0) || possibleInteractive == 0;
+        if (!activation.EffectsEnabled) warnings.Add(new("apocalypse_effects_disabled", "Interactive apocalypse effects are disabled."));
+        if (activationInactive) warnings.Add(new("apocalypse_activation_inactive", "Interactive activation is inactive for the current selection."));
+        if (possibleInteractive == 0) warnings.Add(new("apocalypse_activation_no_interactive_candidates", "No interactive candidates are available."));
+        if (activation.PolicyMode == ApocalypseActivationPolicyMode.Custom && activation.Trigger == ApocalypseActivationTriggerMode.AfterVoting && !settings.VotingEnabled)
+            warnings.Add(new("apocalypse_activation_requires_voting", "After-voting activation requires voting."));
+        if (activation.PolicyMode == ApocalypseActivationPolicyMode.Custom && activation.ScheduleMode == ApocalypseActivationScheduleMode.Recurring && activation.MaxActivations == null)
+            warnings.Add(new("apocalypse_activation_unlimited", "Recurring activation has no activation limit."));
+        if (activation.PolicyMode == ApocalypseActivationPolicyMode.Custom && activation.Trigger == ApocalypseActivationTriggerMode.GameStart)
+            warnings.Add(new("apocalypse_activation_game_start_once", "Game-start activation runs once."));
+        if (activation.PolicyMode == ApocalypseActivationPolicyMode.Custom && apocalypseActivation != null && !activationInactive &&
+            apocalypseActivation.CountCompatible(settings) < possibleInteractive)
+            warnings.Add(new("apocalypse_activation_candidate_incompatible", "One or more interactive candidates do not support the custom activation policy."));
+        if (activation.PolicyMode == ApocalypseActivationPolicyMode.DefinitionDefault && interactiveCandidates
+            .Select(candidate => candidate.Gameplay?.Activation)
+            .Where(definition => definition != null)
+            .Select(definition => $"{definition!.Mode}|{definition.Trigger}|{definition.FirstRound}|{definition.IntervalRounds}|{definition.MaxActivations}")
+            .Distinct(StringComparer.OrdinalIgnoreCase).Skip(1).Any())
+            warnings.Add(new("apocalypse_activation_default_mixed", "Possible interactive candidates have different default activation schedules."));
         return warnings;
     }
 
@@ -260,6 +290,7 @@ public sealed class RoomGameSettingsService
         if (source == null || source.Version <= 0) return Preset(GamePreset.Classic);
         var wasLegacy = source.Version < 2;
         var wasVersion2 = source.Version < 3;
+        var wasVersion3 = source.Version < 4;
         var result = Clone(source);
         if (!ScenarioRules.BunkerIntelEnabled)
             result.BunkerIntelMode = BunkerIntelMode.AllVisible;
@@ -278,8 +309,11 @@ public sealed class RoomGameSettingsService
             result.InteractiveApocalypseChancePercent = 10;
             result.ApocalypseThemeEnabled = true;
         }
+        if (wasVersion3)
+            result.ApocalypseActivation = new();
         result.AllowedApocalypseCategoryIds ??= RoomGameSettings.ProductionApocalypseCategoryIds.ToList();
         result.ApocalypseCustomPoolIds ??= [];
+        result.ApocalypseActivation ??= new();
         result.Version = RoomGameSettings.CurrentVersion;
         return result;
     }
@@ -319,6 +353,8 @@ public sealed class RoomGameSettingsService
         if (!Enum.IsDefined(settings.ApocalypseSelectionMode) || settings.InteractiveApocalypseChancePercent is < 0 or > 100)
             errors.Add("invalid_apocalypse_settings");
         if (apocalypseSelection != null) errors.AddRange(apocalypseSelection.ValidateSettings(settings));
+        if (apocalypseActivation != null && !errors.Any(code => code.StartsWith("apocalypse_", StringComparison.OrdinalIgnoreCase) && !code.StartsWith("apocalypse_activation_", StringComparison.OrdinalIgnoreCase)))
+            errors.AddRange(apocalypseActivation.ValidateSettings(settings));
         return errors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 

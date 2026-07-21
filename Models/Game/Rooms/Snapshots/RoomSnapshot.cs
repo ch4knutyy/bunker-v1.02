@@ -56,6 +56,7 @@ public sealed class RoomSnapshotState
     public Dictionary<string, string> VotingReadyResponses { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public VotingSession? CurrentVoting { get; set; }
     public Apocalypse? Apocalypse { get; set; }
+    public ResolvedApocalypseActivationPolicy? ApocalypseActivationPolicy { get; set; }
     public BunkerInfo? Bunker { get; set; }
     public ScenarioSituationState? ScenarioSituations { get; set; }
     public BunkerIntelState? BunkerIntel { get; set; }

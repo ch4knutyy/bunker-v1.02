@@ -39,6 +39,7 @@ namespace Bunker.Hubs
         private readonly LobbyStartService _lobbyStart;
         private readonly RoomGameSettingsService _roomGameSettings;
         private readonly ApocalypseSelectionService _apocalypseSelection;
+        private readonly ApocalypseActivationPolicyResolver _apocalypseActivation;
         private readonly BunkerResourceService _bunkerResources;
         private readonly GmPanelStateBuilder _gmPanelStateBuilder;
         private readonly ScenarioSchedulerService _scenarioScheduler;
@@ -75,7 +76,8 @@ namespace Bunker.Hubs
             BunkerIntelService? bunkerIntel = null,
             EventSpecialCardService? eventSpecialCards = null,
             IScenarioContentRegistry? scenarioContent = null,
-            ApocalypseSelectionService? apocalypseSelection = null)
+            ApocalypseSelectionService? apocalypseSelection = null,
+            ApocalypseActivationPolicyResolver? apocalypseActivation = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -103,7 +105,8 @@ namespace Bunker.Hubs
             _omniscientRequestRateLimits = omniscientRequestRateLimits ?? new OmniscientRequestRateLimitService(TimeProvider.System);
             _directorControls = directorControls ?? new DirectorControlService(TimeProvider.System);
             _apocalypseSelection = apocalypseSelection ?? new ApocalypseSelectionService(gameData);
-            _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit, _apocalypseSelection);
+            _apocalypseActivation = apocalypseActivation ?? new ApocalypseActivationPolicyResolver(gameData, _apocalypseSelection);
+            _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit, _apocalypseSelection, _apocalypseActivation);
             _bunkerResources = bunkerResources ?? new BunkerResourceService();
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;

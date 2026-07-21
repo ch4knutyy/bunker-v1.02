@@ -23,7 +23,7 @@ test('lobby setup has one compact host editor with read-only public summary', ()
 });
 
 test('settings use one versioned canonical model, atomic apply, revision and freeze', () => {
-  assert.match(settings, /CurrentVersion\s*=\s*3/);
+  assert.match(settings, /CurrentVersion\s*=\s*4/);
   assert.match(settings, /LobbySettingsUpdateRequest/);
   assert.match(service, /ExpectedRevision/);
   assert.match(service, /settings_revision_conflict/);
@@ -51,7 +51,7 @@ test('live revision or host transfer discards stale drafts and non-host remains 
 
 test('local presets and JSON interchange are versioned and whitelist only normalized settings', () => {
   assert.match(client, /schema:'bunker-room-game-settings', version:1/);
-  assert.match(client, /\[1, 2, 3\]\.includes\(Number\(data\?\.settings\?\.version\)\)/);
+  assert.match(client, /\[1, 2, 3, 4\]\.includes\(Number\(data\?\.settings\?\.version\)\)/);
   assert.match(client, /settings:normalizeLobbySettings\(lobbySettingsDraft\)/);
   const normalizeBody = client.slice(client.indexOf('function normalizeLobbySettings'), client.indexOf('function lobbyAmCurrentHost'));
   for (const forbidden of ['password', 'roomId', 'playerId', 'connectionId', 'displayName', 'profession']) {

@@ -104,8 +104,13 @@ public sealed class ApocalypseSelectionService(GameDataService gameData)
             new(settings.ApocalypseSelectionMode.ToString(), settings.SelectedApocalypseId,
                 (settings.AllowedApocalypseCategoryIds ?? []).ToList().AsReadOnly(),
                 (settings.ApocalypseCustomPoolIds ?? []).ToList().AsReadOnly(), settings.AllowInteractiveApocalypses,
-                settings.InteractiveApocalypseChancePercent, settings.ApocalypseThemeEnabled), BuildPreview(settings, language));
+                settings.InteractiveApocalypseChancePercent, settings.ApocalypseThemeEnabled,
+                RoomGameSettingsService.Clone(settings).ApocalypseActivation), BuildPreview(settings, language),
+            ToContract(gameData.ApocalypseInteractiveSchema?.ActivationContract));
     }
+
+    public IReadOnlyList<Apocalypse> GetPossibleInteractiveCandidates(RoomGameSettings settings) =>
+        BuildCandidates(settings).Where(item => item.Gameplay?.Interactive == true).ToList().AsReadOnly();
 
     private List<Apocalypse> BuildCandidates(RoomGameSettings settings) => settings.ApocalypseSelectionMode switch
     {
@@ -125,7 +130,18 @@ public sealed class ApocalypseSelectionService(GameDataService gameData)
     private static LobbyApocalypseOptionDto ToOption(Apocalypse item, string language) => new(item.Id,
         Localized(item.I18n, "name", language, item.Name), Trim(Localized(item.I18n, "description", language, item.Description), 180),
         item.CategoryId, item.VisualThemeId, item.Severity, item.SurvivalChance,
-        Localized(item.I18n, "duration", language, item.Duration), item.Gameplay?.Interactive == true, SafeLocalUrl(item.ImageUrl));
+        Localized(item.I18n, "duration", language, item.Duration), item.Gameplay?.Interactive == true, SafeLocalUrl(item.ImageUrl),
+        ToActivation(item.Gameplay?.Activation));
+
+    private static LobbyApocalypseActivationDefinitionDto? ToActivation(ApocalypseActivationDefinition? activation) => activation == null ? null :
+        new(activation.Configurable, activation.Mode, activation.Trigger, activation.FirstRound,
+            activation.IntervalRounds, activation.MaxActivations, activation.AllowedTriggers.ToList().AsReadOnly(),
+            activation.AllowedFirstRounds.ToList().AsReadOnly(), activation.AllowedIntervalRounds.ToList().AsReadOnly(), activation.AllowOneTime);
+
+    private static LobbyApocalypseActivationContractDto ToContract(ApocalypseActivationContractDefinition? contract) =>
+        new((contract?.SupportedModes ?? []).ToList().AsReadOnly(), (contract?.SupportedTriggers ?? []).ToList().AsReadOnly(),
+            (contract?.AllowedFirstRounds ?? []).ToList().AsReadOnly(), (contract?.AllowedIntervalRounds ?? []).ToList().AsReadOnly(),
+            20, contract?.ConfigurablePerLobby == true);
 
     private static string Localized(Dictionary<string, JsonElement>? i18n, string field, string language, string fallback)
     {
