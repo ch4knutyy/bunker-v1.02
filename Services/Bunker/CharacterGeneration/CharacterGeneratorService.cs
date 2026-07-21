@@ -526,17 +526,18 @@ namespace Bunker.Services
 
 		private Profession GenerateProfession()
 		{
-			// Якщо список професій порожній або випав шанс 1 із 95.
-			if (_gameData.Professions.Count == 0 || _random.Next(95) == 0)
+			// Якщо професії не завантажилися — повертаємо безробітного.
+			if (_gameData.Professions.Count == 0)
 			{
-				return new Profession
-				{
-					Name = "Безробітний",
-					ProfessionalLevel = "Відсутня",
-					SelectedItem = "",
-					SelectedItemIndex = null,
-					Tooltip = "Не має професії та професійного предмета."
-				};
+				return CreateUnemployedProfession();
+			}
+
+			// Приблизно 4,9% безробітних.
+			bool isUnemployed = _random.Next(1000) < 49;
+
+			if (isUnemployed)
+			{
+				return CreateUnemployedProfession();
 			}
 
 			var data = _gameData.Professions[
@@ -545,7 +546,7 @@ namespace Bunker.Services
 
 			var parsedProfession = ParseProfessionNameAndItem(data.Profession);
 
-			// Вибираємо один випадковий предмет із масиву items.
+			// Вибираємо один випадковий професійний предмет.
 			string selectedItem = parsedProfession.Item;
 			int? selectedItemIndex = null;
 
@@ -555,27 +556,46 @@ namespace Bunker.Services
 				selectedItem = data.Items[selectedItemIndex.Value];
 			}
 
-			// Предмет показується окремо в характеристиці.
 			var tooltip = BuildProfessionTooltip(data.Bonus);
 
 			return new Profession
 			{
 				Name = parsedProfession.Name,
 				Type = data.Type,
-
 				ProfessionalLevel = GenerateProfessionalLevel(),
 
 				Skills = data.Skills.ToList(),
 				AllItems = data.Items.ToList(),
+
 				SelectedItem = selectedItem,
 				SelectedItemIndex = selectedItemIndex,
+
 				Bonus = data.Bonus,
 				CapabilityTags = data.CapabilityTags.ToList(),
+
 				Tooltip = tooltip,
 				I18n = data.I18n
 			};
 		}
+		private static Profession CreateUnemployedProfession()
+		{
+			return new Profession
+			{
+				Name = "Безробітний",
+				Type = "unemployed",
+				ProfessionalLevel = "Відсутня",
 
+				Skills = new List<string>(),
+				AllItems = new List<string>(),
+				CapabilityTags = new List<string>(),
+
+				SelectedItem = string.Empty,
+				SelectedItemIndex = null,
+
+				Bonus = string.Empty,
+				Tooltip = "Не має професії та професійного предмета."
+			};
+		}
 		private static string BuildProfessionTooltip(string bonus)
         {
             if (string.IsNullOrEmpty(bonus))
@@ -640,15 +660,13 @@ namespace Bunker.Services
 
 			return roll switch
 			{
-				< 15 => "Стажер",
-				< 33 => "Початківець",
-				< 43 => "Самоук",
-				< 67 => "Спеціаліст",
-				< 84 => "Професіонал",
-				< 93 => "Експерт",
-				< 97 => "Майстер",
-				< 99 => "Ветеран професії",
-				_ => "Легенда професії"
+				< 8 => "Стажер",          // 8%
+				< 26 => "Початківець",     // 18%
+				< 62 => "Спеціаліст",      // 36%
+				< 86 => "Професіонал",     // 24%
+				< 96 => "Експерт",         // 10%
+				< 99 => "Майстер",         // 3%
+				_ => "Легенда професії" // 1%
 			};
 		}
 		#endregion
