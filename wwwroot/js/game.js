@@ -78,6 +78,12 @@ let lobbySettingsDirty = false;
 let lobbySettingsPending = false;
 let lobbySettingsOwnerId = '';
 let lobbySettingsActiveTab = 'basic';
+let lobbyApocalypseCatalog = null;
+let lobbyApocalypseCatalogPending = false;
+let lobbyApocalypseSearch = '';
+let lobbyApocalypseCategoryFilter = '';
+let lobbyApocalypseInteractiveFilter = 'all';
+let lobbyApocalypseVisibleCount = 30;
 const lobbyLocalPresetStorageKey = 'bunker.lobbyGamePresets.v1';
 const pendingCharacteristicReveals = new Set();
 const pendingSpecialCardUses = new Set();
@@ -103,6 +109,7 @@ let pendingJoinRoomId = null; // Для закриття модалки післ
 let hostToken = null;
 let reconnectToken = null;
 let currentApocalypse = null;
+let currentPublicGameSettings = { apocalypseThemeEnabled: true };
 let currentBunker = null;
 let currentThreat = null;
 let currentThreatState = null;
@@ -967,6 +974,7 @@ function clearGameFinishedStateForLobby() {
 	gameTimerClockAnchor = null;
 	myVote = null;
 	currentApocalypse = null;
+	currentPublicGameSettings = { apocalypseThemeEnabled: true };
 	if (typeof renderApocalypse === "function") renderApocalypse(null);
 	currentBunker = null;
 	['myPlayerCards', 'mySpecialCardsList', 'votingCandidates', 'votingResultsContent', 'threatContent'].forEach(id => {
@@ -3628,6 +3636,7 @@ function registerSignalREvents() {
 		}
 		applyRoundState(data.roundState || data.RoundState);
 
+		syncPublicGameSettings(data);
 		// Keep the complete canonical snapshot. The renderer localizes and normalizes it on every render.
 		const apocalypse = data.apocalypse || data.Apocalypse;
 		currentApocalypse = apocalypse || null;
@@ -4256,6 +4265,7 @@ function registerSignalREvents() {
 		console.log("[RejoinSuccess] data.players:", data.players);
 
 		currentRoom = data.room || data.Room;
+		syncPublicGameSettings(data);
 		myPlayerData = normalizePlayer(data.player || data.Player);
 		isHost = data.isHost ?? data.IsHost ?? false;
 		hostToken = data.hostToken || data.HostToken || null;
@@ -4541,6 +4551,7 @@ function registerSignalREvents() {
 	connection.off("ApocalypseChanged");
 	connection.on("ApocalypseChanged", function (data) {
 		console.log("Apocalypse changed:", data);
+		syncPublicGameSettings(data);
 		const apocalypse = data.apocalypse || data.Apocalypse || data;
 		currentApocalypse = apocalypse;
 		renderApocalypse(currentApocalypse);
@@ -5868,6 +5879,16 @@ const apocalypseIconSvgRegistry = Object.freeze({
 	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 55H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
 });
 
+Object.assign(uiTranslations.uk, {
+	lobbyTabApocalypse: 'Апокаліпсис', lobbyApocalypseMode: 'Режим вибору', lobbyApocalypseRandomAll: 'Випадковий з усіх', lobbyApocalypseRandomCategories: 'Випадковий із категорій', lobbyApocalypseSpecific: 'Конкретний', lobbyApocalypseCustomPool: 'Власний набір', lobbyApocalypseAllowInteractive: 'Дозволити інтерактивні апокаліпсиси', lobbyApocalypseChance: 'Шанс інтерактивного апокаліпсиса', lobbyApocalypseTheme: 'Тематичне оформлення апокаліпсиса', lobbyApocalypseSearch: 'Пошук апокаліпсиса', lobbyApocalypseSelectAll: 'Обрати всі', lobbyApocalypseClear: 'Очистити', lobbyApocalypseSelected: 'Обрано', lobbyApocalypseInteractive: 'Інтерактивний', lobbyApocalypseOrdinary: 'Звичайний', lobbyApocalypseLoadMore: 'Показати ще', lobbyWarningApocalypseCategoriesEmpty: 'Оберіть хоча б одну категорію апокаліпсисів.', lobbyWarningApocalypsePoolEmpty: 'Власний набір апокаліпсисів порожній.', lobbyWarningApocalypseSpecificMissing: 'Оберіть конкретний апокаліпсис.', lobbyWarningApocalypseCandidateEmpty: 'За цими налаштуваннями немає доступних апокаліпсисів.', lobbyWarningApocalypseInteractiveUnavailable: 'У виборі немає інтерактивних апокаліпсисів.', lobbyWarningApocalypseOnlyInteractive: 'У виборі залишилися лише інтерактивні апокаліпсиси.', lobbyWarningApocalypseThemeDisabled: 'Тематичне оформлення апокаліпсиса вимкнено.', lobbyWarningApocalypsePoolSmall: 'Власний набір апокаліпсисів дуже малий.', lobbyWarningApocalypseSpecificInteractive: 'Обраний апокаліпсис є інтерактивним.'
+});
+Object.assign(uiTranslations.en, {
+	lobbyTabApocalypse: 'Apocalypse', lobbyApocalypseMode: 'Selection mode', lobbyApocalypseRandomAll: 'Random from all', lobbyApocalypseRandomCategories: 'Random from categories', lobbyApocalypseSpecific: 'Specific apocalypse', lobbyApocalypseCustomPool: 'Custom pool', lobbyApocalypseAllowInteractive: 'Allow interactive apocalypses', lobbyApocalypseChance: 'Interactive apocalypse chance', lobbyApocalypseTheme: 'Apocalypse thematic appearance', lobbyApocalypseSearch: 'Search apocalypses', lobbyApocalypseSelectAll: 'Select all', lobbyApocalypseClear: 'Clear', lobbyApocalypseSelected: 'Selected', lobbyApocalypseInteractive: 'Interactive', lobbyApocalypseOrdinary: 'Ordinary', lobbyApocalypseLoadMore: 'Show more', lobbyWarningApocalypseCategoriesEmpty: 'Select at least one apocalypse category.', lobbyWarningApocalypsePoolEmpty: 'The custom apocalypse pool is empty.', lobbyWarningApocalypseSpecificMissing: 'Select a specific apocalypse.', lobbyWarningApocalypseCandidateEmpty: 'No apocalypses match these settings.', lobbyWarningApocalypseInteractiveUnavailable: 'No interactive apocalypse is available in this selection.', lobbyWarningApocalypseOnlyInteractive: 'This selection contains only interactive apocalypses.', lobbyWarningApocalypseThemeDisabled: 'Apocalypse thematic appearance is disabled.', lobbyWarningApocalypsePoolSmall: 'The custom apocalypse pool is very small.', lobbyWarningApocalypseSpecificInteractive: 'The selected apocalypse is interactive.'
+});
+Object.assign(uiTranslations.ru, {
+	lobbyTabApocalypse: 'Апокалипсис', lobbyApocalypseMode: 'Режим выбора', lobbyApocalypseRandomAll: 'Случайный из всех', lobbyApocalypseRandomCategories: 'Случайный из категорий', lobbyApocalypseSpecific: 'Конкретный', lobbyApocalypseCustomPool: 'Собственный набор', lobbyApocalypseAllowInteractive: 'Разрешить интерактивные апокалипсисы', lobbyApocalypseChance: 'Шанс интерактивного апокалипсиса', lobbyApocalypseTheme: 'Тематическое оформление апокалипсиса', lobbyApocalypseSearch: 'Поиск апокалипсиса', lobbyApocalypseSelectAll: 'Выбрать все', lobbyApocalypseClear: 'Очистить', lobbyApocalypseSelected: 'Выбрано', lobbyApocalypseInteractive: 'Интерактивный', lobbyApocalypseOrdinary: 'Обычный', lobbyApocalypseLoadMore: 'Показать ещё', lobbyWarningApocalypseCategoriesEmpty: 'Выберите хотя бы одну категорию апокалипсисов.', lobbyWarningApocalypsePoolEmpty: 'Собственный набор апокалипсисов пуст.', lobbyWarningApocalypseSpecificMissing: 'Выберите конкретный апокалипсис.', lobbyWarningApocalypseCandidateEmpty: 'Для этих настроек нет доступных апокалипсисов.', lobbyWarningApocalypseInteractiveUnavailable: 'В выборе нет интерактивных апокалипсисов.', lobbyWarningApocalypseOnlyInteractive: 'В выборе остались только интерактивные апокалипсисы.', lobbyWarningApocalypseThemeDisabled: 'Тематическое оформление апокалипсиса выключено.', lobbyWarningApocalypsePoolSmall: 'Собственный набор апокалипсисов очень мал.', lobbyWarningApocalypseSpecificInteractive: 'Выбранный апокалипсис является интерактивным.'
+});
+
 const apocalypseVisualThemeRegistry = Object.freeze({
 	'extinction-red': Object.freeze({ categoryId: 'armageddon', cardVariant: 'nuclear' }),
 	'storm-blue': Object.freeze({ categoryId: 'weather', cardVariant: 'climate' }),
@@ -5954,7 +5975,18 @@ function applyApocalypseVisualTheme(apocalypse) {
 }
 
 function syncApocalypseVisualTheme(apocalypse) {
-	return apocalypse ? applyApocalypseVisualTheme(apocalypse) : (clearApocalypseVisualTheme(), 'default-dark');
+	return apocalypse && currentPublicGameSettings.apocalypseThemeEnabled !== false
+		? applyApocalypseVisualTheme(apocalypse)
+		: (clearApocalypseVisualTheme(), 'default-dark');
+}
+
+function syncPublicGameSettings(payload) {
+	const source = payload?.gameSettings ?? payload?.GameSettings;
+	if (!source) return currentPublicGameSettings;
+	currentPublicGameSettings = {
+		apocalypseThemeEnabled: Boolean(source.apocalypseThemeEnabled ?? source.ApocalypseThemeEnabled ?? true)
+	};
+	return currentPublicGameSettings;
 }
 
 function normalizeApocalypseMetadataValue(value) {
@@ -8247,20 +8279,26 @@ function renderRoomPlayers() {
 }
 
 const lobbyGet = (object, camel, pascal) => object?.[camel] ?? object?.[pascal];
-const lobbySettingNumberKeys = new Set(['maxGameplayPlayers', 'minGameplayPlayers', 'manualBunkerCapacity', 'randomBunkerCapacityMin', 'randomBunkerCapacityMax', 'firstThreatRound', 'maxThreatsPerGame', 'roundTimerDurationSeconds', 'votingStartRound', 'specialCardsPerPlayer', 'bonusInventoryRound', 'bonusInventoryCount', 'startingInventoryCount', 'scenarioFirstAfterRound', 'scenarioIntervalRounds', 'bunkerIntelIntervalRounds']);
+const lobbySettingNumberKeys = new Set(['maxGameplayPlayers', 'minGameplayPlayers', 'manualBunkerCapacity', 'randomBunkerCapacityMin', 'randomBunkerCapacityMax', 'firstThreatRound', 'maxThreatsPerGame', 'roundTimerDurationSeconds', 'votingStartRound', 'specialCardsPerPlayer', 'bonusInventoryRound', 'bonusInventoryCount', 'startingInventoryCount', 'scenarioFirstAfterRound', 'scenarioIntervalRounds', 'bunkerIntelIntervalRounds', 'interactiveApocalypseChancePercent']);
 const lobbySettingNullableNumberKeys = new Set(['manualBunkerCapacity', 'randomBunkerCapacityMin', 'randomBunkerCapacityMax', 'maxThreatsPerGame']);
-const lobbySettingBooleanKeys = new Set(['spectatorsAllowed', 'allowSpectatorsAfterStart', 'allowLateGameplayJoin', 'lockRoomOnStart', 'joinsLocked', 'hostCanStartWithoutAllReady', 'resetReadinessAfterSettingsChange', 'apocalypseEnabled', 'bunkerScenarioEnabled', 'threatsEnabled', 'avoidRepeatedThreats', 'roundTimerEnabled', 'autoStartRoundTimer', 'pauseTimerOnHostDisconnect', 'votingEnabled', 'specialCardsEnabled', 'bonusInventoryEnabled', 'scenarioEnabled', 'scenarioThreatEnabled', 'scenarioEventEnabled', 'scenarioSecretEventEnabled']);
+const lobbySettingBooleanKeys = new Set(['spectatorsAllowed', 'allowSpectatorsAfterStart', 'allowLateGameplayJoin', 'lockRoomOnStart', 'joinsLocked', 'hostCanStartWithoutAllReady', 'resetReadinessAfterSettingsChange', 'apocalypseEnabled', 'allowInteractiveApocalypses', 'apocalypseThemeEnabled', 'bunkerScenarioEnabled', 'threatsEnabled', 'avoidRepeatedThreats', 'roundTimerEnabled', 'autoStartRoundTimer', 'pauseTimerOnHostDisconnect', 'votingEnabled', 'specialCardsEnabled', 'bonusInventoryEnabled', 'scenarioEnabled', 'scenarioThreatEnabled', 'scenarioEventEnabled', 'scenarioSecretEventEnabled']);
 
 function normalizeLobbySettings(source) {
 	const get = key => source?.[key] ?? source?.[key.charAt(0).toUpperCase() + key.slice(1)];
 	return {
-		version: Number(get('version') ?? 2), preset: String(get('preset') ?? 'Classic'),
+		version: 3, preset: String(get('preset') ?? 'Classic'),
 		maxGameplayPlayers: Number(get('maxGameplayPlayers') ?? 12), minGameplayPlayers: Number(get('minGameplayPlayers') ?? 2),
 		spectatorsAllowed: Boolean(get('spectatorsAllowed') ?? true), allowSpectatorsAfterStart: Boolean(get('allowSpectatorsAfterStart') ?? false),
 		allowLateGameplayJoin: Boolean(get('allowLateGameplayJoin') ?? false), lockRoomOnStart: Boolean(get('lockRoomOnStart') ?? true), joinsLocked: Boolean(get('joinsLocked') ?? false),
 		readyRequirement: String(get('readyRequirement') ?? 'AllPlayers'), hostCanStartWithoutAllReady: Boolean(get('hostCanStartWithoutAllReady') ?? false), resetReadinessAfterSettingsChange: Boolean(get('resetReadinessAfterSettingsChange') ?? true),
 		bunkerCapacityMode: String(get('bunkerCapacityMode') ?? 'Automatic'), manualBunkerCapacity: get('manualBunkerCapacity') == null ? null : Number(get('manualBunkerCapacity')), randomBunkerCapacityMin: get('randomBunkerCapacityMin') == null ? null : Number(get('randomBunkerCapacityMin')), randomBunkerCapacityMax: get('randomBunkerCapacityMax') == null ? null : Number(get('randomBunkerCapacityMax')),
-		apocalypseEnabled: Boolean(get('apocalypseEnabled') ?? true), bunkerScenarioEnabled: Boolean(get('bunkerScenarioEnabled') ?? true),
+		apocalypseEnabled: Boolean(get('apocalypseEnabled') ?? true), apocalypseSelectionMode: String(get('apocalypseSelectionMode') ?? 'RandomAll'),
+		selectedApocalypseId: get('selectedApocalypseId') == null ? null : String(get('selectedApocalypseId')),
+		allowedApocalypseCategoryIds: Array.isArray(get('allowedApocalypseCategoryIds')) ? [...new Set(get('allowedApocalypseCategoryIds').map(String))] : ['armageddon','weather','biological','geological','cosmic','technology','ecological','social','anomaly','supernatural'],
+		apocalypseCustomPoolIds: Array.isArray(get('apocalypseCustomPoolIds')) ? [...new Set(get('apocalypseCustomPoolIds').map(String))] : [],
+		allowedApocalypseCategoryCount: Number(get('allowedApocalypseCategoryCount') ?? 10), apocalypseCustomPoolCount: Number(get('apocalypseCustomPoolCount') ?? 0),
+		allowInteractiveApocalypses: Boolean(get('allowInteractiveApocalypses') ?? true), interactiveApocalypseChancePercent: Number(get('interactiveApocalypseChancePercent') ?? 10), apocalypseThemeEnabled: Boolean(get('apocalypseThemeEnabled') ?? true),
+		bunkerScenarioEnabled: Boolean(get('bunkerScenarioEnabled') ?? true),
 		threatsEnabled: Boolean(get('threatsEnabled') ?? true), interactiveThreatRate: String(get('interactiveThreatRate') ?? 'Rare'), firstThreatRound: Number(get('firstThreatRound') ?? 3), threatFrequency: String(get('threatFrequency') ?? 'OncePerGame'), maxThreatsPerGame: get('maxThreatsPerGame') == null ? null : Number(get('maxThreatsPerGame')), avoidRepeatedThreats: Boolean(get('avoidRepeatedThreats') ?? true),
 		roundTimerEnabled: Boolean(get('roundTimerEnabled') ?? false), roundTimerDurationSeconds: Number(get('roundTimerDurationSeconds') ?? 300), autoStartRoundTimer: Boolean(get('autoStartRoundTimer') ?? false), pauseTimerOnHostDisconnect: Boolean(get('pauseTimerOnHostDisconnect') ?? false),
 		votingEnabled: Boolean(get('votingEnabled') ?? true), votingStartRound: Number(get('votingStartRound') ?? 3), votingFrequency: String(get('votingFrequency') ?? 'EveryRound'),
@@ -8292,9 +8330,10 @@ function syncLobbySettingsState(state) {
 	const hostNow = lobbyAmCurrentHost(state); const ownerId = getMyStablePlayerId();
 	const revision = Number(lobbyGet(state, 'settingsRevision', 'SettingsRevision') || 1);
 	const canonical = lobbyGet(state, 'settings', 'Settings');
-	if (!hostNow) { lobbySettingsDraft = null; lobbySettingsDirty = false; lobbySettingsOwnerId = ''; lobbySettingsBaseRevision = revision; return; }
+	if (!hostNow) { lobbySettingsDraft = null; lobbySettingsDirty = false; lobbySettingsOwnerId = ''; lobbySettingsBaseRevision = revision; lobbyApocalypseCatalog = null; return; }
 	if (!lobbySettingsDraft || lobbySettingsOwnerId !== ownerId || lobbySettingsBaseRevision !== revision) {
-		lobbySettingsDraft = normalizeLobbySettings(canonical); lobbySettingsBaseRevision = revision; lobbySettingsDirty = false; lobbySettingsOwnerId = ownerId;
+		lobbySettingsDraft = normalizeLobbySettings(canonical); lobbySettingsBaseRevision = revision; lobbySettingsDirty = false; lobbySettingsOwnerId = ownerId; lobbyApocalypseCatalog = null;
+		if (lobbySettingsActiveTab === 'apocalypse') ensureLobbyApocalypseCatalog();
 	}
 }
 
@@ -8309,8 +8348,83 @@ function setLobbySettingsFeedback(key, error = false) {
 	const element = document.getElementById('lobbySettingsFeedback'); if (!element) return;
 	element.textContent = key ? t(key) : ''; element.className = `lobby-settings-feedback${key ? error ? ' error' : ' success' : ''}`;
 }
-function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive: 'lobbyWarningCapacity', spectators_present: 'lobbyWarningSpectators', player_count_exceeds_max: 'lobbyWarningPlayers' }[code] || 'lobbySettingsInvalid'); }
+function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive: 'lobbyWarningCapacity', spectators_present: 'lobbyWarningSpectators', player_count_exceeds_max: 'lobbyWarningPlayers', apocalypse_categories_empty: 'lobbyWarningApocalypseCategoriesEmpty', apocalypse_pool_empty: 'lobbyWarningApocalypsePoolEmpty', apocalypse_specific_missing: 'lobbyWarningApocalypseSpecificMissing', apocalypse_candidate_set_empty: 'lobbyWarningApocalypseCandidateEmpty', apocalypse_interactive_unavailable: 'lobbyWarningApocalypseInteractiveUnavailable', apocalypse_only_interactive_candidates: 'lobbyWarningApocalypseOnlyInteractive', apocalypse_theme_disabled: 'lobbyWarningApocalypseThemeDisabled', apocalypse_custom_pool_small: 'lobbyWarningApocalypsePoolSmall', apocalypse_specific_is_interactive: 'lobbyWarningApocalypseSpecificInteractive' }[code] || 'lobbySettingsInvalid'); }
 function lobbyAuditLabel(action) { return t({ lobby_settings_applied: 'lobbyAuditSettings', lobby_readiness_changed: 'lobbyAuditReady', lobby_readiness_reset: 'lobbyAuditReadyReset', lobby_role_changed: 'lobbyAuditRole', host_transfer: 'lobbyAuditHost', lobby_player_kicked: 'lobbyAuditKick', lobby_player_joined: 'lobbyAuditJoined', lobby_player_reconnected: 'lobbyAuditReconnected', lobby_player_left: 'lobbyAuditLeft', lobby_password_changed: 'lobbyAuditPassword', game_started_from_lobby: 'lobbyAuditStarted' }[action] || 'lobbyAuditGeneric'); }
+
+async function ensureLobbyApocalypseCatalog() {
+	if (lobbyApocalypseCatalog || lobbyApocalypseCatalogPending || !lobbyAmCurrentHost()) return;
+	lobbyApocalypseCatalogPending = true;
+	try {
+		lobbyApocalypseCatalog = await connection.invoke('GetLobbyApocalypseCatalog', getCurrentLanguage());
+		const config = lobbyGet(lobbyApocalypseCatalog, 'configuration', 'Configuration');
+		if (lobbySettingsDraft && config) {
+			lobbySettingsDraft.selectedApocalypseId = lobbyGet(config, 'selectedApocalypseId', 'SelectedApocalypseId');
+			lobbySettingsDraft.allowedApocalypseCategoryIds = [...(lobbyGet(config, 'allowedApocalypseCategoryIds', 'AllowedApocalypseCategoryIds') || [])];
+			lobbySettingsDraft.apocalypseCustomPoolIds = [...(lobbyGet(config, 'apocalypseCustomPoolIds', 'ApocalypseCustomPoolIds') || [])];
+		}
+	} catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); }
+	finally { lobbyApocalypseCatalogPending = false; renderLobbyGameSetup(); }
+}
+
+function markLobbyApocalypseDraftChanged() {
+	if (!lobbySettingsDraft) return;
+	lobbySettingsDraft.allowedApocalypseCategoryCount = lobbySettingsDraft.allowedApocalypseCategoryIds.length;
+	lobbySettingsDraft.apocalypseCustomPoolCount = lobbySettingsDraft.apocalypseCustomPoolIds.length;
+	lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback(''); renderLobbyGameSetup();
+}
+
+function renderLobbyApocalypseEditor(settings) {
+	const pane = document.getElementById('lobbySettingsApocalypse'); if (!pane) return;
+	const mode = settings.apocalypseSelectionMode;
+	for (const [id, visible] of [['lobbyApocalypseCategories', mode === 'RandomCategories'], ['lobbyApocalypsePicker', mode === 'Specific' || mode === 'CustomPool'], ['lobbyApocalypsePool', mode === 'CustomPool']]) {
+		const element = document.getElementById(id); if (element) element.hidden = !visible;
+	}
+	const chance = document.getElementById('lobbyInteractiveApocalypseChance'); if (chance) chance.disabled = lobbySettingsPending || mode === 'Specific' || !settings.allowInteractiveApocalypses;
+	const catalog = lobbyApocalypseCatalog; if (!catalog) { ensureLobbyApocalypseCatalog(); return; }
+	const categories = lobbyGet(catalog, 'categories', 'Categories') || [];
+	const apocalypses = lobbyGet(catalog, 'apocalypses', 'Apocalypses') || [];
+	const categoryContainer = document.getElementById('lobbyApocalypseCategoryChips');
+	if (categoryContainer) {
+		categoryContainer.replaceChildren(...categories.map(category => {
+			const id = lobbyGet(category, 'id', 'Id'); const button = document.createElement('button'); button.type = 'button';
+			button.className = 'lobby-apocalypse-category-chip'; button.dataset.apocalypseAction = 'toggle-category'; button.dataset.id = id;
+			button.classList.toggle('selected', settings.allowedApocalypseCategoryIds.includes(id));
+			button.style.setProperty('--category-swatch', `var(--apocalypse-swatch-${lobbyGet(category, 'visualThemeId', 'VisualThemeId')}, #777)`);
+			button.textContent = `${lobbyGet(category, 'name', 'Name')} · ${lobbyGet(category, 'ordinaryCount', 'OrdinaryCount')}/${lobbyGet(category, 'interactiveCount', 'InteractiveCount')}`; return button;
+		}));
+	}
+	const filter = document.getElementById('lobbyApocalypseCategoryFilter');
+	if (filter && filter.options.length !== categories.length + 1) {
+		filter.replaceChildren(new Option(t('lobbyApocalypseRandomAll'), ''), ...categories.map(category => new Option(lobbyGet(category, 'name', 'Name'), lobbyGet(category, 'id', 'Id'))));
+		filter.value = lobbyApocalypseCategoryFilter;
+	}
+	const normalizedSearch = lobbyApocalypseSearch.trim().toLocaleLowerCase();
+	const filtered = apocalypses.filter(item => (!normalizedSearch || `${lobbyGet(item, 'name', 'Name')} ${lobbyGet(item, 'id', 'Id')}`.toLocaleLowerCase().includes(normalizedSearch)) &&
+		(!lobbyApocalypseCategoryFilter || lobbyGet(item, 'categoryId', 'CategoryId') === lobbyApocalypseCategoryFilter) &&
+		(lobbyApocalypseInteractiveFilter === 'all' || String(Boolean(lobbyGet(item, 'interactive', 'Interactive'))) === lobbyApocalypseInteractiveFilter));
+	const results = document.getElementById('lobbyApocalypseResults');
+	if (results) results.replaceChildren(...filtered.slice(0, lobbyApocalypseVisibleCount).map(item => {
+		const id = lobbyGet(item, 'id', 'Id'); const interactive = Boolean(lobbyGet(item, 'interactive', 'Interactive'));
+		const button = document.createElement('button'); button.type = 'button'; button.className = 'lobby-apocalypse-option';
+		button.dataset.apocalypseAction = mode === 'Specific' ? 'select-specific' : 'toggle-pool'; button.dataset.id = id;
+		button.classList.toggle('selected', mode === 'Specific' ? settings.selectedApocalypseId === id : settings.apocalypseCustomPoolIds.includes(id));
+		const title = document.createElement('strong'); title.textContent = lobbyGet(item, 'name', 'Name');
+		const meta = document.createElement('span'); meta.textContent = `${lobbyGet(item, 'categoryId', 'CategoryId')} · ${interactive ? t('lobbyApocalypseInteractive') : t('lobbyApocalypseOrdinary')}`;
+		button.append(title, meta); return button;
+	}));
+	const more = document.getElementById('lobbyApocalypseLoadMore'); if (more) more.hidden = filtered.length <= lobbyApocalypseVisibleCount;
+	const selectedList = document.getElementById('lobbyApocalypseSelectedPool');
+	if (selectedList) selectedList.replaceChildren(...settings.apocalypseCustomPoolIds.map(id => {
+		const item = apocalypses.find(value => lobbyGet(value, 'id', 'Id') === id); const button = document.createElement('button'); button.type = 'button';
+		button.dataset.apocalypseAction = 'toggle-pool'; button.dataset.id = id; button.textContent = `${item ? lobbyGet(item, 'name', 'Name') : id} ×`; return button;
+	}));
+	const preview = document.getElementById('lobbyApocalypsePreview');
+	if (preview) {
+		const candidateIds = mode === 'Specific' ? [settings.selectedApocalypseId].filter(Boolean) : mode === 'CustomPool' ? settings.apocalypseCustomPoolIds : mode === 'RandomCategories' ? apocalypses.filter(item => settings.allowedApocalypseCategoryIds.includes(lobbyGet(item, 'categoryId', 'CategoryId'))).map(item => lobbyGet(item, 'id', 'Id')) : apocalypses.map(item => lobbyGet(item, 'id', 'Id'));
+		const candidates = apocalypses.filter(item => candidateIds.includes(lobbyGet(item, 'id', 'Id'))); const interactive = candidates.filter(item => lobbyGet(item, 'interactive', 'Interactive')).length;
+		preview.textContent = `${candidates.length} possible · ${candidates.length - interactive} ${t('lobbyApocalypseOrdinary').toLowerCase()} · ${interactive} ${t('lobbyApocalypseInteractive').toLowerCase()} · ${settings.interactiveApocalypseChancePercent}%`;
+	}
+}
 
 function renderLobbyGameSetup() {
 	const state = lobbyState; const setup = document.getElementById('lobbyGameSetup'); if (!state || !setup) return;
@@ -8330,6 +8444,7 @@ function renderLobbyGameSetup() {
 		`${t('lobbySummaryTimer')}: ${displayed.roundTimerEnabled ? `${Math.round(displayed.roundTimerDurationSeconds / 60)} min` : t('lobbyOff')}`,
 		`${t('lobbySummaryVoting')}: ${displayed.votingEnabled ? `${t('lobbyFromRound')} ${displayed.votingStartRound}` : t('lobbyOff')}`,
 		`${t('lobbySummaryCards')}: ${displayed.specialCardsEnabled ? displayed.specialCardsPerPlayer : 0}`
+		,`${t('apocalypse')}: ${displayed.apocalypseEnabled ? `${displayed.apocalypseSelectionMode} · ${displayed.interactiveApocalypseChancePercent}%` : t('lobbyOff')}`
 	];
 	const chips = document.getElementById('lobbySettingsChips'); if (chips) chips.innerHTML = chipValues.map(value => `<span class="lobby-settings-chip">${escapeHtml(String(value))}</span>`).join('');
 	const warnings = lobbyGet(state, 'settingsWarnings', 'SettingsWarnings') || []; const warningsElement = document.getElementById('lobbySettingsWarnings');
@@ -8347,12 +8462,13 @@ function renderLobbyGameSetup() {
 		});
 		const mode = displayed.bunkerCapacityMode;
 		for (const [id, visible] of [['lobbyManualCapacityRow', mode === 'Manual'], ['lobbyRandomCapacityMinRow', mode === 'RandomRange'], ['lobbyRandomCapacityMaxRow', mode === 'RandomRange']]) { const row = document.getElementById(id); if (row) row.hidden = !visible; }
+		renderLobbyApocalypseEditor(displayed);
 		setup.querySelectorAll('[data-settings-tab]').forEach(button => { const active = button.dataset.settingsTab === lobbySettingsActiveTab; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); });
 		setup.querySelectorAll('[data-settings-pane]').forEach(pane => { const active = pane.dataset.settingsPane === lobbySettingsActiveTab; pane.classList.toggle('active', active); pane.hidden = !active; });
 		for (const id of ['lobbySettingsApply', 'lobbySettingsReset', 'lobbySettingsClassic', 'lobbyPresetSave', 'lobbyPresetLoad', 'lobbyPresetDelete', 'lobbyPresetExport', 'lobbyPresetImport', 'lobbyPasswordApply']) { const button = document.getElementById(id); if (button) button.disabled = lobbySettingsPending || (id === 'lobbySettingsApply' && !lobbySettingsDirty); }
 		renderLobbyLocalPresetOptions();
 	} else if (readOnly) {
-		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
+		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('apocalypse'), canonical.apocalypseEnabled ? `${canonical.apocalypseSelectionMode} · ${canonical.allowedApocalypseCategoryCount} categories · ${canonical.apocalypseCustomPoolCount} pool · ${canonical.interactiveApocalypseChancePercent}%` : t('lobbyOff')], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
 		readOnly.innerHTML = rows.map(([label, value]) => `<article><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	}
 	const events = lobbyGet(state, 'recentEvents', 'RecentEvents') || []; const audit = document.getElementById('lobbyAuditEvents');
@@ -8385,6 +8501,7 @@ function lobbySettingsHubPayload(settings) {
 		preset: enumValue(settings.preset, ['Classic', 'Calm', 'Dangerous', 'Hardcore', 'Quick', 'Long', 'Custom']),
 		readyRequirement: enumValue(settings.readyRequirement, ['AllPlayers', 'HostDecision']),
 		bunkerCapacityMode: enumValue(settings.bunkerCapacityMode, ['Automatic', 'Manual', 'RandomRange']),
+		apocalypseSelectionMode: enumValue(settings.apocalypseSelectionMode, ['RandomAll', 'RandomCategories', 'Specific', 'CustomPool']),
 		interactiveThreatRate: enumValue(settings.interactiveThreatRate, ['Off', 'Rare', 'Standard', 'Often', 'Always']),
 		threatFrequency: enumValue(settings.threatFrequency, ['OncePerGame', 'EveryOtherRound', 'EveryRound', 'RandomEligibleRounds']),
 		votingFrequency: enumValue(settings.votingFrequency, ['EveryRound', 'EveryTwoRounds']), characterGenerationMode: 0,
@@ -8403,11 +8520,11 @@ async function applyLobbySettings() {
 	if (!lobbySettingsDraft || !lobbySettingsDirty || lobbySettingsPending) return;
 	lobbySettingsPending = true; renderLobbyGameSetup();
 	try {
-		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision: lobbySettingsBaseRevision, commandId: crypto.randomUUID(), settings: lobbySettingsHubPayload(lobbySettingsDraft) });
+		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision:lobbySettingsBaseRevision, commandId:crypto.randomUUID(), settings:lobbySettingsHubPayload(lobbySettingsDraft) });
 		if (!(result?.success ?? result?.Success)) {
 			const code = result?.errorCode ?? result?.ErrorCode; setLobbySettingsFeedback(code === 'settings_revision_conflict' ? 'lobbySettingsConflict' : 'lobbySettingsInvalid', true);
 			lobbySettingsDraft = normalizeLobbySettings(result?.settings ?? result?.Settings); lobbySettingsBaseRevision = Number(result?.settingsRevision ?? result?.SettingsRevision ?? lobbySettingsBaseRevision); lobbySettingsDirty = false;
-		} else { lobbySettingsDirty = false; setLobbySettingsFeedback('lobbySettingsApplied'); }
+		} else { lobbySettingsDirty = false; lobbyApocalypseCatalog = null; setLobbySettingsFeedback('lobbySettingsApplied'); if (lobbySettingsActiveTab === 'apocalypse') ensureLobbyApocalypseCatalog(); }
 	} catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); }
 	finally { lobbySettingsPending = false; renderLobbyGameSetup(); }
 }
@@ -8415,11 +8532,11 @@ async function applyLobbySettings() {
 function readLobbyLocalPresets() { try { const value = JSON.parse(localStorage.getItem(lobbyLocalPresetStorageKey) || '{}'); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch (_) { return {}; } }
 function writeLobbyLocalPresets(value) { localStorage.setItem(lobbyLocalPresetStorageKey, JSON.stringify(value)); }
 function renderLobbyLocalPresetOptions() { const select = document.getElementById('lobbyLocalPresetSelect'); if (!select) return; const value = select.value; const presets = readLobbyLocalPresets(); select.innerHTML = Object.keys(presets).sort().map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join(''); if (presets[value]) select.value = value; }
-function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0, 40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version: 1, settings: normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
+function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0, 40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version:1, settings:normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
 function loadLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; const entry = readLobbyLocalPresets()[name]; if (!entry || entry.version !== 1) return setLobbySettingsFeedback('lobbyPresetImportError', true); lobbySettingsDraft = normalizeLobbySettings(entry.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); renderLobbyGameSetup(); }
 function deleteLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; if (!name) return; const presets = readLobbyLocalPresets(); delete presets[name]; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetDeleted'); }
-function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema: 'bunker-room-game-settings', version: 1, name, settings: normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi, '-')}.json`; link.click(); URL.revokeObjectURL(url); }
-async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 2; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
+function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema:'bunker-room-game-settings', version:1, name, settings:normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi, '-')}.json`; link.click(); URL.revokeObjectURL(url); }
+async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2, 3].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 3; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
 
 async function updateLobbyPassword() { if (lobbySettingsPending) return; lobbySettingsPending = true; renderLobbyGameSetup(); try { await connection.invoke('SetLobbyPassword', document.getElementById('lobbyPasswordInput')?.value || null, crypto.randomUUID()); document.getElementById('lobbyPasswordInput').value = ''; setLobbySettingsFeedback('lobbyPasswordUpdated'); } catch (_) { setLobbySettingsFeedback('lobbySettingsInvalid', true); } finally { lobbySettingsPending = false; renderLobbyGameSetup(); } }
 async function resetLobbyMemberReady(playerId) { if (lobbyCommandPending) return; lobbyCommandPending = true; try { await connection.invoke('ResetLobbyReady', playerId, crypto.randomUUID()); } finally { lobbyCommandPending = false; } }
@@ -8427,9 +8544,9 @@ async function kickLobbyMember(playerId) { if (lobbyCommandPending || !confirm(t
 
 function bindLobbySettingsControls() {
 	const setup = document.getElementById('lobbyGameSetup'); if (!setup || setup.dataset.bound === 'true') return; setup.dataset.bound = 'true';
-	setup.addEventListener('input', event => { if (event.target.matches('.lobby-setting-input') && event.target.tagName === 'INPUT' && event.target.type !== 'checkbox') updateLobbySettingsDraft(event.target); });
-	setup.addEventListener('change', event => { if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
-	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; renderLobbyGameSetup(); return; } const actions = { lobbySettingsApply: applyLobbySettings, lobbySettingsReset: () => { lobbySettingsDraft = normalizeLobbySettings(lobbyGet(lobbyState, 'settings', 'Settings')); lobbySettingsDirty = false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic: () => loadLobbyServerPreset('Classic'), lobbyPresetSave: saveLobbyLocalPreset, lobbyPresetLoad: loadLobbyLocalPreset, lobbyPresetDelete: deleteLobbyLocalPreset, lobbyPresetExport: exportLobbyPreset, lobbyPresetImport: () => document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply: updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
+	setup.addEventListener('input', event => { if (event.target.id === 'lobbyApocalypseSearch') { lobbyApocalypseSearch = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('.lobby-setting-input') && event.target.tagName === 'INPUT' && event.target.type !== 'checkbox') updateLobbySettingsDraft(event.target); });
+	setup.addEventListener('change', event => { if (event.target.id === 'lobbyApocalypseCategoryFilter') { lobbyApocalypseCategoryFilter = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.id === 'lobbyApocalypseInteractiveFilter') { lobbyApocalypseInteractiveFilter = event.target.value; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
+	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; if (lobbySettingsActiveTab === 'apocalypse') ensureLobbyApocalypseCatalog(); renderLobbyGameSetup(); return; } const apocalypseAction = event.target.closest('[data-apocalypse-action]'); if (apocalypseAction && lobbySettingsDraft) { const id = apocalypseAction.dataset.id; const action = apocalypseAction.dataset.apocalypseAction; if (action === 'toggle-category') lobbySettingsDraft.allowedApocalypseCategoryIds = lobbySettingsDraft.allowedApocalypseCategoryIds.includes(id) ? lobbySettingsDraft.allowedApocalypseCategoryIds.filter(value => value !== id) : [...lobbySettingsDraft.allowedApocalypseCategoryIds, id]; if (action === 'select-specific') lobbySettingsDraft.selectedApocalypseId = id; if (action === 'toggle-pool') lobbySettingsDraft.apocalypseCustomPoolIds = lobbySettingsDraft.apocalypseCustomPoolIds.includes(id) ? lobbySettingsDraft.apocalypseCustomPoolIds.filter(value => value !== id) : [...lobbySettingsDraft.apocalypseCustomPoolIds, id]; if (action === 'all-categories') lobbySettingsDraft.allowedApocalypseCategoryIds = (lobbyGet(lobbyApocalypseCatalog, 'categories', 'Categories') || []).map(item => lobbyGet(item, 'id', 'Id')); if (action === 'clear-categories') lobbySettingsDraft.allowedApocalypseCategoryIds = []; if (action === 'clear-pool') lobbySettingsDraft.apocalypseCustomPoolIds = []; if (action === 'load-more') { lobbyApocalypseVisibleCount += 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } markLobbyApocalypseDraftChanged(); return; } const actions = { lobbySettingsApply: applyLobbySettings, lobbySettingsReset: () => { lobbySettingsDraft = normalizeLobbySettings(lobbyGet(lobbyState, 'settings', 'Settings')); lobbySettingsDirty = false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic: () => loadLobbyServerPreset('Classic'), lobbyPresetSave: saveLobbyLocalPreset, lobbyPresetLoad: loadLobbyLocalPreset, lobbyPresetDelete: deleteLobbyLocalPreset, lobbyPresetExport: exportLobbyPreset, lobbyPresetImport: () => document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply: updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
 }
 function isLobbyRunning() {
 	const lifecycle = lobbyGet(lobbyState, 'lifecycle', 'Lifecycle');

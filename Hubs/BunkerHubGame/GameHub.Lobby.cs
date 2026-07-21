@@ -21,6 +21,13 @@ public partial class GameHub
 		return Task.FromResult(_roomGameSettings.ToDto(temporary));
 	}
 
+	public Task<LobbyApocalypseCatalogDto> GetLobbyApocalypseCatalog(string language = "uk")
+	{
+		var room = RequireLobbyHost();
+		if (room.State != RoomState.Lobby || room.SettingsFrozen) throw new HubException("settings_frozen");
+		return Task.FromResult(_apocalypseSelection.BuildCatalog(_roomGameSettings.GetCanonical(room), language));
+	}
+
 	public async Task<LobbySettingsApplyResult> ApplyLobbyGameSettings(LobbySettingsUpdateRequest request)
 	{
 		var room = RequireLobbyHost();
@@ -193,6 +200,8 @@ public partial class GameHub
 						entry.Value.IsConnected &&
 						!entry.Value.IsLobbyReady);
 
+			_roomGameSettings.FreezeForStart(room, _random.Next);
+
 			var result =
 				_roomService.StartGame(
 					room.Id,
@@ -201,6 +210,9 @@ public partial class GameHub
 
 			if (!result.success)
 			{
+				room.SettingsFrozen = false;
+				room.FrozenGameSettings = null;
+				room.ResolvedBunkerCapacity = null;
 				throw new HubException(
 					result.error ?? "lobby_start_failed");
 			}
@@ -209,10 +221,6 @@ public partial class GameHub
 			{
 				room.ProcessedGameResetCommandIds.Clear();
 			}
-
-			_roomGameSettings.FreezeForStart(
-				room,
-				_random.Next);
 
 			PrepareLobbyGameplayCharacters(room);
 			room.GuestWarningRevision++;
@@ -253,8 +261,8 @@ public partial class GameHub
 						.CreateStartedSessionAsync(
 							roomCode: roomCode,
 							participants: participantSnapshots,
-							apocalypseId: null,
-							bunkerId: null);
+							apocalypseId: room.Apocalypse?.Id,
+							bunkerId: room.Bunker?.Id);
 
 				lock (room.GameSettingsSyncRoot)
 				{

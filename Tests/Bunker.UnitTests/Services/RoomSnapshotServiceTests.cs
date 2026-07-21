@@ -71,6 +71,11 @@ public sealed class RoomSnapshotServiceTests
         context.Room.SettingsRevision = 4;
         context.Room.GameSettings = RoomGameSettingsService.Preset(GamePreset.Dangerous);
         context.Room.FrozenGameSettings = RoomGameSettingsService.Clone(context.Room.GameSettings);
+        context.Room.FrozenGameSettings.ApocalypseSelectionMode = ApocalypseSelectionMode.CustomPool;
+        context.Room.FrozenGameSettings.ApocalypseCustomPoolIds = context.GameData.Apocalypses.Take(2).Select(item => item.Id).ToList();
+        context.Room.FrozenGameSettings.ApocalypseThemeEnabled = false;
+        context.Room.Apocalypse = context.GameData.Apocalypses.First();
+        var resolvedApocalypseId = context.Room.Apocalypse.Id;
         context.Room.ResolvedBunkerCapacity = 2;
         context.Room.ThreatsTriggeredCount = 1;
         context.Room.TriggeredThreatIds.Add("radiation_leak");
@@ -82,6 +87,8 @@ public sealed class RoomSnapshotServiceTests
         context.Room.ThreatsTriggeredCount = 0;
         context.Room.TriggeredThreatIds.Clear();
         context.Room.ThreatRoundsTriggered.Clear();
+        context.Room.Apocalypse = null;
+        context.Room.FrozenGameSettings!.ApocalypseCustomPoolIds.Clear();
 
         Assert.True(context.Snapshots.RestoreSnapshot(context.Room, snapshot.SnapshotId, "host-player", "restore-settings").Success);
         Assert.True(context.Room.SettingsFrozen);
@@ -91,6 +98,10 @@ public sealed class RoomSnapshotServiceTests
         Assert.Contains("radiation_leak", context.Room.TriggeredThreatIds);
         Assert.Contains(2, context.Room.ThreatRoundsTriggered);
         Assert.Equal(GamePreset.Dangerous, context.Room.FrozenGameSettings!.Preset);
+        Assert.Equal(resolvedApocalypseId, context.Room.Apocalypse!.Id);
+        Assert.Equal(ApocalypseSelectionMode.CustomPool, context.Room.FrozenGameSettings.ApocalypseSelectionMode);
+        Assert.Equal(2, context.Room.FrozenGameSettings.ApocalypseCustomPoolIds.Count);
+        Assert.False(context.Room.FrozenGameSettings.ApocalypseThemeEnabled);
     }
 
     [Fact]

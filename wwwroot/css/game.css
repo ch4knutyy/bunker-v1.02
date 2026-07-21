@@ -1584,6 +1584,19 @@
         }
 }
 
+:root { --apocalypse-swatch-extinction-red:#d85a4f; --apocalypse-swatch-storm-blue:#559ad2; --apocalypse-swatch-biohazard-green:#64ad68; --apocalypse-swatch-seismic-amber:#c58a43; --apocalypse-swatch-cosmic-violet:#916bd0; --apocalypse-swatch-machine-cyan:#42aebc; --apocalypse-swatch-wasteland-olive:#94934e; --apocalypse-swatch-collapse-rust:#ad6848; --apocalypse-swatch-glitch-magenta:#c24caf; --apocalypse-swatch-occult-indigo:#7772bd; }
+.lobby-apocalypse-settings { gap: 1rem; }
+.lobby-apocalypse-mode-panel { margin-top: 1rem; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; background: rgba(0,0,0,.12); }
+.lobby-apocalypse-actions, .lobby-apocalypse-filters { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; margin-bottom: .8rem; }
+.lobby-apocalypse-category-chips, .lobby-apocalypse-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .6rem; }
+.lobby-apocalypse-category-chip, .lobby-apocalypse-option { display: grid; gap: .25rem; min-width: 0; padding: .7rem; color: var(--color-text-primary); text-align: left; background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: 8px; cursor: pointer; }
+.lobby-apocalypse-category-chip::before { content: ""; width: 100%; height: 3px; background: var(--category-swatch, var(--color-gold)); border-radius: 2px; }
+.lobby-apocalypse-category-chip.selected, .lobby-apocalypse-option.selected { border-color: var(--color-gold); box-shadow: 0 0 0 1px var(--color-gold); }
+.lobby-apocalypse-option span { color: var(--color-text-muted); font-size: .78rem; }
+.lobby-apocalypse-selected-pool { display: flex; flex-wrap: wrap; gap: .45rem; }
+.lobby-apocalypse-selected-pool button { padding: .4rem .6rem; color: var(--color-text-primary); background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: 999px; cursor: pointer; }
+@media (max-width: 620px) { .lobby-apocalypse-category-chips, .lobby-apocalypse-results { grid-template-columns: 1fr; } .lobby-apocalypse-filters > * { width: 100%; } }
+
 @media (max-width: 1050px) {
     .my-special-cards-list {
         grid-template-columns: repeat(2,minmax(0,1fr));

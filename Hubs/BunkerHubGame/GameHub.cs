@@ -38,6 +38,7 @@ namespace Bunker.Hubs
         private readonly DirectorControlService _directorControls;
         private readonly LobbyStartService _lobbyStart;
         private readonly RoomGameSettingsService _roomGameSettings;
+        private readonly ApocalypseSelectionService _apocalypseSelection;
         private readonly BunkerResourceService _bunkerResources;
         private readonly GmPanelStateBuilder _gmPanelStateBuilder;
         private readonly ScenarioSchedulerService _scenarioScheduler;
@@ -73,7 +74,8 @@ namespace Bunker.Hubs
             ScenarioRunnerService? scenarioRunner = null,
             BunkerIntelService? bunkerIntel = null,
             EventSpecialCardService? eventSpecialCards = null,
-            IScenarioContentRegistry? scenarioContent = null)
+            IScenarioContentRegistry? scenarioContent = null,
+            ApocalypseSelectionService? apocalypseSelection = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -100,7 +102,8 @@ namespace Bunker.Hubs
             _omniscientHiddenState = omniscientHiddenState ?? new OmniscientHiddenStateService(TimeProvider.System, gameTimerService, roomService);
             _omniscientRequestRateLimits = omniscientRequestRateLimits ?? new OmniscientRequestRateLimitService(TimeProvider.System);
             _directorControls = directorControls ?? new DirectorControlService(TimeProvider.System);
-            _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit);
+            _apocalypseSelection = apocalypseSelection ?? new ApocalypseSelectionService(gameData);
+            _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit, _apocalypseSelection);
             _bunkerResources = bunkerResources ?? new BunkerResourceService();
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;

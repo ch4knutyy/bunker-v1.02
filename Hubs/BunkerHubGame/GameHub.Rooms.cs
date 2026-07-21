@@ -349,6 +349,7 @@ namespace Bunker.Hubs
 				currentPhase = room.CurrentPhase.ToString(),
 				completion = room.Completion,
 				apocalypse = room.Apocalypse?.ToClientInfo(),
+				gameSettings = BuildPublicGameSettings(room),
 				bunker = _bunkerIntel.Project(room, player,
 					player.GmRole is GmMode.TechnicalGm or GmMode.OmniscientGm ||
 					player.IsSpectatorGm && player.HasSeenOmniscientState),
@@ -665,13 +666,8 @@ namespace Bunker.Hubs
 
             var settings = _roomGameSettings.GetEffective(room);
             // Генеруємо лише увімкнені room-local сценарії.
-            if (!settings.ApocalypseEnabled) room.Apocalypse = null;
-            else if (room.Apocalypse == null && _gameData.Apocalypses.Count > 0)
-            {
-                room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
-                // Оновлюємо URL зображення з кешу
-                _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
-            }
+            _apocalypseSelection.ResolveForStart(room, settings, _random.Next);
+            _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
             
             if (!settings.BunkerScenarioEnabled) room.Bunker = null;
             else if (room.Bunker == null && _gameData.Bunkers.Count > 0)
@@ -721,7 +717,7 @@ namespace Bunker.Hubs
             if (room.Bunker != null)
                 await BroadcastBunkerIntelProjection(room);
             if (room.Apocalypse != null)
-                await Clients.Group(roomId).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
+                await Clients.Group(roomId).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo(), gameSettings = BuildPublicGameSettings(room) });
             await SendPlayerHostControlData(room);
 
             // Compatibility aggregate for existing clients; it is built only after
@@ -732,6 +728,7 @@ namespace Bunker.Hubs
                 currentRound = room.CurrentRound,
                 currentTurnPlayerId = room.CurrentTurnPlayerId,
                 apocalypse = room.Apocalypse?.ToClientInfo(),
+                gameSettings = BuildPublicGameSettings(room),
                 bunker = _bunkerIntel.Project(room, null),
                 roundState,
                 players = playersSnapshot.Select(entry =>
@@ -758,6 +755,12 @@ namespace Bunker.Hubs
 
             _logger.LogInformation($"Гра почалась в кімнаті {room.Name}. Апокаліпсис: {room.Apocalypse?.Name}, Бункер: {room.Bunker?.Name}");
         }
+
+		private object BuildPublicGameSettings(Room room)
+		{
+			var settings = _roomGameSettings.GetEffective(room);
+			return new { apocalypseThemeEnabled = settings.ApocalypseThemeEnabled };
+		}
 
         #endregion
     }

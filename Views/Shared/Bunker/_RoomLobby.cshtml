@@ -39,6 +39,7 @@
 					<div class="lobby-settings-tabs" role="tablist" aria-label="Game setup">
 						<button type="button" class="active" role="tab" aria-selected="true" aria-controls="lobbySettingsBasic" data-settings-tab="basic" data-lobby-i18n="lobbyTabBasic">Основне</button>
 						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsThreats" data-settings-tab="threats" data-lobby-i18n="lobbyTabThreats">Загрози</button>
+						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsApocalypse" data-settings-tab="apocalypse" data-lobby-i18n="lobbyTabApocalypse">Апокаліпсис</button>
 						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsRounds" data-settings-tab="rounds" data-lobby-i18n="lobbyTabRounds">Раунди</button>
 						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsAccess" data-settings-tab="access" data-lobby-i18n="lobbyTabAccess">Доступ</button>
 					</div>
@@ -54,10 +55,27 @@
 							<label class="lobby-setting-row"><span data-lobby-i18n="lobbySpecialCardsCount">Спеціальних карт на гравця</span><select id="lobbySettingSpecialCardsPerPlayer" name="specialCardsPerPlayer" class="input-field lobby-setting-input" data-setting="specialCardsPerPlayer"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
 						</div>
 						<div class="lobby-toggle-grid">
-							<label><input id="lobbySettingApocalypseEnabled" name="apocalypseEnabled" class="lobby-setting-input" data-setting="apocalypseEnabled" type="checkbox"><span data-lobby-i18n="lobbyApocalypseEnabled">Апокаліпсис</span></label>
 							<label><input id="lobbySettingBunkerScenarioEnabled" name="bunkerScenarioEnabled" class="lobby-setting-input" data-setting="bunkerScenarioEnabled" type="checkbox"><span data-lobby-i18n="lobbyBunkerEnabled">Бункер</span></label>
 							<label><input id="lobbySettingSpecialCardsEnabled" name="specialCardsEnabled" class="lobby-setting-input" data-setting="specialCardsEnabled" type="checkbox"><span data-lobby-i18n="lobbySpecialCardsEnabled">Спеціальні карти</span></label>
 						</div>
+					</div>
+					<div id="lobbySettingsApocalypse" class="lobby-settings-pane lobby-apocalypse-settings" role="tabpanel" data-settings-pane="apocalypse" hidden>
+						<div class="lobby-toggle-grid">
+							<label><input id="lobbySettingApocalypseEnabled" class="lobby-setting-input" data-setting="apocalypseEnabled" type="checkbox"><span data-lobby-i18n="lobbyApocalypseEnabled">Апокаліпсис увімкнено</span></label>
+							<label><input id="lobbyAllowInteractiveApocalypses" class="lobby-setting-input" data-setting="allowInteractiveApocalypses" type="checkbox"><span data-lobby-i18n="lobbyApocalypseAllowInteractive">Дозволити інтерактивні</span></label>
+							<label><input id="lobbyApocalypseThemeEnabled" class="lobby-setting-input" data-setting="apocalypseThemeEnabled" type="checkbox"><span data-lobby-i18n="lobbyApocalypseTheme">Тематичне оформлення</span></label>
+						</div>
+						<div class="lobby-setting-grid">
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyApocalypseMode">Режим вибору</span><select id="lobbyApocalypseSelectionMode" class="input-field lobby-setting-input" data-setting="apocalypseSelectionMode"><option value="RandomAll" data-lobby-i18n="lobbyApocalypseRandomAll">Випадковий з усіх</option><option value="RandomCategories" data-lobby-i18n="lobbyApocalypseRandomCategories">Випадковий із категорій</option><option value="Specific" data-lobby-i18n="lobbyApocalypseSpecific">Конкретний</option><option value="CustomPool" data-lobby-i18n="lobbyApocalypseCustomPool">Власний набір</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyApocalypseChance">Шанс interactive</span><input id="lobbyInteractiveApocalypseChance" class="input-field lobby-setting-input" data-setting="interactiveApocalypseChancePercent" type="number" min="0" max="100" step="1"></label>
+						</div>
+						<section id="lobbyApocalypseCategories" class="lobby-apocalypse-mode-panel" hidden><div class="lobby-apocalypse-actions"><button type="button" class="btn-secondary" data-apocalypse-action="all-categories" data-lobby-i18n="lobbyApocalypseSelectAll">Обрати всі</button><button type="button" class="btn-secondary" data-apocalypse-action="clear-categories" data-lobby-i18n="lobbyApocalypseClear">Очистити</button></div><div id="lobbyApocalypseCategoryChips" class="lobby-apocalypse-category-chips"></div></section>
+						<section id="lobbyApocalypsePicker" class="lobby-apocalypse-mode-panel" hidden>
+							<div class="lobby-apocalypse-filters"><input id="lobbyApocalypseSearch" class="input-field" type="search" data-lobby-i18n-placeholder="lobbyApocalypseSearch" placeholder="Пошук"><select id="lobbyApocalypseCategoryFilter" class="input-field"></select><select id="lobbyApocalypseInteractiveFilter" class="input-field"><option value="all">All</option><option value="false" data-lobby-i18n="lobbyApocalypseOrdinary">Звичайні</option><option value="true" data-lobby-i18n="lobbyApocalypseInteractive">Інтерактивні</option></select></div>
+							<div id="lobbyApocalypseResults" class="lobby-apocalypse-results"></div><button id="lobbyApocalypseLoadMore" type="button" class="btn-secondary" data-apocalypse-action="load-more" data-lobby-i18n="lobbyApocalypseLoadMore">Показати ще</button>
+						</section>
+						<section id="lobbyApocalypsePool" class="lobby-apocalypse-mode-panel" hidden><div class="lobby-apocalypse-actions"><strong data-lobby-i18n="lobbyApocalypseSelected">Обрано</strong><button type="button" class="btn-secondary" data-apocalypse-action="clear-pool" data-lobby-i18n="lobbyApocalypseClear">Очистити</button></div><div id="lobbyApocalypseSelectedPool" class="lobby-apocalypse-selected-pool"></div></section>
+						<div id="lobbyApocalypsePreview" class="lobby-preview-summary" aria-live="polite"></div>
 					</div>
 					<div id="lobbySettingsThreats" class="lobby-settings-pane" role="tabpanel" data-settings-pane="threats" hidden>
 						<div class="lobby-setting-grid">
