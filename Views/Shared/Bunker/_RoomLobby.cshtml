@@ -34,82 +34,82 @@
 				<div class="lobby-settings-editor-body">
 					<div class="lobby-preset-row lobby-drawer-preset">
 						<label for="lobbyPresetSelect" data-lobby-i18n="lobbyPreset">Пресет</label>
-						<select id="lobbyPresetSelect" class="input-field lobby-setting-input" data-setting="preset"></select>
+						<select name="preset" id="lobbyPresetSelect" class="input-field lobby-setting-input" data-setting="preset"></select>
 					</div>
 					<div class="lobby-settings-tabs" role="tablist" aria-label="Game setup">
-					<button type="button" class="active" role="tab" aria-selected="true" aria-controls="lobbySettingsBasic" data-settings-tab="basic" data-lobby-i18n="lobbyTabBasic">Основне</button>
-					<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsThreats" data-settings-tab="threats" data-lobby-i18n="lobbyTabThreats">Загрози</button>
-					<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsRounds" data-settings-tab="rounds" data-lobby-i18n="lobbyTabRounds">Раунди</button>
-					<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsAccess" data-settings-tab="access" data-lobby-i18n="lobbyTabAccess">Доступ</button>
+						<button type="button" class="active" role="tab" aria-selected="true" aria-controls="lobbySettingsBasic" data-settings-tab="basic" data-lobby-i18n="lobbyTabBasic">Основне</button>
+						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsThreats" data-settings-tab="threats" data-lobby-i18n="lobbyTabThreats">Загрози</button>
+						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsRounds" data-settings-tab="rounds" data-lobby-i18n="lobbyTabRounds">Раунди</button>
+						<button type="button" role="tab" aria-selected="false" aria-controls="lobbySettingsAccess" data-settings-tab="access" data-lobby-i18n="lobbyTabAccess">Доступ</button>
 					</div>
 					<div id="lobbySettingsBasic" class="lobby-settings-pane active" role="tabpanel" data-settings-pane="basic">
-					<div class="lobby-setting-grid">
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxPlayers">Максимум гравців</span><input id="lobbyMaxPlayers" class="input-field lobby-setting-input" data-setting="maxGameplayPlayers" type="number" min="2" max="12" step="1"></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMinPlayers">Мінімум гравців</span><select id="lobbyMinPlayers" class="input-field lobby-setting-input" data-setting="minGameplayPlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyBunkerCapacityMode">Місткість бункера</span><select id="lobbyBunkerCapacityMode" class="input-field lobby-setting-input" data-setting="bunkerCapacityMode"><option value="Automatic" data-lobby-i18n="lobbyAutomatic">Автоматично</option><option value="Manual" data-lobby-i18n="lobbyManual">Вручну</option><option value="RandomRange" data-lobby-i18n="lobbyRandomRange">Випадковий діапазон</option></select></label>
-						<label id="lobbyManualCapacityRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyManualCapacity">Місць</span><input class="input-field lobby-setting-input" data-setting="manualBunkerCapacity" type="number" min="1" max="12" step="1"></label>
-						<label id="lobbyRandomCapacityMinRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyRangeMin">Мінімум місць</span><input class="input-field lobby-setting-input" data-setting="randomBunkerCapacityMin" type="number" min="1" max="12" step="1"></label>
-						<label id="lobbyRandomCapacityMaxRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyRangeMax">Максимум місць</span><input class="input-field lobby-setting-input" data-setting="randomBunkerCapacityMax" type="number" min="1" max="12" step="1"></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyStartingItems">Стартові предмети</span><select class="input-field lobby-setting-input" data-setting="startingInventoryCount"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbySpecialCardsCount">Спеціальних карт на гравця</span><select class="input-field lobby-setting-input" data-setting="specialCardsPerPlayer"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
-					</div>
-					<div class="lobby-toggle-grid">
-						<label><input class="lobby-setting-input" data-setting="apocalypseEnabled" type="checkbox"><span data-lobby-i18n="lobbyApocalypseEnabled">Апокаліпсис</span></label>
-						<label><input class="lobby-setting-input" data-setting="bunkerScenarioEnabled" type="checkbox"><span data-lobby-i18n="lobbyBunkerEnabled">Бункер</span></label>
-						<label><input class="lobby-setting-input" data-setting="specialCardsEnabled" type="checkbox"><span data-lobby-i18n="lobbySpecialCardsEnabled">Спеціальні карти</span></label>
-					</div>
-				</div>
-				<div id="lobbySettingsThreats" class="lobby-settings-pane" role="tabpanel" data-settings-pane="threats" hidden>
-					<div class="lobby-setting-grid">
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyInteractiveRate">Інтерактивні загрози</span><select class="input-field lobby-setting-input" data-setting="interactiveThreatRate"><option value="Off">0%</option><option value="Rare">1%</option><option value="Standard">10%</option><option value="Often">25%</option><option value="Always">100%</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyFirstThreatRound">Перший раунд загрози</span><select class="input-field lobby-setting-input" data-setting="firstThreatRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyThreatFrequency">Частота загроз</span><select class="input-field lobby-setting-input" data-setting="threatFrequency"><option value="OncePerGame" data-lobby-i18n="lobbyOnce">Один раз</option><option value="EveryOtherRound" data-lobby-i18n="lobbyEveryOther">Через раунд</option><option value="EveryRound" data-lobby-i18n="lobbyEveryRound">Щораунду</option><option value="RandomEligibleRounds" data-lobby-i18n="lobbyRandomRounds">Випадково</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxThreats">Максимум загроз</span><select class="input-field lobby-setting-input" data-setting="maxThreatsPerGame"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="" data-lobby-i18n="lobbyUnlimited">Без обмеження</option></select></label>
-					</div>
-					<div class="lobby-toggle-grid"><label><input class="lobby-setting-input" data-setting="threatsEnabled" type="checkbox"><span data-lobby-i18n="lobbyThreatsEnabled">Загрози увімкнено</span></label><label><input class="lobby-setting-input" data-setting="avoidRepeatedThreats" type="checkbox"><span data-lobby-i18n="lobbyAvoidThreatRepeats">Не повторювати ID загроз</span></label></div>
-					<fieldset class="lobby-scenario-settings">
-						<legend>Сценарні ситуації</legend>
 						<div class="lobby-setting-grid">
-							<label class="lobby-setting-row"><span>Перша після раунду</span><select class="input-field lobby-setting-input" data-setting="scenarioFirstAfterRound"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
-							<label class="lobby-setting-row"><span>Інтервал</span><select class="input-field lobby-setting-input" data-setting="scenarioIntervalRounds"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-							<label class="lobby-setting-row"><span>Фаза</span><select class="input-field lobby-setting-input" data-setting="scenarioTriggerPhase"><option value="after_round_before_voting">Перед голосуванням</option><option value="after_voting">Після голосування</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxPlayers">Максимум гравців</span><input name="maxGameplayPlayers" id="lobbyMaxPlayers" class="input-field lobby-setting-input" data-setting="maxGameplayPlayers" type="number" min="2" max="12" step="1"></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMinPlayers">Мінімум гравців</span><select name="minGameplayPlayers" id="lobbyMinPlayers" class="input-field lobby-setting-input" data-setting="minGameplayPlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyBunkerCapacityMode">Місткість бункера</span><select name="bunkerCapacityMode" id="lobbyBunkerCapacityMode" class="input-field lobby-setting-input" data-setting="bunkerCapacityMode"><option value="Automatic" data-lobby-i18n="lobbyAutomatic">Автоматично</option><option value="Manual" data-lobby-i18n="lobbyManual">Вручну</option><option value="RandomRange" data-lobby-i18n="lobbyRandomRange">Випадковий діапазон</option></select></label>
+							<label id="lobbyManualCapacityRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyManualCapacity">Місць</span><input id="lobbySettingManualBunkerCapacity" name="manualBunkerCapacity" class="input-field lobby-setting-input" data-setting="manualBunkerCapacity" type="number" min="1" max="12" step="1"></label>
+							<label id="lobbyRandomCapacityMinRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyRangeMin">Мінімум місць</span><input id="lobbySettingRandomBunkerCapacityMin" name="randomBunkerCapacityMin" class="input-field lobby-setting-input" data-setting="randomBunkerCapacityMin" type="number" min="1" max="12" step="1"></label>
+							<label id="lobbyRandomCapacityMaxRow" class="lobby-setting-row"><span data-lobby-i18n="lobbyRangeMax">Максимум місць</span><input id="lobbySettingRandomBunkerCapacityMax" name="randomBunkerCapacityMax" class="input-field lobby-setting-input" data-setting="randomBunkerCapacityMax" type="number" min="1" max="12" step="1"></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyStartingItems">Стартові предмети</span><select id="lobbySettingStartingInventoryCount" name="startingInventoryCount" class="input-field lobby-setting-input" data-setting="startingInventoryCount"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbySpecialCardsCount">Спеціальних карт на гравця</span><select id="lobbySettingSpecialCardsPerPlayer" name="specialCardsPerPlayer" class="input-field lobby-setting-input" data-setting="specialCardsPerPlayer"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
 						</div>
 						<div class="lobby-toggle-grid">
-							<label><input class="lobby-setting-input" data-setting="scenarioEnabled" type="checkbox"><span>Увімкнено</span></label>
-							<label><input class="lobby-setting-input" data-setting="scenarioThreatEnabled" type="checkbox"><span>Threat</span></label>
-							<label><input class="lobby-setting-input" data-setting="scenarioEventEnabled" type="checkbox"><span>Event</span></label>
-							<label><input class="lobby-setting-input" data-setting="scenarioSecretEventEnabled" type="checkbox"><span>Secret Event</span></label>
+							<label><input id="lobbySettingApocalypseEnabled" name="apocalypseEnabled" class="lobby-setting-input" data-setting="apocalypseEnabled" type="checkbox"><span data-lobby-i18n="lobbyApocalypseEnabled">Апокаліпсис</span></label>
+							<label><input id="lobbySettingBunkerScenarioEnabled" name="bunkerScenarioEnabled" class="lobby-setting-input" data-setting="bunkerScenarioEnabled" type="checkbox"><span data-lobby-i18n="lobbyBunkerEnabled">Бункер</span></label>
+							<label><input id="lobbySettingSpecialCardsEnabled" name="specialCardsEnabled" class="lobby-setting-input" data-setting="specialCardsEnabled" type="checkbox"><span data-lobby-i18n="lobbySpecialCardsEnabled">Спеціальні карти</span></label>
 						</div>
-					</fieldset>
-				</div>
-				<div id="lobbySettingsRounds" class="lobby-settings-pane" role="tabpanel" data-settings-pane="rounds" hidden>
-					<div class="lobby-setting-grid">
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyTimerDuration">Таймер раунду</span><select class="input-field lobby-setting-input" data-setting="roundTimerDurationSeconds"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="420">7 min</option><option value="600">10 min</option><option value="900">15 min</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyVotingStart">Голосування з раунду</span><select class="input-field lobby-setting-input" data-setting="votingStartRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyVotingFrequency">Частота голосувань</span><select class="input-field lobby-setting-input" data-setting="votingFrequency"><option value="EveryRound" data-lobby-i18n="lobbyEveryRound">Щораунду</option><option value="EveryTwoRounds" data-lobby-i18n="lobbyEveryOther">Через раунд</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyBonusRound">Бонусний інвентар у раунді</span><select class="input-field lobby-setting-input" data-setting="bonusInventoryRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
-						<label class="lobby-setting-row"><span data-lobby-i18n="lobbyBonusCount">Бонусних предметів</span><select class="input-field lobby-setting-input" data-setting="bonusInventoryCount"><option value="1">1</option><option value="2">2</option></select></label>
 					</div>
-					<div class="lobby-toggle-grid"><label><input class="lobby-setting-input" data-setting="roundTimerEnabled" type="checkbox"><span data-lobby-i18n="lobbyTimerEnabled">Таймер увімкнено</span></label><label><input class="lobby-setting-input" data-setting="autoStartRoundTimer" type="checkbox"><span data-lobby-i18n="lobbyTimerAutoStart">Автостарт таймера</span></label><label><input class="lobby-setting-input" data-setting="pauseTimerOnHostDisconnect" type="checkbox"><span data-lobby-i18n="lobbyTimerPauseDisconnect">Пауза при відключенні host</span></label><label><input class="lobby-setting-input" data-setting="votingEnabled" type="checkbox"><span data-lobby-i18n="lobbyVotingEnabled">Голосування увімкнено</span></label><label><input class="lobby-setting-input" data-setting="bonusInventoryEnabled" type="checkbox"><span data-lobby-i18n="lobbyBonusEnabled">Бонусний інвентар</span></label></div>
-				</div>
-				<div id="lobbySettingsAccess" class="lobby-settings-pane" role="tabpanel" data-settings-pane="access" hidden>
-					<div class="lobby-setting-grid"><label class="lobby-setting-row"><span data-lobby-i18n="lobbyReadyPolicy">Політика готовності</span><select class="input-field lobby-setting-input" data-setting="readyRequirement"><option value="AllPlayers" data-lobby-i18n="lobbyAllReady">Усі гравці</option><option value="HostDecision" data-lobby-i18n="lobbyHostDecides">Вирішує host</option></select></label><label class="lobby-setting-row"><span data-lobby-i18n="lobbyRoomPassword">Пароль кімнати</span><input id="lobbyPasswordInput" class="input-field" type="password" maxlength="64" autocomplete="new-password" data-lobby-i18n-placeholder="lobbyPasswordPlaceholder"><button id="lobbyPasswordApply" type="button" class="btn-secondary" data-lobby-i18n="lobbyPasswordApply">Оновити пароль</button></label></div>
-					<div class="lobby-toggle-grid"><label><input class="lobby-setting-input" data-setting="spectatorsAllowed" type="checkbox"><span data-lobby-i18n="lobbySpectatorsAllowed">Дозволити спостерігачів</span></label><label><input class="lobby-setting-input" data-setting="hostCanStartWithoutAllReady" type="checkbox"><span data-lobby-i18n="lobbyHostOverride">Host може стартувати без усіх ready</span></label><label><input class="lobby-setting-input" data-setting="resetReadinessAfterSettingsChange" type="checkbox"><span data-lobby-i18n="lobbyResetReady">Скидати ready після змін</span></label><label><input class="lobby-setting-input" data-setting="joinsLocked" type="checkbox"><span data-lobby-i18n="lobbyLockJoins">Заблокувати нові входи</span></label></div>
-				</div>
-				<div class="lobby-settings-tools">
-					<input id="lobbyLocalPresetName" class="input-field" maxlength="40" data-lobby-i18n-placeholder="lobbyPresetName" placeholder="Назва локального пресету">
-					<select id="lobbyLocalPresetSelect" class="input-field"></select>
-					<button id="lobbyPresetSave" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetSave">Зберегти локально</button>
-					<button id="lobbyPresetLoad" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetLoad">Завантажити</button>
-					<button id="lobbyPresetDelete" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetDelete">Видалити</button>
-					<button id="lobbyPresetExport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetExport">Export JSON</button>
-					<button id="lobbyPresetImport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetImport">Import JSON</button>
-					<input id="lobbyPresetFile" type="file" accept="application/json,.json" hidden>
-				</div>
+					<div id="lobbySettingsThreats" class="lobby-settings-pane" role="tabpanel" data-settings-pane="threats" hidden>
+						<div class="lobby-setting-grid">
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyInteractiveRate">Інтерактивні загрози</span><select id="lobbySettingInteractiveThreatRate" name="interactiveThreatRate" class="input-field lobby-setting-input" data-setting="interactiveThreatRate"><option value="Off">0%</option><option value="Rare">1%</option><option value="Standard">10%</option><option value="Often">25%</option><option value="Always">100%</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyFirstThreatRound">Перший раунд загрози</span><select id="lobbySettingFirstThreatRound" name="firstThreatRound" class="input-field lobby-setting-input" data-setting="firstThreatRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyThreatFrequency">Частота загроз</span><select id="lobbySettingThreatFrequency" name="threatFrequency" class="input-field lobby-setting-input" data-setting="threatFrequency"><option value="OncePerGame" data-lobby-i18n="lobbyOnce">Один раз</option><option value="EveryOtherRound" data-lobby-i18n="lobbyEveryOther">Через раунд</option><option value="EveryRound" data-lobby-i18n="lobbyEveryRound">Щораунду</option><option value="RandomEligibleRounds" data-lobby-i18n="lobbyRandomRounds">Випадково</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyMaxThreats">Максимум загроз</span><select id="lobbySettingMaxThreatsPerGame" name="maxThreatsPerGame" class="input-field lobby-setting-input" data-setting="maxThreatsPerGame"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="" data-lobby-i18n="lobbyUnlimited">Без обмеження</option></select></label>
+						</div>
+						<div class="lobby-toggle-grid"><label><input id="lobbySettingThreatsEnabled" name="threatsEnabled" class="lobby-setting-input" data-setting="threatsEnabled" type="checkbox"><span data-lobby-i18n="lobbyThreatsEnabled">Загрози увімкнено</span></label><label><input id="lobbySettingAvoidRepeatedThreats" name="avoidRepeatedThreats" class="lobby-setting-input" data-setting="avoidRepeatedThreats" type="checkbox"><span data-lobby-i18n="lobbyAvoidThreatRepeats">Не повторювати ID загроз</span></label></div>
+						<fieldset class="lobby-scenario-settings">
+							<legend>Сценарні ситуації</legend>
+							<div class="lobby-setting-grid">
+								<label class="lobby-setting-row"><span>Перша після раунду</span><select id="lobbySettingScenarioFirstAfterRound" name="scenarioFirstAfterRound" class="input-field lobby-setting-input" data-setting="scenarioFirstAfterRound"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+								<label class="lobby-setting-row"><span>Інтервал</span><select id="lobbySettingScenarioIntervalRounds" name="scenarioIntervalRounds" class="input-field lobby-setting-input" data-setting="scenarioIntervalRounds"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+								<label class="lobby-setting-row"><span>Фаза</span><select id="lobbySettingScenarioTriggerPhase" name="scenarioTriggerPhase" class="input-field lobby-setting-input" data-setting="scenarioTriggerPhase"><option value="after_round_before_voting">Перед голосуванням</option><option value="after_voting">Після голосування</option></select></label>
+							</div>
+							<div class="lobby-toggle-grid">
+								<label><input id="lobbySettingScenarioEnabled" name="scenarioEnabled" class="lobby-setting-input" data-setting="scenarioEnabled" type="checkbox"><span>Увімкнено</span></label>
+								<label><input id="lobbySettingScenarioThreatEnabled" name="scenarioThreatEnabled" class="lobby-setting-input" data-setting="scenarioThreatEnabled" type="checkbox"><span>Threat</span></label>
+								<label><input id="lobbySettingScenarioEventEnabled" name="scenarioEventEnabled" class="lobby-setting-input" data-setting="scenarioEventEnabled" type="checkbox"><span>Event</span></label>
+								<label><input id="lobbySettingScenarioSecretEventEnabled" name="scenarioSecretEventEnabled" class="lobby-setting-input" data-setting="scenarioSecretEventEnabled" type="checkbox"><span>Secret Event</span></label>
+							</div>
+						</fieldset>
+					</div>
+					<div id="lobbySettingsRounds" class="lobby-settings-pane" role="tabpanel" data-settings-pane="rounds" hidden>
+						<div class="lobby-setting-grid">
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyTimerDuration">Таймер раунду</span><select id="lobbySettingRoundTimerDurationSeconds" name="roundTimerDurationSeconds" class="input-field lobby-setting-input" data-setting="roundTimerDurationSeconds"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="420">7 min</option><option value="600">10 min</option><option value="900">15 min</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyVotingStart">Голосування з раунду</span><select id="lobbySettingVotingStartRound" name="votingStartRound" class="input-field lobby-setting-input" data-setting="votingStartRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyVotingFrequency">Частота голосувань</span><select id="lobbySettingVotingFrequency" name="votingFrequency" class="input-field lobby-setting-input" data-setting="votingFrequency"><option value="EveryRound" data-lobby-i18n="lobbyEveryRound">Щораунду</option><option value="EveryTwoRounds" data-lobby-i18n="lobbyEveryOther">Через раунд</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyBonusRound">Бонусний інвентар у раунді</span><select id="lobbySettingBonusInventoryRound" name="bonusInventoryRound" class="input-field lobby-setting-input" data-setting="bonusInventoryRound"><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+							<label class="lobby-setting-row"><span data-lobby-i18n="lobbyBonusCount">Бонусних предметів</span><select id="lobbySettingBonusInventoryCount" name="bonusInventoryCount" class="input-field lobby-setting-input" data-setting="bonusInventoryCount"><option value="1">1</option><option value="2">2</option></select></label>
+						</div>
+						<div class="lobby-toggle-grid"><label><input id="lobbySettingRoundTimerEnabled" name="roundTimerEnabled" class="lobby-setting-input" data-setting="roundTimerEnabled" type="checkbox"><span data-lobby-i18n="lobbyTimerEnabled">Таймер увімкнено</span></label><label><input id="lobbySettingAutoStartRoundTimer" name="autoStartRoundTimer" class="lobby-setting-input" data-setting="autoStartRoundTimer" type="checkbox"><span data-lobby-i18n="lobbyTimerAutoStart">Автостарт таймера</span></label><label><input id="lobbySettingPauseTimerOnHostDisconnect" name="pauseTimerOnHostDisconnect" class="lobby-setting-input" data-setting="pauseTimerOnHostDisconnect" type="checkbox"><span data-lobby-i18n="lobbyTimerPauseDisconnect">Пауза при відключенні host</span></label><label><input id="lobbySettingVotingEnabled" name="votingEnabled" class="lobby-setting-input" data-setting="votingEnabled" type="checkbox"><span data-lobby-i18n="lobbyVotingEnabled">Голосування увімкнено</span></label><label><input id="lobbySettingBonusInventoryEnabled" name="bonusInventoryEnabled" class="lobby-setting-input" data-setting="bonusInventoryEnabled" type="checkbox"><span data-lobby-i18n="lobbyBonusEnabled">Бонусний інвентар</span></label></div>
+					</div>
+					<div id="lobbySettingsAccess" class="lobby-settings-pane" role="tabpanel" data-settings-pane="access" hidden>
+						<div class="lobby-setting-grid"><label class="lobby-setting-row"><span data-lobby-i18n="lobbyReadyPolicy">Політика готовності</span><select id="lobbySettingReadyRequirement" name="readyRequirement" class="input-field lobby-setting-input" data-setting="readyRequirement"><option value="AllPlayers" data-lobby-i18n="lobbyAllReady">Усі гравці</option><option value="HostDecision" data-lobby-i18n="lobbyHostDecides">Вирішує host</option></select></label><label class="lobby-setting-row"><span data-lobby-i18n="lobbyRoomPassword">Пароль кімнати</span><input name="lobbyPasswordInput" id="lobbyPasswordInput" class="input-field" type="password" maxlength="64" autocomplete="new-password" data-lobby-i18n-placeholder="lobbyPasswordPlaceholder"><button id="lobbyPasswordApply" type="button" class="btn-secondary" data-lobby-i18n="lobbyPasswordApply">Оновити пароль</button></label></div>
+						<div class="lobby-toggle-grid"><label><input id="lobbySettingSpectatorsAllowed" name="spectatorsAllowed" class="lobby-setting-input" data-setting="spectatorsAllowed" type="checkbox"><span data-lobby-i18n="lobbySpectatorsAllowed">Дозволити спостерігачів</span></label><label><input id="lobbySettingHostCanStartWithoutAllReady" name="hostCanStartWithoutAllReady" class="lobby-setting-input" data-setting="hostCanStartWithoutAllReady" type="checkbox"><span data-lobby-i18n="lobbyHostOverride">Host може стартувати без усіх ready</span></label><label><input id="lobbySettingResetReadinessAfterSettingsChange" name="resetReadinessAfterSettingsChange" class="lobby-setting-input" data-setting="resetReadinessAfterSettingsChange" type="checkbox"><span data-lobby-i18n="lobbyResetReady">Скидати ready після змін</span></label><label><input id="lobbySettingJoinsLocked" name="joinsLocked" class="lobby-setting-input" data-setting="joinsLocked" type="checkbox"><span data-lobby-i18n="lobbyLockJoins">Заблокувати нові входи</span></label></div>
+					</div>
+					<div class="lobby-settings-tools">
+						<input name="lobbyLocalPresetName" id="lobbyLocalPresetName" class="input-field" maxlength="40" data-lobby-i18n-placeholder="lobbyPresetName" placeholder="Назва локального пресету">
+						<select name="lobbyLocalPresetSelect" id="lobbyLocalPresetSelect" class="input-field"></select>
+						<button id="lobbyPresetSave" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetSave">Зберегти локально</button>
+						<button id="lobbyPresetLoad" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetLoad">Завантажити</button>
+						<button id="lobbyPresetDelete" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetDelete">Видалити</button>
+						<button id="lobbyPresetExport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetExport">Export JSON</button>
+						<button id="lobbyPresetImport" type="button" class="btn-secondary" data-lobby-i18n="lobbyPresetImport">Import JSON</button>
+						<input name="lobbyPresetFile" id="lobbyPresetFile" type="file" accept="application/json,.json" hidden>
+					</div>
 					<div class="lobby-settings-applybar">
-					<button id="lobbySettingsReset" type="button" class="btn-secondary" data-lobby-i18n="lobbyReset">Скинути</button>
-					<button id="lobbySettingsClassic" type="button" class="btn-secondary" data-lobby-i18n="lobbyResetClassic">Класичний</button>
-					<button id="lobbySettingsApply" type="button" class="btn-success" data-lobby-i18n="lobbyApply">Застосувати</button>
+						<button id="lobbySettingsReset" type="button" class="btn-secondary" data-lobby-i18n="lobbyReset">Скинути</button>
+						<button id="lobbySettingsClassic" type="button" class="btn-secondary" data-lobby-i18n="lobbyResetClassic">Класичний</button>
+						<button id="lobbySettingsApply" type="button" class="btn-success" data-lobby-i18n="lobbyApply">Застосувати</button>
 					</div>
 				</div>
 			</details>

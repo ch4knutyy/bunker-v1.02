@@ -1,4 +1,5 @@
 @model Bunker.Models.ViewModels.Account.LoginViewModel
+
 @{
     ViewData["Title"] = "Вхід";
 }
@@ -11,30 +12,49 @@
             <p>Поверніться до свого профілю Vault Judgment.</p>
         </div>
 
-        <form asp-action="Login" asp-controller="Account" method="post" class="auth-form">
+        <form asp-action="Login"
+              asp-controller="Account"
+              method="post"
+              class="auth-form">
+
             <input asp-for="ReturnUrl" type="hidden" />
-            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary"></div>
 
             <div class="auth-field">
                 <label asp-for="Email"></label>
-                <input asp-for="Email" autocomplete="email" />
+                <input asp-for="Email"
+                       autocomplete="email" />
                 <span asp-validation-for="Email"></span>
             </div>
 
             <div class="auth-field">
                 <label asp-for="Password"></label>
-                <input asp-for="Password" autocomplete="current-password" />
+                <input asp-for="Password"
+                       autocomplete="current-password" />
                 <span asp-validation-for="Password"></span>
             </div>
 
-            <label class="auth-check">
+            <div class="auth-check">
                 <input asp-for="RememberMe" />
-                <span asp-for="RememberMe">Запам’ятати мене</span>
-            </label>
+                <label asp-for="RememberMe">
+                    Запам’ятати мене
+                </label>
+            </div>
 
-            <button type="submit" class="auth-primary">Увійти</button>
+            <button type="submit"
+                    class="auth-primary">
+                Увійти
+            </button>
         </form>
 
-        <p class="auth-alternate">Ще не маєте профілю? <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Зареєструватися</a></p>
+        <p class="auth-alternate">
+            Ще не маєте профілю?
+            <a asp-action="Register"
+               asp-route-returnUrl="@Model.ReturnUrl">
+                Зареєструватися
+            </a>
+        </p>
     </div>
 </section>
