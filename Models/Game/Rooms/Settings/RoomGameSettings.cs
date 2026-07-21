@@ -7,10 +7,13 @@ public enum InteractiveThreatRate { Off, Rare, Standard, Often, Always }
 public enum ThreatFrequencyMode { OncePerGame, EveryOtherRound, EveryRound, RandomEligibleRounds }
 public enum VotingFrequencyMode { EveryRound, EveryTwoRounds }
 public enum CharacterGenerationMode { Classic }
+public enum ApocalypseSelectionMode { RandomAll, RandomCategories, Specific, CustomPool }
 
 public sealed class RoomGameSettings
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
+    public static readonly IReadOnlyList<string> ProductionApocalypseCategoryIds =
+        ["armageddon", "weather", "biological", "geological", "cosmic", "technology", "ecological", "social", "anomaly", "supernatural"];
     public int Version { get; set; } = CurrentVersion;
     public GamePreset Preset { get; set; } = GamePreset.Classic;
 
@@ -32,6 +35,13 @@ public sealed class RoomGameSettings
     public int? RandomBunkerCapacityMax { get; set; }
 
     public bool ApocalypseEnabled { get; set; } = true;
+    public ApocalypseSelectionMode ApocalypseSelectionMode { get; set; } = ApocalypseSelectionMode.RandomAll;
+    public string? SelectedApocalypseId { get; set; }
+    public List<string> AllowedApocalypseCategoryIds { get; set; } = ProductionApocalypseCategoryIds.ToList();
+    public List<string> ApocalypseCustomPoolIds { get; set; } = new();
+    public bool AllowInteractiveApocalypses { get; set; } = true;
+    public int InteractiveApocalypseChancePercent { get; set; } = 10;
+    public bool ApocalypseThemeEnabled { get; set; } = true;
     public bool BunkerScenarioEnabled { get; set; } = true;
 
     public bool ThreatsEnabled { get; set; } = true;
@@ -82,6 +92,12 @@ public sealed record LobbyGameSettingsDto(
     int? RandomBunkerCapacityMax,
     int? ResolvedBunkerCapacity,
     bool ApocalypseEnabled,
+    string ApocalypseSelectionMode,
+    int AllowedApocalypseCategoryCount,
+    int ApocalypseCustomPoolCount,
+    bool AllowInteractiveApocalypses,
+    int InteractiveApocalypseChancePercent,
+    bool ApocalypseThemeEnabled,
     bool BunkerScenarioEnabled,
     bool ThreatsEnabled,
     string InteractiveThreatRate,

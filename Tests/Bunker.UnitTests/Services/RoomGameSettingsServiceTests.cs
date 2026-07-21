@@ -28,6 +28,34 @@ public sealed class RoomGameSettingsServiceTests
         Assert.Equal(3, settings.BonusInventoryRound);
         Assert.Equal(1, settings.BonusInventoryCount);
         Assert.Equal(1, settings.StartingInventoryCount);
+        Assert.Equal(ApocalypseSelectionMode.RandomAll, settings.ApocalypseSelectionMode);
+        Assert.Equal(10, settings.AllowedApocalypseCategoryIds.Count);
+        Assert.True(settings.AllowInteractiveApocalypses);
+        Assert.Equal(10, settings.InteractiveApocalypseChancePercent);
+        Assert.True(settings.ApocalypseThemeEnabled);
+    }
+
+    [Fact]
+    public void VersionTwoMigratesToVersionThreeApocalypseDefaultsIdempotently()
+    {
+        var versionTwo = new RoomGameSettings { Version = 2, ApocalypseSelectionMode = ApocalypseSelectionMode.Specific, SelectedApocalypseId = "legacy" };
+        var migrated = RoomGameSettingsService.Migrate(versionTwo);
+        var twice = RoomGameSettingsService.Migrate(migrated);
+        Assert.Equal(3, migrated.Version); Assert.Equal(ApocalypseSelectionMode.RandomAll, migrated.ApocalypseSelectionMode);
+        Assert.Null(migrated.SelectedApocalypseId); Assert.Equal(10, migrated.AllowedApocalypseCategoryIds.Count);
+        Assert.Equal(JsonSerializer.Serialize(migrated), JsonSerializer.Serialize(twice));
+    }
+
+    [Fact]
+    public void FreezeAndClonePreserveApocalypseConfiguration()
+    {
+        var context = CreateContext(); var settings = RoomGameSettingsService.Clone(context.Room.GameSettings);
+        settings.ApocalypseSelectionMode = ApocalypseSelectionMode.CustomPool;
+        settings.ApocalypseCustomPoolIds = ["one", "two"]; settings.ApocalypseThemeEnabled = false;
+        context.Room.GameSettings = settings; context.Service.FreezeForStart(context.Room, (min, max) => min);
+        settings.ApocalypseCustomPoolIds.Clear();
+        Assert.Equal(["one", "two"], context.Room.FrozenGameSettings!.ApocalypseCustomPoolIds);
+        Assert.False(context.Room.FrozenGameSettings.ApocalypseThemeEnabled);
     }
 
     [Fact]

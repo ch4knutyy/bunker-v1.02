@@ -3,9 +3,17 @@ using Bunker.Models;
 
 namespace Bunker.Services;
 
-public sealed class RoomGameSettingsService(GmAuditService audit)
+public sealed class RoomGameSettingsService
 {
+    private readonly GmAuditService audit;
+    private readonly ApocalypseSelectionService? apocalypseSelection;
     private static readonly HashSet<int> TimerDurations = [120, 180, 300, 420, 600, 900];
+
+    public RoomGameSettingsService(GmAuditService audit, ApocalypseSelectionService? apocalypseSelection = null)
+    {
+        this.audit = audit;
+        this.apocalypseSelection = apocalypseSelection;
+    }
 
     public RoomGameSettings GetCanonical(Room room)
     {
@@ -28,7 +36,10 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
             settings.HostCanStartWithoutAllReady, settings.ResetReadinessAfterSettingsChange,
             settings.BunkerCapacityMode.ToString(), settings.ManualBunkerCapacity,
             settings.RandomBunkerCapacityMin, settings.RandomBunkerCapacityMax, room.ResolvedBunkerCapacity,
-            settings.ApocalypseEnabled, settings.BunkerScenarioEnabled, settings.ThreatsEnabled,
+            settings.ApocalypseEnabled, settings.ApocalypseSelectionMode.ToString(),
+            settings.AllowedApocalypseCategoryIds?.Count ?? 0, settings.ApocalypseCustomPoolIds?.Count ?? 0,
+            settings.AllowInteractiveApocalypses, settings.InteractiveApocalypseChancePercent, settings.ApocalypseThemeEnabled,
+            settings.BunkerScenarioEnabled, settings.ThreatsEnabled,
             settings.InteractiveThreatRate.ToString(), InteractivePercent(settings.InteractiveThreatRate),
             settings.FirstThreatRound, settings.ThreatFrequency.ToString(), settings.MaxThreatsPerGame,
             settings.AvoidRepeatedThreats, settings.RoundTimerEnabled, settings.RoundTimerDurationSeconds,
@@ -148,6 +159,29 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
             warnings.Add(new("spectators_present", "Spectators are present while new spectator roles are disabled."));
         if (players > settings.MaxGameplayPlayers)
             warnings.Add(new("player_count_exceeds_max", "Current gameplay player count exceeds the configured maximum."));
+        if (settings.ApocalypseEnabled && settings.ApocalypseSelectionMode == ApocalypseSelectionMode.RandomCategories && settings.AllowedApocalypseCategoryIds.Count == 0)
+            warnings.Add(new("apocalypse_categories_empty", "No apocalypse categories are selected."));
+        if (settings.ApocalypseEnabled && settings.ApocalypseSelectionMode == ApocalypseSelectionMode.CustomPool && settings.ApocalypseCustomPoolIds.Count == 0)
+            warnings.Add(new("apocalypse_pool_empty", "The custom apocalypse pool is empty."));
+        if (settings.ApocalypseEnabled && settings.ApocalypseSelectionMode == ApocalypseSelectionMode.Specific && string.IsNullOrWhiteSpace(settings.SelectedApocalypseId))
+            warnings.Add(new("apocalypse_specific_missing", "No specific apocalypse is selected."));
+        if (settings.ApocalypseEnabled && apocalypseSelection != null)
+        {
+            var preview = apocalypseSelection.BuildPreview(settings);
+            if (preview.CandidateCount == 0)
+                warnings.Add(new("apocalypse_candidate_set_empty", "The apocalypse candidate set is empty."));
+            if (settings.AllowInteractiveApocalypses && settings.InteractiveApocalypseChancePercent > 0 && preview.InteractiveCount == 0)
+                warnings.Add(new("apocalypse_interactive_unavailable", "No interactive apocalypse is available in this selection."));
+            if (preview.OrdinaryCount == 0 && preview.InteractiveCount > 0)
+                warnings.Add(new("apocalypse_only_interactive_candidates", "This selection contains only interactive apocalypses."));
+        }
+        if (!settings.ApocalypseThemeEnabled)
+            warnings.Add(new("apocalypse_theme_disabled", "Apocalypse thematic appearance is disabled."));
+        if (settings.ApocalypseSelectionMode == ApocalypseSelectionMode.CustomPool && settings.ApocalypseCustomPoolIds.Count is > 0 and < 5)
+            warnings.Add(new("apocalypse_custom_pool_small", "The custom apocalypse pool is small."));
+        if (settings.ApocalypseSelectionMode == ApocalypseSelectionMode.Specific && apocalypseSelection != null &&
+            apocalypseSelection.BuildPreview(settings).Specific?.Interactive == true)
+            warnings.Add(new("apocalypse_specific_is_interactive", "The selected apocalypse is interactive."));
         return warnings;
     }
 
@@ -225,6 +259,7 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
     {
         if (source == null || source.Version <= 0) return Preset(GamePreset.Classic);
         var wasLegacy = source.Version < 2;
+        var wasVersion2 = source.Version < 3;
         var result = Clone(source);
         if (!ScenarioRules.BunkerIntelEnabled)
             result.BunkerIntelMode = BunkerIntelMode.AllVisible;
@@ -233,11 +268,23 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
             result.ScenarioSchedule = new ScenarioScheduleSettings { Enabled = false };
             result.BunkerIntelMode = BunkerIntelMode.AllVisible;
         }
+        if (wasVersion2)
+        {
+            result.ApocalypseSelectionMode = ApocalypseSelectionMode.RandomAll;
+            result.SelectedApocalypseId = null;
+            result.AllowedApocalypseCategoryIds = RoomGameSettings.ProductionApocalypseCategoryIds.ToList();
+            result.ApocalypseCustomPoolIds = [];
+            result.AllowInteractiveApocalypses = true;
+            result.InteractiveApocalypseChancePercent = 10;
+            result.ApocalypseThemeEnabled = true;
+        }
+        result.AllowedApocalypseCategoryIds ??= RoomGameSettings.ProductionApocalypseCategoryIds.ToList();
+        result.ApocalypseCustomPoolIds ??= [];
         result.Version = RoomGameSettings.CurrentVersion;
         return result;
     }
 
-    private static List<string> Validate(RoomGameSettings settings, int currentGameplayCount)
+    private List<string> Validate(RoomGameSettings settings, int currentGameplayCount)
     {
         var errors = new List<string>();
         if (settings.Version != RoomGameSettings.CurrentVersion) errors.Add("unsupported_settings_version");
@@ -269,6 +316,9 @@ public sealed class RoomGameSettingsService(GmAuditService audit)
         if (settings.BunkerIntelMode is null || !Enum.IsDefined(settings.BunkerIntelMode.Value) ||
             settings.BunkerIntelIntervalRounds is < 1 or > 3)
             errors.Add("invalid_bunker_intel_settings");
+        if (!Enum.IsDefined(settings.ApocalypseSelectionMode) || settings.InteractiveApocalypseChancePercent is < 0 or > 100)
+            errors.Add("invalid_apocalypse_settings");
+        if (apocalypseSelection != null) errors.AddRange(apocalypseSelection.ValidateSettings(settings));
         return errors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 

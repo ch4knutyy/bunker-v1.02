@@ -14,7 +14,7 @@ test('lobby setup has one compact host editor with read-only public summary', ()
   assert.equal((view.match(/id="lobbyGameSetup"/g) || []).length, 1);
   assert.equal((view.match(/id="lobbySettingsHostEditor"/g) || []).length, 1);
   assert.equal((view.match(/id="lobbySettingsReadOnly"/g) || []).length, 1);
-  for (const tab of ['basic', 'threats', 'rounds', 'access']) {
+  for (const tab of ['basic', 'apocalypse', 'threats', 'rounds', 'access']) {
     assert.match(view, new RegExp(`data-settings-tab="${tab}"`));
   }
   assert.match(css, /lobby-settings-tabs[\s\S]*overflow-x:\s*auto/);
@@ -23,7 +23,7 @@ test('lobby setup has one compact host editor with read-only public summary', ()
 });
 
 test('settings use one versioned canonical model, atomic apply, revision and freeze', () => {
-  assert.match(settings, /CurrentVersion\s*=\s*1/);
+  assert.match(settings, /CurrentVersion\s*=\s*3/);
   assert.match(settings, /LobbySettingsUpdateRequest/);
   assert.match(service, /ExpectedRevision/);
   assert.match(service, /settings_revision_conflict/);
@@ -51,7 +51,7 @@ test('live revision or host transfer discards stale drafts and non-host remains 
 
 test('local presets and JSON interchange are versioned and whitelist only normalized settings', () => {
   assert.match(client, /schema:'bunker-room-game-settings', version:1/);
-  assert.match(client, /data\?\.schema !== 'bunker-room-game-settings' \|\| data\?\.version !== 1 \|\| data\?\.settings\?\.version !== 1/);
+  assert.match(client, /\[1, 2, 3\]\.includes\(Number\(data\?\.settings\?\.version\)\)/);
   assert.match(client, /settings:normalizeLobbySettings\(lobbySettingsDraft\)/);
   const normalizeBody = client.slice(client.indexOf('function normalizeLobbySettings'), client.indexOf('function lobbyAmCurrentHost'));
   for (const forbidden of ['password', 'roomId', 'playerId', 'connectionId', 'displayName', 'profession']) {
