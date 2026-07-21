@@ -7,7 +7,9 @@ namespace Bunker.Models
     {
         public string Name { get; set; } = "";
         public int ExperienceYears { get; set; }
-        public string Type { get; set; } = "";
+
+		public string ProfessionalLevel { get; set; } = string.Empty;
+		public string Type { get; set; } = "";
         
         /// <summary>
         /// Список навичок професії
