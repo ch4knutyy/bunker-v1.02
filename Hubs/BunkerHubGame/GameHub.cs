@@ -105,14 +105,13 @@ namespace Bunker.Hubs
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;
-			_gmPanelStateBuilder = gmPanelStateBuilder ??
-				throw new ArgumentNullException(nameof(gmPanelStateBuilder));
+			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
 			_authorizationService = authorizationService;
             _bunkerIntel = bunkerIntel ?? new BunkerIntelService();
             if (scenarioScheduler == null || scenarioRunner == null || eventSpecialCards == null || scenarioContent == null)
             {
-                var fallbackContent = scenarioContent ?? new ScenarioContentRegistry(Path.Combine(
-                    Directory.GetCurrentDirectory(), "wwwroot", "data", "scenario"));
+                var fallbackContent = scenarioContent ?? new ScenarioContentRegistry(
+                    ResolveDefaultScenarioContentDirectory());
                 _scenarioContent = fallbackContent;
                 _scenarioScheduler = scenarioScheduler ?? new ScenarioSchedulerService(fallbackContent, TimeProvider.System);
                 _eventSpecialCards = eventSpecialCards ?? new EventSpecialCardService(
@@ -128,6 +127,28 @@ namespace Bunker.Hubs
                 _eventSpecialCards = eventSpecialCards;
             }
 			_logger = logger;
+        }
+
+        private static string ResolveDefaultScenarioContentDirectory()
+        {
+            var workingDirectoryCandidate = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "data",
+                "scenario");
+            if (Directory.Exists(workingDirectoryCandidate))
+                return workingDirectoryCandidate;
+
+            for (var directory = new DirectoryInfo(AppContext.BaseDirectory);
+                 directory != null;
+                 directory = directory.Parent)
+            {
+                var candidate = Path.Combine(directory.FullName, "wwwroot", "data", "scenario");
+                if (Directory.Exists(candidate))
+                    return candidate;
+            }
+
+            return workingDirectoryCandidate;
         }
 
 		private void QueueRoomRecovery(Room room, string reason) =>

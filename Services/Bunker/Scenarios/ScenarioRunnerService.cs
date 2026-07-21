@@ -273,32 +273,51 @@ public sealed class ScenarioRunnerService
             .Where(player => !player.IsEliminated).ToList();
     private static List<Player> SelectTargets(JsonElement source, IReadOnlyList<Player> players)
     {
-        if (source.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+        if (!TryReadTargetSelection(source, out var selection))
             return [];
-        if (source.ValueKind != JsonValueKind.Object)
-            throw new InvalidDataException(
-                $"Scenario source must be an object, but received {source.ValueKind}.");
-        if (!source.TryGetProperty("targetSelection", out var selection) ||
-            selection.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
-            return [];
-        if (selection.ValueKind != JsonValueKind.Object)
-            throw new InvalidDataException(
-                $"Scenario target selector must be an object, but received {selection.ValueKind}.");
 
         var mode = ReadString(selection, "mode");
-        var desired = mode.StartsWith("two_", StringComparison.Ordinal) ? 2 : mode == "random_active_player" ? 1 : 0;
-        if (selection.TryGetProperty("excludePlayersAtMaximumPhysicalSeverity", out var excludeMaximum) &&
-            excludeMaximum.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
-            throw new InvalidDataException(
-                "Scenario target selector property 'excludePlayersAtMaximumPhysicalSeverity' must be a boolean.");
+        if (!ScenarioRules.TryGetTargetSelectionCount(mode, out var desired))
+            throw new InvalidDataException($"Unknown scenario target selector mode '{mode}'.");
+        var excludeMaximumSeverity = ReadOptionalBoolean(
+            selection,
+            "excludePlayersAtMaximumPhysicalSeverity");
+        _ = ReadOptionalBoolean(selection, "excludeHostRoleOnlySpectators");
 
         if (players.Count == 0) return [];
-        var candidates = excludeMaximum.ValueKind == JsonValueKind.True
+        var candidates = excludeMaximumSeverity
             ? players.Where(player => !string.Equals(player.PhysicalHealth.SeverityCode, "critical",
                 StringComparison.OrdinalIgnoreCase)).ToList()
             : players.ToList();
         return candidates.OrderBy(player => player.EventSpecialCards.Count)
             .ThenBy(_ => Random.Shared.Next()).Take(desired).ToList();
+    }
+    private static bool TryReadTargetSelection(JsonElement source, out JsonElement selection)
+    {
+        selection = default;
+        if (source.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return false;
+        if (source.ValueKind != JsonValueKind.Object)
+            throw new InvalidDataException(
+                $"Scenario source must be an object, but received {source.ValueKind}.");
+        if (!source.TryGetProperty("targetSelection", out selection) ||
+            selection.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return false;
+        if (selection.ValueKind != JsonValueKind.Object)
+            throw new InvalidDataException(
+                $"Scenario target selector must be an object, but received {selection.ValueKind}.");
+        return true;
+    }
+    private static bool ReadOptionalBoolean(JsonElement element, string property)
+    {
+        if (!element.TryGetProperty(property, out var value)) return false;
+        return value.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            _ => throw new InvalidDataException(
+                $"Scenario target selector property '{property}' must be a boolean.")
+        };
     }
     private static Player? ResolvePayloadTarget(JsonElement payload, IReadOnlyList<Player> selected, int fallbackIndex)
     {

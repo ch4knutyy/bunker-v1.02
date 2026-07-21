@@ -19,6 +19,16 @@ public static class ScenarioRules
     public const int PrivateChoiceTimeoutSeconds = 180;
     public static bool BunkerIntelEnabled => false;
     public const int EarliestSocialScenarioRound = 2;
+    public static bool TryGetTargetSelectionCount(string mode, out int count)
+    {
+        count = mode switch
+        {
+            "random_active_player" => 1,
+            "two_random_active_players" or "two_distinct_random_active_players" => 2,
+            _ => 0
+        };
+        return count > 0;
+    }
     public static readonly IReadOnlyDictionary<ScenarioType, int> TypeWeights =
         new Dictionary<ScenarioType, int>
         {

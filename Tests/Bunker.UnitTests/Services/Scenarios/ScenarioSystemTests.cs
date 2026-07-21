@@ -64,7 +64,12 @@ public sealed class ScenarioContentRegistryTests
             """);
         Assert.Single(new ScenarioContentRegistry(valid.Directory).Events);
 
-        foreach (var invalidShape in new[] { "\"random_active_player\"", "[]" })
+        foreach (var invalidShape in new[]
+        {
+            "\"random_active_player\"",
+            "[]",
+            "{\"mode\":\"self\"}"
+        })
         {
             using var invalid = new ScenarioFixture();
             invalid.WriteCards("""{"schemaVersion":3,"cards":[]}""");
@@ -225,6 +230,8 @@ public sealed class ScenarioRunnerTests
     [Theory]
     [InlineData("""{"targetSelection":"random_active_player"}""")]
     [InlineData("""{"targetSelection":[]}""")]
+    [InlineData("""{"targetSelection":{"mode":"unknown"}}""")]
+    [InlineData("""{"targetSelection":{"mode":"random_active_player","excludeHostRoleOnlySpectators":"yes"}}""")]
     public void InvalidTargetSelectorFailsBeforeScenarioIsMarkedStarted(string sourceJson)
     {
         var runtime = ScenarioTestData.Runtime();

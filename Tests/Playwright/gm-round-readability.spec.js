@@ -7,10 +7,17 @@ test('GM round controls stay readable and overflow-free on mobile width', async 
   const room = await createTwoPlayerRoom(browser, `Round Readability ${Date.now()}`);
   try {
     await room.host.setViewportSize({ width: 390, height: 844 });
+    await room.host.locator('#lobbyReadyButton').click();
+    await room.guest.locator('#lobbyReadyButton').click();
+    await room.host.locator('#lobbyStartPreviewButton').click();
+    await expect(room.host.locator('#startGameBtn')).toBeEnabled({ timeout: 15000 });
+    const guestWarning = room.host.locator('#guestAccountWarningModal');
+    if (await guestWarning.isVisible())
+      await room.host.locator('#guestWarningContinueButton').click();
     await room.host.locator('#startGameBtn').click();
     await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
     await room.host.locator('#gmPanelBtn').click();
-    await room.host.locator('[data-gm-tab-button="round"]').click();
+    await room.host.locator('[data-gm-tab-button="game"]').click();
     for (const id of ['#gmRoundStateHeading', '#gmRoundMainHeading', '#gmManualRoundHeading', '#gmReadinessHeading', '#gmTimerHeading']) {
       await expect(room.host.locator(id)).toBeVisible();
     }

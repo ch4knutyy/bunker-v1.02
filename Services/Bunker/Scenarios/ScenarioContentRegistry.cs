@@ -345,7 +345,7 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
                 $"target selector must be an object or null, but received {selector.ValueKind}");
 
         var mode = RequiredString(selector, "mode", file, path + ".targetSelection", id);
-        if (!KnownTargets.Contains(mode))
+        if (!ScenarioRules.TryGetTargetSelectionCount(mode, out _))
             Fail(file, path + ".targetSelection.mode", id, $"unknown target value '{mode}'");
         ValidateOptionalBoolean(selector, "excludeHostRoleOnlySpectators", file, path + ".targetSelection", id);
         ValidateOptionalBoolean(selector, "excludePlayersAtMaximumPhysicalSeverity", file, path + ".targetSelection", id);

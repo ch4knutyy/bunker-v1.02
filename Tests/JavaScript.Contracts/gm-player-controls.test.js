@@ -13,7 +13,7 @@ test('player commands require safe capability and same-room target resolution', 
 });
 
 test('host never receives the personal player snapshot', () => {
-  const helper = hub.match(/private Task SendPersonalPlayerSnapshot[\s\S]*?;\r?\n/)?.[0] || '';
+  const helper = hub.match(/private async Task SendPersonalPlayerSnapshot[\s\S]*?(?=\r?\n\s*private async Task SendPublicPlayersUpdate)/)?.[0] || '';
   assert.match(helper, /Clients\.Client\(connectionId\)/);
   assert.doesNotMatch(helper, /Clients\.Caller/);
 });

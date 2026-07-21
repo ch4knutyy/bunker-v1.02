@@ -30,43 +30,15 @@ public partial class GameHub
         var scenarioCommandId = $"scenario-{room.Id}-{completedRound}-{triggerPhase}";
         var snapshot = CreateMutationSnapshot(room, "system", "scenario_started",
             scenarioCommandId, "Before scheduled scenario");
-        ScenarioRunResult result;
-        try
-        {
-            result = _scenarioRunner.Run(
-                room,
-                selection.Scenario,
-                completedRound,
-                commandId: scenarioCommandId);
-        }
-        catch (Exception exception) when (exception is InvalidDataException or JsonException)
-        {
-            RoomSnapshotService.ApplyState(room, snapshot.State);
-            _logger.LogError(
-                exception,
-                "Scenario {ScenarioId} failed in room {RoomId} after round {CompletedRound}; target selector ValueKind={ValueKind}.",
-                selection.Scenario.Id,
-                room.Id,
-                completedRound,
-                GetTargetSelectorValueKind(selection.Scenario));
-            await Clients.Client(room.HostConnectionId).SendAsync(
-                "ReceiveError",
-                "scenario_content_invalid");
-            return null;
-        }
-        if (!result.Success)
-        {
-            RoomSnapshotService.ApplyState(room, snapshot.State);
-            _logger.LogWarning(
-                "Scenario {ScenarioId} was skipped in room {RoomId} after round {CompletedRound}: {ErrorCode}.",
-                selection.Scenario.Id,
-                room.Id,
-                completedRound,
-                result.ErrorCode);
-            await Clients.Client(room.HostConnectionId).SendAsync("ReceiveError",
-                result.ErrorCode ?? "scenario_resolution_failed");
-            return result;
-        }
+        var result = await ExecuteScenarioSafely(
+            room,
+            selection.Scenario,
+            completedRound,
+            scenarioCommandId,
+            snapshot,
+            room.HostConnectionId,
+            "scenario_resolution_failed");
+        if (result == null) return null;
 
         await Clients.Group(room.Id).SendAsync("ScenarioStarted", new
         {
@@ -89,6 +61,73 @@ public partial class GameHub
                 $"Scenario {selection.Scenario.Id} resolved.", allowUndo: false);
         QueueRoomRecovery(room, "scenario_started");
         return result;
+    }
+
+    private async Task<ScenarioRunResult?> ExecuteScenarioSafely(
+        Room room,
+        ScenarioDefinition scenario,
+        int completedRound,
+        string commandId,
+        RoomSnapshot snapshot,
+        string errorConnectionId,
+        string fallbackErrorCode)
+    {
+        ScenarioRunResult result;
+        try
+        {
+            result = _scenarioRunner.Run(
+                room,
+                scenario,
+                completedRound,
+                commandId: commandId);
+        }
+        catch (Exception exception)
+        {
+            RoomSnapshotService.ApplyState(room, snapshot.State);
+            var errorCode = exception is InvalidDataException or JsonException
+                ? "scenario_content_invalid"
+                : "scenario_execution_failed";
+            _logger.LogError(
+                exception,
+                "Scenario {ScenarioId} failed in room {RoomId} after round {CompletedRound}; target selector ValueKind={ValueKind}, ErrorCode={ErrorCode}.",
+                scenario.Id,
+                room.Id,
+                completedRound,
+                GetTargetSelectorValueKind(scenario),
+                errorCode);
+            await TrySendScenarioError(errorConnectionId, errorCode);
+            return null;
+        }
+
+        if (result.Success) return result;
+
+        RoomSnapshotService.ApplyState(room, snapshot.State);
+        var resolutionError = result.ErrorCode ?? fallbackErrorCode;
+        _logger.LogWarning(
+            "Scenario {ScenarioId} was skipped in room {RoomId} after round {CompletedRound}: {ErrorCode}.",
+            scenario.Id,
+            room.Id,
+            completedRound,
+            resolutionError);
+        await TrySendScenarioError(errorConnectionId, resolutionError);
+        return null;
+    }
+
+    private async Task TrySendScenarioError(string connectionId, string errorCode)
+    {
+        if (string.IsNullOrWhiteSpace(connectionId)) return;
+        try
+        {
+            await Clients.Client(connectionId).SendAsync("ReceiveError", errorCode);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "Failed to notify connection {ConnectionId} about scenario error {ErrorCode}.",
+                connectionId,
+                errorCode);
+        }
     }
 
     private async Task BroadcastBunkerIntelProjection(Room room)
@@ -579,12 +618,15 @@ public partial class GameHub
         room.ScenarioSituations ??= _scenarioScheduler.InitializeForNewGame(_roomGameSettings.GetEffective(room));
         var snapshot = CreateMutationSnapshot(room, GetGmActorId(room), "scenario_started",
             commandId, "Before forced scenario");
-        var result = _scenarioRunner.Run(room, definition, room.CurrentRound, commandId: commandId);
-        if (!result.Success)
-        {
-            await Clients.Caller.SendAsync("ReceiveError", result.ErrorCode ?? "scenario_force_failed");
-            return;
-        }
+        var result = await ExecuteScenarioSafely(
+            room,
+            definition,
+            room.CurrentRound,
+            commandId,
+            snapshot,
+            Context.ConnectionId,
+            "scenario_force_failed");
+        if (result == null) return;
         await Clients.Group(room.Id).SendAsync("ScenarioStarted", new
         {
             scenario = result.Public
