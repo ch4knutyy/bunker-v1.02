@@ -1,4 +1,5 @@
 @model Bunker.Models.ViewModels.Account.RegisterViewModel
+
 @{
     ViewData["Title"] = "Реєстрація";
 }
@@ -11,37 +12,64 @@
             <p>Збережіть власне ім’я профілю для майбутніх можливостей Vault Judgment.</p>
         </div>
 
-        <form asp-action="Register" asp-controller="Account" method="post" class="auth-form">
+        <form asp-action="Register"
+              asp-controller="Account"
+              method="post"
+              class="auth-form">
+
             <input asp-for="ReturnUrl" type="hidden" />
-            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary"></div>
 
             <div class="auth-field">
                 <label asp-for="DisplayName"></label>
-                <input asp-for="DisplayName" autocomplete="name" maxlength="32" />
+                <input asp-for="DisplayName"
+                       type="text"
+                       autocomplete="nickname"
+                       maxlength="32" />
                 <span asp-validation-for="DisplayName"></span>
             </div>
 
             <div class="auth-field">
                 <label asp-for="Email"></label>
-                <input asp-for="Email" autocomplete="email" />
+                <input asp-for="Email"
+                       type="email"
+                       autocomplete="email" />
                 <span asp-validation-for="Email"></span>
             </div>
 
             <div class="auth-field">
                 <label asp-for="Password"></label>
-                <input asp-for="Password" autocomplete="new-password" />
+                <input asp-for="Password"
+                       type="password"
+                       autocomplete="new-password" />
                 <span asp-validation-for="Password"></span>
             </div>
 
             <div class="auth-field">
                 <label asp-for="ConfirmPassword"></label>
-                <input asp-for="ConfirmPassword" autocomplete="new-password" />
+                <input asp-for="ConfirmPassword"
+                       type="password"
+                       autocomplete="new-password" />
                 <span asp-validation-for="ConfirmPassword"></span>
             </div>
 
-            <button type="submit" class="auth-primary">Зареєструватися</button>
+            <button type="submit" class="auth-primary">
+                Зареєструватися
+            </button>
         </form>
 
-        <p class="auth-alternate">Уже маєте обліковий запис? <a asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl">Увійти</a></p>
+        <p class="auth-alternate">
+            Уже маєте обліковий запис?
+            <a asp-action="Login"
+               asp-route-returnUrl="@Model.ReturnUrl">
+                Увійти
+            </a>
+        </p>
     </div>
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
