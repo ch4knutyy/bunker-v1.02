@@ -80,6 +80,9 @@ namespace Bunker.Data.Persistence.Migrations
                     b.Property<bool>("IsWinner")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("LeftAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PlayerNameSnapshot")
                         .IsRequired()
                         .HasMaxLength(10)

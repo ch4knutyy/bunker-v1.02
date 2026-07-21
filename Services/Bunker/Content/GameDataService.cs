@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Bunker.Models.GameData;
 using Bunker.Models;
 
@@ -21,7 +22,10 @@ namespace Bunker.Services
         private List<CharacterTraitData>? _characterTraits;
         private List<PhobiaData>? _phobias;
         private List<FactData>? _facts;
-        private List<Apocalypse>? _apocalypses;
+        private IReadOnlyList<Apocalypse> _apocalypses = Array.Empty<Apocalypse>();
+        private IReadOnlyList<ApocalypseCategoryDefinition> _apocalypseCategories = Array.Empty<ApocalypseCategoryDefinition>();
+        private IReadOnlyList<ApocalypseVisualThemeDefinition> _apocalypseVisualThemes = Array.Empty<ApocalypseVisualThemeDefinition>();
+        private ApocalypseInteractiveSchemaDefinition? _apocalypseInteractiveSchema;
         private List<BunkerInfo>? _bunkers;
         private List<ThreatData>? _threats;
         private List<SpecialCardData>? _specialCards;
@@ -55,7 +59,7 @@ namespace Bunker.Services
             _characterTraits = LoadJsonArray<CharacterTraitData>(Path.Combine(dataPath, "character_traits.json"), "character_traits");
             _phobias = LoadJsonArray<PhobiaData>(Path.Combine(dataPath, "phobias.json"), "phobias");
             _facts = LoadJsonArray<FactData>(Path.Combine(dataPath, "facts.json"), "facts");
-            _apocalypses = LoadJsonArray<Apocalypse>(Path.Combine(dataPath, "apocalypses.json"), "apocalypses");
+            LoadApocalypseData(Path.Combine(dataPath, "apocalypses.json"));
             _bunkers = ValidateBunkers(
                 LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers"));
             _threats = LoadJsonArray<ThreatData>(Path.Combine(dataPath, "threats.json"), "threats");
@@ -68,12 +72,201 @@ namespace Bunker.Services
                                    $"{_mentalConditions.Count} ментальних станів, {_physicalConditions.Count} фізичних станів, " +
                                    $"{_items.Count} предметів, {_characterTraits.Count} рис характеру, " +
                                    $"{_phobias.Count} фобій, {_facts.Count} фактів, " +
-                                   $"{_apocalypses.Count} апокаліпсисів, {_bunkers.Count} бункерів, " +
+                                   $"{_bunkers.Count} бункерів, " +
                                    $"{_threats.Count} загроз, {_specialCards.Count} спеціальних карт, " +
                                    $"{_properties.Count} варіантів майна");
 
             ValidateHealthConditions(_physicalConditions, "physical");
             ValidateHealthConditions(_mentalConditions, "mental");
+        }
+
+        private void LoadApocalypseData(string path)
+        {
+            if (!File.Exists(path))
+                throw new InvalidDataException($"apocalypses.json was not found: {path}");
+
+            ApocalypsesRoot? root;
+            try
+            {
+                root = JsonSerializer.Deserialize<ApocalypsesRoot>(File.ReadAllText(path), _jsonOptions);
+            }
+            catch (JsonException ex)
+            {
+                throw new InvalidDataException($"apocalypses.json could not be deserialized: {ex.Message}", ex);
+            }
+
+            ValidateApocalypseData(root);
+
+            _apocalypses = root!.Apocalypses.AsReadOnly();
+            _apocalypseCategories = root.CategoryCatalog.AsReadOnly();
+            _apocalypseVisualThemes = root.VisualThemeProfiles.AsReadOnly();
+            _apocalypseInteractiveSchema = root.InteractiveEffectSchema;
+
+            var interactiveCount = _apocalypses.Count(apocalypse => apocalypse.Gameplay?.Interactive == true);
+            _logger.LogInformation(
+                "Apocalypse data loaded: {Total} apocalypses; {Ordinary} ordinary; {Interactive} interactive; " +
+                "{Categories} categories; {Themes} visual themes; interactive schema version {SchemaVersion}",
+                _apocalypses.Count,
+                _apocalypses.Count - interactiveCount,
+                interactiveCount,
+                _apocalypseCategories.Count,
+                _apocalypseVisualThemes.Count,
+                _apocalypseInteractiveSchema!.Version);
+        }
+
+        internal static void ValidateApocalypseData(ApocalypsesRoot? root)
+        {
+            if (root == null)
+                throw new InvalidDataException("apocalypses.json validation failed: root is null");
+
+            var errors = new List<string>();
+            var apocalypses = root.Apocalypses ?? new();
+            var categories = root.CategoryCatalog ?? new();
+            var themes = root.VisualThemeProfiles ?? new();
+            var schema = root.InteractiveEffectSchema;
+
+            if (apocalypses.Count != 220) errors.Add($"expected 220 apocalypse records, found {apocalypses.Count}");
+            if (categories.Count != 10) errors.Add($"expected 10 apocalypse categories, found {categories.Count}");
+            if (themes.Count != 10) errors.Add($"expected 10 visual themes, found {themes.Count}");
+            if (schema == null) errors.Add("interactive effect schema is required");
+            else
+            {
+                if (schema.Version != 2) errors.Add($"interactive effect schema version must be 2, found {schema.Version}");
+                if (!string.Equals(schema.RuntimeStatus, "definition_only", StringComparison.Ordinal))
+                    errors.Add("interactive effect schema runtimeStatus must be 'definition_only'");
+                if (schema.ActivationContract == null) errors.Add("interactive activation contract is required");
+            }
+
+            AddIdErrors(apocalypses, item => item.Id, "apocalypse", errors);
+            AddIdErrors(categories, item => item.Id, "category", errors);
+            AddIdErrors(themes, item => item.Id, "visual theme", errors);
+
+            var categoryIds = categories.Where(item => !string.IsNullOrWhiteSpace(item.Id))
+                .Select(item => item.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var themeById = themes.Where(item => !string.IsNullOrWhiteSpace(item.Id))
+                .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+            foreach (var category in categories)
+            {
+                var label = string.IsNullOrWhiteSpace(category.Id) ? "<empty>" : category.Id;
+                if (string.IsNullOrWhiteSpace(category.VisualThemeId))
+                    errors.Add($"category '{label}' has an empty visualThemeId");
+                else if (!themeById.ContainsKey(category.VisualThemeId))
+                    errors.Add($"category '{label}' references unknown visual theme '{category.VisualThemeId}'");
+                if (!HasProductionLocalization(category.I18n))
+                    errors.Add($"category '{label}' must contain localized name and description for uk/en/ru");
+            }
+
+            foreach (var theme in themes)
+            {
+                var label = string.IsNullOrWhiteSpace(theme.Id) ? "<empty>" : theme.Id;
+                if (string.IsNullOrWhiteSpace(theme.CategoryId) || !categoryIds.Contains(theme.CategoryId))
+                    errors.Add($"visual theme '{label}' references unknown category '{theme.CategoryId}'");
+                if (string.IsNullOrWhiteSpace(theme.CssClass))
+                    errors.Add($"visual theme '{label}' has an empty cssClass");
+                else if (!Regex.IsMatch(theme.CssClass, "^[A-Za-z0-9_-]+$", RegexOptions.CultureInvariant))
+                    errors.Add($"visual theme '{label}' has unsafe cssClass '{theme.CssClass}'");
+                if (string.IsNullOrWhiteSpace(theme.BackgroundVariant)) errors.Add($"visual theme '{label}' has an empty backgroundVariant");
+                if (string.IsNullOrWhiteSpace(theme.OverlayVariant)) errors.Add($"visual theme '{label}' has an empty overlayVariant");
+                if (string.IsNullOrWhiteSpace(theme.FallbackThemeId))
+                    errors.Add($"visual theme '{label}' has an empty fallbackThemeId");
+                else if (!string.Equals(theme.FallbackThemeId, "default-dark", StringComparison.OrdinalIgnoreCase) &&
+                         !themeById.ContainsKey(theme.FallbackThemeId))
+                    errors.Add($"visual theme '{label}' references unknown fallback '{theme.FallbackThemeId}'");
+            }
+
+            var interactiveCount = 0;
+            foreach (var apocalypse in apocalypses)
+            {
+                var label = string.IsNullOrWhiteSpace(apocalypse.Id) ? "<empty>" : apocalypse.Id;
+                if (string.IsNullOrWhiteSpace(apocalypse.Name)) errors.Add($"apocalypse '{label}' has an empty name");
+                if (string.IsNullOrWhiteSpace(apocalypse.CategoryId) || !categoryIds.Contains(apocalypse.CategoryId))
+                    errors.Add($"apocalypse '{label}' references unknown category '{apocalypse.CategoryId}'");
+                if (string.IsNullOrWhiteSpace(apocalypse.VisualThemeId) || !themeById.TryGetValue(apocalypse.VisualThemeId, out var theme))
+                    errors.Add($"apocalypse '{label}' references unknown visual theme '{apocalypse.VisualThemeId}'");
+                else if (!string.Equals(theme.CategoryId, apocalypse.CategoryId, StringComparison.OrdinalIgnoreCase) &&
+                         string.IsNullOrWhiteSpace(theme.FallbackThemeId))
+                    errors.Add($"apocalypse '{label}' uses a theme from another category without a fallback");
+
+                if (apocalypse.Gameplay == null) continue;
+                if (apocalypse.Gameplay.Interactive) interactiveCount++;
+                ValidateGameplay(apocalypse, schema?.ActivationContract, errors);
+            }
+
+            if (interactiveCount != 20) errors.Add($"expected 20 interactive apocalypses, found {interactiveCount}");
+
+            if (errors.Count > 0)
+                throw new InvalidDataException($"apocalypses.json validation failed: {string.Join("; ", errors)}");
+        }
+
+        private static void ValidateGameplay(
+            Apocalypse apocalypse,
+            ApocalypseActivationContractDefinition? contract,
+            List<string> errors)
+        {
+            var gameplay = apocalypse.Gameplay!;
+            var label = string.IsNullOrWhiteSpace(apocalypse.Id) ? "<empty>" : apocalypse.Id;
+            if (gameplay.SchemaVersion != 2) errors.Add($"apocalypse '{label}' gameplay schemaVersion must be 2");
+            if (!string.Equals(gameplay.RuntimeStatus, "definition_only", StringComparison.Ordinal))
+                errors.Add($"apocalypse '{label}' gameplay runtimeStatus must be 'definition_only'");
+            if (string.IsNullOrWhiteSpace(gameplay.EffectProfileId)) errors.Add($"apocalypse '{label}' has an empty effectProfileId");
+            if (gameplay.Activation == null) errors.Add($"apocalypse '{label}' gameplay activation is required");
+            if (gameplay.Effects == null || gameplay.Effects.Count == 0) errors.Add($"apocalypse '{label}' gameplay effects are required");
+            else if (gameplay.Effects.Any(effect => string.IsNullOrWhiteSpace(effect.Type)))
+                errors.Add($"apocalypse '{label}' contains an effect with an empty type");
+
+            if (gameplay.Activation == null || contract == null) return;
+            var activation = gameplay.Activation;
+            var supportedModes = contract.SupportedModes ?? Array.Empty<string>();
+            var supportedTriggers = contract.SupportedTriggers ?? Array.Empty<string>();
+            var contractFirstRounds = contract.AllowedFirstRounds ?? Array.Empty<int>();
+            var contractIntervalRounds = contract.AllowedIntervalRounds ?? Array.Empty<int>();
+            var allowedTriggers = activation.AllowedTriggers ?? Array.Empty<string>();
+            var allowedFirstRounds = activation.AllowedFirstRounds ?? Array.Empty<int>();
+            var allowedIntervalRounds = activation.AllowedIntervalRounds ?? Array.Empty<int>();
+            if (!supportedModes.Contains(activation.Mode, StringComparer.OrdinalIgnoreCase))
+                errors.Add($"apocalypse '{label}' has unsupported activation mode '{activation.Mode}'");
+            if (!supportedTriggers.Contains(activation.Trigger, StringComparer.OrdinalIgnoreCase))
+                errors.Add($"apocalypse '{label}' has unsupported activation trigger '{activation.Trigger}'");
+            if (!contractFirstRounds.Contains(activation.FirstRound))
+                errors.Add($"apocalypse '{label}' has disallowed firstRound {activation.FirstRound}");
+            if (string.Equals(activation.Mode, "recurring", StringComparison.OrdinalIgnoreCase) && !activation.IntervalRounds.HasValue)
+                errors.Add($"apocalypse '{label}' recurring activation requires intervalRounds");
+            if (activation.IntervalRounds.HasValue && !contractIntervalRounds.Contains(activation.IntervalRounds.Value))
+                errors.Add($"apocalypse '{label}' has disallowed intervalRounds {activation.IntervalRounds.Value}");
+            if (activation.MaxActivations is < 1 or > 20)
+                errors.Add($"apocalypse '{label}' maxActivations must be in range 1..20");
+            if (allowedTriggers.Any(trigger => !supportedTriggers.Contains(trigger, StringComparer.OrdinalIgnoreCase)))
+                errors.Add($"apocalypse '{label}' allowedTriggers contains an unsupported value");
+            if (allowedFirstRounds.Any(round => !contractFirstRounds.Contains(round)))
+                errors.Add($"apocalypse '{label}' allowedFirstRounds exceeds the root contract");
+            if (allowedIntervalRounds.Any(round => !contractIntervalRounds.Contains(round)))
+                errors.Add($"apocalypse '{label}' allowedIntervalRounds exceeds the root contract");
+        }
+
+        private static void AddIdErrors<T>(IEnumerable<T> items, Func<T, string> getId, string label, List<string> errors)
+        {
+            if (items.Any(item => string.IsNullOrWhiteSpace(getId(item)))) errors.Add($"one or more {label} IDs are empty");
+            var duplicates = items.Where(item => !string.IsNullOrWhiteSpace(getId(item)))
+                .GroupBy(getId, StringComparer.OrdinalIgnoreCase).Where(group => group.Count() > 1).Select(group => group.Key);
+            var duplicateList = duplicates.ToList();
+            if (duplicateList.Count > 0) errors.Add($"duplicate {label} IDs: {string.Join(", ", duplicateList)}");
+        }
+
+        private static bool HasProductionLocalization(Dictionary<string, JsonElement>? i18n)
+        {
+            if (i18n == null) return false;
+            foreach (var field in new[] { "name", "description" })
+            {
+                if (!i18n.TryGetValue(field, out var localized) || localized.ValueKind != JsonValueKind.Object) return false;
+                foreach (var language in new[] { "uk", "en", "ru" })
+                {
+                    if (!localized.TryGetProperty(language, out var text) || text.ValueKind != JsonValueKind.String ||
+                        string.IsNullOrWhiteSpace(text.GetString())) return false;
+                }
+            }
+            return true;
         }
 
         private List<BunkerInfo> ValidateBunkers(List<BunkerInfo> bunkers)
@@ -988,7 +1181,18 @@ namespace Bunker.Services
         public IReadOnlyList<CharacterTraitData> CharacterTraits => _characterTraits ?? new();
         public IReadOnlyList<PhobiaData> Phobias => _phobias ?? new();
         public IReadOnlyList<FactData> Facts => _facts ?? new();
-        public IReadOnlyList<Apocalypse> Apocalypses => _apocalypses ?? new();
+        public IReadOnlyList<Apocalypse> Apocalypses => _apocalypses;
+        public IReadOnlyList<ApocalypseCategoryDefinition> ApocalypseCategories => _apocalypseCategories;
+        public IReadOnlyList<ApocalypseVisualThemeDefinition> ApocalypseVisualThemes => _apocalypseVisualThemes;
+        public ApocalypseInteractiveSchemaDefinition? ApocalypseInteractiveSchema => _apocalypseInteractiveSchema;
+        public Apocalypse? FindApocalypseById(string id) =>
+            _apocalypses.FirstOrDefault(item => string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase));
+        public ApocalypseCategoryDefinition? GetApocalypseCategoryById(string id) =>
+            _apocalypseCategories.FirstOrDefault(item => string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase));
+        public ApocalypseVisualThemeDefinition? GetApocalypseVisualThemeById(string id) =>
+            _apocalypseVisualThemes.FirstOrDefault(item => string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase));
+        public IReadOnlyList<Apocalypse> GetInteractiveApocalypses() =>
+            Array.AsReadOnly(_apocalypses.Where(item => item.Gameplay?.Interactive == true).ToArray());
         public IReadOnlyList<BunkerInfo> Bunkers => _bunkers ?? new();
         public IReadOnlyList<ThreatData> Threats => _threats ?? new();
         public IReadOnlyList<SpecialCardData> SpecialCards => _specialCards ?? new();

@@ -327,9 +327,7 @@ public partial class GameHub
 			try
 			{
 				var completed = await _gameSessionHistoryService
-					.CompleteSessionAsync(
-						previousSessionId,
-						result.ParticipantResults);
+					.CompleteSessionAsync(previousSessionId, result.ParticipantResults);
 
 				if (!completed)
 				{

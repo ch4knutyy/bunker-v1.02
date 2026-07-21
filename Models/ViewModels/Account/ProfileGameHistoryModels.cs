@@ -20,6 +20,7 @@ public sealed record ProfileGameHistoryItem(
 	bool IsWinner,
 	bool WasEliminated,
 	int? EliminatedAtRound,
+	DateTime? LeftAtUtc,
 	string? ApocalypseId,
 	string? BunkerId);
 

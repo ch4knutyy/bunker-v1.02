@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Bunker.Hubs;
 using Bunker.Models;
+using Bunker.Services.Bunker.GameSessions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Services;
@@ -23,6 +24,7 @@ public sealed class PlayerDisconnectCleanupCoordinator
     private readonly TimeProvider _timeProvider;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<PlayerDisconnectCleanupCoordinator> _logger;
+	private readonly IServiceScopeFactory? _serviceScopeFactory;
 
     public PlayerDisconnectCleanupCoordinator(
         RoomService roomService,
@@ -30,7 +32,8 @@ public sealed class PlayerDisconnectCleanupCoordinator
         IHubContext<GameHub> hubContext,
         TimeProvider timeProvider,
         IHostApplicationLifetime applicationLifetime,
-        ILogger<PlayerDisconnectCleanupCoordinator> logger)
+        ILogger<PlayerDisconnectCleanupCoordinator> logger,
+		IServiceScopeFactory? serviceScopeFactory = null)
     {
         _roomService = roomService;
         _gmAudit = gmAudit;
@@ -38,6 +41,7 @@ public sealed class PlayerDisconnectCleanupCoordinator
         _timeProvider = timeProvider;
         _applicationLifetime = applicationLifetime;
         _logger = logger;
+		_serviceScopeFactory = serviceScopeFactory;
     }
 
     public void Schedule(string roomId, Guid playerId, string expectedConnectionId, string auditPlayerId)
@@ -98,6 +102,31 @@ public sealed class PlayerDisconnectCleanupCoordinator
                 key.RoomId,
                 key.PlayerId,
                 scheduled.ExpectedConnectionId);
+
+			if (result.Removed && result.Room?.GameSessionId is Guid &&
+				_serviceScopeFactory is not null)
+			{
+				try
+				{
+					await using var scope = _serviceScopeFactory.CreateAsyncScope();
+					var history = scope.ServiceProvider.GetRequiredService<IGameSessionHistoryService>();
+
+					await GameSessionLifecycleTransitions.ApplyPlayerRemovalAsync(
+						history,
+						result.Room,
+						scheduled.AuditPlayerId,
+						result.RoomDeleted,
+						"disconnect_grace_expired_room_removed",
+						scheduled.Cancellation.Token);
+				}
+				catch (Exception exception) when (!scheduled.Cancellation.IsCancellationRequested)
+				{
+					_logger.LogError(
+						exception,
+						"Failed to persist delayed game-session cleanup for room {RoomId}",
+						result.RoomId);
+				}
+			}
 
             if (!result.Removed || result.RoomDeleted || result.Room == null)
             {

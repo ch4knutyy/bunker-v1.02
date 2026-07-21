@@ -16,6 +16,8 @@ namespace Bunker.Hubs
 		/// </summary>
 		public async Task CreateRoom(string roomName, string playerName, int maxPlayers = 12, string? password = null, string? stablePlayerId = null)
 		{
+			var previousRoom = _roomService.GetPlayerRoom(Context.ConnectionId);
+			var previousPlayer = _roomService.GetPlayer(Context.ConnectionId);
 			// Validate and sanitize inputs
 			roomName = roomName?.Trim() ?? "";
 			playerName = SanitizePlayerName(playerName);
@@ -50,6 +52,16 @@ namespace Bunker.Hubs
 					return;
 				}
 
+				if (previousRoom != null && previousPlayer != null &&
+					!string.Equals(previousRoom.Id, joinedRoom.Id, StringComparison.OrdinalIgnoreCase))
+				{
+					await HandleGameSessionDepartureAsync(
+						previousRoom,
+						RoomService.GetPlayerKey(previousPlayer),
+						_roomService.GetRoom(previousRoom.Id) is null,
+						"player_moved_to_new_room");
+				}
+
 				// Додаємо до SignalR групи
 				await Groups.AddToGroupAsync(Context.ConnectionId, joinedRoom.Id);
 				AppendLobbyPresenceAudit(joinedRoom, RoomService.GetPlayerKey(player), "lobby_player_joined", "A lobby member joined the room.");
@@ -81,6 +93,8 @@ namespace Bunker.Hubs
 
 		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null, string? reconnectToken = null)
 		{
+			var previousRoom = _roomService.GetPlayerRoom(Context.ConnectionId);
+			var previousPlayer = _roomService.GetPlayer(Context.ConnectionId);
 			// Validate and sanitize inputs
 			roomId = roomId?.Trim() ?? "";
 			playerName = SanitizePlayerName(playerName);
@@ -144,6 +158,16 @@ namespace Bunker.Hubs
 					return;
 				}
 
+				if (previousRoom != null && previousPlayer != null &&
+					!string.Equals(previousRoom.Id, room.Id, StringComparison.OrdinalIgnoreCase))
+				{
+					await HandleGameSessionDepartureAsync(
+						previousRoom,
+						RoomService.GetPlayerKey(previousPlayer),
+						_roomService.GetRoom(previousRoom.Id) is null,
+						"player_moved_to_another_room");
+				}
+
 				// Додаємо до SignalR групи
 				await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
 				AppendLobbyPresenceAudit(room, RoomService.GetPlayerKey(player), "lobby_player_joined", "A lobby member joined the room.");
@@ -194,6 +218,12 @@ namespace Bunker.Hubs
             var (success, room, roomDeleted, newHostConnectionId) = _roomService.LeaveRoom(Context.ConnectionId);
 
             if (!success || room == null) return;
+
+			await HandleGameSessionDepartureAsync(
+				room,
+				leavingPlayerId,
+				roomDeleted,
+				roomDeleted ? "explicit_leave_removed_room" : "explicit_leave");
 
             // Видаляємо з SignalR групи
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);

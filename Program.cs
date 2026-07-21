@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+var processStartedAtUtc = DateTime.UtcNow;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
@@ -167,10 +168,13 @@ _ = app.Services.GetRequiredService<IScenarioContentRegistry>();
 
 using (var scope = app.Services.CreateScope())
 {
-	await scope.ServiceProvider
-		.GetRequiredService<BunkerDbContext>()
-		.Database
-		.MigrateAsync();
+	await scope.ServiceProvider.GetRequiredService<BunkerDbContext>()
+		.Database.MigrateAsync();
+
+	await scope.ServiceProvider.GetRequiredService<IGameSessionHistoryService>()
+		.AbandonStartedSessionsAsync(
+			processStartedAtUtc,
+			"startup_recovery");
 }
 
 if (!app.Environment.IsDevelopment())

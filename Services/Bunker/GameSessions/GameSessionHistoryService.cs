@@ -59,7 +59,7 @@ namespace Bunker.Services.Bunker.GameSessions
 				CreatedAtUtc = nowUtc,
 				StartedAtUtc = nowUtc,
 				EndedAtUtc = null,
-				Status = "Started",
+				Status = GameSessionStatuses.Started,
 				PlayerCount = participants.Count,
 				ApocalypseId = apocalypseId,
 				BunkerId = bunkerId
@@ -84,7 +84,8 @@ namespace Bunker.Services.Bunker.GameSessions
 					IsHost = participant.IsHost,
 					IsWinner = false,
 					WasEliminated = false,
-					EliminatedAtRound = null
+					EliminatedAtRound = null,
+					LeftAtUtc = null
 				});
 			}
 
@@ -120,7 +121,7 @@ namespace Bunker.Services.Bunker.GameSessions
 				return false;
 			}
 
-			if (session.Status == "Completed")
+			if (session.Status == GameSessionStatuses.Completed)
 			{
 				if (session.EndedAtUtc is null)
 				{
@@ -131,7 +132,12 @@ namespace Bunker.Services.Bunker.GameSessions
 				return true;
 			}
 
-			session.Status = "Completed";
+			if (session.Status != GameSessionStatuses.Started)
+			{
+				return false;
+			}
+
+			session.Status = GameSessionStatuses.Completed;
 			session.EndedAtUtc ??= DateTime.UtcNow;
 
 			var participantsByStableId = session.GameSessionPlayers
@@ -158,6 +164,104 @@ namespace Bunker.Services.Bunker.GameSessions
 			await _dbContext.SaveChangesAsync(cancellationToken);
 
 			return true;
+		}
+
+		public async Task<bool> AbandonSessionAsync(
+			Guid sessionId,
+			string reason,
+			CancellationToken cancellationToken = default)
+		{
+			if (sessionId == Guid.Empty)
+			{
+				throw new ArgumentException("Session ID cannot be empty.", nameof(sessionId));
+			}
+
+			var updated = await _dbContext.GameSessions
+				.Where(session =>
+					session.Id == sessionId &&
+					session.Status == GameSessionStatuses.Started)
+				.ExecuteUpdateAsync(setters => setters
+					.SetProperty(session => session.Status, GameSessionStatuses.Abandoned)
+					.SetProperty(session => session.EndedAtUtc, DateTime.UtcNow),
+					cancellationToken);
+
+			if (updated > 0)
+			{
+				_logger.LogInformation(
+					"Game session {GameSessionId} was abandoned. Reason: {Reason}",
+					sessionId,
+					NormalizeReason(reason));
+				return true;
+			}
+
+			return await _dbContext.GameSessions
+				.AsNoTracking()
+				.AnyAsync(session =>
+					session.Id == sessionId &&
+					session.Status == GameSessionStatuses.Abandoned,
+					cancellationToken);
+		}
+
+		public async Task<bool> MarkParticipantLeftEarlyAsync(
+			Guid sessionId,
+			string stablePlayerId,
+			CancellationToken cancellationToken = default)
+		{
+			if (sessionId == Guid.Empty || string.IsNullOrWhiteSpace(stablePlayerId))
+			{
+				return false;
+			}
+
+			var nowUtc = DateTime.UtcNow;
+			var updated = await _dbContext.GameSessionPlayers
+				.Where(participant =>
+					participant.GameSessionId == sessionId &&
+					participant.StablePlayerIdSnapshot == stablePlayerId &&
+					participant.LeftAtUtc == null &&
+					participant.GameSession.Status == GameSessionStatuses.Started)
+				.ExecuteUpdateAsync(setters => setters
+					.SetProperty(participant => participant.LeftAtUtc, nowUtc),
+					cancellationToken);
+
+			return updated > 0;
+		}
+
+		public async Task<int> AbandonStartedSessionsAsync(
+			DateTime startedBeforeUtc,
+			string reason,
+			CancellationToken cancellationToken = default)
+		{
+			var updated = await _dbContext.GameSessions
+				.Where(session =>
+					session.Status == GameSessionStatuses.Started &&
+					session.CreatedAtUtc < startedBeforeUtc)
+				.ExecuteUpdateAsync(setters => setters
+					.SetProperty(session => session.Status, GameSessionStatuses.Abandoned)
+					.SetProperty(session => session.EndedAtUtc, DateTime.UtcNow),
+					cancellationToken);
+
+			if (updated > 0)
+			{
+				_logger.LogInformation(
+					"Abandoned {GameSessionCount} stale started game sessions. Reason: {Reason}",
+					updated,
+					NormalizeReason(reason));
+			}
+
+			return updated;
+		}
+
+		private static string NormalizeReason(string reason)
+		{
+			return reason?.Trim() switch
+			{
+				"startup_recovery" => "startup_recovery",
+				"explicit_leave_removed_room" => "explicit_leave_removed_room",
+				"disconnect_grace_expired_room_removed" => "disconnect_grace_expired_room_removed",
+				"player_moved_to_new_room" => "player_moved_to_new_room",
+				"player_moved_to_another_room" => "player_moved_to_another_room",
+				_ => "unspecified"
+			};
 		}
 	}
 }
