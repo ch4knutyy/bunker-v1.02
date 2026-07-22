@@ -42,9 +42,17 @@ test('game completion enters final discussion without opening a blank story surf
 });
 
 test('developer badge and observer mode use only server projections', () => {
-  assert.match(client, /p\.isDeveloper \? `<span class="player-role-developer">DEVELOPER/);
+  assert.match(client, /p\.isDeveloper \? `<span class="player-role-developer"[^>]*>DEVELOPER/);
   assert.match(client, /data\.developer \|\| data\.Developer/);
   assert.match(client, /joinAsDeveloperObserver/);
   assert.match(client, /connection\.invoke\("JoinRoom"[\s\S]*developerObserver\)/);
   assert.doesNotMatch(client, /name\s*===\s*['"]Developer|includes\(['"]developer/i);
+});
+
+test('host cancellation preserves the private developer draft and recovery remains explicit', () => {
+  assert.match(transitionHub, /Host cancellation only exits the public story flow/);
+  assert.doesNotMatch(transitionHub, /room\.PostGameStory\.GeneratedPrompt = null/);
+  assert.match(story, /SavePostGameStoryDraft/);
+  assert.match(story, /ResumePostGameStoryDraft/);
+  assert.match(client, /phase === 'StoryRequested' \|\| phase === 'StoryPreparation'/);
 });

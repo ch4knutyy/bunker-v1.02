@@ -80,7 +80,7 @@
             });
             array(warnings).forEach(warning => append(box, 'p', warning));
         }
-        visible($('postGameStoryCorrectionPrompt'), array(errors).length > 0 && !!($('postGameStoryResult')?.value));
+        visible($('postGameStoryCorrectionPrompt'), array(state?.validationErrors).length > 0 && !!($('postGameStoryResult')?.value));
         visible($('postGameStoryRecovery'), !!recoverableError);
     }
     function updateWorkspaceCounts() {
@@ -130,9 +130,13 @@
     }
     function prepareRequested() {
         const transition = typeof currentPostGameTransition !== 'undefined' ? currentPostGameTransition : null;
-        if (transition?.phase === 'StoryPreparation' && (state?.generatedPrompt || state?.preview)) {
+        if (state?.generatedPrompt || state?.preview) {
+            if (transition?.phase === 'StoryRequested') {
+                return connection.invoke('ResumePostGameStoryDraft', crypto.randomUUID())
+                    .catch(error => feedback([localize(error)], [], true));
+            }
             openDirector();
-            return;
+            return undefined;
         }
         return prepare(transition?.requestedStoryMode || state?.currentMode || 'final_story', state?.currentEntryId || null);
     }
@@ -148,6 +152,46 @@
     async function cancel() {
         try { await connection.invoke('CancelPostGameStoryDraft', crypto.randomUUID()); }
         catch (error) { feedback([localize(error)], [], true); }
+    }
+    async function schema() {
+        if (!responseSchema) responseSchema = await connection.invoke('GetPostGameStoryResponseSchema');
+        return responseSchema;
+    }
+    function download(name, text) {
+        const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url; link.download = name; link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+    function scheduleDraftSave() {
+        updateWorkspaceCounts();
+        previewFingerprint = null;
+        renderPreview(null);
+        clearTimeout(draftSaveTimer);
+        if (!isCurrentDeveloper() || !(typeof developerState !== 'undefined' && developerState?.isActiveOperator)) return;
+        draftSaveTimer = setTimeout(async () => {
+            try {
+                await connection.invoke('SavePostGameStoryDraft', $('postGameStoryResult')?.value || '', developerState?.operatorVersion || 0);
+            } catch (error) {
+                feedback([localize(error)], [], true);
+            }
+        }, 800);
+    }
+    async function copyCorrectionPrompt() {
+        try {
+            const errors = array(state?.validationErrors);
+            const invalid = $('postGameStoryResult')?.value || state?.rawResult || '';
+            const correction = [
+                'Виправ структуру JSON. Поверни лише виправлений JSON без Markdown і пояснень.',
+                '', 'ПОМИЛКИ ВАЛІДАЦІЇ:', errors.join('\n') || 'Невідома структурна помилка.',
+                '', 'ОБОВ’ЯЗКОВА СХЕМА:', await schema(),
+                '', 'ПОТОЧНИЙ INVALID JSON:', invalid
+            ].join('\n');
+            await navigator.clipboard.writeText(correction);
+            feedback([], ['Prompt для виправлення JSON скопійовано.']);
+        } catch (error) {
+            feedback([localize(error)], [], true);
+        }
     }
     function section(root, title, items) {
         const values = array(items).filter(Boolean); if (!values.length) return;
@@ -238,7 +282,26 @@
         });
         hub.off('PostGameStoryCleared'); hub.on('PostGameStoryCleared', value => applyState(value, false));
     }
-    $('postGameStoryCopyPrompt')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText($('postGameStoryPrompt')?.value || ''); feedback(['Промт скопійовано.']); } catch (_) { feedback(['Не вдалося скопіювати промт.']); } });
+    $('postGameStoryCopyPrompt')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText($('postGameStoryPrompt')?.value || ''); feedback([], ['Промт скопійовано.']); } catch (_) { feedback(['Не вдалося скопіювати промт.']); } });
+    $('postGameStoryDownloadPrompt')?.addEventListener('click', () => download(`bunker-story-prompt-${Date.now()}.txt`, $('postGameStoryPrompt')?.value || ''));
+    $('postGameStoryCopySchema')?.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(await schema()); feedback([], ['JSON schema скопійовано.']); }
+        catch (error) { feedback([localize(error)], [], true); }
+    });
+    $('postGameStoryPasteResult')?.addEventListener('click', async () => {
+        try { $('postGameStoryResult').value = await navigator.clipboard.readText(); scheduleDraftSave(); }
+        catch (_) { feedback(['Браузер не дозволив читання буфера обміну.']); }
+    });
+    $('postGameStoryClearResult')?.addEventListener('click', () => {
+        if (!confirm('Очистити приватний draft JSON?')) return;
+        $('postGameStoryResult').value = '';
+        if (state) { state.rawResult = ''; state.validationErrors = []; state.validationWarnings = []; }
+        feedback([]); scheduleDraftSave();
+    });
+    $('postGameStoryCorrectionPrompt')?.addEventListener('click', copyCorrectionPrompt);
+    $('postGameStoryResult')?.addEventListener('input', scheduleDraftSave);
+    $('postGameStoryRetry')?.addEventListener('click', prepareRequested);
+    $('postGameStoryRecoverUi')?.addEventListener('click', () => { if (typeof recoverDeveloperUi === 'function') recoverDeveloperUi(); else hideUi(); });
     $('postGameStoryValidate')?.addEventListener('click', submit); $('postGameStoryPublish')?.addEventListener('click', publish); $('postGameStoryCancel')?.addEventListener('click', cancel);
     $('postGameStoryBack')?.addEventListener('click', () => visible($('postGameStoryPreview'), false)); $('postGameStoryShowAll')?.addEventListener('click', showAll);
     $('postGameStorySound')?.addEventListener('click', toggleSound); $('postGameStoryClose')?.addEventListener('click', close);
@@ -251,6 +314,7 @@
     }));
     document.addEventListener('visibilitychange', () => { if (!document.hidden && !revealTimer && revealIndex < revealNodes.length) scheduleReveal(); });
     window.PostGameStoryDirector = { bind, prepare, prepareRequested, applyState, applyTransition, showFinished, showPresentation, showAll, hideUi, clear };
+    updateWorkspaceCounts();
     if (typeof connection !== 'undefined') bind(connection);
     if (typeof currentGameCompletion !== 'undefined' && currentGameCompletion) showFinished();
 })();

@@ -70,9 +70,20 @@ public sealed class DeveloperAuthorityService
 
     public DeveloperPresenceDto Presence(Room room)
     {
-        var developer = RoomService.GetPlayersSnapshot(room).Select(x => x.Value)
-            .FirstOrDefault(player => player.IsConnected && IsDeveloper(player));
-        return new(developer != null, developer == null ? null : RoomService.GetPlayerKey(developer), developer == null ? "offline" : "connected");
+        var developers = RoomService.GetPlayersSnapshot(room).Select(x => x.Value).Where(IsDeveloper).ToArray();
+        var connected = developers.FirstOrDefault(player => player.IsConnected);
+        if (connected != null)
+        {
+            var status = room.PostGamePhase == PostGamePhase.StoryPreparation &&
+                string.Equals(room.ActiveDeveloperPlayerId, RoomService.GetPlayerKey(connected), StringComparison.OrdinalIgnoreCase)
+                    ? "story_workspace_active"
+                    : "connected";
+            return new(true, RoomService.GetPlayerKey(connected), status);
+        }
+        var reconnectWindow = TimeSpan.FromSeconds(Math.Clamp(_options.Value.OperatorReconnectWindowSeconds, 5, 300));
+        var reconnecting = developers.FirstOrDefault(player => player.DisconnectedAt is DateTime disconnectedAt &&
+            _timeProvider.GetUtcNow().UtcDateTime - disconnectedAt.ToUniversalTime() <= reconnectWindow);
+        return new(false, reconnecting == null ? null : RoomService.GetPlayerKey(reconnecting), reconnecting == null ? "offline" : "reconnecting");
     }
 
     public bool TryGetDeveloperRoomActor(Room room, ClaimsPrincipal? principal, out Player player)
@@ -92,11 +103,13 @@ public sealed class DeveloperAuthorityService
         {
             var now = _timeProvider.GetUtcNow();
             var samePlayer = string.Equals(room.ActiveDeveloperPlayerId, RoomService.GetPlayerKey(developer), StringComparison.OrdinalIgnoreCase);
+            var sameConnection = string.Equals(room.ActiveDeveloperConnectionId, connectionId, StringComparison.Ordinal);
             var leaseExpired = room.ActiveDeveloperLeaseUtc is null ||
                 now - room.ActiveDeveloperLeaseUtc.Value > TimeSpan.FromSeconds(Math.Clamp(_options.Value.OperatorReconnectWindowSeconds, 5, 300));
             var activeConnected = !string.IsNullOrWhiteSpace(room.ActiveDeveloperConnectionId) &&
                 IsCurrentDeveloperConnection(room, room.ActiveDeveloperConnectionId);
-            if (string.IsNullOrWhiteSpace(room.ActiveDeveloperPlayerId) || samePlayer || leaseExpired || !activeConnected || takeover)
+            if (string.IsNullOrWhiteSpace(room.ActiveDeveloperPlayerId) || sameConnection ||
+                samePlayer && !activeConnected || leaseExpired || takeover)
             {
                 room.ActiveDeveloperPlayerId = RoomService.GetPlayerKey(developer);
                 room.ActiveDeveloperConnectionId = connectionId;

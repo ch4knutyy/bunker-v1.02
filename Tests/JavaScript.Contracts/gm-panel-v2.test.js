@@ -19,6 +19,17 @@ test('server permissions determine role-safe visible tabs and owner link', () =>
   assert.match(view, /gmOwnerContentEditorLink[^>]+hidden/);
 });
 
+test('normal host panel defaults to local simple mode without changing server permissions', () => {
+  assert.match(client, /let panelMode = "simple"/);
+  assert.match(client, /window\.setGmPanelMode/);
+  assert.match(client, /preferenceKey\("mode"\)/);
+  assert.match(client, /panel\.dataset\.gmMode = panelMode/);
+  assert.match(view, /id="gmPanelSimpleMode"[^>]+aria-pressed="true"/);
+  assert.match(view, /id="gmPanelAdvancedMode"/);
+  assert.match(view, /Наступна рекомендована дія/);
+  assert.match(css, /data-gm-mode="simple"[^\n]+data-gm-advanced/);
+});
+
 test('omniscient overview does not inherit normal mutation tabs', () => {
   assert.match(client, /if \(tab === "players"\).*canManagePlayers/);
   assert.match(client, /if \(tab === "voting"\).*canManageVoting/);

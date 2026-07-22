@@ -62,6 +62,21 @@ public class PostGameStoryStateTests
     }
 
     [Fact]
+    public void DeveloperDraftAutosaveStaysPrivateAndDoesNotChangeValidationStatus()
+    {
+        var room = PostGameStoryTestRoom.Create();
+        var developer = room.Players[room.HostConnectionId];
+        var service = new PostGameStoryService(new(), new(), TimeProvider.System, PostGameStoryTestRoom.CreateAuthority());
+        service.Prepare(room, developer, PostGameStoryModes.FinalStory, null, "prepare-autosave");
+
+        service.SaveDraft(room, developer, "{\"incomplete\":true}");
+
+        Assert.Equal("{\"incomplete\":true}", room.PostGameStory.RawResult);
+        Assert.Equal(PostGameStoryStatuses.PromptReady, room.PostGameStory.Status);
+        Assert.DoesNotContain("incomplete", JsonSerializer.Serialize(service.ToPublicDto(room.PostGameStory)));
+    }
+
+    [Fact]
     public void SnapshotRoundTripPreservesPublishedStoryWithoutDuplicatingIt()
     {
         var room = PostGameStoryTestRoom.Create();

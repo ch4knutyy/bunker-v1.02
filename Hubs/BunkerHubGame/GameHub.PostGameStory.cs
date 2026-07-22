@@ -21,6 +21,25 @@ public partial class GameHub
         await BroadcastPostGameTransition(room);
     }
 
+    public async Task ResumePostGameStoryDraft(string commandId)
+    {
+        var (room, actor) = RequireStoryDeveloper(RoomActorCapability.OperatePostGameStoryDirector);
+        if (string.IsNullOrWhiteSpace(commandId)) throw new HubException("command_id_required");
+        lock (room.GameSettingsSyncRoot)
+        {
+            if (room.ProcessedPostGameCommandIds.Contains(commandId)) return;
+            if (room.PostGamePhase != PostGamePhase.StoryRequested) throw new HubException("story_not_requested");
+            if (string.IsNullOrWhiteSpace(room.PostGameStory.GeneratedPromptFingerprint))
+                throw new HubException("story_prompt_required");
+            RememberPostGameCommand(room, commandId);
+            room.PostGamePhase = PostGamePhase.StoryPreparation;
+        }
+        _developerAuthority.Audit(room, actor, RoomActorCapability.OperatePostGameStoryDirector, "story_draft_resumed", "success", commandId: commandId);
+        await Clients.Caller.SendAsync("PostGameStoryDeveloperStateChanged", _postGameStories.ToHostDto(room.PostGameStory));
+        await Clients.OthersInGroup(room.Id).SendAsync("PostGameStoryStateChanged", _postGameStories.ToPublicDto(room.PostGameStory));
+        await BroadcastPostGameTransition(room);
+    }
+
     public async Task SubmitPostGameStoryResult(string rawResult, string commandId)
     {
         var (room, actor) = RequireStoryDeveloper(RoomActorCapability.OperatePostGameStoryDirector);
