@@ -23,7 +23,7 @@ public partial class GameHub
 
 	public Task<LobbyApocalypseCatalogDto> GetLobbyApocalypseCatalog(string language = "uk")
 	{
-		var room = RequireLobbyHost();
+		var room = RequireLobbyMember();
 		return Task.FromResult(_apocalypseSelection.BuildCatalog(_roomGameSettings.GetEffective(room), language));
 	}
 
@@ -70,6 +70,9 @@ public partial class GameHub
 		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
 		if (target == null) throw new HubException("target_not_found");
 		if (room.IsHost(target)) throw new HubException("cannot_kick_host");
+		var caller = _roomService.GetPlayer(Context.ConnectionId);
+		if (_developerAuthority.IsDeveloper(target) && !_developerAuthority.IsDeveloper(caller))
+			throw new HubException("developer_protected");
 		if (!RememberLobbyCommand(room, commandId)) { await BroadcastLobbyState(room); return; }
 		var targetConnectionId = _roomService.GetCurrentConnectionId(room, RoomService.GetPlayerKey(target));
 		await AppendGmAudit(room, GetGmActorId(room), "lobby_player_kicked", GmAuditResult.Success,
@@ -81,6 +84,7 @@ public partial class GameHub
 			await Groups.RemoveFromGroupAsync(targetConnectionId, room.Id);
 		}
 		await BroadcastLobbyState(room);
+		await BroadcastDeveloperAuthorityState(room);
 		await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
 	}
 
@@ -319,6 +323,11 @@ public partial class GameHub
 		}
 
 		var actorId = GetGmActorId(room);
+		if (room.PostGamePhase is not (PostGamePhase.HostDecision or PostGamePhase.StoryRequested or
+			PostGamePhase.StoryPreparation or PostGamePhase.StoryPublished or PostGamePhase.Completed))
+		{
+			throw new HubException("post_game_decision_required");
+		}
 		var result = GameResetService.TryReturnFinishedGameToLobby(
 			room,
 			commandId);
@@ -389,7 +398,7 @@ public partial class GameHub
 	private Room RequireLobbyHost()
 	{
 		var room = RequireLobbyMember(); var player = _roomService.GetPlayer(Context.ConnectionId);
-		if (player == null || !room.IsHost(player)) throw new HubException("lobby_host_required"); return room;
+		if (player == null || !HasActiveRoomCapability(room, player, RoomActorCapability.ManageRoom)) throw new HubException("lobby_host_required"); return room;
 	}
 	private Player? ResolveStableLobbyTarget(Room room, string id)
 	{

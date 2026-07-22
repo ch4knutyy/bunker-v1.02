@@ -9043,6 +9043,13 @@ body.gm-panel-v2-open .modal {
     background: #10100f;
 }
 
+.gm-panel-mode-switch { display: inline-flex; gap: .25rem; padding: .2rem; border: 1px solid rgba(255,255,255,.14); border-radius: .6rem; }
+.gm-panel-mode-switch .btn-gm-action { min-height: 2rem; padding: .3rem .65rem; }
+.gm-panel-mode-switch .btn-gm-action[aria-pressed="true"] { color: #101518; background: #e0b16f; }
+.gm-recommended-action { display: grid; gap: .25rem; margin-bottom: .8rem; padding: .75rem .9rem; border-left: 3px solid #d5a467; background: rgba(213,164,103,.08); }
+.gm-recommended-action span { color: #d5a467; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
+.gm-panel-v2-drawer[data-gm-mode="simple"] [data-gm-advanced] { display: none !important; }
+
     .gm-panel-v2-header h3 {
         margin: 0;
         color: #e5c96f;

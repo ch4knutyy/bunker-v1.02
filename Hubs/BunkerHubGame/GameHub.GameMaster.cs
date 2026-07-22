@@ -22,12 +22,26 @@ namespace Bunker.Hubs
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
             return room != null &&
                 _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) &&
-                (room.IsHost(player) || (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value)));
+                (HasActiveRoomCapability(room, player, RoomActorCapability.ManageRoom) ||
+                 (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value)));
         }
 
-        private bool HasGmCapability(Room room, GmCapability capability) =>
-            (IsCallerHost() && GmCapabilities.Allows(room.GmMode, capability)) ||
-            (_activeDirectorCapability != null && _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) && IsAuthorizedDirector(player, _activeDirectorCapability.Value));
+        private bool HasActiveRoomCapability(Room room, Player player, RoomActorCapability capability)
+        {
+            if (!_developerAuthority.Has(room, player, capability)) return false;
+            if (!_developerAuthority.IsDeveloper(player)) return true;
+            return _developerAuthority.EnsureActiveOperator(room, player, Context.ConnectionId) &&
+                _developerAuthority.IsActiveOperator(room, player, Context.ConnectionId);
+        }
+
+        private bool HasGmCapability(Room room, GmCapability capability)
+        {
+            if (!_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player)) return false;
+            if (_developerAuthority.IsDeveloper(player))
+                return HasActiveRoomCapability(room, player, RoomActorCapability.UseDeveloperTools);
+            return (room.IsHost(player) && GmCapabilities.Allows(room.GmMode, capability)) ||
+                (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value));
+        }
 
         private List<PlayerHostControlDto> BuildPlayerHostControlData(Room room) =>
             RoomService.GetPlayersSnapshot(room).Select(entry =>
@@ -1178,10 +1192,9 @@ namespace Bunker.Hubs
 			actor = null!;
 			return room != null &&
 				_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out actor) &&
-				room.IsHost(actor) &&
-				!actor.IsSpectatorGm &&
-				actor.GmRole != GmMode.OmniscientGm &&
-				GmCapabilities.Allows(room.GmMode, GmCapability.ManagePublicGameState);
+				(HasActiveRoomCapability(room, actor, RoomActorCapability.ManageBunkerResources) ||
+				 (room.IsHost(actor) && !actor.IsSpectatorGm && actor.GmRole != GmMode.OmniscientGm &&
+				  GmCapabilities.Allows(room.GmMode, GmCapability.ManagePublicGameState)));
 		}
 		/// <summary>
 		/// Відправити нову подію з ефектом всім гравцям
@@ -1552,6 +1565,12 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Хост не може виключити себе");
                 return;
             }
+			if (_developerAuthority.IsDeveloper(player) &&
+				!_developerAuthority.IsDeveloper(_roomService.GetPlayer(Context.ConnectionId)))
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "developer_protected");
+				return;
+			}
 
             var kickSnapshot = CreateMutationSnapshot(callerRoom, GetGmActorId(callerRoom), "player_kick", commandId, "Before player kick");
 
@@ -1564,6 +1583,8 @@ namespace Bunker.Hubs
             }
             await Groups.RemoveFromGroupAsync(targetConnectionId, callerRoom.Id);
             await Clients.Group(callerRoom.Id).SendAsync("PlayerLeftRoom", new { connectionId = targetConnectionId, kicked = true });
+			await BroadcastDeveloperAuthorityState(callerRoom);
+			await BroadcastPostGameTransition(callerRoom);
             await SendPublicPlayersUpdate(callerRoom);
             await SendPlayerHostControlData(callerRoom);
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "kick", playerName = player.Name });
@@ -1714,7 +1735,7 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
                 return;
             }
-            var oldHostConnectionId = Context.ConnectionId;
+            var oldHostConnectionId = room.HostConnectionId;
             var oldHostPlayerId = GetGmActorId(room);
             var transferSnapshot = CreateMutationSnapshot(room, oldHostPlayerId, "host_transfer", commandId, "Before host transfer");
             if (!_roomService.TransferHost(room, connectionId, out _))

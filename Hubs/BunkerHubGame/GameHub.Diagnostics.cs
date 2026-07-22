@@ -28,7 +28,7 @@ public partial class GameHub
 
     public async Task ApplyRoomAutoFix(string? commandId, bool confirmed, string? language = null)
     {
-        if (!TryGetDiagnosticsRoom(out var room))
+        if (!TryGetDiagnosticsRoom(out var room, RoomActorCapability.UseRecoveryTools))
         {
             await RejectDiagnosticsAccess("diagnostics_apply");
             return;
@@ -75,7 +75,7 @@ public partial class GameHub
 
     public async Task GetGmAuditLog()
     {
-        if (!TryGetDiagnosticsRoom(out var room))
+        if (!TryGetDiagnosticsRoom(out var room, RoomActorCapability.ViewAuditLog))
         {
             await RejectDiagnosticsAccess("audit_refresh");
             return;
@@ -91,7 +91,7 @@ public partial class GameHub
 
     public async Task CreateManualRoomSnapshot(string? reason, string? commandId)
     {
-        if (!TryGetDiagnosticsRoom(out var room)) { await RejectDiagnosticsAccess("snapshot_create"); return; }
+        if (!TryGetDiagnosticsRoom(out var room, RoomActorCapability.ManageSnapshots)) { await RejectDiagnosticsAccess("snapshot_create"); return; }
         if (string.IsNullOrWhiteSpace(commandId)) { await Clients.Caller.SendAsync("ReceiveError", "Некоректний command id"); return; }
         if (!_roomSnapshots.TryRememberManualCommand(room, commandId)) { await SendRoomSnapshots(room, Clients.Caller); return; }
         var actor = GetGmActorId(room);
@@ -110,7 +110,7 @@ public partial class GameHub
 
     public async Task RestoreRoomSnapshot(string snapshotId, string commandId, bool confirmed, bool activeGameConfirmed = false)
     {
-        if (!TryGetDiagnosticsRoom(out var room)) { await RejectDiagnosticsAccess("snapshot_restore"); return; }
+        if (!TryGetDiagnosticsRoom(out var room, RoomActorCapability.UseRecoveryTools)) { await RejectDiagnosticsAccess("snapshot_restore"); return; }
         if (!confirmed || string.IsNullOrWhiteSpace(commandId) || (room.State == RoomState.Playing && !activeGameConfirmed))
         {
             await Clients.Caller.SendAsync("ReceiveError", "Потрібне підтвердження restore");
@@ -135,7 +135,7 @@ public partial class GameHub
 
     public async Task UndoLastGmAction(string commandId)
     {
-        if (!TryGetDiagnosticsRoom(out var room)) { await RejectDiagnosticsAccess("gm_action_undo"); return; }
+        if (!TryGetDiagnosticsRoom(out var room, RoomActorCapability.UseRecoveryTools)) { await RejectDiagnosticsAccess("gm_action_undo"); return; }
         if (string.IsNullOrWhiteSpace(commandId)) { await Clients.Caller.SendAsync("ReceiveError", "Некоректний command id"); return; }
         var actor = GetGmActorId(room);
         var result = _roomSnapshots.UndoLastGmAction(room, actor, commandId, out var original);
@@ -152,11 +152,13 @@ public partial class GameHub
         await Clients.Caller.SendAsync("GMActionSuccess", new { action = "gm_action_undone", originalAuditId = original.Id });
     }
 
-    private bool TryGetDiagnosticsRoom(out Room room)
+    private bool TryGetDiagnosticsRoom(out Room room, RoomActorCapability capability = RoomActorCapability.ViewDiagnostics)
     {
         room = _roomService.GetPlayerRoom(Context.ConnectionId)!;
         return room != null && _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var caller) &&
-            room.IsHost(caller) && GmCapabilities.Allows(room.GmMode, GmCapability.ManagePublicGameState);
+            (capability is RoomActorCapability.UseRecoveryTools or RoomActorCapability.ManageSnapshots or RoomActorCapability.EditRoomState
+                ? HasActiveRoomCapability(room, caller, capability)
+                : _developerAuthority.Has(room, caller, capability));
     }
 
     private async Task RejectDiagnosticsAccess(string actionType)
@@ -182,10 +184,27 @@ public partial class GameHub
         var canUndo = snapshot != null && allowUndo && _roomSnapshots.IsRestorable(room, snapshot.SnapshotId);
         _gmAudit.Append(room, actorPlayerId, actionType, result, summary, targetPlayerId, commandId, errorCode,
             snapshot?.SnapshotId, canUndo);
-        if (!string.IsNullOrWhiteSpace(room.HostConnectionId))
-            await SendGmAuditLog(room, Clients.Client(room.HostConnectionId));
-        if (!string.IsNullOrWhiteSpace(room.HostConnectionId) && snapshot != null)
-            await SendRoomSnapshots(room, Clients.Client(room.HostConnectionId));
+        var currentActor = _roomService.GetPlayer(Context.ConnectionId);
+        if (currentActor != null &&
+            _developerAuthority.IsDeveloper(currentActor) &&
+            string.Equals(RoomService.GetPlayerKey(currentActor), actorPlayerId, StringComparison.OrdinalIgnoreCase))
+        {
+            _developerAuthority.Audit(
+                room,
+                currentActor,
+                RoomActorCapability.UseDeveloperTools,
+                actionType,
+                result.ToString(),
+                targetPlayerId,
+                commandId,
+                errorCode);
+        }
+        foreach (var developer in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)
+            .Where(player => player.IsConnected && _developerAuthority.IsDeveloper(player)))
+        {
+            await SendGmAuditLog(room, Clients.Client(developer.ConnectionId));
+            if (snapshot != null) await SendRoomSnapshots(room, Clients.Client(developer.ConnectionId));
+        }
     }
 
     private RoomSnapshot CreateMutationSnapshot(Room room, string actorPlayerId, string actionType, string? commandId, string reason) =>
@@ -231,7 +250,11 @@ public partial class GameHub
     {
         await SendSafeRoomResync(room);
         await SendDiagnostics(room, null);
-        await SendGmAuditLog(room, Clients.Client(room.HostConnectionId));
-        await SendRoomSnapshots(room, Clients.Client(room.HostConnectionId));
+        foreach (var developer in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)
+            .Where(player => player.IsConnected && _developerAuthority.IsDeveloper(player)))
+        {
+            await SendGmAuditLog(room, Clients.Client(developer.ConnectionId));
+            await SendRoomSnapshots(room, Clients.Client(developer.ConnectionId));
+        }
     }
 }

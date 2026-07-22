@@ -31,12 +31,16 @@ test('post-game actions are host-safe and summary exposes names instead of ids',
   assert.match(view, /id="gameFinishedPanel"/);
   assert.match(view, /id="returnFinishedGameButton"/);
   assert.match(view, /id="copyGameSummaryButton"/);
-  assert.match(client, /newGameButton\.style\.display = isHost \? 'inline-flex' : 'none'/);
-  assert.match(client, /if \(!isHost \|\| returnFinishedGamePending \|\| !currentGameCompletion\) return/);
+  assert.match(view, /id="finishPostGameDiscussionButton"/);
+  assert.match(view, /id="createPostGameStoryButton"[\s\S]*requestFinalPostGameStory\(\)/);
+  assert.match(client, /setPostGameButton\('returnFinishedGameButton', canManagePostGame && canStartAgain\)/);
+  assert.match(client, /setPostGameButton\('createPostGameStoryButton', canManagePostGame && hostDecision && !!transition\?\.developerPresent && !!transition\?\.storyDirectorAvailable\)/);
+  assert.match(client, /if \(\(!isHost && !\(isDeveloper && developerState\?\.isActiveOperator\)\) \|\| returnFinishedGamePending \|\| !currentGameCompletion\) return/);
   assert.match(client, /connection\.invoke\('ReturnFinishedGameToLobby', true, crypto\.randomUUID\(\)\)/);
   assert.match(lobbyHub, /public async Task ReturnFinishedGameToLobby/);
   assert.match(lobbyHub, /RequireLobbyHost\(\)/);
   assert.match(lobbyHub, /game_return_confirmation_required/);
+  assert.match(lobbyHub, /PostGamePhase\.HostDecision or PostGamePhase\.StoryPublished or PostGamePhase\.Completed/);
 
   const summary = client.slice(
     client.indexOf('function buildGameSummaryText()'),

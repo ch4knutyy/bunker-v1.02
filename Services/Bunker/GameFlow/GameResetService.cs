@@ -68,6 +68,9 @@ internal static class GameResetService
 			room.CurrentRound = 0;
 			room.CurrentTurnPlayerId = null;
 			room.Completion = null;
+			room.PostGameStory = new();
+			room.PostGamePhase = PostGamePhase.None;
+			room.ProcessedPostGameCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.GameSessionId = null;
 			room.CurrentVoting = null;
 			room.VotingReadyResponses = new();

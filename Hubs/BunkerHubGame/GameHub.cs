@@ -8,6 +8,8 @@ using Microsoft.Extensions.FileProviders;
 using System.Numerics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Bunker.Services.Bunker.GameSessions;
+using Bunker.Services.OwnerContent;
+using Microsoft.Extensions.Options;
 
 namespace Bunker.Hubs
 {
@@ -47,6 +49,8 @@ namespace Bunker.Hubs
         private readonly ScenarioRunnerService _scenarioRunner;
         private readonly BunkerIntelService _bunkerIntel;
         private readonly EventSpecialCardService _eventSpecialCards;
+        private readonly PostGameStoryService _postGameStories;
+        private readonly DeveloperAuthorityService _developerAuthority;
         private readonly IScenarioContentRegistry _scenarioContent;
         private readonly IAuthorizationService? _authorizationService;
         private GmCapability? _activeDirectorCapability;
@@ -79,7 +83,9 @@ namespace Bunker.Hubs
             IScenarioContentRegistry? scenarioContent = null,
             ApocalypseSelectionService? apocalypseSelection = null,
             ApocalypseActivationPolicyResolver? apocalypseActivation = null,
-            ApocalypseActivationScheduler? apocalypseEffects = null)
+            ApocalypseActivationScheduler? apocalypseEffects = null,
+            PostGameStoryService? postGameStories = null,
+            DeveloperAuthorityService? developerAuthority = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -117,9 +123,13 @@ namespace Bunker.Hubs
                     TimeProvider.System);
             }
             _apocalypseEffects = apocalypseEffects;
+            _developerAuthority = developerAuthority ?? new DeveloperAuthorityService(
+                Options.Create(new OwnerAccessOptions()), Options.Create(new DeveloperAuthorityOptions()), TimeProvider.System);
+            _postGameStories = postGameStories ?? new PostGameStoryService(
+                new PostGameStoryPromptBuilder(), new PostGameStoryResultParser(), TimeProvider.System, _developerAuthority);
             _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit, _apocalypseSelection, _apocalypseActivation);
             _bunkerResources = bunkerResources ?? new BunkerResourceService();
-            _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);
+            _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit, _developerAuthority);
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;
 			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);

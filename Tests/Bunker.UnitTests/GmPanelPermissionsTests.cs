@@ -7,7 +7,7 @@ namespace Bunker.UnitTests;
 public sealed class GmPanelPermissionsTests
 {
 	[Fact]
-	public void HostTechnicalAndOmniscientModesReceiveDistinctServerPermissions()
+	public void HostDeveloperAndOmniscientModesReceiveDistinctServerPermissions()
 	{
 		var builder = new GmPanelStateBuilder(TimeProvider.System);
 
@@ -22,8 +22,28 @@ public sealed class GmPanelPermissionsTests
 		var technical = CreateRoom(GmMode.TechnicalGm);
 		var technicalState = builder.TryBuild(technical.Room, technical.Host)!;
 		Assert.True(technicalState.Permissions.CanManageRounds);
-		Assert.True(technicalState.Permissions.CanUseTechnicalTools);
-		Assert.True(technicalState.Permissions.CanRestoreSnapshots);
+		Assert.False(technicalState.Permissions.CanUseTechnicalTools);
+		Assert.False(technicalState.Permissions.CanRestoreSnapshots);
+
+		var developerState = builder.TryBuild(
+			technical.Room,
+			technical.Host,
+			canOpenContentEditor: true,
+			isDeveloper: true)!;
+		Assert.Equal("Developer", developerState.Role);
+		Assert.True(developerState.Permissions.CanUseTechnicalTools);
+		Assert.True(developerState.Permissions.CanRestoreSnapshots);
+		Assert.True(developerState.Permissions.CanOpenContentEditor);
+
+		var readOnlyDeveloperState = builder.TryBuild(
+			technical.Room,
+			technical.Host,
+			isDeveloper: true,
+			developerCanMutate: false)!;
+		Assert.Equal("Developer", readOnlyDeveloperState.Role);
+		Assert.False(readOnlyDeveloperState.Permissions.CanManageRounds);
+		Assert.False(readOnlyDeveloperState.Permissions.CanUseTechnicalTools);
+		Assert.True(readOnlyDeveloperState.Permissions.CanViewOmniscientData);
 
 		var omniscient = CreateRoom(GmMode.OmniscientGm);
 		var spectator = new Player

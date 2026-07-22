@@ -64,6 +64,9 @@ namespace Bunker.Hubs
 
 				// Додаємо до SignalR групи
 				await Groups.AddToGroupAsync(Context.ConnectionId, joinedRoom.Id);
+				var isDeveloper = _developerAuthority.IsDeveloper(player);
+				if (isDeveloper)
+					_developerAuthority.EnsureActiveOperator(joinedRoom, player, Context.ConnectionId);
 				AppendLobbyPresenceAudit(joinedRoom, RoomService.GetPlayerKey(player), "lobby_player_joined", "A lobby member joined the room.");
 
 				// Повідомляємо клієнта про успішне створення кімнати
@@ -75,9 +78,13 @@ namespace Bunker.Hubs
 					hostToken = joinedRoom.HostToken,
 					reconnectToken,
 					players = BuildRoomPlayersPayload(joinedRoom),
-					roundState = BuildRoundState(joinedRoom)
+					roundState = BuildRoundState(joinedRoom),
+					developer = isDeveloper ? _developerAuthority.PrivateState(joinedRoom, player, Context.ConnectionId) : null,
+					developerPresence = _developerAuthority.Presence(joinedRoom),
+					postGameTransition = BuildPostGameTransition(joinedRoom)
 				});
 				await BroadcastLobbyState(joinedRoom);
+				await BroadcastDeveloperAuthorityState(joinedRoom);
 
 				// Оновлюємо список кімнат
 				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
@@ -91,7 +98,7 @@ namespace Bunker.Hubs
 			}
 		}
 
-		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null, string? reconnectToken = null)
+		public async Task JoinRoom(string roomId, string playerName, string? password = null, string? stablePlayerId = null, string? reconnectToken = null, bool developerObserver = false)
 		{
 			var previousRoom = _roomService.GetPlayerRoom(Context.ConnectionId);
 			var previousPlayer = _roomService.GetPlayer(Context.ConnectionId);
@@ -113,6 +120,11 @@ namespace Bunker.Hubs
 
 			try
 			{
+				if (developerObserver && !_developerAuthority.IsDeveloper(Context.User))
+				{
+					await Clients.Caller.SendAsync("ReceiveError", "developer_required");
+					return;
+				}
 				if (!string.IsNullOrWhiteSpace(stablePlayerId))
 				{
 					var (rejoinSuccess, rejoinError, rejoinRoom, rejoinPlayer, wasHost) =
@@ -146,11 +158,12 @@ namespace Bunker.Hubs
 
 				var existingRoom = _roomService.GetRoom(roomId);
 				var player = CreateGeneratedPlayer(playerName, stablePlayerId, existingRoom);
+				if (developerObserver) player.IsLobbySpectator = true;
 				reconnectToken = CreateReconnectToken(player);
 
 				// Один виклик JoinRoom
 				var (joinSuccess, joinError, room) =
-					_roomService.JoinRoom(roomId, Context.ConnectionId, player, password);
+					_roomService.JoinRoom(roomId, Context.ConnectionId, player, password, bypassJoinLock: developerObserver);
 
 				if (!joinSuccess || room == null)
 				{
@@ -170,6 +183,8 @@ namespace Bunker.Hubs
 
 				// Додаємо до SignalR групи
 				await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
+				if (_developerAuthority.IsDeveloper(player))
+					_developerAuthority.EnsureActiveOperator(room, player, Context.ConnectionId);
 				AppendLobbyPresenceAudit(room, RoomService.GetPlayerKey(player), "lobby_player_joined", "A lobby member joined the room.");
 
 				// Відправляємо дані новому гравцю
@@ -181,7 +196,12 @@ namespace Bunker.Hubs
 					hostToken = room.IsHost(Context.ConnectionId) ? room.HostToken : null,
 					reconnectToken,
 					players = BuildRoomPlayersPayload(room),
-					roundState = BuildRoundState(room)
+					roundState = BuildRoundState(room),
+					developer = _developerAuthority.IsDeveloper(player)
+						? _developerAuthority.PrivateState(room, player, Context.ConnectionId)
+						: null,
+					developerPresence = _developerAuthority.Presence(room),
+					postGameTransition = BuildPostGameTransition(room)
 				});
 
 				// Повідомляємо інших у кімнаті
@@ -191,11 +211,14 @@ namespace Bunker.Hubs
 					connectionId = Context.ConnectionId,
 					stablePlayerId = RoomService.GetPlayerKey(player),
 					isHost = false,
+					isDeveloper = _developerAuthority.IsDeveloper(player),
+					developerParticipationMode = player.IsLobbySpectator ? "observer" : "player",
 					revealed = player.Revealed,
 					fact = player.Fact
 				});
 				await BroadcastOmniscientStateToAuthorizedSpectators(room);
 				await BroadcastLobbyState(room);
+				await BroadcastDeveloperAuthorityState(room);
 
 				// Оновлюємо список кімнат
 				await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());
@@ -248,6 +271,8 @@ namespace Bunker.Hubs
                 });
                 await BroadcastOmniscientStateToAuthorizedSpectators(room);
                 await BroadcastLobbyState(room);
+				await BroadcastDeveloperAuthorityState(room);
+				await BroadcastPostGameTransition(room);
             }
 
             // Оновлюємо список кімнат
@@ -338,6 +363,9 @@ namespace Bunker.Hubs
 			_imageService.UpdateBunkerImageUrl(room.Bunker);
 
 			await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+			var isDeveloper = _developerAuthority.IsDeveloper(player);
+			if (isDeveloper)
+				_developerAuthority.EnsureActiveOperator(room, player, Context.ConnectionId);
 
 			await Clients.Caller.SendAsync("RejoinSuccess", new
 			{
@@ -348,6 +376,12 @@ namespace Bunker.Hubs
 				roomState = room.State.ToString(),
 				currentPhase = room.CurrentPhase.ToString(),
 				completion = room.Completion,
+				postGameStory = isDeveloper
+					? (object)_postGameStories.ToHostDto(room.PostGameStory)
+					: _postGameStories.ToPublicDto(room.PostGameStory),
+				postGameTransition = BuildPostGameTransition(room),
+				developerPresence = _developerAuthority.Presence(room),
+				developer = isDeveloper ? _developerAuthority.PrivateState(room, player, Context.ConnectionId) : null,
 				apocalypse = GetPublicApocalypse(room),
 				gameSettings = BuildPublicGameSettings(room),
 				bunker = _bunkerIntel.Project(room, player,
@@ -364,10 +398,13 @@ namespace Bunker.Hubs
 				name = player.Name,
 				connectionId = Context.ConnectionId,
 				stablePlayerId = RoomService.GetPlayerKey(player),
-				isHost = wasHost
+				isHost = wasHost,
+				isDeveloper = _developerAuthority.IsDeveloper(player),
+				developerParticipationMode = player.IsLobbySpectator ? "observer" : "player"
 			});
 			await BroadcastOmniscientStateToAuthorizedSpectators(room);
 			await BroadcastLobbyState(room);
+			await BroadcastDeveloperAuthorityState(room);
 		}
 
 		private object? BuildVotingReconnectInfo(Room room, Player player)
@@ -587,6 +624,8 @@ namespace Bunker.Hubs
 					connectionId = connectionId,
 					stablePlayerId = RoomService.GetPlayerKey(p),
 					isHost = room.IsHost(connectionId),
+					isDeveloper = _developerAuthority.IsDeveloper(p),
+					developerParticipationMode = p.IsLobbySpectator ? "observer" : "player",
 					revealed = p.Revealed,
 					revealedValues = p.Revealed?.RevealedValues,
 					revealedSources = BuildRevealedSources(p),

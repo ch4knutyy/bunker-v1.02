@@ -23,6 +23,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<OwnerAccessOptions>(
 	builder.Configuration.GetSection(OwnerAccessOptions.SectionName));
+builder.Services.Configure<DeveloperAuthorityOptions>(
+	builder.Configuration.GetSection(DeveloperAuthorityOptions.SectionName));
 
 builder.Services.Configure<ContentEditorOptions>(
 	builder.Configuration.GetSection(ContentEditorOptions.SectionName));
@@ -72,6 +74,10 @@ builder.Services.AddSingleton<GmPanelStateBuilder>();
 builder.Services.AddSingleton<PlayerDisconnectCleanupCoordinator>();
 builder.Services.AddSingleton<RoomIntegrityService>();
 builder.Services.AddSingleton<RoomSnapshotService>();
+builder.Services.AddSingleton<DeveloperAuthorityService>();
+builder.Services.AddSingleton<PostGameStoryPromptBuilder>();
+builder.Services.AddSingleton<PostGameStoryResultParser>();
+builder.Services.AddSingleton<PostGameStoryService>();
 
 builder.Services.Configure<RoomRecoveryOptions>(
 	builder.Configuration.GetSection(RoomRecoveryOptions.SectionName));

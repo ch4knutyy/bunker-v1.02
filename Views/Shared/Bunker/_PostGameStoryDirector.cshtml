@@ -1,0 +1,74 @@
+<div id="postGameStoryRoot" class="story-root" hidden data-testid="post-game-story-root">
+    <section id="postGameStoryWaiting" class="story-waiting" hidden role="status" aria-live="polite">
+        <span class="story-kicker">Post-game Story Director</span>
+        <h2 id="postGameStoryWaitingText">Хост вирішує подальшу долю бункера…</h2>
+        <button id="postGameStoryWaitingCancel" type="button" class="btn-secondary" hidden>Скасувати запит історії</button>
+    </section>
+
+    <section id="postGameStoryDirector" class="story-director" hidden role="dialog" aria-modal="true" aria-labelledby="postGameStoryDirectorTitle">
+        <header>
+            <span class="story-kicker">Post-game Story Director</span>
+            <h2 id="postGameStoryDirectorTitle">Фінальна хроніка</h2>
+            <p>Скопіюйте промт у зовнішню нейромережу та вставте отриманий JSON. Гра не надсилає дані до AI автоматично.</p>
+        </header>
+        <div class="story-director-grid">
+            <div>
+                <label for="postGameStoryPrompt">Промт</label>
+                <textarea id="postGameStoryPrompt" readonly rows="12"></textarea>
+                <small id="postGameStoryPromptCount" class="story-workspace-count">0 символів</small>
+                <div class="story-workspace-actions">
+                    <button id="postGameStoryCopyPrompt" type="button" class="btn-secondary">Копіювати prompt</button>
+                    <button id="postGameStoryDownloadPrompt" type="button" class="btn-secondary">Завантажити .txt</button>
+                    <button id="postGameStoryCopySchema" type="button" class="btn-secondary">Скопіювати JSON schema</button>
+                </div>
+            </div>
+            <div>
+                <label for="postGameStoryResult">JSON-відповідь</label>
+                <textarea id="postGameStoryResult" rows="12" spellcheck="false" placeholder='{"schemaVersion":1,...}'></textarea>
+                <small id="postGameStoryResultCount" class="story-workspace-count">0 символів</small>
+                <div class="story-workspace-actions">
+                    <button id="postGameStoryPasteResult" type="button" class="btn-secondary">Вставити з буфера</button>
+                    <button id="postGameStoryClearResult" type="button" class="btn-secondary">Очистити відповідь</button>
+                    <button id="postGameStoryCorrectionPrompt" type="button" class="btn-secondary" hidden>Скопіювати prompt виправлення JSON</button>
+                    <button id="postGameStoryValidate" type="button" class="btn-primary">Перевірити й показати preview</button>
+                </div>
+            </div>
+        </div>
+        <div id="postGameStoryValidation" class="story-validation" role="status"></div>
+        <div id="postGameStoryRecovery" class="story-workspace-actions" hidden>
+            <button id="postGameStoryRetry" type="button" class="btn-secondary">Повторити</button>
+            <button id="postGameStoryRecoverUi" type="button" class="btn-secondary">Відновити інтерфейс</button>
+        </div>
+        <article id="postGameStoryPreview" class="story-preview" hidden></article>
+        <p class="story-disclosure-warning">Опублікована історія стане доступною всім гравцям і може розкрити приховані характеристики.</p>
+        <footer>
+            <button id="postGameStoryBack" type="button" class="btn-secondary">Назад до редагування</button>
+            <button id="postGameStoryCancel" type="button" class="btn-secondary">Скасувати</button>
+            <button id="postGameStoryPublish" type="button" class="btn-primary" disabled>Опублікувати історію</button>
+        </footer>
+    </section>
+
+    <section id="postGameStoryPresentation" class="story-presentation" hidden role="dialog" aria-modal="true" aria-labelledby="postGameStoryTitle">
+        <header class="story-presentation-header">
+            <span class="story-kicker">Хроніка бункера</span>
+            <h1 id="postGameStoryTitle"></h1>
+            <p id="postGameStorySubtitle"></p>
+            <div class="story-score"><strong id="postGameStoryScore"></strong><span id="postGameStoryVerdict"></span></div>
+            <div class="story-toolbar">
+                <button id="postGameStoryShowAll" type="button">Показати весь текст</button>
+                <button id="postGameStorySound" type="button" aria-pressed="false">Звук: вимк.</button>
+                <button id="postGameStoryClose" type="button">Закрити хроніку</button>
+            </div>
+        </header>
+        <div id="postGameStoryContent" class="story-content"></div>
+        <div id="postGameStoryProgress" class="story-progress" aria-live="polite"></div>
+        <footer id="postGameStoryFooter" class="story-presentation-footer">
+            <button data-story-mode="continuation" type="button">Продовжити історію</button>
+            <button data-story-mode="humanity_outcome" type="button">Доля людства</button>
+            <button data-story-mode="bunker_contribution" type="button">Внесок бункера</button>
+            <button data-story-mode="eliminated_fates" type="button">Долі вибулих</button>
+            <button id="postGameStoryNewGame" type="button">Нова гра</button>
+            <button id="postGameStoryReplay" type="button">Переглянути ще раз</button>
+        </footer>
+    </section>
+</div>

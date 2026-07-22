@@ -28,7 +28,7 @@ test('mode-specific editors are canonical and incremental', () => {
 
 test('catalog remains read-only after settings freeze and public projection protects hidden apocalypse ids', () => {
   const catalogMethod = hub.slice(hub.indexOf('GetLobbyApocalypseCatalog'), hub.indexOf('ApplyLobbyGameSettings'));
-  assert.match(catalogMethod, /RequireLobbyHost\(\)/);
+  assert.match(catalogMethod, /RequireLobbyMember\(\)/);
   assert.match(catalogMethod, /GetEffective\(room\)/);
   assert.doesNotMatch(catalogMethod, /settings_frozen|SettingsFrozen|RoomState\.Lobby/);
   assert.match(hub.slice(hub.indexOf('ApplyLobbyGameSettings')), /_roomGameSettings\.Apply\(room, actor, request\)/);

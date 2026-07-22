@@ -80,6 +80,20 @@ namespace Bunker.Models
 		public Guid? GameSessionId { get; set; }
 		public GameCompletionState? Completion { get; set; }
 		public PostGameStoryState PostGameStory { get; set; } = new();
+		public PostGamePhase PostGamePhase { get; set; } = PostGamePhase.None;
+		public HashSet<string> ProcessedPostGameCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+		[System.Text.Json.Serialization.JsonIgnore]
+		public object DeveloperAuthoritySyncRoot { get; } = new();
+		[System.Text.Json.Serialization.JsonIgnore]
+		public string? ActiveDeveloperPlayerId { get; set; }
+		[System.Text.Json.Serialization.JsonIgnore]
+		public string? ActiveDeveloperConnectionId { get; set; }
+		[System.Text.Json.Serialization.JsonIgnore]
+		public DateTimeOffset? ActiveDeveloperLeaseUtc { get; set; }
+		[System.Text.Json.Serialization.JsonIgnore]
+		public long DeveloperOperatorVersion { get; set; }
+		[System.Text.Json.Serialization.JsonIgnore]
+		public List<DeveloperAuditEntry> DeveloperAuditLog { get; set; } = [];
 		public string Name { get; set; } = "";
 		public string? Password { get; set; }
 		[System.Text.Json.Serialization.JsonIgnore]

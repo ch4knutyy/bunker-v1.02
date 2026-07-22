@@ -11,22 +11,26 @@ public sealed class LobbyStartService
     private readonly TimeProvider time;
     private readonly RoomGameSettingsService settings;
     private readonly GmAuditService audit;
+    private readonly DeveloperAuthorityService? developerAuthority;
     private sealed record Ticket(string RoomId, string HostPlayerId, long Version, string Fingerprint, DateTimeOffset ExpiresAtUtc, bool CanStart);
     private sealed record VersionStamp(string Fingerprint, long Version);
     private readonly ConcurrentDictionary<string, Ticket> _tickets = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, VersionStamp> _versions = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, long> _guestWarningRequests = new(StringComparer.OrdinalIgnoreCase);
 
-    public LobbyStartService(TimeProvider time, RoomGameSettingsService? settings = null, GmAuditService? audit = null)
+    public LobbyStartService(TimeProvider time, RoomGameSettingsService? settings = null, GmAuditService? audit = null,
+        DeveloperAuthorityService? developerAuthority = null)
     {
         this.time = time;
         this.audit = audit ?? new GmAuditService(time);
         this.settings = settings ?? new RoomGameSettingsService(this.audit);
+        this.developerAuthority = developerAuthority;
     }
 
     public LobbyStateDto GetState(Room room)
     {
-        var members = RoomService.GetPlayersSnapshot(room).Select(entry => BuildMember(room, entry.Value)).ToList();
+        var members = RoomService.GetPlayersSnapshot(room)
+            .Select(entry => BuildMember(room, entry.Value, developerAuthority?.IsDeveloper(entry.Value) == true)).ToList();
         var blockers = Validate(room, members);
         var requiredMembers = members.Where(member => member.IsGameplayParticipant && member.IsConnected).ToList();
         var recentEvents = audit.GetRecent(room, 20)
@@ -63,13 +67,13 @@ public sealed class LobbyStartService
         return true;
     }
 
-    public static LobbyMemberDto BuildMember(Room room, Player player)
+    public static LobbyMemberDto BuildMember(Room room, Player player, bool isDeveloper = false)
     {
         var gameplay = RoomService.IsGameplayParticipant(player); var omni = player.IsSpectatorGm && player.GmRole == GmMode.OmniscientGm;
         var technical = player.GmRole == GmMode.TechnicalGm; var spectator = !gameplay;
         var role = omni ? "OmniscientGm" : technical ? "TechnicalGm" : gameplay && room.IsHost(player) ? "HostPlayer" : gameplay ? "Player" : "Spectator";
         return new(RoomService.GetPlayerKey(player), player.Name, role, room.IsHost(player), gameplay, spectator, technical, omni,
-            player.IsLobbyReady, player.IsConnected, player.AccountUserId.HasValue, null);
+            player.IsLobbyReady, player.IsConnected, player.AccountUserId.HasValue, isDeveloper, null);
     }
 
     public static string Lifecycle(Room room) => room.State switch { RoomState.Lobby or RoomState.Waiting => "Lobby", RoomState.Finished => "Finished", _ => "Running" };

@@ -14,17 +14,20 @@ namespace Bunker.Controllers
         private readonly RoomService _roomService;
         private readonly IHubContext<GameHub> _hubContext;
         private readonly ILogger<ScenarioImageController> _logger;
+        private readonly DeveloperAuthorityService _developerAuthority;
 
         public ScenarioImageController(
             ScenarioImageService imageService, 
             RoomService roomService,
             IHubContext<GameHub> hubContext,
-            ILogger<ScenarioImageController> logger)
+            ILogger<ScenarioImageController> logger,
+            DeveloperAuthorityService developerAuthority)
         {
             _imageService = imageService;
             _roomService = roomService;
             _hubContext = hubContext;
             _logger = logger;
+            _developerAuthority = developerAuthority;
         }
 
         /// <summary>
@@ -34,23 +37,23 @@ namespace Bunker.Controllers
         public async Task<IActionResult> UploadApocalypseImage(
             [FromForm] IFormFile file,
             [FromForm] string roomId,
-            [FromForm] string connectionId,
-            [FromForm] string? hostToken,
             [FromForm] string apocalypseId)
         {
             // Валідація входу
             if (file == null || file.Length == 0)
                 return BadRequest(new { error = "Файл не вибрано" });
                 
-            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(apocalypseId))
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(apocalypseId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            // Перевірка прав хоста
-            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            // Серверна перевірка Developer authority
+            var hostRoomResult = GetDeveloperRoom(roomId);
             if (hostRoomResult.Failure is { } failure)
-                return CreateHostRoomError(failure, "Тільки хост може завантажувати зображення");
+                return CreateDeveloperRoomError(failure);
 
             var room = hostRoomResult.Room!;
+            if (room.Apocalypse == null || !string.Equals(room.Apocalypse.Id, apocalypseId, StringComparison.Ordinal))
+                return BadRequest(new { error = "scenario_target_not_current" });
 
             // Зберігаємо файл
             using var stream = file.OpenReadStream();
@@ -58,7 +61,11 @@ namespace Bunker.Controllers
                 apocalypseId, stream, file.FileName);
 
             if (!success)
+            {
+                _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                    "scenario_image_upload", "failed", apocalypseId, failureCode: "image_save_failed");
                 return BadRequest(new { error });
+            }
 
             // Оновлюємо апокаліпсис в кімнаті
             if (room.Apocalypse != null && room.Apocalypse.Id == apocalypseId)
@@ -74,6 +81,8 @@ namespace Bunker.Controllers
             });
 
             _logger.LogInformation($"Зображення апокаліпсису {apocalypseId} завантажено для кімнати {roomId}");
+            _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_upload", "success", apocalypseId);
 
             return Ok(new { imageUrl });
         }
@@ -85,23 +94,23 @@ namespace Bunker.Controllers
         public async Task<IActionResult> UploadBunkerImage(
             [FromForm] IFormFile file,
             [FromForm] string roomId,
-            [FromForm] string connectionId,
-            [FromForm] string? hostToken,
             [FromForm] string bunkerId)
         {
             // Валідація входу
             if (file == null || file.Length == 0)
                 return BadRequest(new { error = "Файл не вибрано" });
                 
-            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(bunkerId))
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(bunkerId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            // Перевірка прав хоста
-            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            // Серверна перевірка Developer authority
+            var hostRoomResult = GetDeveloperRoom(roomId);
             if (hostRoomResult.Failure is { } failure)
-                return CreateHostRoomError(failure, "Тільки хост може завантажувати зображення");
+                return CreateDeveloperRoomError(failure);
 
             var room = hostRoomResult.Room!;
+            if (room.Bunker == null || !string.Equals(room.Bunker.Id, bunkerId, StringComparison.Ordinal))
+                return BadRequest(new { error = "scenario_target_not_current" });
 
             // Зберігаємо файл
             using var stream = file.OpenReadStream();
@@ -109,7 +118,11 @@ namespace Bunker.Controllers
                 bunkerId, stream, file.FileName);
 
             if (!success)
+            {
+                _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                    "scenario_image_upload", "failed", bunkerId, failureCode: "image_save_failed");
                 return BadRequest(new { error });
+            }
 
             // Оновлюємо бункер в кімнаті
             if (room.Bunker != null && room.Bunker.Id == bunkerId)
@@ -125,6 +138,8 @@ namespace Bunker.Controllers
             });
 
             _logger.LogInformation($"Зображення бункера {bunkerId} завантажено для кімнати {roomId}");
+            _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_upload", "success", bunkerId);
 
             return Ok(new { imageUrl });
         }
@@ -136,19 +151,17 @@ namespace Bunker.Controllers
         public async Task<IActionResult> UploadThreatImage(
             [FromForm] IFormFile file,
             [FromForm] string roomId,
-            [FromForm] string connectionId,
-            [FromForm] string? hostToken,
             [FromForm] string threatId)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { error = "Файл не вибрано" });
 
-            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(threatId))
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(threatId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            var hostRoomResult = GetDeveloperRoom(roomId);
             if (hostRoomResult.Failure is { } failure)
-                return CreateHostRoomError(failure, "Тільки хост може завантажувати зображення");
+                return CreateDeveloperRoomError(failure);
 
             var room = hostRoomResult.Room!;
 
@@ -161,7 +174,11 @@ namespace Bunker.Controllers
                 threatImageKey, stream, file.FileName);
 
             if (!success)
+            {
+                _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                    "scenario_image_upload", "failed", threatId, failureCode: "image_save_failed");
                 return BadRequest(new { error });
+            }
 
             room.CurrentThreat.ImageUrl = imageUrl;
             room.CurrentThreat.UploadedImagePath = imageUrl;
@@ -173,6 +190,8 @@ namespace Bunker.Controllers
             });
 
             _logger.LogInformation($"Зображення загрози {threatId} завантажено для кімнати {roomId}");
+            _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_upload", "success", threatId);
 
             return Ok(new { imageUrl });
         }
@@ -183,19 +202,19 @@ namespace Bunker.Controllers
         [HttpDelete("apocalypse")]
         public async Task<IActionResult> RemoveApocalypseImage(
             [FromQuery] string roomId,
-            [FromQuery] string connectionId,
-            [FromQuery] string? hostToken,
             [FromQuery] string apocalypseId)
         {
-            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(apocalypseId))
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(apocalypseId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            // Перевірка прав хоста
-            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            // Серверна перевірка Developer authority
+            var hostRoomResult = GetDeveloperRoom(roomId);
             if (hostRoomResult.Failure is { } failure)
-                return CreateHostRoomError(failure, "Тільки хост може видаляти зображення");
+                return CreateDeveloperRoomError(failure);
 
             var room = hostRoomResult.Room!;
+            if (room.Apocalypse == null || !string.Equals(room.Apocalypse.Id, apocalypseId, StringComparison.Ordinal))
+                return BadRequest(new { error = "scenario_target_not_current" });
 
             // Видаляємо файл
             _imageService.RemoveApocalypseImage(apocalypseId);
@@ -213,6 +232,8 @@ namespace Bunker.Controllers
             });
 
             _logger.LogInformation($"Зображення апокаліпсису {apocalypseId} видалено для кімнати {roomId}");
+            _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_remove", "success", apocalypseId);
 
             return Ok(new { success = true });
         }
@@ -223,19 +244,19 @@ namespace Bunker.Controllers
         [HttpDelete("bunker")]
         public async Task<IActionResult> RemoveBunkerImage(
             [FromQuery] string roomId,
-            [FromQuery] string connectionId,
-            [FromQuery] string? hostToken,
             [FromQuery] string bunkerId)
         {
-            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(bunkerId))
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(bunkerId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            // Перевірка прав хоста
-            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            // Серверна перевірка Developer authority
+            var hostRoomResult = GetDeveloperRoom(roomId);
             if (hostRoomResult.Failure is { } failure)
-                return CreateHostRoomError(failure, "Тільки хост може видаляти зображення");
+                return CreateDeveloperRoomError(failure);
 
             var room = hostRoomResult.Room!;
+            if (room.Bunker == null || !string.Equals(room.Bunker.Id, bunkerId, StringComparison.Ordinal))
+                return BadRequest(new { error = "scenario_target_not_current" });
 
             // Видаляємо файл
             _imageService.RemoveBunkerImage(bunkerId);
@@ -253,6 +274,8 @@ namespace Bunker.Controllers
             });
 
             _logger.LogInformation($"Зображення бункера {bunkerId} видалено для кімнати {roomId}");
+            _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_remove", "success", bunkerId);
 
             return Ok(new { success = true });
         }
@@ -263,16 +286,14 @@ namespace Bunker.Controllers
         [HttpDelete("threat")]
         public async Task<IActionResult> RemoveThreatImage(
             [FromQuery] string roomId,
-            [FromQuery] string connectionId,
-            [FromQuery] string? hostToken,
             [FromQuery] string threatId)
         {
-            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(connectionId) || string.IsNullOrEmpty(threatId))
+            if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(threatId))
                 return BadRequest(new { error = "Відсутні обов'язкові параметри" });
 
-            var hostRoomResult = GetHostRoom(roomId, hostToken);
+            var hostRoomResult = GetDeveloperRoom(roomId);
             if (hostRoomResult.Failure is { } failure)
-                return CreateHostRoomError(failure, "Тільки хост може видаляти зображення");
+                return CreateDeveloperRoomError(failure);
 
             var room = hostRoomResult.Room!;
 
@@ -289,6 +310,8 @@ namespace Bunker.Controllers
             });
 
             _logger.LogInformation($"Зображення загрози {threatId} видалено для кімнати {roomId}");
+            _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_remove", "success", threatId);
 
             return Ok(new { success = true });
         }
@@ -299,10 +322,14 @@ namespace Bunker.Controllers
         [HttpGet("apocalypse/prompt")]
         public IActionResult GetApocalypsePrompt([FromQuery] string roomId)
         {
-            var room = _roomService.GetRoom(roomId);
-            if (room?.Apocalypse == null)
+            var result = GetDeveloperRoom(roomId);
+            if (result.Failure is { } failure) return CreateDeveloperRoomError(failure);
+            var room = result.Room!;
+            if (room.Apocalypse == null)
                 return NotFound(new { error = "Апокаліпсис не знайдено" });
 
+            _developerAuthority.Audit(room, result.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_prompt", "success", room.Apocalypse.Id);
             return Ok(new { prompt = room.Apocalypse.GenerateImagePrompt() });
         }
 
@@ -312,10 +339,14 @@ namespace Bunker.Controllers
         [HttpGet("bunker/prompt")]
         public IActionResult GetBunkerPrompt([FromQuery] string roomId)
         {
-            var room = _roomService.GetRoom(roomId);
-            if (room?.Bunker == null)
+            var result = GetDeveloperRoom(roomId);
+            if (result.Failure is { } failure) return CreateDeveloperRoomError(failure);
+            var room = result.Room!;
+            if (room.Bunker == null)
                 return NotFound(new { error = "Бункер не знайдено" });
 
+            _developerAuthority.Audit(room, result.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_prompt", "success", room.Bunker.Id);
             return Ok(new { prompt = room.Bunker.GenerateImagePrompt() });
         }
 
@@ -325,10 +356,14 @@ namespace Bunker.Controllers
         [HttpGet("threat/prompt")]
         public IActionResult GetThreatPrompt([FromQuery] string roomId)
         {
-            var room = _roomService.GetRoom(roomId);
-            if (room?.CurrentThreat == null || !room.IsThreatRevealed)
+            var result = GetDeveloperRoom(roomId);
+            if (result.Failure is { } failure) return CreateDeveloperRoomError(failure);
+            var room = result.Room!;
+            if (room.CurrentThreat == null || !room.IsThreatRevealed)
                 return NotFound(new { error = "Загрозу ще не розкрито" });
 
+            _developerAuthority.Audit(room, result.Actor!, RoomActorCapability.ManageScenarioImages,
+                "scenario_image_prompt", "success", room.CurrentThreat.Id);
             return Ok(new
             {
                 prompt = room.CurrentThreat.GenerateImagePrompt(room.Apocalypse, room.Bunker)
@@ -340,43 +375,43 @@ namespace Bunker.Controllers
             return $"{roomId}_{threatId}";
         }
 
-        private HostRoomResult GetHostRoom(string roomId, string? hostToken)
+        private DeveloperRoomResult GetDeveloperRoom(string roomId)
         {
             var room = _roomService.GetRoom(roomId);
             if (room == null)
-                return new HostRoomResult(null, HostRoomFailure.RoomNotFound);
+                return new DeveloperRoomResult(null, null, DeveloperRoomFailure.RoomNotFound);
 
-            if (!IsValidHostRequest(room, hostToken))
-                return new HostRoomResult(null, HostRoomFailure.InvalidHostToken);
+            if (!_developerAuthority.FeatureAllows(RoomActorCapability.ManageScenarioImages))
+                return new DeveloperRoomResult(null, null, DeveloperRoomFailure.FeatureDisabled);
+            if (!_developerAuthority.TryGetDeveloperRoomActor(room, User, out var actor))
+                return new DeveloperRoomResult(null, null, DeveloperRoomFailure.DeveloperRequired);
+            if (!_developerAuthority.EnsureActiveOperator(room, actor, actor.ConnectionId) ||
+                !_developerAuthority.IsActiveOperator(room, actor, actor.ConnectionId))
+                return new DeveloperRoomResult(null, null, DeveloperRoomFailure.OperatorRequired);
 
-            return new HostRoomResult(room, null);
+            return new DeveloperRoomResult(room, actor, null);
         }
 
-        private IActionResult CreateHostRoomError(HostRoomFailure failure, string invalidHostTokenMessage)
+        private IActionResult CreateDeveloperRoomError(DeveloperRoomFailure failure)
         {
             return failure switch
             {
-                HostRoomFailure.RoomNotFound => NotFound(new { error = "Кімнату не знайдено" }),
-                HostRoomFailure.InvalidHostToken => StatusCode(
-                    StatusCodes.Status403Forbidden,
-                    new { error = invalidHostTokenMessage }),
+                DeveloperRoomFailure.RoomNotFound => NotFound(new { error = "room_not_found" }),
+                DeveloperRoomFailure.FeatureDisabled => StatusCode(StatusCodes.Status403Forbidden, new { error = "feature_disabled" }),
+                DeveloperRoomFailure.DeveloperRequired => StatusCode(StatusCodes.Status403Forbidden, new { error = "developer_required" }),
+                DeveloperRoomFailure.OperatorRequired => StatusCode(StatusCodes.Status409Conflict, new { error = "developer_operator_required" }),
                 _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null)
             };
         }
 
-        private static bool IsValidHostRequest(Room room, string? hostToken)
-        {
-            return !string.IsNullOrWhiteSpace(hostToken) &&
-                !string.IsNullOrWhiteSpace(room.HostToken) &&
-                string.Equals(room.HostToken, hostToken, StringComparison.Ordinal);
-        }
+        private sealed record DeveloperRoomResult(Room? Room, Player? Actor, DeveloperRoomFailure? Failure);
 
-        private sealed record HostRoomResult(Room? Room, HostRoomFailure? Failure);
-
-        private enum HostRoomFailure
+        private enum DeveloperRoomFailure
         {
             RoomNotFound,
-            InvalidHostToken
+            FeatureDisabled,
+            DeveloperRequired,
+            OperatorRequired
         }
     }
 }

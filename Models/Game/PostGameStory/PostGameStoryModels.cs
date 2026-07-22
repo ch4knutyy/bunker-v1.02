@@ -47,6 +47,7 @@ public sealed class PostGameStoryState
     public DateTimeOffset? UpdatedAtUtc { get; set; }
     public string? CreatedByPlayerId { get; set; }
     public HashSet<string> ProcessedCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, string> PublishedCommandEntryIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 public sealed class PostGameStoryEntry
@@ -135,6 +136,7 @@ public sealed record PostGameStoryHostDto(
     string WaitingState,
     string? GeneratedPrompt,
     string? GeneratedPromptFingerprint,
+    string? RawResult,
     PostGameStoryEntry? Preview,
     string? PreviewFingerprint,
     IReadOnlyList<string> ValidationErrors,

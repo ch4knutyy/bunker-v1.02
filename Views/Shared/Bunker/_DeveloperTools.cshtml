@@ -1,0 +1,16 @@
+<aside id="developerToolsPanel" class="developer-tools-panel" hidden aria-labelledby="developerToolsTitle">
+    <header>
+        <div><span class="developer-label">DEVELOPER</span><h2 id="developerToolsTitle">Developer Tools</h2></div>
+        <button type="button" class="btn-close" onclick="toggleDeveloperTools(false)" aria-label="Закрити">×</button>
+    </header>
+    <p id="developerOperatorStatus" role="status">Operator state is loading…</p>
+    <div class="developer-tools-actions">
+        <button type="button" class="btn-secondary" onclick="copyDeveloperChecklist()">Скопіювати діагностику</button>
+        <button type="button" class="btn-secondary" onclick="recoverDeveloperUi()">Відновити інтерфейс</button>
+        <button id="developerTakeoverButton" type="button" class="btn-danger" onclick="takeOverDeveloperOperator()" hidden>Перехопити керування</button>
+    </div>
+    <h3>Перевірка перед грою</h3>
+    <pre id="developerChecklist" class="developer-checklist"></pre>
+    <h3>Останні дії Developer</h3>
+    <div id="developerAuditList" class="developer-audit-list" aria-live="polite"></div>
+</aside>

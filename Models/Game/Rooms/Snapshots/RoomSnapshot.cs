@@ -65,6 +65,8 @@ public sealed class RoomSnapshotState
     public PendingEliminationState? PendingElimination { get; set; }
     public GameCompletionState? Completion { get; set; }
     public PostGameStoryState PostGameStory { get; set; } = new();
+    public PostGamePhase PostGamePhase { get; set; }
+    public HashSet<string> ProcessedPostGameCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, Player> PlayersByStableId { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
