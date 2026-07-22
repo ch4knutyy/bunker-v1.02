@@ -57,6 +57,7 @@ public sealed class RoomSnapshotState
     public VotingSession? CurrentVoting { get; set; }
     public Apocalypse? Apocalypse { get; set; }
     public ResolvedApocalypseActivationPolicy? ApocalypseActivationPolicy { get; set; }
+    public ApocalypseEffectRuntimeState? ApocalypseEffectRuntime { get; set; }
     public BunkerInfo? Bunker { get; set; }
     public ScenarioSituationState? ScenarioSituations { get; set; }
     public BunkerIntelState? BunkerIntel { get; set; }

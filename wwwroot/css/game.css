@@ -9995,3 +9995,33 @@ body.apocalypse-theme-revealing :is(.site-command-bar, .site-round-hud, #gameSec
         transition: none;
     }
 }
+/* Live interactive-apocalypse activation. */
+.apocalypse-effect-banner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: .85rem 0;
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(255, 174, 66, .62);
+    border-left: .3rem solid #ffae42;
+    border-radius: .75rem;
+    background: linear-gradient(105deg, rgba(67, 25, 16, .97), rgba(22, 19, 26, .96));
+    color: #fff5e5;
+    box-shadow: 0 .65rem 1.8rem rgba(0, 0, 0, .3);
+    animation: apocalypse-effect-enter .3s ease-out both;
+}
+.apocalypse-effect-banner[hidden] { display: none; }
+.apocalypse-effect-banner p { margin: .25rem 0 0; }
+.apocalypse-effect-banner ul { margin: .55rem 0 0; padding-left: 1.2rem; }
+.apocalypse-effect-banner button {
+    border: 0; background: transparent; color: inherit; font-size: 1.5rem;
+    line-height: 1; cursor: pointer;
+}
+@keyframes apocalypse-effect-enter {
+    from { opacity: 0; transform: translateY(-.5rem); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .apocalypse-effect-banner { animation: none; }
+}

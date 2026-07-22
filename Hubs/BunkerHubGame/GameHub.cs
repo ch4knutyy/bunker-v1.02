@@ -40,6 +40,7 @@ namespace Bunker.Hubs
         private readonly RoomGameSettingsService _roomGameSettings;
         private readonly ApocalypseSelectionService _apocalypseSelection;
         private readonly ApocalypseActivationPolicyResolver _apocalypseActivation;
+        private readonly ApocalypseActivationScheduler _apocalypseEffects;
         private readonly BunkerResourceService _bunkerResources;
         private readonly GmPanelStateBuilder _gmPanelStateBuilder;
         private readonly ScenarioSchedulerService _scenarioScheduler;
@@ -77,7 +78,8 @@ namespace Bunker.Hubs
             EventSpecialCardService? eventSpecialCards = null,
             IScenarioContentRegistry? scenarioContent = null,
             ApocalypseSelectionService? apocalypseSelection = null,
-            ApocalypseActivationPolicyResolver? apocalypseActivation = null)
+            ApocalypseActivationPolicyResolver? apocalypseActivation = null,
+            ApocalypseActivationScheduler? apocalypseEffects = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -106,6 +108,15 @@ namespace Bunker.Hubs
             _directorControls = directorControls ?? new DirectorControlService(TimeProvider.System);
             _apocalypseSelection = apocalypseSelection ?? new ApocalypseSelectionService(gameData);
             _apocalypseActivation = apocalypseActivation ?? new ApocalypseActivationPolicyResolver(gameData, _apocalypseSelection);
+            if (apocalypseEffects == null)
+            {
+                var effectRandom = new SystemApocalypseRandom();
+                var effectRegistry = new ApocalypseEffectHandlerRegistry(gameData, effectRandom);
+                apocalypseEffects = new ApocalypseActivationScheduler(
+                    new ApocalypseEffectEngine(effectRegistry, gameData, effectRandom),
+                    TimeProvider.System);
+            }
+            _apocalypseEffects = apocalypseEffects;
             _roomGameSettings = roomGameSettings ?? new RoomGameSettingsService(_gmAudit, _apocalypseSelection, _apocalypseActivation);
             _bunkerResources = bunkerResources ?? new BunkerResourceService();
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit);

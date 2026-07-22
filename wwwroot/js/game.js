@@ -3228,10 +3228,75 @@ function normalizeEliminationVoteImmunity(source) {
 	};
 }
 
+let apocalypseEffectBannerTimer = null;
+
+function apocalypseEffectSummaryKey(code, failed) {
+	if (failed) return 'apocalypseEffectFailed';
+	return ({
+		apocalypse_effect_age: 'apocalypseEffectAge',
+		apocalypse_effect_body: 'apocalypseEffectBody',
+		apocalypse_effect_profession: 'apocalypseEffectProfession',
+		apocalypse_effect_conditions: 'apocalypseEffectConditions'
+	})[String(code || '')] || 'apocalypseEffectApplied';
+}
+
+function hideApocalypseEffectBanner() {
+	const banner = document.getElementById('apocalypseEffectBanner');
+	if (banner) banner.hidden = true;
+	if (apocalypseEffectBannerTimer) clearTimeout(apocalypseEffectBannerTimer);
+	apocalypseEffectBannerTimer = null;
+}
+
+function showApocalypseEffectBanner(data) {
+	const banner = document.getElementById('apocalypseEffectBanner');
+	const title = document.getElementById('apocalypseEffectBannerTitle');
+	const message = document.getElementById('apocalypseEffectBannerMessage');
+	const changes = document.getElementById('apocalypseEffectPersonalChanges');
+	if (!banner || !title || !message || !changes) return;
+
+	const failed = String(data?.result ?? data?.Result ?? '').toLowerCase() === 'failed';
+	const summaryKey = apocalypseEffectSummaryKey(data?.summaryCode ?? data?.SummaryCode, failed);
+	const localizedMessage = t(summaryKey);
+	title.textContent = t(failed ? 'apocalypseEffectFailureTitle' : 'apocalypseEffectTitle');
+	message.textContent = localizedMessage;
+	changes.replaceChildren();
+	banner.dataset.activationId = String(data?.activationId ?? data?.ActivationId ?? '');
+	banner.hidden = false;
+	document.getElementById('apocalypseEffectBannerDismiss')?.addEventListener('click', hideApocalypseEffectBanner, { once: true });
+	addEventMessage(escapeHtml(localizedMessage));
+	if (apocalypseEffectBannerTimer) clearTimeout(apocalypseEffectBannerTimer);
+	apocalypseEffectBannerTimer = setTimeout(hideApocalypseEffectBanner, 9000);
+}
+
+function showApocalypseEffectPersonalChanges(data) {
+	const banner = document.getElementById('apocalypseEffectBanner');
+	const list = document.getElementById('apocalypseEffectPersonalChanges');
+	const activationId = String(data?.activationId ?? data?.ActivationId ?? '');
+	if (!banner || !list || banner.hidden || banner.dataset.activationId !== activationId) return;
+	const changes = data?.changes ?? data?.Changes ?? [];
+	list.replaceChildren(...changes.map(change => {
+		const item = document.createElement('li');
+		const field = String(change?.field ?? change?.Field ?? '');
+		const after = String(change?.after ?? change?.After ?? '');
+		item.textContent = `${field}: ${after}`;
+		return item;
+	}));
+}
+
 // ==================== SIGNALR HANDLERS ====================
 
 // Список кімнат оновлено
 function registerSignalREvents() {
+	connection.off("ApocalypseEffectActivated");
+	connection.on("ApocalypseEffectActivated", function (data) {
+		showApocalypseEffectBanner(data);
+	});
+
+	connection.off("ApocalypseEffectPersonalChanged");
+	connection.on("ApocalypseEffectPersonalChanged", function (data) {
+		showApocalypseEffectPersonalChanges(data);
+	});
+
 	connection.off("RoomsListUpdated");
 	connection.on("RoomsListUpdated", function (rooms) {
 		console.log("Rooms updated:", rooms);
@@ -5897,6 +5962,25 @@ Object.assign(uiTranslations.en, {
 });
 Object.assign(uiTranslations.ru, {
 	lobbyActivationTitle: 'Интерактивный эффект', lobbyActivationEffectsEnabled: 'Применять интерактивные эффекты', lobbyActivationPolicy: 'Расписание', lobbyActivationDefinitionDefault: 'Стандартное расписание апокалипсиса', lobbyActivationCustom: 'Собственное расписание', lobbyActivationScheduleMode: 'Режим', lobbyActivationTrigger: 'Момент', lobbyActivationFirstRound: 'Первый раунд', lobbyActivationInterval: 'Интервал в раундах', lobbyActivationMaximum: 'Максимум активаций', lobbyActivationOnce: 'Однократно', lobbyActivationRecurring: 'Повторяемо', lobbyActivationGameStart: 'В начале игры', lobbyActivationAfterVoting: 'После голосования', lobbyActivationAfterRound: 'После раунда', lobbyActivationUnlimited: 'Без ограничения', lobbyActivationOrdinary: 'Выбранный апокалипсис не имеет интерактивного эффекта.', lobbyActivationUnavailable: 'При текущих настройках интерактивный апокалипсис не может выпасть.', lobbyActivationInactiveSummary: 'Интерактивная активация неактивна.', lobbyActivationEffectsOffSummary: 'Апокалипсис будет показан без изменения характеристик.', lobbyActivationGameStartSummary: 'Эффект будет применён один раз после начала игры.', lobbyActivationFromRound: 'с раунда', lobbyActivationEvery: 'каждые раунды', lobbyActivationVotingRequired: 'Необходимо включить голосование.', lobbyWarningActivationEffectsDisabled: 'Интерактивные эффекты выключены.', lobbyWarningActivationInactive: 'Интерактивная активация сейчас неактивна.', lobbyWarningActivationDefaultMixed: 'Возможные апокалипсисы имеют разные стандартные расписания.', lobbyWarningActivationCandidateIncompatible: 'Один или несколько кандидатов не поддерживают собственное расписание.', lobbyWarningActivationRequiresVoting: 'Активация после голосования требует включённого голосования.', lobbyWarningActivationUnlimited: 'Количество активаций не ограничено.', lobbyWarningActivationGameStartOnce: 'Активация в начале игры выполняется один раз.', lobbyWarningActivationNoCandidates: 'Нет возможных интерактивных кандидатов.'
+});
+
+Object.assign(uiTranslations.uk, {
+	apocalypseEffectTitle: 'Апокаліпсис змінив умови', apocalypseEffectFailureTitle: 'Ефект апокаліпсиса не застосовано',
+	apocalypseEffectApplied: 'Інтерактивний ефект апокаліпсиса застосовано.', apocalypseEffectFailed: 'Зміни скасовано: стан гравців не змінено.',
+	apocalypseEffectAge: 'Апокаліпсис змінив вікові характеристики.', apocalypseEffectBody: 'Апокаліпсис змінив фізичні параметри.',
+	apocalypseEffectProfession: 'Апокаліпсис вплинув на професійні навички.', apocalypseEffectConditions: 'Апокаліпсис змінив характеристики мешканців.'
+});
+Object.assign(uiTranslations.en, {
+	apocalypseEffectTitle: 'The apocalypse changed the conditions', apocalypseEffectFailureTitle: 'Apocalypse effect not applied',
+	apocalypseEffectApplied: 'The interactive apocalypse effect was applied.', apocalypseEffectFailed: 'Changes were rolled back; player state was not changed.',
+	apocalypseEffectAge: 'The apocalypse changed age characteristics.', apocalypseEffectBody: 'The apocalypse changed physical parameters.',
+	apocalypseEffectProfession: 'The apocalypse affected professional skills.', apocalypseEffectConditions: 'The apocalypse changed resident characteristics.'
+});
+Object.assign(uiTranslations.ru, {
+	apocalypseEffectTitle: 'Апокалипсис изменил условия', apocalypseEffectFailureTitle: 'Эффект апокалипсиса не применён',
+	apocalypseEffectApplied: 'Интерактивный эффект апокалипсиса применён.', apocalypseEffectFailed: 'Изменения отменены: состояние игроков не изменено.',
+	apocalypseEffectAge: 'Апокалипсис изменил возрастные характеристики.', apocalypseEffectBody: 'Апокалипсис изменил физические параметры.',
+	apocalypseEffectProfession: 'Апокалипсис повлиял на профессиональные навыки.', apocalypseEffectConditions: 'Апокалипсис изменил характеристики жителей.'
 });
 
 const apocalypseVisualThemeRegistry = Object.freeze({

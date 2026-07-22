@@ -593,7 +593,7 @@ namespace Bunker.Hubs
 					additionalConditionEffects = p.Revealed?.PhysicalHealth == true
 						? p.AdditionalConditionEffects
 						: new List<PlayerConditionEffect>(),
-					fact = p.Fact,
+					fact = p.Revealed?.Fact == true ? p.Fact : null,
 					isEliminated = p.IsEliminated,
 					isSpectatorGm = p.IsSpectatorGm,
 					publicRole = p.IsSpectatorGm ? "spectator_gm" : "player",
@@ -669,6 +669,11 @@ namespace Bunker.Hubs
             _apocalypseSelection.ResolveForStart(room, settings, _random.Next);
             _apocalypseActivation.ResolveForStart(room, settings);
             _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
+
+            var gameStartActivation = await ActivateApocalypseEffects(
+                room, "game_start", Math.Max(1, room.CurrentRound), "session");
+            if (gameStartActivation.Execution?.Success == false)
+                throw new HubException("apocalypse_effect_game_start_failed");
             
             if (!settings.BunkerScenarioEnabled) room.Bunker = null;
             else if (room.Bunker == null && _gameData.Bunkers.Count > 0)
@@ -766,7 +771,14 @@ namespace Bunker.Hubs
 				apocalypseThemeEnabled = settings.ApocalypseThemeEnabled,
 				apocalypseActivation = policy == null ? null : new PublicApocalypseActivationPolicyDto(
 					policy.Enabled, policy.ScheduleMode, policy.Trigger, policy.FirstRound,
-					policy.IntervalRounds, policy.MaxActivations)
+					policy.IntervalRounds, policy.MaxActivations),
+				apocalypseEffectRuntime = room.ApocalypseEffectRuntime == null ? null : new
+				{
+					successfulActivationCount = room.ApocalypseEffectRuntime.SuccessfulActivationCount,
+					failedActivationCount = room.ApocalypseEffectRuntime.FailedActivationCount,
+					lastSuccessfulRound = room.ApocalypseEffectRuntime.LastSuccessfulRound,
+					lastSuccessfulTrigger = room.ApocalypseEffectRuntime.LastSuccessfulTrigger
+				}
 			};
 		}
 

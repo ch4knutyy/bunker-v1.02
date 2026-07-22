@@ -200,6 +200,7 @@ public sealed class RoomSnapshotService
             CurrentVoting = Clone(room.CurrentVoting),
             Apocalypse = Clone(room.Apocalypse),
             ApocalypseActivationPolicy = Clone(room.ApocalypseActivationPolicy),
+            ApocalypseEffectRuntime = Clone(room.ApocalypseEffectRuntime),
             Bunker = Clone(room.Bunker),
             ScenarioSituations = Clone(room.ScenarioSituations),
             BunkerIntel = Clone(room.BunkerIntel),
@@ -267,6 +268,7 @@ public sealed class RoomSnapshotService
         room.CurrentVoting = state.CurrentVoting;
         room.Apocalypse = state.Apocalypse;
         room.ApocalypseActivationPolicy = state.ApocalypseActivationPolicy;
+        room.ApocalypseEffectRuntime = state.ApocalypseEffectRuntime;
         room.Bunker = state.Bunker;
         room.ScenarioSituations = state.ScenarioSituations;
         room.BunkerIntel = state.BunkerIntel;

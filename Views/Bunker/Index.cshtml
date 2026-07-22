@@ -143,6 +143,23 @@
              role="status">
         </div>
 
+        <aside id="apocalypseEffectBanner"
+               class="apocalypse-effect-banner"
+               hidden
+               role="status"
+               aria-live="polite"
+               data-testid="apocalypse-effect-banner">
+            <div>
+                <strong id="apocalypseEffectBannerTitle"></strong>
+                <p id="apocalypseEffectBannerMessage"></p>
+                <ul id="apocalypseEffectPersonalChanges"></ul>
+            </div>
+            <button id="apocalypseEffectBannerDismiss"
+                    type="button"
+                    aria-label="Закрити"
+                    data-testid="apocalypse-effect-dismiss">×</button>
+        </aside>
+
         @* Публічний стан поточного раунду *@
         <div id="roundStatusPanel" class="round-status-panel site-round-hud" style="display: none;">
             <div class="round-status-main site-hud-module module-round">

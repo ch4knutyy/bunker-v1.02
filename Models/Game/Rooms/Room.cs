@@ -50,6 +50,9 @@ namespace Bunker.Models
 		public RoomGameSettings GameSettings { get; set; } = new();
 		public RoomGameSettings? FrozenGameSettings { get; set; }
 		public ResolvedApocalypseActivationPolicy? ApocalypseActivationPolicy { get; set; }
+		public ApocalypseEffectRuntimeState? ApocalypseEffectRuntime { get; set; }
+		[System.Text.Json.Serialization.JsonIgnore]
+		public object ApocalypseEffectSyncRoot { get; } = new();
 		public ScenarioSituationState? ScenarioSituations { get; set; }
 		public BunkerIntelState? BunkerIntel { get; set; }
 		public PendingEliminationState? PendingElimination { get; set; }
