@@ -20,7 +20,7 @@ public partial class GameHub
 
     public async Task ApplyRoomLocalEdit(string category, string? targetPlayerId, string fieldId, string? proposedValue, string commandId)
     {
-        if (!TryGetDiagnosticsRoom(out var room)) { await RejectDiagnosticsAccess("room_local_edit_apply"); return; }
+        if (!TryGetDiagnosticsRoom(out var room, RoomActorCapability.EditRoomState)) { await RejectDiagnosticsAccess("room_local_edit_apply"); return; }
         var preview = _roomLocalEditor.Preview(room, category, targetPlayerId, fieldId, proposedValue);
         if (!preview.CanApply || string.IsNullOrWhiteSpace(commandId))
         {
@@ -61,7 +61,7 @@ public partial class GameHub
 
     public async Task ResetRoomLocalField(string category, string? targetPlayerId, string fieldId, string commandId)
     {
-        if (!TryGetDiagnosticsRoom(out _)) { await RejectDiagnosticsAccess("room_local_edit_reset"); return; }
+        if (!TryGetDiagnosticsRoom(out _, RoomActorCapability.EditRoomState)) { await RejectDiagnosticsAccess("room_local_edit_reset"); return; }
         await Clients.Caller.SendAsync("ReceiveError", "reset_unavailable_use_snapshot");
     }
 

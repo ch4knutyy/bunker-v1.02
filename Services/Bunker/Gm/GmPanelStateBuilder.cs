@@ -14,31 +14,33 @@ public sealed class GmPanelStateBuilder
 	public GmPanelStateDto? TryBuild(
 		Room room,
 		Player caller,
-		bool canOpenContentEditor = false)
+		bool canOpenContentEditor = false,
+		bool isDeveloper = false,
+		bool developerToolsEnabled = true,
+		bool recoveryToolsEnabled = true,
+		bool developerCanMutate = true)
 	{
 		var isHost = room.IsHost(caller);
-		var isTechnical = isHost &&
-			(room.GmMode == GmMode.TechnicalGm ||
-			 caller.GmRole == GmMode.TechnicalGm);
+		var isTechnical = isDeveloper && developerToolsEnabled && developerCanMutate;
 		var isOmniscient =
 			caller.IsSpectatorGm ||
 			caller.GmRole == GmMode.OmniscientGm;
-		if (!isHost && !isOmniscient)
+		if (!isHost && !isOmniscient && !isDeveloper)
 		{
 			return null;
 		}
 
-		var canManageGame = isHost && !isOmniscient;
+		var canManageGame = isDeveloper ? developerCanMutate : isHost && !isOmniscient;
 		var permissions = new GmPanelPermissionsDto(
 			CanManageRounds: canManageGame,
 			CanManagePlayers: canManageGame,
 			CanManageVoting: canManageGame,
 			CanManageThreats: canManageGame,
 			CanManageBunker: canManageGame,
-			CanViewOmniscientData: isOmniscient &&
+			CanViewOmniscientData: isDeveloper || isOmniscient &&
 				GmCapabilities.Allows(room.GmMode, GmCapability.ViewHiddenGameState),
 			CanUseTechnicalTools: isTechnical,
-			CanRestoreSnapshots: isTechnical,
+			CanRestoreSnapshots: isTechnical && recoveryToolsEnabled,
 			CanUseDangerousActions: isTechnical ||
 				(isOmniscient &&
 				 GmCapabilities.Allows(room.GmMode, GmCapability.UseDirectorPlayerControls)),
@@ -74,6 +76,7 @@ public sealed class GmPanelStateBuilder
 
 		return new GmPanelStateDto(
 			room.Id,
+			isDeveloper ? "Developer" :
 			isOmniscient ? "OmniscientGm" :
 				isTechnical ? "TechnicalGm" : "Host",
 			room.State.ToString(),

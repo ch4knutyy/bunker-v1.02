@@ -42,6 +42,7 @@ public class GameCompletionTests
         Assert.NotNull(completion);
         Assert.Equal(RoomState.Finished, room.State);
         Assert.Equal(GamePhase.Finished, room.CurrentPhase);
+        Assert.Equal(PostGamePhase.FinalDiscussion, room.PostGamePhase);
         Assert.Same(room.Completion, completion.State);
         Assert.Equal("bunker_capacity_reached", completion.State.Reason);
         Assert.Equal("vote", completion.State.Source);

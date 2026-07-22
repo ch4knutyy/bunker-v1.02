@@ -9,19 +9,22 @@ public partial class GameHub
     public Task<GlobalContentAccessDto> EnableDevelopmentGlobalContentCatalog(string bootstrapKey)
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-        if (room == null || !IsCallerHost() || !_globalContentAccess.ValidateDevelopmentBootstrap(bootstrapKey))
+        var actor = _roomService.GetPlayer(Context.ConnectionId);
+        if (room == null || actor == null ||
+            !_developerAuthority.Has(room, actor, RoomActorCapability.EditGlobalContent) ||
+            !_globalContentAccess.ValidateDevelopmentBootstrap(bootstrapKey))
             throw new HubException("global_content_bootstrap_denied");
-        room.GmMode = GmMode.TechnicalGm;
         _logger.LogWarning("Development global content catalog capability enabled for room {RoomId}", room.Id);
-        return Task.FromResult(_globalContentAccess.GetAccess(room.GmMode));
+        return Task.FromResult(_globalContentAccess.GetAccess(GmMode.TechnicalGm));
     }
 
     public Task<GlobalContentAccessDto> GetGlobalContentCatalogAccess()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-        if (room == null || !IsCallerHost())
-            return Task.FromResult(new GlobalContentAccessDto(false, false, false, "host_required"));
-        return Task.FromResult(_globalContentAccess.GetAccess(room.GmMode));
+        var actor = _roomService.GetPlayer(Context.ConnectionId);
+        if (room == null || actor == null || !_developerAuthority.Has(room, actor, RoomActorCapability.EditGlobalContent))
+            return Task.FromResult(new GlobalContentAccessDto(false, false, false, "developer_required"));
+        return Task.FromResult(_globalContentAccess.GetAccess(GmMode.TechnicalGm));
     }
 
     public Task<IReadOnlyList<GlobalContentMetadataDto>> GetGlobalContentCategories()
@@ -134,15 +137,20 @@ public partial class GameHub
     private Room DemandGlobalContentAccess()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-        if (room == null || !IsCallerHost() ||
-            !GmCapabilities.Allows(room.GmMode, GmCapability.ManageGlobalContent) ||
-            !_globalContentAccess.CanAccess(room.GmMode))
+        var actor = _roomService.GetPlayer(Context.ConnectionId);
+        if (room == null || actor == null ||
+            !_developerAuthority.Has(room, actor, RoomActorCapability.EditGlobalContent) ||
+            !_globalContentAccess.CanAccess(GmMode.TechnicalGm))
             throw new HubException("global_content_access_denied");
         return room;
     }
 
     private void ConsumeGlobalContentMutation(string actor)
     {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+        var player = _roomService.GetPlayer(Context.ConnectionId);
+        if (room == null || player == null || !HasActiveRoomCapability(room, player, RoomActorCapability.EditGlobalContent))
+            throw new HubException("developer_operator_read_only");
         if (!_globalContentDrafts.TryConsumeMutation(actor)) throw new HubException("global_content_mutation_rate_limited");
     }
 

@@ -36,17 +36,19 @@ public partial class GameHub
 				throw new HubException("gm_panel_access_denied");
 			}
 
-			var canOpenContentEditor =
-				_authorizationService is not null &&
-				Context.User?.Identity?.IsAuthenticated == true &&
-				(await _authorizationService.AuthorizeAsync(
-					Context.User,
-					resource: null,
-					policyName: "OwnerOnly")).Succeeded;
+			var isDeveloper = _developerAuthority.IsDeveloper(caller);
+			var developerCanMutate = !isDeveloper ||
+				_developerAuthority.IsActiveOperator(room, caller, Context.ConnectionId);
+			var canOpenContentEditor = isDeveloper && developerCanMutate &&
+				_developerAuthority.FeatureAllows(RoomActorCapability.EditGlobalContent);
 			var state = _gmPanelStateBuilder.TryBuild(
 				room,
 				caller,
-				canOpenContentEditor);
+				canOpenContentEditor,
+				isDeveloper,
+				_developerAuthority.FeatureAllows(RoomActorCapability.UseDeveloperTools),
+				_developerAuthority.FeatureAllows(RoomActorCapability.UseRecoveryTools),
+				developerCanMutate);
 			if (state is null)
 			{
 				_logger.LogWarning(
@@ -243,9 +245,8 @@ public partial class GameHub
 				Context.ConnectionId,
 				out _,
 				out actor) &&
-			room.IsHost(actor) &&
-			!actor.IsSpectatorGm &&
-			actor.GmRole != GmMode.OmniscientGm;
+			(HasActiveRoomCapability(room, actor, RoomActorCapability.ManagePlayers) ||
+			 (room.IsHost(actor) && !actor.IsSpectatorGm && actor.GmRole != GmMode.OmniscientGm));
 	}
 
 	private IReadOnlyList<PropertyEditorDefinitionDto> BuildPropertyEditorDefinitions(

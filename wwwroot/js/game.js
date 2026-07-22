@@ -6,9 +6,11 @@ const connection = new signalR.HubConnectionBuilder()
 registerSignalREvents();
 console.log("[SignalR] about to call connection.start()");
 connection.start()
-	.then(() => {
+	.then(async () => {
 		console.log("SignalR connected, connectionId:", connection.connectionId);
 		myConnectionId = connection.connectionId;
+		try { applyDeveloperAccessState(await connection.invoke('GetDeveloperAccessState')); }
+		catch (_) { applyDeveloperAccessState(null); }
 
 		updateConnectionStatus(`✓ ${getCurrentLanguage() === 'en' ? 'Connected to server' : getCurrentLanguage() === 'ru' ? 'Подключено к серверу' : 'Підключено до сервера'}`);
 
@@ -36,6 +38,10 @@ let currentRoom = null;
 let myPlayerData = null;
 let myConnectionId = null;
 let isHost = false;
+let isDeveloper = false;
+let developerState = null;
+let developerPresence = { developerPresent: false, status: 'offline' };
+let currentPostGameTransition = null;
 let roomPlayers = {}; // connectionId -> player info
 let selectedPublicPlayerSeat = null;
 let publicPlayerViewMode = 'all';
@@ -464,7 +470,7 @@ Object.assign(uiTranslations.uk, {
 	lobbyLifecycleLobby: 'Лобі', lobbyLifecycleRunning: 'Гра триває', lobbyLifecycleFinished: 'Гру завершено',
 	lobbyRoleHostPlayer: 'Хост і гравець', lobbyRolePlayer: 'Гравець', lobbyRoleSpectator: 'Спостерігач', lobbyRoleTechnicalGm: 'Технічний GM', lobbyRoleOmniscientGm: 'Всезнаючий GM',
 	lobbyConnected: 'У мережі', lobbyDisconnected: 'Не в мережі', lobbyReady: 'Готовий', lobbyNotReady: 'Не готовий', lobbyIAmReady: 'Я готовий', lobbyCancelReady: 'Скасувати готовність',
-	lobbyCheckReadiness: 'Перевірити готовність', lobbyStartTitle: 'Готовність до старту', lobbyTransferHost: 'Передати хост', lobbyHostBadge: 'Хост', lobbyRoomCode: 'Код кімнати',
+	lobbyCheckReadiness: 'Перевірити готовність', lobbyStartTitle: 'Готовність до старту', lobbyTransferHost: 'Передати хост', lobbyHostBadge: 'Хост', developerBadgeTitle: 'Розробник гри', lobbyRoomCode: 'Код кімнати',
 	lobbyCopyLink: 'Скопіювати посилання', lobbyGmPanel: 'GM-панель', lobbyLeave: 'Вийти з кімнати', lobbyReadyProgress: 'Готові', lobbyGameplayProgress: 'Активні гравці', lobbyMinimum: 'мінімум', lobbyRoleLabel: 'Роль',
 	lobbyRolePlayerHelp: 'Отримує персонажа, голосує та бере участь у загрозах.', lobbyRoleSpectatorHelp: 'Не отримує персонажа, не голосує та не займає місце серед активних гравців.',
 	lobbyRoleTechnicalHelp: 'Допомагає керувати технічним станом кімнати без доступу до прихованих характеристик.', lobbyRoleOmniscientHelp: 'Спостерігає за грою, бачить прихований стан і не бере участі як гравець.',
@@ -480,7 +486,7 @@ Object.assign(uiTranslations.en, {
 	lobbyActivePlayers: 'Active players', lobbySpectators: 'Spectators', lobbyReadySummary: 'Readiness', lobbyRoomState: 'Room state', lobbyLifecycleLobby: 'Lobby', lobbyLifecycleRunning: 'Game running', lobbyLifecycleFinished: 'Game finished',
 	lobbyRoleHostPlayer: 'Host and player', lobbyRolePlayer: 'Player', lobbyRoleSpectator: 'Spectator', lobbyRoleTechnicalGm: 'Technical GM', lobbyRoleOmniscientGm: 'Omniscient GM',
 	lobbyConnected: 'Online', lobbyDisconnected: 'Offline', lobbyReady: 'Ready', lobbyNotReady: 'Not ready', lobbyIAmReady: 'I am ready', lobbyCancelReady: 'Cancel readiness', lobbyCheckReadiness: 'Check readiness',
-	lobbyStartTitle: 'Ready to start', lobbyTransferHost: 'Transfer host', lobbyHostBadge: 'Host', lobbyRoomCode: 'Room code', lobbyCopyLink: 'Copy link', lobbyGmPanel: 'GM panel', lobbyLeave: 'Leave room', lobbyReadyProgress: 'Ready', lobbyGameplayProgress: 'Active players', lobbyMinimum: 'minimum', lobbyRoleLabel: 'Role',
+	lobbyStartTitle: 'Ready to start', lobbyTransferHost: 'Transfer host', lobbyHostBadge: 'Host', developerBadgeTitle: 'Game developer', lobbyRoomCode: 'Room code', lobbyCopyLink: 'Copy link', lobbyGmPanel: 'GM panel', lobbyLeave: 'Leave room', lobbyReadyProgress: 'Ready', lobbyGameplayProgress: 'Active players', lobbyMinimum: 'minimum', lobbyRoleLabel: 'Role',
 	lobbyRolePlayerHelp: 'Receives a character, votes, and participates in threats.', lobbyRoleSpectatorHelp: 'Does not receive a character, vote, or occupy an active-player slot.', lobbyRoleTechnicalHelp: 'Helps manage technical room state without access to hidden characteristics.', lobbyRoleOmniscientHelp: 'Observes the game, sees hidden state, and does not participate as a player.',
 	lobbyBlockMinimum: 'At least 2 active players are required to start.', lobbyBlockReady: 'Not all connected members have confirmed readiness.', lobbyBlockRole: 'One or more members have an incompatible role.', lobbyBlockVoting: 'The game cannot start during active voting.', lobbyBlockThreat: 'The game cannot start during an active threat.', lobbyBlockHost: 'Only the current host can start the game.', lobbyBlockFallback: 'The game cannot start yet. Refresh the lobby state.', lobbyPreviewReady: 'Check complete: the room is ready to start.', lobbyPreviewBlocked: 'Check complete: resolve the blockers below.'
 	, guestWarningTitle: 'You are playing without an account', guestWarningPrimary: 'Normal reconnection after refreshing the page is supported. However, after clearing browser data, changing devices, or a full server restart, recovery of your character is not currently guaranteed.', guestWarningSecondary: 'An account creates a stable user binding and will be used for more reliable recovery and game history.', guestWarningContinue: 'Continue as guest', guestWarningRegister: 'Register', guestWarningCurrentPlayerRemainsGuest: 'The current player will remain a guest until you re-enter the room with an authenticated account.', lobbyGuestCount: 'Guest players in the room: {count}', lobbyGuestRisk: 'They can play without registering. Page refresh and normal reconnection are supported, but recovery of the current game after browser data loss or a full server restart is not currently guaranteed.'
@@ -492,7 +498,7 @@ Object.assign(uiTranslations.ru, {
 	lobbyActivePlayers: 'Активные игроки', lobbySpectators: 'Наблюдатели', lobbyReadySummary: 'Готовность', lobbyRoomState: 'Состояние комнаты', lobbyLifecycleLobby: 'Лобби', lobbyLifecycleRunning: 'Игра продолжается', lobbyLifecycleFinished: 'Игра завершена',
 	lobbyRoleHostPlayer: 'Хост и игрок', lobbyRolePlayer: 'Игрок', lobbyRoleSpectator: 'Наблюдатель', lobbyRoleTechnicalGm: 'Технический GM', lobbyRoleOmniscientGm: 'Всезнающий GM',
 	lobbyConnected: 'В сети', lobbyDisconnected: 'Не в сети', lobbyReady: 'Готов', lobbyNotReady: 'Не готов', lobbyIAmReady: 'Я готов', lobbyCancelReady: 'Отменить готовность', lobbyCheckReadiness: 'Проверить готовность',
-	lobbyStartTitle: 'Готовность к старту', lobbyTransferHost: 'Передать хост', lobbyHostBadge: 'Хост', lobbyRoomCode: 'Код комнаты', lobbyCopyLink: 'Скопировать ссылку', lobbyGmPanel: 'GM-панель', lobbyLeave: 'Выйти из комнаты', lobbyReadyProgress: 'Готовы', lobbyGameplayProgress: 'Активные игроки', lobbyMinimum: 'минимум', lobbyRoleLabel: 'Роль',
+	lobbyStartTitle: 'Готовность к старту', lobbyTransferHost: 'Передать хост', lobbyHostBadge: 'Хост', developerBadgeTitle: 'Разработчик игры', lobbyRoomCode: 'Код комнаты', lobbyCopyLink: 'Скопировать ссылку', lobbyGmPanel: 'GM-панель', lobbyLeave: 'Выйти из комнаты', lobbyReadyProgress: 'Готовы', lobbyGameplayProgress: 'Активные игроки', lobbyMinimum: 'минимум', lobbyRoleLabel: 'Роль',
 	lobbyRolePlayerHelp: 'Получает персонажа, голосует и участвует в угрозах.', lobbyRoleSpectatorHelp: 'Не получает персонажа, не голосует и не занимает место среди активных игроков.', lobbyRoleTechnicalHelp: 'Помогает управлять техническим состоянием комнаты без доступа к скрытым характеристикам.', lobbyRoleOmniscientHelp: 'Наблюдает за игрой, видит скрытое состояние и не участвует как игрок.',
 	lobbyBlockMinimum: 'Для старта нужны как минимум 2 активных игрока.', lobbyBlockReady: 'Не все подключённые участники подтвердили готовность.', lobbyBlockRole: 'Один или несколько участников имеют несовместимую роль.', lobbyBlockVoting: 'Нельзя начать игру во время активного голосования.', lobbyBlockThreat: 'Нельзя начать игру во время активной угрозы.', lobbyBlockHost: 'Начать игру может только текущий хост.', lobbyBlockFallback: 'Игру пока нельзя начать. Обновите состояние лобби.', lobbyPreviewReady: 'Проверка завершена: комната готова к старту.', lobbyPreviewBlocked: 'Проверка завершена: устраните препятствия ниже.'
 	, guestWarningTitle: 'Вы играете без аккаунта', guestWarningPrimary: 'Обычное переподключение после обновления страницы поддерживается. Однако после очистки данных браузера, смены устройства или полного перезапуска сервера восстановление вашего персонажа пока не гарантируется.', guestWarningSecondary: 'Аккаунт создаёт стабильную привязку к пользователю и будет использоваться для более надёжного восстановления и истории партий.', guestWarningContinue: 'Продолжить как гость', guestWarningRegister: 'Зарегистрироваться', guestWarningCurrentPlayerRemainsGuest: 'Текущий игрок останется гостевым до повторного входа в комнату с авторизованным аккаунтом.', lobbyGuestCount: 'В комнате есть гостевые игроки: {count}', lobbyGuestRisk: 'Они могут играть без регистрации. Обновление страницы и обычное переподключение поддерживаются, но после потери данных браузера или полного перезапуска сервера восстановление текущей игры пока не гарантируется.'
@@ -797,6 +803,7 @@ function applyRoundState(source) {
 		currentRoom.phase = normalized.currentPhase || normalized.phase;
 	}
 	if (normalized.completion) currentGameCompletion = normalized.completion;
+	applyPostGameTransition(source.postGameTransition || source.PostGameTransition || null);
 	currentThreat = normalized.threat || (normalized.threatRevealed ? currentThreat : null);
 	currentThreatState = normalized.threatState || currentThreatState;
 	if (normalized.gameTimer) syncGameTimer(normalized.gameTimer);
@@ -804,6 +811,237 @@ function applyRoundState(source) {
 	renderThreatPanel(currentThreat);
 	updateReadyCheckUI();
 	updateSpecialCardsUI();
+}
+
+function applyDeveloperAccessState(value) {
+	const projection = value || {};
+	const roomProjection = projection.isDeveloper ?? projection.IsDeveloper;
+	isDeveloper = !!roomProjection;
+	developerState = isDeveloper ? {
+		isDeveloper: true,
+		participationMode: projection.participationMode || projection.ParticipationMode || 'player',
+		isActiveOperator: !!(projection.isActiveOperator ?? projection.IsActiveOperator),
+		canTakeOverOperator: !!(projection.canTakeOverOperator ?? projection.CanTakeOverOperator),
+		operatorVersion: projection.operatorVersion ?? projection.OperatorVersion ?? 0,
+		capabilities: projection.capabilities || projection.Capabilities || [],
+		features: projection.features || projection.Features || {},
+		recentAudit: projection.recentAudit || projection.RecentAudit || []
+	} : null;
+	renderDeveloperAuthorityUi();
+	renderPostGameCommandState();
+}
+
+function applyDeveloperPresence(value) {
+	value ||= {};
+	developerPresence = {
+		developerPresent: !!(value.developerPresent ?? value.DeveloperPresent),
+		developerPlayerId: value.developerPlayerId || value.DeveloperPlayerId || null,
+		status: value.status || value.Status || 'offline'
+	};
+	if (currentPostGameTransition) {
+		currentPostGameTransition.developerPresent = developerPresence.developerPresent;
+		currentPostGameTransition.developerPlayerId = developerPresence.developerPlayerId;
+	}
+	renderPostGameCommandState();
+}
+
+function normalizePostGameTransition(value) {
+	if (!value) return null;
+	return {
+		phase: value.phase || value.Phase || 'None',
+		developerPresent: !!(value.developerPresent ?? value.DeveloperPresent),
+		developerPlayerId: value.developerPlayerId || value.DeveloperPlayerId || null,
+		canRevealRemainingCharacteristics: !!(value.canRevealRemainingCharacteristics ?? value.CanRevealRemainingCharacteristics),
+		hostDecisionPending: !!(value.hostDecisionPending ?? value.HostDecisionPending),
+		storyRequested: !!(value.storyRequested ?? value.StoryRequested),
+		publishedStoryAvailable: !!(value.publishedStoryAvailable ?? value.PublishedStoryAvailable),
+		waitingStatusCode: value.waitingStatusCode || value.WaitingStatusCode || 'none',
+		storyDirectorAvailable: !!(value.storyDirectorAvailable ?? value.StoryDirectorAvailable),
+		requestedStoryMode: value.requestedStoryMode || value.RequestedStoryMode || null
+	};
+}
+
+function applyPostGameTransition(value) {
+	const normalized = normalizePostGameTransition(value);
+	if (!normalized) return;
+	currentPostGameTransition = normalized;
+	developerPresence = { ...developerPresence, developerPresent: normalized.developerPresent, developerPlayerId: normalized.developerPlayerId };
+	renderPostGameCommandState();
+	window.PostGameStoryDirector?.applyTransition(normalized);
+}
+
+function setPostGameButton(id, visible) {
+	const button = document.getElementById(id);
+	if (button) button.style.display = visible ? 'inline-flex' : 'none';
+}
+
+function renderPostGameCommandState() {
+	const transition = currentPostGameTransition;
+	const phase = transition?.phase || 'None';
+	const inFinalDiscussion = phase === 'FinalDiscussion';
+	const hostDecision = phase === 'HostDecision';
+	const storyActive = phase === 'StoryRequested' || phase === 'StoryPreparation';
+	const canStartAgain = phase === 'HostDecision' || phase === 'StoryRequested' || phase === 'StoryPreparation' || phase === 'StoryPublished' || phase === 'Completed';
+	const canManagePostGame = isHost || (isDeveloper && developerState?.isActiveOperator);
+	setPostGameButton('finishPostGameDiscussionButton', canManagePostGame && inFinalDiscussion);
+	setPostGameButton('revealPostGameCharacteristicsButton', inFinalDiscussion);
+	setPostGameButton('returnFinishedGameButton', canManagePostGame && canStartAgain);
+	setPostGameButton('createPostGameStoryButton', canManagePostGame && hostDecision && !!transition?.developerPresent && !!transition?.storyDirectorAvailable);
+	setPostGameButton('cancelPostGameStoryRequestButton', canManagePostGame && storyActive);
+	setPostGameButton('openPostGameStoryDeveloperButton', isDeveloper && storyActive && !!transition?.storyDirectorAvailable);
+	const waiting = document.getElementById('gameFinishedWaitingForHost');
+	if (waiting) {
+		waiting.textContent = hostDecision && (!transition?.developerPresent || !transition?.storyDirectorAvailable)
+			? 'Фінальна історія недоступна: Developer офлайн або функцію вимкнено. Можна почати нову гру.'
+			: storyActive ? (transition?.developerPresent ? 'Developer готує фінальну історію…' : 'Очікування Developer…')
+			: inFinalDiscussion ? 'Фінальне обговорення: ігрове поле залишається доступним лише для читання та розкриття карток.'
+			: '';
+		waiting.style.display = waiting.textContent ? 'block' : 'none';
+	}
+}
+
+function renderDeveloperAuthorityUi() {
+	const toolsEnabled = developerFeatureEnabled('developerTools');
+	const button = document.getElementById('developerToolsButton');
+	if (button) button.hidden = !(isDeveloper && toolsEnabled && currentRoom);
+	const observer = document.getElementById('developerObserverOption');
+	if (observer) observer.hidden = !isDeveloper;
+	const status = document.getElementById('developerOperatorStatus');
+	if (status) status.textContent = developerState?.isActiveOperator ? 'Active developer operator' : developerState?.canTakeOverOperator ? 'Read-only: another developer tab owns the operator lease.' : 'Developer authority verified.';
+	const takeover = document.getElementById('developerTakeoverButton');
+	if (takeover) takeover.hidden = !developerState?.canTakeOverOperator;
+	const checklist = document.getElementById('developerChecklist');
+	if (checklist) checklist.textContent = buildDeveloperChecklist();
+	renderDeveloperAudit();
+}
+
+function developerFeatureEnabled(key) {
+	if (!isDeveloper) return false;
+	const features = developerState?.features || {};
+	const pascal = key.charAt(0).toUpperCase() + key.slice(1);
+	return (features[key] ?? features[pascal]) === true;
+}
+
+function buildDeveloperChecklist() {
+	const roomState = currentRoom?.state || currentRoom?.State || 'none';
+	const players = Object.values(typeof roomPlayers === 'object' && roomPlayers ? roomPlayers : {});
+	const gameplayPlayers = players.filter(player => !player.isLobbySpectator && !player.IsLobbySpectator && !player.isSpectatorGm && !player.IsSpectatorGm);
+	const connected = typeof connection !== 'undefined' && connection.state === signalR.HubConnectionState.Connected;
+	const capability = name => developerState?.capabilities?.some(value => String(value).toLowerCase() === name.toLowerCase());
+	const rootsValid = document.querySelectorAll('#postGameStoryRoot').length === 1 && document.querySelectorAll('#apocalypseAmbientLayer').length <= 1;
+	const stalePostGame = roomState !== 'Finished' && currentPostGameTransition?.phase && currentPostGameTransition.phase !== 'None';
+	const line = (status, label, detail) => `[${status}] ${label}${detail ? ` — ${detail}` : ''}`;
+	return [
+		line(connected ? 'Ready' : 'Critical', 'SignalR', connected ? 'connected' : 'disconnected'),
+		line(isDeveloper ? 'Ready' : 'Critical', 'Developer authorization', isDeveloper ? 'server verified' : 'inactive'),
+		line(currentRoom ? 'Ready' : 'Critical', 'Correct room', currentRoom?.id || currentRoom?.Id || 'not joined'),
+		line(developerState?.isActiveOperator ? 'Ready' : 'Warning', 'Active operator', developerState?.isActiveOperator ? 'acquired' : 'read-only'),
+		line((currentRoom?.hostName || currentRoom?.HostName || isHost) ? 'Ready' : 'Warning', 'Host assigned'),
+		line(gameplayPlayers.length > 0 ? 'Ready' : 'Warning', 'Gameplay players', String(gameplayPlayers.length)),
+		line(document.querySelector('[data-bunker-id], #bunkerInfo, .bunker-info') ? 'Ready' : 'Warning', 'Bunker content', 'UI projection'),
+		line(document.querySelector('[data-apocalypse-id], #apocalypseInfo, .apocalypse-info') ? 'Ready' : 'Warning', 'Apocalypse content', 'UI projection'),
+		line(document.getElementById('threatPanel') || document.getElementById('threatInfo') ? 'Ready' : 'Warning', 'Threat content', 'UI projection'),
+		line(document.querySelector('.scenario-immersive-panel, #scenarioPanel') ? 'Ready' : 'Warning', 'Scenario content', 'UI projection'),
+		line(developerFeatureEnabled('scenarioImages') ? 'Ready' : 'Warning', 'Image endpoints', developerFeatureEnabled('scenarioImages') ? 'enabled' : 'disabled'),
+		line(developerFeatureEnabled('postGameStory') ? 'Ready' : 'Warning', 'Story Director service', developerFeatureEnabled('postGameStory') ? 'enabled' : 'disabled'),
+		line(capability('ManageSnapshots') ? 'Ready' : 'Warning', 'Snapshot service', capability('ManageSnapshots') ? 'available' : 'unavailable'),
+		line('Ready', 'Recovery operation', 'none reported'),
+		line(stalePostGame ? 'Critical' : 'Ready', 'Post-game state', currentPostGameTransition?.phase || 'None'),
+		line(rootsValid ? 'Ready' : 'Critical', 'UI roots', rootsValid ? 'unique' : 'duplicate root detected'),
+		line('Ready', 'Environment', document.documentElement.dataset.environment || 'server build')
+	].join('\n');
+}
+
+function renderDeveloperAudit() {
+	const root = document.getElementById('developerAuditList');
+	if (!root) return;
+	root.replaceChildren();
+	const entries = developerState?.recentAudit || [];
+	if (!entries.length) {
+		const empty = document.createElement('p');
+		empty.textContent = 'Привілейованих дій ще немає.';
+		root.appendChild(empty);
+		return;
+	}
+	entries.forEach(entry => {
+		const row = document.createElement('div');
+		row.className = 'developer-audit-entry';
+		const timestamp = entry.timestampUtc || entry.TimestampUtc;
+		const action = entry.commandType || entry.CommandType || 'developer_action';
+		const result = entry.result || entry.Result || 'unknown';
+		const target = entry.affectedEntityId || entry.AffectedEntityId;
+		const time = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+		row.textContent = `${time} · ${action} · ${result}${target ? ` · ${target}` : ''}`;
+		root.appendChild(row);
+	});
+}
+
+function toggleDeveloperTools(force) {
+	if (!isDeveloper) return;
+	const panel = document.getElementById('developerToolsPanel');
+	if (!panel) return;
+	panel.hidden = typeof force === 'boolean' ? !force : !panel.hidden;
+	renderDeveloperAuthorityUi();
+}
+
+async function copyDeveloperChecklist() {
+	try { await navigator.clipboard.writeText(buildDeveloperChecklist()); } catch (_) { }
+}
+
+function recoverDeveloperUi() {
+	document.getElementById('developerToolsPanel')?.setAttribute('hidden', '');
+	document.getElementById('promptModal')?.style.setProperty('display', 'none');
+	window.PostGameStoryDirector?.hideUi();
+	document.body.style.removeProperty('overflow');
+	document.body.classList.remove('modal-open', 'story-open');
+	document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+	renderCurrentGameUI();
+	renderPostGameCommandState();
+	if (currentRoom?.id && connection?.state === signalR.HubConnectionState.Connected) {
+		connection.invoke('GetRoomState').then(state => {
+			currentRoom = { ...currentRoom, ...(state.room || state.Room || {}) };
+			const nextPlayers = {};
+			(state.players || state.Players || []).forEach(player => {
+				const id = player.connectionId || player.ConnectionId;
+				if (id) nextPlayers[id] = player;
+			});
+			roomPlayers = nextPlayers;
+			applyRoundState(state.roundState || state.RoundState);
+			applyDeveloperPresence(state.developerPresence || state.DeveloperPresence);
+			applyPostGameTransition(state.postGameTransition || state.PostGameTransition);
+			renderCurrentGameUI();
+		}).catch(() => {});
+	}
+}
+
+async function takeOverDeveloperOperator() {
+	if (!isDeveloper || !confirm('Перехопити активний Developer operator у цій вкладці?')) return;
+	try { await connection.invoke('TakeOverDeveloperOperator', crypto.randomUUID(), true); }
+	catch (error) { alert(localizeServerMessage(error?.message || 'developer_takeover_failed')); }
+}
+
+async function finishPostGameDiscussion() {
+	if (!isHost && !(isDeveloper && developerState?.isActiveOperator)) return;
+	try { await connection.invoke('FinishPostGameDiscussion', crypto.randomUUID()); }
+	catch (error) { alert(localizeServerMessage(error?.message || 'post_game_transition_failed')); }
+}
+
+async function revealRemainingPostGameCharacteristics() {
+	try { await connection.invoke('RevealRemainingPostGameCharacteristics', crypto.randomUUID()); }
+	catch (error) { alert(localizeServerMessage(error?.message || 'post_game_reveal_failed')); }
+}
+
+async function requestPostGameStoryMode(mode, parentEntryId = null) {
+	try { await connection.invoke('ChoosePostGameStory', mode, parentEntryId, crypto.randomUUID()); }
+	catch (error) { alert(localizeServerMessage(error?.message || 'post_game_story_failed')); }
+}
+
+function requestFinalPostGameStory() { return requestPostGameStoryMode('final_story'); }
+
+async function cancelPostGameStoryRequest() {
+	if (!isHost && !(isDeveloper && developerState?.isActiveOperator)) return;
+	try { await connection.invoke('CancelPostGameStoryRequest', crypto.randomUUID()); }
+	catch (error) { alert(localizeServerMessage(error?.message || 'post_game_story_failed')); }
 }
 
 function normalizeGameCompletion(source) {
@@ -904,21 +1142,16 @@ function renderGameFinished(completion, context = {}) {
 
 	const newGameButton = document.getElementById('returnFinishedGameButton');
 	if (newGameButton) {
-		newGameButton.style.display = isHost ? 'inline-flex' : 'none';
 		newGameButton.textContent = returnFinishedGamePending ? t('gameFinishedReturning') : t('gameFinishedNewGame');
 		newGameButton.disabled = returnFinishedGamePending;
 	}
 	const copyButton = document.getElementById('copyGameSummaryButton');
 	if (copyButton) copyButton.textContent = t('gameFinishedCopy');
-	const waiting = document.getElementById('gameFinishedWaitingForHost');
-	if (waiting) {
-		waiting.textContent = isHost ? '' : t('gameFinishedWaitHost');
-		waiting.style.display = isHost ? 'none' : 'block';
-	}
 	const stateLabel = document.getElementById('currentRoomState');
 	if (stateLabel) stateLabel.textContent = t('gameFinishedTitle');
 
 	setGameFinishedMutationState(true);
+	renderPostGameCommandState();
 	return true;
 }
 
@@ -950,7 +1183,7 @@ async function copyGameSummary() {
 }
 
 async function returnFinishedGameToLobby() {
-	if (!isHost || returnFinishedGamePending || !currentGameCompletion) return;
+	if ((!isHost && !(isDeveloper && developerState?.isActiveOperator)) || returnFinishedGamePending || !currentGameCompletion) return;
 	if (!confirm(t('gameFinishedConfirmReturn'))) return;
 	returnFinishedGamePending = true;
 	renderGameFinished(currentGameCompletion, { source: 'return-request' });
@@ -966,6 +1199,7 @@ async function returnFinishedGameToLobby() {
 
 function clearGameFinishedStateForLobby() {
 	currentGameCompletion = null;
+	currentPostGameTransition = null;
 	returnFinishedGamePending = false;
 	currentVoting = null;
 	currentRoundState = null;
@@ -987,6 +1221,7 @@ function clearGameFinishedStateForLobby() {
 	const feedback = document.getElementById('gameFinishedFeedback');
 	if (feedback) { feedback.textContent = ''; feedback.classList.remove('is-error'); }
 	setGameFinishedMutationState(false);
+	window.PostGameStoryDirector?.clear();
 }
 
 function normalizeGameTimer(source) {
@@ -1284,7 +1519,7 @@ function getPhaseLabel(phase = getCurrentPhase()) {
 }
 
 function canEndRoundNow() {
-	return isHost &&
+	return (isHost || isDeveloper) &&
 		currentRoom?.state === "Playing" &&
 		getCurrentPhase() === "RoundReveal" &&
 		currentRoundState?.allPlayersRevealed === true;
@@ -1295,7 +1530,7 @@ function canRollRoundDiceNow() {
 }
 
 function canStartVotingNow() {
-	return isHost && currentRoundState?.canStartVoting === true;
+	return (isHost || isDeveloper) && currentRoundState?.canStartVoting === true;
 }
 
 function getRoomStateLabel() {
@@ -1541,7 +1776,7 @@ function renderThreatScenario(model) {
 	const detailDescription = model.description && model.description !== model.shortDescription
 		? `<section class="threat-content-card content-description" aria-labelledby="threat-description-title"><h5 id="threat-description-title">${escapeHtml(t('threatWhatHappens'))}</h5><p>${escapeHtml(model.description)}</p></section>` : '';
 	const interactive = model.isInteractive ? renderThreatInteractionPanel(model) : '';
-	const footerControls = isHost ? `<input type="file" id="threatImageInput" accept="image/*" hidden onchange="uploadThreatImage(this)"><button type="button" class="btn-scenario-image" onclick="document.getElementById('threatImageInput').click()">${escapeHtml(t('uploadImage'))}</button><button type="button" class="btn-scenario-image btn-generate" onclick="generateThreatPrompt()">${escapeHtml(t('generatePrompt'))}</button>${model.imageUrl ? `<button type="button" class="btn-scenario-image" onclick="openCurrentThreatImage()">${escapeHtml(t('threatOpenImage'))}</button><button type="button" class="btn-scenario-image btn-remove" onclick="removeThreatImage()">${escapeHtml(t('remove'))}</button>` : ''}` : '';
+	const footerControls = developerFeatureEnabled('scenarioImages') ? `<input type="file" id="threatImageInput" accept="image/*" hidden onchange="uploadThreatImage(this)"><button type="button" class="btn-scenario-image" onclick="document.getElementById('threatImageInput').click()">${escapeHtml(t('uploadImage'))}</button><button type="button" class="btn-scenario-image btn-generate" onclick="generateThreatPrompt()">${escapeHtml(t('generatePrompt'))}</button>${model.imageUrl ? `<button type="button" class="btn-scenario-image" onclick="openCurrentThreatImage()">${escapeHtml(t('threatOpenImage'))}</button><button type="button" class="btn-scenario-image btn-remove" onclick="removeThreatImage()">${escapeHtml(t('remove'))}</button>` : ''}` : '';
 
 	return `<article class="scenario-immersive-shell threat-scenario-shell variant-${variant} severity-${severity.semantic}" aria-labelledby="threat-scenario-title">
 		<header class="scenario-immersive-hero threat-hero ${model.imageUrl ? 'has-image' : 'no-image'}">${media}<div class="threat-hero-overlay" aria-hidden="true"></div><div class="threat-hero-pattern" aria-hidden="true"></div>
@@ -3100,6 +3335,8 @@ function normalizePlayer(player) {
 		connectionId: player.connectionId ?? player.ConnectionId ?? null,
 		stablePlayerId: player.stablePlayerId ?? player.StablePlayerId ?? "",
 		isHost: player.isHost ?? player.IsHost ?? false,
+		isDeveloper: !!(player.isDeveloper ?? player.IsDeveloper),
+		developerParticipationMode: player.developerParticipationMode ?? player.DeveloperParticipationMode ?? null,
 		isEliminated: player.isEliminated ?? player.IsEliminated ?? false,
 		isSpectatorGm: player.isSpectatorGm ?? player.IsSpectatorGm ?? false,
 		publicRole: player.publicRole ?? player.PublicRole ?? 'player',
@@ -3344,6 +3581,9 @@ function registerSignalREvents() {
 		currentRoom = data.room || data.Room;
 		myPlayerData = normalizePlayer(data.player || data.Player);
 		isHost = data.isHost ?? data.IsHost ?? true;
+		applyDeveloperAccessState(data.developer || data.Developer || null);
+		applyDeveloperPresence(data.developerPresence || data.DeveloperPresence || null);
+		applyPostGameTransition(data.postGameTransition || data.PostGameTransition || null);
 		hostToken = data.hostToken || data.HostToken || null;
 		reconnectToken = data.reconnectToken || data.ReconnectToken || reconnectToken;
 		myConnectionId = myPlayerData.connectionId;
@@ -3381,6 +3621,8 @@ function registerSignalREvents() {
 				connectionId: connId,
 				stablePlayerId: p.stablePlayerId || p.StablePlayerId || "",
 				isHost: p.isHost ?? p.IsHost ?? false,
+				isDeveloper: !!(p.isDeveloper ?? p.IsDeveloper),
+				developerParticipationMode: p.developerParticipationMode || p.DeveloperParticipationMode || null,
 				isSpectatorGm: !!(p.isSpectatorGm ?? p.IsSpectatorGm),
 				publicRole: p.publicRole || p.PublicRole || '',
 				revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
@@ -3437,6 +3679,9 @@ function registerSignalREvents() {
 		currentRoom = data.room || data.Room;
 		myPlayerData = normalizePlayer(data.player || data.Player);
 		isHost = data.isHost ?? data.IsHost ?? false;
+		applyDeveloperAccessState(data.developer || data.Developer || null);
+		applyDeveloperPresence(data.developerPresence || data.DeveloperPresence || null);
+		applyPostGameTransition(data.postGameTransition || data.PostGameTransition || null);
 		hostToken = data.hostToken || data.HostToken || null;
 		reconnectToken = data.reconnectToken || data.ReconnectToken || reconnectToken;
 		myConnectionId = myPlayerData.connectionId;
@@ -3470,6 +3715,8 @@ function registerSignalREvents() {
 				connectionId: connId,
 				stablePlayerId: p.stablePlayerId || p.StablePlayerId || "",
 				isHost: p.isHost ?? p.IsHost ?? false,
+				isDeveloper: !!(p.isDeveloper ?? p.IsDeveloper),
+				developerParticipationMode: p.developerParticipationMode || p.DeveloperParticipationMode || null,
 				isSpectatorGm: !!(p.isSpectatorGm ?? p.IsSpectatorGm),
 				publicRole: p.publicRole || p.PublicRole || '',
 				revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
@@ -3503,6 +3750,8 @@ function registerSignalREvents() {
 			connectionId: info.connectionId,
 			stablePlayerId: info.stablePlayerId || info.StablePlayerId || "",
 			isHost: info.isHost,
+			isDeveloper: !!(info.isDeveloper ?? info.IsDeveloper),
+			developerParticipationMode: info.developerParticipationMode || info.DeveloperParticipationMode || null,
 			revealed: normalizeRevealedState(info.revealed || {}),
 			fact: normalizeFactFromPlayer(info),
 			revealedData: {},
@@ -3512,6 +3761,13 @@ function registerSignalREvents() {
 		renderCurrentGameUI();
 		addEventMessage(`Гравець <span class="event-player">${info.name}</span> приєднався`);
 	});
+
+	connection.off('DeveloperPresenceChanged');
+	connection.on('DeveloperPresenceChanged', applyDeveloperPresence);
+	connection.off('DeveloperAuthorityChanged');
+	connection.on('DeveloperAuthorityChanged', applyDeveloperAccessState);
+	connection.off('PostGameTransitionChanged');
+	connection.on('PostGameTransitionChanged', applyPostGameTransition);
 
 	// Гравець покинув кімнату
 	connection.off("PlayerLeftRoom");
@@ -4215,6 +4471,7 @@ function registerSignalREvents() {
 	connection.off("GameFinished");
 	connection.on("GameFinished", function (data) {
 		applyRoundState(data?.roundState || data?.RoundState);
+		applyPostGameTransition(data?.postGameTransition || data?.PostGameTransition || null);
 		const completion = normalizeGameCompletion(data);
 		renderCurrentGameUI();
 		renderGameFinished(completion, { source: 'live' });
@@ -4370,6 +4627,9 @@ function registerSignalREvents() {
 		isHost = data.isHost ?? data.IsHost ?? false;
 		hostToken = data.hostToken || data.HostToken || null;
 		myConnectionId = myPlayerData.connectionId;
+		applyDeveloperAccessState(data.developer || data.Developer || null);
+		applyDeveloperPresence(data.developerPresence || data.DeveloperPresence || null);
+		applyPostGameTransition(data.postGameTransition || data.PostGameTransition || null);
 
 		// Normalize room
 		if (currentRoom) {
@@ -4405,6 +4665,8 @@ function registerSignalREvents() {
 				connectionId: connId,
 				stablePlayerId: p.stablePlayerId || p.StablePlayerId || "",
 				isHost: p.isHost ?? p.IsHost ?? false,
+				isDeveloper: !!(p.isDeveloper ?? p.IsDeveloper),
+				developerParticipationMode: p.developerParticipationMode || p.DeveloperParticipationMode || null,
 				isSpectatorGm: !!(p.isSpectatorGm ?? p.IsSpectatorGm),
 				publicRole: p.publicRole || p.PublicRole || '',
 				revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
@@ -4448,6 +4710,7 @@ function registerSignalREvents() {
 			document.getElementById('myPlayerSection').style.display = 'block';
 			renderCurrentGameUI();
 			renderGameFinished(rejoinCompletion, { source: 'rejoin' });
+			window.PostGameStoryDirector?.applyState(data.postGameStory || data.PostGameStory, true);
 		} else if (isGameState) {
 			currentApocalypse = data.apocalypse || data.Apocalypse;
 			currentBunker = data.bunker || data.Bunker;
@@ -4544,6 +4807,8 @@ function registerSignalREvents() {
 			playerData.connectionId = info.connectionId;
 			playerData.stablePlayerId = reconnectedStableId || playerData.stablePlayerId || "";
 			playerData.isHost = info.isHost;
+			playerData.isDeveloper = !!(info.isDeveloper ?? info.IsDeveloper);
+			playerData.developerParticipationMode = info.developerParticipationMode || info.DeveloperParticipationMode || playerData.developerParticipationMode;
 			roomPlayers[info.connectionId] = playerData;
 		}
 		renderCurrentGameUI();
@@ -5878,6 +6143,8 @@ function openJoinRoomModal(roomId) {
 	if (!modal || !roomInput) return;
 
 	roomInput.value = roomId;
+	const observerOption = document.getElementById('developerObserverOption');
+	if (observerOption) observerOption.hidden = !isDeveloper;
 	if (joinNameInput && !joinNameInput.value.trim()) {
 		joinNameInput.value = createNameInput?.value?.trim() || localStorage.getItem('bunker_lastPlayerName') || '';
 	}
@@ -5885,9 +6152,11 @@ function openJoinRoomModal(roomId) {
 	joinNameInput?.focus();
 }
 
-function joinRoom(roomId, hasPassword) {
-	if (hasPassword) {
+function joinRoom(roomId, hasPassword, forceDeveloperObserver = false) {
+	if (hasPassword || isDeveloper) {
 		openJoinRoomModal(roomId);
+		const observer = document.getElementById('joinAsDeveloperObserver');
+		if (observer) observer.checked = !!forceDeveloperObserver;
 	} else {
 		const typedName = document.getElementById('playerNameJoin')?.value?.trim()
 			|| document.getElementById('playerNameCreate')?.value?.trim()
@@ -5910,6 +6179,7 @@ function submitJoinRoom() {
 	const playerNameRaw = document.getElementById('playerNameJoin').value;
 	const password = document.getElementById('joinRoomPassword').value || null;
 	const roomId = document.getElementById('joinRoomId').value;
+	const developerObserver = isDeveloper && !!document.getElementById('joinAsDeveloperObserver')?.checked;
 
 	// Validate name
 	const validation = validatePlayerName(playerNameRaw);
@@ -5924,7 +6194,7 @@ function submitJoinRoom() {
 	// Зберігаємо roomId для перевірки в RoomJoined handler
 	pendingJoinRoomId = roomId;
 
-	connection.invoke("JoinRoom", roomId, playerName, password, stablePlayerId, loadSession().reconnectToken || null)
+	connection.invoke("JoinRoom", roomId, playerName, password, stablePlayerId, loadSession().reconnectToken || null, developerObserver)
 		.catch(err => {
 			console.error("JoinRoom error:", err);
 			pendingJoinRoomId = null;
@@ -5936,6 +6206,8 @@ function closeJoinModal() {
 	document.getElementById('joinModal').style.display = 'none';
 	document.getElementById('playerNameJoin').value = '';
 	document.getElementById('joinRoomPassword').value = '';
+	const observer = document.getElementById('joinAsDeveloperObserver');
+	if (observer) observer.checked = false;
 }
 
 function leaveRoom() {
@@ -6610,7 +6882,7 @@ function renderApocalypseScenario(model) {
 	const imageButton = model.imageUrl
 		? `<button type="button" class="apocalypse-open-image" onclick="openCurrentApocalypseImage()">${escapeHtml(t('apocOpenImage'))}</button>`
 		: '';
-	const hostControls = isHost ? `<div class="scenario-image-controls apocalypse-image-controls">
+	const hostControls = developerFeatureEnabled('scenarioImages') ? `<div class="scenario-image-controls apocalypse-image-controls">
 		<input type="file" id="apocalypseImageInput" accept="image/*" hidden onchange="uploadApocalypseImage(this)">
 		<button type="button" class="btn-scenario-image" onclick="document.getElementById('apocalypseImageInput').click()">${escapeHtml(t('uploadImage'))}</button>
 		<button type="button" class="btn-scenario-image btn-generate" onclick="generateApocalypsePrompt()">${escapeHtml(t('generatePrompt'))}</button>
@@ -7103,7 +7375,7 @@ function renderBunkerFacility(model) {
 		<img class="bunker-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleBunkerHeroImageError(this)">
 	</div>` : '';
 	const imageButton = model.imageUrl ? `<button type="button" class="bunker-open-image" onclick="openCurrentBunkerImage()">${escapeHtml(t('bunkerOpenImage'))}</button>` : '';
-	const hostControls = isHost ? `<div class="scenario-image-controls bunker-image-controls">
+	const hostControls = developerFeatureEnabled('scenarioImages') ? `<div class="scenario-image-controls bunker-image-controls">
 		<input type="file" id="bunkerImageInput" accept="image/*" hidden onchange="uploadBunkerImage(this)">
 		<button type="button" class="btn-scenario-image" onclick="document.getElementById('bunkerImageInput').click()">${escapeHtml(t('uploadImage'))}</button>
 		<button type="button" class="btn-scenario-image btn-generate" onclick="generateBunkerPrompt()">${escapeHtml(t('generatePrompt'))}</button>
@@ -7455,7 +7727,7 @@ async function refreshGlobalContentCatalogAccess() {
 	const panel = document.getElementById('globalContentCatalog');
 	if (!panel) return;
 	const roomId = currentRoom?.id || currentRoom?.Id || null;
-	if (!isHost || !roomId) {
+	if (!isDeveloper || !roomId) {
 		panel.style.display = 'none';
 		globalCatalogAllowed = false;
 		globalCatalogAccessRoomId = null;
@@ -8685,7 +8957,7 @@ function updateRoomUI() {
 	// Показуємо кнопку старту тільки хосту в лобі
 	const startBtn = document.getElementById('startGameBtn');
 	if (startBtn) {
-		if (isHost && currentRoom.state === 'Lobby') {
+		if ((isHost || isDeveloper) && currentRoom.state === 'Lobby') {
 			startBtn.style.display = 'inline-block';
 			startBtn.disabled = playerCount < 2; // Changed from 4 to 2 for testing
 			startBtn.title = playerCount < 2 ? (getCurrentLanguage() === 'en' ? 'At least 2 players required' : getCurrentLanguage() === 'ru' ? 'Нужно минимум 2 игрока' : 'Потрібно мінімум 2 гравці') : '';
@@ -8708,7 +8980,7 @@ function updateRoomUI() {
 	// Показуємо кнопку GM панелі хосту ЗАВЖДИ (і в лобі, і під час гри)
 	const gmPanelBtn = document.getElementById('gmPanelBtn');
 	if (gmPanelBtn) {
-		if (isHost || !!omniscientHiddenState) {
+		if (isHost || isDeveloper || !!omniscientHiddenState) {
 			gmPanelBtn.style.display = 'inline-block';
 			console.log("[updateRoomUI] GM Panel button shown for host");
 		} else {
@@ -8741,6 +9013,8 @@ function updateRoomUI() {
 	// Оновлюємо GM секції якщо гра почалась
 	updateGMSections();
 	refreshGlobalContentCatalogAccess();
+	renderDeveloperAuthorityUi();
+	renderPostGameCommandState();
 
 	renderRoomPlayers();
 	renderLobbyState();
@@ -8765,8 +9039,10 @@ function renderRoomsList(rooms) {
 		return;
 	}
 
-	container.innerHTML = rooms.map(room => `
-            <div class="room-card ${!room.canJoin ? 'room-full' : ''}">
+	container.innerHTML = rooms.map(room => {
+		const canJoin = !!room.canJoin || isDeveloper;
+		return `
+            <div class="room-card ${!canJoin ? 'room-full' : ''}">
                 <div class="room-card-header">
                     <span class="room-card-name">${escapeHtml(room.name)}</span>
                     ${room.hasPassword ? '<span class="room-lock">🔒</span>' : ''}
@@ -8775,11 +9051,12 @@ function renderRoomsList(rooms) {
                     <span class="room-host">${t('host')}: ${escapeHtml(room.hostName)}</span>
                     <span class="room-players">${room.playerCount}/${room.maxPlayers} ${t('players')}</span>
                 </div>
-                <button class="btn-join" onclick="joinRoom('${room.id}', ${room.hasPassword})" ${!room.canJoin ? 'disabled' : ''}>
-                    ${room.canJoin ? (getCurrentLanguage() === 'en' ? 'Join' : getCurrentLanguage() === 'ru' ? 'Присоединиться' : 'Приєднатися') : (getCurrentLanguage() === 'en' ? 'Full' : getCurrentLanguage() === 'ru' ? 'Заполнено' : 'Заповнено')}
+				<button class="btn-join" onclick="joinRoom('${room.id}', ${room.hasPassword}, ${isDeveloper && !room.canJoin})" ${!canJoin ? 'disabled' : ''}>
+					${canJoin ? (isDeveloper && !room.canJoin ? 'Join as Developer Observer' : (getCurrentLanguage() === 'en' ? 'Join' : getCurrentLanguage() === 'ru' ? 'Присоединиться' : 'Приєднатися')) : (getCurrentLanguage() === 'en' ? 'Full' : getCurrentLanguage() === 'ru' ? 'Заполнено' : 'Заповнено')}
                 </button>
             </div>
-        `).join('');
+        `;
+	}).join('');
 }
 
 function renderRoomPlayers() {
@@ -8805,6 +9082,7 @@ function renderRoomPlayers() {
                 <span class="player-number">${seatLabel}</span>
                 <span class="player-name">${escapeHtml(p.name)}</span>
                 ${p.isHost ? `<span class="host-badge">${t('host')}</span>` : ''}
+                ${p.isDeveloper ? `<span class="player-role-developer" title="${escapeHtml(t('developerBadgeTitle'))}" aria-label="${escapeHtml(t('developerBadgeTitle'))}">DEVELOPER</span>` : ''}
                 ${p.connectionId === myConnectionId ? `<span class="you-badge">${t('you')}</span>` : ''}
                 ${isEliminated ? `<span class="eliminated-badge-small">${t('eliminated')}</span>` : ''}
                 ${isSpectatorGm ? `<span class="host-badge">${t('omniscientPublicBadge')}</span>` : ''}
@@ -9327,6 +9605,7 @@ function renderLobbyState() {
 	const readyCount = lobbyGet(state, 'readyCount', 'ReadyCount') || 0; const readyRequiredCount = lobbyGet(state, 'readyRequiredCount', 'ReadyRequiredCount') || 0; const gameplayCount = lobbyGet(state, 'gameplayPlayerCount', 'GameplayPlayerCount') || 0;
 	const meId = getMyStablePlayerId(); const me = members.find(member => lobbyGet(member, 'playerId', 'PlayerId') === meId);
 	isHost = Boolean(lobbyGet(me, 'isCurrentHost', 'IsCurrentHost'));
+	const canManageLobby = isHost || isDeveloper;
 	const focusedKey = document.activeElement?.dataset?.lobbyFocus || null;
 	const summary = document.getElementById('lobbySummary');
 	const countSeparator = getCurrentLanguage() === 'en' ? 'of' : getCurrentLanguage() === 'ru' ? 'из' : 'із';
@@ -9337,13 +9616,14 @@ function renderLobbyState() {
 	const list = document.getElementById('lobbyMembers');
 	if (list) list.innerHTML = members.map(member => {
 		const id = lobbyGet(member, 'playerId', 'PlayerId'); const role = lobbyGet(member, 'role', 'Role'); const host = lobbyGet(member, 'isCurrentHost', 'IsCurrentHost');
+		const developer = !!lobbyGet(member, 'isDeveloper', 'IsDeveloper');
 		const ready = lobbyGet(member, 'isReady', 'IsReady'); const connected = lobbyGet(member, 'isConnected', 'IsConnected'); const self = id === meId; const gameplay = lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant');
 		const gmRole = lobbyGet(member, 'isTechnicalGm', 'IsTechnicalGm') || lobbyGet(member, 'isOmniscientGm', 'IsOmniscientGm');
 		const displayName = String(lobbyGet(member, 'displayName', 'DisplayName') || '');
 		const initials = displayName.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase() || '?';
 		return `<article class="lobby-member-card ${ready ? 'is-ready' : ''} ${connected ? '' : 'is-offline'} ${role === 'Spectator' ? 'is-spectator' : ''}" data-player-id="${escapeHtml(String(id))}">
                 <header class="lobby-member-header">
-                    <div class="lobby-member-identity"><span class="lobby-member-avatar" aria-hidden="true">${escapeHtml(initials)}</span><div class="lobby-member-name"><strong>${escapeHtml(displayName)}</strong><div class="lobby-badges"><span class="lobby-role-badge">${escapeHtml(localizeLobbyRole(role))}</span>${host ? `<span class="lobby-host-badge">${t('lobbyHostBadge')}</span>` : ''}</div></div></div>
+					<div class="lobby-member-identity"><span class="lobby-member-avatar" aria-hidden="true">${escapeHtml(initials)}</span><div class="lobby-member-name"><strong>${escapeHtml(displayName)}</strong><div class="lobby-badges"><span class="lobby-role-badge">${escapeHtml(localizeLobbyRole(role))}</span>${host ? `<span class="lobby-host-badge">${t('lobbyHostBadge')}</span>` : ''}${developer ? `<span class="player-role-developer" title="${escapeHtml(t('developerBadgeTitle'))}" aria-label="${escapeHtml(t('developerBadgeTitle'))}">DEVELOPER</span>` : ''}</div></div></div>
                     <div class="lobby-member-state"><span class="lobby-connection-state"><span class="lobby-connection-indicator ${connected ? 'online' : 'offline'}" aria-hidden="true"></span>${connected ? t('lobbyConnected') : t('lobbyDisconnected')}</span><span class="${ready ? 'lobby-ready-status' : 'lobby-not-ready-status'}">${ready ? t('lobbyReady') : t('lobbyNotReady')}</span></div>
                 </header>
                 ${self && gameplay ? `<button id="lobbyReadyButton" type="button" class="btn-success lobby-self-ready lobby-command" data-lobby-focus="ready-${escapeHtml(String(id))}" onclick="toggleLobbyReady()" ${lobbyCommandPending || lifecycle !== 'Lobby' ? 'disabled' : ''}>${ready ? t('lobbyCancelReady') : t('lobbyIAmReady')}</button>` : ''}
@@ -9367,9 +9647,9 @@ function renderLobbyState() {
 	const startSection = document.getElementById('lobbyStartSection'); if (startSection) startSection.classList.toggle('is-ready', allReady);
 	const roomCode = document.getElementById('lobbyRoomCode'); if (roomCode) roomCode.textContent = `${t('lobbyRoomCode')}: ${currentRoom?.id || currentRoom?.Id || '—'}`;
 	const capacity = document.getElementById('lobbyMemberCapacity'); if (capacity) capacity.textContent = `${t('lobbyParticipants')}: ${gameplayCount}`;
-	const previewButton = document.getElementById('lobbyStartPreviewButton'); if (previewButton) { previewButton.style.display = isHost && lifecycle === 'Lobby' ? '' : 'none'; previewButton.disabled = lobbyCommandPending; }
+	const previewButton = document.getElementById('lobbyStartPreviewButton'); if (previewButton) { previewButton.style.display = canManageLobby && lifecycle === 'Lobby' ? '' : 'none'; previewButton.disabled = lobbyCommandPending; }
 	const canApplyStart = !!lobbyStartPreview?.canStart && !!lobbyGet(state, 'canStart', 'CanStart');
-	['startGameBtn', 'lobbyStartPrimaryButton'].forEach(id => { const button = document.getElementById(id); if (!button) return; button.style.display = isHost && lifecycle === 'Lobby' ? 'inline-flex' : 'none'; button.disabled = lobbyCommandPending || !canApplyStart; button.style.pointerEvents = button.disabled ? 'none' : 'auto'; button.textContent = t('startGame'); });
+	['startGameBtn', 'lobbyStartPrimaryButton'].forEach(id => { const button = document.getElementById(id); if (!button) return; button.style.display = canManageLobby && lifecycle === 'Lobby' ? 'inline-flex' : 'none'; button.disabled = lobbyCommandPending || !canApplyStart; button.style.pointerEvents = button.disabled ? 'none' : 'auto'; button.textContent = t('startGame'); });
 	const copy = document.getElementById('copyInviteLinkBtn'); if (copy && lifecycle === 'Lobby') copy.textContent = t('lobbyCopyLink');
 	const gm = document.getElementById('gmPanelBtn'); if (gm && lifecycle === 'Lobby') gm.textContent = t('lobbyGmPanel');
 	const leave = document.querySelector('#roomSection .room-actions .btn-danger'); if (leave && lifecycle === 'Lobby') leave.textContent = t('lobbyLeave');

@@ -75,6 +75,7 @@ namespace Bunker.Hubs
                 currentPhase = room.CurrentPhase.ToString(),
                 phase = room.CurrentPhase.ToString(),
                 completion = room.Completion,
+                postGameTransition = BuildPostGameTransition(room),
                 isPaused = room.IsPaused,
                 pauseReason = room.PauseReason,
                 pausedAtUtc = room.PausedAtUtc,

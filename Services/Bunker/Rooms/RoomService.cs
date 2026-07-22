@@ -64,7 +64,8 @@ namespace Bunker.Services
         /// <summary>
         /// Приєднатися до кімнати
         /// </summary>
-        public (bool success, string? error, Room? room) JoinRoom(string roomId, string connectionId, Player player, string? password = null)
+        public (bool success, string? error, Room? room) JoinRoom(string roomId, string connectionId, Player player,
+            string? password = null, bool bypassJoinLock = false)
         {
             if (!_rooms.TryGetValue(roomId, out var room))
             {
@@ -83,12 +84,13 @@ namespace Bunker.Services
 
             var playersSnapshot = GetPlayersSnapshot(room, "JoinRoom", cleanupInvalid: true);
 
-            if (RoomGameSettingsService.Migrate(room.GameSettings).JoinsLocked)
+            if (RoomGameSettingsService.Migrate(room.GameSettings).JoinsLocked && !bypassJoinLock)
             {
                 return (false, "Приєднання до кімнати заблоковано", null);
             }
 
-            if (room.State != RoomState.Lobby || GetGameplayPlayersSnapshot(room).Count >= room.MaxPlayers)
+            if (room.State != RoomState.Lobby ||
+                (!player.IsLobbySpectator && GetGameplayPlayersSnapshot(room).Count >= room.MaxPlayers))
             {
                 return (false, room.State != RoomState.Lobby ? "Гра вже почалась" : "Кімната заповнена", null);
             }
@@ -644,11 +646,11 @@ namespace Bunker.Services
                             id = room.Id,
                             name = room.Name,
                             hasPassword = room.HasPassword,
-                            playerCount = playersSnapshot.Count,
+                            playerCount = GetGameplayPlayersSnapshot(room).Count,
                             maxPlayers = room.MaxPlayers,
                             hostName = room.HostName ?? "",
                             state = room.State.ToString(),
-                            canJoin = room.State == RoomState.Lobby && playersSnapshot.Count < room.MaxPlayers
+                            canJoin = room.State == RoomState.Lobby && GetGameplayPlayersSnapshot(room).Count < room.MaxPlayers
                         }
                     ));
                 }

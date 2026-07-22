@@ -4,6 +4,7 @@
 
 <link rel="stylesheet" href="~/css/game.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/apocalypse-category-effects.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/post-game-story.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/character-cards.css" asp-append-version="true" />
 
 <div class="game-container site-game-shell">
@@ -114,6 +115,14 @@
                     🎮 GM Панель
                 </button>
 
+                <button id="developerToolsButton"
+                        type="button"
+                        class="btn-secondary developer-only-control"
+                        onclick="toggleDeveloperTools()"
+                        hidden>
+                    Developer Tools
+                </button>
+
                 <button id="startVotingBtn"
                         type="button"
                         class="btn-vote"
@@ -217,6 +226,46 @@
                     Нова гра
                 </button>
 
+                <button id="finishPostGameDiscussionButton"
+                        type="button"
+                        class="btn-primary"
+                        onclick="finishPostGameDiscussion()"
+                        style="display: none;">
+                    Завершити обговорення
+                </button>
+
+                <button id="revealPostGameCharacteristicsButton"
+                        type="button"
+                        class="btn-secondary"
+                        onclick="revealRemainingPostGameCharacteristics()"
+                        style="display: none;">
+                    Розкрити решту моїх карток
+                </button>
+
+                <button id="createPostGameStoryButton"
+                        type="button"
+                        class="btn-primary"
+                        onclick="requestFinalPostGameStory()"
+                        style="display: none;">
+                    Створити фінальну історію
+                </button>
+
+                <button id="openPostGameStoryDeveloperButton"
+                        type="button"
+                        class="btn-primary developer-only-control"
+                        onclick="window.PostGameStoryDirector?.prepareRequested()"
+                        style="display: none;">
+                    Відкрити Story Director
+                </button>
+
+                <button id="cancelPostGameStoryRequestButton"
+                        type="button"
+                        class="btn-secondary"
+                        onclick="cancelPostGameStoryRequest()"
+                        style="display: none;">
+                    Скасувати запит історії
+                </button>
+
                 <button id="copyGameSummaryButton"
                         type="button"
                         class="btn-secondary"
@@ -313,6 +362,8 @@
 
 @* Панель керування грою рендериться на верхньому рівні, щоб fixed drawer не залежав від game container. *@
 <partial name="~/Views/Shared/Bunker/_GmPanel.cshtml" />
+<partial name="~/Views/Shared/Bunker/_DeveloperTools.cshtml" />
+<partial name="~/Views/Shared/Bunker/_PostGameStoryDirector.cshtml" />
 
 <div id="scenarioPublicModal"
      class="modal scenario-situation-modal"
@@ -406,6 +457,11 @@
 
             <input type="hidden" id="joinRoomId" name="joinRoomId" />
 
+            <label id="developerObserverOption" class="developer-observer-option" hidden>
+                <input id="joinAsDeveloperObserver" type="checkbox" />
+                Увійти як Developer Observer (не займає місце)
+            </label>
+
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeJoinModal()">Скасувати</button>
                 <button type="button" class="btn-primary" onclick="submitJoinRoom()">Приєднатися</button>
@@ -466,6 +522,7 @@
 
 <script src="~/js/signalr-lite.js" asp-append-version="true"></script>
 <script src="~/js/game.js" asp-append-version="true"></script>
+<script src="~/js/bunker/post-game-story-director.js" asp-append-version="true"></script>
 <script src="~/js/apocalypse-category-visual-registry.js" asp-append-version="true"></script>
 <script src="~/js/bunker/gm-panel-v2.js" asp-append-version="true"></script>
 <script src="~/js/bunker/development-images.js" asp-append-version="true"></script>

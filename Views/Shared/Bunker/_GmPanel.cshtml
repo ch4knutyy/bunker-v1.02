@@ -26,6 +26,10 @@
 				<span id="gmPanelConnectionStatus" class="gm-panel-connection">Синхронізовано</span>
 			</div>
 		</div>
+		<div class="gm-panel-mode-switch" role="group" aria-label="Режим панелі ведучого">
+			<button id="gmPanelSimpleMode" type="button" class="btn-gm-action" aria-pressed="true" onclick="setGmPanelMode('simple')">Simple</button>
+			<button id="gmPanelAdvancedMode" type="button" class="btn-gm-action" aria-pressed="false" onclick="setGmPanelMode('advanced')">Advanced</button>
+		</div>
 		<button type="button" class="btn-close" aria-label="Закрити панель ведучого" onclick="toggleGMPanel()">×</button>
 	</div>
 	<nav class="gm-panel-v2-tabs" aria-label="GM sections">
@@ -39,6 +43,10 @@
 		<button id="omniscientHiddenTab" type="button" class="gm-tab" role="tab" aria-selected="false" data-gm-tab-button="overview" onclick="switchGMTab('overview')" hidden>Огляд</button>
 	</nav>
 	<div class="gm-panel-v2-content">
+		<section id="gmRecommendedAction" class="gm-recommended-action" aria-live="polite">
+			<span>Наступна рекомендована дія</span>
+			<strong id="gmRecommendedActionText">Очікуйте синхронізації стану кімнати</strong>
+		</section>
 		<div id="gmPanelV2LoadState" class="gm-panel-v2-load-state" role="status" aria-live="polite">
 			<p id="gmPanelV2LoadMessage">Завантаження панелі ведучого…</p>
 			<button id="gmPanelV2Retry"
@@ -53,7 +61,7 @@
 			<h4 class="gm-section-title">Стан гри</h4>
 			<div id="gmGameStateSummary" class="gm-status-grid"></div>
 		</div>
-		<div class="gm-section" id="gmScenarioSection" data-gm-tab="events" style="display: none;">
+		<div class="gm-section" id="gmScenarioSection" data-gm-tab="events" data-gm-advanced style="display: none;">
 			<h4 class="gm-section-title">Сценарні ситуації</h4>
 			<div id="gmScenarioSummary" class="gm-status-grid"></div>
 			<div class="gm-round-actions">
@@ -140,7 +148,7 @@
 				<div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
 				<div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
 			</section>
-			<section class="gm-round-control-block" aria-labelledby="gmManualRoundHeading">
+			<section class="gm-round-control-block" data-gm-advanced aria-labelledby="gmManualRoundHeading">
 				<h5 id="gmManualRoundHeading" data-gm-i18n="gmManualRoundHeading">Ручне встановлення раунду</h5>
 				<p class="gm-round-hint" data-gm-i18n="gmManualRoundHint">Перехід можливий лише вперед; частину стану поточного раунду буде очищено.</p>
 				<div class="gm-round-form-row">
@@ -184,7 +192,7 @@
 				</div>
 				<p id="gmTimerFeedback" class="gm-round-hint" aria-live="polite"></p>
 			</section>
-			<div class="gm-voting-admin-card">
+			<div class="gm-voting-admin-card" data-gm-advanced>
 				<h5 data-gm-i18n="gmVotingRecovery">Відновлення голосування</h5>
 				<div class="gm-round-actions">
 					<button class="btn-gm-action gm-round-command" data-gm-i18n="gmClearVotes" onclick="clearCurrentVotes()">Очистити голоси</button>
@@ -216,7 +224,7 @@
 		<div class="gm-section" id="gmThreatControlSection" data-gm-tab="threats" style="display: none;">
 			<h4 class="gm-section-title">Керування загрозою</h4>
 			<div id="gmThreatCurrent" class="gm-threat-current">Поточна загроза відсутня</div>
-			<div id="gmSpecificThreatControls" style="display: none;">
+			<div id="gmSpecificThreatControls" data-gm-advanced style="display: none;">
 				<input id="gmThreatSearch" class="gm-select" type="search" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
 				<select id="gmThreatSelect" class="gm-select"></select>
 				<button class="btn-gm-action" onclick="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
@@ -224,7 +232,7 @@
 			<div class="gm-round-actions">
 				<button class="btn-gm-action" onclick="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
 				<button class="btn-gm-action" onclick="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
-				<button class="btn-gm-action" onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
+				<button class="btn-gm-action" data-gm-advanced onclick="gmResyncThreatRoom()">Примусово синхронізувати кімнату</button>
 			</div>
 			<div class="gm-threat-danger-zone" id="gmThreatEmergencyBlock">
 				<strong data-gm-i18n="gmThreatEmergency">Аварійне керування</strong>
@@ -282,7 +290,7 @@
 			   class="gm-round-hint"
 			   aria-live="polite"></p>
 
-			<details class="gm-player-secondary">
+			<details class="gm-player-secondary" data-gm-advanced>
 				<summary data-gm-i18n="gmPlayerSecondaryActions">
 					Додаткові дії
 				</summary>

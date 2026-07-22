@@ -20,13 +20,12 @@ async function uploadApocalypseImage(input) {
 	const formData = new FormData();
 	formData.append('file', file);
 	formData.append('roomId', currentRoom?.id || '');
-	formData.append('connectionId', myConnectionId || '');
-	formData.append('hostToken', hostToken || '');
 	formData.append('apocalypseId', currentApocalypse?.id || '');
 
 	try {
 		const response = await fetch('/api/ScenarioImage/apocalypse', {
 			method: 'POST',
+			credentials: 'same-origin',
 			body: formData
 		});
 
@@ -68,13 +67,12 @@ async function uploadBunkerImage(input) {
 	const formData = new FormData();
 	formData.append('file', file);
 	formData.append('roomId', currentRoom?.id || '');
-	formData.append('connectionId', myConnectionId || '');
-	formData.append('hostToken', hostToken || '');
 	formData.append('bunkerId', currentBunker?.id || currentBunker?.Id || '');
 
 	try {
 		const response = await fetch('/api/ScenarioImage/bunker', {
 			method: 'POST',
+			credentials: 'same-origin',
 			body: formData
 		});
 
@@ -121,13 +119,12 @@ async function uploadThreatImage(input) {
 	const formData = new FormData();
 	formData.append('file', file);
 	formData.append('roomId', currentRoom?.id || '');
-	formData.append('connectionId', myConnectionId || '');
-	formData.append('hostToken', hostToken || '');
 	formData.append('threatId', currentThreat?.id || currentThreat?.Id || '');
 
 	try {
 		const response = await fetch('/api/ScenarioImage/threat', {
 			method: 'POST',
+			credentials: 'same-origin',
 			body: formData
 		});
 
@@ -153,13 +150,12 @@ async function removeApocalypseImage() {
 	try {
 		const params = new URLSearchParams({
 			roomId: currentRoom?.id || '',
-			connectionId: myConnectionId || '',
-			hostToken: hostToken || '',
 			apocalypseId: currentApocalypse?.id || ''
 		});
 
 		const response = await fetch(`/api/ScenarioImage/apocalypse?${params}`, {
-			method: 'DELETE'
+			method: 'DELETE',
+			credentials: 'same-origin'
 		});
 
 		if (!response.ok) {
@@ -182,13 +178,12 @@ async function removeBunkerImage() {
 	try {
 		const params = new URLSearchParams({
 			roomId: currentRoom?.id || '',
-			connectionId: myConnectionId || '',
-			hostToken: hostToken || '',
 			bunkerId: currentBunker?.id || currentBunker?.Id || ''
 		});
 
 		const response = await fetch(`/api/ScenarioImage/bunker?${params}`, {
-			method: 'DELETE'
+			method: 'DELETE',
+			credentials: 'same-origin'
 		});
 
 		if (!response.ok) {
@@ -216,13 +211,12 @@ async function removeThreatImage() {
 	try {
 		const params = new URLSearchParams({
 			roomId: currentRoom?.id || '',
-			connectionId: myConnectionId || '',
-			hostToken: hostToken || '',
 			threatId: currentThreat?.id || currentThreat?.Id || ''
 		});
 
 		const response = await fetch(`/api/ScenarioImage/threat?${params}`, {
-			method: 'DELETE'
+			method: 'DELETE',
+			credentials: 'same-origin'
 		});
 
 		if (!response.ok) {
@@ -241,7 +235,7 @@ async function removeThreatImage() {
 // Генерація промпту для апокаліпсису
 async function generateApocalypsePrompt() {
 	try {
-		const response = await fetch(`/api/ScenarioImage/apocalypse/prompt?roomId=${currentRoom?.id || ''}`);
+		const response = await fetch(`/api/ScenarioImage/apocalypse/prompt?roomId=${currentRoom?.id || ''}`, { credentials: 'same-origin' });
 
 		if (!response.ok) {
 			alert('Помилка отримання промпту');
@@ -259,7 +253,7 @@ async function generateApocalypsePrompt() {
 // Генерація промпту для бункера
 async function generateBunkerPrompt() {
 	try {
-		const response = await fetch(`/api/ScenarioImage/bunker/prompt?roomId=${currentRoom?.id || ''}`);
+		const response = await fetch(`/api/ScenarioImage/bunker/prompt?roomId=${currentRoom?.id || ''}`, { credentials: 'same-origin' });
 
 		if (!response.ok) {
 			alert('Помилка отримання промпту');
@@ -282,7 +276,7 @@ async function generateThreatPrompt() {
 	}
 
 	try {
-		const response = await fetch(`/api/ScenarioImage/threat/prompt?roomId=${currentRoom?.id || ''}`);
+		const response = await fetch(`/api/ScenarioImage/threat/prompt?roomId=${currentRoom?.id || ''}`, { credentials: 'same-origin' });
 
 		if (!response.ok) {
 			alert('Помилка отримання промпту');

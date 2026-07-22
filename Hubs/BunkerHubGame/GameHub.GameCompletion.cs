@@ -65,6 +65,7 @@ namespace Bunker.Hubs
 				room.State = RoomState.Finished;
 				room.CurrentPhase = GamePhase.Finished;
 				room.Completion = completionState;
+				room.PostGamePhase = PostGamePhase.FinalDiscussion;
 
 				completion = new GameCompletionSnapshot(
 					completionState,
@@ -83,6 +84,7 @@ namespace Bunker.Hubs
 			string actorId)
 		{
 			var state = completion.State;
+			_gameTimerService.Stop(room);
 
 			// Спочатку повідомляємо клієнтів.
 			await Clients.Group(room.Id).SendAsync(
@@ -96,7 +98,8 @@ namespace Bunker.Hubs
 					winners = state.Winners,
 					completedAtRound = state.CompletedAtRound,
 					completedAtUtc = state.CompletedAtUtc,
-					roundState = BuildRoundState(room)
+					roundState = BuildRoundState(room),
+					postGameTransition = BuildPostGameTransition(room)
 				});
 
 			await AppendGmAudit(

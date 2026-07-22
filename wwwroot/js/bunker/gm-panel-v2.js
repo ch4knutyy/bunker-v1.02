@@ -31,6 +31,7 @@
     let commandPending = false;
     let propertyEditorData = null;
     let propertyEditorPending = false;
+    let panelMode = "simple";
 
     function value(source, camel, pascal) {
         return source?.[camel] ?? source?.[pascal];
@@ -57,6 +58,7 @@
 
     function canShowTab(tab) {
         const access = permissions();
+        if (panelMode === "simple" && tab === "events") return false;
         if (tab === "technical") return Boolean(value(access, "canUseTechnicalTools", "CanUseTechnicalTools"));
         if (tab === "overview") return Boolean(value(access, "canViewOmniscientData", "CanViewOmniscientData"));
         if (tab === "players") return Boolean(value(access, "canManagePlayers", "CanManagePlayers"));
@@ -140,6 +142,14 @@
         renderGmPanelV2();
     };
 
+    window.setGmPanelMode = function setGmPanelMode(mode) {
+        panelMode = mode === "advanced" ? "advanced" : "simple";
+        if (roomCode()) localStorage.setItem(preferenceKey("mode"), panelMode);
+        activeGMTab = safeTab(activeGMTab);
+        renderGmPanelV2();
+        window.switchGMTab(activeGMTab);
+    };
+
     window.toggleGMPanel = function toggleGmPanelV2() {
         const panel = document.getElementById("gmPanel");
         if (!panel) return;
@@ -206,6 +216,7 @@
             sessionStorage.removeItem(preferenceKey("selected-player"));
         }
         const restored = localStorage.getItem(preferenceKey("active-tab"));
+        panelMode = localStorage.getItem(preferenceKey("mode")) === "advanced" ? "advanced" : "simple";
         activeGMTab = safeTab(restored || activeGMTab || "game");
         if (localStorage.getItem(preferenceKey("open")) === "1") {
             setPanelOpen(true, false);
@@ -220,10 +231,39 @@
     function renderGmPanelV2() {
         if (!gmPanelV2State) return;
         renderHeader();
+        renderPanelMode();
+        renderRecommendedAction();
         renderTabs();
         renderOverview();
         renderVoting();
         renderPlayerCards();
+    }
+
+    function renderPanelMode() {
+        const panel = document.getElementById("gmPanel");
+        if (panel) panel.dataset.gmMode = panelMode;
+        const simple = document.getElementById("gmPanelSimpleMode");
+        const advanced = document.getElementById("gmPanelAdvancedMode");
+        if (simple) simple.setAttribute("aria-pressed", String(panelMode === "simple"));
+        if (advanced) advanced.setAttribute("aria-pressed", String(panelMode === "advanced"));
+    }
+
+    function renderRecommendedAction() {
+        const target = document.getElementById("gmRecommendedActionText");
+        if (!target) return;
+        const roomState = value(gmPanelV2State, "roomState", "RoomState") || "Lobby";
+        const phase = value(gmPanelV2State, "phase", "Phase") || "Lobby";
+        const votingState = value(gmPanelV2State, "votingStatus", "VotingStatus") || "Inactive";
+        const threatState = value(gmPanelV2State, "threatStatus", "ThreatStatus") || "Inactive";
+        const postGamePhase = typeof currentPostGameTransition !== "undefined" ? currentPostGameTransition?.phase : null;
+        target.textContent = postGamePhase === "FinalDiscussion" ? "Завершіть фінальне обговорення"
+            : postGamePhase === "HostDecision" ? "Оберіть нову гру або фінальну історію"
+            : postGamePhase === "StoryRequested" || postGamePhase === "StoryPreparation" ? "Дочекайтеся публікації або скасуйте фінальну історію"
+            : roomState === "Lobby" ? "Перевірте готовність гравців і почніть гру"
+            : votingState !== "Inactive" ? "Завершіть поточне голосування"
+            : threatState !== "Inactive" && threatState !== "Resolved" ? "Розв’яжіть поточну загрозу"
+            : phase === "RoundReveal" ? "Дочекайтеся розкриття характеристик і завершіть раунд"
+            : "Перевірте стан раунду та виконайте наступну основну дію";
     }
 
     function renderHeader() {

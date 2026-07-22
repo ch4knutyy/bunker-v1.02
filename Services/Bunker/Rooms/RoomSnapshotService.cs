@@ -211,7 +211,11 @@ public sealed class RoomSnapshotService
             Bunker = Clone(room.Bunker),
             ScenarioSituations = Clone(room.ScenarioSituations),
             BunkerIntel = Clone(room.BunkerIntel),
-            PendingElimination = Clone(room.PendingElimination)
+            PendingElimination = Clone(room.PendingElimination),
+            Completion = Clone(room.Completion),
+            PostGameStory = Clone(room.PostGameStory) ?? new(),
+            PostGamePhase = room.PostGamePhase,
+            ProcessedPostGameCommandIds = new(room.ProcessedPostGameCommandIds, StringComparer.OrdinalIgnoreCase)
         };
         lock (room.ThreatSyncRoot)
         {
@@ -287,6 +291,10 @@ public sealed class RoomSnapshotService
         room.ScenarioSituations = state.ScenarioSituations;
         room.BunkerIntel = state.BunkerIntel;
         room.PendingElimination = state.PendingElimination;
+        room.Completion = state.Completion;
+        room.PostGameStory = state.PostGameStory ?? new();
+        room.PostGamePhase = state.PostGamePhase;
+        room.ProcessedPostGameCommandIds = new(state.ProcessedPostGameCommandIds ?? [], StringComparer.OrdinalIgnoreCase);
 
         lock (room.Players)
         {
@@ -401,6 +409,8 @@ public sealed class RoomSnapshotService
         Add("scenario_state", Json(current.ScenarioSituations) != Json(state.ScenarioSituations) ||
             Json(current.BunkerIntel) != Json(state.BunkerIntel) ? 1 : 0);
         Add("pending_elimination", Json(current.PendingElimination) != Json(state.PendingElimination) ? 1 : 0);
+        Add("post_game_story", Json(current.PostGameStory) != Json(state.PostGameStory) ? 1 : 0);
+        Add("post_game_phase", current.PostGamePhase != state.PostGamePhase ? 1 : 0);
         return result;
     }
 
