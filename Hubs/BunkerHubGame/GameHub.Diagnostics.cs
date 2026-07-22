@@ -222,7 +222,8 @@ public partial class GameHub
         await SendVotingAdminState(Clients.Client(room.HostConnectionId), room);
         await SendPlayerHostControlData(room);
         if (room.Bunker != null) await BroadcastBunkerIntelProjection(room);
-        if (room.Apocalypse != null) await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
+        if (room.ApocalypseRevealed && room.Apocalypse != null)
+            await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
         await BroadcastOmniscientStateToAuthorizedSpectators(room);
     }
 

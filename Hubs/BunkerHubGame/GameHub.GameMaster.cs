@@ -943,6 +943,7 @@ namespace Bunker.Hubs
             }
 
             room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
+            room.ApocalypseRevealed = true;
 
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
             await Clients.Group(roomId).SendAsync("ApocalypseChanged", new

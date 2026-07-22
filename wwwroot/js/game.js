@@ -6087,6 +6087,7 @@ function clearApocalypseVisualTheme() {
 	if (typeof stopApocalypseAmbientScheduler === 'function') stopApocalypseAmbientScheduler();
 	if (typeof resetApocalypseParallax === 'function') resetApocalypseParallax();
 	if (typeof clearApocalypseCardRevealWave === 'function') clearApocalypseCardRevealWave({ resetKey: true });
+	if (typeof clearApocalypseCategoryVisualState === 'function') clearApocalypseCategoryVisualState();
 }
 
 const apocalypseVisualReactionTypes = Object.freeze([
@@ -6111,6 +6112,8 @@ const apocalypseAmbientEventsByTheme = Object.freeze({
 const apocalypseAmbientEventTypes = Object.freeze([...new Set(Object.values(apocalypseAmbientEventsByTheme).flat())]);
 let apocalypseAmbientSchedulerTimer = null;
 let apocalypseAmbientEventTimer = null;
+let activeApocalypseCategoryProfile = null;
+let lastApocalypseAmbientEventType = '';
 let apocalypseParallaxTimer = null;
 let apocalypseParallaxInitialized = false;
 let apocalypsePendingPointer = null;
@@ -6147,10 +6150,12 @@ function setApocalypseEffectsLevel(level) {
 	try { localStorage.setItem(apocalypseEffectsPreferenceKey, normalized); } catch (_) { }
 	if (document.body) document.body.dataset.apocalypseEffectsLevel = normalized;
 	if (normalized === 'off') {
+		clearApocalypseCategoryVisualState();
 		clearApocalypseVisualReactions();
 		stopApocalypseAmbientScheduler();
 		resetApocalypseParallax();
 	} else {
+		syncApocalypseCategoryVisualState(currentApocalypse);
 		startApocalypseAmbientScheduler();
 	}
 	return normalized;
@@ -6198,22 +6203,119 @@ function canRunApocalypseEnvironmentalEffects() {
 		!document.hidden && !prefersReducedApocalypseMotion());
 }
 
+function normalizeApocalypseCategoryToken(value) {
+	return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/_+/g, '-');
+}
+
+function getApocalypseCategoryRegistry() {
+	return window.ApocalypseCategoryVisualRegistry?.registry || null;
+}
+
+function resolveApocalypseCategoryProfile(apocalypse) {
+	const registry = getApocalypseCategoryRegistry();
+	if (!apocalypse || !registry) return null;
+	const categories = new Map(registry.categoryPackages.map(item => [item.categoryId, item]));
+	const modifiers = new Map(registry.modifierCatalog.map(item => [item.id, item]));
+	const id = String(apocalypse.id ?? apocalypse.Id ?? '').trim();
+	const registered = window.ApocalypseCategoryVisualRegistry?.getApocalypseVisualMetadata?.(id);
+	const categoryId = String(apocalypse.categoryId ?? apocalypse.CategoryId ?? registered?.categoryId ?? '').trim().toLowerCase();
+	const category = categories.get(categoryId);
+	if (!category) return null;
+	const rawModifiers = apocalypse.visualModifierIds ?? apocalypse.VisualModifierIds ?? registered?.visualModifierIds ?? [];
+	const maximum = getApocalypseEffectsLevel() === 'subtle' || window.matchMedia?.('(max-width: 768px)')?.matches === true
+		? 1
+		: Math.min(3, Number(registry.maxModifiers) || 3);
+	const modifierIds = [...new Set(Array.isArray(rawModifiers) ? rawModifiers.map(value => String(value).trim().toLowerCase()) : [])]
+		.filter(value => modifiers.has(value))
+		.slice(0, maximum);
+	return { apocalypseId: id, categoryId, category, modifierIds, modifiers };
+}
+
+function getApocalypseCategoryEventPools() {
+	if (!activeApocalypseCategoryProfile) {
+		const fallback = apocalypseAmbientEventsByTheme[document.body?.dataset.apocalypseTheme] || [];
+		return { category: [...fallback], modifier: [], all: [...fallback] };
+	}
+	const category = [...new Set((activeApocalypseCategoryProfile.category.baseEvents || []).map(normalizeApocalypseCategoryToken).filter(Boolean))];
+	const modifier = [...new Set(activeApocalypseCategoryProfile.modifierIds
+		.flatMap(id => activeApocalypseCategoryProfile.modifiers.get(id)?.eventPool || [])
+		.map(normalizeApocalypseCategoryToken).filter(Boolean))];
+	return { category, modifier, all: [...new Set([...category, ...modifier])] };
+}
+
+function clearApocalypseCategoryVisualState() {
+	const registry = getApocalypseCategoryRegistry();
+	const ambient = document.getElementById('apocalypseAmbientRoot');
+	for (const item of registry?.modifierCatalog || []) {
+		document.body?.classList.remove(item.cssClass);
+		ambient?.classList.remove(item.cssClass);
+	}
+	ambient?.removeAttribute('data-apocalypse-package');
+	activeApocalypseCategoryProfile = null;
+	lastApocalypseAmbientEventType = '';
+}
+
+function syncApocalypseCategoryVisualState(apocalypse) {
+	clearApocalypseAmbientEvent();
+	clearApocalypseCategoryVisualState();
+	const profile = resolveApocalypseCategoryProfile(apocalypse);
+	if (!profile) return null;
+	activeApocalypseCategoryProfile = profile;
+	if (getApocalypseEffectsLevel() === 'off' || !document.body?.classList.contains('apocalypse-theme-active')) return profile;
+	const ambient = ensureApocalypseAmbientRoot();
+	ambient.dataset.apocalypsePackage = normalizeApocalypseCategoryToken(profile.category.packageId);
+	for (const id of profile.modifierIds) {
+		const className = profile.modifiers.get(id)?.cssClass;
+		if (!className) continue;
+		document.body.classList.add(className);
+		ambient.classList.add(className);
+	}
+	return profile;
+}
+
+function renderApocalypseCategoryBadge(apocalypse) {
+	const profile = resolveApocalypseCategoryProfile(apocalypse);
+	const hero = document.querySelector('.apocalypse-hero-content');
+	if (!profile || !hero) return;
+	const language = ['uk', 'en', 'ru'].includes(getCurrentLanguage?.()) ? getCurrentLanguage() : 'uk';
+	const badge = document.createElement('span');
+	badge.className = 'apocalypse-category-badge';
+	badge.dataset.category = profile.categoryId;
+	badge.textContent = profile.category?._i18n?.name?.[language] || profile.category?._i18n?.name?.uk || profile.categoryId;
+	const title = hero.querySelector('.apocalypse-title');
+	hero.insertBefore(badge, title || null);
+}
+
 function clearApocalypseAmbientEvent() {
 	if (apocalypseAmbientEventTimer) window.clearTimeout(apocalypseAmbientEventTimer);
 	apocalypseAmbientEventTimer = null;
 	const ambient = document.getElementById('apocalypseAmbientRoot');
 	if (!ambient) return;
-	for (const type of apocalypseAmbientEventTypes) ambient.classList.remove(`apoc-event-${type}`);
+	const registry = getApocalypseCategoryRegistry();
+	const registeredTypes = [
+		...(registry?.categoryPackages || []).flatMap(item => item.baseEvents || []),
+		...(registry?.modifierCatalog || []).flatMap(item => item.eventPool || [])
+	].map(normalizeApocalypseCategoryToken);
+	for (const type of new Set([...apocalypseAmbientEventTypes, ...registeredTypes])) ambient.classList.remove(`apoc-event-${type}`);
 }
 
 function triggerApocalypseAmbientEvent(preferredType = '') {
 	if (!canRunApocalypseEnvironmentalEffects()) return false;
 	const ambient = ensureApocalypseAmbientRoot();
-	const themeEvents = apocalypseAmbientEventsByTheme[document.body.dataset.apocalypseTheme] || [];
-	const type = themeEvents.includes(preferredType)
-		? preferredType
-		: themeEvents[Math.floor(Math.random() * themeEvents.length)];
+	const pools = getApocalypseCategoryEventPools();
+	const normalizedPreferred = normalizeApocalypseCategoryToken(preferredType);
+	let type = pools.all.includes(normalizedPreferred) ? normalizedPreferred : '';
+	if (!type) {
+		const categoryPercent = Number(getApocalypseCategoryRegistry()?.eventWeights?.categoryBasePercent ?? 65);
+		const useModifier = pools.modifier.length > 0 && Math.random() * 100 >= categoryPercent;
+		let selectedPool = useModifier ? pools.modifier : pools.category;
+		if (!selectedPool.length) selectedPool = pools.all;
+		if (selectedPool.length > 1 && lastApocalypseAmbientEventType)
+			selectedPool = selectedPool.filter(value => value !== lastApocalypseAmbientEventType);
+		type = selectedPool[Math.floor(Math.random() * selectedPool.length)] || '';
+	}
 	if (!type) return false;
+	lastApocalypseAmbientEventType = type;
 	clearApocalypseAmbientEvent();
 	const className = `apoc-event-${type}`;
 	ambient.classList.add(className);
@@ -6524,11 +6626,13 @@ function renderApocalypse(apocalypse) {
 		clearApocalypseCardRevealWave({ resetKey: true });
 		resetApocalypseParallax();
 		clearApocalypseVisualTheme();
+		clearApocalypseCategoryVisualState();
 		updateScenarioSectionVisibility();
 		return;
 	}
 	if (!container) {
 		syncApocalypseVisualTheme(apocalypse);
+		syncApocalypseCategoryVisualState(apocalypse);
 		startApocalypseAmbientScheduler();
 		return;
 	}
@@ -6539,6 +6643,8 @@ function renderApocalypse(apocalypse) {
 	clearApocalypseCardRevealWave();
 	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse));
 	syncApocalypseVisualTheme(apocalypse);
+	syncApocalypseCategoryVisualState(apocalypse);
+	renderApocalypseCategoryBadge(apocalypse);
 	startApocalypseAmbientScheduler();
 	updateScenarioSectionVisibility();
 }

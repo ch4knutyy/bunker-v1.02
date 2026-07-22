@@ -348,7 +348,7 @@ namespace Bunker.Hubs
 				roomState = room.State.ToString(),
 				currentPhase = room.CurrentPhase.ToString(),
 				completion = room.Completion,
-				apocalypse = room.Apocalypse?.ToClientInfo(),
+				apocalypse = GetPublicApocalypse(room),
 				gameSettings = BuildPublicGameSettings(room),
 				bunker = _bunkerIntel.Project(room, player,
 					player.GmRole is GmMode.TechnicalGm or GmMode.OmniscientGm ||
@@ -666,6 +666,7 @@ namespace Bunker.Hubs
 
             var settings = _roomGameSettings.GetEffective(room);
             // Генеруємо лише увімкнені room-local сценарії.
+            room.ApocalypseRevealed = false;
             _apocalypseSelection.ResolveForStart(room, settings, _random.Next);
             _apocalypseActivation.ResolveForStart(room, settings);
             _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
@@ -723,7 +724,10 @@ namespace Bunker.Hubs
             if (room.Bunker != null)
                 await BroadcastBunkerIntelProjection(room);
             if (room.Apocalypse != null)
+            {
+                room.ApocalypseRevealed = true;
                 await Clients.Group(roomId).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo(), gameSettings = BuildPublicGameSettings(room) });
+            }
             await SendPlayerHostControlData(room);
 
             // Compatibility aggregate for existing clients; it is built only after
@@ -733,7 +737,7 @@ namespace Bunker.Hubs
                 roomState = room.State.ToString(),
                 currentRound = room.CurrentRound,
                 currentTurnPlayerId = room.CurrentTurnPlayerId,
-                apocalypse = room.Apocalypse?.ToClientInfo(),
+				apocalypse = GetPublicApocalypse(room),
                 gameSettings = BuildPublicGameSettings(room),
                 bunker = _bunkerIntel.Project(room, null),
                 roundState,
@@ -761,6 +765,9 @@ namespace Bunker.Hubs
 
             _logger.LogInformation($"Гра почалась в кімнаті {room.Name}. Апокаліпсис: {room.Apocalypse?.Name}, Бункер: {room.Bunker?.Name}");
         }
+
+		internal static object? GetPublicApocalypse(Room room) =>
+			room.ApocalypseRevealed ? room.Apocalypse?.ToClientInfo() : null;
 
 		private object BuildPublicGameSettings(Room room)
 		{

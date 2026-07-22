@@ -205,6 +205,7 @@ public sealed class RoomSnapshotService
             VotingReadyResponses = Clone(room.VotingReadyResponses) ?? new(StringComparer.OrdinalIgnoreCase),
             CurrentVoting = Clone(room.CurrentVoting),
             Apocalypse = Clone(room.Apocalypse),
+            ApocalypseRevealed = room.ApocalypseRevealed,
             ApocalypseActivationPolicy = Clone(room.ApocalypseActivationPolicy),
             ApocalypseEffectRuntime = Clone(room.ApocalypseEffectRuntime),
             Bunker = Clone(room.Bunker),
@@ -279,6 +280,7 @@ public sealed class RoomSnapshotService
         room.VotingReadyResponses = state.VotingReadyResponses;
         room.CurrentVoting = state.CurrentVoting;
         room.Apocalypse = state.Apocalypse;
+        room.ApocalypseRevealed = state.ApocalypseRevealed && state.Apocalypse != null;
         room.ApocalypseActivationPolicy = state.ApocalypseActivationPolicy;
         room.ApocalypseEffectRuntime = state.ApocalypseEffectRuntime;
         room.Bunker = state.Bunker;

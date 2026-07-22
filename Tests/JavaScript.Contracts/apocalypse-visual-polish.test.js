@@ -99,7 +99,7 @@ test('environmental scheduler is rare, theme-allowlisted and lifecycle-safe', ()
   for (const theme of themes) assert.match(game, new RegExp(`'${theme}': Object\\.freeze\\(\\[`));
   assert.match(start, /apocalypseAmbientSchedulerTimer[\s\S]*20000[\s\S]*20001[\s\S]*setTimeout/);
   assert.match(stop, /clearTimeout[\s\S]*clearApocalypseAmbientEvent/);
-  assert.match(trigger, /themeEvents\.includes\(preferredType\)[\s\S]*classList\.add/);
+  assert.match(trigger, /pools\.all\.includes\(normalizedPreferred\)[\s\S]*classList\.add/);
   assert.match(gate, /dataset\.apocalypseTheme[\s\S]*document\.hidden[\s\S]*prefersReducedApocalypseMotion/);
   assert.doesNotMatch(start + stop + trigger, /setInterval|currentApocalypse|\.name|\.Name/);
   assert.match(method('renderApocalypse'), /startApocalypseAmbientScheduler/);

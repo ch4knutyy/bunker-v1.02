@@ -88,6 +88,7 @@ internal static class GameResetService
 			room.PausedByPlayerId = null;
 			room.Bunker = null;
 			room.Apocalypse = null;
+			room.ApocalypseRevealed = false;
 			room.ApocalypseActivationPolicy = null;
 			room.ApocalypseEffectRuntime = null;
 			room.ResolvedBunkerCapacity = null;

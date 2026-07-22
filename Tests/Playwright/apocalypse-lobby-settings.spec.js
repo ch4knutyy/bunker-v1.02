@@ -6,7 +6,7 @@ test.use({ ignoreHTTPSErrors: true });
 async function openSettings(page) {
   const details = page.locator('details#lobbySettingsHostEditor, details:has(#lobbySettingsHostEditor)').first();
   await expect(details).toBeVisible({ timeout: 15000 });
-  if (!(await details.evaluate(element => element.open))) await details.locator('summary').click();
+  if (!(await details.evaluate(element => element.open))) await details.locator(':scope > summary').click();
 }
 
 test('host selects a specific apocalypse and can disable its visual theme', async ({ browser }) => {
