@@ -301,6 +301,10 @@ public partial class GameHub
 		room.FrozenGameSettings = null;
 		room.ResolvedBunkerCapacity = null;
 		room.ApocalypseActivationPolicy = null;
+		room.ApocalypseEffectRuntime = null;
+		room.State = RoomState.Lobby;
+		room.CurrentPhase = GamePhase.Lobby;
+		room.CurrentRound = 0;
 		if (!ReferenceEquals(room.Apocalypse, apocalypseBeforeStart)) room.Apocalypse = apocalypseBeforeStart;
 	}
 

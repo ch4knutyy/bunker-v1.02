@@ -12,6 +12,8 @@ public class GameResetTests
     {
         var room = FinishedRoom();
         room.ApocalypseActivationPolicy = new() { Enabled = true, ApocalypseId = "resolved", EffectProfileId = "profile" };
+        room.ApocalypseEffectRuntime = new() { SuccessfulActivationCount = 2 };
+        room.Players["host-connection"].ApocalypseProfessionSuppression = new() { IsSuppressed = true };
         var roomId = room.Id;
         var hostToken = room.HostToken;
         var sessionId = room.GameSessionId;
@@ -34,6 +36,8 @@ public class GameResetTests
         Assert.Null(room.Bunker);
         Assert.Null(room.Apocalypse);
         Assert.Null(room.ApocalypseActivationPolicy);
+        Assert.Null(room.ApocalypseEffectRuntime);
+        Assert.Null(room.Players["host-connection"].ApocalypseProfessionSuppression);
         Assert.False(room.SettingsFrozen);
         Assert.Null(room.FrozenGameSettings);
         Assert.Empty(room.CurrentRoundReveals);

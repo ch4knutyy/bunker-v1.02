@@ -379,6 +379,9 @@ namespace Bunker.Hubs
                 }
             }
 
+            await ActivateApocalypseEffectsWithoutBreakingFlow(
+                room, "after_voting", room.CurrentRound, $"voting:{voting.Id}");
+
             // Повідомляємо всіх
             var playersSnapshot = RoomService.GetPlayersSnapshot(room)
                 .ToDictionary(entry => entry.Key, entry => entry.Value);

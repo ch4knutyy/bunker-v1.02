@@ -67,6 +67,7 @@ namespace Bunker.Models
         public int? CharacteristicsProtectedUntilRound { get; set; }
         public EliminationVoteImmunity EliminationVoteImmunity { get; set; } = new();
         public List<PlayerConditionEffect> AdditionalConditionEffects { get; set; } = new();
+        public ApocalypseProfessionSuppressionState? ApocalypseProfessionSuppression { get; set; }
         
     }
 }

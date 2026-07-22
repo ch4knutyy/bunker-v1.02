@@ -89,6 +89,7 @@ internal static class GameResetService
 			room.Bunker = null;
 			room.Apocalypse = null;
 			room.ApocalypseActivationPolicy = null;
+			room.ApocalypseEffectRuntime = null;
 			room.ResolvedBunkerCapacity = null;
 			room.SettingsFrozen = false;
 			room.FrozenGameSettings = null;
@@ -155,5 +156,6 @@ internal static class GameResetService
 		player.CharacteristicsProtectedUntilRound = null;
 		player.EliminationVoteImmunity = new EliminationVoteImmunity();
 		player.AdditionalConditionEffects = new();
+		player.ApocalypseProfessionSuppression = null;
 	}
 }

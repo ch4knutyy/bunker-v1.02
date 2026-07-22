@@ -101,6 +101,18 @@ namespace Bunker.Hubs
         private Player BuildPlayerClientState(Player player)
         {
             var clientPlayer = JsonSerializer.Deserialize<Player>(JsonSerializer.Serialize(player))!;
+            if (clientPlayer.ApocalypseProfessionSuppression?.IsSuppressed == true)
+            {
+                clientPlayer.Profession.Name = "Професійні навички втрачені";
+                clientPlayer.Profession.ProfessionalLevel = "";
+                clientPlayer.Profession.ExperienceYears = 0;
+                clientPlayer.Profession.Skills.Clear();
+                clientPlayer.Profession.AllItems.Clear();
+                clientPlayer.Profession.SelectedItem = "";
+                clientPlayer.Profession.SelectedItemIndex = null;
+                clientPlayer.Profession.Bonus = "";
+                clientPlayer.Profession.Tooltip = "";
+            }
             clientPlayer.Property = BuildPropertyClientState(clientPlayer.Property);
             return clientPlayer;
         }
@@ -468,6 +480,8 @@ namespace Bunker.Hubs
             room.VotingReadyResponses.Clear();
 
             await ProcessEventCardRoundBoundary(room, completedRound);
+            await ActivateApocalypseEffectsWithoutBreakingFlow(
+                room, "after_round", completedRound, $"round:{completedRound}");
 
             var configuredThreatDue = ShouldTriggerThreat(room, completedRound);
             var scenarioResult = await TryRunScenarioAfterRound(room, completedRound, configuredThreatDue);

@@ -20,6 +20,7 @@ namespace Bunker.Models
 		public List<string> ResourceTags { get; set; } = new();
 		public List<string> ProtectionTags { get; set; } = new();
 		public Dictionary<string, JsonElement>? ThreatUsage { get; set; }
+		public int ConditionLevel { get; set; }
 
 		[JsonPropertyName("_i18n")]
 		public Dictionary<string, JsonElement>? I18n { get; set; }
