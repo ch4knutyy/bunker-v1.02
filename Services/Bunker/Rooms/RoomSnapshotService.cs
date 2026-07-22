@@ -171,6 +171,12 @@ public sealed class RoomSnapshotService
 
     internal static RoomSnapshotState CaptureState(Room room)
     {
+        lock (room.ApocalypseEffectSyncRoot)
+            return CaptureStateCore(room);
+    }
+
+    private static RoomSnapshotState CaptureStateCore(Room room)
+    {
         var state = new RoomSnapshotState
         {
             State = room.State,
@@ -232,6 +238,12 @@ public sealed class RoomSnapshotService
     }
 
     internal static void ApplyState(Room room, RoomSnapshotState source)
+    {
+        lock (room.ApocalypseEffectSyncRoot)
+            ApplyStateCore(room, source);
+    }
+
+    private static void ApplyStateCore(Room room, RoomSnapshotState source)
     {
         var state = Clone(source)!;
         room.State = state.State;

@@ -3253,6 +3253,8 @@ function showApocalypseEffectBanner(data) {
 	const message = document.getElementById('apocalypseEffectBannerMessage');
 	const changes = document.getElementById('apocalypseEffectPersonalChanges');
 	if (!banner || !title || !message || !changes) return;
+	const activationId = String(data?.activationId ?? data?.ActivationId ?? '');
+	if (activationId && banner.dataset.lastActivationId === activationId) return;
 
 	const failed = String(data?.result ?? data?.Result ?? '').toLowerCase() === 'failed';
 	const summaryKey = apocalypseEffectSummaryKey(data?.summaryCode ?? data?.SummaryCode, failed);
@@ -3260,7 +3262,8 @@ function showApocalypseEffectBanner(data) {
 	title.textContent = t(failed ? 'apocalypseEffectFailureTitle' : 'apocalypseEffectTitle');
 	message.textContent = localizedMessage;
 	changes.replaceChildren();
-	banner.dataset.activationId = String(data?.activationId ?? data?.ActivationId ?? '');
+	banner.dataset.activationId = activationId;
+	banner.dataset.lastActivationId = activationId;
 	banner.hidden = false;
 	document.getElementById('apocalypseEffectBannerDismiss')?.addEventListener('click', hideApocalypseEffectBanner, { once: true });
 	addEventMessage(escapeHtml(localizedMessage));

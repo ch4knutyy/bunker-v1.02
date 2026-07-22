@@ -23,15 +23,22 @@ test('banner uses safe DOM construction and reduced motion', () => {
   assert.match(runtime, /replaceChildren/);
   assert.doesNotMatch(runtime, /innerHTML|insertAdjacentHTML/);
   assert.match(runtime, /setTimeout\(hideApocalypseEffectBanner, 9000\)/);
+  assert.match(runtime, /lastActivationId === activationId/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
 test('public payload is sanitized while personal changes stay one-client only', () => {
-  const publicSend = hub.slice(hub.indexOf('SendAsync("ApocalypseEffectActivated"'), hub.indexOf('if (!execution.Success)'));
-  assert.match(publicSend, /summaryCode/);
-  assert.doesNotMatch(publicSend, /PersonalChanges|before\s*=|after\s*=|EffectTypes/);
-  assert.match(hub, /Clients\.Client\(connectionId\)\.SendAsync\("ApocalypseEffectPersonalChanged"/);
+  const publicEvent = hub.slice(hub.indexOf('object PublicEvent()'), hub.indexOf('if (!execution.Success)'));
+  assert.match(publicEvent, /summaryCode/);
+  assert.doesNotMatch(publicEvent, /PersonalChanges|before\s*=|after\s*=|EffectTypes/);
+  assert.match(hub, /Clients\.Client\(recipient\.ConnectionId\)\.SendAsync\("ApocalypseEffectPersonalChanged"/);
   assert.match(roomHub, /fact = p\.Revealed\?\.Fact == true \? p\.Fact : null/);
+});
+
+test('successful activation synchronizes player and authority state before the public event', () => {
+  const successPath = hub.slice(hub.indexOf('var personalRecipients'), hub.indexOf('foreach (var recipient'));
+  assert.ok(successPath.indexOf('SendPublicPlayersUpdate') < successPath.lastIndexOf('SendAsync("ApocalypseEffectActivated"'));
+  assert.ok(successPath.indexOf('BroadcastOmniscientStateToAuthorizedSpectators') < successPath.lastIndexOf('SendAsync("ApocalypseEffectActivated"'));
 });
 
 test('runtime is projected as summary only and is not replayed as a cinematic', () => {

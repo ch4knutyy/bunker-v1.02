@@ -17,7 +17,9 @@ public sealed class ApocalypseEffectEngineTests
     public void RegistryCoversEveryProductionEffectAndAllInteractiveProfilesValidate()
     {
         var registry = Registry();
-        Assert.Equal(21, registry.EffectTypes.Count);
+        var productionTypes = Data.Value.ApocalypseInteractiveSchema!.EffectTypesUsed
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Equal(productionTypes, registry.EffectTypes.ToHashSet(StringComparer.OrdinalIgnoreCase));
         Assert.Equal(20, Data.Value.GetInteractiveApocalypses().Count);
         Assert.All(Data.Value.GetInteractiveApocalypses(), apocalypse =>
             Assert.All(apocalypse.Gameplay!.Effects, effect => Assert.NotNull(registry.Get(effect.Type))));
@@ -57,6 +59,44 @@ public sealed class ApocalypseEffectEngineTests
         Assert.Equal(18, gameplay.Personality.Age);
         Assert.Equal(40, spectator.Personality.Age);
         Assert.Single(result.PersonalChanges);
+    }
+
+    [Fact]
+    public void IncludeEliminatedAddsEliminatedPlayersButNeverGmOrSpectators()
+    {
+        var active = Player("active", 30);
+        var eliminated = Player("eliminated", 31); eliminated.IsEliminated = true;
+        var technicalGm = Player("technical-gm", 32); technicalGm.GmRole = GmMode.TechnicalGm;
+        var omniscientGm = Player("omniscient-gm", 33); omniscientGm.IsSpectatorGm = true; omniscientGm.GmRole = GmMode.OmniscientGm;
+        var spectator = Player("spectator", 34); spectator.IsLobbySpectator = true;
+        var room = new Room { Players = new() { ["a"] = active, ["e"] = eliminated, ["t"] = technicalGm, ["o"] = omniscientGm, ["s"] = spectator } };
+
+        var result = Engine().Execute(room, Apocalypse(Effect("set_all_player_age", new { value = 18, includeEliminated = true })));
+
+        Assert.True(result.Success);
+        Assert.Equal(18, active.Personality.Age);
+        Assert.Equal(18, eliminated.Personality.Age);
+        Assert.Equal(32, technicalGm.Personality.Age);
+        Assert.Equal(33, omniscientGm.Personality.Age);
+        Assert.Equal(34, spectator.Personality.Age);
+    }
+
+    [Fact]
+    public void MalformedNumericPayloadFailsBeforeAnyMutation()
+    {
+        var player = Player("stable", 30);
+        player.Body.Weight = 80;
+        var room = new Room { Players = new() { ["connection"] = player } };
+        var apocalypse = Apocalypse(
+            Effect("add_all_player_age", new { value = 10, minimum = 8, maximum = 120 }),
+            Effect("multiply_all_player_weight", new { factor = "not-a-number", minimumWeight = 25, maximumWeight = 350 }));
+
+        var result = Engine().Execute(room, apocalypse);
+
+        Assert.False(result.Success);
+        Assert.Equal("apocalypse_effect_payload_invalid", result.FailureCode);
+        Assert.Equal(30, player.Personality.Age);
+        Assert.Equal(80, player.Body.Weight);
     }
 
     [Fact]

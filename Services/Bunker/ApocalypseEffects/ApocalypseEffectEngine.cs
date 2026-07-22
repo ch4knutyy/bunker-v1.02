@@ -71,7 +71,10 @@ public sealed class ApocalypseEffectContext
     }
 
     public IReadOnlyList<Player> Targets(bool includeEliminated) => Players.Values
-        .Where(RoomService.IsGameplayParticipant)
+        // IsGameplayParticipant intentionally excludes eliminated players, so use
+        // the role boundary here and apply elimination policy separately.
+        .Where(player => !player.IsSpectatorGm && !player.IsLobbySpectator &&
+            player.GmRole != GmMode.TechnicalGm && player.GmRole != GmMode.OmniscientGm)
         .Where(player => includeEliminated || !player.IsEliminated)
         .OrderBy(RoomService.GetPlayerKey, StringComparer.OrdinalIgnoreCase).ToList();
 
@@ -214,6 +217,61 @@ internal static class ApocalypseEffectHandlers
             "swap_characteristic_bundle_between_random_players" => ["keys"], _ => Array.Empty<string>()
         };
         if (required.Any(key => !Has(key))) throw new InvalidDataException($"effect_payload_missing:{type}");
+
+        foreach (var key in required)
+        {
+            var value = effect.Parameters[key];
+            if (key == "value" && type != "set_all_player_body_type")
+            {
+                if (!value.TryGetInt32(out _))
+                    throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+            else if (key is "value" or "mode" or "replacementId" or "fallback" or "healthyFallbackConditionId" or "severity" or "conditionId" or "direction")
+            {
+                if (value.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(value.GetString()))
+                    throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+            else if (key is "factor")
+            {
+                if (value.ValueKind != JsonValueKind.Number || !value.TryGetDouble(out var number) || !double.IsFinite(number))
+                    throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+            else if (key == "excludeNoPhobia")
+            {
+                if (value.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+            else if (key is "heightRange" or "weightRange")
+            {
+                if (value.ValueKind != JsonValueKind.Array || value.GetArrayLength() != 2 ||
+                    !value[0].TryGetInt32(out var minimum) || !value[1].TryGetInt32(out var maximum) || minimum > maximum)
+                    throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+            else if (key is "allowedKeys" or "keys" or "scopes")
+            {
+                if (value.ValueKind != JsonValueKind.Array || value.GetArrayLength() == 0 ||
+                    value.EnumerateArray().Any(item => item.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(item.GetString())))
+                    throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+            else if (!value.TryGetInt32(out _))
+            {
+                throw new InvalidDataException($"effect_payload_invalid:{type}:{key}");
+            }
+        }
+
+        ValidateBounds(effect.Parameters, "minimum", "maximum");
+        ValidateBounds(effect.Parameters, "minimumWeight", "maximumWeight");
+    }
+
+    private static void ValidateBounds(Dictionary<string, JsonElement> parameters, string minimumKey, string maximumKey)
+    {
+        var hasMinimum = parameters.TryGetValue(minimumKey, out var minimum);
+        var hasMaximum = parameters.TryGetValue(maximumKey, out var maximum);
+        if (!hasMinimum && !hasMaximum) return;
+        if ((hasMinimum && !minimum.TryGetInt32(out _)) || (hasMaximum && !maximum.TryGetInt32(out _)))
+            throw new InvalidDataException($"effect_payload_invalid:{minimumKey}:{maximumKey}");
+        if (hasMinimum && hasMaximum && minimum.GetInt32() > maximum.GetInt32())
+            throw new InvalidDataException($"effect_payload_invalid:{minimumKey}:{maximumKey}");
     }
 
     private static void Apply(string type, ApocalypseEffectContext context, ApocalypseEffectDefinition effect)

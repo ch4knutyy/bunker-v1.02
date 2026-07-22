@@ -30,19 +30,24 @@ public partial class GameHub
             errorCode: execution.FailureCode,
             allowUndo: false);
 
-            await Clients.Group(room.Id).SendAsync("ApocalypseEffectActivated", new
+            object PublicEvent() => new
             {
-            activationId = record.ActivationId,
-            result = record.Result,
-            trigger = record.Trigger,
-            round = record.Round,
-            affectedPlayerCount = record.AffectedPlayerCount,
-            summaryCode = record.PublicSummaryCode,
-            occurredAtUtc = record.OccurredAtUtc
-            });
+                activationId = record.ActivationId,
+                result = record.Result,
+                trigger = record.Trigger,
+                round = record.Round,
+                affectedPlayerCount = record.AffectedPlayerCount,
+                summaryCode = record.PublicSummaryCode,
+                occurredAtUtc = record.OccurredAtUtc
+            };
 
-            if (!execution.Success) return result;
+            if (!execution.Success)
+            {
+                await Clients.Group(room.Id).SendAsync("ApocalypseEffectActivated", PublicEvent());
+                return result;
+            }
 
+            var personalRecipients = new List<(string ConnectionId, IReadOnlyList<ApocalypseEffectPersonalChange> Changes)>();
             foreach (var entry in execution.PersonalChanges)
             {
             var connectionId = _roomService.GetCurrentConnectionId(room, entry.Key);
@@ -52,19 +57,24 @@ public partial class GameHub
                 continue;
 
                 await SendPersonalPlayerSnapshot(connectionId, player, "apocalypse_effect_applied");
-                await Clients.Client(connectionId).SendAsync("ApocalypseEffectPersonalChanged", new
-                {
-                activationId = record.ActivationId,
-                changes = entry.Value.Select(change => new
-                {
-                    field = change.Field,
-                    before = change.Before,
-                    after = change.After
-                })
-                });
+                personalRecipients.Add((connectionId, entry.Value));
             }
 
             await SendPublicPlayersUpdate(room);
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
+            await Clients.Group(room.Id).SendAsync("ApocalypseEffectActivated", PublicEvent());
+
+            foreach (var recipient in personalRecipients)
+                await Clients.Client(recipient.ConnectionId).SendAsync("ApocalypseEffectPersonalChanged", new
+                {
+                    activationId = record.ActivationId,
+                    changes = recipient.Changes.Select(change => new
+                    {
+                        field = change.Field,
+                        before = change.Before,
+                        after = change.After
+                    })
+                });
         }
         catch (Exception exception)
         {
