@@ -110,6 +110,47 @@ test('environmental effects are theme-aware, duplicate-safe and preference-contr
   await expect(page.locator('#apocalypseAmbientRoot')).toBeHidden();
 });
 
+test('category badge and three modifier slots survive off mode and suppress contradictions', async ({ page }) => {
+  await page.goto('/Bunker');
+  await page.evaluate(() => {
+    document.getElementById('gameSection').style.display = 'block';
+    currentPublicGameSettings.apocalypseThemeEnabled = true;
+    currentApocalypse = { id: 'water_depletion', name: 'Water depletion', description: 'Dry world', categoryId: 'ecological', visualThemeId: 'wasteland-olive', visualModifierIds: ['drought','toxic','vegetation-collapse'] };
+    setApocalypseEffectsLevel('atmospheric');
+    renderApocalypse(currentApocalypse);
+  });
+  await expect(page.locator('.apocalypse-category-badge')).toContainText(/Екологічні|Ecological|Экологические/);
+  await expect(page.locator('.apocalypse-category-badge svg')).toHaveCount(1);
+  for (const modifier of ['drought','toxic','vegetation-collapse']) await expect(page.locator('body')).toHaveClass(new RegExp(`apocalypse-modifier-${modifier}`));
+  const pools = await page.evaluate(() => getApocalypseCategoryEventPools());
+  expect(pools.all).not.toContain('rain-pass');
+  expect(pools.all).not.toContain('flood-wave');
+  await page.evaluate(() => setApocalypseEffectsLevel('off'));
+  await expect(page.locator('.apocalypse-category-badge')).toHaveCount(1);
+  await expect(page.locator('.apocalypse-category-badge')).toContainText(/Екологічні|Ecological|Экологические/);
+  await expect(page.locator('body')).not.toHaveClass(/apocalypse-modifier-/);
+  await expect(page.locator('#apocalypseAmbientRoot')).toHaveCount(1);
+});
+
+test('representative category profiles resolve without contradictory events', async ({ page }) => {
+  await page.goto('/Bunker');
+  const records = ['water_depletion','fungal_apocalypse','electronic_silence','reverse_aging','frozen_equator','economic_total_collapse'];
+  const results = await page.evaluate(ids => ids.map(id => {
+    const metadata = ApocalypseCategoryVisualRegistry.getApocalypseVisualMetadata(id);
+    currentPublicGameSettings.apocalypseThemeEnabled = true;
+    currentApocalypse = { id, name: id, description: id, ...metadata };
+    setApocalypseEffectsLevel('atmospheric'); renderApocalypse(currentApocalypse);
+    const pools = getApocalypseCategoryEventPools();
+    const modifiers = activeApocalypseCategoryProfile?.modifierIds || [];
+    return { id, category: activeApocalypseCategoryProfile?.categoryId, modifiers, groups: modifiers.map(modifier => ApocalypseCategoryVisualRegistry.resolveModifier(modifier).group), classes: [...document.body.classList].filter(value => value.startsWith('apocalypse-modifier-')), events: pools.all, badge: document.querySelector('.apocalypse-category-badge')?.textContent?.trim(), icon: Boolean(document.querySelector('.apocalypse-category-badge svg')) };
+  }), records);
+  expect(results).toHaveLength(6);
+  expect(results.every(result => result.badge && result.icon && result.modifiers.length <= 3 && new Set(result.groups).size === result.modifiers.length)).toBe(true);
+  expect(results.find(result => result.id === 'water_depletion').events).not.toContain('rain-pass');
+  expect(results.find(result => result.id === 'frozen_equator').events).not.toContain('heat-shimmer');
+  expect(results.find(result => result.id === 'electronic_silence').events).toContain('signal-interruption');
+});
+
 test.describe('reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
   test('keeps atmosphere inert and controls clickable', async ({ page }) => {
@@ -131,8 +172,12 @@ test('ambient stays non-interactive without adding horizontal overflow on mobile
     await page.setViewportSize(viewport);
     await page.evaluate(() => { currentApocalypse = null; renderApocalypse(null); });
     const baselineScrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
-    await page.evaluate(apocalypse => { currentApocalypse = apocalypse; renderApocalypse(apocalypse); }, fixture('machine-cyan'));
+    const apocalypse = viewport.width <= 768
+      ? { id: 'water_depletion', name: 'Water depletion', description: 'Dry world', categoryId: 'ecological', visualThemeId: 'wasteland-olive', visualModifierIds: ['drought','toxic','vegetation-collapse'] }
+      : fixture('machine-cyan');
+    await page.evaluate(apocalypse => { currentApocalypse = apocalypse; renderApocalypse(apocalypse); }, apocalypse);
     await expect(page.locator('#apocalypseAmbientRoot')).toHaveCSS('pointer-events', 'none');
+    if (viewport.width <= 768) expect(await page.locator('body').evaluate(body => [...body.classList].filter(value => value.startsWith('apocalypse-modifier-')).length)).toBe(1);
     await expect.poll(() => page.evaluate(baseline => document.documentElement.scrollWidth <= baseline, baselineScrollWidth)).toBe(true);
     const targetIsCreateControl = await page.locator('#createRoomBtn').evaluate(button => {
       const rect = button.getBoundingClientRect();

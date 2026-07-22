@@ -15,6 +15,10 @@
     background: color-mix(in srgb, var(--apoc-surface, #111) 82%, transparent);
     box-shadow: 0 0 18px color-mix(in srgb, var(--apoc-glow, #c7a554) 28%, transparent);
 }
+.apocalypse-category-badge-icon,
+.lobby-apocalypse-category-icon { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; flex: 0 0 auto; }
+.apocalypse-category-badge-icon svg,
+.lobby-apocalypse-category-icon svg { width: 100%; height: 100%; fill: currentColor; }
 
 .lobby-apocalypse-category-group {
     margin: 0 0 .7rem;
@@ -24,7 +28,7 @@
     overflow: clip;
 }
 
-.lobby-apocalypse-category-heading {
+.lobby-apocalypse-category-header {
     display: flex;
     align-items: center;
     min-height: 46px;
@@ -35,18 +39,19 @@
     letter-spacing: .08em;
     text-transform: uppercase;
     cursor: pointer;
-    list-style: none;
+	width: 100%; border: 0; text-align: left;
     background: linear-gradient(90deg, rgb(199 165 84 / 9%), transparent 62%);
 }
 
-.lobby-apocalypse-category-heading::-webkit-details-marker { display: none; }
-.lobby-apocalypse-category-heading::after {
+.lobby-apocalypse-category-header::after {
     content: '+';
     margin-left: auto;
     color: #9f8b51;
     font-size: 1rem;
 }
-.lobby-apocalypse-category-group[open] > .lobby-apocalypse-category-heading::after { content: '−'; }
+.lobby-apocalypse-category-header[aria-expanded='true']::after { content: '−'; }
+.lobby-apocalypse-category-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lobby-apocalypse-category-counts { margin-left: auto; padding-left: .75rem; color: #aa9862; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .lobby-apocalypse-category-options {
     display: grid;
@@ -56,70 +61,70 @@
     border-top: 1px solid rgb(199 165 84 / 17%);
 }
 
-/* Modifier variables: category remains the visual base; modifiers only affect edge layers. */
-.apocalypse-modifier-frost { --apoc-modifier-edge: rgb(185 225 255 / 17%); --apoc-modifier-secondary: rgb(210 240 255 / 11%); }
-.apocalypse-modifier-heat { --apoc-modifier-edge: rgb(255 118 44 / 17%); --apoc-modifier-secondary: rgb(255 183 73 / 10%); }
-.apocalypse-modifier-drought { --apoc-modifier-edge: rgb(182 139 68 / 19%); --apoc-modifier-secondary: rgb(116 91 42 / 12%); }
-.apocalypse-modifier-flood { --apoc-modifier-edge: rgb(63 143 188 / 18%); --apoc-modifier-secondary: rgb(95 191 217 / 10%); }
-.apocalypse-modifier-storm { --apoc-modifier-edge: rgb(103 147 208 / 17%); --apoc-modifier-secondary: rgb(170 202 255 / 9%); }
-.apocalypse-modifier-fog { --apoc-modifier-edge: rgb(190 202 199 / 14%); --apoc-modifier-secondary: rgb(220 226 222 / 8%); }
-.apocalypse-modifier-ash { --apoc-modifier-edge: rgb(110 103 96 / 22%); --apoc-modifier-secondary: rgb(169 147 120 / 9%); }
-.apocalypse-modifier-darkness { --apoc-modifier-edge: rgb(0 0 0 / 34%); --apoc-modifier-secondary: rgb(28 25 38 / 15%); }
-.apocalypse-modifier-air-hazard { --apoc-modifier-edge: rgb(168 165 98 / 16%); --apoc-modifier-secondary: rgb(205 198 105 / 9%); }
-.apocalypse-modifier-cosmic-impact { --apoc-modifier-edge: rgb(147 110 210 / 18%); --apoc-modifier-secondary: rgb(208 183 255 / 9%); }
-.apocalypse-modifier-infection { --apoc-modifier-edge: rgb(72 158 78 / 18%); --apoc-modifier-secondary: rgb(117 214 94 / 9%); }
-.apocalypse-modifier-spores { --apoc-modifier-edge: rgb(128 176 86 / 19%); --apoc-modifier-secondary: rgb(192 226 116 / 10%); }
-.apocalypse-modifier-radiation { --apoc-modifier-edge: rgb(174 205 44 / 20%); --apoc-modifier-secondary: rgb(218 244 74 / 10%); }
-.apocalypse-modifier-toxic { --apoc-modifier-edge: rgb(153 161 43 / 20%); --apoc-modifier-secondary: rgb(207 205 52 / 10%); }
-.apocalypse-modifier-nanotech { --apoc-modifier-edge: rgb(53 178 185 / 18%); --apoc-modifier-secondary: rgb(116 226 224 / 10%); }
-.apocalypse-modifier-mutation { --apoc-modifier-edge: rgb(167 74 159 / 19%); --apoc-modifier-secondary: rgb(224 109 199 / 9%); }
-.apocalypse-modifier-swarm { --apoc-modifier-edge: rgb(91 99 38 / 22%); --apoc-modifier-secondary: rgb(165 155 66 / 9%); }
-.apocalypse-modifier-parasite { --apoc-modifier-edge: rgb(102 122 57 / 21%); --apoc-modifier-secondary: rgb(183 176 71 / 9%); }
-.apocalypse-modifier-allergens { --apoc-modifier-edge: rgb(193 157 75 / 16%); --apoc-modifier-secondary: rgb(229 197 116 / 9%); }
-.apocalypse-modifier-structural-damage { --apoc-modifier-edge: rgb(133 98 66 / 22%); --apoc-modifier-secondary: rgb(183 145 94 / 9%); }
-.apocalypse-modifier-machine { --apoc-modifier-edge: rgb(50 176 196 / 18%); --apoc-modifier-secondary: rgb(81 224 235 / 9%); }
-.apocalypse-modifier-vegetation-collapse { --apoc-modifier-edge: rgb(93 112 49 / 22%); --apoc-modifier-secondary: rgb(139 139 61 / 9%); }
-.apocalypse-modifier-reality-fracture { --apoc-modifier-edge: rgb(191 53 177 / 19%); --apoc-modifier-secondary: rgb(225 97 208 / 10%); }
-.apocalypse-modifier-psychological { --apoc-modifier-edge: rgb(75 57 105 / 22%); --apoc-modifier-secondary: rgb(125 83 153 / 10%); }
-.apocalypse-modifier-unrest { --apoc-modifier-edge: rgb(157 78 51 / 19%); --apoc-modifier-secondary: rgb(190 112 69 / 10%); }
-.apocalypse-modifier-emp { --apoc-modifier-edge: rgb(39 168 201 / 19%); --apoc-modifier-secondary: rgb(78 219 234 / 10%); }
-.apocalypse-modifier-identity-shift { --apoc-modifier-edge: rgb(146 65 174 / 20%); --apoc-modifier-secondary: rgb(212 110 218 / 9%); }
-.apocalypse-modifier-blackout { --apoc-modifier-edge: rgb(0 0 0 / 42%); --apoc-modifier-secondary: rgb(21 29 35 / 16%); }
-.apocalypse-modifier-resource-scarcity { --apoc-modifier-edge: rgb(154 117 55 / 20%); --apoc-modifier-secondary: rgb(190 151 75 / 9%); }
-.apocalypse-modifier-communication-failure { --apoc-modifier-edge: rgb(52 116 144 / 19%); --apoc-modifier-secondary: rgb(76 171 188 / 9%); }
-.apocalypse-modifier-undead { --apoc-modifier-edge: rgb(91 31 32 / 24%); --apoc-modifier-secondary: rgb(132 57 48 / 10%); }
+/* Three independent modifier slots with one centrally defined opacity budget. */
+body.apocalypse-theme-active { --apoc-mod-env-opacity: .18; --apoc-mod-contamination-opacity: .14; --apoc-mod-world-opacity: .12; }
+.apocalypse-modifier-frost { --apoc-mod-env-accent: #b9e1ff; --apoc-mod-env-overlay: linear-gradient(135deg,transparent,#b9e1ff); }
+.apocalypse-modifier-heat { --apoc-mod-env-accent: #ff762c; --apoc-mod-env-overlay: linear-gradient(135deg,transparent,#ffb749); }
+.apocalypse-modifier-drought { --apoc-mod-env-accent: #b68b44; --apoc-mod-env-overlay: repeating-linear-gradient(118deg,transparent 0 36px,#b68b44 37px 38px,transparent 39px 76px); }
+.apocalypse-modifier-flood { --apoc-mod-env-accent: #3f8fbc; --apoc-mod-env-overlay: linear-gradient(180deg,transparent,#5fbfd9); }
+.apocalypse-modifier-storm { --apoc-mod-env-accent: #6793d0; --apoc-mod-env-overlay: linear-gradient(145deg,transparent,#aacaff); }
+.apocalypse-modifier-fog { --apoc-mod-env-accent: #becac7; --apoc-mod-env-overlay: radial-gradient(ellipse,#dce2de,transparent 65%); }
+.apocalypse-modifier-ash { --apoc-mod-env-accent: #6e6760; --apoc-mod-env-overlay: linear-gradient(135deg,transparent,#a99378); }
+.apocalypse-modifier-darkness { --apoc-mod-env-accent: #1c1926; --apoc-mod-env-overlay: radial-gradient(ellipse,transparent,#000); }
+.apocalypse-modifier-air-hazard { --apoc-mod-env-accent: #a8a562; --apoc-mod-env-overlay: linear-gradient(135deg,transparent,#cdc669); }
+.apocalypse-modifier-cosmic-impact { --apoc-mod-env-accent: #936ed2; --apoc-mod-env-overlay: radial-gradient(circle,transparent,#d0b7ff); }
+.apocalypse-modifier-infection { --apoc-mod-contamination-accent: #489e4e; }
+.apocalypse-modifier-spores { --apoc-mod-contamination-accent: #80b056; }
+.apocalypse-modifier-radiation { --apoc-mod-contamination-accent: #aecd2c; }
+.apocalypse-modifier-toxic { --apoc-mod-contamination-accent: #99a12b; }
+.apocalypse-modifier-nanotech { --apoc-mod-contamination-accent: #35b2b9; }
+.apocalypse-modifier-mutation { --apoc-mod-contamination-accent: #a74a9f; }
+.apocalypse-modifier-swarm { --apoc-mod-contamination-accent: #5b6326; }
+.apocalypse-modifier-parasite { --apoc-mod-contamination-accent: #667a39; }
+.apocalypse-modifier-allergens { --apoc-mod-contamination-accent: #c19d4b; }
+.apocalypse-modifier-structural-damage { --apoc-mod-world-accent: #856242; }
+.apocalypse-modifier-machine { --apoc-mod-world-accent: #32b0c4; }
+.apocalypse-modifier-vegetation-collapse { --apoc-mod-world-accent: #5d7031; }
+.apocalypse-modifier-reality-fracture { --apoc-mod-world-accent: #bf35b1; }
+.apocalypse-modifier-psychological { --apoc-mod-world-accent: #4b3969; }
+.apocalypse-modifier-unrest { --apoc-mod-world-accent: #9d4e33; }
+.apocalypse-modifier-emp { --apoc-mod-world-accent: #27a8c9; }
+.apocalypse-modifier-identity-shift { --apoc-mod-world-accent: #9241ae; }
+.apocalypse-modifier-blackout { --apoc-mod-world-accent: #151d23; }
+.apocalypse-modifier-resource-scarcity { --apoc-mod-world-accent: #9a7537; }
+.apocalypse-modifier-communication-failure { --apoc-mod-world-accent: #347490; }
+.apocalypse-modifier-undead { --apoc-mod-world-accent: #5b1f20; }
 
-body.apocalypse-theme-active[class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-front {
-    opacity: .72;
-    background:
-        radial-gradient(ellipse at 0 50%, var(--apoc-modifier-edge, transparent), transparent 42%),
-        radial-gradient(ellipse at 100% 42%, var(--apoc-modifier-secondary, transparent), transparent 44%),
-        linear-gradient(90deg, var(--apoc-modifier-edge, transparent), transparent 19% 81%, var(--apoc-modifier-edge, transparent));
+body.apocalypse-theme-active .apocalypse-ambient-layer-edge-back {
+    opacity: var(--apoc-mod-env-opacity, 0);
+    background: var(--apoc-mod-env-overlay, none); color: var(--apoc-mod-env-accent, transparent);
+}
+body.apocalypse-theme-active .apocalypse-ambient-layer-edge-front {
+    opacity: var(--apoc-mod-contamination-opacity, 0);
+    background: radial-gradient(ellipse at 0 50%, var(--apoc-mod-contamination-accent, transparent), transparent 42%), radial-gradient(ellipse at 100% 42%, var(--apoc-mod-contamination-accent, transparent), transparent 44%);
     mix-blend-mode: screen;
 }
-
-body.apocalypse-theme-active[class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-back {
-    background:
-        repeating-linear-gradient(118deg, transparent 0 36px, var(--apoc-modifier-secondary, transparent) 37px 38px, transparent 39px 76px),
-        radial-gradient(circle at 50% 110%, var(--apoc-modifier-edge, transparent), transparent 45%);
+body.apocalypse-theme-active .apocalypse-ambient-layer-vignette {
+    opacity: var(--apoc-mod-world-opacity, 0);
+    box-shadow: inset 0 0 12vw var(--apoc-mod-world-accent, transparent);
 }
 
 .apocalypse-modifier-spores .apocalypse-ambient-layer-edge-front,
 .apocalypse-modifier-allergens .apocalypse-ambient-layer-edge-front,
 .apocalypse-modifier-swarm .apocalypse-ambient-layer-edge-front {
     background-image:
-        radial-gradient(circle at 6% 22%, var(--apoc-modifier-edge) 0 1px, transparent 2px),
-        radial-gradient(circle at 92% 64%, var(--apoc-modifier-secondary) 0 2px, transparent 3px),
-        radial-gradient(ellipse at 0 50%, var(--apoc-modifier-edge), transparent 42%),
-        radial-gradient(ellipse at 100% 42%, var(--apoc-modifier-secondary), transparent 44%);
+        radial-gradient(circle at 6% 22%, var(--apoc-mod-contamination-accent) 0 1px, transparent 2px),
+        radial-gradient(circle at 92% 64%, var(--apoc-mod-contamination-accent) 0 2px, transparent 3px),
+        radial-gradient(ellipse at 0 50%, var(--apoc-mod-contamination-accent), transparent 42%),
+        radial-gradient(ellipse at 100% 42%, var(--apoc-mod-contamination-accent), transparent 44%);
     background-size: 52px 58px, 77px 69px, auto, auto;
 }
 
 .apocalypse-modifier-structural-damage .apocalypse-ambient-layer-edge-back,
 .apocalypse-modifier-reality-fracture .apocalypse-ambient-layer-edge-back {
     background-image:
-        linear-gradient(132deg, transparent 42%, var(--apoc-modifier-edge) 42.4% 42.8%, transparent 43.2%),
-        linear-gradient(47deg, transparent 61%, var(--apoc-modifier-secondary) 61.3% 61.7%, transparent 62.1%);
+        linear-gradient(132deg, transparent 42%, var(--apoc-mod-world-accent) 42.4% 42.8%, transparent 43.2%),
+        linear-gradient(47deg, transparent 61%, var(--apoc-mod-world-accent) 61.3% 61.7%, transparent 62.1%);
     background-size: 190px 170px, 240px 220px;
 }
 

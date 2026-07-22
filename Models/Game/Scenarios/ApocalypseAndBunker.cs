@@ -17,14 +17,17 @@ namespace Bunker.Models
         public List<string> Threats { get; set; } = new(); // Загрози зовні
         public List<string> Requirements { get; set; } = new(); // Що потрібно для виживання
         public List<string> Tags { get; set; } = new();
-        public IReadOnlyList<string>? VisualModifierIds { get; set; } = Array.Empty<string>();
+        [JsonInclude]
+        public IReadOnlyList<string>? VisualModifierIds { get; internal set; } = Array.Empty<string>();
         public string? ImageUrl { get; set; } // URL зображення апокаліпсису
 
         [JsonPropertyName("_i18n")]
         public Dictionary<string, JsonElement>? I18n { get; set; }
 
-        public string CategoryId { get; set; } = "";
-        public string VisualThemeId { get; set; } = "default-dark";
+        [JsonInclude]
+        public string CategoryId { get; internal set; } = "";
+        [JsonInclude]
+        public string VisualThemeId { get; internal set; } = "default-dark";
         public ApocalypseGameplayDefinition? Gameplay { get; set; }
 
         public object ToClientInfo()

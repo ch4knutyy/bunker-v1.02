@@ -63,6 +63,8 @@ public sealed class RoomSnapshotState
     public ScenarioSituationState? ScenarioSituations { get; set; }
     public BunkerIntelState? BunkerIntel { get; set; }
     public PendingEliminationState? PendingElimination { get; set; }
+    public GameCompletionState? Completion { get; set; }
+    public PostGameStoryState PostGameStory { get; set; } = new();
     public Dictionary<string, Player> PlayersByStableId { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 

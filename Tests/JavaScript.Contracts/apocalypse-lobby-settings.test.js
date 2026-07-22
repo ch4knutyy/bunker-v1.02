@@ -20,7 +20,7 @@ test('mode-specific editors are canonical and incremental', () => {
   assert.match(client, /mode === 'RandomCategories'/);
   assert.match(client, /mode === 'Specific' \|\| mode === 'CustomPool'/);
   assert.match(client, /mode === 'CustomPool'/);
-  assert.match(client, /slice\(0, lobbyApocalypseVisibleCount\)/);
+  assert.match(client, /filtered\.slice\(0, visibleLimit\)/);
   assert.match(client, /lobbyApocalypseVisibleCount \+= 30/);
   assert.match(client, /replaceChildren[\s\S]*textContent/);
   assert.doesNotMatch(client.slice(client.indexOf('function renderLobbyApocalypseEditor'), client.indexOf('function renderLobbyGameSetup')), /innerHTML/);

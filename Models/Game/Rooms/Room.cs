@@ -79,6 +79,7 @@ namespace Bunker.Models
 		[System.Text.Json.Serialization.JsonIgnore]
 		public Guid? GameSessionId { get; set; }
 		public GameCompletionState? Completion { get; set; }
+		public PostGameStoryState PostGameStory { get; set; } = new();
 		public string Name { get; set; } = "";
 		public string? Password { get; set; }
 		[System.Text.Json.Serialization.JsonIgnore]
