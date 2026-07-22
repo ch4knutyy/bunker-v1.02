@@ -50,6 +50,24 @@ public sealed class DeveloperAuthorityServiceTests
     }
 
     [Fact]
+    public void DisconnectedOperatorKeepsLeaseDuringReconnectWindow()
+    {
+        var authority = CreateAuthority();
+        var room = new Room();
+        var first = new Player { StablePlayerId = "dev-one", ConnectionId = "connection-one", AccountUserId = OwnerId, IsConnected = true };
+        var second = new Player { StablePlayerId = "dev-two", ConnectionId = "connection-two", AccountUserId = OwnerId, IsConnected = true };
+        room.Players[first.ConnectionId] = first;
+        room.Players[second.ConnectionId] = second;
+        Assert.True(authority.EnsureActiveOperator(room, first, first.ConnectionId));
+
+        first.IsConnected = false;
+        first.DisconnectedAt = DateTime.UtcNow;
+
+        Assert.False(authority.EnsureActiveOperator(room, second, second.ConnectionId));
+        Assert.True(authority.PrivateState(room, second, second.ConnectionId).CanTakeOverOperator);
+    }
+
+    [Fact]
     public void PublicPresenceIncludesNoCapabilitiesOrAuthenticationMaterial()
     {
         var authority = CreateAuthority();
@@ -64,6 +82,24 @@ public sealed class DeveloperAuthorityServiceTests
         Assert.True(presence.DeveloperPresent);
         Assert.Equal("developer-player", presence.DeveloperPlayerId);
         Assert.Equal("connected", presence.Status);
+    }
+
+    [Fact]
+    public void PrivateDeveloperAuditIsBoundedAndIncludesNoSecrets()
+    {
+        var authority = CreateAuthority();
+        var room = new Room { Id = "AUDIT01" };
+        var developer = new Player { StablePlayerId = "developer-player", ConnectionId = "dev", AccountUserId = OwnerId, IsConnected = true };
+        room.Players[developer.ConnectionId] = developer;
+        authority.EnsureActiveOperator(room, developer, developer.ConnectionId);
+
+        for (var index = 0; index < DeveloperAuthorityService.MaxAuditEntries + 5; index++)
+            authority.Audit(room, developer, RoomActorCapability.UseDeveloperTools, "safe_action", "success", "target", $"command-{index}");
+
+        var state = authority.PrivateState(room, developer, developer.ConnectionId);
+        Assert.Equal(DeveloperAuthorityService.MaxAuditEntries, room.DeveloperAuditLog.Count);
+        Assert.Equal(20, state.RecentAudit.Count);
+        Assert.All(state.RecentAudit, entry => Assert.Equal("AUDIT01", entry.RoomId));
     }
 
     private static DeveloperAuthorityService CreateAuthority() => new(
