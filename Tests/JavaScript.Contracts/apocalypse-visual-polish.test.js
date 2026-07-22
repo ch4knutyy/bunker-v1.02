@@ -19,11 +19,11 @@ function method(name) {
   throw new Error(`unclosed ${name}`);
 }
 
-test('one inert three-layer ambient root is created idempotently', () => {
+test('one inert five-layer ambient root is created idempotently', () => {
   const source = method('ensureApocalypseAmbientRoot');
-  assert.match(source, /getElementById\('apocalypseAmbientRoot'\)[\s\S]*if \(ambient\) return ambient/);
+  assert.match(source, /getElementById\('apocalypseAmbientRoot'\)[\s\S]*if \(!ambient\)[\s\S]*querySelector[\s\S]*continue/);
   assert.match(source, /aria-hidden[\s\S]*inert = true/);
-  for (const layer of ['primary', 'secondary', 'vignette']) assert.match(source, new RegExp(`'${layer}'`));
+  for (const layer of ['primary', 'secondary', 'edge-back', 'edge-front', 'vignette']) assert.match(source, new RegExp(`'${layer}'`));
   assert.match(css, /\.apocalypse-ambient-root\s*\{[^}]*position:\s*fixed[^}]*pointer-events:\s*none[^}]*user-select:\s*none/s);
 });
 
@@ -88,6 +88,53 @@ test('motion, mobile, visibility and performance safeguards are present', () => 
   const visualController = game.slice(game.indexOf('const apocalypseVisualReactionTypes'), game.indexOf('function syncPublicGameSettings'));
   const visualCss = css.slice(css.indexOf('APOCALYPSE VISUAL POLISH V1-F'));
   assert.doesNotMatch(visualController + visualCss, /requestAnimationFrame|WebGLRenderingContext|<canvas[^>]*particle|particle.*setInterval/i);
+});
+
+test('environmental scheduler is rare, theme-allowlisted and lifecycle-safe', () => {
+  const start = method('startApocalypseAmbientScheduler');
+  const stop = method('stopApocalypseAmbientScheduler');
+  const trigger = method('triggerApocalypseAmbientEvent');
+  const gate = method('canRunApocalypseEnvironmentalEffects');
+  const themes = ['extinction-red','storm-blue','biohazard-green','seismic-amber','cosmic-violet','machine-cyan','wasteland-olive','collapse-rust','glitch-magenta','occult-indigo'];
+  for (const theme of themes) assert.match(game, new RegExp(`'${theme}': Object\\.freeze\\(\\[`));
+  assert.match(start, /apocalypseAmbientSchedulerTimer[\s\S]*20000[\s\S]*20001[\s\S]*setTimeout/);
+  assert.match(stop, /clearTimeout[\s\S]*clearApocalypseAmbientEvent/);
+  assert.match(trigger, /themeEvents\.includes\(preferredType\)[\s\S]*classList\.add/);
+  assert.match(gate, /dataset\.apocalypseTheme[\s\S]*document\.hidden[\s\S]*prefersReducedApocalypseMotion/);
+  assert.doesNotMatch(start + stop + trigger, /setInterval|currentApocalypse|\.name|\.Name/);
+  assert.match(method('renderApocalypse'), /startApocalypseAmbientScheduler/);
+  assert.match(method('clearApocalypseVisualTheme'), /stopApocalypseAmbientScheduler/);
+});
+
+test('parallax is input-throttled, bounded and disabled on mobile', () => {
+  const init = method('initApocalypseParallaxManager');
+  const queue = method('queueApocalypseParallaxUpdate');
+  const flush = method('flushApocalypseParallax');
+  assert.match(init, /apocalypseParallaxInitialized[\s\S]*pointermove[\s\S]*scroll[\s\S]*resize/);
+  assert.match(queue, /apocalypseParallaxTimer[\s\S]*setTimeout\(flushApocalypseParallax, 48\)/);
+  for (const variable of ['--apoc-parallax-x','--apoc-parallax-y','--apoc-parallax-scroll']) assert.match(flush, new RegExp(variable));
+  assert.match(flush, /max-width: 768px[\s\S]*resetApocalypseParallax/);
+  assert.doesNotMatch(init + queue + flush, /setInterval|requestAnimationFrame/);
+});
+
+test('canonical apocalypse reveal wave is duplicate-safe and reconnect does not replay it', () => {
+  const reveal = method('triggerApocalypseCardRevealWave');
+  assert.match(reveal, /lastApocalypseCardRevealKey[\s\S]*return false[\s\S]*apoc-card-reveal-wave/);
+  assert.match(game, /ApocalypseChanged[\s\S]{0,520}triggerApocalypseCardRevealWave\(apocalypse\)/);
+  const rejoinStart = game.indexOf('connection.on("RejoinSuccess"');
+  const rejoinEnd = game.indexOf('\n\tconnection.off(', rejoinStart);
+  assert.doesNotMatch(game.slice(rejoinStart, rejoinEnd), /triggerApocalypseCardRevealWave/);
+  assert.match(method('renderApocalypse'), /!apocalypse[\s\S]*clearApocalypseCardRevealWave\(\{ resetKey: true \}\)/);
+});
+
+test('edge contamination, card shimmer and effects levels have static fallbacks', () => {
+  for (const layer of ['edge-back','edge-front']) assert.match(css, new RegExp(`apocalypse-ambient-layer-${layer}`));
+  for (const variable of ['--apocalypse-edge-back','--apocalypse-edge-front']) assert.match(css, new RegExp(variable));
+  assert.match(css, /#apocalypsePanel \.apocalypse-card-border-light[\s\S]*apocalypse-card-border-sweep/);
+  assert.match(css, /apoc-card-reveal-wave[\s\S]*apocalypse-card-reveal-wave/);
+  assert.match(css, /data-apocalypse-effects-level="off"[\s\S]*apocalypse-ambient-layer-edge-back[\s\S]*apocalypse-card-border-light/);
+  assert.match(css, /data-apocalypse-effects-level="subtle"[\s\S]*--apoc-event-strength/);
+  assert.match(css, /prefers-reduced-motion: reduce[\s\S]*apocalypse-card-border-light[\s\S]*animation:\s*none !important/);
 });
 
 test('visual controller uses safe DOM construction and no alerts or server HTML', () => {

@@ -10037,6 +10037,16 @@ body.apocalypse-theme-active {
     --apocalypse-panel-sheen: color-mix(in srgb, var(--apocalypse-accent) 12%, transparent);
     --apocalypse-animation-speed: 28s;
     --apocalypse-pulse-strength: .42;
+    --apocalypse-edge-back: radial-gradient(ellipse at center, transparent 42%, color-mix(in srgb, var(--apocalypse-accent) 8%, transparent) 78%, transparent 100%);
+    --apocalypse-edge-front: linear-gradient(90deg, color-mix(in srgb, var(--apocalypse-accent) 8%, transparent), transparent 12% 88%, color-mix(in srgb, var(--apocalypse-accent) 8%, transparent));
+    --apoc-parallax-x: 0px;
+    --apoc-parallax-y: 0px;
+    --apoc-parallax-x-far: 0px;
+    --apoc-parallax-y-far: 0px;
+    --apoc-parallax-x-mid: 0px;
+    --apoc-parallax-y-mid: 0px;
+    --apoc-parallax-scroll: 0px;
+    --apoc-event-strength: .7;
 }
 
 body.apocalypse-theme-active::before { display: none; }
@@ -10056,7 +10066,7 @@ body.apocalypse-theme-active::before { display: none; }
 .apocalypse-ambient-layer-primary {
     background: var(--apocalypse-ambient-primary);
     opacity: .72;
-    transform: scale(1.05);
+    transform: translate3d(var(--apoc-parallax-x-far), var(--apoc-parallax-y-far), 0) scale(1.05);
     animation: apocalypse-primary-breathe calc(var(--apocalypse-animation-speed) * 1.35) ease-in-out infinite alternate;
 }
 .apocalypse-ambient-layer-secondary {
@@ -10064,6 +10074,24 @@ body.apocalypse-theme-active::before { display: none; }
     background-size: 220px 220px, auto;
     opacity: var(--apocalypse-texture-opacity);
     animation: apocalypse-secondary-drift var(--apocalypse-animation-speed) linear infinite alternate;
+}
+.apocalypse-ambient-layer-edge-back,
+.apocalypse-ambient-layer-edge-front {
+    inset: 0;
+    background-repeat: no-repeat;
+    will-change: transform, opacity;
+    -webkit-mask-image: radial-gradient(ellipse at center, transparent 0 42%, rgba(0,0,0,.25) 64%, #000 88%);
+    mask-image: radial-gradient(ellipse at center, transparent 0 42%, rgba(0,0,0,.25) 64%, #000 88%);
+}
+.apocalypse-ambient-layer-edge-back {
+    background: var(--apocalypse-edge-back);
+    opacity: .58;
+    transform: translate3d(var(--apoc-parallax-x-mid), calc(var(--apoc-parallax-y-mid) + var(--apoc-parallax-scroll)), 0) scale(1.015);
+}
+.apocalypse-ambient-layer-edge-front {
+    background: var(--apocalypse-edge-front);
+    opacity: .5;
+    transform: translate3d(var(--apoc-parallax-x), calc(var(--apoc-parallax-y) + var(--apoc-parallax-scroll)), 0) scale(1.025);
 }
 .apocalypse-ambient-layer-vignette {
     inset: 0;
@@ -10075,52 +10103,119 @@ body.apocalypse-theme-active :is(#gameSection, #roomLobby, .apocalypse-effect-ba
 body[data-apocalypse-theme="extinction-red"] {
     --apocalypse-ambient-primary: radial-gradient(circle at 72% 8%, rgba(224,42,29,.28), transparent 34%), linear-gradient(145deg, rgba(62,9,7,.3), transparent 62%);
     --apocalypse-ambient-secondary: radial-gradient(ellipse, rgba(216,90,79,.28) 0 1px, transparent 2px), linear-gradient(115deg, transparent 45%, rgba(255,92,54,.09) 49%, transparent 53%);
+    --apocalypse-edge-back: radial-gradient(circle at 4% 18%, rgba(128,45,34,.42), transparent 28%), radial-gradient(circle at 96% 80%, rgba(73,31,27,.5), transparent 32%);
+    --apocalypse-edge-front: radial-gradient(circle, rgba(204,139,116,.32) 0 1px, transparent 2px), linear-gradient(90deg, rgba(51,20,18,.55), transparent 14% 86%, rgba(51,20,18,.55));
     --apocalypse-reaction-glow: #e84f40; --apocalypse-texture-opacity: .12; --apocalypse-animation-speed: 31s;
 }
 body[data-apocalypse-theme="storm-blue"] {
     --apocalypse-ambient-primary: radial-gradient(ellipse at 32% 0, rgba(80,151,218,.25), transparent 56%), linear-gradient(180deg, rgba(7,30,53,.3), transparent);
     --apocalypse-ambient-secondary: repeating-linear-gradient(116deg, transparent 0 18px, rgba(150,211,255,.14) 19px, transparent 20px 42px), radial-gradient(ellipse, rgba(181,222,255,.08), transparent 60%);
+    --apocalypse-edge-back: radial-gradient(ellipse at 0 52%, rgba(90,150,194,.28), transparent 25%), radial-gradient(ellipse at 100% 18%, rgba(139,188,218,.24), transparent 27%);
+    --apocalypse-edge-front: repeating-linear-gradient(103deg, transparent 0 31px, rgba(179,220,241,.2) 32px, transparent 34px 61px), linear-gradient(90deg, rgba(34,74,101,.42), transparent 12% 88%, rgba(34,74,101,.42));
     --apocalypse-reaction-glow: #80c3f4; --apocalypse-texture-opacity: .105; --apocalypse-animation-speed: 22s;
 }
 body[data-apocalypse-theme="biohazard-green"] {
     --apocalypse-ambient-primary: radial-gradient(circle at 50% 42%, rgba(67,176,78,.2), transparent 50%), radial-gradient(circle at 15% 88%, rgba(125,194,87,.13), transparent 34%);
     --apocalypse-ambient-secondary: radial-gradient(circle, rgba(154,226,143,.34) 0 1.5px, transparent 2.5px), radial-gradient(circle, rgba(112,190,102,.18) 0 2px, transparent 3px);
+    --apocalypse-edge-back: radial-gradient(circle at 5% 22%, rgba(92,164,76,.38), transparent 27%), radial-gradient(circle at 94% 75%, rgba(49,121,62,.34), transparent 30%);
+    --apocalypse-edge-front: radial-gradient(circle, rgba(170,225,132,.34) 0 2px, transparent 3px), radial-gradient(circle, rgba(91,175,82,.25) 0 1px, transparent 2px);
     --apocalypse-reaction-glow: #75d67a; --apocalypse-texture-opacity: .14; --apocalypse-animation-speed: 36s;
 }
 body[data-apocalypse-theme="seismic-amber"] {
     --apocalypse-ambient-primary: linear-gradient(155deg, rgba(188,119,38,.22), transparent 48%), radial-gradient(ellipse at 80% 90%, rgba(214,149,65,.15), transparent 44%);
     --apocalypse-ambient-secondary: linear-gradient(112deg, transparent 0 46%, rgba(230,171,85,.15) 46.3% 46.8%, transparent 47.1%), repeating-linear-gradient(22deg, transparent 0 52px, rgba(195,135,62,.08) 53px 54px);
+    --apocalypse-edge-back: radial-gradient(ellipse at 0 100%, rgba(179,116,45,.4), transparent 34%), radial-gradient(ellipse at 100% 0, rgba(133,83,35,.34), transparent 31%);
+    --apocalypse-edge-front: linear-gradient(62deg, transparent 0 17%, rgba(224,158,76,.26) 17.2% 17.6%, transparent 18%), linear-gradient(118deg, transparent 79%, rgba(190,123,49,.24) 79.3% 79.7%, transparent 80%);
     --apocalypse-reaction-glow: #d89c51; --apocalypse-texture-opacity: .11; --apocalypse-animation-speed: 34s;
 }
 body[data-apocalypse-theme="cosmic-violet"] {
     --apocalypse-ambient-primary: radial-gradient(ellipse at 64% 25%, rgba(131,76,220,.25), transparent 46%), radial-gradient(ellipse at 20% 84%, rgba(70,47,145,.22), transparent 48%);
     --apocalypse-ambient-secondary: radial-gradient(circle, rgba(255,255,255,.7) 0 1px, transparent 1.5px), radial-gradient(circle, rgba(190,158,255,.5) 0 1px, transparent 1.8px);
+    --apocalypse-edge-back: radial-gradient(ellipse at 0 35%, rgba(112,67,185,.36), transparent 30%), radial-gradient(ellipse at 100% 70%, rgba(56,109,173,.28), transparent 32%);
+    --apocalypse-edge-front: radial-gradient(circle, rgba(210,191,255,.45) 0 1px, transparent 1.6px), linear-gradient(90deg, rgba(72,42,126,.34), transparent 13% 87%, rgba(72,42,126,.34));
     --apocalypse-reaction-glow: #a27bea; --apocalypse-texture-opacity: .18; --apocalypse-animation-speed: 42s;
 }
 body[data-apocalypse-theme="machine-cyan"] {
     --apocalypse-ambient-primary: linear-gradient(90deg, rgba(24,134,152,.15), transparent 34% 68%, rgba(34,154,166,.12)), radial-gradient(circle at 50% 0, rgba(61,203,217,.18), transparent 44%);
     --apocalypse-ambient-secondary: repeating-linear-gradient(0deg, transparent 0 6px, rgba(87,222,232,.13) 7px 8px), repeating-linear-gradient(90deg, transparent 0 79px, rgba(67,196,209,.06) 80px 81px);
+    --apocalypse-edge-back: linear-gradient(90deg, rgba(32,173,187,.32), transparent 11% 89%, rgba(32,173,187,.32)), repeating-linear-gradient(90deg, transparent 0 63px, rgba(83,217,226,.12) 64px 65px);
+    --apocalypse-edge-front: repeating-linear-gradient(0deg, rgba(92,231,238,.18) 0 1px, transparent 2px 7px), linear-gradient(90deg, rgba(14,78,87,.44), transparent 10% 90%, rgba(14,78,87,.44));
     --apocalypse-reaction-glow: #56d9e1; --apocalypse-texture-opacity: .105; --apocalypse-animation-speed: 19s;
 }
 body[data-apocalypse-theme="wasteland-olive"] {
     --apocalypse-ambient-primary: radial-gradient(ellipse at 45% 110%, rgba(151,137,59,.23), transparent 58%), linear-gradient(125deg, rgba(116,105,43,.14), transparent 44% 72%, rgba(78,69,26,.16));
     --apocalypse-ambient-secondary: radial-gradient(ellipse, rgba(212,190,103,.26) 0 1px, transparent 2px), repeating-linear-gradient(27deg, transparent 0 47px, rgba(166,149,72,.09) 48px 49px);
+    --apocalypse-edge-back: radial-gradient(ellipse at 0 80%, rgba(151,128,61,.42), transparent 31%), radial-gradient(ellipse at 100% 22%, rgba(111,96,46,.38), transparent 28%);
+    --apocalypse-edge-front: radial-gradient(ellipse, rgba(222,196,111,.3) 0 1px, transparent 2px), linear-gradient(90deg, rgba(88,76,35,.46), transparent 14% 86%, rgba(88,76,35,.46));
     --apocalypse-reaction-glow: #b8a85a; --apocalypse-texture-opacity: .13; --apocalypse-animation-speed: 39s;
 }
 body[data-apocalypse-theme="collapse-rust"] {
     --apocalypse-ambient-primary: radial-gradient(ellipse at 0 48%, rgba(164,74,39,.22), transparent 44%), linear-gradient(160deg, rgba(102,43,24,.15), transparent 58%);
     --apocalypse-ambient-secondary: repeating-linear-gradient(7deg, transparent 0 37px, rgba(208,126,91,.12) 38px 39px), repeating-radial-gradient(circle at 80% 30%, transparent 0 28px, rgba(134,63,39,.07) 29px 30px);
+    --apocalypse-edge-back: linear-gradient(90deg, rgba(121,52,29,.48), transparent 14% 86%, rgba(121,52,29,.48)), radial-gradient(ellipse at 82% 0, rgba(184,91,52,.28), transparent 32%);
+    --apocalypse-edge-front: repeating-linear-gradient(91deg, transparent 0 45px, rgba(188,94,54,.17) 46px 48px, transparent 49px 73px), linear-gradient(rgba(96,42,26,.32), transparent 20% 82%, rgba(96,42,26,.38));
     --apocalypse-reaction-glow: #c87550; --apocalypse-texture-opacity: .12; --apocalypse-animation-speed: 29s;
 }
 body[data-apocalypse-theme="glitch-magenta"] {
     --apocalypse-ambient-primary: radial-gradient(ellipse at 50% 30%, rgba(207,52,186,.22), transparent 48%), linear-gradient(90deg, rgba(46,194,211,.07), transparent 32% 68%, rgba(235,54,202,.09));
     --apocalypse-ambient-secondary: repeating-linear-gradient(0deg, transparent 0 17px, rgba(230,92,204,.12) 18px 19px), linear-gradient(90deg, transparent 19%, rgba(237,78,211,.12) 20%, transparent 21% 68%, rgba(70,203,220,.1) 69%, transparent 70%);
+    --apocalypse-edge-back: linear-gradient(90deg, rgba(222,46,193,.31), transparent 12% 88%, rgba(57,196,211,.24)), repeating-linear-gradient(0deg, transparent 0 23px, rgba(225,77,204,.13) 24px 26px);
+    --apocalypse-edge-front: linear-gradient(90deg, rgba(46,208,219,.25) 0 2%, rgba(224,52,195,.28) 3% 6%, transparent 11% 89%, rgba(224,52,195,.3) 94% 97%, rgba(46,208,219,.22));
     --apocalypse-reaction-glow: #e258cc; --apocalypse-texture-opacity: .12; --apocalypse-animation-speed: 17s;
 }
 body[data-apocalypse-theme="occult-indigo"] {
     --apocalypse-ambient-primary: radial-gradient(circle at 50% 44%, rgba(79,73,169,.22), transparent 43%), radial-gradient(ellipse at 18% 82%, rgba(39,31,109,.18), transparent 42%);
     --apocalypse-ambient-secondary: repeating-radial-gradient(circle at 50% 50%, transparent 0 42px, rgba(133,124,211,.11) 43px 44px, transparent 45px 72px), radial-gradient(ellipse, rgba(74,64,157,.1), transparent 65%);
+    --apocalypse-edge-back: radial-gradient(ellipse at 0 50%, rgba(51,42,122,.46), transparent 31%), radial-gradient(ellipse at 100% 48%, rgba(73,51,130,.4), transparent 29%);
+    --apocalypse-edge-front: repeating-radial-gradient(circle at 50% 50%, transparent 0 92px, rgba(142,129,218,.18) 93px 95px, transparent 96px 136px), linear-gradient(90deg, rgba(30,24,77,.52), transparent 13% 87%, rgba(30,24,77,.52));
     --apocalypse-reaction-glow: #8179cc; --apocalypse-texture-opacity: .13; --apocalypse-animation-speed: 44s;
+}
+
+.apocalypse-ambient-root.apoc-event-dust-burst .apocalypse-ambient-layer-edge-front { animation: apoc-event-dust-burst 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-heat-haze .apocalypse-ambient-layer-edge-back { animation: apoc-event-heat-haze 1.6s ease-in-out both; }
+.apocalypse-ambient-root.apoc-event-lightning .apocalypse-ambient-layer-edge-front { animation: apoc-event-lightning .8s ease-out both; }
+.apocalypse-ambient-root.apoc-event-mist-sweep .apocalypse-ambient-layer-edge-back { animation: apoc-event-mist-sweep 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-spore-wave .apocalypse-ambient-layer-edge-front { animation: apoc-event-spore-wave 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-toxic-bloom .apocalypse-ambient-layer-edge-back { animation: apoc-event-toxic-bloom 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-ash-burst .apocalypse-ambient-layer-edge-front { animation: apoc-event-ash-burst 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-smoke-pulse .apocalypse-ambient-layer-edge-back { animation: apoc-event-smoke-pulse 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-microcrack .apocalypse-ambient-layer-edge-front { animation: apoc-event-microcrack 1.2s ease-out both; }
+.apocalypse-ambient-root.apoc-event-cosmic-warp .apocalypse-ambient-layer-edge-back { animation: apoc-event-cosmic-warp 1.6s ease-in-out both; }
+.apocalypse-ambient-root.apoc-event-star-pulse .apocalypse-ambient-layer-edge-front { animation: apoc-event-star-pulse 1.4s ease-out both; }
+.apocalypse-ambient-root.apoc-event-scanline-pulse .apocalypse-ambient-layer-edge-front { animation: apoc-event-scanline-pulse 1.2s steps(8, end) both; }
+.apocalypse-ambient-root.apoc-event-static-flicker .apocalypse-ambient-layer-edge-back { animation: apoc-event-static-flicker .9s steps(5, end) both; }
+.apocalypse-ambient-root.apoc-event-rust-drip .apocalypse-ambient-layer-edge-front { animation: apoc-event-rust-drip 1.6s ease-in both; }
+.apocalypse-ambient-root.apoc-event-glitch-pulse .apocalypse-ambient-layer-edge-front { animation: apoc-event-glitch-pulse .75s steps(4, end) both; }
+.apocalypse-ambient-root.apoc-event-chromatic-slip .apocalypse-ambient-layer-edge-back { animation: apoc-event-chromatic-slip 1.1s ease-out both; }
+.apocalypse-ambient-root.apoc-event-ritual-ring .apocalypse-ambient-layer-edge-front { animation: apoc-event-ritual-ring 1.6s ease-out both; }
+.apocalypse-ambient-root.apoc-event-shadow-smoke .apocalypse-ambient-layer-edge-back { animation: apoc-event-shadow-smoke 1.6s ease-out both; }
+
+#apocalypsePanel .apocalypse-card-border-light,
+#apocalypsePanel .apocalypse-card-reveal-wave {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    border-radius: inherit;
+    pointer-events: none;
+}
+#apocalypsePanel .apocalypse-card-border-light {
+    padding: 1px;
+    opacity: .48;
+    background: linear-gradient(112deg, transparent 18%, var(--apocalypse-reaction-glow) 43%, rgba(255,255,255,.65) 50%, var(--apocalypse-reaction-glow) 57%, transparent 82%);
+    background-size: 260% 100%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: apocalypse-card-border-sweep 14s linear infinite;
+}
+#apocalypsePanel .apocalypse-card-reveal-wave {
+    inset: -8%;
+    opacity: 0;
+    background: radial-gradient(ellipse at 50% 38%, transparent 25%, color-mix(in srgb, var(--apocalypse-reaction-glow) 48%, transparent) 42%, transparent 63%);
+    transform: scale(.68);
+}
+#apocalypsePanel .apocalypse-scenario-shell.apoc-card-reveal-wave .apocalypse-card-reveal-wave {
+    animation: apocalypse-card-reveal-wave 1.05s ease-out both;
 }
 
 body.apocalypse-theme-active :is(.scenario-immersive-panel, .voting-panel, .events-panel, .gm-panel-v2-drawer, .special-cards-section, .site-round-hud) {
@@ -10155,17 +10250,24 @@ body.apocalypse-reaction-voting-result #votingResultsPanel {
 #publicGameTimer.timer-expired { animation: apocalypse-timer-final .7s ease-out 1; }
 
 body[data-apocalypse-effects-level="off"] .apocalypse-ambient-layer-primary,
-body[data-apocalypse-effects-level="off"] .apocalypse-ambient-layer-secondary { display: none; }
+body[data-apocalypse-effects-level="off"] .apocalypse-ambient-layer-secondary,
+body[data-apocalypse-effects-level="off"] .apocalypse-ambient-layer-edge-back,
+body[data-apocalypse-effects-level="off"] .apocalypse-ambient-layer-edge-front,
+body[data-apocalypse-effects-level="off"] #apocalypsePanel .apocalypse-card-border-light,
+body[data-apocalypse-effects-level="off"] #apocalypsePanel .apocalypse-card-reveal-wave { display: none; }
 body[data-apocalypse-effects-level="atmospheric"] .apocalypse-ambient-root { opacity: 1; }
 body[data-apocalypse-effects-level="off"] .apocalypse-ambient-layer-vignette { opacity: .35; }
 body[data-apocalypse-effects-level="off"] :is(.scenario-immersive-panel, .voting-panel, .events-panel, .gm-panel-v2-drawer, .special-cards-section, .site-round-hud) { animation: none; background-image: none; }
 body[data-apocalypse-effects-level="subtle"] .apocalypse-ambient-layer-secondary { opacity: calc(var(--apocalypse-texture-opacity) * .45); animation-duration: 70s; }
 body[data-apocalypse-effects-level="subtle"] .apocalypse-ambient-layer-primary { animation-duration: 65s; opacity: .48; }
+body[data-apocalypse-effects-level="subtle"] { --apoc-event-strength: .34; }
+body[data-apocalypse-effects-level="subtle"] :is(.apocalypse-ambient-layer-edge-back, .apocalypse-ambient-layer-edge-front) { opacity: .25; }
+body[data-apocalypse-effects-level="subtle"] #apocalypsePanel .apocalypse-card-border-light { opacity: .24; animation-duration: 24s; }
 body.apocalypse-ambient-paused .apocalypse-ambient-layer,
-body.apocalypse-ambient-paused :is(.scenario-immersive-panel, .voting-panel, .events-panel, .gm-panel-v2-drawer, .special-cards-section, .site-round-hud) { animation-play-state: paused !important; }
+body.apocalypse-ambient-paused :is(.scenario-immersive-panel, .voting-panel, .events-panel, .gm-panel-v2-drawer, .special-cards-section, .site-round-hud, .apocalypse-card-border-light, .apocalypse-card-reveal-wave) { animation-play-state: paused !important; }
 
-@keyframes apocalypse-primary-breathe { from { opacity: .5; transform: scale(1.02) translate3d(-1%,0,0); } to { opacity: .78; transform: scale(1.08) translate3d(1%,-1%,0); } }
-@keyframes apocalypse-secondary-drift { from { background-position: 0 0, 0 0; transform: translate3d(-1%,0,0); } to { background-position: 72px 48px, -44px 26px; transform: translate3d(1%,1%,0); } }
+@keyframes apocalypse-primary-breathe { from { opacity: .5; transform: translate3d(calc(-1% + var(--apoc-parallax-x-far)), var(--apoc-parallax-y-far), 0) scale(1.02); } to { opacity: .78; transform: translate3d(calc(1% + var(--apoc-parallax-x-far)), calc(-1% + var(--apoc-parallax-y-far)), 0) scale(1.08); } }
+@keyframes apocalypse-secondary-drift { from { background-position: 0 0, 0 0; transform: translate3d(calc(-1% + var(--apoc-parallax-x-mid)), calc(var(--apoc-parallax-y-mid) + var(--apoc-parallax-scroll)), 0); } to { background-position: 72px 48px, -44px 26px; transform: translate3d(calc(1% + var(--apoc-parallax-x-mid)), calc(1% + var(--apoc-parallax-y-mid) + var(--apoc-parallax-scroll)), 0); } }
 @keyframes apocalypse-panel-sheen { from { background-position: 120% 0; } to { background-position: -80% 0; } }
 @keyframes apocalypse-reaction-surge { 0% { opacity: .7; filter: saturate(1); } 35% { opacity: 1; filter: saturate(1.35) brightness(1.08); } 100% { opacity: 1; filter: saturate(1); } }
 @keyframes apocalypse-decorative-shift { 25% { transform: translate3d(3px,1px,0); } 55% { transform: translate3d(-2px,-1px,0); } }
@@ -10173,11 +10275,34 @@ body.apocalypse-ambient-paused :is(.scenario-immersive-panel, .voting-panel, .ev
 @keyframes apocalypse-timer-warning { 50% { box-shadow: 0 0 20px rgba(217,164,65,.32); } }
 @keyframes apocalypse-timer-critical { 50% { box-shadow: 0 0 25px rgba(227,91,79,.44); } }
 @keyframes apocalypse-timer-final { 35% { box-shadow: 0 0 30px rgba(227,91,79,.5); } }
+@keyframes apocalypse-card-border-sweep { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+@keyframes apocalypse-card-reveal-wave { 0% { opacity: 0; transform: scale(.68); } 32% { opacity: .7; } 100% { opacity: 0; transform: scale(1.12); } }
+@keyframes apoc-event-dust-burst { 0%,100% { opacity: 0; } 28% { opacity: var(--apoc-event-strength); filter: contrast(1.15); } 70% { opacity: calc(var(--apoc-event-strength) * .55); background-position: 32px -18px, 0 0; } }
+@keyframes apoc-event-heat-haze { 0%,100% { opacity: .28; filter: blur(0); } 48% { opacity: var(--apoc-event-strength); filter: blur(2px) saturate(1.15); } }
+@keyframes apoc-event-lightning { 0%,18%,100% { opacity: 0; filter: brightness(1); } 8%,28% { opacity: var(--apoc-event-strength); filter: brightness(2.2); } }
+@keyframes apoc-event-mist-sweep { from { opacity: 0; background-position: -60px 0; } 50% { opacity: var(--apoc-event-strength); } to { opacity: 0; background-position: 80px 0; } }
+@keyframes apoc-event-spore-wave { 0%,100% { opacity: 0; background-position: 0 28px, 0 0; } 45% { opacity: var(--apoc-event-strength); background-position: 34px -18px, -22px 20px; } }
+@keyframes apoc-event-toxic-bloom { 0%,100% { opacity: .15; filter: saturate(1); } 50% { opacity: var(--apoc-event-strength); filter: saturate(1.45) brightness(1.08); } }
+@keyframes apoc-event-ash-burst { 0%,100% { opacity: 0; background-position: 0 -24px, 0 0; } 42% { opacity: var(--apoc-event-strength); background-position: 24px 38px, 0 0; } }
+@keyframes apoc-event-smoke-pulse { 0%,100% { opacity: .18; filter: blur(0); } 50% { opacity: var(--apoc-event-strength); filter: blur(3px); } }
+@keyframes apoc-event-microcrack { 0%,100% { opacity: .12; } 38% { opacity: var(--apoc-event-strength); filter: brightness(1.3); } }
+@keyframes apoc-event-cosmic-warp { 0%,100% { opacity: .2; filter: hue-rotate(0deg); } 50% { opacity: var(--apoc-event-strength); filter: hue-rotate(12deg) saturate(1.35); } }
+@keyframes apoc-event-star-pulse { 0%,100% { opacity: .1; } 46% { opacity: var(--apoc-event-strength); filter: brightness(1.8); } }
+@keyframes apoc-event-scanline-pulse { 0%,100% { opacity: .12; background-position: 0 0, 0 0; } 50% { opacity: var(--apoc-event-strength); background-position: 0 35px, 0 0; } }
+@keyframes apoc-event-static-flicker { 0%,100% { opacity: .08; } 30% { opacity: var(--apoc-event-strength); filter: contrast(1.6); } 62% { opacity: .18; } }
+@keyframes apoc-event-rust-drip { from { opacity: 0; background-position: 0 -45px, 0 0; } 50% { opacity: var(--apoc-event-strength); } to { opacity: 0; background-position: 0 36px, 0 0; } }
+@keyframes apoc-event-glitch-pulse { 0%,100% { opacity: .08; clip-path: inset(0); } 35% { opacity: var(--apoc-event-strength); clip-path: inset(7% 0 19% 0); filter: hue-rotate(20deg); } 66% { clip-path: inset(62% 0 8% 0); } }
+@keyframes apoc-event-chromatic-slip { 0%,100% { opacity: .12; filter: hue-rotate(0); } 48% { opacity: var(--apoc-event-strength); filter: hue-rotate(28deg) saturate(1.5); } }
+@keyframes apoc-event-ritual-ring { 0%,100% { opacity: .08; background-size: 100% 100%; } 50% { opacity: var(--apoc-event-strength); background-size: 108% 108%; } }
+@keyframes apoc-event-shadow-smoke { 0%,100% { opacity: .2; filter: blur(0); } 52% { opacity: var(--apoc-event-strength); filter: blur(4px) brightness(.8); } }
 
 @media (max-width: 768px) {
     .apocalypse-ambient-root { opacity: .72; }
     .apocalypse-ambient-layer { inset: -4%; }
     .apocalypse-ambient-layer-secondary { background-size: 170px 170px, auto; opacity: calc(var(--apocalypse-texture-opacity) * .55); animation-duration: 60s; }
+    .apocalypse-ambient-layer-edge-back,
+    .apocalypse-ambient-layer-edge-front { inset: 0; opacity: .22; transform: none; }
+    #apocalypsePanel .apocalypse-card-border-light { opacity: .28; animation-duration: 24s; }
     body.apocalypse-theme-active :is(.scenario-immersive-panel, .voting-panel, .events-panel, .gm-panel-v2-drawer, .special-cards-section, .site-round-hud) { animation-duration: 28s; }
     body[class*="apocalypse-reaction-"] .apocalypse-ambient-root { animation-duration: .38s; }
 }
@@ -10186,8 +10311,12 @@ body.apocalypse-ambient-paused :is(.scenario-immersive-panel, .voting-panel, .ev
     .apocalypse-ambient-layer,
     body.apocalypse-theme-active :is(.scenario-immersive-panel, .voting-panel, .events-panel, .gm-panel-v2-drawer, .special-cards-section, .site-round-hud),
     body[class*="apocalypse-reaction-"] .apocalypse-ambient-root,
+    #apocalypsePanel .apocalypse-card-border-light,
+    #apocalypsePanel .apocalypse-card-reveal-wave,
     .apocalypse-personal-change,
     #publicGameTimer.timer-warning,
     #publicGameTimer.timer-critical,
     #publicGameTimer.timer-expired { animation: none !important; transition: none !important; transform: none !important; }
+    #apocalypsePanel .apocalypse-card-border-light { opacity: .24; background-position: 50% 0; }
+    #apocalypsePanel .apocalypse-card-reveal-wave { display: none; }
 }
