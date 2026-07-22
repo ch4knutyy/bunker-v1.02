@@ -4,153 +4,287 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IAuthorizationService AuthorizationService
 @{
-    var signedInUser = User.Identity?.IsAuthenticated == true
-        ? await UserManager.GetUserAsync(User)
-        : null;
-    var canUseOwnerContentEditor = signedInUser is not null &&
-        (await AuthorizationService.AuthorizeAsync(User, "OwnerOnly")).Succeeded;
+	var signedInUser = User.Identity?.IsAuthenticated == true
+		? await UserManager.GetUserAsync(User)
+		: null;
+	var canUseOwnerContentEditor = signedInUser is not null &&
+		(await AuthorizationService.AuthorizeAsync(User, "OwnerOnly")).Succeeded;
 }
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    @{
-        var titleText = ViewData["Title"]?.ToString();
-        var pageTitle = string.IsNullOrWhiteSpace(titleText) || string.Equals(titleText, "Vault Judgment", System.StringComparison.OrdinalIgnoreCase)
-            ? "Vault Judgment"
-            : $"{titleText} - Vault Judgment";
-    }
-    <title>@pageTitle</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/tooltip.css" asp-append-version="true" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<meta charset="utf-8" />
+	<meta name="viewport"
+		  content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+	@{
+		var titleText = ViewData["Title"]?.ToString();
+		var pageTitle = string.IsNullOrWhiteSpace(titleText) || string.Equals(titleText, "Vault Judgment", System.StringComparison.OrdinalIgnoreCase)
+			? "Vault Judgment"
+			: $"{titleText} - Vault Judgment";
+	}
+	<title>@pageTitle</title>
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/tooltip.css" asp-append-version="true" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    @{
-    var currentPath = (Context.Request.Path.Value ?? "/").TrimEnd('/').ToLowerInvariant();
+	@{
+		var currentPath = (Context.Request.Path.Value ?? "/").TrimEnd('/').ToLowerInvariant();
 
-    if (string.IsNullOrEmpty(currentPath))
-    {
-        currentPath = "/";
-    }
+		if (string.IsNullOrEmpty(currentPath))
+		{
+			currentPath = "/";
+		}
 
-    var isHomeActive = currentPath == "/";
-    var isPlayActive =
-        currentPath == "/games" ||
-        currentPath.StartsWith("/games/") ||
-        currentPath == "/bunker" ||
-        currentPath.StartsWith("/bunker/") ||
-        currentPath == "/room" ||
-        currentPath.StartsWith("/room/") ||
-        currentPath == "/rooms" ||
-        currentPath.StartsWith("/rooms/") ||
-        currentPath == "/spy" ||
-        currentPath.StartsWith("/spy/");
+		var isHomeActive = currentPath == "/";
+		var isPlayActive =
+			currentPath == "/games" ||
+			currentPath.StartsWith("/games/") ||
+			currentPath == "/bunker" ||
+			currentPath.StartsWith("/bunker/") ||
+			currentPath == "/room" ||
+			currentPath.StartsWith("/room/") ||
+			currentPath == "/rooms" ||
+			currentPath.StartsWith("/rooms/") ||
+			currentPath == "/spy" ||
+			currentPath.StartsWith("/spy/");
 
-    var isRulesActive =
-        currentPath == "/rules" ||
-        currentPath.StartsWith("/rules/");
-    }
+		var isRulesActive =
+			currentPath == "/rules" ||
+			currentPath.StartsWith("/rules/");
+	}
 
-    @* Головна навігація сайту *@
-    <header class="main-header">
-        <div class="header-container">
-            <a class="logo-section" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Vault Judgment">
-                <div class="logo-icon">🏚️</div>
-                <div class="logo-text">
-                    <span class="logo-bunker">Vault</span>
-                    <span class="logo-online">Judgment</span>
-                </div>
-            </a>
+	@* Головна навігація сайту *@
+	<header class="main-header">
+		<div class="header-container">
+			<a class="logo-section"
+			   asp-area=""
+			   asp-controller="Home"
+			   asp-action="Index"
+			   aria-label="Vault Judgment">
 
-            <nav class="main-nav">
-                <a class="nav-link @(isHomeActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index" data-i18n="navHome">Головна</a>
-                <a class="nav-link @(isPlayActive ? "active" : "")" asp-controller="Games" asp-action="Index" data-i18n="navPlay">Грати</a>
-                <a href="/rules" class="nav-link @(isRulesActive ? "active" : "")" data-i18n="navRules">Правила</a>
-                <a href="/#author" class="nav-link" data-i18n="navAuthor">Автор</a>
-                <a href="https://github.com/ch4knutyy/bunker-v1.02" class="nav-link" target="_blank" rel="noopener noreferrer" data-i18n="navGithub">GitHub</a>
-            </nav>
+				<div class="logo-icon">🏚️</div>
 
-            <div class="header-actions">
-                <div class="language-selector language-switcher" aria-label="Language">
-                    <button type="button" class="lang-btn language-btn" data-lang="uk" onclick="changeLanguage('uk')">UA</button>
-                    <button type="button" class="lang-btn language-btn" data-lang="en" onclick="changeLanguage('en')">EN</button>
-                    <button type="button" class="lang-btn language-btn" data-lang="ru" onclick="changeLanguage('ru')">RU</button>
-                </div>
-                <div class="account-nav">
-                    @if (signedInUser is null)
-                    {
-                        <a class="account-nav-link" asp-controller="Account" asp-action="Login" data-i18n="authLogin">Увійти</a>
-                        <a class="account-nav-link account-nav-primary" asp-controller="Account" asp-action="Register" data-i18n="authRegister">Реєстрація</a>
-                    }
-                    else
-                    {
-                        <a class="account-nav-user" asp-controller="Profile" asp-action="Index" title="Профіль">
-                            <span aria-hidden="true">👤</span>
-                            <span>@signedInUser.DisplayName</span>
-                        </a>
-                        @if (canUseOwnerContentEditor)
-                        {
-                            <a class="account-nav-link" asp-controller="OwnerContent" asp-action="Index">
-                                Редактор контенту
-                            </a>
-                        }
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="account-logout-form">
-                            <button type="submit" class="account-nav-link account-nav-button" data-i18n="authLogout">Вийти</button>
-                        </form>
-                    }
-                </div>
-            </div>
-        </div>
-    </header>
+				<div class="logo-text">
+					<span class="logo-bunker">Vault</span>
+					<span class="logo-online">Judgment</span>
+				</div>
+			</a>
 
-    @* Вміст поточного представлення *@
-    <main class="main-content">
-        @RenderBody()
-    </main>
+			<button type="button"
+					class="mobile-menu-toggle"
+					id="mobileMenuToggle"
+					aria-label="Відкрити меню"
+					aria-controls="mobileHeaderPanel"
+					aria-expanded="false">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
 
-    @* Нижня частина сайту *@
-    <footer class="main-footer">
-        <div class="footer-container">
-            <p>&copy; 2026 - Vault Judgment - Всі права захищено</p>
-            <div class="footer-links">
-                <a asp-area="" asp-controller="Home" asp-action="Privacy">Конфіденційність</a>
-                <a href="#">Умови використання</a>
-                <a href="#">Контакти</a>
-            </div>
-        </div>
-    </footer>
+			<div class="header-mobile-panel"
+				 id="mobileHeaderPanel">
 
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/tooltip.js" asp-append-version="true"></script>
-    
-    <script>
-        if (typeof window.changeLanguage !== 'function') {
-            window.changeLanguage = function(lang) {
-                if (lang === 'gb') lang = 'en';
-                if (!['uk', 'en', 'ru'].includes(lang)) lang = 'uk';
-                localStorage.setItem('language', lang);
-                document.querySelectorAll('.language-btn').forEach(function(btn) {
-                    btn.classList.toggle('active', btn.dataset.lang === lang);
-                });
-            };
-        }
+				<nav class="main-nav">
+					<a class="nav-link @(isHomeActive ? "active" : "")"
+					   asp-area=""
+					   asp-controller="Home"
+					   asp-action="Index"
+					   data-i18n="navHome">
+						Головна
+					</a>
 
-        (function syncHeaderLanguageButtons() {
-            var lang = localStorage.getItem('language') || 'uk';
-            if (lang === 'gb') {
-                lang = 'en';
-                localStorage.setItem('language', lang);
-            }
-            document.querySelectorAll('.language-btn').forEach(function(btn) {
-                btn.classList.toggle('active', btn.dataset.lang === lang);
-            });
-        })();
-    </script>
-    
-    @await RenderSectionAsync("Scripts", required: false)
+					<a class="nav-link @(isPlayActive ? "active" : "")"
+					   asp-controller="Games"
+					   asp-action="Index"
+					   data-i18n="navPlay">
+						Грати
+					</a>
+
+					<a href="/rules"
+					   class="nav-link @(isRulesActive ? "active" : "")"
+					   data-i18n="navRules">
+						Правила
+					</a>
+
+					<a href="/#author"
+					   class="nav-link"
+					   data-i18n="navAuthor">
+						Автор
+					</a>
+
+					<a href="https://github.com/ch4knutyy/bunker-v1.02"
+					   class="nav-link"
+					   target="_blank"
+					   rel="noopener noreferrer"
+					   data-i18n="navGithub">
+						GitHub
+					</a>
+				</nav>
+
+				<div class="header-actions">
+					<div class="language-selector language-switcher"
+						 aria-label="Language">
+
+						<button type="button"
+								class="lang-btn language-btn"
+								data-lang="uk"
+								onclick="changeLanguage('uk')">
+							UA
+						</button>
+
+						<button type="button"
+								class="lang-btn language-btn"
+								data-lang="en"
+								onclick="changeLanguage('en')">
+							EN
+						</button>
+
+						<button type="button"
+								class="lang-btn language-btn"
+								data-lang="ru"
+								onclick="changeLanguage('ru')">
+							RU
+						</button>
+					</div>
+
+					<div class="account-nav">
+						@if (signedInUser is null)
+						{
+							<a class="account-nav-link"
+							   asp-controller="Account"
+							   asp-action="Login"
+							   data-i18n="authLogin">
+								Увійти
+							</a>
+
+							<a class="account-nav-link account-nav-primary"
+							   asp-controller="Account"
+							   asp-action="Register"
+							   data-i18n="authRegister">
+								Реєстрація
+							</a>
+						}
+						else
+						{
+							<a class="account-nav-user"
+							   asp-controller="Profile"
+							   asp-action="Index"
+							   title="Профіль">
+								<span aria-hidden="true">👤</span>
+								<span>@signedInUser.DisplayName</span>
+							</a>
+
+							@if (canUseOwnerContentEditor)
+							{
+								<a class="account-nav-link"
+								   asp-controller="OwnerContent"
+								   asp-action="Index">
+									Редактор контенту
+								</a>
+							}
+
+							<form asp-controller="Account"
+								  asp-action="Logout"
+								  method="post"
+								  class="account-logout-form">
+
+								<button type="submit"
+										class="account-nav-link account-nav-button"
+										data-i18n="authLogout">
+									Вийти
+								</button>
+							</form>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	@* Вміст поточного представлення *@
+	<main class="main-content">
+		@RenderBody()
+	</main>
+
+	@* Нижня частина сайту *@
+	<footer class="main-footer">
+		<div class="footer-container">
+			<p>&copy; 2026 - Vault Judgment - Всі права захищено</p>
+			<div class="footer-links">
+				<a asp-area="" asp-controller="Home" asp-action="Privacy">Конфіденційність</a>
+				<a href="#">Умови використання</a>
+				<a href="#">Контакти</a>
+			</div>
+		</div>
+	</footer>
+
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/tooltip.js" asp-append-version="true"></script>
+
+	<script>
+			if (typeof window.changeLanguage !== 'function') {
+				window.changeLanguage = function (lang) {
+					if (lang === 'gb') lang = 'en';
+					if (!['uk', 'en', 'ru'].includes(lang)) lang = 'uk';
+					localStorage.setItem('language', lang);
+					document.querySelectorAll('.language-btn').forEach(function (btn) {
+						btn.classList.toggle('active', btn.dataset.lang === lang);
+					});
+				};
+			}
+
+			(function syncHeaderLanguageButtons() {
+				var lang = localStorage.getItem('language') || 'uk';
+				if (lang === 'gb') {
+					lang = 'en';
+					localStorage.setItem('language', lang);
+				}
+				document.querySelectorAll('.language-btn').forEach(function (btn) {
+					btn.classList.toggle('active', btn.dataset.lang === lang);
+				});
+			})();
+	</script>
+
+	<script>
+			(function initializeMobileHeader() {
+				const toggle = document.getElementById('mobileMenuToggle');
+				const panel = document.getElementById('mobileHeaderPanel');
+
+				if (!toggle || !panel) {
+					return;
+				}
+
+				function setMenuState(isOpen) {
+					panel.classList.toggle('is-open', isOpen);
+					toggle.classList.toggle('is-open', isOpen);
+					toggle.setAttribute('aria-expanded', String(isOpen));
+					toggle.setAttribute(
+						'aria-label',
+						isOpen ? 'Закрити меню' : 'Відкрити меню'
+					);
+				}
+
+				toggle.addEventListener('click', function () {
+					setMenuState(!panel.classList.contains('is-open'));
+				});
+
+				panel.querySelectorAll('a').forEach(function (link) {
+					link.addEventListener('click', function () {
+						setMenuState(false);
+					});
+				});
+
+				window.addEventListener('resize', function () {
+					if (window.innerWidth > 768) {
+						setMenuState(false);
+					}
+				});
+			})();
+	</script>
+
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

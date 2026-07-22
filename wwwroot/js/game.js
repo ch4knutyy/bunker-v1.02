@@ -6153,26 +6153,51 @@ function openJoinRoomModal(roomId) {
 }
 
 function joinRoom(roomId, hasPassword, forceDeveloperObserver = false) {
-	if (hasPassword || isDeveloper) {
+	if (hasPassword || isDeveloper || forceDeveloperObserver) {
 		openJoinRoomModal(roomId);
-		const observer = document.getElementById('joinAsDeveloperObserver');
-		if (observer) observer.checked = !!forceDeveloperObserver;
-	} else {
-		const typedName = document.getElementById('playerNameJoin')?.value?.trim()
-			|| document.getElementById('playerNameCreate')?.value?.trim()
-			|| '';
-		let playerName = typedName || prompt("Введіть ваше ім'я (макс. 10 символів):");
-		if (playerName && playerName.trim()) {
-			// Validate and sanitize name
-			const validation = validatePlayerName(playerName);
-			if (!validation.valid) {
-				alert(validation.error);
-				return;
-			}
-			connection.invoke("JoinRoom", roomId, validation.name, null, stablePlayerId, loadSession().reconnectToken || null)
-				.catch(err => console.error("JoinRoom error:", err));
+
+		const observer = document.getElementById(
+			'joinAsDeveloperObserver'
+		);
+
+		if (observer) {
+			observer.checked = !!forceDeveloperObserver;
 		}
+
+		return;
 	}
+
+	const typedName =
+		document.getElementById('playerNameJoin')?.value?.trim() ||
+		document.getElementById('playerNameCreate')?.value?.trim() ||
+		'';
+
+	const playerName =
+		typedName ||
+		prompt('Введіть ваше ім’я (макс. 10 символів):');
+
+	if (!playerName?.trim()) {
+		return;
+	}
+
+	const validation = validatePlayerName(playerName);
+
+	if (!validation.valid) {
+		alert(validation.error);
+		return;
+	}
+
+	connection.invoke(
+		'JoinRoom',
+		roomId,
+		validation.name,
+		null,
+		stablePlayerId,
+		loadSession().reconnectToken || null,
+		false
+	).catch(error => {
+		console.error('JoinRoom error:', error);
+	});
 }
 
 function submitJoinRoom() {
