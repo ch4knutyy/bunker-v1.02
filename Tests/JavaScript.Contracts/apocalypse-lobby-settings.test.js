@@ -26,9 +26,12 @@ test('mode-specific editors are canonical and incremental', () => {
   assert.doesNotMatch(client.slice(client.indexOf('function renderLobbyApocalypseEditor'), client.indexOf('function renderLobbyGameSetup')), /innerHTML/);
 });
 
-test('host-only catalog and public lobby projection protect hidden apocalypse ids', () => {
-  assert.match(hub, /GetLobbyApocalypseCatalog[\s\S]*RequireLobbyHost/);
-  assert.match(hub, /room\.State != RoomState\.Lobby \|\| room\.SettingsFrozen/);
+test('catalog remains read-only after settings freeze and public projection protects hidden apocalypse ids', () => {
+  const catalogMethod = hub.slice(hub.indexOf('GetLobbyApocalypseCatalog'), hub.indexOf('ApplyLobbyGameSettings'));
+  assert.match(catalogMethod, /RequireLobbyHost\(\)/);
+  assert.match(catalogMethod, /GetEffective\(room\)/);
+  assert.doesNotMatch(catalogMethod, /settings_frozen|SettingsFrozen|RoomState\.Lobby/);
+  assert.match(hub.slice(hub.indexOf('ApplyLobbyGameSettings')), /_roomGameSettings\.Apply\(room, actor, request\)/);
   const publicDto = settings.slice(settings.indexOf('public sealed record LobbyGameSettingsDto'), settings.indexOf('public sealed record LobbySettingsWarningDto'));
   assert.match(publicDto, /AllowedApocalypseCategoryCount/);
   assert.match(publicDto, /ApocalypseCustomPoolCount/);
