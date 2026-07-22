@@ -90,8 +90,8 @@ test('environmental effects are theme-aware, duplicate-safe and preference-contr
 
   await expect(page.locator('#apocalypseAmbientRoot .apocalypse-ambient-layer')).toHaveCount(5);
   await expect(page.locator('.apocalypse-ambient-layer-edge-front')).toHaveCSS('pointer-events', 'none');
-  expect(await page.evaluate(() => triggerApocalypseAmbientEvent('dust-burst'))).toBe(true);
-  await expect(page.locator('#apocalypseAmbientRoot')).toHaveClass(/apoc-event-dust-burst/);
+  expect(await page.evaluate(() => triggerApocalypseAmbientEvent('dust-surge'))).toBe(true);
+  await expect(page.locator('#apocalypseAmbientRoot')).toHaveClass(/apoc-event-dust-surge/);
 
   expect(await page.evaluate(value => triggerApocalypseCardRevealWave(value), apocalypse)).toBe(true);
   await expect(page.locator('.apocalypse-scenario-shell')).toHaveClass(/apoc-card-reveal-wave/);

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Bunker.Models
@@ -17,7 +17,6 @@ namespace Bunker.Models
         public List<string> Threats { get; set; } = new(); // Загрози зовні
         public List<string> Requirements { get; set; } = new(); // Що потрібно для виживання
         public List<string> Tags { get; set; } = new();
-        public IReadOnlyList<string>? VisualModifierIds { get; set; } = Array.Empty<string>();
         public string? ImageUrl { get; set; } // URL зображення апокаліпсису
 
         [JsonPropertyName("_i18n")]
@@ -40,7 +39,6 @@ namespace Bunker.Models
                 threats = Threats,
                 requirements = Requirements,
                 tags = Tags,
-                visualModifierIds = ApocalypseVisualMetadata.Normalize(VisualModifierIds),
                 imageUrl = ImageUrl,
                 _i18n = I18n,
                 categoryId = CategoryId,

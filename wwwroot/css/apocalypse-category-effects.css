@@ -1,0 +1,176 @@
+/* APOCALYPSE CATEGORY EFFECT SYSTEM V1-F3 */
+.apocalypse-category-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin: .15rem 0 .2rem;
+    padding: .28rem .62rem;
+    color: color-mix(in srgb, var(--apoc-accent-strong, #e2bd63) 90%, white);
+    font-size: .68rem;
+    font-weight: 850;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    border: 1px solid color-mix(in srgb, var(--apoc-accent, #c7a554) 48%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--apoc-surface, #111) 82%, transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--apoc-glow, #c7a554) 28%, transparent);
+}
+
+.lobby-apocalypse-category-group {
+    margin: 0 0 .7rem;
+    border: 1px solid rgb(199 165 84 / 24%);
+    border-radius: 10px;
+    background: linear-gradient(145deg, rgb(21 22 24 / 82%), rgb(10 11 13 / 92%));
+    overflow: clip;
+}
+
+.lobby-apocalypse-category-heading {
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    padding: .72rem .9rem;
+    color: #dfc36f;
+    font-size: .78rem;
+    font-weight: 850;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+    background: linear-gradient(90deg, rgb(199 165 84 / 9%), transparent 62%);
+}
+
+.lobby-apocalypse-category-heading::-webkit-details-marker { display: none; }
+.lobby-apocalypse-category-heading::after {
+    content: '+';
+    margin-left: auto;
+    color: #9f8b51;
+    font-size: 1rem;
+}
+.lobby-apocalypse-category-group[open] > .lobby-apocalypse-category-heading::after { content: '−'; }
+
+.lobby-apocalypse-category-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: .55rem;
+    padding: .7rem;
+    border-top: 1px solid rgb(199 165 84 / 17%);
+}
+
+/* Modifier variables: category remains the visual base; modifiers only affect edge layers. */
+.apocalypse-modifier-frost { --apoc-modifier-edge: rgb(185 225 255 / 17%); --apoc-modifier-secondary: rgb(210 240 255 / 11%); }
+.apocalypse-modifier-heat { --apoc-modifier-edge: rgb(255 118 44 / 17%); --apoc-modifier-secondary: rgb(255 183 73 / 10%); }
+.apocalypse-modifier-drought { --apoc-modifier-edge: rgb(182 139 68 / 19%); --apoc-modifier-secondary: rgb(116 91 42 / 12%); }
+.apocalypse-modifier-flood { --apoc-modifier-edge: rgb(63 143 188 / 18%); --apoc-modifier-secondary: rgb(95 191 217 / 10%); }
+.apocalypse-modifier-storm { --apoc-modifier-edge: rgb(103 147 208 / 17%); --apoc-modifier-secondary: rgb(170 202 255 / 9%); }
+.apocalypse-modifier-fog { --apoc-modifier-edge: rgb(190 202 199 / 14%); --apoc-modifier-secondary: rgb(220 226 222 / 8%); }
+.apocalypse-modifier-ash { --apoc-modifier-edge: rgb(110 103 96 / 22%); --apoc-modifier-secondary: rgb(169 147 120 / 9%); }
+.apocalypse-modifier-darkness { --apoc-modifier-edge: rgb(0 0 0 / 34%); --apoc-modifier-secondary: rgb(28 25 38 / 15%); }
+.apocalypse-modifier-air-hazard { --apoc-modifier-edge: rgb(168 165 98 / 16%); --apoc-modifier-secondary: rgb(205 198 105 / 9%); }
+.apocalypse-modifier-cosmic-impact { --apoc-modifier-edge: rgb(147 110 210 / 18%); --apoc-modifier-secondary: rgb(208 183 255 / 9%); }
+.apocalypse-modifier-infection { --apoc-modifier-edge: rgb(72 158 78 / 18%); --apoc-modifier-secondary: rgb(117 214 94 / 9%); }
+.apocalypse-modifier-spores { --apoc-modifier-edge: rgb(128 176 86 / 19%); --apoc-modifier-secondary: rgb(192 226 116 / 10%); }
+.apocalypse-modifier-radiation { --apoc-modifier-edge: rgb(174 205 44 / 20%); --apoc-modifier-secondary: rgb(218 244 74 / 10%); }
+.apocalypse-modifier-toxic { --apoc-modifier-edge: rgb(153 161 43 / 20%); --apoc-modifier-secondary: rgb(207 205 52 / 10%); }
+.apocalypse-modifier-nanotech { --apoc-modifier-edge: rgb(53 178 185 / 18%); --apoc-modifier-secondary: rgb(116 226 224 / 10%); }
+.apocalypse-modifier-mutation { --apoc-modifier-edge: rgb(167 74 159 / 19%); --apoc-modifier-secondary: rgb(224 109 199 / 9%); }
+.apocalypse-modifier-swarm { --apoc-modifier-edge: rgb(91 99 38 / 22%); --apoc-modifier-secondary: rgb(165 155 66 / 9%); }
+.apocalypse-modifier-parasite { --apoc-modifier-edge: rgb(102 122 57 / 21%); --apoc-modifier-secondary: rgb(183 176 71 / 9%); }
+.apocalypse-modifier-allergens { --apoc-modifier-edge: rgb(193 157 75 / 16%); --apoc-modifier-secondary: rgb(229 197 116 / 9%); }
+.apocalypse-modifier-structural-damage { --apoc-modifier-edge: rgb(133 98 66 / 22%); --apoc-modifier-secondary: rgb(183 145 94 / 9%); }
+.apocalypse-modifier-machine { --apoc-modifier-edge: rgb(50 176 196 / 18%); --apoc-modifier-secondary: rgb(81 224 235 / 9%); }
+.apocalypse-modifier-vegetation-collapse { --apoc-modifier-edge: rgb(93 112 49 / 22%); --apoc-modifier-secondary: rgb(139 139 61 / 9%); }
+.apocalypse-modifier-reality-fracture { --apoc-modifier-edge: rgb(191 53 177 / 19%); --apoc-modifier-secondary: rgb(225 97 208 / 10%); }
+.apocalypse-modifier-psychological { --apoc-modifier-edge: rgb(75 57 105 / 22%); --apoc-modifier-secondary: rgb(125 83 153 / 10%); }
+.apocalypse-modifier-unrest { --apoc-modifier-edge: rgb(157 78 51 / 19%); --apoc-modifier-secondary: rgb(190 112 69 / 10%); }
+.apocalypse-modifier-emp { --apoc-modifier-edge: rgb(39 168 201 / 19%); --apoc-modifier-secondary: rgb(78 219 234 / 10%); }
+.apocalypse-modifier-identity-shift { --apoc-modifier-edge: rgb(146 65 174 / 20%); --apoc-modifier-secondary: rgb(212 110 218 / 9%); }
+.apocalypse-modifier-blackout { --apoc-modifier-edge: rgb(0 0 0 / 42%); --apoc-modifier-secondary: rgb(21 29 35 / 16%); }
+.apocalypse-modifier-resource-scarcity { --apoc-modifier-edge: rgb(154 117 55 / 20%); --apoc-modifier-secondary: rgb(190 151 75 / 9%); }
+.apocalypse-modifier-communication-failure { --apoc-modifier-edge: rgb(52 116 144 / 19%); --apoc-modifier-secondary: rgb(76 171 188 / 9%); }
+.apocalypse-modifier-undead { --apoc-modifier-edge: rgb(91 31 32 / 24%); --apoc-modifier-secondary: rgb(132 57 48 / 10%); }
+
+body.apocalypse-theme-active[class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-front {
+    opacity: .72;
+    background:
+        radial-gradient(ellipse at 0 50%, var(--apoc-modifier-edge, transparent), transparent 42%),
+        radial-gradient(ellipse at 100% 42%, var(--apoc-modifier-secondary, transparent), transparent 44%),
+        linear-gradient(90deg, var(--apoc-modifier-edge, transparent), transparent 19% 81%, var(--apoc-modifier-edge, transparent));
+    mix-blend-mode: screen;
+}
+
+body.apocalypse-theme-active[class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-back {
+    background:
+        repeating-linear-gradient(118deg, transparent 0 36px, var(--apoc-modifier-secondary, transparent) 37px 38px, transparent 39px 76px),
+        radial-gradient(circle at 50% 110%, var(--apoc-modifier-edge, transparent), transparent 45%);
+}
+
+.apocalypse-modifier-spores .apocalypse-ambient-layer-edge-front,
+.apocalypse-modifier-allergens .apocalypse-ambient-layer-edge-front,
+.apocalypse-modifier-swarm .apocalypse-ambient-layer-edge-front {
+    background-image:
+        radial-gradient(circle at 6% 22%, var(--apoc-modifier-edge) 0 1px, transparent 2px),
+        radial-gradient(circle at 92% 64%, var(--apoc-modifier-secondary) 0 2px, transparent 3px),
+        radial-gradient(ellipse at 0 50%, var(--apoc-modifier-edge), transparent 42%),
+        radial-gradient(ellipse at 100% 42%, var(--apoc-modifier-secondary), transparent 44%);
+    background-size: 52px 58px, 77px 69px, auto, auto;
+}
+
+.apocalypse-modifier-structural-damage .apocalypse-ambient-layer-edge-back,
+.apocalypse-modifier-reality-fracture .apocalypse-ambient-layer-edge-back {
+    background-image:
+        linear-gradient(132deg, transparent 42%, var(--apoc-modifier-edge) 42.4% 42.8%, transparent 43.2%),
+        linear-gradient(47deg, transparent 61%, var(--apoc-modifier-secondary) 61.3% 61.7%, transparent 62.1%);
+    background-size: 190px 170px, 240px 220px;
+}
+
+/* Registry events. Events share a small number of GPU-safe visual families. */
+.apocalypse-ambient-root[class*='apoc-event-'] .apocalypse-ambient-layer-edge-front { animation: apoc-category-event-surge 1.55s ease-out; }
+.apocalypse-ambient-root:is(.apoc-event-lightning-glow,.apoc-event-emergency-red-surge,.apoc-event-radiation-glow,.apoc-event-electric-pulse,.apoc-event-warning-pulse) .apocalypse-ambient-layer-primary { animation: apoc-category-event-flash 1.2s ease-out; }
+.apocalypse-ambient-root:is(.apoc-event-dust-burst,.apoc-event-dust-surge,.apoc-event-dry-wind,.apoc-event-ash-burst,.apoc-event-volcanic-ash-pass,.apoc-event-impact-dust,.apoc-event-paper-drift,.apoc-event-pollen-drift) .apocalypse-ambient-layer-edge-front { animation: apoc-category-event-drift 1.55s ease-out; }
+.apocalypse-ambient-root:is(.apoc-event-data-glitch,.apoc-event-signal-interruption,.apoc-event-emp-fade,.apoc-event-scanline-sweep,.apoc-event-static-interruption,.apoc-event-chromatic-shift,.apoc-event-reality-tear,.apoc-event-geometry-distortion) .apocalypse-ambient-layer-secondary { animation: apoc-category-event-glitch 1.2s steps(2, end); }
+.apocalypse-ambient-root:is(.apoc-event-spore-wave,.apoc-event-organic-pulse,.apoc-event-infection-haze,.apoc-event-toxic-bloom,.apoc-event-contamination-trace,.apoc-event-plant-spore-release) .apocalypse-ambient-layer-edge-front { animation: apoc-category-event-organic 1.55s ease-in-out; }
+.apocalypse-ambient-root:is(.apoc-event-shadow-pass,.apoc-event-smoke-contraction,.apoc-event-silhouette-fade,.apoc-event-blackout-flicker,.apoc-event-visibility-fade) .apocalypse-ambient-layer-vignette { animation: apoc-category-event-shadow 1.5s ease-out; }
+
+@keyframes apoc-category-event-surge {
+    0%,100% { opacity: .3; filter: saturate(1); }
+    38% { opacity: .95; filter: saturate(1.45) brightness(1.18); }
+}
+@keyframes apoc-category-event-flash {
+    0%,100% { opacity: .45; }
+    24% { opacity: .95; filter: brightness(1.45); }
+    48% { opacity: .55; }
+}
+@keyframes apoc-category-event-drift {
+    0% { transform: translate3d(-5%, 2%, 0) scale(1.03); opacity: .1; }
+    45% { opacity: .9; }
+    100% { transform: translate3d(6%, -2%, 0) scale(1.08); opacity: .2; }
+}
+@keyframes apoc-category-event-glitch {
+    0%,100% { transform: translate3d(0,0,0); opacity: .45; }
+    25% { transform: translate3d(4px,-1px,0); opacity: .9; }
+    50% { transform: translate3d(-3px,2px,0); filter: hue-rotate(18deg); }
+    75% { transform: translate3d(2px,0,0); }
+}
+@keyframes apoc-category-event-organic {
+    0%,100% { transform: scale(1); opacity: .35; }
+    50% { transform: scale(1.035); opacity: .9; filter: saturate(1.35); }
+}
+@keyframes apoc-category-event-shadow {
+    0%,100% { opacity: .55; }
+    45% { opacity: .95; filter: brightness(.65); }
+}
+
+body[data-apocalypse-effects-level='subtle'][class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-front,
+body[data-apocalypse-effects-level='subtle'][class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-back { opacity: .35; }
+body[data-apocalypse-effects-level='off'][class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-front,
+body[data-apocalypse-effects-level='off'][class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-back { display: none; }
+
+@media (max-width: 768px) {
+    .lobby-apocalypse-category-options { grid-template-columns: 1fr; }
+    .apocalypse-category-badge { font-size: .61rem; }
+    body.apocalypse-theme-active[class*='apocalypse-modifier-'] .apocalypse-ambient-layer-edge-back { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .apocalypse-ambient-root[class*='apoc-event-'] .apocalypse-ambient-layer { animation: none !important; }
+}

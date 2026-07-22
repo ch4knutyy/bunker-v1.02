@@ -72,7 +72,7 @@ public partial class GameHub
     {
         if (category == RoomLocalEditorCategories.Bunker && room.Bunker != null)
             await BroadcastBunkerIntelProjection(room);
-        else if (category == RoomLocalEditorCategories.Apocalypse && room.Apocalypse != null)
+        else if (category == RoomLocalEditorCategories.Apocalypse && room.ApocalypseRevealed && room.Apocalypse != null)
             await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = room.Apocalypse.ToClientInfo() });
         else if (category == RoomLocalEditorCategories.Player && !string.IsNullOrWhiteSpace(targetPlayerId) &&
                  _roomService.TryResolvePlayer(room, targetPlayerId, out var connectionId, out var player))

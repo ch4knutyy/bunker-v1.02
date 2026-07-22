@@ -85,6 +85,57 @@ public sealed class ApocalypseDataValidationTests
         AssertValidationError(root, "unknown visual theme");
     }
 
+    [Fact]
+    public void VisualThemeFromAnotherCategoryIsRejected()
+    {
+        var root = LoadRoot();
+        var apocalypse = root.Apocalypses[0];
+        apocalypse.VisualThemeId = root.VisualThemeProfiles.First(theme =>
+            !string.Equals(theme.CategoryId, apocalypse.CategoryId, StringComparison.OrdinalIgnoreCase)).Id;
+        AssertValidationError(root, "instead of");
+    }
+
+    [Theory]
+    [InlineData("unknown-modifier", "unknown visual modifier")]
+    [InlineData("unsafe_modifier", "unsafe visual modifier")]
+    [InlineData("", "empty visual modifier")]
+    public void InvalidVisualModifierIsRejected(string modifier, string expected)
+    {
+        var root = LoadRoot();
+        root.Apocalypses[0].VisualModifierIds = [modifier];
+        AssertValidationError(root, expected);
+    }
+
+    [Fact]
+    public void DuplicateVisualModifierIsRejected()
+    {
+        var root = LoadRoot();
+        root.Apocalypses[0].VisualModifierIds = ["storm", "STORM"];
+        AssertValidationError(root, "duplicate visual modifiers");
+    }
+
+    [Fact]
+    public void MoreThanThreeVisualModifiersIsRejected()
+    {
+        var root = LoadRoot();
+        root.Apocalypses[0].VisualModifierIds = ["storm", "flood", "fog", "frost"];
+        AssertValidationError(root, "more than 3 visual modifiers");
+    }
+
+    [Fact]
+    public void NullVisualModifiersAreNormalizedAndValidZeroToThreeRemainReadOnly()
+    {
+        var root = LoadRoot();
+        root.Apocalypses[0].VisualModifierIds = null;
+        root.Apocalypses[1].VisualModifierIds = ["storm", "flood", "fog"];
+
+        GameDataService.ValidateApocalypseData(root);
+
+        Assert.Empty(root.Apocalypses[0].VisualModifierIds!);
+        Assert.Equal(new[] { "storm", "flood", "fog" }, root.Apocalypses[1].VisualModifierIds);
+        Assert.False(root.Apocalypses[1].VisualModifierIds is List<string>);
+    }
+
     [Theory]
     [InlineData("theme unsafe")]
     [InlineData(".theme")]
@@ -171,6 +222,20 @@ public sealed class ApocalypseDataValidationTests
     }
 
     [Fact]
+    public void ClientInfoProjectsOnlyNormalizedAllowlistedVisualModifiers()
+    {
+        var apocalypse = new Apocalypse
+        {
+            VisualModifierIds = ["STORM", "unknown-modifier", "unsafe_modifier", "storm", "flood", "fog", "frost"]
+        };
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(apocalypse.ToClientInfo()));
+        var modifiers = document.RootElement.GetProperty("visualModifierIds")
+            .EnumerateArray().Select(value => value.GetString()).ToArray();
+
+        Assert.Equal(new[] { "storm", "flood", "fog" }, modifiers);
+    }
+
+    [Fact]
     public void SnapshotStyleClonePreservesDefinitionMetadata()
     {
         var source = LoadRoot().Apocalypses.First(item => item.Gameplay?.Interactive == true);
@@ -196,7 +261,7 @@ public sealed class ApocalypseDataValidationTests
     private static GameDataService LoadService() =>
         new(new TestEnvironment(RepositoryRoot()), NullLogger<GameDataService>.Instance);
 
-    private static string ApocalypsePath() => Path.Combine(RepositoryRoot(), "wwwroot", "data", "apocalypses.json");
+    private static string ApocalypsePath() => Path.Combine(RepositoryRoot(), "wwwroot", "data", "Apocalypses", "apocalypses.json");
 
     private static string RepositoryRoot()
     {

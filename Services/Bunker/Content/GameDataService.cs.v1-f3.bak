@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Bunker.Models.GameData;
 using Bunker.Models;
@@ -59,10 +59,7 @@ namespace Bunker.Services
             _characterTraits = LoadJsonArray<CharacterTraitData>(Path.Combine(dataPath, "character_traits.json"), "character_traits");
             _phobias = LoadJsonArray<PhobiaData>(Path.Combine(dataPath, "phobias.json"), "phobias");
             _facts = LoadJsonArray<FactData>(Path.Combine(dataPath, "facts.json"), "facts");
-            var categorizedApocalypsePath = Path.Combine(dataPath, "Apocalypses", "apocalypses.json");
-            LoadApocalypseData(File.Exists(categorizedApocalypsePath)
-                ? categorizedApocalypsePath
-                : Path.Combine(dataPath, "apocalypses.json"));
+            LoadApocalypseData(Path.Combine(dataPath, "apocalypses.json"));
             _bunkers = ValidateBunkers(
                 LoadJsonArray<BunkerInfo>(Path.Combine(dataPath, "bunkers.json"), "bunkers"));
             _threats = LoadJsonArray<ThreatData>(Path.Combine(dataPath, "threats.json"), "threats");
@@ -188,24 +185,9 @@ namespace Bunker.Services
                     errors.Add($"apocalypse '{label}' references unknown category '{apocalypse.CategoryId}'");
                 if (string.IsNullOrWhiteSpace(apocalypse.VisualThemeId) || !themeById.TryGetValue(apocalypse.VisualThemeId, out var theme))
                     errors.Add($"apocalypse '{label}' references unknown visual theme '{apocalypse.VisualThemeId}'");
-                else if (!string.Equals(theme.CategoryId, apocalypse.CategoryId, StringComparison.OrdinalIgnoreCase))
-                    errors.Add($"apocalypse '{label}' uses visual theme '{apocalypse.VisualThemeId}' from category '{theme.CategoryId}' instead of '{apocalypse.CategoryId}'");
-
-                var visualModifiers = apocalypse.VisualModifierIds ?? Array.Empty<string>();
-                if (visualModifiers.Count > 3)
-                    errors.Add($"apocalypse '{label}' contains more than 3 visual modifiers");
-                if (visualModifiers.Any(string.IsNullOrWhiteSpace))
-                    errors.Add($"apocalypse '{label}' contains an empty visual modifier");
-                if (visualModifiers.Distinct(StringComparer.OrdinalIgnoreCase).Count() != visualModifiers.Count)
-                    errors.Add($"apocalypse '{label}' contains duplicate visual modifiers");
-                foreach (var modifier in visualModifiers.Where(value => !string.IsNullOrWhiteSpace(value)))
-                {
-                    if (!ApocalypseVisualMetadata.HasSafeSyntax(modifier))
-                        errors.Add($"apocalypse '{label}' contains unsafe visual modifier '{modifier}'");
-                    else if (!ApocalypseVisualMetadata.AllowedModifierIds.Contains(modifier))
-                        errors.Add($"apocalypse '{label}' references unknown visual modifier '{modifier}'");
-                }
-                apocalypse.VisualModifierIds = ApocalypseVisualMetadata.Normalize(visualModifiers);
+                else if (!string.Equals(theme.CategoryId, apocalypse.CategoryId, StringComparison.OrdinalIgnoreCase) &&
+                         string.IsNullOrWhiteSpace(theme.FallbackThemeId))
+                    errors.Add($"apocalypse '{label}' uses a theme from another category without a fallback");
 
                 if (apocalypse.Gameplay == null) continue;
                 if (apocalypse.Gameplay.Interactive) interactiveCount++;

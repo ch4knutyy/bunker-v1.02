@@ -296,6 +296,7 @@ public partial class GameHub
 
 	internal static void RollbackFailedLobbyStart(Room room, Apocalypse? apocalypseBeforeStart)
 	{
+		room.ApocalypseRevealed = false;
 		room.SettingsFrozen = false;
 		room.FrozenGameSettings = null;
 		room.ResolvedBunkerCapacity = null;

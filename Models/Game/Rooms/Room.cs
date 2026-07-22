@@ -197,6 +197,10 @@ namespace Bunker.Models
 		/// Апокаліпсис для цієї гри
 		/// </summary>
 		public Apocalypse? Apocalypse { get; set; }
+		/// <summary>
+		/// True only after the selected apocalypse reaches the canonical public reveal point.
+		/// </summary>
+		public bool ApocalypseRevealed { get; set; }
 
 		/// <summary>
 		/// Бункер для цієї гри
