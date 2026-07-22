@@ -1,0 +1,436 @@
+{
+  "version": 1,
+  "recordsTotal": 220,
+  "categories": [
+    {
+      "id": "armageddon",
+      "visualThemeId": "extinction-red",
+      "_i18n": {
+        "name": {
+          "uk": "Армагеддон і глобальне знищення",
+          "en": "Armageddon and Global Extinction",
+          "ru": "Армагеддон и глобальное уничтожение"
+        },
+        "description": {
+          "uk": "Глобальне знищення поверхні, масова загибель і невідворотні сценарії кінця світу.",
+          "en": "Global surface destruction, mass death, and unavoidable end-of-world scenarios.",
+          "ru": "Глобальное уничтожение поверхности, массовая гибель и неотвратимые сценарии конца света."
+        }
+      },
+      "count": 7,
+      "ordinaryCount": 7,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "nuclear_war",
+        "sky_burning",
+        "nuclear_winter",
+        "death_of_stars",
+        "heat_death_local",
+        "fire_sky",
+        "surface_extinction_countdown"
+      ]
+    },
+    {
+      "id": "weather",
+      "visualThemeId": "storm-blue",
+      "_i18n": {
+        "name": {
+          "uk": "Погодні та кліматичні",
+          "en": "Weather and Climate",
+          "ru": "Погодные и климатические"
+        },
+        "description": {
+          "uk": "Кліматичні зсуви, бурі, холод, спека, опади та некерована погода.",
+          "en": "Climate shifts, storms, cold, heat, precipitation, and uncontrolled weather.",
+          "ru": "Климатические сдвиги, бури, холод, жара, осадки и неконтролируемая погода."
+        }
+      },
+      "count": 20,
+      "ordinaryCount": 20,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "climate_collapse",
+        "magnetic_pole_flip",
+        "ice_age_rapid",
+        "carbon_dioxide_surge",
+        "blood_rain",
+        "drought_permanent",
+        "perpetual_storm",
+        "mega_drought",
+        "temporal_storm",
+        "ice_wall_rising",
+        "weather_control_loss",
+        "sentient_weather",
+        "sky_ocean",
+        "ocean_rise_rapid",
+        "night_without_end",
+        "permanent_superfog",
+        "global_salt_storms",
+        "frozen_equator",
+        "boiling_seas",
+        "living_storm_fronts"
+      ]
+    },
+    {
+      "id": "biological",
+      "visualThemeId": "biohazard-green",
+      "_i18n": {
+        "name": {
+          "uk": "Віруси та біологічні",
+          "en": "Viruses and Biological",
+          "ru": "Вирусы и биологические"
+        },
+        "description": {
+          "uk": "Віруси, пандемії, паразити, мутації та зміни людської біології.",
+          "en": "Viruses, pandemics, parasites, mutations, and changes to human biology.",
+          "ru": "Вирусы, пандемии, паразиты, мутации и изменения человеческой биологии."
+        }
+      },
+      "count": 55,
+      "ordinaryCount": 44,
+      "interactiveCount": 11,
+      "apocalypseIds": [
+        "zombie_pandemic",
+        "memory_loss_plague",
+        "pandemic_super_virus",
+        "parasite_mind_control",
+        "language_breakdown",
+        "fungal_apocalypse",
+        "bioterrorism_plague",
+        "flesh_virus",
+        "iron_plague",
+        "sleep_plague",
+        "color_blindness_epidemic",
+        "crystal_growth_virus",
+        "sound_plague",
+        "fungal_mind_hive",
+        "hivemind_virus",
+        "emotion_plague",
+        "reverse_evolution",
+        "plague_of_forgetting",
+        "plague_empathy",
+        "genetic_lock",
+        "invisible_plague",
+        "pandemic_rage",
+        "plague_of_youth",
+        "mind_plague",
+        "plague_beauty",
+        "dna_rewrite",
+        "bone_plague",
+        "pandemic_telepathy",
+        "plague_transparency",
+        "plague_wisdom",
+        "plague_laughter",
+        "inversion_of_senses",
+        "plague_of_speed",
+        "plague_empowerment",
+        "mind_parasite_spores",
+        "age_flux_plague",
+        "metabolic_famine",
+        "absolute_truth_pandemic",
+        "exchange_plague",
+        "predatory_flora_bloom",
+        "worldwide_insomnia",
+        "mass_feralization",
+        "glass_spore_plague",
+        "red_rain_pathogen",
+        "hypercaloric_food_virus",
+        "accelerated_aging_syndrome",
+        "metabolic_wasting_plague",
+        "gigantism_spore_bloom",
+        "miniaturization_fever",
+        "myostatin_collapse",
+        "muscle_atrophy_fog",
+        "skill_erasure_plague",
+        "phobia_seeding_plague",
+        "allergy_bloom_pandemic",
+        "regenerative_rejuvenation_plague"
+      ]
+    },
+    {
+      "id": "geological",
+      "visualThemeId": "seismic-amber",
+      "_i18n": {
+        "name": {
+          "uk": "Геологічні",
+          "en": "Geological",
+          "ru": "Геологические"
+        },
+        "description": {
+          "uk": "Землетруси, вулкани, руйнування кори та перебудова надр планети.",
+          "en": "Earthquakes, volcanoes, crustal destruction, and planetary interior changes.",
+          "ru": "Землетрясения, вулканы, разрушение коры и перестройка недр планеты."
+        }
+      },
+      "count": 11,
+      "ordinaryCount": 11,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "supervolcano_eruption",
+        "mega_earthquake",
+        "volcano_chain",
+        "hollow_earth",
+        "volcano_ocean",
+        "perpetual_earthquake",
+        "volcanic_winter_forever",
+        "concrete_crumbling",
+        "underground_fire_network",
+        "global_earth_hum",
+        "ash_ocean"
+      ]
+    },
+    {
+      "id": "cosmic",
+      "visualThemeId": "cosmic-violet",
+      "_i18n": {
+        "name": {
+          "uk": "Космічні",
+          "en": "Cosmic",
+          "ru": "Космические"
+        },
+        "description": {
+          "uk": "Сонячні, космічні, орбітальні та позаземні катастрофи.",
+          "en": "Solar, cosmic, orbital, and extraterrestrial catastrophes.",
+          "ru": "Солнечные, космические, орбитальные и внеземные катастрофы."
+        }
+      },
+      "count": 15,
+      "ordinaryCount": 15,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "solar_radiation_storm",
+        "asteroid_storm",
+        "black_hole_effect",
+        "solar_flare_emp",
+        "second_moon",
+        "night_sun",
+        "alien_terraforming",
+        "anti_matter_leak",
+        "color_sun",
+        "magnetic_storm_permanent",
+        "iron_sky",
+        "moon_shard_rain",
+        "orbital_debris_cascade",
+        "daylight_disappearance",
+        "solar_flicker"
+      ]
+    },
+    {
+      "id": "technology",
+      "visualThemeId": "machine-cyan",
+      "_i18n": {
+        "name": {
+          "uk": "Технологічні та ШІ",
+          "en": "Technology and AI",
+          "ru": "Технологические и ИИ"
+        },
+        "description": {
+          "uk": "Штучний інтелект, машини, цифрові системи, нанотехнології та техногенні поля.",
+          "en": "Artificial intelligence, machines, digital systems, nanotechnology, and technological fields.",
+          "ru": "Искусственный интеллект, машины, цифровые системы, нанотехнологии и техногенные поля."
+        }
+      },
+      "count": 27,
+      "ordinaryCount": 26,
+      "interactiveCount": 1,
+      "apocalypseIds": [
+        "ai_takeover",
+        "nanobot_plague",
+        "silicon_plague",
+        "digital_virus_reality",
+        "nano_gray_goo",
+        "consciousness_transfer",
+        "electromagnetic_life",
+        "cybernetic_rebellion",
+        "war_of_clones",
+        "mind_upload_disaster",
+        "tech_singularity_gone_wrong",
+        "ancient_machine_war",
+        "biological_robots",
+        "swarm_intelligence",
+        "consciousness_epidemic",
+        "plague_machines",
+        "digital_to_real",
+        "anti_technology_field",
+        "sound_weaponization",
+        "internet_collapse",
+        "electronic_silence",
+        "universal_power_blackout",
+        "autonomous_factory_war",
+        "synthetic_food_collapse",
+        "global_navigation_failure",
+        "language_ai_poisoning",
+        "rust_nanite_inheritance"
+      ]
+    },
+    {
+      "id": "ecological",
+      "visualThemeId": "wasteland-olive",
+      "_i18n": {
+        "name": {
+          "uk": "Екологічні та ресурсні",
+          "en": "Ecological and Resource",
+          "ru": "Экологические и ресурсные"
+        },
+        "description": {
+          "uk": "Руйнування екосистем, води, кисню, їжі, рослин і природних ресурсів.",
+          "en": "Collapse of ecosystems, water, oxygen, food, plants, and natural resources.",
+          "ru": "Разрушение экосистем, воды, кислорода, пищи, растений и природных ресурсов."
+        }
+      },
+      "count": 22,
+      "ordinaryCount": 22,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "ocean_collapse",
+        "water_depletion",
+        "mutation_wave",
+        "resource_depletion",
+        "protein_collapse",
+        "insect_swarm_apocalypse",
+        "plant_revolt",
+        "oxygen_depletion",
+        "predator_evolution",
+        "food_chain_reversal",
+        "photosynthesis_failure",
+        "poison_atmosphere",
+        "plague_of_plenty",
+        "light_eaters",
+        "aquifer_memory_poison",
+        "plastic_decay_bacteria",
+        "oxygen_decline",
+        "ocean_jellification",
+        "insect_empire",
+        "freshwater_crystallization",
+        "soil_sterility",
+        "methane_atmosphere_release"
+      ]
+    },
+    {
+      "id": "social",
+      "visualThemeId": "collapse-rust",
+      "_i18n": {
+        "name": {
+          "uk": "Соціальні та цивілізаційні",
+          "en": "Social and Civilizational",
+          "ru": "Социальные и цивилизационные"
+        },
+        "description": {
+          "uk": "Розпад держав, економіки, довіри, культури та суспільного порядку.",
+          "en": "Collapse of states, economies, trust, culture, and social order.",
+          "ru": "Распад государств, экономики, доверия, культуры и общественного порядка."
+        }
+      },
+      "count": 11,
+      "ordinaryCount": 11,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "economic_total_collapse",
+        "mass_insanity",
+        "stone_age_regression",
+        "plague_of_truth",
+        "mass_teleportation",
+        "war_of_beliefs",
+        "plague_of_purpose",
+        "currency_memory_collapse",
+        "permanent_civil_war",
+        "global_prison_break",
+        "city_state_fragmentation"
+      ]
+    },
+    {
+      "id": "anomaly",
+      "visualThemeId": "glitch-magenta",
+      "_i18n": {
+        "name": {
+          "uk": "Аномалії реальності",
+          "en": "Reality Anomalies",
+          "ru": "Аномалии реальности"
+        },
+        "description": {
+          "uk": "Порушення часу, простору, гравітації, матерії та законів реальності.",
+          "en": "Disruption of time, space, gravity, matter, and the laws of reality.",
+          "ru": "Нарушение времени, пространства, гравитации, материи и законов реальности."
+        }
+      },
+      "count": 36,
+      "ordinaryCount": 28,
+      "interactiveCount": 8,
+      "apocalypseIds": [
+        "simulation_failure",
+        "gravity_instability",
+        "dimension_tears",
+        "reality_glitches",
+        "time_loop_collapse",
+        "magnetic_reversal",
+        "anti_gravity_zones",
+        "quantum_uncertainty",
+        "gravity_reversal",
+        "reverse_aging",
+        "age_acceleration",
+        "sound_silence",
+        "endless_darkness",
+        "energy_drain",
+        "mirror_world",
+        "dimensional_overlap",
+        "reverse_entropy",
+        "storm_of_ideas",
+        "color_drain",
+        "weight_anomaly",
+        "temporal_decay",
+        "crystal_time",
+        "identity_rotation",
+        "temporal_compression",
+        "hypergravity_burden",
+        "lethal_sound_resonance",
+        "universal_false_memories",
+        "reality_echoes",
+        "shadow_duplication",
+        "personality_inversion_wave",
+        "consciousness_body_rotation",
+        "panic_resonance_field",
+        "clone_convergence_event",
+        "mutation_pulse_storm",
+        "memory_theft_cycle",
+        "identity_fragmentation_wave"
+      ]
+    },
+    {
+      "id": "supernatural",
+      "visualThemeId": "occult-indigo",
+      "_i18n": {
+        "name": {
+          "uk": "Надприродні та окультні",
+          "en": "Supernatural and Occult",
+          "ru": "Сверхъестественные и оккультные"
+        },
+        "description": {
+          "uk": "Надприродні істоти, прокляття, душі, магія та окультні явища.",
+          "en": "Supernatural beings, curses, souls, magic, and occult phenomena.",
+          "ru": "Сверхъестественные существа, проклятия, души, магия и оккультные явления."
+        }
+      },
+      "count": 16,
+      "ordinaryCount": 16,
+      "interactiveCount": 0,
+      "apocalypseIds": [
+        "ancient_gods_awakening",
+        "cursed_world",
+        "magic_collapse",
+        "shadow_plague",
+        "soul_separation",
+        "ghost_world",
+        "collective_nightmare",
+        "immortality_curse",
+        "death_echo",
+        "dream_bleed",
+        "fear_materialization",
+        "reverse_death",
+        "rebirth_loop",
+        "undead_sleepers",
+        "mirror_entities",
+        "dream_invasion"
+      ]
+    }
+  ]
+}
