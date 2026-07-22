@@ -1,4 +1,5 @@
 using Bunker.Models;
+using Bunker.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Hubs;
@@ -51,29 +52,74 @@ public partial class GameHub
         await Clients.OthersInGroup(room.Id).SendAsync("PostGameStoryStateChanged", _postGameStories.ToPublicDto(room.PostGameStory));
     }
 
-    public Task SavePostGameStoryDraft(string rawResult, long operatorVersion)
-    {
-        var (room, actor) = RequireStoryDeveloper(RoomActorCapability.OperatePostGameStoryDirector);
-        if (room.PostGamePhase != PostGamePhase.StoryPreparation) throw new HubException("story_not_in_preparation");
-        if (operatorVersion != room.DeveloperOperatorVersion) throw new HubException("developer_operator_stale");
-        try { _postGameStories.SaveDraft(room, actor, rawResult); }
-        catch (Exception exception) { throw StoryHubException(exception); }
-        return Task.CompletedTask;
-    }
+	public Task<long> SavePostGameStoryDraft(
+		string rawResult,
+		long operatorVersion)
+	{
+		var (room, actor) = RequireStoryDeveloper(
+			RoomActorCapability.OperatePostGameStoryDirector);
 
-    public string GetPostGameStoryResponseSchema()
-    {
-        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("room_membership_required");
-        var actor = _roomService.GetPlayer(Context.ConnectionId) ?? throw new HubException("room_membership_required");
-        if (!_developerAuthority.IsDeveloper(actor)) throw new HubException("developer_required");
-        if (!_developerAuthority.FeatureAllows(RoomActorCapability.OperatePostGameStoryDirector)) throw new HubException("feature_disabled");
-        return PostGameStoryPromptBuilder.ResponseSchema.Replace(
-            "\"final_story\"",
-            $"\"{room.PostGameStory.CurrentMode ?? PostGameStoryModes.FinalStory}\"",
-            StringComparison.Ordinal);
-    }
+		if (room.PostGamePhase != PostGamePhase.StoryPreparation)
+			throw new HubException("story_not_in_preparation");
 
-    public async Task PublishPostGameStory(string previewFingerprint, string commandId)
+		var isActiveConnection = string.Equals(
+			room.ActiveDeveloperConnectionId,
+			Context.ConnectionId,
+			StringComparison.Ordinal);
+
+		if (!isActiveConnection)
+			throw new HubException("developer_operator_required");
+
+		var currentOperatorVersion = room.DeveloperOperatorVersion;
+
+		if (operatorVersion != currentOperatorVersion)
+		{
+			_logger.LogInformation(
+				"Story draft received stale operator version. Client={ClientVersion}, Server={ServerVersion}, Connection={ConnectionId}. Using current server version.",
+				operatorVersion,
+				currentOperatorVersion,
+				Context.ConnectionId);
+		}
+
+		try
+		{
+			_postGameStories.SaveDraft(
+				room,
+				actor,
+				rawResult ?? string.Empty);
+		}
+		catch (Exception exception)
+		{
+			throw StoryHubException(exception);
+		}
+
+		return Task.FromResult(currentOperatorVersion);
+	}
+
+	public string GetPostGameStoryResponseSchema()
+	{
+		var room = _roomService.GetPlayerRoom(Context.ConnectionId)
+			?? throw new HubException("room_membership_required");
+
+		var actor = _roomService.GetPlayer(Context.ConnectionId)
+			?? throw new HubException("room_membership_required");
+
+		if (!_developerAuthority.IsDeveloper(actor))
+			throw new HubException("developer_required");
+
+		if (!_developerAuthority.FeatureAllows(
+				RoomActorCapability.OperatePostGameStoryDirector))
+		{
+			throw new HubException("feature_disabled");
+		}
+
+		return Bunker.Services.PostGameStoryPromptBuilder.ResponseSchema.Replace(
+			"\"final_story\"",
+			$"\"{room.PostGameStory.CurrentMode ?? PostGameStoryModes.FinalStory}\"",
+			StringComparison.Ordinal);
+	}
+
+	public async Task PublishPostGameStory(string previewFingerprint, string commandId)
     {
         var (room, actor) = RequireStoryDeveloper(RoomActorCapability.PublishPostGameStory);
         if (room.PostGamePhase != PostGamePhase.StoryPreparation) throw new HubException("story_not_in_preparation");

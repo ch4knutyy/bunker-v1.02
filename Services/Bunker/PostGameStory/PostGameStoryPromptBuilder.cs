@@ -10,7 +10,7 @@ public sealed record PostGameStoryPrompt(string Text, string Fingerprint);
 
 public sealed class PostGameStoryPromptBuilder
 {
-    public const string ResponseSchema = """{"schemaVersion":1,"mode":"final_story","title":"...","subtitle":"...","survivalScore":0,"verdictCode":"...","verdictText":"...","estimatedHorizon":"...","opening":"...","chapters":[{"title":"...","text":"..."}],"survivorEpilogues":[{"playerName":"...","role":"...","fate":"..."}],"eliminatedPlayerFates":[{"playerName":"...","usefulnessAssessment":"...","fate":"..."}],"bunkerOutcome":"...","humanityOutcomePreview":"...","bunkerContributionPreview":"...","strengths":[],"criticalRisks":[],"finalSummary":"...","continuationHooks":[],"humanityOutcome":"...","worldTimeline":[],"bunkerRole":"...","bunkerContribution":"...","legacy":"...","keyContributors":[],"decisionAssessment":"...","groupLosses":[]}""";
+    public const string ResponseSchema = """{"schemaVersion":1,"mode":"final_story","title":"...","subtitle":"...","survivalScore":0,"verdictCode":"...","verdictText":"...","estimatedHorizon":"...","opening":"...","chapters":[{"title":"...","text":"..."}],"survivorEpilogues":[{"playerName":"...","role":"...","fate":"..."}],"eliminatedPlayerFates":[{"playerName":"...","usefulnessAssessment":"...","fate":"..."}],"bunkerOutcome":"...","humanityOutcomePreview":"...","bunkerContributionPreview":"...","strengths":[],"criticalRisks":[],"finalSummary":"...","continuationHooks":[],"humanityOutcome":"...","worldTimeline":[{"period":"...","event":"..."}],"bunkerRole":"...","bunkerContribution":"...","legacy":"...","keyContributors":[],"decisionAssessment":"...","groupLosses":[]}""";
     public const int MaxPromptLength = 120_000;
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
@@ -180,12 +180,38 @@ public sealed class PostGameStoryPromptBuilder
         _ => "Створи фінальну історію цієї партії гри «Бункер».\n"
     };
 
-    private static string ResponseContract(string mode, IEnumerable<string> survivors, IEnumerable<string> eliminated) => $$"""
-        Схема: {{ResponseSchema.Replace("\"final_story\"", $"\"{mode}\"", StringComparison.Ordinal)}}
-        Обов'язкові survivors: {{string.Join(", ", survivors)}}.
-        Обов'язкові eliminated players: {{string.Join(", ", eliminated)}}.
-        Для humanity_outcome обов'язкові humanityOutcome і bunkerRole; для bunker_contribution — bunkerContribution і legacy; для eliminated_fates — eliminatedPlayerFates, decisionAssessment і groupLosses.
-        """;
+	private static string ResponseContract(
+		string mode,
+		IEnumerable<string> survivors,
+		IEnumerable<string> eliminated) => $$"""
+    Схема:
+    {{ResponseSchema.Replace(
+			"\"final_story\"",
+			$"\"{mode}\"",
+			StringComparison.Ordinal)}}
 
-    public static string Fingerprint(string value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
+    Обов'язкові survivors:
+    {{string.Join(", ", survivors)}}.
+
+    Обов'язкові eliminated players:
+    {{string.Join(", ", eliminated)}}.
+
+    Важливі правила структури:
+
+    - chapters — масив об'єктів із полями title та text;
+    - survivorEpilogues — масив об'єктів із playerName, role та fate;
+    - eliminatedPlayerFates — масив об'єктів із playerName,
+      usefulnessAssessment та fate;
+    - worldTimeline — тільки масив об'єктів із полями period та event;
+    - не повертай worldTimeline як масив рядків;
+    - strengths, criticalRisks, continuationHooks, keyContributors
+      та groupLosses — масиви рядків.
+
+    Для humanity_outcome обов'язкові humanityOutcome і bunkerRole.
+    Для bunker_contribution обов'язкові bunkerContribution і legacy.
+    Для eliminated_fates обов'язкові eliminatedPlayerFates,
+    decisionAssessment і groupLosses.
+    """;
+
+	public static string Fingerprint(string value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 }
