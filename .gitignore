@@ -36,6 +36,7 @@ Thumbs.db
 
 # Patch and rejected merge files
 *.rej
+*.v1-f3.bak
 
 # Local development and AI-agent artifacts
 .emergent/

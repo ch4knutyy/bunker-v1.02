@@ -136,6 +136,35 @@ public sealed class ApocalypseDataValidationTests
         Assert.False(root.Apocalypses[1].VisualModifierIds is List<string>);
     }
 
+    [Fact]
+    public void VisualModifierNormalizationCopiesTheDeserializedCollection()
+    {
+        var root = LoadRoot();
+        var source = new List<string> { "drought", "toxic", "vegetation-collapse" };
+        root.Apocalypses[0].VisualModifierIds = source;
+
+        GameDataService.ValidateApocalypseData(root);
+        source[0] = "flood";
+        source.Add("storm");
+
+        Assert.Equal(new[] { "drought", "toxic", "vegetation-collapse" }, root.Apocalypses[0].VisualModifierIds);
+        Assert.False(root.Apocalypses[0].VisualModifierIds is List<string>);
+    }
+
+    [Fact]
+    public void LobbyCatalogCategoryTotalsAreCanonicalAndSumToProductionCount()
+    {
+        var service = LoadService();
+        var catalog = new ApocalypseSelectionService(service).BuildCatalog(new RoomGameSettings(), "uk");
+
+        Assert.Equal(10, catalog.Categories.Count);
+        Assert.Equal(220, catalog.Categories.Sum(category => category.TotalCount));
+        Assert.All(catalog.Categories, category => Assert.Equal(category.TotalCount, category.OrdinaryCount + category.InteractiveCount));
+        var json = JsonSerializer.Serialize(catalog);
+        Assert.DoesNotContain("effectProfileId", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("\"Effects\":", json, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Theory]
     [InlineData("theme unsafe")]
     [InlineData(".theme")]

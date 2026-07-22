@@ -84,6 +84,7 @@ let lobbyApocalypseSearch = '';
 let lobbyApocalypseCategoryFilter = '';
 let lobbyApocalypseInteractiveFilter = 'all';
 let lobbyApocalypseVisibleCount = 30;
+const lobbyApocalypseCollapsedCategoryIds = new Set();
 const lobbyLocalPresetStorageKey = 'bunker.lobbyGamePresets.v1';
 const pendingCharacteristicReveals = new Set();
 const pendingSpecialCardUses = new Set();
@@ -5982,6 +5983,21 @@ const apocalypseIconSvgRegistry = Object.freeze({
 	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 55H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
 });
 
+const apocalypseCategoryIconRegistry = Object.freeze({
+	armageddon: 'nuclear', weather: 'climate', biological: 'biological', geological: 'collapse', cosmic: 'cosmic',
+	technology: 'ai', ecological: 'collapse', social: 'collapse', anomaly: 'anomaly', supernatural: 'mystical'
+});
+
+function resolveApocalypseCategoryIconKey(categoryId) {
+	return apocalypseCategoryIconRegistry[String(categoryId ?? '').trim().toLowerCase()] || 'generic';
+}
+
+function createApocalypseCategoryIcon(categoryId) {
+	const template = document.createElement('template');
+	template.innerHTML = apocalypseIconSvgRegistry[resolveApocalypseCategoryIconKey(categoryId)] || apocalypseIconSvgRegistry.generic;
+	return template.content.firstElementChild;
+}
+
 Object.assign(uiTranslations.uk, {
 	lobbyTabApocalypse: 'Апокаліпсис', lobbyApocalypseMode: 'Режим вибору', lobbyApocalypseRandomAll: 'Випадковий з усіх', lobbyApocalypseRandomCategories: 'Випадковий із категорій', lobbyApocalypseSpecific: 'Конкретний', lobbyApocalypseCustomPool: 'Власний набір', lobbyApocalypseAllowInteractive: 'Дозволити інтерактивні апокаліпсиси', lobbyApocalypseChance: 'Шанс інтерактивного апокаліпсиса', lobbyApocalypseTheme: 'Тематичне оформлення апокаліпсиса', lobbyApocalypseSearch: 'Пошук апокаліпсиса', lobbyApocalypseSelectAll: 'Обрати всі', lobbyApocalypseClear: 'Очистити', lobbyApocalypseSelected: 'Обрано', lobbyApocalypseInteractive: 'Інтерактивний', lobbyApocalypseOrdinary: 'Звичайний', lobbyApocalypseLoadMore: 'Показати ще', lobbyWarningApocalypseCategoriesEmpty: 'Оберіть хоча б одну категорію апокаліпсисів.', lobbyWarningApocalypsePoolEmpty: 'Власний набір апокаліпсисів порожній.', lobbyWarningApocalypseSpecificMissing: 'Оберіть конкретний апокаліпсис.', lobbyWarningApocalypseCandidateEmpty: 'За цими налаштуваннями немає доступних апокаліпсисів.', lobbyWarningApocalypseInteractiveUnavailable: 'У виборі немає інтерактивних апокаліпсисів.', lobbyWarningApocalypseOnlyInteractive: 'У виборі залишилися лише інтерактивні апокаліпсиси.', lobbyWarningApocalypseThemeDisabled: 'Тематичне оформлення апокаліпсиса вимкнено.', lobbyWarningApocalypsePoolSmall: 'Власний набір апокаліпсисів дуже малий.', lobbyWarningApocalypseSpecificInteractive: 'Обраний апокаліпсис є інтерактивним.'
 });
@@ -6114,6 +6130,17 @@ let apocalypseAmbientSchedulerTimer = null;
 let apocalypseAmbientEventTimer = null;
 let activeApocalypseCategoryProfile = null;
 let lastApocalypseAmbientEventType = '';
+const apocalypseModifierGroupPriority = Object.freeze({
+	environment: Object.freeze(['drought','frost','flood','heat','storm','fog','ash','darkness','air-hazard','cosmic-impact']),
+	contamination: Object.freeze(['toxic','radiation','spores','infection','mutation','nanotech','parasite','allergens','swarm']),
+	world: Object.freeze(['emp','blackout','communication-failure','structural-damage','vegetation-collapse','reality-fracture','identity-shift','machine','unrest','psychological','undead','resource-scarcity'])
+});
+const apocalypseModifierEventSuppressions = Object.freeze({
+	drought: Object.freeze(['rain-pass','flood-wave','condensation-wave','water-distortion']),
+	frost: Object.freeze(['heat-shimmer','ember-trace','thermal-wave']),
+	flood: Object.freeze(['dry-wind','dust-surge','water-evaporation-shimmer','heat-shimmer']),
+	heat: Object.freeze(['frost-edge','cold-mist','snow-drift'])
+});
 let apocalypseParallaxTimer = null;
 let apocalypseParallaxInitialized = false;
 let apocalypsePendingPointer = null;
@@ -6225,9 +6252,11 @@ function resolveApocalypseCategoryProfile(apocalypse) {
 	const maximum = getApocalypseEffectsLevel() === 'subtle' || window.matchMedia?.('(max-width: 768px)')?.matches === true
 		? 1
 		: Math.min(3, Number(registry.maxModifiers) || 3);
-	const modifierIds = [...new Set(Array.isArray(rawModifiers) ? rawModifiers.map(value => String(value).trim().toLowerCase()) : [])]
-		.filter(value => modifiers.has(value))
-		.slice(0, maximum);
+	const candidates = [...new Set(Array.isArray(rawModifiers) ? rawModifiers.map(value => String(value).trim().toLowerCase()) : [])].filter(value => modifiers.has(value));
+	const modifierIds = registry.priorityGroups.map(group => {
+		const priority = apocalypseModifierGroupPriority[group] || [];
+		return candidates.filter(id => modifiers.get(id)?.group === group).sort((left, right) => priority.indexOf(left) - priority.indexOf(right))[0];
+	}).filter(Boolean).slice(0, maximum);
 	return { apocalypseId: id, categoryId, category, modifierIds, modifiers };
 }
 
@@ -6236,10 +6265,11 @@ function getApocalypseCategoryEventPools() {
 		const fallback = apocalypseAmbientEventsByTheme[document.body?.dataset.apocalypseTheme] || [];
 		return { category: [...fallback], modifier: [], all: [...fallback] };
 	}
-	const category = [...new Set((activeApocalypseCategoryProfile.category.baseEvents || []).map(normalizeApocalypseCategoryToken).filter(Boolean))];
+	const suppressed = new Set(activeApocalypseCategoryProfile.modifierIds.flatMap(id => apocalypseModifierEventSuppressions[id] || []));
+	const category = [...new Set((activeApocalypseCategoryProfile.category.baseEvents || []).map(normalizeApocalypseCategoryToken).filter(value => value && !suppressed.has(value)))];
 	const modifier = [...new Set(activeApocalypseCategoryProfile.modifierIds
 		.flatMap(id => activeApocalypseCategoryProfile.modifiers.get(id)?.eventPool || [])
-		.map(normalizeApocalypseCategoryToken).filter(Boolean))];
+		.map(normalizeApocalypseCategoryToken).filter(value => value && !suppressed.has(value)))];
 	return { category, modifier, all: [...new Set([...category, ...modifier])] };
 }
 
@@ -6276,12 +6306,15 @@ function syncApocalypseCategoryVisualState(apocalypse) {
 function renderApocalypseCategoryBadge(apocalypse) {
 	const profile = resolveApocalypseCategoryProfile(apocalypse);
 	const hero = document.querySelector('.apocalypse-hero-content');
-	if (!profile || !hero) return;
+	if (!hero) return;
+	const categoryId = profile?.categoryId || '';
 	const language = ['uk', 'en', 'ru'].includes(getCurrentLanguage?.()) ? getCurrentLanguage() : 'uk';
 	const badge = document.createElement('span');
 	badge.className = 'apocalypse-category-badge';
-	badge.dataset.category = profile.categoryId;
-	badge.textContent = profile.category?._i18n?.name?.[language] || profile.category?._i18n?.name?.uk || profile.categoryId;
+	badge.dataset.category = categoryId || 'generic';
+	const icon = document.createElement('span'); icon.className = 'apocalypse-category-badge-icon'; icon.setAttribute('aria-hidden', 'true'); icon.append(createApocalypseCategoryIcon(categoryId));
+	const label = document.createElement('span'); label.textContent = profile?.category?._i18n?.name?.[language] || profile?.category?._i18n?.name?.uk || t('apocalypse');
+	badge.append(icon, label);
 	const title = hero.querySelector('.apocalypse-title');
 	hero.insertBefore(badge, title || null);
 }
@@ -8989,15 +9022,22 @@ function renderLobbyApocalypseEditor(settings) {
 	const filtered = apocalypses.filter(item => (!normalizedSearch || `${lobbyGet(item, 'name', 'Name')} ${lobbyGet(item, 'id', 'Id')}`.toLocaleLowerCase().includes(normalizedSearch)) &&
 		(!lobbyApocalypseCategoryFilter || lobbyGet(item, 'categoryId', 'CategoryId') === lobbyApocalypseCategoryFilter) &&
 		(lobbyApocalypseInteractiveFilter === 'all' || String(Boolean(lobbyGet(item, 'interactive', 'Interactive'))) === lobbyApocalypseInteractiveFilter));
+	const selectedIds = mode === 'Specific' ? [settings.selectedApocalypseId].filter(Boolean) : settings.apocalypseCustomPoolIds;
+	const groupedModel = buildLobbyApocalypseGroupedModel(categories, apocalypses, filtered, selectedIds, mode, lobbyApocalypseVisibleCount);
 	const results = document.getElementById('lobbyApocalypseResults');
-	if (results) results.replaceChildren(...filtered.slice(0, lobbyApocalypseVisibleCount).map(item => {
-		const id = lobbyGet(item, 'id', 'Id'); const interactive = Boolean(lobbyGet(item, 'interactive', 'Interactive'));
-		const button = document.createElement('button'); button.type = 'button'; button.className = 'lobby-apocalypse-option';
-		button.dataset.apocalypseAction = mode === 'Specific' ? 'select-specific' : 'toggle-pool'; button.dataset.id = id;
-		button.classList.toggle('selected', mode === 'Specific' ? settings.selectedApocalypseId === id : settings.apocalypseCustomPoolIds.includes(id));
-		const title = document.createElement('strong'); title.textContent = lobbyGet(item, 'name', 'Name');
-		const meta = document.createElement('span'); meta.textContent = `${lobbyGet(item, 'categoryId', 'CategoryId')} · ${interactive ? t('lobbyApocalypseInteractive') : t('lobbyApocalypseOrdinary')}`;
-		button.append(title, meta); return button;
+	if (results) results.replaceChildren(...groupedModel.map(group => {
+		const container = document.createElement('div'); container.className = 'lobby-apocalypse-category-group'; container.dataset.categoryId = group.id;
+		for (const [key, value] of Object.entries({ totalCount: group.totalCount, visibleCount: group.visibleCount, renderedCount: group.renderedCount, selectedCount: group.selectedCount })) container.dataset[key] = String(value);
+		const collapsed = lobbyApocalypseCollapsedCategoryIds.has(group.id);
+		const header = document.createElement('button'); header.type = 'button'; header.className = 'lobby-apocalypse-category-header';
+		header.dataset.apocalypseCategoryToggle = group.id; header.setAttribute('aria-expanded', String(!collapsed)); header.title = group.description;
+		const icon = document.createElement('span'); icon.className = 'lobby-apocalypse-category-icon'; icon.setAttribute('aria-hidden', 'true'); icon.append(createApocalypseCategoryIcon(group.id));
+		const label = document.createElement('span'); label.className = 'lobby-apocalypse-category-name'; label.textContent = group.name;
+		const counts = document.createElement('span'); counts.className = 'lobby-apocalypse-category-counts'; counts.textContent = mode === 'CustomPool' ? `${group.selectedCount} · ${group.visibleCount} / ${group.totalCount}` : `${group.visibleCount} / ${group.totalCount}`;
+		header.append(icon, label, counts);
+		const options = document.createElement('div'); options.className = 'lobby-apocalypse-category-options'; options.hidden = collapsed;
+		options.replaceChildren(...group.items.map(item => createLobbyApocalypseOption(item, settings, mode)));
+		container.append(header, options); return container;
 	}));
 	const more = document.getElementById('lobbyApocalypseLoadMore'); if (more) more.hidden = filtered.length <= lobbyApocalypseVisibleCount;
 	const selectedList = document.getElementById('lobbyApocalypseSelectedPool');
@@ -9012,6 +9052,27 @@ function renderLobbyApocalypseEditor(settings) {
 		preview.textContent = `${candidates.length} possible · ${candidates.length - interactive} ${t('lobbyApocalypseOrdinary').toLowerCase()} · ${interactive} ${t('lobbyApocalypseInteractive').toLowerCase()} · ${settings.interactiveApocalypseChancePercent}%`;
 	}
 	renderLobbyApocalypseActivation(settings, apocalypses);
+}
+
+function buildLobbyApocalypseGroupedModel(categories, apocalypses, filtered, selectedIds, mode, visibleLimit) {
+	const selected = new Set(selectedIds); const rendered = filtered.slice(0, visibleLimit);
+	const renderedIds = new Set(rendered.map(item => lobbyGet(item, 'id', 'Id')));
+	const selectedExtras = mode === 'CustomPool' ? apocalypses.filter(item => selected.has(lobbyGet(item, 'id', 'Id')) && !renderedIds.has(lobbyGet(item, 'id', 'Id'))) : [];
+	const displayed = [...rendered, ...selectedExtras];
+	return categories.map(category => {
+		const id = lobbyGet(category, 'id', 'Id'); const categoryItems = apocalypses.filter(item => lobbyGet(item, 'categoryId', 'CategoryId') === id);
+		const visibleItems = filtered.filter(item => lobbyGet(item, 'categoryId', 'CategoryId') === id); const items = displayed.filter(item => lobbyGet(item, 'categoryId', 'CategoryId') === id);
+		const selectedCount = categoryItems.filter(item => selected.has(lobbyGet(item, 'id', 'Id'))).length;
+		return { id, name: lobbyGet(category, 'name', 'Name'), description: lobbyGet(category, 'description', 'Description') || '', totalCount: Number(lobbyGet(category, 'totalCount', 'TotalCount') ?? categoryItems.length), visibleCount: visibleItems.length, renderedCount: items.length, selectedCount, items };
+	}).filter(group => group.visibleCount > 0 || mode === 'CustomPool' && group.selectedCount > 0);
+}
+
+function createLobbyApocalypseOption(item, settings, mode) {
+	const id = lobbyGet(item, 'id', 'Id'); const interactive = Boolean(lobbyGet(item, 'interactive', 'Interactive'));
+	const button = document.createElement('button'); button.type = 'button'; button.className = 'lobby-apocalypse-option'; button.dataset.apocalypseAction = mode === 'Specific' ? 'select-specific' : 'toggle-pool'; button.dataset.id = id;
+	button.classList.toggle('selected', mode === 'Specific' ? settings.selectedApocalypseId === id : settings.apocalypseCustomPoolIds.includes(id));
+	const title = document.createElement('strong'); title.textContent = lobbyGet(item, 'name', 'Name'); const meta = document.createElement('span'); meta.textContent = interactive ? t('lobbyApocalypseInteractive') : t('lobbyApocalypseOrdinary');
+	button.append(title, meta); return button;
 }
 
 function renderLobbyGameSetup() {
@@ -9141,6 +9202,12 @@ async function kickLobbyMember(playerId) { if (lobbyCommandPending || !confirm(t
 
 function bindLobbySettingsControls() {
 	const setup = document.getElementById('lobbyGameSetup'); if (!setup || setup.dataset.bound === 'true') return; setup.dataset.bound = 'true';
+	setup.onclick = event => {
+		const header = event.target.closest('[data-apocalypse-category-toggle]'); if (!header) return;
+		const id = header.dataset.apocalypseCategoryToggle;
+		lobbyApocalypseCollapsedCategoryIds.has(id) ? lobbyApocalypseCollapsedCategoryIds.delete(id) : lobbyApocalypseCollapsedCategoryIds.add(id);
+		renderLobbyApocalypseEditor(lobbySettingsDraft);
+	};
 	setup.addEventListener('input', event => { if (event.target.id === 'lobbyApocalypseSearch') { lobbyApocalypseSearch = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('.lobby-setting-input') && event.target.tagName === 'INPUT' && event.target.type !== 'checkbox') updateLobbySettingsDraft(event.target); });
 	setup.addEventListener('change', event => { if (event.target.id === 'lobbyApocalypseCategoryFilter') { lobbyApocalypseCategoryFilter = event.target.value; lobbyApocalypseVisibleCount = 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.id === 'lobbyApocalypseInteractiveFilter') { lobbyApocalypseInteractiveFilter = event.target.value; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } if (event.target.matches('[data-activation-setting]')) { updateLobbyActivationDraft(event.target); return; } if (event.target.matches('.lobby-setting-input')) updateLobbySettingsDraft(event.target); if (event.target.id === 'lobbyPresetFile' && event.target.files?.[0]) { importLobbyPresetFile(event.target.files[0]); event.target.value = ''; } });
 	setup.addEventListener('click', event => { const tab = event.target.closest('[data-settings-tab]'); if (tab) { lobbySettingsActiveTab = tab.dataset.settingsTab; if (lobbySettingsActiveTab === 'apocalypse') ensureLobbyApocalypseCatalog(); renderLobbyGameSetup(); return; } const apocalypseAction = event.target.closest('[data-apocalypse-action]'); if (apocalypseAction && lobbySettingsDraft) { const id = apocalypseAction.dataset.id; const action = apocalypseAction.dataset.apocalypseAction; if (action === 'toggle-category') lobbySettingsDraft.allowedApocalypseCategoryIds = lobbySettingsDraft.allowedApocalypseCategoryIds.includes(id) ? lobbySettingsDraft.allowedApocalypseCategoryIds.filter(value => value !== id) : [...lobbySettingsDraft.allowedApocalypseCategoryIds, id]; if (action === 'select-specific') lobbySettingsDraft.selectedApocalypseId = id; if (action === 'toggle-pool') lobbySettingsDraft.apocalypseCustomPoolIds = lobbySettingsDraft.apocalypseCustomPoolIds.includes(id) ? lobbySettingsDraft.apocalypseCustomPoolIds.filter(value => value !== id) : [...lobbySettingsDraft.apocalypseCustomPoolIds, id]; if (action === 'all-categories') lobbySettingsDraft.allowedApocalypseCategoryIds = (lobbyGet(lobbyApocalypseCatalog, 'categories', 'Categories') || []).map(item => lobbyGet(item, 'id', 'Id')); if (action === 'clear-categories') lobbySettingsDraft.allowedApocalypseCategoryIds = []; if (action === 'clear-pool') lobbySettingsDraft.apocalypseCustomPoolIds = []; if (action === 'load-more') { lobbyApocalypseVisibleCount += 30; renderLobbyApocalypseEditor(lobbySettingsDraft); return; } markLobbyApocalypseDraftChanged(); return; } const actions = { lobbySettingsApply: applyLobbySettings, lobbySettingsReset: () => { lobbySettingsDraft = normalizeLobbySettings(lobbyGet(lobbyState, 'settings', 'Settings')); lobbySettingsDirty = false; setLobbySettingsFeedback(''); renderLobbyGameSetup(); }, lobbySettingsClassic: () => loadLobbyServerPreset('Classic'), lobbyPresetSave: saveLobbyLocalPreset, lobbyPresetLoad: loadLobbyLocalPreset, lobbyPresetDelete: deleteLobbyLocalPreset, lobbyPresetExport: exportLobbyPreset, lobbyPresetImport: () => document.getElementById('lobbyPresetFile')?.click(), lobbyPasswordApply: updateLobbyPassword }; const action = actions[event.target.closest('button')?.id]; if (action) action(); });
