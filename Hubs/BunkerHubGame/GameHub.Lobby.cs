@@ -24,8 +24,7 @@ public partial class GameHub
 	public Task<LobbyApocalypseCatalogDto> GetLobbyApocalypseCatalog(string language = "uk")
 	{
 		var room = RequireLobbyHost();
-		if (room.State != RoomState.Lobby || room.SettingsFrozen) throw new HubException("settings_frozen");
-		return Task.FromResult(_apocalypseSelection.BuildCatalog(_roomGameSettings.GetCanonical(room), language));
+		return Task.FromResult(_apocalypseSelection.BuildCatalog(_roomGameSettings.GetEffective(room), language));
 	}
 
 	public async Task<LobbySettingsApplyResult> ApplyLobbyGameSettings(LobbySettingsUpdateRequest request)
