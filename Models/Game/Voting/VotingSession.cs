@@ -17,6 +17,8 @@ namespace Bunker.Models
     {
         public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
         public int Round { get; set; } = 1;
+        public int VotingStartedAtRound { get; set; } = 1;
+        public bool IsEarlyVoting { get; set; }
         public VotingState State { get; set; } = VotingState.Active;
         public DateTime StartedAt { get; set; } = DateTime.UtcNow;
         public DateTime? EndedAt { get; set; }
