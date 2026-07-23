@@ -7,20 +7,12 @@ namespace Bunker.UnitTests.Services;
 public sealed class RoundVotingAdminServiceTests
 {
     [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    public void VotingIsBlockedBeforeThirdRound(int round)
-    {
-        var result = RoundVotingAdminService.CanStartVoting(PlayableRoom(round, GamePhase.PreVotingReadyCheck));
-        Assert.False(result.Allowed);
-        Assert.Equal("round_not_completed", result.Code);
-    }
-
-    [Theory]
+    [InlineData(1, GamePhase.PreVotingReadyCheck)]
+    [InlineData(2, GamePhase.PreVotingReadyCheck)]
     [InlineData(3, GamePhase.ExtraInventory)]
     [InlineData(3, GamePhase.PreVotingReadyCheck)]
     [InlineData(4, GamePhase.PreVotingReadyCheck)]
-    public void VotingIsAllowedAfterNormalThirdRoundAndLater(int round, GamePhase phase) =>
+    public void VotingIsAllowedFromRound1AndLater(int round, GamePhase phase) =>
         Assert.True(RoundVotingAdminService.CanStartVoting(PlayableRoom(round, phase)).Allowed);
 
     [Fact]
@@ -177,6 +169,25 @@ public sealed class RoundVotingAdminServiceTests
         var json = JsonSerializer.Serialize(voting.ToClientInfo(players, showVotes: false));
         Assert.Contains("\"votes\":null", json, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("\"voters\":[]", json, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData(1, 3, true)]
+    [InlineData(2, 3, true)]
+    [InlineData(3, 3, false)]
+    [InlineData(4, 3, false)]
+    public void EarlyVotingFlagIsComputedCorrectlyFromStartRoundSettings(int currentRound, int votingStartRound, bool expectedIsEarly)
+    {
+        var room = PlayableRoom(currentRound, GamePhase.PreVotingReadyCheck);
+        var settings = new RoomGameSettings { VotingStartRound = votingStartRound };
+        var voting = new VotingSession
+        {
+            Round = room.CurrentRound,
+            VotingStartedAtRound = room.CurrentRound,
+            IsEarlyVoting = room.CurrentRound < settings.VotingStartRound
+        };
+        Assert.Equal(currentRound, voting.VotingStartedAtRound);
+        Assert.Equal(expectedIsEarly, voting.IsEarlyVoting);
     }
 
     private static VotingSession ActiveVoting() => new() { State = VotingState.Active };

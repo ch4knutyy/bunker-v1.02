@@ -18,8 +18,6 @@ public static class RoundVotingAdminService
             return new(false, "room_not_playing", "Голосування доступне тільки під час гри");
         if (!settings.VotingEnabled)
             return new(false, "voting_disabled", "Голосування вимкнено в налаштуваннях кімнати");
-        if (room.CurrentRound < settings.VotingStartRound)
-            return new(false, "round_not_completed", $"Голосування доступне після завершення раунду {settings.VotingStartRound}");
         if (settings.VotingFrequency == VotingFrequencyMode.EveryTwoRounds &&
             (room.CurrentRound - settings.VotingStartRound) % 2 != 0)
             return new(false, "voting_not_scheduled", "Голосування не заплановано для цього раунду");

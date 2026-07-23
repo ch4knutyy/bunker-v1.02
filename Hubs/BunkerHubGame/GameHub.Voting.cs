@@ -1,4 +1,4 @@
-﻿using Bunker.Models;
+using Bunker.Models;
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -44,10 +44,14 @@ namespace Bunker.Hubs
                 return;
             }
 
+            var settings = _roomGameSettings.GetEffective(room);
+
             // Створюємо нову сесію голосування
             var voting = new VotingSession
             {
-                Round = room.CurrentRound
+                Round = room.CurrentRound,
+                VotingStartedAtRound = room.CurrentRound,
+                IsEarlyVoting = room.CurrentRound < settings.VotingStartRound
             };
 
             var playersSnapshot = RoomService.GetPlayersSnapshot(room);
