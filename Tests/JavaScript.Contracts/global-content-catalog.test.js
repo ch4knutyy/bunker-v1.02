@@ -8,6 +8,7 @@ const model = fs.readFileSync('Models/Game/Content/GlobalContentCatalog.cs', 'ut
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 
 test('catalog is read-only, allowlisted and capability guarded', () => {
   assert.match(hub, /GmCapability\.ManageGlobalContent/);
@@ -33,6 +34,6 @@ test('read-only UI stays hidden until server capability response', () => {
   assert.match(client, /panel\.style\.display = globalCatalogAllowed \? 'block' : 'none'/);
   assert.doesNotMatch(catalog, /Save to file|Hot reload/i);
   for (const key of ['globalCatalogTitle', 'globalCatalogReadOnly', 'globalCatalogCategory', 'globalCatalogSearch']) {
-    assert.equal((client.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `missing localization ${key}`);
+    assert.equal((i18n.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `missing localization ${key}`);
   }
 });

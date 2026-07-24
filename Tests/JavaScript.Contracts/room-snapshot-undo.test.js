@@ -9,6 +9,7 @@ const diagnosticsHub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 
 const threatHub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.GMThreats.cs'), 'utf8');
 const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const i18n = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'i18n', 'translations.js'), 'utf8');
 
 test('snapshot service uses explicit state and excludes runtime room fields', () => {
   const captureState = service.match(/private static RoomSnapshotState CaptureState[\s\S]*?(?=\n    private static void ApplyState)/)?.[0] || '';
@@ -56,6 +57,6 @@ test('snapshot UI is live, localized, confirmed, and prevents double submit', ()
   assert.match(client, /if \(gmSnapshotCommandPending\) return/);
   assert.match(client, /confirm\(t\('gmSnapshotConfirm'\)\)/);
   assert.match(client, /confirm\(t\('gmSnapshotActiveConfirm'\)\)/);
-  assert.equal((client.match(/gmSnapshotsTitle:/g) || []).length, 3);
-  assert.equal((client.match(/gmUndoLastAction:/g) || []).length, 3);
+  assert.equal((i18n.match(/gmSnapshotsTitle:/g) || []).length, 3);
+  assert.equal((i18n.match(/gmUndoLastAction:/g) || []).length, 3);
 });

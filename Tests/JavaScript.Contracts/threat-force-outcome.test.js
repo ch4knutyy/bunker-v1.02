@@ -7,6 +7,7 @@ const threatsHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Threats.cs', 'utf
 const mutator = fs.readFileSync('Services/Bunker/Threats/GMThreatStateMutator.cs', 'utf8');
 const auditModel = fs.readFileSync('Models/Game/Threats/ThreatAuditEntry.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 
@@ -59,7 +60,7 @@ test('GM UI requests preview first, renders safe modal and guards double confirm
   assert.match(client, /GMThreatForceRejected/);
   assert.match(client, /gmThreatForceStale/);
   for (const key of ['gmThreatForceSuccess', 'gmThreatForceFailure', 'gmThreatForcePreviewTitle']) {
-    assert.equal((client.match(new RegExp(key, 'g')) || []).length >= 3, true);
+    assert.equal((i18n.match(new RegExp(key, 'g')) || []).length >= 3, true);
   }
 });
 

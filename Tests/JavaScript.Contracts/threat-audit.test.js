@@ -7,6 +7,7 @@ const service = fs.readFileSync('Services/Bunker/Threats/ThreatAuditService.cs',
 const gmHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GMThreats.cs', 'utf8');
 const threatsHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Threats.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 
@@ -44,6 +45,6 @@ test('GM history UI localizes, escapes, limits and renders server timestamps', (
   assert.match(client, /toLocaleTimeString/);
   assert.match(client, /escapeHtml\(name\)/);
   for (const key of ['gmThreatHistory', 'gmThreatHistoryEmpty', 'gmThreatEventEffectsApplied']) {
-    assert.equal((client.match(new RegExp(key, 'g')) || []).length >= 3, true);
+    assert.equal((i18n.match(new RegExp(key, 'g')) || []).length >= 3, true);
   }
 });

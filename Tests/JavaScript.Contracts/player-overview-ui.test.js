@@ -6,6 +6,7 @@ const test = require('node:test');
 const root = path.resolve(__dirname, '..', '..');
 const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GameBoard.cshtml'), 'utf8');
 const game = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const i18n = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'i18n', 'translations.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'wwwroot', 'css', 'game.css'), 'utf8');
 
 function method(source, name) {
@@ -117,7 +118,7 @@ test('automatic special card neighbors are presentation-only canonical seat labe
 
 test('UA RU and EN overview and comparison labels are registered in the current localization system', () => {
   for (const key of ['playerOverviewTitle', 'playerLabel', 'notRevealed', 'revealedProgress', 'previousPlayer', 'nextPlayer', 'noAvailablePlayers', 'specialNextOrder', 'specialPreviousOrder', 'allPlayersView', 'singlePlayerView', 'comparisonSort', 'sortBySeat', 'sortByName', 'sortMostRevealed', 'sortLeastRevealed']) {
-    assert.equal((game.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `${key} must exist in three locales`);
+    assert.equal((i18n.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `${key} must exist in three locales`);
   }
   assert.match(game, /t\('revealedProgress'\)\.replace\('\{shown\}'/);
 });

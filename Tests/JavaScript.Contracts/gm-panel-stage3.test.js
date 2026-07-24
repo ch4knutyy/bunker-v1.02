@@ -6,6 +6,7 @@ const test = require('node:test');
 const root = path.resolve(__dirname, '..', '..');
 const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const i18n = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'i18n', 'translations.js'), 'utf8');
 
 test('GM panel exposes the current role-safe tabs and diagnostics', () => {
   for (const tab of ['game', 'players', 'voting', 'threats', 'bunker', 'events', 'technical', 'overview']) {
@@ -34,7 +35,7 @@ test('visible phase and interaction state use localized labels', () => {
   assert.match(client, /function getPhaseLabel/);
   assert.match(client, /function getThreatStatusLabel/);
   for (const key of ['gmGameState', 'gmRoundControl', 'gmThreatControl', 'gmContent', 'gmDiagnostics']) {
-    assert.match(client, new RegExp(key));
+    assert.match(i18n, new RegExp(key));
   }
 });
 

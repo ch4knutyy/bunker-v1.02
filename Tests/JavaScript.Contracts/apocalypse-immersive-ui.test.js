@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const test = require('node:test');
 
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
@@ -139,7 +140,7 @@ test('live, reconnect and language paths rerender the same current scenario', ()
   assert.match(game, /RejoinSuccess[\s\S]*currentApocalypse = data\.apocalypse \|\| data\.Apocalypse[\s\S]*renderApocalypse\(currentApocalypse\)/);
   assert.match(game, /renderCurrentGameUI\(\)[\s\S]*renderApocalypse\(currentApocalypse\)/);
   for (const key of ['apocBadge', 'apocDanger', 'apocMainThreats', 'apocSurvivalRequirements', 'apocConsequences', 'dangerCritical', 'dangerUnknown']) {
-    assert.equal((game.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `${key} must have UA/EN/RU`);
+    assert.equal((i18n.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `${key} must have UA/EN/RU`);
   }
 });
 
