@@ -49,3 +49,14 @@ test('updateGMSections no longer references legacy round tab button', () => {
   assert.doesNotMatch(fn, /data-gm-tab-button="round"/);
   assert.doesNotMatch(fn, /console\.log/);
 });
+
+test('threat tab has single resync control and single authoritative renderer', () => {
+  const threatSection = view.slice(
+    view.indexOf('id="gmThreatControlSection"'),
+    view.indexOf('id="gmPlayerCardsV2"'));
+  const resyncOnclicks = (threatSection.match(/gmResyncThreatRoom\(\)/g) || []).length;
+  assert.equal(resyncOnclicks, 1, 'expected exactly one gmResyncThreatRoom onclick in threats tab');
+  assert.match(threatSection, /id="gmThreatResync"/);
+  assert.match(client, /function renderGMThreatControl\(\)/);
+  assert.match(client, /gmThreatControlData\.threats/);
+});
