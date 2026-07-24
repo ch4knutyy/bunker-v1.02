@@ -60,3 +60,35 @@ test('threat tab has single resync control and single authoritative renderer', (
   assert.match(client, /function renderGMThreatControl\(\)/);
   assert.match(client, /gmThreatControlData\.threats/);
 });
+
+test('resetClientGameStateForNewRoom clears all GM transient state', () => {
+  const resetFn = client.slice(
+    client.indexOf('function resetClientGameStateForNewRoom()'),
+    client.indexOf('function clearLegacyRoomStateOnly'));
+  assert.match(resetFn, /gmThreatControlData\s*=\s*\{/);
+  assert.match(resetFn, /gmThreatForcePreview\s*=\s*null/);
+  assert.match(resetFn, /gmThreatCommandPending\s*=\s*false/);
+  assert.match(resetFn, /gmPlayerCommandPending\s*=\s*false/);
+  assert.match(resetFn, /gmDiagnosticsData\s*=\s*null/);
+  assert.match(resetFn, /gmAuditData\s*=\s*\{/);
+  assert.match(resetFn, /gmSnapshotsData\s*=\s*\[\]/);
+  assert.match(resetFn, /gmRoomLocalEditorData\s*=\s*\{/);
+  assert.match(resetFn, /gmVotingAdminState\s*=\s*\{/);
+  assert.match(resetFn, /omniscientPreview\s*=\s*null/);
+  assert.match(resetFn, /directorPreview\s*=\s*null/);
+  assert.match(resetFn, /gmLastCommandError\s*=\s*''/);
+});
+
+test('RejoinSuccess resets pending GM command flags before rejoining', () => {
+  const rejoinSection = client.slice(
+    client.indexOf('// Успішне перепідключення'),
+    client.indexOf('connection.off("RejoinSuccess")'));
+  assert.match(rejoinSection, /gmThreatCommandPending\s*=\s*false/);
+  assert.match(rejoinSection, /gmThreatForcePending\s*=\s*false/);
+  assert.match(rejoinSection, /gmPlayerCommandPending\s*=\s*false/);
+  assert.match(rejoinSection, /gmRoundCommandPending\s*=\s*false/);
+  assert.match(rejoinSection, /gmSnapshotCommandPending\s*=\s*false/);
+  assert.match(rejoinSection, /gmRoomLocalEditorPending\s*=\s*false/);
+  assert.match(rejoinSection, /gmDiagnosticsPending\s*=\s*false/);
+  assert.match(rejoinSection, /bunkerCapacityPending\s*=\s*false/);
+});

@@ -110,7 +110,6 @@ let currentGameTimer = null;
 let gameTimerClockAnchor = null;
 let gameTimerCommandPending = false;
 let activeGMTab = 'state';
-let gmLastServerUpdateAt = null;
 let gmLastCommandError = '';
 let pendingJoinRoomId = null; // Для закриття модалки після успішного join
 let hostToken = null;
@@ -2534,6 +2533,30 @@ function resetClientGameStateForNewRoom() {
 	returnFinishedGamePending = false;
 	myVote = null;
 	if (typeof gmRevealedChars !== "undefined") gmRevealedChars = {};
+	gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
+	gmThreatForcePreview = null;
+	gmThreatForceRequestedOutcome = '';
+	gmThreatCommandPending = false;
+	gmThreatForcePending = false;
+	gmPlayerCommandPending = false;
+	gmRoundCommandPending = false;
+	gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };
+	gmDiagnosticsData = null;
+	gmAuditData = { entries: [] };
+	gmAutoFixPreview = null;
+	gmDiagnosticsPending = false;
+	gmSnapshotsData = [];
+	gmSnapshotRestorePreview = null;
+	gmSnapshotCommandPending = false;
+	gmRoomLocalEditorData = { bunkerFields: [], apocalypseFields: [], players: [] };
+	gmRoomLocalEditPreview = null;
+	gmRoomLocalEditorPending = false;
+	omniscientPreview = null;
+	omniscientCommandPending = false;
+	directorPreview = null;
+	directorCommandPending = false;
+	gmLastCommandError = '';
+	bunkerCapacityPending = false;
 
 	['myPlayerCards', 'publicPlayerSelector', 'selectedPlayerPanel', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent', 'specialCardsTableBody', 'gmSpecialCardsList'].forEach(id => {
 		const el = document.getElementById(id);
@@ -3951,6 +3974,30 @@ function registerSignalREvents() {
 		roomPlayers = {};
 		currentApocalypse = null;
 		renderApocalypse(null);
+		gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
+		gmThreatForcePreview = null;
+		gmThreatCommandPending = false;
+		gmThreatForcePending = false;
+		gmPlayerCommandPending = false;
+		gmRoundCommandPending = false;
+		gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };
+		gmDiagnosticsData = null;
+		gmAuditData = { entries: [] };
+		gmAutoFixPreview = null;
+		gmDiagnosticsPending = false;
+		gmSnapshotsData = [];
+		gmSnapshotRestorePreview = null;
+		gmSnapshotCommandPending = false;
+		gmRoomLocalEditorData = { bunkerFields: [], apocalypseFields: [], players: [] };
+		gmRoomLocalEditPreview = null;
+		gmRoomLocalEditorPending = false;
+		omniscientPreview = null;
+		omniscientCommandPending = false;
+		directorPreview = null;
+		directorCommandPending = false;
+		gmLastCommandError = '';
+		bunkerCapacityPending = false;
+		selectedPlayerForGM = null;
 		clearSession();
 		showLobbySection();
 		addEventMessage(`Ви покинули кімнату`);
@@ -4521,6 +4568,9 @@ function registerSignalREvents() {
 		});
 		updateGMPlayerSelect();
 		updateSpecialCardsUI();
+		if (selectedPlayerForGM && !gmPlayersData[selectedPlayerForGM]) {
+			selectedPlayerForGM = null;
+		}
 		if (selectedPlayerForGM) loadPlayerDataForGM();
 	});
 
@@ -4606,6 +4656,17 @@ function registerSignalREvents() {
 	// ==================== SESSION RESTORE HANDLERS ====================
 
 	// Успішне перепідключення
+	// Успішне перепідключення — очищуємо pending-флаги GM commands,
+	// оскільки серверний стан є авторитетним після reconnect
+	gmThreatCommandPending = false;
+	gmThreatForcePending = false;
+	gmPlayerCommandPending = false;
+	gmRoundCommandPending = false;
+	gmSnapshotCommandPending = false;
+	gmRoomLocalEditorPending = false;
+	gmDiagnosticsPending = false;
+	bunkerCapacityPending = false;
+
 	connection.off("RejoinSuccess");
 	connection.on("RejoinSuccess", function (data) {
 		console.log("=== REJOIN SUCCESS START ===");
@@ -8197,7 +8258,6 @@ function renderGmVotingAdmin() {
 }
 
 function markGMServerUpdate() {
-	gmLastServerUpdateAt = new Date();
 	renderGMPanelState();
 }
 
