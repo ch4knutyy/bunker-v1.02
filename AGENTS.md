@@ -384,6 +384,19 @@ Preserve Ukrainian, Russian, and English localization structures.
 ### 14.1 Agent communication
 
 Write plans, warnings, assumptions, implementation summaries, and final reports in Ukrainian.
+Natural-language reports must be written entirely in Ukrainian.
+
+English is allowed only for:
+
+- code identifiers;
+- file and directory names;
+- command names;
+- library, framework, protocol, and API names;
+- localization keys;
+- exact error messages and quoted source-code fragments.
+
+Do not mix English words into Ukrainian prose when a clear Ukrainian equivalent exists.
+Do not introduce text in unrelated languages.
 
 ### 14.2 Code identifiers
 
@@ -576,7 +589,159 @@ Do not claim that something works unless supported by one or more of:
 
 ---
 
-## 19. Final report format
+## 19. Audit and analysis report persistence
+
+For substantial read-only audits, architecture reviews, implementation plans, migration analyses, security reviews, or other reports that are too large for convenient chat transfer, save the final useful report as a Markdown document inside the repository.
+
+This rule applies when:
+
+- the user explicitly requests a saved report;
+- the task prompt requires report persistence;
+- the report is substantial enough that preserving it in project documentation is materially useful.
+
+Do not create a repository report for trivial inspections, short answers, or routine implementation summaries unless the user requests one.
+
+### 19.1 Relationship to read-only tasks
+
+Creating the requested report document is allowed even when source-code modification is prohibited, provided that:
+
+- the user did not explicitly prohibit creation of all files;
+- only the report document is created or updated;
+- no source code, configuration, content data, tests, project files, or runtime state are changed;
+- the report is treated as an intended task output, not as an implementation change.
+
+If the current task explicitly says **do not create files**, that instruction takes priority. Complete the audit in chat and ask whether the user wants the report saved afterward.
+
+### 19.2 Documentation location
+
+Before creating a report:
+
+1. Inspect the existing documentation structure.
+2. Reuse an appropriate existing directory when one clearly exists.
+3. Prefer a repository-specific audit or architecture directory when available.
+4. Otherwise use:
+
+```text
+docs/audits/
+```
+
+Do not reorganize existing documentation solely to store one report.
+
+### 19.3 File naming
+
+Use lowercase kebab-case names with an ISO date prefix:
+
+```text
+YYYY-MM-DD-topic-audit.md
+YYYY-MM-DD-topic-review.md
+YYYY-MM-DD-topic-plan.md
+```
+
+Examples:
+
+```text
+docs/audits/2026-07-24-gm-panel-audit.md
+docs/audits/2026-07-24-voting-security-review.md
+docs/audits/2026-07-24-scenario-system-plan.md
+```
+
+Do not overwrite an existing report unless the user explicitly requested an update to that exact document.
+
+If the target filename already exists and the task is a separate report, use a meaningful suffix such as:
+
+```text
+-revised
+-follow-up
+-02
+```
+
+### 19.4 Required metadata
+
+Begin every saved report with a compact metadata block containing, when available:
+
+- title;
+- date;
+- report type;
+- scope;
+- status;
+- repository branch;
+- relevant working-tree state;
+- tools or model used, when useful and available;
+- checks performed;
+- checks intentionally not performed;
+- known limitations.
+
+Do not include secrets, tokens, private configuration, bootstrap keys, connection IDs, or sensitive diagnostics.
+
+### 19.5 Content requirements
+
+The saved report must:
+
+- be written in Ukrainian;
+- use Markdown and UTF-8;
+- be understandable without the original chat session;
+- preserve the complete useful findings;
+- preserve evidence, file paths, symbols, and approximate line references;
+- distinguish verified facts from assumptions and inferences;
+- preserve important tables;
+- preserve risks and regression concerns;
+- preserve approval gates;
+- preserve the recommended implementation plan;
+- preserve manual verification steps;
+- state what was not inspected or verified.
+
+Do not include:
+
+- private chain-of-thought;
+- hidden reasoning;
+- internal deliberation;
+- raw tool transcripts;
+- repetitive progress messages;
+- copied terminal noise;
+- large source-code excerpts unless essential as evidence;
+- unsupported claims.
+
+Summarize tool activity as evidence instead of copying raw execution logs.
+
+### 19.6 Repository safety
+
+When saving an audit or analysis report:
+
+1. The report must be the only repository modification unless the task explicitly authorizes other changes.
+2. Do not modify source code merely to improve the report.
+3. Do not run build, tests, Playwright, or the server solely for report persistence.
+4. Do not run Git write operations.
+5. Preserve unrelated uncommitted changes.
+6. Do not update documentation indexes or navigation files unless explicitly requested.
+7. Do not add generated binaries, screenshots, logs, or temporary files unless explicitly required.
+
+### 19.7 Verification after writing
+
+After creating or updating the report:
+
+1. Verify that the file exists.
+2. Verify that it is not empty.
+3. Inspect the beginning and ending of the document.
+4. Verify that headings and Markdown tables were preserved.
+5. Check the file size and line count.
+6. Run `git status --short` for visibility.
+7. Inspect the report-specific diff when practical.
+8. Confirm that no unrelated files changed.
+
+The final chat response should contain only a concise summary plus:
+
+- the exact report path;
+- whether it was created or updated;
+- file size;
+- line count;
+- verification result;
+- any limitations.
+
+Do not paste the full saved report into chat unless the user explicitly asks for it.
+
+---
+
+## 20. Final report format
 
 At the end of every implementation task, provide a structured report in Ukrainian.
 
