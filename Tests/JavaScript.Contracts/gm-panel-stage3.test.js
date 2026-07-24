@@ -37,3 +37,15 @@ test('visible phase and interaction state use localized labels', () => {
     assert.match(client, new RegExp(key));
   }
 });
+
+test('omniscient hidden state update refreshes GM panel button', () => {
+  assert.match(client, /OmniscientHiddenStateUpdated[\s\S]*renderCurrentGameUI\(\)/);
+});
+
+test('updateGMSections no longer references legacy round tab button', () => {
+  const fn = client.slice(
+    client.indexOf('function updateGMSections()'),
+    client.indexOf('function renderRoomsList'));
+  assert.doesNotMatch(fn, /data-gm-tab-button="round"/);
+  assert.doesNotMatch(fn, /console\.log/);
+});
