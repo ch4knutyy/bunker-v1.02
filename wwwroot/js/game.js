@@ -3852,6 +3852,7 @@ function registerSignalREvents() {
 		omniscientHiddenStateVersion = version;
 		omniscientHiddenState = state;
 		renderOmniscientHiddenState();
+		renderCurrentGameUI();
 	});
 
 	connection.off("PlayerStateResynced");
@@ -8982,12 +8983,8 @@ function updateRoomUI() {
 
 // Нова функція для оновлення GM секцій
 function updateGMSections() {
-	const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started' || currentRoom.state === 'Voting');
-	const roundTab = document.querySelector('[data-gm-tab-button="round"]');
-	if (roundTab) roundTab.disabled = !isGameActive;
 	updateRoundStatusUI();
 	renderGMPanelState();
-	console.log("[updateGMSections] isHost:", isHost, "isGameActive:", isGameActive);
 }
 
 function renderRoomsList(rooms) {

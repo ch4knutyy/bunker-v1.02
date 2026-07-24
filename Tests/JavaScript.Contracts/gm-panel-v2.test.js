@@ -28,6 +28,7 @@ test('normal host panel defaults to local simple mode without changing server pe
   assert.match(view, /id="gmPanelAdvancedMode"/);
   assert.match(view, /Наступна рекомендована дія/);
   assert.match(css, /data-gm-mode="simple"[^\n]+data-gm-advanced/);
+  assert.match(view, /id="gmOmniscientMode"[^>]+data-gm-advanced/);
 });
 
 test('omniscient overview does not inherit normal mutation tabs', () => {
