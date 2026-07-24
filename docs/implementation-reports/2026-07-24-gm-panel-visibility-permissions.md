@@ -183,7 +183,6 @@ renderCurrentGameUI();  // кнопка оновлюється одразу
 
 - Повний xUnit suite
 - Повний Playwright suite
-- Runtime UI verification
 
 ---
 
@@ -198,15 +197,20 @@ renderCurrentGameUI();  // кнопка оновлюється одразу
 
 ## Ризики та ручна перевірка
 
-Рекомендовано ручну перевірку користувачем:
+Ручна перевірка користувачем — **успішна**:
 
-1. **Omniscient GM**: кнопка GM Panel з'являється одразу після входу (без затримки)
-2. **Omniscient GM після F5**: кнопка стабільно видима
-3. **Ordinary host**: `#gmOmniscientMode` прихований у simple mode
-4. **Ordinary host**: technical tab прихований
-5. **Developer**: technical controls доступні
-6. **Host transfer**: новий host отримує кнопку, старий — втрачає
-7. **Console**: немає null errors або visibility exceptions
+1. ✅ Ordinary host бачить кнопку GM Panel
+2. ✅ Ordinary host не бачить вкладку Technical
+3. ✅ У Simple mode omniscient bootstrap прихований
+4. ✅ Перемикання Simple/Advanced працює
+5. ✅ Звичайний active player не бачить кнопку GM Panel
+6. ✅ Після передачі host старий host втрачає кнопку, новий отримує її без F5
+7. ✅ Omniscient GM бачить кнопку одразу після входу
+8. ✅ Після F5/reconnect кнопка omniscient GM залишається доступною
+9. ✅ Developer technical controls працюють
+10. ✅ У browser console немає null errors, visibility exceptions або інших пов'язаних JavaScript-помилок
+
+Перевірка — ручна (не Playwright).
 
 ---
 
@@ -228,7 +232,7 @@ renderCurrentGameUI();  // кнопка оновлюється одразу
 | 12 | `dotnet build --no-restore` успішний | ✅ (0 errors, 0 warnings) |
 | 13 | Релевантні JS tests успішні | ✅ (11/11 + 7/7) |
 | 14 | Diff локальний, без unrelated formatting | ✅ (4 файли, -5/+14) |
-| 15 | Runtime UI verification чітко позначено | ✅ (не виконано, рекомендовано) |
+| 15 | Runtime UI verification чітко позначено | ✅ Ручна перевірка — успішна |
 | 16 | Approval-required дії не виконані | ✅ |
 
 ---
@@ -245,7 +249,7 @@ renderCurrentGameUI();  // кнопка оновлюється одразу
 
 ## Обмеження, що залишилися
 
-1. **Runtime UI verification**: не виконано. Потребує ручної перевірки користувачем.
+1. **Runtime UI verification**: виконано ручну перевірку — успішна.
 2. **`canShowTab("events")` line 68**: unreachable в advanced mode (line 61 не блокує, але line 68 перевіряє `canManageRounds` — ті ж permissions, що й game tab). Це не баг, але може бути неочевидним.
 3. **Omniscient bootstrap entry в technical tab**: навіть з `data-gm-advanced`, developer бачить його в advanced mode. Це коректно — developer може ввімкнути omniscient mode.
 4. **`omniscientHiddenState` як delay-dependent flag**: кнопка тепер оновлюється одразу, але `omniscientHiddenState` як concept залишається залежним від event timing. Поточне рішення достатнє.
