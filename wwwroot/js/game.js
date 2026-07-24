@@ -3,36 +3,6 @@ const connection = new signalR.HubConnectionBuilder()
 	.withAutomaticReconnect()
 	.build();
 
-if (typeof registerSignalREvents === 'function') registerSignalREvents();
-console.log("[SignalR] about to call connection.start()");
-connection.start()
-	.then(async () => {
-		console.log("SignalR connected, connectionId:", connection.connectionId);
-		myConnectionId = connection.connectionId;
-		try { applyDeveloperAccessState(await connection.invoke('GetDeveloperAccessState')); }
-		catch (_) { applyDeveloperAccessState(null); }
-
-		updateConnectionStatus(`✓ ${getCurrentLanguage() === 'en' ? 'Connected to server' : getCurrentLanguage() === 'ru' ? 'Подключено к серверу' : 'Підключено до сервера'}`);
-
-		// Спроба перепідключення до існуючої сесії
-		if (!tryRejoin()) {
-			if (initialInviteRoomId) {
-				openJoinRoomModal(initialInviteRoomId);
-			}
-			connection.invoke("GetRooms");
-		}
-
-		// Автозаповнення імені
-		prefillPlayerName();
-
-		addEventMessage("Підключено до сервера");
-	})
-	.catch(err => {
-		console.error("Connection error:", err);
-		updateConnectionStatus("✗ Помилка підключення. Оновіть сторінку.", true);
-		addEventMessage("Помилка підключення до сервера");
-	});
-
 // Дані
 let currentRoom = null;
 let myPlayerData = null;
@@ -126,6 +96,36 @@ let currentGameCompletion = null;
 let returnFinishedGamePending = false;
 let myVote = null;
 let initialInviteRoomId = getRoomIdFromPath();
+
+if (typeof registerSignalREvents === 'function') registerSignalREvents();
+console.log("[SignalR] about to call connection.start()");
+connection.start()
+	.then(async () => {
+		console.log("SignalR connected, connectionId:", connection.connectionId);
+		myConnectionId = connection.connectionId;
+		try { applyDeveloperAccessState(await connection.invoke('GetDeveloperAccessState')); }
+		catch (_) { applyDeveloperAccessState(null); }
+
+		updateConnectionStatus(`✓ ${getCurrentLanguage() === 'en' ? 'Connected to server' : getCurrentLanguage() === 'ru' ? 'Подключено к серверу' : 'Підключено до сервера'}`);
+
+		// Спроба перепідключення до існуючої сесії
+		if (!tryRejoin()) {
+			if (initialInviteRoomId) {
+				openJoinRoomModal(initialInviteRoomId);
+			}
+			connection.invoke("GetRooms");
+		}
+
+		// Автозаповнення імені
+		prefillPlayerName();
+
+		addEventMessage("Підключено до сервера");
+	})
+	.catch(err => {
+		console.error("Connection error:", err);
+		updateConnectionStatus("✗ Помилка підключення. Оновіть сторінку.", true);
+		addEventMessage("Помилка підключення до сервера");
+	});
 
 // ==================== GLOBAL HELPER FUNCTIONS ====================
 // escapeHtml and sanitizeNameInput are defined in game-utils.js (loaded before this file)
