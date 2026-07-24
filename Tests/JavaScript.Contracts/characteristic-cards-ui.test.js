@@ -6,6 +6,7 @@ const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const tooltip = fs.readFileSync('wwwroot/js/tooltip.js', 'utf8');
 const stoneTexture = fs.readFileSync('wwwroot/images/ui/character-card-stone.svg', 'utf8');
+const charactersIcons = fs.readFileSync('wwwroot/js/bunker/characters/icons.js', 'utf8');
 
 function cssRule(selector) {
   const start = css.indexOf(selector);
@@ -29,7 +30,7 @@ test('one reusable renderer supports all canonical characteristic cards', () => 
 test('profession details and deterministic tag icon priority use safe fallback', () => {
   assert.match(game, /cardExperience[\s\S]*experienceYears/);
   assert.match(game, /cardAdditionalItem[\s\S]*localizedProfessionItem/);
-  assert.match(game, /const professionIconRegistry = Object\.freeze/);
+  assert.match(charactersIcons, /const professionIconRegistry = Object\.freeze/);
 	assert.match(game, /const priority = \['violin','string_instrument','guitar'/);
   assert.match(game, /professionIconRegistry\[match\] \|\| professionIconRegistry\.generic/);
   assert.match(game, /capabilityTags: src\.capabilityTags/);

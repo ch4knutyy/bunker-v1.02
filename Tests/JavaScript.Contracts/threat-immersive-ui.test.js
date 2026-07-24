@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const test = require('node:test');
 
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const render = fs.readFileSync('wwwroot/js/bunker/apocalypse/render.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
@@ -145,7 +146,7 @@ test('shared variables variants circular medallion and responsive rules are pres
 });
 
 test('apocalypse bunker and room count regression remain independent', () => {
-  assert.doesNotMatch(method(game, 'renderApocalypseScenario'), /renderThreatScenario|threat-scenario-shell|resolveThreatVisualVariant/);
+  assert.doesNotMatch(method(render, 'renderApocalypseScenario'), /renderThreatScenario|threat-scenario-shell|resolveThreatVisualVariant/);
   assert.doesNotMatch(method(game, 'renderBunkerFacility'), /renderThreatScenario|threat-scenario-shell|resolveThreatVisualVariant/);
   assert.match(game, /if \(roomPlayerCountElement\)/);
   assert.match(view, /id="apocalypseContent"/);

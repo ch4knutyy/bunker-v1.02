@@ -1039,23 +1039,6 @@ function updateRoundStatusUI() {
 	}
 }
 
-const threatIconSvgRegistry = Object.freeze({
-	radiation: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="7" fill="currentColor"/><path d="M27 22 19 8A28 28 0 0 1 31 5v16m6 1 8-14a28 28 0 0 1 9 9L40 25m1 12h16a28 28 0 0 1-5 13L38 41M27 42l-8 14a28 28 0 0 1-10-9l14-8" fill="none" stroke="currentColor" stroke-width="5"/></svg>',
-	air: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="5" fill="currentColor"/><path d="M32 27c-2-11 5-18 15-16 3 10-3 18-15 16Zm5 8c11-2 18 5 16 15-10 3-18-3-16-15Zm-10 2c2 11-5 18-15 16-3-10 3-18 15-16Zm-2-10C14 29 7 22 9 12c10-3 18 3 16 15Z" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
-	fire: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M35 5c4 12-7 15-3 26 4-7 10-10 15-15 8 11 10 20 5 30-4 9-12 13-21 13S14 55 10 47C4 34 14 23 27 11c0 9 2 13 8 17" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	flood: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 22c7 0 7 5 14 5s7-5 14-5 7 5 14 5 7-5 10-5M7 35c7 0 7 5 14 5s7-5 14-5 7 5 14 5 7-5 10-5M7 48c7 0 7 5 14 5s7-5 14-5 7 5 14 5 7-5 10-5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',
-	structural: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56V13h48v43M8 56h48M31 13l-6 14 10 6-8 23M18 24h9m10 0h10M16 41h9m14 0h9" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	contamination: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 7h16M28 7v17L14 50c-2 4 1 7 5 7h26c4 0 7-3 5-7L36 24V7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M20 43c8-5 16 5 25-1" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="28" cy="48" r="2" fill="currentColor"/></svg>',
-	medical: '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="13" width="46" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="4"/><path d="M27 22h10v10h10v10H37v10H27V42H17V32h10V22Z" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	biological: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 25V8m-6 19L11 18m14 16L9 39m20 0L18 54m20-15 10 15m-9-20 16 5m-16-12 14-9" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="8" r="4"/><circle cx="11" cy="18" r="4"/><circle cx="9" cy="39" r="4"/><circle cx="18" cy="54" r="4"/><circle cx="48" cy="54" r="4"/><circle cx="55" cy="39" r="4"/><circle cx="53" cy="18" r="4"/></svg>',
-	security: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 53 14v16c0 13-8 23-21 28C19 53 11 43 11 30V14l21-8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 33h20M32 23v20" stroke="currentColor" stroke-width="4"/></svg>',
-	power: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M36 5 15 36h15l-3 23 22-34H34l2-20Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>',
-	environmental: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M13 42h35c7 0 11-4 11-10s-5-10-11-10c-2-9-9-15-18-15-10 0-18 7-19 18-6 1-9 5-9 9 0 5 4 8 11 8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m20 49-4 8m17-8-4 8m17-8-4 8" stroke="currentColor" stroke-width="4"/></svg>',
-	chemical: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M22 8h20M27 8v18L13 51c-2 4 1 7 5 7h28c4 0 7-3 5-7L37 26V8" fill="none" stroke="currentColor" stroke-width="4"/><path d="M19 44h27" stroke="currentColor" stroke-width="4"/></svg>',
-	anomaly: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m32 5 9 18 18 9-18 9-9 18-9-18-18-9 18-9 9-18Z" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="7" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
-	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 56H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 23v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
-});
-
 function normalizeThreatMetadataValue(value) {
 	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
@@ -2833,17 +2816,8 @@ function normalizeEliminationVoteImmunity(source) {
 	};
 }
 
-let apocalypseEffectBannerTimer = null;
-
-function apocalypseEffectSummaryKey(code, failed) {
-	if (failed) return 'apocalypseEffectFailed';
-	return ({
-		apocalypse_effect_age: 'apocalypseEffectAge',
-		apocalypse_effect_body: 'apocalypseEffectBody',
-		apocalypse_effect_profession: 'apocalypseEffectProfession',
-		apocalypse_effect_conditions: 'apocalypseEffectConditions'
-	})[String(code || '')] || 'apocalypseEffectApplied';
-}
+// apocalypseEffectBannerTimer is defined in apocalypse/state.js
+// apocalypseEffectSummaryKey is defined in apocalypse/helpers.js
 
 function hideApocalypseEffectBanner() {
 	const banner = document.getElementById('apocalypseEffectBanner');
@@ -5650,35 +5624,11 @@ async function reveal(characteristicName) {
 
 // ==================== APOCALYPSE & BUNKER FUNCTIONS ====================
 
-const apocalypseIconSvgRegistry = Object.freeze({
-	nuclear: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="7"/><path d="M29 25 18 7A28 28 0 0 1 46 7L35 25a10 10 0 0 0-6 0ZM38 31h21a28 28 0 0 1-14 24L35 38a10 10 0 0 0 3-7ZM29 38 19 55A28 28 0 0 1 5 31h21a10 10 0 0 0 3 7Z"/></svg>',
-	biological: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="6"/><path d="M32 26c-8-14-24-9-24 5h17M38 32c16 0 19 16 7 23l-8-15M29 38c-8 14-24 8-24-6h17" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="32" cy="32" r="4"/></svg>',
-	climate: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 37h40a11 11 0 0 0-4-21 16 16 0 0 0-30 7A8 8 0 0 0 9 37Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m18 46-4 8m18-8-4 8m18-8-4 8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',
-	cosmic: '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="31" cy="32" r="16" fill="none" stroke="currentColor" stroke-width="4"/><path d="M7 42c9 7 29 4 43-7 7-6 9-11 6-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="49" cy="10" r="3"/></svg>',
-	ai: '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="14" width="36" height="36" rx="6" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 25h16v14H24zM6 24h8M6 40h8M50 24h8M50 40h8M24 6v8M40 6v8M24 50v8M40 50v8" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	alien: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7c15 0 23 10 19 25-3 13-12 24-19 25-7-1-16-12-19-25C9 17 17 7 32 7Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M18 27c7-3 11 1 12 9-7 1-11-2-12-9Zm28 0c-7-3-11 1-12 9 7 1 11-2 12-9ZM26 46h12" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
-	fungal: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M13 32C15 16 25 8 36 9c12 1 19 10 20 23H13Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M27 32c2 8 1 15-4 22h21c-5-7-6-14-4-22" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="25" cy="23" r="2"/><circle cx="39" cy="18" r="2"/><circle cx="47" cy="26" r="2"/></svg>',
-	zombie: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 48c-5-6-8-13-8-21C10 14 20 6 32 6s22 8 22 21c0 8-3 15-8 21v8H18v-8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m20 28 9 5-9 4m24-9-9 5 9 4M28 45h8M25 56v-7m14 7v-7" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	mystical: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M5 32s10-17 27-17 27 17 27 17-10 17-27 17S5 32 5 32Z" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 4v7M8 9l6 6m42-6-6 6M32 53v7" stroke="currentColor" stroke-width="3"/></svg>',
-	anomaly: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m32 5 8 17 19 2-14 13 4 19-17-9-17 9 4-19L5 24l19-2 8-17Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m25 20 14 24M40 18 23 45" stroke="currentColor" stroke-width="3"/></svg>',
-	collapse: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 57h46M15 57V13h19v44M34 24h15v33M21 21h7m-7 10h7m-7 10h7m19-9-8 8 7 6-9 11" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 55H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'
-});
+// apocalypseIconSvgRegistry and apocalypseCategoryIconRegistry are defined in apocalypse/icons.js
 
-const apocalypseCategoryIconRegistry = Object.freeze({
-	armageddon: 'nuclear', weather: 'climate', biological: 'biological', geological: 'collapse', cosmic: 'cosmic',
-	technology: 'ai', ecological: 'collapse', social: 'collapse', anomaly: 'anomaly', supernatural: 'mystical'
-});
+// resolveApocalypseCategoryIconKey is defined in apocalypse/helpers.js
 
-function resolveApocalypseCategoryIconKey(categoryId) {
-	return apocalypseCategoryIconRegistry[String(categoryId ?? '').trim().toLowerCase()] || 'generic';
-}
-
-function createApocalypseCategoryIcon(categoryId) {
-	const template = document.createElement('template');
-	template.innerHTML = apocalypseIconSvgRegistry[resolveApocalypseCategoryIconKey(categoryId)] || apocalypseIconSvgRegistry.generic;
-	return template.content.firstElementChild;
-}
+// createApocalypseCategoryIcon is defined in apocalypse/render.js
 
 Object.assign(uiTranslations.uk, {
 	lobbyTabApocalypse: 'Апокаліпсис', lobbyApocalypseMode: 'Режим вибору', lobbyApocalypseRandomAll: 'Випадковий з усіх', lobbyApocalypseRandomCategories: 'Випадковий із категорій', lobbyApocalypseSpecific: 'Конкретний', lobbyApocalypseCustomPool: 'Власний набір', lobbyApocalypseAllowInteractive: 'Дозволити інтерактивні апокаліпсиси', lobbyApocalypseChance: 'Шанс інтерактивного апокаліпсиса', lobbyApocalypseTheme: 'Тематичне оформлення апокаліпсиса', lobbyApocalypseSearch: 'Пошук апокаліпсиса', lobbyApocalypseSelectAll: 'Обрати всі', lobbyApocalypseClear: 'Очистити', lobbyApocalypseSelected: 'Обрано', lobbyApocalypseInteractive: 'Інтерактивний', lobbyApocalypseOrdinary: 'Звичайний', lobbyApocalypseLoadMore: 'Показати ще', lobbyWarningApocalypseCategoriesEmpty: 'Оберіть хоча б одну категорію апокаліпсисів.', lobbyWarningApocalypsePoolEmpty: 'Власний набір апокаліпсисів порожній.', lobbyWarningApocalypseSpecificMissing: 'Оберіть конкретний апокаліпсис.', lobbyWarningApocalypseCandidateEmpty: 'За цими налаштуваннями немає доступних апокаліпсисів.', lobbyWarningApocalypseInteractiveUnavailable: 'У виборі немає інтерактивних апокаліпсисів.', lobbyWarningApocalypseOnlyInteractive: 'У виборі залишилися лише інтерактивні апокаліпсиси.', lobbyWarningApocalypseThemeDisabled: 'Тематичне оформлення апокаліпсиса вимкнено.', lobbyWarningApocalypsePoolSmall: 'Власний набір апокаліпсисів дуже малий.', lobbyWarningApocalypseSpecificInteractive: 'Обраний апокаліпсис є інтерактивним.'
@@ -5719,456 +5669,71 @@ Object.assign(uiTranslations.ru, {
 	apocalypseEffectProfession: 'Апокалипсис повлиял на профессиональные навыки.', apocalypseEffectConditions: 'Апокалипсис изменил характеристики жителей.'
 });
 
-const apocalypseVisualThemeRegistry = Object.freeze({
-	'extinction-red': Object.freeze({ categoryId: 'armageddon', cardVariant: 'nuclear' }),
-	'storm-blue': Object.freeze({ categoryId: 'weather', cardVariant: 'climate' }),
-	'biohazard-green': Object.freeze({ categoryId: 'biological', cardVariant: 'biological' }),
-	'seismic-amber': Object.freeze({ categoryId: 'geological', cardVariant: 'collapse' }),
-	'cosmic-violet': Object.freeze({ categoryId: 'cosmic', cardVariant: 'cosmic' }),
-	'machine-cyan': Object.freeze({ categoryId: 'technology', cardVariant: 'ai' }),
-	'wasteland-olive': Object.freeze({ categoryId: 'ecological', cardVariant: 'collapse' }),
-	'collapse-rust': Object.freeze({ categoryId: 'social', cardVariant: 'collapse' }),
-	'glitch-magenta': Object.freeze({ categoryId: 'anomaly', cardVariant: 'anomaly' }),
-	'occult-indigo': Object.freeze({ categoryId: 'supernatural', cardVariant: 'mystical' })
-});
+// apocalypseVisualThemeRegistry, apocalypseCategoryThemeRegistry, and related constants are defined in apocalypse/visual-config.js
 
-const apocalypseCategoryThemeRegistry = Object.freeze(Object.fromEntries(
-	Object.entries(apocalypseVisualThemeRegistry).map(([themeId, definition]) => [definition.categoryId, themeId])
-));
+// normalizeApocalypseVisualThemeId is defined in apocalypse/helpers.js
 
-function normalizeApocalypseVisualThemeId(value) {
-	const normalized = String(value ?? '').trim().toLowerCase();
-	return Object.prototype.hasOwnProperty.call(apocalypseVisualThemeRegistry, normalized)
-		? normalized
-		: 'default-dark';
-}
+// resolveApocalypseVisualTheme is defined in apocalypse/helpers.js
 
-function resolveApocalypseVisualTheme(apocalypse) {
-	if (!apocalypse) return 'default-dark';
-	const hasThemeField = Object.prototype.hasOwnProperty.call(apocalypse, 'visualThemeId') ||
-		Object.prototype.hasOwnProperty.call(apocalypse, 'VisualThemeId');
-	if (hasThemeField) {
-		return normalizeApocalypseVisualThemeId(apocalypse.visualThemeId ?? apocalypse.VisualThemeId);
-	}
+// clearApocalypseVisualTheme is defined in apocalypse/render.js
 
-	const category = normalizeApocalypseMetadataValue(
-		apocalypse.categoryId ?? apocalypse.CategoryId ?? apocalypse.category ?? apocalypse.Category
-	);
-	if (apocalypseCategoryThemeRegistry[category]) return apocalypseCategoryThemeRegistry[category];
+// All apocalypse mutable state (apocalypseReactionTimers, apocalypseEffectBannerTimer, etc.) is defined in apocalypse/state.js
 
-	const tags = (Array.isArray(apocalypse.tags ?? apocalypse.Tags) ? (apocalypse.tags ?? apocalypse.Tags) : [])
-		.map(normalizeApocalypseMetadataValue)
-		.join(' ');
-	const tagRules = [
-		['extinction-red', /armageddon|nuclear|radiation|fallout/],
-		['storm-blue', /weather|climate|storm|flood|winter_cold/],
-		['biohazard-green', /biological|biohazard|infection|virus|fungal|zombie/],
-		['seismic-amber', /geological|earthquake|seismic|volcanic/],
-		['cosmic-violet', /cosmic|space|asteroid|meteor|solar/],
-		['machine-cyan', /technology|ai_machines|cyber|robot|machine/],
-		['wasteland-olive', /ecological|drought|toxic_contamination|wasteland/],
-		['collapse-rust', /social_conflict|structural_damage|collapse|infrastructure/],
-		['glitch-magenta', /anomaly|reality_distortion|dimensional/],
-		['occult-indigo', /supernatural|mystical|occult|magic/]
-	];
-	return tagRules.find(([, pattern]) => pattern.test(tags))?.[0] || 'default-dark';
-}
+// ensureApocalypseAmbientRoot is defined in apocalypse/effects.js
 
-function clearApocalypseVisualTheme() {
-	const root = document.body;
-	if (!root) return;
-	root.classList.remove('apocalypse-theme-active', 'apocalypse-theme-revealing', 'apocalypse-ambient-paused');
-	delete root.dataset.apocalypseTheme;
-	delete root.dataset.apocalypseCategory;
-	const ambient = document.getElementById?.('apocalypseAmbientRoot');
-	if (ambient) ambient.setAttribute('hidden', '');
-	if (typeof stopApocalypseAmbientScheduler === 'function') stopApocalypseAmbientScheduler();
-	if (typeof resetApocalypseParallax === 'function') resetApocalypseParallax();
-	if (typeof clearApocalypseCardRevealWave === 'function') clearApocalypseCardRevealWave({ resetKey: true });
-	if (typeof clearApocalypseCategoryVisualState === 'function') clearApocalypseCategoryVisualState();
-}
+// getApocalypseEffectsLevel is defined in apocalypse/effects.js
 
-const apocalypseVisualReactionTypes = Object.freeze([
-	'apocalypse-reveal', 'apocalypse-effect', 'characteristic-reveal', 'timer-warning',
-	'timer-critical', 'voting-start', 'voting-result', 'threat-reveal', 'round-change'
-]);
-const apocalypseEffectsLevels = Object.freeze(['off', 'subtle', 'atmospheric']);
-const apocalypseEffectsPreferenceKey = 'bunker-apocalypse-effects-level';
-const apocalypseReactionTimers = new Map();
-const apocalypseAmbientEventsByTheme = Object.freeze({
-	'extinction-red': Object.freeze(['ash-burst', 'smoke-pulse']),
-	'storm-blue': Object.freeze(['lightning', 'mist-sweep']),
-	'biohazard-green': Object.freeze(['spore-wave', 'toxic-bloom']),
-	'seismic-amber': Object.freeze(['dust-burst', 'microcrack']),
-	'cosmic-violet': Object.freeze(['cosmic-warp', 'star-pulse']),
-	'machine-cyan': Object.freeze(['scanline-pulse', 'static-flicker']),
-	'wasteland-olive': Object.freeze(['dust-burst', 'heat-haze']),
-	'collapse-rust': Object.freeze(['rust-drip', 'dust-burst']),
-	'glitch-magenta': Object.freeze(['glitch-pulse', 'chromatic-slip']),
-	'occult-indigo': Object.freeze(['ritual-ring', 'shadow-smoke'])
-});
-const apocalypseAmbientEventTypes = Object.freeze([...new Set(Object.values(apocalypseAmbientEventsByTheme).flat())]);
-let apocalypseAmbientSchedulerTimer = null;
-let apocalypseAmbientEventTimer = null;
-let activeApocalypseCategoryProfile = null;
-let lastApocalypseAmbientEventType = '';
-const apocalypseModifierGroupPriority = Object.freeze({
-	environment: Object.freeze(['drought','frost','flood','heat','storm','fog','ash','darkness','air-hazard','cosmic-impact']),
-	contamination: Object.freeze(['toxic','radiation','spores','infection','mutation','nanotech','parasite','allergens','swarm']),
-	world: Object.freeze(['emp','blackout','communication-failure','structural-damage','vegetation-collapse','reality-fracture','identity-shift','machine','unrest','psychological','undead','resource-scarcity'])
-});
-const apocalypseModifierEventSuppressions = Object.freeze({
-	drought: Object.freeze(['rain-pass','flood-wave','condensation-wave','water-distortion']),
-	frost: Object.freeze(['heat-shimmer','ember-trace','thermal-wave']),
-	flood: Object.freeze(['dry-wind','dust-surge','water-evaporation-shimmer','heat-shimmer']),
-	heat: Object.freeze(['frost-edge','cold-mist','snow-drift'])
-});
-let apocalypseParallaxTimer = null;
-let apocalypseParallaxInitialized = false;
-let apocalypsePendingPointer = null;
-let lastApocalypseCardRevealKey = '';
-let apocalypseCardRevealTimer = null;
+// setApocalypseEffectsLevel is defined in apocalypse/effects.js
 
-function ensureApocalypseAmbientRoot() {
-	let ambient = document.getElementById('apocalypseAmbientRoot');
-	if (!ambient) {
-		ambient = document.createElement('div');
-		ambient.id = 'apocalypseAmbientRoot';
-		ambient.className = 'apocalypse-ambient-root';
-		ambient.setAttribute('aria-hidden', 'true');
-		ambient.inert = true;
-		document.body?.prepend(ambient);
-	}
-	for (const layer of ['primary', 'secondary', 'edge-back', 'edge-front', 'vignette']) {
-		if (ambient.querySelector(`.apocalypse-ambient-layer-${layer}`)) continue;
-		const element = document.createElement('div');
-		element.className = `apocalypse-ambient-layer apocalypse-ambient-layer-${layer}`;
-		ambient.append(element);
-	}
-	return ambient;
-}
+// syncApocalypseEffectsPreference is defined in apocalypse/effects.js
 
-function getApocalypseEffectsLevel() {
-	let value = 'atmospheric';
-	try { value = localStorage.getItem(apocalypseEffectsPreferenceKey) || value; } catch (_) { }
-	return apocalypseEffectsLevels.includes(value) ? value : 'atmospheric';
-}
+// clearApocalypseVisualReactions is defined in apocalypse/effects.js
 
-function setApocalypseEffectsLevel(level) {
-	const normalized = apocalypseEffectsLevels.includes(level) ? level : 'atmospheric';
-	try { localStorage.setItem(apocalypseEffectsPreferenceKey, normalized); } catch (_) { }
-	if (document.body) document.body.dataset.apocalypseEffectsLevel = normalized;
-	if (normalized === 'off') {
-		clearApocalypseCategoryVisualState();
-		clearApocalypseVisualReactions();
-		stopApocalypseAmbientScheduler();
-		resetApocalypseParallax();
-	} else {
-		syncApocalypseCategoryVisualState(currentApocalypse);
-		startApocalypseAmbientScheduler();
-	}
-	return normalized;
-}
+// triggerApocalypseVisualReaction is defined in apocalypse/effects.js
 
-function syncApocalypseEffectsPreference() {
-	return setApocalypseEffectsLevel(getApocalypseEffectsLevel());
-}
+// prefersReducedApocalypseMotion is defined in apocalypse/helpers.js
 
-function clearApocalypseVisualReactions() {
-	const root = document.body;
-	for (const timer of apocalypseReactionTimers.values()) window.clearTimeout(timer);
-	apocalypseReactionTimers.clear();
-	if (!root) return;
-	for (const type of apocalypseVisualReactionTypes) root.classList.remove(`apocalypse-reaction-${type}`);
-}
+// canRunApocalypseEnvironmentalEffects is defined in apocalypse/effects.js
 
-function triggerApocalypseVisualReaction(type, options = {}) {
-	if (!apocalypseVisualReactionTypes.includes(type) || getApocalypseEffectsLevel() === 'off') return false;
-	const root = document.body;
-	if (!root?.classList.contains('apocalypse-theme-active')) return false;
-	const className = `apocalypse-reaction-${type}`;
-	const existing = apocalypseReactionTimers.get(type);
-	if (existing) window.clearTimeout(existing);
-	root.classList.remove(className);
-	void root.offsetWidth;
-	root.classList.add(className);
-	const duration = Math.max(180, Math.min(1400, Number(options.duration) || (type === 'apocalypse-reveal' ? 900 : 620)));
-	apocalypseReactionTimers.set(type, window.setTimeout(() => {
-		root.classList.remove(className);
-		apocalypseReactionTimers.delete(type);
-	}, duration));
-	return true;
-}
+// normalizeApocalypseCategoryToken is defined in apocalypse/helpers.js
 
-function prefersReducedApocalypseMotion() {
-	return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
-}
+// getApocalypseCategoryRegistry is defined in apocalypse/effects.js
 
-function canRunApocalypseEnvironmentalEffects() {
-	const root = document.body;
-	const theme = root?.dataset.apocalypseTheme;
-	return Boolean(root?.classList.contains('apocalypse-theme-active') &&
-		apocalypseAmbientEventsByTheme[theme] && getApocalypseEffectsLevel() !== 'off' &&
-		!document.hidden && !prefersReducedApocalypseMotion());
-}
+// resolveApocalypseCategoryProfile is defined in apocalypse/effects.js
 
-function normalizeApocalypseCategoryToken(value) {
-	return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/_+/g, '-');
-}
+// getApocalypseCategoryEventPools is defined in apocalypse/effects.js
 
-function getApocalypseCategoryRegistry() {
-	return window.ApocalypseCategoryVisualRegistry?.registry || null;
-}
+// clearApocalypseCategoryVisualState is defined in apocalypse/effects.js
 
-function resolveApocalypseCategoryProfile(apocalypse) {
-	const registry = getApocalypseCategoryRegistry();
-	if (!apocalypse || !registry) return null;
-	const categories = new Map(registry.categoryPackages.map(item => [item.categoryId, item]));
-	const modifiers = new Map(registry.modifierCatalog.map(item => [item.id, item]));
-	const id = String(apocalypse.id ?? apocalypse.Id ?? '').trim();
-	const registered = window.ApocalypseCategoryVisualRegistry?.getApocalypseVisualMetadata?.(id);
-	const categoryId = String(apocalypse.categoryId ?? apocalypse.CategoryId ?? registered?.categoryId ?? '').trim().toLowerCase();
-	const category = categories.get(categoryId);
-	if (!category) return null;
-	const rawModifiers = apocalypse.visualModifierIds ?? apocalypse.VisualModifierIds ?? registered?.visualModifierIds ?? [];
-	const maximum = getApocalypseEffectsLevel() === 'subtle' || window.matchMedia?.('(max-width: 768px)')?.matches === true
-		? 1
-		: Math.min(3, Number(registry.maxModifiers) || 3);
-	const candidates = [...new Set(Array.isArray(rawModifiers) ? rawModifiers.map(value => String(value).trim().toLowerCase()) : [])].filter(value => modifiers.has(value));
-	const modifierIds = registry.priorityGroups.map(group => {
-		const priority = apocalypseModifierGroupPriority[group] || [];
-		return candidates.filter(id => modifiers.get(id)?.group === group).sort((left, right) => priority.indexOf(left) - priority.indexOf(right))[0];
-	}).filter(Boolean).slice(0, maximum);
-	return { apocalypseId: id, categoryId, category, modifierIds, modifiers };
-}
+// syncApocalypseCategoryVisualState is defined in apocalypse/effects.js
 
-function getApocalypseCategoryEventPools() {
-	if (!activeApocalypseCategoryProfile) {
-		const fallback = apocalypseAmbientEventsByTheme[document.body?.dataset.apocalypseTheme] || [];
-		return { category: [...fallback], modifier: [], all: [...fallback] };
-	}
-	const suppressed = new Set(activeApocalypseCategoryProfile.modifierIds.flatMap(id => apocalypseModifierEventSuppressions[id] || []));
-	const category = [...new Set((activeApocalypseCategoryProfile.category.baseEvents || []).map(normalizeApocalypseCategoryToken).filter(value => value && !suppressed.has(value)))];
-	const modifier = [...new Set(activeApocalypseCategoryProfile.modifierIds
-		.flatMap(id => activeApocalypseCategoryProfile.modifiers.get(id)?.eventPool || [])
-		.map(normalizeApocalypseCategoryToken).filter(value => value && !suppressed.has(value)))];
-	return { category, modifier, all: [...new Set([...category, ...modifier])] };
-}
+// renderApocalypseCategoryBadge is defined in apocalypse/render.js
 
-function clearApocalypseCategoryVisualState() {
-	const registry = getApocalypseCategoryRegistry();
-	const ambient = document.getElementById('apocalypseAmbientRoot');
-	for (const item of registry?.modifierCatalog || []) {
-		document.body?.classList.remove(item.cssClass);
-		ambient?.classList.remove(item.cssClass);
-	}
-	ambient?.removeAttribute('data-apocalypse-package');
-	activeApocalypseCategoryProfile = null;
-	lastApocalypseAmbientEventType = '';
-}
+// clearApocalypseAmbientEvent is defined in apocalypse/effects.js
 
-function syncApocalypseCategoryVisualState(apocalypse) {
-	clearApocalypseAmbientEvent();
-	clearApocalypseCategoryVisualState();
-	const profile = resolveApocalypseCategoryProfile(apocalypse);
-	if (!profile) return null;
-	activeApocalypseCategoryProfile = profile;
-	if (getApocalypseEffectsLevel() === 'off' || !document.body?.classList.contains('apocalypse-theme-active')) return profile;
-	const ambient = ensureApocalypseAmbientRoot();
-	ambient.dataset.apocalypsePackage = normalizeApocalypseCategoryToken(profile.category.packageId);
-	for (const id of profile.modifierIds) {
-		const className = profile.modifiers.get(id)?.cssClass;
-		if (!className) continue;
-		document.body.classList.add(className);
-		ambient.classList.add(className);
-	}
-	return profile;
-}
+// triggerApocalypseAmbientEvent is defined in apocalypse/effects.js
 
-function renderApocalypseCategoryBadge(apocalypse) {
-	const profile = resolveApocalypseCategoryProfile(apocalypse);
-	const hero = document.querySelector('.apocalypse-hero-content');
-	if (!hero) return;
-	const categoryId = profile?.categoryId || '';
-	const language = ['uk', 'en', 'ru'].includes(getCurrentLanguage?.()) ? getCurrentLanguage() : 'uk';
-	const badge = document.createElement('span');
-	badge.className = 'apocalypse-category-badge';
-	badge.dataset.category = categoryId || 'generic';
-	const icon = document.createElement('span'); icon.className = 'apocalypse-category-badge-icon'; icon.setAttribute('aria-hidden', 'true'); icon.append(createApocalypseCategoryIcon(categoryId));
-	const label = document.createElement('span'); label.textContent = profile?.category?._i18n?.name?.[language] || profile?.category?._i18n?.name?.uk || t('apocalypse');
-	badge.append(icon, label);
-	const title = hero.querySelector('.apocalypse-title');
-	hero.insertBefore(badge, title || null);
-}
+// startApocalypseAmbientScheduler is defined in apocalypse/effects.js
 
-function clearApocalypseAmbientEvent() {
-	if (apocalypseAmbientEventTimer) window.clearTimeout(apocalypseAmbientEventTimer);
-	apocalypseAmbientEventTimer = null;
-	const ambient = document.getElementById('apocalypseAmbientRoot');
-	if (!ambient) return;
-	const registry = getApocalypseCategoryRegistry();
-	const registeredTypes = [
-		...(registry?.categoryPackages || []).flatMap(item => item.baseEvents || []),
-		...(registry?.modifierCatalog || []).flatMap(item => item.eventPool || [])
-	].map(normalizeApocalypseCategoryToken);
-	for (const type of new Set([...apocalypseAmbientEventTypes, ...registeredTypes])) ambient.classList.remove(`apoc-event-${type}`);
-}
+// stopApocalypseAmbientScheduler is defined in apocalypse/effects.js
 
-function triggerApocalypseAmbientEvent(preferredType = '') {
-	if (!canRunApocalypseEnvironmentalEffects()) return false;
-	const ambient = ensureApocalypseAmbientRoot();
-	const pools = getApocalypseCategoryEventPools();
-	const normalizedPreferred = normalizeApocalypseCategoryToken(preferredType);
-	let type = pools.all.includes(normalizedPreferred) ? normalizedPreferred : '';
-	if (!type) {
-		const categoryPercent = Number(getApocalypseCategoryRegistry()?.eventWeights?.categoryBasePercent ?? 65);
-		const useModifier = pools.modifier.length > 0 && Math.random() * 100 >= categoryPercent;
-		let selectedPool = useModifier ? pools.modifier : pools.category;
-		if (!selectedPool.length) selectedPool = pools.all;
-		if (selectedPool.length > 1 && lastApocalypseAmbientEventType)
-			selectedPool = selectedPool.filter(value => value !== lastApocalypseAmbientEventType);
-		type = selectedPool[Math.floor(Math.random() * selectedPool.length)] || '';
-	}
-	if (!type) return false;
-	lastApocalypseAmbientEventType = type;
-	clearApocalypseAmbientEvent();
-	const className = `apoc-event-${type}`;
-	ambient.classList.add(className);
-	const duration = getApocalypseEffectsLevel() === 'subtle' ? 900 : 1600;
-	apocalypseAmbientEventTimer = window.setTimeout(() => {
-		ambient.classList.remove(className);
-		apocalypseAmbientEventTimer = null;
-	}, duration);
-	return true;
-}
+// resetApocalypseParallax is defined in apocalypse/effects.js
 
-function startApocalypseAmbientScheduler() {
-	if (apocalypseAmbientSchedulerTimer || !canRunApocalypseEnvironmentalEffects()) return false;
-	const delay = 20000 + Math.floor(Math.random() * 20001);
-	apocalypseAmbientSchedulerTimer = window.setTimeout(() => {
-		apocalypseAmbientSchedulerTimer = null;
-		triggerApocalypseAmbientEvent();
-		startApocalypseAmbientScheduler();
-	}, delay);
-	return true;
-}
+// flushApocalypseParallax is defined in apocalypse/effects.js
 
-function stopApocalypseAmbientScheduler() {
-	if (apocalypseAmbientSchedulerTimer) window.clearTimeout(apocalypseAmbientSchedulerTimer);
-	apocalypseAmbientSchedulerTimer = null;
-	clearApocalypseAmbientEvent();
-}
+// queueApocalypseParallaxUpdate is defined in apocalypse/effects.js
 
-function resetApocalypseParallax() {
-	if (apocalypseParallaxTimer) window.clearTimeout(apocalypseParallaxTimer);
-	apocalypseParallaxTimer = null;
-	apocalypsePendingPointer = null;
-	const ambient = document.getElementById('apocalypseAmbientRoot');
-	for (const variable of ['--apoc-parallax-x', '--apoc-parallax-y', '--apoc-parallax-x-far', '--apoc-parallax-y-far', '--apoc-parallax-x-mid', '--apoc-parallax-y-mid', '--apoc-parallax-scroll'])
-		ambient?.style.removeProperty(variable);
-}
+// initApocalypseParallaxManager is defined in apocalypse/effects.js
 
-function flushApocalypseParallax() {
-	apocalypseParallaxTimer = null;
-	const ambient = document.getElementById('apocalypseAmbientRoot');
-	const mobile = window.matchMedia?.('(max-width: 768px)')?.matches === true;
-	if (!ambient || !canRunApocalypseEnvironmentalEffects() || mobile) {
-		resetApocalypseParallax();
-		return;
-	}
-	if (apocalypsePendingPointer) {
-		const x = ((apocalypsePendingPointer.x / Math.max(window.innerWidth, 1)) - .5) * 2;
-		const y = ((apocalypsePendingPointer.y / Math.max(window.innerHeight, 1)) - .5) * 2;
-		const clampedX = Math.max(-1, Math.min(1, x));
-		const clampedY = Math.max(-1, Math.min(1, y));
-		ambient.style.setProperty('--apoc-parallax-x', `${(clampedX * 4).toFixed(2)}px`);
-		ambient.style.setProperty('--apoc-parallax-y', `${(clampedY * 4).toFixed(2)}px`);
-		ambient.style.setProperty('--apoc-parallax-x-mid', `${(clampedX * 2.7).toFixed(2)}px`);
-		ambient.style.setProperty('--apoc-parallax-y-mid', `${(clampedY * 2.7).toFixed(2)}px`);
-		ambient.style.setProperty('--apoc-parallax-x-far', `${(clampedX * 1.4).toFixed(2)}px`);
-		ambient.style.setProperty('--apoc-parallax-y-far', `${(clampedY * 1.4).toFixed(2)}px`);
-	}
-	ambient.style.setProperty('--apoc-parallax-scroll', `${Math.max(-6, Math.min(6, window.scrollY * .008)).toFixed(2)}px`);
-}
+// clearApocalypseCardRevealWave is defined in apocalypse/effects.js
 
-function queueApocalypseParallaxUpdate(event) {
-	if (event?.clientX != null) apocalypsePendingPointer = { x: event.clientX, y: event.clientY };
-	if (apocalypseParallaxTimer) return;
-	apocalypseParallaxTimer = window.setTimeout(flushApocalypseParallax, 48);
-}
+// triggerApocalypseCardRevealWave is defined in apocalypse/effects.js
 
-function initApocalypseParallaxManager() {
-	if (apocalypseParallaxInitialized) return;
-	apocalypseParallaxInitialized = true;
-	document.addEventListener('pointermove', queueApocalypseParallaxUpdate, { passive: true });
-	window.addEventListener('scroll', queueApocalypseParallaxUpdate, { passive: true });
-	window.addEventListener('resize', queueApocalypseParallaxUpdate, { passive: true });
-}
+// syncDocumentVisibilityEffects is defined in apocalypse/effects.js
 
-function clearApocalypseCardRevealWave(options = {}) {
-	if (apocalypseCardRevealTimer) window.clearTimeout(apocalypseCardRevealTimer);
-	apocalypseCardRevealTimer = null;
-	document.querySelectorAll?.('.apocalypse-scenario-shell.apoc-card-reveal-wave')
-		.forEach(card => card.classList.remove('apoc-card-reveal-wave'));
-	if (options.resetKey) lastApocalypseCardRevealKey = '';
-}
+// applyApocalypseVisualTheme is defined in apocalypse/render.js
 
-function triggerApocalypseCardRevealWave(apocalypse) {
-	if (!apocalypse) return false;
-	const id = String(apocalypse.id ?? apocalypse.Id ?? '').trim();
-	const revealKey = id || `${resolveApocalypseVisualTheme(apocalypse)}:${String(apocalypse.categoryId ?? apocalypse.CategoryId ?? '')}`;
-	if (!revealKey || revealKey === lastApocalypseCardRevealKey) return false;
-	lastApocalypseCardRevealKey = revealKey;
-	if (getApocalypseEffectsLevel() === 'off' || prefersReducedApocalypseMotion()) return false;
-	const card = document.querySelector('.apocalypse-scenario-shell');
-	if (!card) return false;
-	clearApocalypseCardRevealWave();
-	card.classList.add('apoc-card-reveal-wave');
-	apocalypseCardRevealTimer = window.setTimeout(() => {
-		card.classList.remove('apoc-card-reveal-wave');
-		apocalypseCardRevealTimer = null;
-	}, 1100);
-	return true;
-}
-
-function syncDocumentVisibilityEffects() {
-	document.body?.classList.toggle('apocalypse-ambient-paused', document.hidden);
-	if (document.hidden) {
-		stopApocalypseAmbientScheduler();
-		resetApocalypseParallax();
-	} else {
-		startApocalypseAmbientScheduler();
-	}
-}
-
-function applyApocalypseVisualTheme(apocalypse) {
-	const root = document.body;
-	if (!root) return 'default-dark';
-	const themeId = resolveApocalypseVisualTheme(apocalypse);
-	if (themeId === 'default-dark') {
-		clearApocalypseVisualTheme();
-		return themeId;
-	}
-
-	const definition = apocalypseVisualThemeRegistry[themeId];
-	if (root.dataset.apocalypseTheme === themeId &&
-		root.dataset.apocalypseCategory === definition.categoryId &&
-		root.classList.contains('apocalypse-theme-active')) return themeId;
-
-	clearApocalypseVisualTheme();
-	const ambient = document.getElementById?.('apocalypseAmbientRoot');
-	ambient?.removeAttribute(['hid', 'den'].join(''));
-	root.dataset.apocalypseTheme = themeId;
-	root.dataset.apocalypseCategory = definition.categoryId;
-	root.classList.add('apocalypse-theme-active');
-	return themeId;
-}
-
-function syncApocalypseVisualTheme(apocalypse) {
-	return apocalypse && currentPublicGameSettings.apocalypseThemeEnabled !== false
-		? applyApocalypseVisualTheme(apocalypse)
-		: (clearApocalypseVisualTheme(), 'default-dark');
-}
+// syncApocalypseVisualTheme is defined in apocalypse/render.js
 
 function syncPublicGameSettings(payload) {
 	const source = payload?.gameSettings ?? payload?.GameSettings;
@@ -6188,146 +5753,23 @@ function syncPublicGameSettings(payload) {
 	return currentPublicGameSettings;
 }
 
-function normalizeApocalypseMetadataValue(value) {
-	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
-}
+// normalizeApocalypseMetadataValue is defined in apocalypse/helpers.js
 
-function resolveApocalypseVisualVariant(model) {
-	const themeId = normalizeApocalypseVisualThemeId(model?.visualThemeId);
-	if (themeId !== 'default-dark') return apocalypseVisualThemeRegistry[themeId].cardVariant;
-	const metadata = [
-		...(Array.isArray(model?.tags) ? model.tags : []),
-		model?.category, model?.type, model?.classification, model?.imageCategory, model?.imageType
-	].map(normalizeApocalypseMetadataValue).filter(Boolean).join(' ');
-	const rules = [
-		['nuclear', /nuclear|radiation|atomic|fallout/],
-		['fungal', /fungal|fungus|spore|mushroom/],
-		['zombie', /zombie|undead/],
-		['biological', /biological|biohazard|infection|virus|pandemic|parasite|toxic_contamination/],
-		['climate', /weather_climate|climate|winter_cold|heat_fire|volcanic_ash|storm|flood|drought|ice/],
-		['cosmic', /cosmic|space|asteroid|meteor|solar|planetary/],
-		['ai', /ai_machines|artificial_intelligence|technology|nanotech|cyber|robot|machine/],
-		['alien', /alien|extraterrestrial|ufo|unknown_signal/],
-		['mystical', /mystical|occult|magic|supernatural|rune/],
-		['anomaly', /anomaly_reality|anomaly|reality_distortion|dimensional/],
-		['collapse', /structural_damage|social_conflict|collapse|industrial|infrastructure/]
-	];
-	return rules.find(([, pattern]) => pattern.test(metadata))?.[0] || 'generic';
-}
+// resolveApocalypseVisualVariant is defined in apocalypse/helpers.js
 
-function normalizeLocalScenarioImageUrl(value) {
-	const url = String(value ?? '').trim().replace(/\\/g, '/');
-	if (!url || /^(?:https?:)?\/\//i.test(url) || /^[a-z][a-z0-9+.-]*:/i.test(url) || url.includes('..')) return '';
-	return url.startsWith('/') ? url : `/${url.replace(/^\.\//, '')}`;
-}
+// normalizeLocalScenarioImageUrl is defined in apocalypse/helpers.js
 
-function getApocalypseDangerKey(value) {
-	const normalized = normalizeApocalypseMetadataValue(value);
-	if (['low', 'minor'].includes(normalized)) return 'low';
-	if (['medium', 'moderate'].includes(normalized)) return 'medium';
-	if (['high', 'severe'].includes(normalized)) return 'high';
-	if (['very_high', 'veryhigh'].includes(normalized)) return 'very-high';
-	if (['critical', 'extreme', 'catastrophic'].includes(normalized)) return 'critical';
-	return 'unknown';
-}
+// getApocalypseDangerKey is defined in apocalypse/helpers.js
 
-function getApocalypseDangerLabel(key) {
-	return t({ low: 'dangerLow', medium: 'dangerMedium', high: 'dangerHigh', 'very-high': 'dangerVeryHigh', critical: 'dangerCritical' }[key] || 'dangerUnknown');
-}
+// getApocalypseDangerLabel is defined in apocalypse/helpers.js
 
-function buildApocalypseScenarioModel(source) {
-	if (!source) return null;
-	const rawTags = source.tags || source.Tags || [];
-	const dangerLevel = source.dangerLevel ?? source.DangerLevel ?? source.severity ?? source.Severity ?? '';
-	const model = {
-		id: source.id || source.Id || '',
-		name: getLocalizedValue(source, 'name') || t('unknown'),
-		shortDescription: getLocalizedByFields(source, ['shortDescription', 'subtitle', 'description']),
-		description: getLocalizedValue(source, 'description'),
-		dangerLevel,
-		survivalChance: source.survivalChance ?? source.SurvivalChance ?? '',
-		duration: getLocalizedValue(source, 'duration') || '',
-		threats: getLocalizedArray(source, 'threats'),
-		requirements: getLocalizedArray(source, 'requirements'),
-		consequences: getLocalizedArray(source, 'consequences'),
-		imageUrl: normalizeLocalScenarioImageUrl(source.imageUrl || source.ImageUrl || source.uploadedImagePath || source.UploadedImagePath),
-		tags: Array.isArray(rawTags) ? rawTags : [],
-		categoryId: source.categoryId || source.CategoryId || '',
-		visualThemeId: source.visualThemeId ?? source.VisualThemeId,
-		category: source.categoryId || source.CategoryId || source.category || source.Category || '',
-		type: source.type || source.Type || '',
-		classification: source.classification || source.Classification || '',
-		imageCategory: source.imageCategory || source.ImageCategory || '',
-		imageType: source.imageType || source.ImageType || ''
-	};
-	model.visualVariant = resolveApocalypseVisualVariant(model);
-	model.dangerKey = getApocalypseDangerKey(dangerLevel);
-	return model;
-}
+// buildApocalypseScenarioModel is defined in apocalypse/helpers.js
 
-function renderApocalypseIcon(variant) {
-	return apocalypseIconSvgRegistry[variant] || apocalypseIconSvgRegistry.generic;
-}
+// renderApocalypseIcon is defined in apocalypse/render.js
 
-function renderApocalypseContentSection(kind, title, items) {
-	if (!Array.isArray(items) || !items.length) return '';
-	return `<section class="apocalypse-content-card content-${kind}" aria-labelledby="apoc-${kind}-title">
-		<h5 id="apoc-${kind}-title" class="apocalypse-content-title"><span aria-hidden="true"></span>${escapeHtml(title)}</h5>
-		<ul>${items.map(item => `<li><span aria-hidden="true"></span><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
-	</section>`;
-}
+// renderApocalypseContentSection is defined in apocalypse/render.js
 
-function renderApocalypseScenario(model) {
-	if (!model) return `<p class="apocalypse-empty">${escapeHtml(t('unknown'))}</p>`;
-	const variant = model.visualVariant || resolveApocalypseVisualVariant(model);
-	const survivalValue = model.survivalChance === '' || model.survivalChance == null
-		? t('unknown')
-		: `${escapeHtml(model.survivalChance)}${typeof model.survivalChance === 'number' || /^\d+(?:[.,]\d+)?$/.test(String(model.survivalChance)) ? '%' : ''}`;
-	const durationValue = model.duration || t('unknown');
-	const heroImage = model.imageUrl
-		? `<div class="apocalypse-hero-media" aria-hidden="true">
-			<img class="apocalypse-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleApocalypseHeroImageError(this)">
-		</div>`
-		: '';
-	const imageButton = model.imageUrl
-		? `<button type="button" class="apocalypse-open-image" onclick="openCurrentApocalypseImage()">${escapeHtml(t('apocOpenImage'))}</button>`
-		: '';
-	const hostControls = developerFeatureEnabled('scenarioImages') ? `<div class="scenario-image-controls apocalypse-image-controls">
-		<input type="file" id="apocalypseImageInput" accept="image/*" hidden onchange="uploadApocalypseImage(this)">
-		<button type="button" class="btn-scenario-image" onclick="document.getElementById('apocalypseImageInput').click()">${escapeHtml(t('uploadImage'))}</button>
-		<button type="button" class="btn-scenario-image btn-generate" onclick="generateApocalypsePrompt()">${escapeHtml(t('generatePrompt'))}</button>
-		${model.imageUrl ? `<button type="button" class="btn-scenario-image btn-remove" onclick="removeApocalypseImage()">${escapeHtml(t('remove'))}</button>` : ''}
-	</div>` : '';
-	const details = model.description && model.description !== model.shortDescription
-		? `<p class="apocalypse-footer-description">${escapeHtml(model.description)}</p>` : '';
-
-	return `<article class="scenario-immersive-shell apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
-		<div class="apocalypse-card-border-light" aria-hidden="true"></div>
-		<div class="apocalypse-card-reveal-wave" aria-hidden="true"></div>
-		<header class="scenario-immersive-hero apocalypse-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
-			${heroImage}
-			<div class="apocalypse-hero-overlay" aria-hidden="true"></div>
-			<div class="apocalypse-hero-pattern" aria-hidden="true"></div>
-			<div class="apocalypse-theme-mark" aria-hidden="true">${renderApocalypseIcon(variant)}</div>
-			<div class="apocalypse-hero-content apocalypse-hero-copy">
-				<span class="apocalypse-badge">${escapeHtml(t('apocBadge'))}</span>
-				<h4 id="apocalypse-scenario-title" class="apocalypse-title">${escapeHtml(model.name)}</h4>
-				${model.shortDescription ? `<p class="apocalypse-subtitle">${escapeHtml(model.shortDescription)}</p>` : ''}
-			</div>
-		</header>
-		<section class="apocalypse-metrics" aria-label="${escapeHtml(t('apocBadge'))}">
-			<div class="apocalypse-metric metric-danger" data-danger="${model.dangerKey}"><span class="apocalypse-metric-label">${escapeHtml(t('apocDanger'))}</span><strong>${escapeHtml(getApocalypseDangerLabel(model.dangerKey))}</strong></div>
-			<div class="apocalypse-metric metric-survival"><span class="apocalypse-metric-label">${escapeHtml(t('survivalChance'))}</span><strong>${survivalValue}</strong></div>
-			<div class="apocalypse-metric metric-duration"><span class="apocalypse-metric-label">${escapeHtml(t('duration'))}</span><strong>${escapeHtml(durationValue)}</strong></div>
-		</section>
-		<div class="apocalypse-content-grid">
-			${renderApocalypseContentSection('threats', t('apocMainThreats'), model.threats)}
-			${renderApocalypseContentSection('requirements', t('apocSurvivalRequirements'), model.requirements)}
-			${renderApocalypseContentSection('consequences', t('apocConsequences'), model.consequences)}
-		</div>
-		<footer class="apocalypse-footer"><div><span class="apocalypse-footer-kicker">${escapeHtml(t('apocScenarioBrief'))}</span>${details}</div><div class="apocalypse-footer-actions">${imageButton}${hostControls}</div></footer>
-	</article>`;
-}
+// renderApocalypseScenario is defined in apocalypse/render.js
 
 function renderApocalypse(apocalypse) {
 	const container = document.getElementById('apocalypseContent');
@@ -6364,18 +5806,9 @@ function renderApocalypse(apocalypse) {
 	updateScenarioSectionVisibility();
 }
 
-function handleApocalypseHeroImageError(image) {
-	const hero = image?.closest?.('.apocalypse-hero');
-	if (!hero) return;
-	hero.classList.remove('has-image');
-	hero.classList.add('no-image');
-	image.closest('.apocalypse-hero-media')?.remove();
-}
+// handleApocalypseHeroImageError is defined in apocalypse/render.js
 
-function openCurrentApocalypseImage() {
-	const model = buildApocalypseScenarioModel(currentApocalypse);
-	if (model?.imageUrl) openImageModal(model.imageUrl, model.name);
-}
+// openCurrentApocalypseImage is defined in apocalypse/render.js
 
 // ==================== VOTING FUNCTIONS ====================
 
@@ -6648,22 +6081,6 @@ function resolveNoElimination() {
 			.catch(err => console.error("ResolveVoting error:", err));
 	}
 }
-
-const bunkerIconSvgRegistry = Object.freeze({
-	military: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 53 14v16c0 13-8 23-21 28C19 53 11 43 11 30V14l21-8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 38V26l11-7 11 7v12M27 38v-8h10v8" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	industrial: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56V26l16 9V25l16 10V16h10v40H8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M16 46h6m8 0h6m8 0h6M44 8h10" stroke="currentColor" stroke-width="4"/></svg>',
-	underground: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 55V35C7 18 18 8 32 8s25 10 25 27v20M17 55V35c0-10 6-17 15-17s15 7 15 17v20M6 55h52" fill="none" stroke="currentColor" stroke-width="4"/><path d="M27 55V36h10v19" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	scientific: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 7h16M28 7v17L14 50c-2 4 1 7 5 7h26c4 0 7-3 5-7L36 24V7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 42h22M25 35h14" stroke="currentColor" stroke-width="3"/><circle cx="31" cy="49" r="2"/></svg>',
-	medical: '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="14" width="48" height="42" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 14V8h16v6M27 25h10v8h8v10h-8v8H27v-8h-8V33h8v-8Z" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	civilian: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m7 30 25-21 25 21M13 27v29h38V27M25 56V39h14v17" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	luxury: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m8 22 10-13 14 13L46 9l10 13-7 34H15L8 22Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M14 29h36M22 43h20" stroke="currentColor" stroke-width="4"/></svg>',
-	emergency: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 47h30l-3-24c-1-8-6-13-12-13s-11 5-12 13l-3 24ZM10 56h44M8 26H2m60 0h-6M13 9 8 4m43 5 5-5" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	natural: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 55h50M13 55V37C13 20 22 9 32 9s19 11 19 28v18M22 55V39c0-9 4-15 10-15s10 6 10 15v16" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 38c-8-8-14 0 0 12 14-12 8-20 0-12Z" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
-	remote: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m5 53 16-25 9 12L41 19l18 34H5Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 8a22 22 0 0 1 22 22M32 16a14 14 0 0 1 14 14M32 24a6 6 0 0 1 6 6" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
-	damaged: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="m8 29 24-20 24 20v27H8V29Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m31 10-5 18 10 5-8 23M16 43h8m17 0h7" fill="none" stroke="currentColor" stroke-width="4"/></svg>',
-	critical: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 59 56H5L32 6Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 23v17m0 8v2" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>',
-	generic: '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56V24L32 8l24 16v32H8Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M17 34h30M17 43h30M25 56V43h14v13" fill="none" stroke="currentColor" stroke-width="3"/></svg>'
-});
 
 function normalizeBunkerMetadataValue(value) {
 	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
@@ -9033,22 +8450,6 @@ function isMyPlayerRef(connectionId, stableId) {
 		(!!stableId && !!myStable && stableId === myStable);
 }
 
-const specialCardIconSvgRegistry = Object.freeze({
-	star: '<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
-	eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-	shield: '<path d="M12 2 4 5v6c0 5 3 9 8 11 5-2 8-6 8-11V5l-8-3Z"/><path d="m8 12 3 3 5-6"/>',
-	hand: '<path d="M6 12V7a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v6-4a2 2 0 0 1 4 0v7c0 5-3 8-8 8-4 0-7-2-8-6l-1-4a2 2 0 0 1 4-1l1 1Z"/>',
-	swap: '<path d="m7 7 3-3-3-3M10 4H5a3 3 0 0 0-3 3v3M17 17l-3 3 3 3M14 20h5a3 3 0 0 0 3-3v-3"/><path d="M5 14h14M19 10H5"/>',
-	dice: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/>',
-	refresh: '<path d="M20 7V3l-3 3a8 8 0 1 0 2 9M4 17v4l3-3"/>',
-	globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
-	warning: '<path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5M12 18h.01"/>',
-	backpack: '<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
-	briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
-	heart: '<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
-	brain: '<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>'
-});
-
 function renderSpecialCardIcon(iconKey) {
 	const body = specialCardIconSvgRegistry[iconKey] || specialCardIconSvgRegistry.star;
 	return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
@@ -9523,20 +8924,6 @@ function updateSpecialCardsUI() {
 	}
 }
 
-const publicCharacteristicDefinitions = Object.freeze([
-	{ key: 'personality', labelKey: 'personality', icon: 'user' },
-	{ key: 'body', labelKey: 'body', icon: 'body' },
-	{ key: 'profession', labelKey: 'profession', icon: 'briefcase' },
-	{ key: 'physicalHealth', labelKey: 'physicalHealth', icon: 'heart' },
-	{ key: 'mentalHealth', labelKey: 'mentalHealth', icon: 'brain' },
-	{ key: 'hobby', labelKey: 'hobby', icon: 'star' },
-	{ key: 'characterTrait', labelKey: 'characterTrait', icon: 'mask' },
-	{ key: 'phobia', labelKey: 'phobia', icon: 'eye' },
-	{ key: 'inventory', labelKey: 'inventory', icon: 'backpack' },
-	{ key: 'property', labelKey: 'property', icon: 'home' },
-	{ key: 'fact', labelKey: 'fact', icon: 'document' }
-]);
-
 function isPublicGameplayPlayer(player) {
 	if (!player || player.isSpectatorGm || player.IsSpectatorGm) return false;
 	const role = String(player.publicRole || player.PublicRole || 'player').toLowerCase().replace(/[_\s-]/g, '');
@@ -9921,50 +9308,6 @@ function renderAdditionalPhysicalConditionsForOverview(player) {
 	return `<div class="public-additional-conditions">${conditions.join('')}</div>`;
 }
 
-
-const characteristicIconRegistry = Object.freeze({
-	personality: 'user', body: 'body', profession: 'briefcase', physicalHealth: 'heart', mentalHealth: 'brain',
-	hobby: 'star', characterTrait: 'mask', phobia: 'eye', inventory: 'backpack', property: 'home', fact: 'document'
-});
-
-const professionIconRegistry = Object.freeze({
-	violin: 'violin', string_instrument: 'violin', guitar: 'guitar', music: 'music', medical: 'medical', medicine: 'medical', healthcare: 'medical',
-	engineering: 'engineering', engineer: 'engineering', military: 'shield', agriculture: 'wheat', transport: 'steeringWheel', science: 'flask',
-	technology: 'cpu', education: 'book', construction: 'hammer', law: 'scales', food: 'utensils', restaurant: 'cloche', hospitality: 'cloche',
-	food_service: 'cloche', service: 'serviceBell', chef: 'chefHat', waiter: 'serviceBell', generic: 'briefcase'
-});
-
-const characteristicIconSvgRegistry = Object.freeze({
-	user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-5 3.5-7 8-7s7.2 2 8 7"/>',
-	body: '<path d="M8 3h8l2 6-3 12H9L6 9l2-6Z"/><path d="M8 8h8M9 14h6"/>',
-	briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 12h18M10 12v2h4v-2"/>',
-	violin: '<path d="M15 3c-2 1-2 4-1 6l-4 4c-2-1-5-1-6 1s1 6 4 6c2 0 3-2 3-4l4-4c2 1 5 0 5-2 0-3-3-5-5-4"/><path d="m16 8 5-5M18 5l2 2"/>',
-	guitar: '<path d="m15 3 6 6-3 3-2-2-5 5c1 3-2 6-5 5s-3-5-1-7 4-2 6-1l5-5-2-2 1-3Z"/>',
-	music: '<path d="M9 18V5l11-2v13M9 8l11-2"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
-	medical: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z"/>',
-	engineering: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
-	shield: '<path d="M12 2 20 5v6c0 5-3 9-8 11-5-2-8-6-8-11V5l8-3Z"/>',
-	wheat: '<path d="M12 22V6M12 10C7 9 6 6 6 4c4 0 6 2 6 6ZM12 15c-5-1-6-4-6-6 4 0 6 2 6 6ZM12 10c5-1 6-4 6-6-4 0-6 2-6 6ZM12 15c5-1 6-4 6-6-4 0-6 2-6 6Z"/>',
-	steeringWheel: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3 11h18M12 14v7M10 10 6 6M14 10l4-4"/>',
-	flask: '<path d="M9 2h6M10 2v6l-6 11c-.5 1 .2 2 1.5 2h13c1.3 0 2-1 1.5-2L14 8V2M7 15h10"/>',
-	cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v5M15 1v5M9 18v5M15 18v5M1 9h5M18 9h5M1 15h5M18 15h5"/>',
-	book: '<path d="M3 4h7c2 0 2 2 2 2v15s0-2-2-2H3V4Zm18 0h-7c-2 0-2 2-2 2v15s0-2 2-2h7V4Z"/>',
-	hammer: '<path d="m4 20 9-9M10 4l3-2 7 7-2 3-8-8ZM2 18l4 4"/>',
-	scales: '<path d="M12 3v18M6 21h12M4 7h16M7 7 3 14h8L7 7Zm10 0-4 7h8l-4-7Z"/>',
-	utensils: '<path d="M6 2v8M3 2v5c0 2 6 2 6 0V2M6 10v12M16 2v20M16 2c5 3 5 9 0 11"/>',
-	cloche: '<path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 7V5M9 5h6"/>',
-	serviceBell: '<path d="M4 17h16M6 17c0-5 2-8 6-8s6 3 6 8M12 9V7M9 7h6M3 20h18"/>',
-	chefHat: '<path d="M7 11a4 4 0 1 1 2-7 4 4 0 0 1 7 0 4 4 0 1 1 2 7v9H6v-9M9 15v5M15 15v5"/>',
-	heart: '<path d="M12 21S3 16 3 9c0-5 6-7 9-3 3-4 9-2 9 3 0 7-9 12-9 12Z"/><path d="M7 12h3l2-4 2 8 2-4h2"/>',
-	brain: '<path d="M9 4a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4M15 4a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4M9 4v16M15 4v16M9 8h3M12 15h3"/>',
-	star: '<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
-	mask: '<path d="M3 5c6-3 12-3 18 0v7c0 6-5 10-9 10S3 18 3 12V5Z"/><path d="M6 10c2-2 4-2 5 0M13 10c2-2 4-2 5 0M9 16c2 1 4 1 6 0"/>',
-	eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-	backpack: '<path d="M7 8V6c0-5 10-5 10 0v2M5 8h14v13H5V8Z"/><path d="M8 13h8M3 11v7M21 11v7"/>',
-	home: '<path d="m3 11 9-8 9 8v10H3V11Z"/><path d="M9 21v-7h6v7M7 10h10"/>',
-	document: '<path d="M6 2h9l4 4v16H6V2Z"/><path d="M14 2v5h5M9 12h7M9 16h7"/>'
-	, lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>'
-});
 
 function normalizeProfessionIconTags(profession) {
 	const raw = profession?.capabilityTags || profession?.CapabilityTags || profession?.tags || profession?.Tags || [];

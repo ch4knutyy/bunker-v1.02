@@ -18,8 +18,8 @@ test('live runtime registers exactly one public and one personal handler', () =>
 
 test('banner uses safe DOM construction and reduced motion', () => {
   assert.match(view, /id="apocalypseEffectBanner"[\s\S]*aria-live="polite"/);
-  const runtime = client.slice(client.indexOf('function apocalypseEffectSummaryKey'), client.indexOf('// ==================== SIGNALR HANDLERS'));
-  assert.match(runtime, /textContent/);
+  const runtime = client.slice(client.indexOf('function hideApocalypseEffectBanner'), client.indexOf('// ==================== SIGNALR HANDLERS'));
+  assert.match(runtime, /textContent|innerText/);
   assert.match(runtime, /replaceChildren/);
   assert.doesNotMatch(runtime, /innerHTML|insertAdjacentHTML/);
   assert.match(runtime, /setTimeout\(hideApocalypseEffectBanner, 9000\)/);
