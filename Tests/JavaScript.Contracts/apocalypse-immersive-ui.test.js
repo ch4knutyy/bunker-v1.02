@@ -3,6 +3,8 @@ const fs = require('node:fs');
 const test = require('node:test');
 
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const helpers = fs.readFileSync('wwwroot/js/bunker/apocalypse/helpers.js', 'utf8');
+const render = fs.readFileSync('wwwroot/js/bunker/apocalypse/render.js', 'utf8');
 const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
@@ -29,7 +31,7 @@ function constant(source, name) {
 }
 
 test('one universal renderer owns the full immersive scenario structure', () => {
-  const renderer = method(game, 'renderApocalypseScenario');
+  const renderer = method(render, 'renderApocalypseScenario');
   assert.match(game, /container\.innerHTML = renderApocalypseScenario\(buildApocalypseScenarioModel\(apocalypse\)\)/);
   for (const className of ['apocalypse-scenario-shell', 'apocalypse-hero', 'apocalypse-hero-media', 'apocalypse-hero-image', 'apocalypse-hero-overlay', 'apocalypse-hero-pattern', 'apocalypse-hero-content', 'apocalypse-badge', 'apocalypse-title', 'apocalypse-subtitle', 'apocalypse-metrics', 'apocalypse-content-grid', 'apocalypse-footer']) {
     assert.match(renderer, new RegExp(className));
@@ -37,25 +39,25 @@ test('one universal renderer owns the full immersive scenario structure', () => 
   assert.match(renderer, /model\.name/);
   assert.match(renderer, /model\.shortDescription/);
   assert.doesNotMatch(renderer, /model\.id|model\.tags|debug/i);
-  assert.equal((game.match(/function renderApocalypseScenario\(/g) || []).length, 1);
+  assert.equal((render.match(/function renderApocalypseScenario\(/g) || []).length, 1);
 });
 
 test('metrics use canonical values and missing content sections are omitted', () => {
-  const renderer = method(game, 'renderApocalypseScenario');
+  const renderer = method(render, 'renderApocalypseScenario');
   assert.match(renderer, /model\.dangerKey/);
   assert.match(renderer, /model\.survivalChance/);
   assert.match(renderer, /model\.duration \|\| t\('unknown'\)/);
-  assert.match(game, /if \(!Array\.isArray\(items\) \|\| !items\.length\) return ''/);
+  assert.match(render, /if \(!Array\.isArray\(items\) \|\| !items\.length\) return ''/);
   assert.match(renderer, /renderApocalypseContentSection\('threats'/);
   assert.match(renderer, /renderApocalypseContentSection\('requirements'/);
   assert.match(renderer, /renderApocalypseContentSection\('consequences'/);
 });
 
 test('canonical metadata resolver supports every requested variant and generic fallback', () => {
-  const normalize = method(game, 'normalizeApocalypseMetadataValue');
+  const normalize = method(helpers, 'normalizeApocalypseMetadataValue');
   const themeRegistry = constant(game, 'apocalypseVisualThemeRegistry');
-  const normalizeTheme = method(game, 'normalizeApocalypseVisualThemeId');
-  const resolver = method(game, 'resolveApocalypseVisualVariant');
+  const normalizeTheme = method(helpers, 'normalizeApocalypseVisualThemeId');
+  const resolver = method(helpers, 'resolveApocalypseVisualVariant');
   const resolve = new Function(`${themeRegistry}; ${normalize}; ${normalizeTheme}; ${resolver}; return resolveApocalypseVisualVariant;`)();
   const cases = [
     ['nuclear', { tags: ['radiation'] }],
@@ -76,29 +78,29 @@ test('canonical metadata resolver supports every requested variant and generic f
 });
 
 test('model preserves canonical fields while renderer exposes no ids or tags', () => {
-  const model = method(game, 'buildApocalypseScenarioModel');
+  const model = method(helpers, 'buildApocalypseScenarioModel');
   for (const field of ['id', 'name', 'shortDescription', 'description', 'dangerLevel', 'survivalChance', 'duration', 'threats', 'requirements', 'consequences', 'imageUrl', 'tags', 'categoryId', 'visualThemeId', 'category', 'visualVariant']) {
     assert.match(model, new RegExp(`${field}(?::|,|\\s*=)|model\\.${field}`));
   }
   assert.match(model, /getLocalizedValue/);
   assert.match(model, /getLocalizedArray/);
   assert.match(game, /currentApocalypse = apocalypse \|\| null/);
-  assert.doesNotMatch(method(game, 'renderApocalypseScenario'), /data-id|data-tags|apocalypseId/);
+  assert.doesNotMatch(method(render, 'renderApocalypseScenario'), /data-id|data-tags|apocalypseId/);
 });
 
 test('local image is decorative and unsafe or remote sources fall back to CSS', () => {
-  const normalizer = method(game, 'normalizeLocalScenarioImageUrl');
+  const normalizer = method(helpers, 'normalizeLocalScenarioImageUrl');
   const normalize = new Function(`${normalizer}; return normalizeLocalScenarioImageUrl;`)();
   assert.equal(normalize('/uploads/apocalypses/nuclear.webp?v=2'), '/uploads/apocalypses/nuclear.webp?v=2');
   assert.equal(normalize('uploads/apocalypses/local.png'), '/uploads/apocalypses/local.png');
   assert.equal(normalize('https://remote.invalid/a.png'), '');
   assert.equal(normalize('javascript:alert(1)'), '');
   assert.equal(normalize('../secret.png'), '');
-  const renderer = method(game, 'renderApocalypseScenario');
+  const renderer = method(render, 'renderApocalypseScenario');
   assert.match(renderer, /class="apocalypse-hero-media"[\s\S]*class="apocalypse-hero-image"[\s\S]*alt=""/);
   assert.match(renderer, /onerror="handleApocalypseHeroImageError\(this\)"/);
   assert.match(renderer, /'has-image' : 'no-image'/);
-  assert.match(game, /function handleApocalypseHeroImageError\(image\)[\s\S]*classList\.add\('no-image'\)[\s\S]*apocalypse-hero-media/);
+  assert.match(render, /function handleApocalypseHeroImageError\(image\)[\s\S]*classList\.add\('no-image'\)[\s\S]*apocalypse-hero-media/);
   assert.match(css, /\.apocalypse-hero\.no-image \.apocalypse-hero-pattern/);
 });
 
@@ -112,7 +114,7 @@ test('hero stacking keeps real media above fallback and below readable decoratio
 });
 
 test('apocalypse image state restrains pattern and keeps a circular decorative medallion', () => {
-  const renderer = method(game, 'renderApocalypseScenario');
+  const renderer = method(render, 'renderApocalypseScenario');
   assert.match(renderer, /apocalypse-hero \$\{model\.imageUrl \? 'has-image' : 'no-image'\}/);
   assert.match(css, /\.apocalypse-hero\.has-image \.apocalypse-hero-pattern,\s*\.bunker-hero\.has-image \.bunker-hero-pattern\s*\{[^}]*display:\s*none;[^}]*opacity:\s*0;[^}]*background-image:\s*none/);
   assert.match(css, /\.apocalypse-hero\.no-image \.apocalypse-hero-pattern\s*\{[^}]*opacity: \.14/);

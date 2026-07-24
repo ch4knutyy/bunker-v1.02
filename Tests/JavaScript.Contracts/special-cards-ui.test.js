@@ -5,6 +5,7 @@ const test = require('node:test');
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const tooltip = fs.readFileSync('wwwroot/js/tooltip.js', 'utf8');
+const specialCardsIcons = fs.readFileSync('wwwroot/js/bunker/special-cards/icons.js', 'utf8');
 
 function method(source, name) {
   const start = source.indexOf(`function ${name}(`);
@@ -46,8 +47,8 @@ test('semantic resolver maps canonical metadata and falls back to neutral', () =
 });
 
 test('icons are local inline SVG with fallback and no emoji final icon', () => {
-  assert.match(game, /const specialCardIconSvgRegistry = Object\.freeze/);
-  for (const icon of ['star','eye','shield','hand','swap','dice','refresh','globe','warning','backpack','briefcase','heart','brain']) assert.match(game, new RegExp(`${icon}:`));
+  assert.match(specialCardsIcons, /const specialCardIconSvgRegistry = Object\.freeze/);
+  for (const icon of ['star','eye','shield','hand','swap','dice','refresh','globe','warning','backpack','briefcase','heart','brain']) assert.match(specialCardsIcons, new RegExp(`${icon}:`));
   assert.match(game, /specialCardIconSvgRegistry\[iconKey\] \|\| specialCardIconSvgRegistry\.star/);
   assert.match(game, /aria-hidden="true"/);
   assert.doesNotMatch(method(game, 'renderSpecialCardIcon'), /https?:|<img|[🎲🛡️👁️⭐]/u);
