@@ -402,11 +402,15 @@
 	});
 	$('postGameStoryReplay')?.addEventListener('click', () => showPresentation(currentEntry, {})); $('postGameStoryNewGame')?.addEventListener('click', () => returnFinishedGameToLobby());
 	document.querySelectorAll('[data-story-mode]').forEach(button => button.addEventListener('click', () => {
-		if (typeof requestPostGameStoryMode === 'function') requestPostGameStoryMode(button.dataset.storyMode, get(currentEntry, 'id', 'Id'));
-	}));
+    if (typeof requestPostGameStoryMode === 'function') requestPostGameStoryMode(button.dataset.storyMode, get(currentEntry, 'id', 'Id'));
+}));
+
 	document.addEventListener('visibilitychange', () => { if (!document.hidden && !revealTimer && revealIndex < revealNodes.length) scheduleReveal(); });
 	window.PostGameStoryDirector = { bind, prepare, prepareRequested, applyState, applyTransition, showFinished, showPresentation, showAll, hideUi, clear };
 	updateWorkspaceCounts();
-	if (typeof connection !== 'undefined') bind(connection);
+	if (typeof connection !== 'undefined') {
+		bind(connection);
+		registerSignalREventsForPostGame();
+	}
 	if (typeof currentGameCompletion !== 'undefined' && currentGameCompletion) showFinished();
 })();

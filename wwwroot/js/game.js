@@ -3,7 +3,7 @@ const connection = new signalR.HubConnectionBuilder()
 	.withAutomaticReconnect()
 	.build();
 
-registerSignalREvents();
+if (typeof registerSignalREvents === 'function') registerSignalREvents();
 console.log("[SignalR] about to call connection.start()");
 connection.start()
 	.then(async () => {
