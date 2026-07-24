@@ -1,8 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build",
   "lsp": true,
   "permission": {
-    "lsp": "allow"
+    "lsp": "allow",
+    "question": "deny",
+    "task": "deny"
   },
   "compaction": {
     "auto": true,
