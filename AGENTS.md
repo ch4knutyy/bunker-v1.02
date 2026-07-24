@@ -671,7 +671,7 @@ Begin every saved report with a compact metadata block containing, when availabl
 - checks intentionally not performed;
 - known limitations.
 
-Do not include secrets, tokens, private configuration, bootstrap keys, connection IDs, or sensitive diagnostics.
+Do not include secrets, access tokens, API keys, private configuration, bootstrap keys, connection IDs, or sensitive diagnostics.
 
 ### 19.5 Content requirements
 
@@ -774,6 +774,42 @@ List any safe assumptions made. Omit this section when there were none.
 ### Ризики та ручна перевірка
 
 List remaining risks, unverified runtime behavior, or manual scenarios to check.
+
+### Використання токенів
+
+At the end of every substantial audit, implementation, debugging, review, or planning task, report token and context usage when exact values are available to the agent.
+
+Use this format:
+
+```markdown
+### Використання токенів
+
+- Токенів на початку задачі: [exact value or unavailable]
+- Токенів наприкінці задачі: [exact value or unavailable]
+- Витрачено на цю задачу: [exact difference or unavailable]
+- Заповнення контексту наприкінці: [exact percentage or unavailable]
+```
+
+Rules:
+
+1. Distinguish clearly between:
+   - total tokens used by the current OpenCode session;
+   - tokens used only by the current task;
+   - the percentage of the context window currently occupied.
+2. Calculate task token usage only when both the starting and ending counters are available.
+3. Do not estimate, infer, or fabricate token values.
+4. Do not convert a context percentage into a token count.
+5. If only the ending session counter is available, report it as the session total and state that task-specific usage cannot be calculated.
+6. If exact metrics are unavailable to the agent, write:
+
+```text
+Точні дані про використання токенів недоступні агенту.
+```
+
+7. Values explicitly provided by the user or exposed directly to the agent by OpenCode may be treated as verified.
+8. Do not include private chain-of-thought, hidden reasoning metrics, access tokens, API keys, or other sensitive data.
+9. Include the same token-usage section in a saved audit or implementation report when such a report is created.
+10. For a trivial task where token accounting would add no practical value, this section may be omitted unless the user explicitly requests it.
 
 For straightforward tasks, keep the report concise.
 

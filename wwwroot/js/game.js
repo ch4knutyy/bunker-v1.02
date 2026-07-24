@@ -8195,24 +8195,6 @@ function renderGmVotingAdmin() {
 		`<div>${escapeHtml(voter.name || voter.Name || '')}</div>`).join('');
 }
 
-function switchGMTab(tab) {
-	activeGMTab = ['state', 'round', 'threat', 'content', 'diagnostics', 'omniscient'].includes(tab) ? tab : 'state';
-	renderGMTabsVisibility();
-	renderGMPanelState();
-}
-
-function renderGMTabsVisibility() {
-	document.querySelectorAll('[data-gm-tab]').forEach(section => {
-		const active = section.dataset.gmTab === activeGMTab;
-		if (section.id === 'gmPlayerInfo') section.style.display = active && selectedPlayerForGM ? 'block' : 'none';
-		else if (section.dataset.gmTab === 'omniscient') section.style.display = active && !!omniscientHiddenState ? 'block' : 'none';
-		else section.style.display = active && isHost ? 'block' : 'none';
-	});
-	document.querySelectorAll('[data-gm-tab-button]').forEach(button => {
-		button.classList.toggle('active', button.dataset.gmTabButton === activeGMTab);
-	});
-}
-
 function markGMServerUpdate() {
 	gmLastServerUpdateAt = new Date();
 	renderGMPanelState();
@@ -8231,19 +8213,6 @@ function renderGMPanelState() {
 		currentBunkerCapacity = currentBunker.capacity;
 		capacityInput.value = currentBunker.capacity;
 	}
-	const phase = getPhaseLabel(getCurrentPhase());
-	const players = Object.values(roomPlayers || {});
-	const activePlayers = players.filter(player => !(player.isEliminated || player.IsEliminated));
-	const connectedPlayers = activePlayers.filter(player => player.isConnected ?? player.IsConnected ?? true);
-	const threatName = currentThreat ? getLocalizedValue(currentThreat, 'name') || currentThreat.name || currentThreat.Name : '—';
-	const interactionStatus = currentThreatState ? getThreatStatusLabel(currentThreatState.threatStatus) : '—';
-	const stateSummary = document.getElementById('gmGameStateSummary');
-	if (stateSummary) stateSummary.innerHTML = [
-		['Кімната', currentRoom?.name || currentRoom?.Name || '—'],
-		['Раунд', round], ['Етап', phase], ['Активні гравці', activePlayers.length],
-		['Готовність', `${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? activePlayers.length}`],
-		['Поточна загроза', threatName], ['Interaction status', interactionStatus]
-	].map(([label, value]) => `<div class="gm-status-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('');
 	renderRoomDiagnostics();
 	const error = document.getElementById('gmLastCommandError');
 	if (error) {
@@ -9014,7 +8983,6 @@ function updateRoomUI() {
 // Нова функція для оновлення GM секцій
 function updateGMSections() {
 	const isGameActive = currentRoom && (currentRoom.state === 'Playing' || currentRoom.state === 'Started' || currentRoom.state === 'Voting');
-	renderGMTabsVisibility();
 	const roundTab = document.querySelector('[data-gm-tab-button="round"]');
 	if (roundTab) roundTab.disabled = !isGameActive;
 	updateRoundStatusUI();
