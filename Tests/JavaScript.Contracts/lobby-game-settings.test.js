@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
@@ -61,7 +62,7 @@ test('local presets and JSON interchange are versioned and whitelist only normal
 
 test('UA RU EN expose setup labels and spectator readiness is server blocked', () => {
   for (const key of ['lobbySetupTitle', 'lobbyPresetClassic', 'lobbyInteractiveRate', 'lobbyTimerDuration', 'lobbyVotingStart', 'lobbyApply']) {
-    assert.equal((client.match(new RegExp(`${key}:`, 'g')) || []).length, 3);
+    assert.equal((i18n.match(new RegExp(`${key}:`, 'g')) || []).length, 3);
   }
   assert.match(lobby, /IsGameplayParticipant\(player\)[^\n]*spectators_not_ready_participants/);
   assert.match(lobby, /SetLobbyReady/);

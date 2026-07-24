@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '..', '..');
 const service = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Rooms', 'RoomLocalEditorService.cs'), 'utf8');
 const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.RoomLocalEditor.cs'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const i18n = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'i18n', 'translations.js'), 'utf8');
 const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 
 test('editor is host-authorized and uses typed allowlist without reflection or threat fields', () => {
@@ -33,5 +34,5 @@ test('advanced editor UI is closed by default live localized and guarded', () =>
   assert.doesNotMatch(view, /<details id="gmRoomLocalEditor"[^>]*open/);
   assert.match(client, /connection\.on\("RoomLocalEditorUpdated"/);
   assert.match(client, /if \(gmRoomLocalEditorPending\) return/);
-  assert.equal((client.match(/gmRoomLocalEditor:/g) || []).length, 3);
+  assert.equal((i18n.match(/gmRoomLocalEditor:/g) || []).length, 3);
 });

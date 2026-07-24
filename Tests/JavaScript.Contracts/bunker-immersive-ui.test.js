@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const test = require('node:test');
 
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
@@ -135,7 +136,7 @@ test('live capacity image reconnect and localization paths reuse the current ren
   assert.match(game, /BunkerImageUpdated[\s\S]*currentBunker\.imageUrl = imageUrl[\s\S]*renderBunker\(currentBunker\)/);
   assert.match(game, /RejoinSuccess[\s\S]*currentBunker = data\.bunker \|\| data\.Bunker[\s\S]*renderBunker\(currentBunker\)/);
   assert.match(game, /renderCurrentGameUI\(\)[\s\S]*renderBunker\(currentBunker\)/);
-  for (const key of ['bunkerBadge','bunkerRooms','bunkerResources','bunkerProblems','bunkerFacilityRecord','conditionExcellent','conditionCritical','conditionUnknown']) assert.equal((game.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `${key} must have UA/EN/RU`);
+  for (const key of ['bunkerBadge','bunkerRooms','bunkerResources','bunkerProblems','bunkerFacilityRecord','conditionExcellent','conditionCritical','conditionUnknown']) assert.equal((i18n.match(new RegExp(`${key}:`, 'g')) || []).length, 3, `${key} must have UA/EN/RU`);
 });
 
 test('apocalypse renderer and room count privacy guard remain independent', () => {

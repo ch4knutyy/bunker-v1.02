@@ -3,13 +3,14 @@ const fs = require('node:fs');
 const test = require('node:test');
 
 const game = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const gmPanel = fs.readFileSync('wwwroot/js/bunker/gm-panel-v2.js', 'utf8');
 const gmView = fs.readFileSync('Views/Shared/Bunker/_GmPanel.cshtml', 'utf8');
 
 test('bunker card renders localized food and water as independent metrics', () => {
-  assert.match(game, /supplies:\s*"Їжа",\s*water:\s*"Вода"/);
-  assert.match(game, /supplies:\s*"Food",\s*water:\s*"Water"/);
-  assert.match(game, /supplies:\s*"Еда",\s*water:\s*"Вода"/);
+  assert.match(i18n, /supplies:\s*"Їжа",\s*water:\s*"Вода"/);
+  assert.match(i18n, /supplies:\s*"Food",\s*water:\s*"Water"/);
+  assert.match(i18n, /supplies:\s*"Еда",\s*water:\s*"Вода"/);
   assert.match(game, /metric-supplies[\s\S]*t\('supplies'\)/);
   assert.match(game, /metric-water[\s\S]*t\('water'\)/);
 });

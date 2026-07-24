@@ -6,6 +6,7 @@ const test = require('node:test');
 const root = path.resolve(__dirname, '..', '..');
 const view = fs.readFileSync(path.join(root, 'Views', 'Shared', 'Bunker', '_GmPanel.cshtml'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const i18n = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'i18n', 'translations.js'), 'utf8');
 const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.Diagnostics.cs'), 'utf8');
 
 test('diagnostics and audit are host-authorized and use canonical live events', () => {
@@ -36,7 +37,7 @@ test('GM diagnostics UI renders safe issues and unified audit without reload', (
 });
 
 test('UA RU and EN diagnostics labels exist', () => {
-  assert.equal((client.match(/gmRunDiagnostics:/g) || []).length, 3);
-  assert.equal((client.match(/gmAutoFixConfirm:/g) || []).length, 3);
-  assert.equal((client.match(/gmAuditLog:/g) || []).length, 3);
+  assert.equal((i18n.match(/gmRunDiagnostics:/g) || []).length, 3);
+  assert.equal((i18n.match(/gmAutoFixConfirm:/g) || []).length, 3);
+  assert.equal((i18n.match(/gmAuditLog:/g) || []).length, 3);
 });

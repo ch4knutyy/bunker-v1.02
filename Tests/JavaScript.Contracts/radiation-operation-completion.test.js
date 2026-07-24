@@ -8,6 +8,7 @@ const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.Th
 const service = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Threats', 'RadiationLeakMiniGameService.cs'), 'utf8');
 const dto = fs.readFileSync(path.join(root, 'Services', 'Bunker', 'Threats', 'IThreatMiniGameService.cs'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const i18n = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'i18n', 'translations.js'), 'utf8');
 
 test('all completion paths converge on the idempotent finalizer', () => {
   assert.match(hub, /StartThreatMiniGame[\s\S]*FinalizeRadiationOperationAsync/);
@@ -56,7 +57,7 @@ test('final payload carries status, outcome, score, and refreshed players', () =
 
 test('final UI uses one server status and a nonzero server progress', () => {
   assert.match(client, /function getRadiationOperationStatus/);
-  assert.match(client, /failed: "Операція провалена"/);
+  assert.match(i18n, /failed: "Операція провалена"/);
   assert.match(client, /if \(isFinal\)[\s\S]*miniGame\.currentIndex[\s\S]*miniGame\.totalQuestions/);
   assert.doesNotMatch(client, /if \(!question\)[\s\S]{0,250}Операція триває/);
 });

@@ -1,8 +1,8 @@
 const test = require('node:test'); const assert = require('node:assert/strict'); const fs = require('node:fs');
-const { readBunkerView } = require('./bunker-view-test-helpers'); const client = fs.readFileSync('wwwroot/js/game.js','utf8'); const view = readBunkerView(); const css = fs.readFileSync('wwwroot/css/game.css','utf8');
+const { readBunkerView } = require('./bunker-view-test-helpers'); const client = fs.readFileSync('wwwroot/js/game.js','utf8'); const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js','utf8'); const view = readBunkerView(); const css = fs.readFileSync('wwwroot/css/game.css','utf8');
 test('UA RU EN lobby labels use localization keys', () => {
   for (const key of ['lobbyActivePlayers','lobbySpectators','lobbyReadySummary','lobbyRoomState','lobbyRoleHostPlayer','lobbyCheckReadiness']) {
-    assert.match(client, new RegExp(`${key}:`));
+    assert.match(i18n, new RegExp(`${key}:`));
   }
   assert.match(client, /localizeLobbyLifecycle/); assert.match(client, /localizeLobbyRole/); assert.match(view, /data-lobby-i18n/);
 });

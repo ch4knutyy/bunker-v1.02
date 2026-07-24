@@ -6,6 +6,7 @@ const gm = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GameMaster.cs', 'utf8');
 const voting = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Voting.cs', 'utf8');
 const gameActions = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GameActions.cs', 'utf8');
 const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
 const helpers = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Helpers.cs', 'utf8');
@@ -64,7 +65,7 @@ test('round controls are grouped without changing existing command handlers', ()
 
 test('round labels are localized and pause reason is rendered from server state', () => {
   for (const key of ['gmRoundCurrentState', 'gmRoundMainActions', 'gmManualRoundHint', 'gmReadinessHint', 'gmTimerMinutes']) {
-    assert.equal((client.match(new RegExp(key, 'g')) || []).length >= 3, true, `missing localized ${key}`);
+    assert.equal((i18n.match(new RegExp(key, 'g')) || []).length >= 3, true, `missing localized ${key}`);
   }
   assert.match(client, /currentRoundState\.pauseReason/);
   assert.match(client, /gmStatusPaused/);
