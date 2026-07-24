@@ -149,6 +149,8 @@ V2 liveEvents: `ThreatStateUpdated`, `GMThreatControlData` → `scheduleGmPanelV
 - Повний xUnit suite
 - Повний Playwright suite
 
+Ручна runtime-перевірка користувачем виконана успішно (див. «Ризики та ручна перевірка»).
+
 ---
 
 ## Припущення
@@ -162,13 +164,20 @@ V2 liveEvents: `ThreatStateUpdated`, `GMThreatControlData` → `scheduleGmPanelV
 
 ## Ризики та ручна перевірка
 
-Рекомендовано ручну перевірку користувачем:
+Ручна runtime-перевірка користувачем (не Playwright) виконана успішно:
 
-1. Відкрити GM Panel → вкладка Threats
-2. Перевірити, що emergency resync кнопка працює
-3. Перевірити, що generate buttons працюють
-4. Перевірити, що force preview/confirm працює
-5. Перевірити console на відсутність null DOM errors
+| # | Сценарій | Результат |
+|---|---|---|
+| 1 | Вкладка Threats відкривається коректно | ✅ |
+| 2 | Кнопка resync відображається лише одна | ✅ |
+| 3 | Resync працює | ✅ |
+| 4 | Вибір конкретної загрози працює | ✅ |
+| 5 | Generate rare працює | ✅ |
+| 6 | Generate text працює | ✅ |
+| 7 | Force success/failure preview відкривається | ✅ |
+| 8 | Confirm/cancel modal працюють | ✅ |
+| 9 | Після перемикання вкладок Threat UI залишається коректним | ✅ |
+| 10 | Browser console: відсутні null DOM errors, undefined renderer, duplicate event handling або інші пов'язані JavaScript-помилки | ✅ |
 
 ---
 
@@ -189,7 +198,7 @@ V2 liveEvents: `ThreatStateUpdated`, `GMThreatControlData` → `scheduleGmPanelV
 | 11 | `dotnet build --no-restore` успішний | ✅ |
 | 12 | JS tests успішні | ✅ (11/11 + 8/8) |
 | 13 | Diff локальний | ✅ (2 файли, +11/-1) |
-| 14 | Runtime UI verification | ⚠️ Не виконано |
+| 14 | Runtime UI verification | ✅ Ручна перевірка користувачем (див. «Ризики та ручна перевірка») |
 | 15 | Approval-required дії не виконані | ✅ |
 
 ---
@@ -205,8 +214,7 @@ V2 liveEvents: `ThreatStateUpdated`, `GMThreatControlData` → `scheduleGmPanelV
 
 ## Обмеження
 
-1. **Runtime UI verification**: не виконано. Потребує ручної перевірки.
-2. **V2 threat renderer**: v2 не має власного threat renderer — делегує game.js. Це коректна архітектура, але означає, що v2 threats tab повністю залежить від `renderGMThreatControl()`.
+1. **V2 threat renderer**: v2 не має власного threat renderer — делегує game.js. Це коректна архітектура, але означає, що v2 threats tab повністю залежить від `renderGMThreatControl()`.
 
 ---
 
