@@ -130,7 +130,6 @@ Call sites (незмінні):
 
 - Повний xUnit suite
 - Повний Playwright suite
-- Runtime UI verification
 
 ---
 
@@ -145,19 +144,19 @@ Call sites (незмінні):
 
 ## Ризики та ручна перевірка
 
-Рекомендовано ручну перевірку користувачем:
+Ручна перевірка користувачем — **успішна**:
 
-1. Відкрити GM Panel
-2. Перемкнути всі доступні вкладки ordinary host
-3. Перевірити active button state
-4. У simple mode перевірити приховані advanced controls
-5. У advanced mode перевірити їх появу
-6. Перевірити вкладку «Гравці» та player cards
-7. Перевірити summary на вкладці «Гра»
-8. Виконати дію, яка змінює round/readiness/voting state, і перевірити оновлення summary
-9. Закрити та повторно відкрити панель
-10. Оновити сторінку через F5
-11. Перевірити browser console на помилки
+1. ✅ GM Panel відкривається
+2. ✅ Усі доступні ordinary host вкладки перемикаються
+3. ✅ Активна вкладка правильно підсвічується
+4. ✅ Simple/Advanced mode працює
+5. ✅ V2 player cards працюють
+6. ✅ Summary на вкладці «Гра» відображається та оновлюється
+7. ✅ Панель повторно відкривається
+8. ✅ Після F5 reconnect працює
+9. ✅ У консолі немає `switchGMTab`, `renderGMTabsVisibility`, null DOM або інших JavaScript exceptions
+
+**Спостереження**: під час join/reconnect двічі з'явився warning `No current player character found`. Після цього прийшов `PlayerStateResynced` — дані персонажа відновилися. Warning не пов'язаний із змінами 01D–01E і не блокував роботу UI. Перевірка — ручна (не Playwright).
 
 ---
 
@@ -188,5 +187,11 @@ Call sites (незмінні):
 | 12 | `dotnet build --no-restore` успішний | ✅ (0 errors, 0 warnings) |
 | 13 | Вузькі JS-тести успішні | ✅ (11/11 + 5/5) |
 | 14 | Diff локальний, без unrelated formatting | ✅ (2 файли, -36/+2) |
-| 15 | Runtime UI verification | ⚠️ Не перевірено — рекомендовано ручну перевірку |
+| 15 | Runtime UI verification | ✅ Ручна перевірка — успішна |
 | 16 | Approval-required дії не виконані | ✅ |
+
+---
+
+## Використання токенів
+
+Точні дані про використання токенів недоступні агенту.
