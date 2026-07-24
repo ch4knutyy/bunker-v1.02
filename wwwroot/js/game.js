@@ -7927,23 +7927,7 @@ async function applyStableIdMigration() {
 	finally { setGlobalDraftPending(false); }
 }
 
-function toggleGMPanel() {
-	const panel = document.getElementById('gmPanel');
-	const isVisible = panel.style.display !== 'none';
-	panel.style.display = isVisible ? 'none' : 'flex';
 
-	if (!isVisible && isHost) {
-		// Завантажуємо дані гравців при відкритті панелі
-		connection.invoke("GetAllPlayersData").catch(err => console.error(err));
-		connection.invoke("GetGMThreatControlData").catch(err => console.error(err));
-		connection.invoke("ResyncVotingState").catch(err => console.error(err));
-		connection.invoke("RunRoomIntegrityCheck", getCurrentLanguage()).catch(err => console.error(err));
-		connection.invoke("GetGmAuditLog").catch(err => console.error(err));
-		connection.invoke("GetRoomSnapshots").catch(err => console.error(err));
-		connection.invoke("GetRoomLocalEditorData").catch(err => console.error(err));
-		renderGMPanelState();
-	}
-}
 
 function setGmDiagnosticsPending(pending) {
 	gmDiagnosticsPending = pending;
