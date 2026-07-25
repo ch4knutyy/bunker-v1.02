@@ -1,0 +1,3376 @@
+[
+  {
+    "name": "getRoomIdFromPath",
+    "originalLine": 133,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "8ffdbd9ce95e3b5e0dc4ef19fea79f1f72164dd16ee34c1aa89a55997060922b"
+  },
+  {
+    "name": "normalizeRoundState",
+    "originalLine": 139,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "de909fcf3ec31aa04b3deeeec8cbdba7151c5db650ce50a24cb39de863f522ae"
+  },
+  {
+    "name": "applyRoundState",
+    "originalLine": 188,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "08c60593177438a4f9e55c23af1713dd59c7abfefcb81b73be7fc4e0bb65f242"
+  },
+  {
+    "name": "applyDeveloperAccessState",
+    "originalLine": 209,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "c255172421d84678bc4d49e0fda5d2e4f3f128486317b8032eed83500dc55308"
+  },
+  {
+    "name": "applyDeveloperPresence",
+    "originalLine": 227,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "1e5fa6d564fa918eaea8dba2b58ff800589fd02bcc4d9164100ef12501718763"
+  },
+  {
+    "name": "normalizePostGameTransition",
+    "originalLine": 241,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "54cb8ad61a9d2cf19ed17621db879ea356372ee36a65dd652c50e9af49ac74a5"
+  },
+  {
+    "name": "applyPostGameTransition",
+    "originalLine": 257,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "2e8967fb0c4ea6cab82299f47885bc3995073c6edbd24f9b8af474269952bf51"
+  },
+  {
+    "name": "setPostGameButton",
+    "originalLine": 266,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "5f0e5de0a19d228eae49a9e8d3fa8a800bff712f8916200421e3112ef689f236"
+  },
+  {
+    "name": "renderPostGameCommandState",
+    "originalLine": 271,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "8099aba5e721fa7a3750ecfab0644215fd93b81e5d2af27a9a05ccd70e966ed7"
+  },
+  {
+    "name": "renderDeveloperAuthorityUi",
+    "originalLine": 296,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "61a2d70b3301019c3a89f0aba90db01a10ed1dd378e7bbee71373e0d596effcf"
+  },
+  {
+    "name": "developerFeatureEnabled",
+    "originalLine": 311,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "f5a0823212d7f70f23813d6abbc4a94bf291d3f72c15a8d84363769d7ba3e521"
+  },
+  {
+    "name": "buildDeveloperChecklist",
+    "originalLine": 318,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "6c2ff78a41a2e4809ed163d3a722d175def2f37a0322209db0448bbd9ab359d8"
+  },
+  {
+    "name": "renderDeveloperAudit",
+    "originalLine": 348,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "0acf3eb4b7a373580a47c02820ba4737685382ef74bbf84636d70118fe8057ab"
+  },
+  {
+    "name": "toggleDeveloperTools",
+    "originalLine": 372,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "f110aa8b6ac958c3db45a6388cb287d74c4ae3c3ad6df43b4589daf4aec91fd6"
+  },
+  {
+    "name": "copyDeveloperChecklist",
+    "originalLine": 380,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "6239d0b37bec857997445e2185ee9d284e9d015fa522a952e87e22ffbf3fcd0f"
+  },
+  {
+    "name": "recoverDeveloperUi",
+    "originalLine": 384,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "a5853ad7805b5825a711339169236ae6c1141e9e4e3cc2a8f77eb54baa0a2cd8"
+  },
+  {
+    "name": "takeOverDeveloperOperator",
+    "originalLine": 410,
+    "domain": "diagnostics/runtime.js",
+    "kind": "function",
+    "sha256": "81307fe9c439d721079b640c9ed386c8c98860e8c91b6c566813f9be7a87bc8a"
+  },
+  {
+    "name": "finishPostGameDiscussion",
+    "originalLine": 416,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "5f1cce2c6e7e96c91046be1cb9d845c3426d161431d9765f2385fe5d06d3a07a"
+  },
+  {
+    "name": "revealRemainingPostGameCharacteristics",
+    "originalLine": 422,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "50585bbda6cf673230ef3708dcf0bba7864a0a5e8971743f7836b16a02fe0491"
+  },
+  {
+    "name": "requestPostGameStoryMode",
+    "originalLine": 427,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "5bd3fa07f5cf247faf25bce3fc30540be23763babe063a87bb44f3b8464d835c"
+  },
+  {
+    "name": "requestFinalPostGameStory",
+    "originalLine": 432,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "b9a582e462e20b7d77d99d3fe78e3d0f6e093e7d04a75c5e6308beb3dc7310da"
+  },
+  {
+    "name": "cancelPostGameStoryRequest",
+    "originalLine": 434,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "ab6637771c67ff4065e33dd77308b3bbbdb8e8c1e9ef69d1231f33c778ff2e9d"
+  },
+  {
+    "name": "normalizeGameCompletion",
+    "originalLine": 440,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "ccb4bea0eb3b2fa7207ae3811ec3a9bdd574a49229cd17da1f7c89c482a0aa9d"
+  },
+  {
+    "name": "isFinishedGameState",
+    "originalLine": 457,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "01b5f60886ecd404b3d41da09b998f201fa5a31b88c9ad101f02afd86c0314eb"
+  },
+  {
+    "name": "setGameFinishedMutationState",
+    "originalLine": 463,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "ec1b1b5001ff1d9a73a9bd9e244f150831c5dfee09e0968e7624dbf506b3207b"
+  },
+  {
+    "name": "renderGameFinished",
+    "originalLine": 490,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "2644d5c861956bc50e37bbd02e29df8d97139ada0420117820f1cb106b8512c4"
+  },
+  {
+    "name": "buildGameSummaryText",
+    "originalLine": 551,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "9784737f90dc44842a39dddb0f3c3e321eddab8edb99c45a4e1ccfda44ad4d39"
+  },
+  {
+    "name": "copyGameSummary",
+    "originalLine": 564,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "8eb74abd87788a62930a8bd506df383dbef089d359ca5b03ac86e70a7664a88d"
+  },
+  {
+    "name": "returnFinishedGameToLobby",
+    "originalLine": 578,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "d749af9782c87c73f7cfcba541385e73cad6de973c1011e742d71f2e2d50e533"
+  },
+  {
+    "name": "clearGameFinishedStateForLobby",
+    "originalLine": 593,
+    "domain": "postgame/runtime.js",
+    "kind": "function",
+    "sha256": "45bf181f83a5502a163b85088c587c1f0061d131057ab8e199c3575d31f8a372"
+  },
+  {
+    "name": "normalizeGameTimer",
+    "originalLine": 620,
+    "domain": "timer/runtime.js",
+    "kind": "function",
+    "sha256": "528f930e80ad9c9683ad2cf54ed2e846ec41273439ab67e78d06f6c062e2de05"
+  },
+  {
+    "name": "syncGameTimer",
+    "originalLine": 634,
+    "domain": "timer/runtime.js",
+    "kind": "function",
+    "sha256": "15dedbcc1b51a349c87c739ab9050f0e6699a90e1c8a8863f02468617b4fe152"
+  },
+  {
+    "name": "getGameTimerRemaining",
+    "originalLine": 651,
+    "domain": "timer/runtime.js",
+    "kind": "function",
+    "sha256": "6c946225c70820a7b5a3ed88ed9fdc8c74e42d4d8f04610ca4f8a642b7cf88de"
+  },
+  {
+    "name": "renderGameTimer",
+    "originalLine": 660,
+    "domain": "timer/runtime.js",
+    "kind": "function",
+    "sha256": "52d846f2b36f1b20e769caad70f7e92d285b207e38db7124cebe232871bdcd02"
+  },
+  {
+    "name": "getCurrentRoundNumber",
+    "originalLine": 698,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "36960cb01b68e03497c0ddf5398cf9486ebb3aa52d6d362dee32aef2ebae02d9"
+  },
+  {
+    "name": "getCurrentPhase",
+    "originalLine": 702,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "462be67d5922db1c2f446fa088ec67f5a7361e262689931be4f6cc8738a878a6"
+  },
+  {
+    "name": "normalizeThreatState",
+    "originalLine": 706,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "472b20b7f3cc0db91640289489fe8439a41b30f27fe69f0cc70223dfb7cdbc2e"
+  },
+  {
+    "name": "normalizeDiceRoll",
+    "originalLine": 838,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "557b1c086a9c979ec423da05bb8cd71f864c2fe3552d8299353358035b99c56b"
+  },
+  {
+    "name": "hasCurrentPlayerRevealedThisRound",
+    "originalLine": 853,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "2f9d1b976bb59d205a427dadccacd493fac6ac9cdc78f150479f4cb817039e3f"
+  },
+  {
+    "name": "canRevealThisRound",
+    "originalLine": 865,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "cfeb2861c4eff7a0c55d81db406e0d216407b893a149d9c27fdf7130f7b50317"
+  },
+  {
+    "name": "getRevealBlockedReason",
+    "originalLine": 870,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "2ba7c05107b06fd90aa011a49c1888dd1683f7535c40e31b4e60ccaeda2902cc"
+  },
+  {
+    "name": "getPhaseLabel",
+    "originalLine": 899,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "d331f636749ec47aab303365f60daa0f9b940773f1082c746705ab49fa4db862"
+  },
+  {
+    "name": "canEndRoundNow",
+    "originalLine": 914,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "1bd47fbbc802dcdd7a4ab2acd29414e3681554c22fc88332a94262693e34c7f8"
+  },
+  {
+    "name": "canRollRoundDiceNow",
+    "originalLine": 921,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "5dc73507a8ce57e1b0a2db6c75d82244d9527c54f1c873088315c1deaebefac6"
+  },
+  {
+    "name": "canStartVotingNow",
+    "originalLine": 925,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "e830e782a50043ec77c720d06467e54918c03dec005dc974b0b1cfe45f348497"
+  },
+  {
+    "name": "getRoomStateLabel",
+    "originalLine": 929,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "b26b32c59eeeaa1d94b8ee0d29013d02212089538d85f0de52924cef263347e0"
+  },
+  {
+    "name": "updateRoundStatusUI",
+    "originalLine": 946,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "a0294961a8cccad064585c78fbbb13642724001e0b6f6e92c70a929464f92302"
+  },
+  {
+    "name": "normalizeThreatMetadataValue",
+    "originalLine": 1042,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "84178113361bedfcdd42292e517f484defa07f323f1ff45a4d9f74f5777f9076"
+  },
+  {
+    "name": "resolveThreatVisualVariant",
+    "originalLine": 1046,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "841daa288e2138082747380317de14e0e1e740e0c2b02cb544b3ca9adeac9030"
+  },
+  {
+    "name": "resolveThreatSeverity",
+    "originalLine": 1070,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "6f227ee425ce8c141006c00c864bc2770aa43c9a2854af3d7806e5060decf274"
+  },
+  {
+    "name": "getThreatSeverityLabel",
+    "originalLine": 1083,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "9f3e0c96e3aed94e98d88210c542b6e3527c6cc01d4ce7981adef4d3d150d737"
+  },
+  {
+    "name": "resolveThreatStatusPresentation",
+    "originalLine": 1087,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "7e42aaeb7de22d28f39e74f534e9a04e7b986f8765011343476ef6132563a682"
+  },
+  {
+    "name": "buildThreatScenarioModel",
+    "originalLine": 1099,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "6b1e894193741d632fc619909f8af2e7a8e8467de7ff1df8b465597d0391c74d"
+  },
+  {
+    "name": "renderThreatIcon",
+    "originalLine": 1129,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "9f4f93f2f626c80ede4bcfd6dcee6e5c38947ea1ccfd3ea76d5bbf0eb26d0565"
+  },
+  {
+    "name": "renderHiddenThreatScenario",
+    "originalLine": 1133,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "9bff638c37d1afebf0ddfc79cc2f6598f43446694396091d36c81bba412d25a2"
+  },
+  {
+    "name": "renderThreatContentSection",
+    "originalLine": 1141,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "af34d53fe7f49df6f0fb07a8d231d4aa870437922febf45d64e71f8c1ff2b7ab"
+  },
+  {
+    "name": "renderThreatScenario",
+    "originalLine": 1146,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "08de781d6412f39e4dfe5cb381f621eec43e03eff56101898c4838f6162a174c"
+  },
+  {
+    "name": "renderThreatPanel",
+    "originalLine": 1169,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "6d7fc1185cb66e3f3c11e85eb35e3d3acd1baa8d8ce56fe59d64a313b785829a"
+  },
+  {
+    "name": "handleThreatHeroImageError",
+    "originalLine": 1182,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "7c106fb5671cdeb51fe9da3b2fbb55937bc2238f20a125f2323c8a47e621e22a"
+  },
+  {
+    "name": "openCurrentThreatImage",
+    "originalLine": 1190,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "8e71b65c4d5f3085d14da6fb30e4efe609703475dd49b48ddbd82fa939ad46d8"
+  },
+  {
+    "name": "renderThreatInteractionPanel",
+    "originalLine": 1195,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "10ef4a4957323520405919858070fc56e0074c2e5100899962c2491804ba4b47"
+  },
+  {
+    "name": "getPlanChoiceText",
+    "originalLine": 1229,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "edc98d86ca9a006ebb810ebd8a64cc6dcb859efeb61211140b1f84adc353128a"
+  },
+  {
+    "name": "renderPlanRequirementList",
+    "originalLine": 1235,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "ca45f513c8fba541d1e78de6d1d443f24c18f60b96798249aacfde3fdd212618"
+  },
+  {
+    "name": "planChoiceLabel",
+    "originalLine": 1240,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "e4e5de4ac82d773ccc8b3aeab4263252561634e0cc10caab978f3cf8d35a7e1b"
+  },
+  {
+    "name": "planChoiceLevel",
+    "originalLine": 1249,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "2e58600e78582be697b90b9927b47c668418e6e300b7c48a62eb9c76d0b0bc2f"
+  },
+  {
+    "name": "renderAirFilterPlanChoice",
+    "originalLine": 1258,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "8f10da1db10092b5e2cb90a2296b41a74981864fcd6bcbea2bebf24a4413677a"
+  },
+  {
+    "name": "getThreatStatusLabel",
+    "originalLine": 1314,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "50dbac79c4223ad985ae1ef164a8fe151d3ff6e89c75f35a82d4febe3cdcaa1e"
+  },
+  {
+    "name": "getRadiationOperationStatus",
+    "originalLine": 1318,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "f2a1910f7a6e9ccecac268205ba83b8e3ae2e29c2cda335513e42dcbe402f928"
+  },
+  {
+    "name": "openThreatOperationModal",
+    "originalLine": 1326,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "2cd343b023692e06049c0a655f93c4ba553bac3498d9a70bfc94c378dbc99c1c"
+  },
+  {
+    "name": "closeThreatOperationModal",
+    "originalLine": 1333,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "502057ea3609fbc774e77e3744d17ba9b198fc2bd8dc92087efcbb7c4758e07a"
+  },
+  {
+    "name": "renderThreatOperationModal",
+    "originalLine": 1338,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "d1bef3f6921d0b217cdfa74cdd35e37ebaaedf11c4adefbf479b058db0c01690"
+  },
+  {
+    "name": "getThreatOperationMetrics",
+    "originalLine": 1411,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "03dff01918b1ba3e89d4ff259a9c0e6ffdefa93bea19b4c4ca91e1e71986c068"
+  },
+  {
+    "name": "buildThreatTeamText",
+    "originalLine": 1417,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "c2d950a576da2af459b4f4441df1e36b74d6f56e87ea93f5dadbec3783dd85db"
+  },
+  {
+    "name": "renderThreatParticipantsList",
+    "originalLine": 1425,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "db42b3265da0da6da5afb29feea2e24a08c11bebaf3a34598a52466ddc8c8546"
+  },
+  {
+    "name": "renderThreatLeaderControl",
+    "originalLine": 1450,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "805c4c2e2d730cb8a92bd75a40edd27bc02fe15528b6c82b25fb8357287ebd0f"
+  },
+  {
+    "name": "renderThreatMiniGamePanel",
+    "originalLine": 1466,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "d6f77c83ee1f2554108403ce1bbe9441c9a4bff3a81aacd822045166e6391bc5"
+  },
+  {
+    "name": "isCurrentPlayerId",
+    "originalLine": 1525,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "0ff88927bcc1451a3b8a47ec294ee5a1cab493703a0d92545ca1e55c4916d3fd"
+  },
+  {
+    "name": "getThreatSourceLabel",
+    "originalLine": 1531,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "e346baa5e03b3db43a31911384723920a2366e97bf5e5a28d5e827af8eccf517"
+  },
+  {
+    "name": "renderThreatItemSelect",
+    "originalLine": 1544,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "10ba2cef809c4820a127e6ddc85db2d854711bacda0d8c5fdc3be75527d5d033"
+  },
+  {
+    "name": "renderBunkerAssetControls",
+    "originalLine": 1569,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "2ab9da6105d1700f33c41c2f63e3f183899c8743ae58ec70a26f2803325abc2a"
+  },
+  {
+    "name": "renderThreatVolunteerVoteControls",
+    "originalLine": 1588,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "5600afb02e1488a624d4aba5f0c6abbf992ac90afa847bcfdb0d541498b70974"
+  },
+  {
+    "name": "renderThreatRevealedItems",
+    "originalLine": 1603,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "d52004f2aaff9d61cb9037f057d2c5772f12b3b379983d63b8f68e03fa65d0d3"
+  },
+  {
+    "name": "rollThreatSupportDice",
+    "originalLine": 1610,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "8edfa14829038bdcb7633204754e3dab8611a19974c579404b53466ac1b47eea"
+  },
+  {
+    "name": "submitThreatVolunteer",
+    "originalLine": 1614,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "d1efc1f5f81725c57651b6f76cf396bbc8de1c453927ffb340fc7b085aa8f024"
+  },
+  {
+    "name": "useProfessionForThreat",
+    "originalLine": 1618,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "e99c926985945cb488b446b685f919f143d875b94db12785b2f6a349c1dcc275"
+  },
+  {
+    "name": "useHobbyForThreat",
+    "originalLine": 1622,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "eb15a6e0d2845c4602ce49204d4d712dcbd0b6298430b33f9a73cbaf61c8a0c6"
+  },
+  {
+    "name": "contributeThreatItem",
+    "originalLine": 1626,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "597196b0bc8a3015e0a3046b7900a1037cec90b6fc75bd311b258a4418dff31c"
+  },
+  {
+    "name": "contributeBunkerThreatAsset",
+    "originalLine": 1635,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "0c42d6921b88671579eb542836022af064325de7e4f1c859cc1e7f8c2d799a2e"
+  },
+  {
+    "name": "withdrawThreatContribution",
+    "originalLine": 1645,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "275bd2b637b23a09546bea871d07ef2dba9f42d8fb17ae74e5d2cd0b45875dba"
+  },
+  {
+    "name": "startThreatVolunteerVote",
+    "originalLine": 1649,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "f772ada3bcc0455167a3beeb5d78997e89bf86659a5c94df58835810e48c32f6"
+  },
+  {
+    "name": "setThreatOperationLeader",
+    "originalLine": 1653,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "4602a114f6bf9738bc4823a62cacaef3de856946c09f8bca48545e986097f56e"
+  },
+  {
+    "name": "voteThreatVolunteer",
+    "originalLine": 1659,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "8c1d71151817eb275e9629e11dc7ed191941c53cfbf8b10d1ef45f0bcd3a058f"
+  },
+  {
+    "name": "closeThreatVolunteerVote",
+    "originalLine": 1663,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "6931cecd7839971ded1a08dc706ac91565ce70bf3b99586847a377d9d9d3bfa4"
+  },
+  {
+    "name": "resolveCurrentThreat",
+    "originalLine": 1667,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "cfdd4da1baf11269fbd07a0ba067c44d2163dc4dd5ed507cf5244d1b074dd2c0"
+  },
+  {
+    "name": "selectThreatPlan",
+    "originalLine": 1671,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "d45e0e42a7c1704d81d0c03b12a73a4bb564857bf0e0d4c5d44385344e622136"
+  },
+  {
+    "name": "startThreatMiniGame",
+    "originalLine": 1675,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "4d9d554d6525076969abf5f5874d8a9ba810ff002c6554c68877f8919481a2e6"
+  },
+  {
+    "name": "submitThreatMiniGameAnswer",
+    "originalLine": 1679,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "70e3fe51f770ab5728fcdc6b5e2caa612d44aecddf4821b5e61a551c68f99080"
+  },
+  {
+    "name": "useThreatMiniGameHint",
+    "originalLine": 1683,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "1c53515470fc1363d6f0ed98adb43dc9bd605d6f2fe2403071a8fcb1f743de52"
+  },
+  {
+    "name": "updateThreatOperationTimer",
+    "originalLine": 1687,
+    "domain": "threats/runtime.js",
+    "kind": "function",
+    "sha256": "f1940a2259a53797bafa3f214169af456d2d314b93d252944571ef4511e7a495"
+  },
+  {
+    "name": "getReadyStatusLabel",
+    "originalLine": 1703,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "a36f91e9a5b7dda38a9c169653d456e578309f8298add4f4d0de4128c4e629c6"
+  },
+  {
+    "name": "getReadyStatusClass",
+    "originalLine": 1713,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "3f72dfb1a0021d2f1915160c9f391be1abd18a227ec2c5e41c20f324a7b5b919"
+  },
+  {
+    "name": "updateReadyCheckUI",
+    "originalLine": 1717,
+    "domain": "rounds/runtime.js",
+    "kind": "function",
+    "sha256": "78b9c744b6e141fc8c6709321c7055c668287f9e74a5984275c48bf514cd9ae4"
+  },
+  {
+    "name": "setText",
+    "originalLine": 1763,
+    "domain": "i18n/runtime.js",
+    "kind": "function",
+    "sha256": "ba22ffdb3670d417998cf46fa5083534fea291f6aec2ca897a04d676f974dbe2"
+  },
+  {
+    "name": "setPlaceholder",
+    "originalLine": 1768,
+    "domain": "i18n/runtime.js",
+    "kind": "function",
+    "sha256": "3e70b087e1ff9fae183f3870e12a331fb12aebc6453d0a2f4f836db8b3f2b50d"
+  },
+  {
+    "name": "applyStaticTranslations",
+    "originalLine": 1773,
+    "domain": "i18n/runtime.js",
+    "kind": "function",
+    "sha256": "5dd492c1d3edab6d2a090b4685979bae8acf742a2ed76d0338e0e5d186d09bed"
+  },
+  {
+    "name": "rerenderLocalizedUI",
+    "originalLine": 1830,
+    "domain": "i18n/runtime.js",
+    "kind": "function",
+    "sha256": "2e0fbf95c81d6d4da26a9f884d62ba9304a06e6731eda2301cd1bae78f4dce07"
+  },
+  {
+    "name": "renderCurrentGameUI",
+    "originalLine": 1836,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "7eef34f912480d3f1544df2135f66d581cd39ccc7c21a9785adfb346555bae67"
+  },
+  {
+    "name": "resetClientGameStateForNewRoom",
+    "originalLine": 1861,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "a8804c8868aeb91a5d0dd2a3186a7bd88c9b0f35383c58558574b90a924b1f2b"
+  },
+  {
+    "name": "clearLegacyRoomStateOnly",
+    "originalLine": 1919,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "8c417119f2b7dd010df568aecb3246a2b28e2b2840939737403d19322a95543c"
+  },
+  {
+    "name": "changeLanguage",
+    "originalLine": 1942,
+    "domain": "i18n/runtime.js",
+    "kind": "function",
+    "sha256": "35463e1046139c09bd9be3375c2a81ae5c504051746e3e989cdef1470b64f11e"
+  },
+  {
+    "name": "normalizeCharacteristicKey",
+    "originalLine": 1960,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "7f9f548f133c826b47ac5e2c451553d09e38aefde410dd006051cca852c047af"
+  },
+  {
+    "name": "cleanTooltipText",
+    "originalLine": 1964,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "da835459f00372fb3fcc70c122cc08ca5522c2d8622768576391ba7e569007d7"
+  },
+  {
+    "name": "cleanProfessionName",
+    "originalLine": 2009,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "5252193fd92e3dac50681a20c04e1580b4beb5e4ac0daeb2dbd85e7156b1b19f"
+  },
+  {
+    "name": "getProfessionDisplayName",
+    "originalLine": 2015,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "99f416991b66fbd73370c9fa427f718b10d0555125ba1326ffff27b843cd209f"
+  },
+  {
+    "name": "getSeverityCode",
+    "originalLine": 2029,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "1745563bcd08ebbcecadc1d0bb43dd88cfa62895347b2e5a029b6a5c34abd7d8"
+  },
+  {
+    "name": "getSeverityLabel",
+    "originalLine": 2061,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "4702f2f36429b2d4380c891c3c35fdd9aae3c892165943f2cbdca02588e81d13"
+  },
+  {
+    "name": "getConditionSeverityLabel",
+    "originalLine": 2072,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "b85a17086fbfb82d799ba6b93dfc31f08964b843661363f884887ca2ce83fa84"
+  },
+  {
+    "name": "conditionShouldShowSeverity",
+    "originalLine": 2119,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "e97883fa22a5644565967f407d504062f10eef564b47afac3fe1cc57a9f4e253"
+  },
+  {
+    "name": "getConditionDisplayName",
+    "originalLine": 2168,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "dbf44e609df9f74cb9d20fdb1c22562f02a22ebb948c0ffca2b024b75a40d33d"
+  },
+  {
+    "name": "shouldShowSeverity",
+    "originalLine": 2190,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "494187c6044cf016c11e11ea69a783dc94ace95d5ebfd51bd9406b0e75a11a56"
+  },
+  {
+    "name": "buildLocalizedTooltip",
+    "originalLine": 2211,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "bd9f1020d9d846e0bd31d4b7abfb9f4b694e37228d23f4b06339b4d6b2ee2f41"
+  },
+  {
+    "name": "getLocalizedHealthDescription",
+    "originalLine": 2236,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "fa2b9b023222886039c76bbf6a60d62a9b66de8fcca9a408874630710039e2c8"
+  },
+  {
+    "name": "buildHealthConditionTooltip",
+    "originalLine": 2266,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "8954026025e6c5407af5e0e8ca63ec6bdc48c11272261a46e0d99dc4b21ac5f2"
+  },
+  {
+    "name": "buildPhysicalHealthTooltip",
+    "originalLine": 2273,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "2ff4cc533a6972cea7d7855fd735947a82e92bfdea5df1a51562dc742213f8bf"
+  },
+  {
+    "name": "parseFactValue",
+    "originalLine": 2291,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "3ee5b6940bd3744c92d76c7b0964c2c49cb91aeffd10545939ef19e63a9f0d7b"
+  },
+  {
+    "name": "normalizeFactFromPlayer",
+    "originalLine": 2304,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "2e625e41b2d28f3162263021e6abe732cfdd2b9741faa3213498109aa53022a1"
+  },
+  {
+    "name": "normalizeRevealedState",
+    "originalLine": 2325,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "92da6bc7b2382354413506c7fa2fa7253f375867eed90b416fa3c9a67c7825e2"
+  },
+  {
+    "name": "normalizeRevealedSources",
+    "originalLine": 2343,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "fa00c562b815edf9387f18f5ef89cdddc59b9a9e1135363332f9050618fe71da"
+  },
+  {
+    "name": "normalizeRevealedValues",
+    "originalLine": 2352,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "c9dc5c7ab8e8922eb22437a08fc918c8b95bdfbd2a26318337eeb2ed6a1aa51d"
+  },
+  {
+    "name": "getRevealedSource",
+    "originalLine": 2369,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "8e4b5d2e23d086e3606da7ada00c47b7b8ea435b8c76207518eabb85e6433552"
+  },
+  {
+    "name": "getLocalizedRevealedValue",
+    "originalLine": 2378,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "67a154d9d536fe5d0423e72ad0b4fe68a18814376445dc44d9a7c99c550e2eff"
+  },
+  {
+    "name": "getLocalizedRevealedTooltip",
+    "originalLine": 2426,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "1b9db067354a10e49b87b2c20937e931e39fa8c33203933ba565a00a761c76c9"
+  },
+  {
+    "name": "hasGeneratedCharacterData",
+    "originalLine": 2433,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "a38403001ea20df23042862e4062ae851ac753660e916254b6e12a490f74892e"
+  },
+  {
+    "name": "normalizeInventoryData",
+    "originalLine": 2462,
+    "domain": "inventory/runtime.js",
+    "kind": "function",
+    "sha256": "5abbb7d574fab813fc6052f5089b6ddcbf399991ffe41bb569f69f33e1a0e768"
+  },
+  {
+    "name": "normalizePropertyData",
+    "originalLine": 2473,
+    "domain": "inventory/runtime.js",
+    "kind": "function",
+    "sha256": "d63d5d3b1d48097fcd6b91165eac35f0b67a15dc87305e2baa65f07ea0ab9ba6"
+  },
+  {
+    "name": "getPropertyPresentation",
+    "originalLine": 2488,
+    "domain": "inventory/runtime.js",
+    "kind": "function",
+    "sha256": "849b6ec99e99739cebe265d7c0722f8eaefe5a1322f30ed699033e84198cff34"
+  },
+  {
+    "name": "getPropertyDisplay",
+    "originalLine": 2510,
+    "domain": "inventory/runtime.js",
+    "kind": "function",
+    "sha256": "224303c7d290b0a6b7d0a6a43cb375d13721bb8e40ed7d9391ca0035a5d4731b"
+  },
+  {
+    "name": "normalizeItemData",
+    "originalLine": 2518,
+    "domain": "inventory/runtime.js",
+    "kind": "function",
+    "sha256": "cab3adca2dffb010ebd606c739aa107b5511aefdc86f9e6ad0ed7467819d5077"
+  },
+  {
+    "name": "normalizeSpecialCard",
+    "originalLine": 2533,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "a6c954148a0928d3772d1a2895f0058159cdb2d4891c3af67264e9cb8417ecd6"
+  },
+  {
+    "name": "normalizeSpecialCards",
+    "originalLine": 2579,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "4c5d1a241f00b9e8adfd4304ed3c21cc265915c1486bf9e309e56cb99e891859"
+  },
+  {
+    "name": "normalizeSpecialCardState",
+    "originalLine": 2590,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "41ea2345344bb06ca89b710c72de2e6516b4587ce731fe8566e46ff41e634cfa"
+  },
+  {
+    "name": "getSpecialCardName",
+    "originalLine": 2621,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "8f9a6f9423b15e10143279b63b89f42cc4ed99d85591129590ffb25f0ae24400"
+  },
+  {
+    "name": "getSpecialCardDescription",
+    "originalLine": 2626,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "25d88bd4002d00bc098cf92c593d8e84fb5c2b7b4f7877380b8cf355e617555e"
+  },
+  {
+    "name": "normalizePlayer",
+    "originalLine": 2632,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "8fc3116be06d91a380860f01b507dd932b0d85c088a87e1f2916523c7e07985d"
+  },
+  {
+    "name": "normalizeAdditionalPhysicalConditions",
+    "originalLine": 2794,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "e83c8a42a6ff60a4775ca6c7c31e91c4be80703c7ae9cd959ee4632798aad697"
+  },
+  {
+    "name": "normalizeEliminationVoteImmunity",
+    "originalLine": 2809,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "e9116564a46324e806d72b80a9fb9736c8e6304268a610164a9086a54218c2e5"
+  },
+  {
+    "name": "hideApocalypseEffectBanner",
+    "originalLine": 2822,
+    "domain": "apocalypse/runtime.js",
+    "kind": "function",
+    "sha256": "5c29ba2942e6a24ebfa359785240a7a2506551717a307af070f6afe2cff40cf1"
+  },
+  {
+    "name": "showApocalypseEffectBanner",
+    "originalLine": 2829,
+    "domain": "apocalypse/runtime.js",
+    "kind": "function",
+    "sha256": "ef05ca4775b4811118d5e5db3c8d66fd51686b9b6d8c44feabf1f7bebd91d82e"
+  },
+  {
+    "name": "showApocalypseEffectPersonalChanges",
+    "originalLine": 2854,
+    "domain": "apocalypse/runtime.js",
+    "kind": "function",
+    "sha256": "94d6dff2fb0e3f1446be69f8b320f80faa80aee8eab67cad70a06f8bdad76721"
+  },
+  {
+    "name": "previewLobbyStart",
+    "originalLine": 2876,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "8a0d8aa05e385baf93ebbaa1c19e52a51b3211a30771a6f1cdbddd156265768d"
+  },
+  {
+    "name": "startGame",
+    "originalLine": 2883,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "dee26923afb883a5c24732b97e5889a1443e43a2f2aeea81ca287dcba8651275"
+  },
+  {
+    "name": "toggleLobbyReady",
+    "originalLine": 2893,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "35048036b35ae25f4b0e404994dd67a7b76bedd69a189f023491d59e2378649b"
+  },
+  {
+    "name": "setLobbyParticipation",
+    "originalLine": 2901,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "b0d7c4801b06da7cc17d8db82966c338868b73c0e8a5955602b6a73652f76c8e"
+  },
+  {
+    "name": "transferLobbyHost",
+    "originalLine": 2907,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "5c84234c15c8e2587ee8d84a27141de3e892fad438ee1f27cb8175bb0956e5f4"
+  },
+  {
+    "name": "updateConnectionStatus",
+    "originalLine": 2914,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "16369bda128ae5518ccbf744ebb9a92d7ea7bcc48cda133d8163906c034dc100"
+  },
+  {
+    "name": "openImageModal",
+    "originalLine": 2935,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "ebc6702e5a44f8651fbba1ffe5452319cb184181bbaf1fbdd7f736b72b73abea"
+  },
+  {
+    "name": "closeImageModal",
+    "originalLine": 2965,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "bac4f1176dd81c9eb5fe190731bae2bdc79fe7c58a36052e166d003eff99d37b"
+  },
+  {
+    "name": "bunkerResourceCommandId",
+    "originalLine": 2974,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "82763f60ec331598ec7c45ca9e5746ce15ab89318e5f45fcf46cca2f8612e69b"
+  },
+  {
+    "name": "mutateBunkerResource",
+    "originalLine": 2978,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "1f51f9ffea7a512910d2525cb9b5cbb1ea5b8bfd93def3b7e3f0a99f985d832b"
+  },
+  {
+    "name": "addBunkerSupplies",
+    "originalLine": 3005,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "efb03c3d5ee1f4a93a1ee3e959c51a9c3df8d1235a8659f0e0273a96ac1d414d"
+  },
+  {
+    "name": "removeBunkerSupplies",
+    "originalLine": 3006,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "2f23636146414729928a9144ce4a27bfc10f14234f8bc024fb338781a7e2f105"
+  },
+  {
+    "name": "addBunkerWater",
+    "originalLine": 3007,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "ffd3d7d0447e00e66301606831788f696d0ffd5166c8de09dffbf42604ec7461"
+  },
+  {
+    "name": "removeBunkerWater",
+    "originalLine": 3008,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "114004bbcf6412ecec28a9b7d44792f0805e017a5225dbc5d14eaf1298c7efc6"
+  },
+  {
+    "name": "validatePlayerName",
+    "originalLine": 3052,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "62402521389b7972537b0af34c519f0769a7db97024544a3cb7662429b6b8b7a"
+  },
+  {
+    "name": "saveSession",
+    "originalLine": 3074,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "8c7c0ce5a32bbc8f1ddb26f70c7435af5bef0c30828c3d10f68e3ef2a9e29784"
+  },
+  {
+    "name": "getOrCreatePlayerId",
+    "originalLine": 3109,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "0d9197e3332339de83ddaffe76c808c5c3c57cbcf4afeeed8b551c7d91ab14cf"
+  },
+  {
+    "name": "clearSession",
+    "originalLine": 3121,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "765d3666cff2c7d07d5d264ae847add7ec44a3bcf3d386b7cff7d74c94173a55"
+  },
+  {
+    "name": "loadSession",
+    "originalLine": 3132,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "b5d029dc73641a80ffc6d7f5fcf2950ff4f3b63ed402c5bb0320a16d91528301"
+  },
+  {
+    "name": "tryRejoin",
+    "originalLine": 3144,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "d048c341d2339b2f09b9523b9e864a009da8000844d82e9e0cbdd6ecf8de3c4b"
+  },
+  {
+    "name": "prefillPlayerName",
+    "originalLine": 3163,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "34f98caf0741cee2f61444cfc4d0e8da1824c3a6cc2977efa2150b445b475de9"
+  },
+  {
+    "name": "peekCharacteristic",
+    "originalLine": 3177,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "0b481310dd3752fba272b191fa0ce8864db31a99329627740cb8365c9946e931"
+  },
+  {
+    "name": "revealCharInGMPanel",
+    "originalLine": 3193,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "8c03e3a35987c0198914d269f40afabba0490f42ee430f22ab3257d108d3aceb"
+  },
+  {
+    "name": "showPeekModal",
+    "originalLine": 3259,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "23f6ab274bcc6a0f0613594886852318e7fd8d48bd4de3c46381ab3192975be8"
+  },
+  {
+    "name": "closePeekModal",
+    "originalLine": 3272,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "0a3ceddd286cb394def4aeb45f8609cc365527303ecfb32f5f355e865e5b0cd4"
+  },
+  {
+    "name": "setBunkerCapacityPending",
+    "originalLine": 3280,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "579065e9baf7e2de9b7101e3b57171fdbc9660be534af2a618c88e38dea2f52f"
+  },
+  {
+    "name": "submitBunkerCapacity",
+    "originalLine": 3288,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "53ffb7ccadc9c7e8d3a731c6434964a7b19c080f88034c12f9123ca422c2ba1c"
+  },
+  {
+    "name": "handleBunkerCapacityKeydown",
+    "originalLine": 3309,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "f5d4a4398cffb3c77543bbc6c8847ea57a36c1fabf2043ee9f128dce5117bec0"
+  },
+  {
+    "name": "regenerateBunker",
+    "originalLine": 3316,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a5510e4fa4240d1be52accfdc23d54a179b6bdea56a5e1fc993ad14ae4c3fc50"
+  },
+  {
+    "name": "regenerateApocalypse",
+    "originalLine": 3323,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "3854f8e5c829f07b49dac3fb557fc57826fdb0f83e7e371e8f4e365f80680759"
+  },
+  {
+    "name": "sendGameEvent",
+    "originalLine": 3330,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "8400d056e8c2dd476ec40a3fb17ee232e5323d0e6e7e91beea924cfecb5e436e"
+  },
+  {
+    "name": "sendQuickEvent",
+    "originalLine": 3342,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "43e25de1ff69181baad65c86834aec3e262042c1a259b384fd28c8593b8b06b7"
+  },
+  {
+    "name": "initMobileTooltips",
+    "originalLine": 3350,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "010da268bb7bc739d7135bce852164c1717a68a946069116955e8b316d77357f"
+  },
+  {
+    "name": "createRoom",
+    "originalLine": 3356,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "06c39dcbd61fa8f4e00be238eaaa49a3b6d77f57dc6ddc885b7ede2562cac41d"
+  },
+  {
+    "name": "getInviteLink",
+    "originalLine": 3410,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "81b7a80d20c738559baf2f4a65c7939ba65617777bf077f5f83b9b17a1cb4a30"
+  },
+  {
+    "name": "fallbackCopyText",
+    "originalLine": 3415,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "d6cc6c336414ee15cba1bc1c6e6953b308c96f862308cc770c9e0b3e796f1f66"
+  },
+  {
+    "name": "copyInviteLink",
+    "originalLine": 3428,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "921ee0f4a0330b4dff5399f5531730d88b0da705ee06560ab13bd8fd5c63b50e"
+  },
+  {
+    "name": "openJoinRoomModal",
+    "originalLine": 3457,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "13d4821bd0a4f70a4b97df8dff8d6716046615bab43855b28fe9b81821a4071e"
+  },
+  {
+    "name": "joinRoom",
+    "originalLine": 3475,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "38857d3a02c085f98980c163edfa9e783694971ab5ad77bc4e8c8fa664c32312"
+  },
+  {
+    "name": "submitJoinRoom",
+    "originalLine": 3523,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "f7acec6c8043600a2e195abd3aee8cc9239f393c96f43868888ee93a04b1c2e0"
+  },
+  {
+    "name": "closeJoinModal",
+    "originalLine": 3550,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "37589b5dd7aa2d55f69c1c3c921b9f28d69d23d7ea9d71729861f86b970eb04d"
+  },
+  {
+    "name": "leaveRoom",
+    "originalLine": 3558,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "2e464091473b3970cd414d5203f279fe6c1f3f54d0f967d9e1559e8ee68bcf7d"
+  },
+  {
+    "name": "reveal",
+    "originalLine": 3566,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "a995015cef0cb47174c804442ee1fe343353a164f440f34f499a3342d50b058e"
+  },
+  {
+    "name": "syncPublicGameSettings",
+    "originalLine": 3699,
+    "domain": "apocalypse/runtime.js",
+    "kind": "function",
+    "sha256": "0da33b8bac750cef598e3534d215018f49d812ba26b9082b3871c1be0d13c9fd"
+  },
+  {
+    "name": "renderApocalypse",
+    "originalLine": 3735,
+    "domain": "apocalypse/runtime.js",
+    "kind": "function",
+    "sha256": "d1c75781c6d2f0800f246ffb97a6ab4c70ada1f40bb4d98a0d9741ffc6eefbf2"
+  },
+  {
+    "name": "endRound",
+    "originalLine": 3776,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "8bde07014c0d0dea9a4bac82899f74f85860fd5a8cf646096c8f1e1514210f05"
+  },
+  {
+    "name": "rollRoundDice",
+    "originalLine": 3788,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "fc9e4ac8631aaf497b4b323417e80d9d2be888954ef46a836d5247efb81c5028"
+  },
+  {
+    "name": "markAllPlayersReady",
+    "originalLine": 3798,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "dc71b14c2102698850421678a0edc30a1bb5804f45cdf2a68d13280238c47c45"
+  },
+  {
+    "name": "submitVotingReadyStatus",
+    "originalLine": 3804,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "ca14aafc8d94cad21f327825e4d1d431dae0e99227709b9c53da488a9d4199ca"
+  },
+  {
+    "name": "startVoting",
+    "originalLine": 3809,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "94bdae6d3e79f8a2e71dfa18029264e07f540b709a635179a6d2ff2b784c71ec"
+  },
+  {
+    "name": "showVotingPanel",
+    "originalLine": 3821,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "bd1ca1c4b4510643b7c1278b6dd8ae9cfff3b7f3b66bf8b4dfe435525d03256b"
+  },
+  {
+    "name": "updateVotingCandidates",
+    "originalLine": 3879,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "4fd28a7d54b053426e6609656ff8200c803479bce4a18818791c767de938fb90"
+  },
+  {
+    "name": "voteFor",
+    "originalLine": 3897,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "69f1b9e6fb6b2991298be61b95d0920db25ab19300e8860b45ce36a7d29ff1fa"
+  },
+  {
+    "name": "endVotingEarly",
+    "originalLine": 3902,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "18d061dd86710266c56490f4e8f233b11da46de710c9e83903021190aa85d9a8"
+  },
+  {
+    "name": "cancelVoting",
+    "originalLine": 3909,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "6e99cb95564d747424d2583607ebe44e76816539e5cc26ac47d73e6c85f78a08"
+  },
+  {
+    "name": "showVotingResults",
+    "originalLine": 3916,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "11818d670d190f7137bc26c6f0d4e12bd92639331145eb89a4b7982def647ef2"
+  },
+  {
+    "name": "eliminateTopVoted",
+    "originalLine": 4024,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "2f9814f2b0154f9c5730edabb14cce03859a2dc6d6bf3f5df485355eb6c7974d"
+  },
+  {
+    "name": "resolveNoElimination",
+    "originalLine": 4039,
+    "domain": "voting/runtime.js",
+    "kind": "function",
+    "sha256": "8a0b2818cf5d023281e1b189d248734eef68c781f59ec1f87e0f6e06f286965c"
+  },
+  {
+    "name": "normalizeBunkerMetadataValue",
+    "originalLine": 4046,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "3be7f9f2d4da77b865fdfc42e6ce0d944d74d4869778034a7f110e5937ce6499"
+  },
+  {
+    "name": "resolveBunkerCondition",
+    "originalLine": 4050,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "b5f3182d860d269c4a7bfc6e340daa534bd2836155bc7672ea385948cb7222ab"
+  },
+  {
+    "name": "getBunkerConditionLabel",
+    "originalLine": 4065,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "326eeafa09f8614286b8b3564d79a102a78193f5d38790a31990b2451aa9977f"
+  },
+  {
+    "name": "getBunkerCapacityValue",
+    "originalLine": 4069,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "1882fc61a57769996ccc19fdbd1a6a741c42566febcfd243878ca52eec214329"
+  },
+  {
+    "name": "resolveBunkerVisualVariant",
+    "originalLine": 4073,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "39720d55c57807fdd971820a76f2f46cde0572ead10226736e25beb0f506fe9f"
+  },
+  {
+    "name": "buildBunkerFacilityModel",
+    "originalLine": 4095,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "edb3468440af4fae0fe6551530c8555f926d5a55f7378e66bd07138d67c61553"
+  },
+  {
+    "name": "renderBunkerIcon",
+    "originalLine": 4130,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "dec338255c40caa970cddd5e852d8eaea330a31b93fbee3ffbbdc1f7b9af318e"
+  },
+  {
+    "name": "renderBunkerSectionIcon",
+    "originalLine": 4134,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "dd6fe6b18dd5330dff1c11a563d933c9cc21b0cdd5ce4d8c97a97723be1188e1"
+  },
+  {
+    "name": "renderBunkerContentSection",
+    "originalLine": 4143,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "5303e6a0a0913e850b5194c0ffa72e6e9ca3bfa0a4c9b93aeaa6d81268c74888"
+  },
+  {
+    "name": "renderBunkerFacility",
+    "originalLine": 4151,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "d7ecb44f7623c31f7fb117ec8ff9eed68558c3c12259c3aeb9ac63fd494f35d4"
+  },
+  {
+    "name": "renderBunker",
+    "originalLine": 4200,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "c877c26259f770b30e74409727c5c1b295d6a8cf8c3400bde1d3aa799546362f"
+  },
+  {
+    "name": "handleBunkerHeroImageError",
+    "originalLine": 4211,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "cf6320ea729d6104e5906133371ecbc50c386b11427fd8db19ebde3d6f63f5b8"
+  },
+  {
+    "name": "openCurrentBunkerImage",
+    "originalLine": 4219,
+    "domain": "bunker/runtime.js",
+    "kind": "function",
+    "sha256": "c578f22ddac840b5de43f070022ec67ce97f95b0a3d831b740d2ce78cdb144d6"
+  },
+  {
+    "name": "closeScenarioPublicModal",
+    "originalLine": 4229,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "8a9dfe938932a0c154d450559f5b8ed5607f8a48a5877f4911ae5e20d30cc458"
+  },
+  {
+    "name": "closeScenarioPrivateModal",
+    "originalLine": 4234,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "8eca21fc13454a5cc31e130f77188cf9ad1b61a31b6ade180e46e9483451837b"
+  },
+  {
+    "name": "renderScenarioPrivateChoices",
+    "originalLine": 4239,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "8884bd591c1ca00c66b15bd7752e29bcd749ce033932e3730cbf77aed86c31a3"
+  },
+  {
+    "name": "resolveScenarioPrivateChoice",
+    "originalLine": 4250,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "d7a3ef5485eadde7eab0e54a7b674440aa1815f03d2ef8cffd0f900e3a7cb360"
+  },
+  {
+    "name": "gmRevealNextBunkerIntel",
+    "originalLine": 4261,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "a3caaef9e0a9a371fb4ed95d8e6a890bcf25146d7c7aed9beb1636a79047623e"
+  },
+  {
+    "name": "gmGrantPrivateBunkerIntel",
+    "originalLine": 4266,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "30e7c10ea2ff19cc3e6ef53790fdcbc4634f1eaee708a39bdb8c7513230900c4"
+  },
+  {
+    "name": "gmSkipScenarioChoice",
+    "originalLine": 4273,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "59ab673764fa66577df2c4eb8619fb21baf003241eaf0631978e3aa1d61c1553"
+  },
+  {
+    "name": "showCurrentEvent",
+    "originalLine": 4280,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "f47e2859b8392d68921d5a966af413282a7fbdf9c8e110b64c8fe7093fd75737"
+  },
+  {
+    "name": "formatEventEffect",
+    "originalLine": 4313,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "ea8a4e01748fd1dcea17e58ead04c24364f020ddc6c71dd2cdd2806926a2254a"
+  },
+  {
+    "name": "applyCurrentEventEffect",
+    "originalLine": 4333,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "8457e49d1e7df571bdaacd001f31886f754dc16326f139e5a17828b1f29f950d"
+  },
+  {
+    "name": "dismissCurrentEvent",
+    "originalLine": 4349,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "91fd3c11f42ab70dd62fe9dee5a1e6640aba2b45363b785bc4045e8841d1fc5b"
+  },
+  {
+    "name": "addEventToHistory",
+    "originalLine": 4362,
+    "domain": "events/runtime.js",
+    "kind": "function",
+    "sha256": "1d4d0f508e6e310ec00be424b8a57ddefbfc40f3db39f8c89525ffdcc33278d0"
+  },
+  {
+    "name": "setOmniscientPending",
+    "originalLine": 4389,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "5ab14cc1a0e02baa462e81d847923f6caef4cbdf3ce479fd8f34dbe47e3753d8"
+  },
+  {
+    "name": "previewEnterOmniscientGm",
+    "originalLine": 4393,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "58d6c93e9a570b3ab2dd9c025834b5ab927e11fe44a8e3a5887edfb3936d26b0"
+  },
+  {
+    "name": "enterOmniscientGm",
+    "originalLine": 4399,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "b7243a6495277881bca4db7278898e26d3d0a2adcf2908c75d9f6f9e2bef46d0"
+  },
+  {
+    "name": "clearOmniscientHiddenState",
+    "originalLine": 4407,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "d1692d29dd2605bd41e9380b12026a386c08998a0e102b6bc65ff7a305aa04a5"
+  },
+  {
+    "name": "resyncOmniscientHiddenState",
+    "originalLine": 4419,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a6968f69da9d3fd7c9be7d9ed8e97b09ce416c5cc6651bf239d32db1702f4eb8"
+  },
+  {
+    "name": "buildDirectorRequest",
+    "originalLine": 4426,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "523d49c4df3af848f75647c0dd828b4dab23b2cf2163506f3a0db02aba98fca9"
+  },
+  {
+    "name": "syncDirectorControls",
+    "originalLine": 4434,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "0445093991633f166883d77c1965abaf9fe5c14e21f8b1794059ec79a92f1cce"
+  },
+  {
+    "name": "setDirectorPending",
+    "originalLine": 4459,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "44a67683ebe82e899983c5d28c8f6046f72c718fc9c29bad270574c97c5f916c"
+  },
+  {
+    "name": "previewDirectorAction",
+    "originalLine": 4460,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "f82a642503ad1514252cb7f47d4760b468e9813c88d3e7b01336b7f90aed28b9"
+  },
+  {
+    "name": "applyDirectorAction",
+    "originalLine": 4466,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "d9bb8ba06652229cbc397aed2c787a7edf2c93b0346fa5663677ccef86e537f1"
+  },
+  {
+    "name": "renderOmniscientHiddenState",
+    "originalLine": 4476,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "bdd55e8bba963f28c562350cf539eec24eb055c7156e3b6707e04fbbe609fc31"
+  },
+  {
+    "name": "refreshGlobalContentCatalogAccess",
+    "originalLine": 4514,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "95de1800bea8cf591519162d558cb68f2c7b8747fb69c7e101a8ba0dcbf3ac9d"
+  },
+  {
+    "name": "loadGlobalContentCategories",
+    "originalLine": 4537,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "108cdc7d00d767cf354cd2301f4c124486e38c1f51516dc787745587efa682b8"
+  },
+  {
+    "name": "loadGlobalContentPage",
+    "originalLine": 4556,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "9ffc853618f8f163a6bf53c038e43b8209802403218faba6f8d8be9828a2c14a"
+  },
+  {
+    "name": "renderGlobalContentPage",
+    "originalLine": 4571,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "c07be2938ee7c1ed1148017e2eb1d1bd7039f2a77d7abd83d10b8fc0d8c8c535"
+  },
+  {
+    "name": "loadGlobalContentEntry",
+    "originalLine": 4606,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "cb597b49854f83caf953853cc8bd3feec6717fdf2bc32c477fedd21fda8f7d9a"
+  },
+  {
+    "name": "changeGlobalContentPage",
+    "originalLine": 4616,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "1616fba9713122ab8eb6254b05c60bd8ae6c53e7b36e7866ff19804bdd0c12bf"
+  },
+  {
+    "name": "scheduleGlobalContentSearch",
+    "originalLine": 4617,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "ad188d859565a4894c7b7c9e0a4436fab4083b8f0b1e03766cdba039c5e39808"
+  },
+  {
+    "name": "renderGlobalCatalogError",
+    "originalLine": 4621,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "e2108665183760ae8208afbabed29e4b9ef4e19ec8381932ed20721c2f713c1d"
+  },
+  {
+    "name": "setGlobalDraftPending",
+    "originalLine": 4626,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "84024467f21cf900b7bc5f02b495cde9d1cc1ab62e04feae380c5a04d629da91"
+  },
+  {
+    "name": "selectedGlobalDraftId",
+    "originalLine": 4637,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "cf3a9a76fd7fe325195c481cab0f4f0541b7e1fa3bfdca1d541ea5655773ef64"
+  },
+  {
+    "name": "loadGlobalContentDrafts",
+    "originalLine": 4638,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "02d5c2b333057991e1eb220838cf903d4aefd505108f890a8850012dfa878a0c"
+  },
+  {
+    "name": "renderGlobalDraftState",
+    "originalLine": 4646,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "040e5d54bb44420501c18d77acc34a473974b14c990e4bc3f5f7d493e0b3348a"
+  },
+  {
+    "name": "runGlobalDraftCommand",
+    "originalLine": 4655,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "2248c3031a564ac1aa3ddad67ccfcb4727458c15d087881060214a2a06f62444"
+  },
+  {
+    "name": "createGlobalContentDraft",
+    "originalLine": 4661,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "a1bdf56c43b9ae92cdd9d4dbb7bf056178e5765972a705b96dcc4f501008d702"
+  },
+  {
+    "name": "applyGlobalDraftCommand",
+    "originalLine": 4662,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "b78f38d30fe429ba498a4248269987fbb604457ae8ab5e846d6c679a6e70c0dc"
+  },
+  {
+    "name": "validateGlobalDraft",
+    "originalLine": 4668,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "169a047b667ece535ebcee37c9d8e99ef125dd63ff570ca6627219e2e6d312ef"
+  },
+  {
+    "name": "previewGlobalDraftDiff",
+    "originalLine": 4669,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "79f297d669dfad3fc997127251a130e4c1698d7f3af8206c8ae6435c483d9a1b"
+  },
+  {
+    "name": "discardGlobalDraft",
+    "originalLine": 4670,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "43da87a657adf6b61932ff62f3fa005268f70c3d977d29987831e4256c3fa24c"
+  },
+  {
+    "name": "commitGlobalDraft",
+    "originalLine": 4671,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "e002d4587e8839ee80633e7c481bd6a8095167dc330032651e89a4034b8c76aa"
+  },
+  {
+    "name": "loadGlobalContentBackups",
+    "originalLine": 4682,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "f5e8170230fc4c6be62a27e91436e12fb9c86b0bf7488506d96061e73c25f40c"
+  },
+  {
+    "name": "previewGlobalRollback",
+    "originalLine": 4687,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "7ad4ff8ef33a79e7a3af7fe3883b6ebb39e348c0501fd3b1802dc4c6e02adc1a"
+  },
+  {
+    "name": "executeGlobalRollback",
+    "originalLine": 4691,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "a9ffbcff241dc6ef792e671087e2adace176fe23bb4b5c9dc1929aa5ba4af5c6"
+  },
+  {
+    "name": "previewStableIdMigration",
+    "originalLine": 4696,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "aa5dc975840b646beda074ee6da333c3ddfc1acaa0e5c3727183286ad455089f"
+  },
+  {
+    "name": "applyStableIdMigration",
+    "originalLine": 4703,
+    "domain": "global-content/runtime.js",
+    "kind": "function",
+    "sha256": "221899b02554520f7cf679538c526e857a79e3be6c0feb0997fb564a2e809f32"
+  },
+  {
+    "name": "setGmDiagnosticsPending",
+    "originalLine": 4713,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "7fb478c7b8f96dbc8f688f21d64fbbdfea9e87239c29ab686afdc0a021943299"
+  },
+  {
+    "name": "diagnosticsCommand",
+    "originalLine": 4720,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "fbee01cd8ad491781fbdf0d9b4f3d5e40af823ceb2f75e9dd4ca47dfdf4a1d28"
+  },
+  {
+    "name": "runRoomIntegrityCheck",
+    "originalLine": 4731,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "396fe5d857b7319870306442400a40eb811031035a4eb7c32084c2bf053169ab"
+  },
+  {
+    "name": "previewRoomAutoFix",
+    "originalLine": 4735,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "c3616e3cc0cf4cb08360fa8232acc5b0838b7426505e1c4629cc5eb733a53d7d"
+  },
+  {
+    "name": "applyRoomAutoFix",
+    "originalLine": 4740,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "06916ad09244a28a91e7603342478e220c5728a261936bff339230937c27ec40"
+  },
+  {
+    "name": "refreshGmAudit",
+    "originalLine": 4745,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "24ea1e9ca8c1319059366517107d054204cf78c47f0acf4d87a598968b28aa18"
+  },
+  {
+    "name": "setGmSnapshotPending",
+    "originalLine": 4749,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "bf04fa481b8e67e41aa5bfd6fbf3b8fd6ad021db150d549876097e7f7c2ed5e8"
+  },
+  {
+    "name": "invokeSnapshotCommand",
+    "originalLine": 4755,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "9d6f2c7ca07a81c958a59c3c65e4a3756be35c2e8e5b063a91bf0d140953f88a"
+  },
+  {
+    "name": "refreshRoomSnapshots",
+    "originalLine": 4766,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "b33c0b21f5a41544e0ebcac047b5796e315b95ff671652e3f8032023c34bdf35"
+  },
+  {
+    "name": "createManualRoomSnapshot",
+    "originalLine": 4770,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "1a7c1273ee776a9b6d86e3f29921799698201e222774f03e0fe6d7d1014c539a"
+  },
+  {
+    "name": "previewRoomSnapshot",
+    "originalLine": 4775,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "9230cd4ce47202f6f750dd03f5cd4c2ac03c645a6a39580a4fd55333c8ed694a"
+  },
+  {
+    "name": "restoreRoomSnapshot",
+    "originalLine": 4780,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "28458a426349a3f8c7b38351517a5d5eebf48919c3688f45094b8cea53e8bcc9"
+  },
+  {
+    "name": "undoLastGmAction",
+    "originalLine": 4789,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "707fca194a088f5066ad1287244a05a54a4acafa03756e15b720ca50c9e34372"
+  },
+  {
+    "name": "setRoomLocalEditorPending",
+    "originalLine": 4794,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "42222d8f48a3de051141d0f82cb97f61b27939fc4853345962be1a34ff0b1319"
+  },
+  {
+    "name": "currentRoomLocalEditorSelection",
+    "originalLine": 4799,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "e3a5450d6f81cca069888d7946051c5513834794d315d6030a6ccfe26bdb4d6f"
+  },
+  {
+    "name": "previewRoomLocalEdit",
+    "originalLine": 4808,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "d08fa8d80075d5131bf174bb256050bf2a67317284037d9be944001cb1b23872"
+  },
+  {
+    "name": "applyRoomLocalEdit",
+    "originalLine": 4818,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "d4600d6e0d5779d9a5f2ce0870ba594700d5c64231896c8d1dbc848e477b3577"
+  },
+  {
+    "name": "renderRoomLocalEditor",
+    "originalLine": 4828,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a4943938706423d2cd47d9ae9c6078aa1b912888a41cf604a3b1e428fd929f7e"
+  },
+  {
+    "name": "syncRoomLocalEditorField",
+    "originalLine": 4845,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "903b3efb54c8beac94968aab1e0222c33f869beca7ca1b179d6816ed3d0421fd"
+  },
+  {
+    "name": "gmRoundCommandId",
+    "originalLine": 4855,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "2b50ac5e6fe59c573f5da4930bbafcc826d39daa1c57e6554057746e60db496b"
+  },
+  {
+    "name": "setGmRoundCommandPending",
+    "originalLine": 4859,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "017c303b6c37894009ae2aee1a40836c03db126b2e063227b1c5873562e64597"
+  },
+  {
+    "name": "finishGmRoundCommand",
+    "originalLine": 4864,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "1b616ddb0bad467bc1d11b01336e98b328550e80bb2937b1d8a11faf49faba6f"
+  },
+  {
+    "name": "handleGmRoundCommandError",
+    "originalLine": 4870,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "7859ae1b004620d9b0e8125466fc576f1a3f5d66635a406d6ece271a251ffb72"
+  },
+  {
+    "name": "invokeGmRoundCommand",
+    "originalLine": 4874,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a9101bfe9df100a26705efc416c25141a0e5cffe2a54a50d824c316bd7abdb21"
+  },
+  {
+    "name": "setGamePause",
+    "originalLine": 4880,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "e20f9d44772f4056104d0bc686ba36521d9dde97b970d8bccb89ae3f60076160"
+  },
+  {
+    "name": "previewManualRoundChange",
+    "originalLine": 4885,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "8b84ac6aeac7de3d833fc6be442c65eda7357eff5348b7890b4ba4e7b7eabcff"
+  },
+  {
+    "name": "resetRoundReadiness",
+    "originalLine": 4896,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "bccfc5e8cec82721ac41a5405be9ecb09da2d6a53fc757e5532ea5474ff8eab0"
+  },
+  {
+    "name": "clearCurrentVotes",
+    "originalLine": 4900,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "47f501506c7e8ddec39e845e9579372b4f69383fba441d98e4a1a798d12fab4f"
+  },
+  {
+    "name": "removeSelectedVote",
+    "originalLine": 4904,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "ece637e0199245dad02e0df9530a08746edf227ff2cab7059ba014a30597bed4"
+  },
+  {
+    "name": "resyncVotingAdmin",
+    "originalLine": 4909,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "60a68e4baa6dba8a89ad8fc272d4d5f901664cc16708278068bf50cff13d5c81"
+  },
+  {
+    "name": "gameTimerDurationValue",
+    "originalLine": 4915,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "9c47d6b8b35e44d4a77ca462546bc33f87239969c4d1dee81866f5064a72e657"
+  },
+  {
+    "name": "gameTimerCommandId",
+    "originalLine": 4923,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "5f6b981d8d9d8fa44d5e23d9bce05f760ecf6f5122d65f6fc3b29be3d66196c2"
+  },
+  {
+    "name": "invokeGameTimerCommand",
+    "originalLine": 4927,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "243b85f37821dedf30270909b0546a716766af9cf315ad53146f919775f96e72"
+  },
+  {
+    "name": "startGameTimer",
+    "originalLine": 4940,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "4fb6f0faea3372642718e32bd9e122b544ba593af2b784e18d0c5ed1a0dd150b"
+  },
+  {
+    "name": "setGameTimer",
+    "originalLine": 4946,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "66272979b448f3962aa74d0bfd7a106650cfa68a71f941f58a664e3536d03838"
+  },
+  {
+    "name": "adjustGameTimer",
+    "originalLine": 4952,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "21c52399128f7e71216908616d62d49d33cb32aba1157ef1aaacd3d6217dc907"
+  },
+  {
+    "name": "restartGameTimer",
+    "originalLine": 4954,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "ddc15a6955908b05e96826060fb7f1b1cea186ef68beb3ae45c54c4afa2af6ce"
+  },
+  {
+    "name": "stopGameTimer",
+    "originalLine": 4959,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "4f93b5e8524d933726e7e0a5f04d5443d02cf4aebab6652463dc2be7fdd2fe64"
+  },
+  {
+    "name": "handleGameTimerKeydown",
+    "originalLine": 4964,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "78d7b776f9b64dca84f079e96ace18a097ad572293d7eb4ee5256fbfcaa3dbb5"
+  },
+  {
+    "name": "renderGmVotingAdmin",
+    "originalLine": 4968,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "4b02dfd7a018bd9e410a3a8d334a2a7951302f2117c67ab180fa84887aba1819"
+  },
+  {
+    "name": "markGMServerUpdate",
+    "originalLine": 4979,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "0a84aa57ec0e2b1855d670f03744b312dba48de542bf5c89a5023872b5e3fa2e"
+  },
+  {
+    "name": "renderGMPanelState",
+    "originalLine": 4983,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "db3e227c007982618a76bb615c22b66616e1fcc599178a9ffc5849080b70281a"
+  },
+  {
+    "name": "renderGMThreatControl",
+    "originalLine": 5006,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "accaab425c8e193410d127a1804fcc49fae41b05beda03ce687f1d3699069344"
+  },
+  {
+    "name": "renderGMThreatAudit",
+    "originalLine": 5045,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "bce230bf50a194c1f9e207ee919fccbae97b0ac12259c751e549b81591c4c100"
+  },
+  {
+    "name": "renderRoomDiagnostics",
+    "originalLine": 5049,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "1de85b0cf69a953163c6f8e75a2777c427cea56879ded6484e2174ede2a28ced"
+  },
+  {
+    "name": "renderRoomSnapshots",
+    "originalLine": 5084,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "bcb482a9013e2c995452290eca9c0033124add20f49c8228a8b48dd0e9a6d2ec"
+  },
+  {
+    "name": "renderUnifiedGmAudit",
+    "originalLine": 5125,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "8397e2aa907fc43f9cd24a676e48c7b55934addf414e1a9217265ce40e33f4ae"
+  },
+  {
+    "name": "filterGMThreatOptions",
+    "originalLine": 5182,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "b9e3f8f1fba2faf2060ff8091067f674c577f4fd9f7d97f14752fa3debbb798b"
+  },
+  {
+    "name": "gmThreatCommandId",
+    "originalLine": 5189,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a64e1cd63e1dffe34250ca2d8af8e99d0f1b40a9d442feb1596adbee75c7cf8c"
+  },
+  {
+    "name": "confirmGMThreatReplacement",
+    "originalLine": 5193,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "1b5f93937071a02afe3852906ec8f1123eb2e1d1c2cdebab0ca74a457e9aaa6e"
+  },
+  {
+    "name": "invokeGMThreatCommand",
+    "originalLine": 5198,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "cb46437d21272322537d0bb87e8d7881388ec9957a252fb7dc7eb60c11a85412"
+  },
+  {
+    "name": "gmGenerateRareThreat",
+    "originalLine": 5215,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "adad97a84c2559817bfeb88a6ed5a0fa50e22b3c0229cab3bc6b39654190b0fc"
+  },
+  {
+    "name": "gmGenerateTextThreat",
+    "originalLine": 5218,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "dd965c138821bf12a83102a31da4cfc3cffbc898a01ee26ed3e91fc853bce83a"
+  },
+  {
+    "name": "gmSelectSpecificThreat",
+    "originalLine": 5221,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "0400f55f1e865b4f40fc8282dee3e6ae0a2a1cfc2b5f5fa55d4af73e1d186928"
+  },
+  {
+    "name": "gmCancelThreat",
+    "originalLine": 5225,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "48f3bde5ddcee5ac2925869d57e00f4c21b7074039824ee02be3acce2aaa774d"
+  },
+  {
+    "name": "gmRestartThreat",
+    "originalLine": 5228,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "436cd5a9a6597c1d1ca2f12611d0d54211bce70c465ee3cf7151ec4acdecbb45"
+  },
+  {
+    "name": "gmResyncThreatRoom",
+    "originalLine": 5231,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "e352946e057512c8fdb3a106b2a41959d4ecb839e7ac5394dbffca5ef12ef14c"
+  },
+  {
+    "name": "setGMThreatForcePending",
+    "originalLine": 5235,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "2b0c0efc2f8a9e8d82daf5d9abf95a1d2c4b9001ca8ecccce4ff8393b63661a4"
+  },
+  {
+    "name": "requestGMThreatForcePreview",
+    "originalLine": 5246,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "528a7e69c55bfa5943a223aee397cdec1d41276abf13e99ea660346bb69ab256"
+  },
+  {
+    "name": "refreshGMThreatForcePreview",
+    "originalLine": 5261,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "d6778c275ac5b1b515036ad99fdf9159eb60ced5652ef207bc2acecb5cb7749e"
+  },
+  {
+    "name": "renderGMThreatForcePreview",
+    "originalLine": 5265,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "b6011f607f900f93efe9db7f1dbd3bfcb91bced5402c3af69f366b71a5e66306"
+  },
+  {
+    "name": "confirmGMThreatForce",
+    "originalLine": 5290,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "9eaaf48ea753a851836752a580b69b3c780030aec1b275c3b79430e9aa0f58fd"
+  },
+  {
+    "name": "closeGMThreatForceModal",
+    "originalLine": 5303,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "96dfb54b00f4347733beb1477fe11fa705609c836b0b2004774f9f8c22d49a17"
+  },
+  {
+    "name": "invokeGMThreatEmergency",
+    "originalLine": 5310,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "86960a9fe7665718d491a53428fd84b5eae54d5723993cfc5835566c8105885c"
+  },
+  {
+    "name": "updateGMPlayerSelect",
+    "originalLine": 5325,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "4997d1598e7095857de38c9bafc747523eb27a2ae424aea0c787fbf0ba98d0fe"
+  },
+  {
+    "name": "loadPlayerDataForGM",
+    "originalLine": 5339,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "76967cdd7eb1a5e1050d69ddeaf7380d31ca685b57da7405c1fd518df1910545"
+  },
+  {
+    "name": "renderGMAdditionalConditions",
+    "originalLine": 5398,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "f38911bafcd48dbfeb69ece8c9521587a7df814d017f9ab4394f69670211a675"
+  },
+  {
+    "name": "formatPersonality",
+    "originalLine": 5424,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "31bdeeaf921472a1359ba91cc49d294ec9dfd0e6bedc5c53872aa1b6a209fc7c"
+  },
+  {
+    "name": "formatBody",
+    "originalLine": 5443,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "ac422cdb970da04b392cdd64c1de8acbc8b02d60b816befea467236d87175ab9"
+  },
+  {
+    "name": "getCharValue",
+    "originalLine": 5452,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "d15627e6533728a6da3f6c9383c53119fb463d761379ebdb912e627a497877d9"
+  },
+  {
+    "name": "editCharacteristic",
+    "originalLine": 5468,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "de931bfbc43857fc695b70c344c818750be59bde8592b2fb3519c1a8b9269309"
+  },
+  {
+    "name": "submitEditCharacteristic",
+    "originalLine": 5508,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a185f86b5f4334966e8e41e0c84a1020dba941932d67f18241d05d2ce377b49c"
+  },
+  {
+    "name": "clearCharacteristic",
+    "originalLine": 5525,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "32a5f4e047bc3f503a9c719c08f10ff545e971206a57d670ed6506635823bc86"
+  },
+  {
+    "name": "closeEditCharModal",
+    "originalLine": 5537,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "db5d7dab0e8019b46e295c48f056b2a019cfaa22140d3cfe30b4348866757991"
+  },
+  {
+    "name": "regenerateCharacteristic",
+    "originalLine": 5542,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "bfb228456cd590c86183c0f15d63042f9721bba313de50e4353203438a4c8a69"
+  },
+  {
+    "name": "forceReveal",
+    "originalLine": 5554,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "6617c9b966cb3669dbcb9cb7efa72c3e94be88525dd86af18fb97163ed689d18"
+  },
+  {
+    "name": "eliminateSelectedPlayer",
+    "originalLine": 5566,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "6fd5a78708c2de0c55232d2006ee2a208120ef75beea574a164bf3fbc3a5e254"
+  },
+  {
+    "name": "restoreSelectedPlayer",
+    "originalLine": 5579,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "017cbd439f66c5fe714da8312db4cfc231d8fef7ddfd67513b2b8c65a157d59d"
+  },
+  {
+    "name": "gmPlayerCommandId",
+    "originalLine": 5592,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "2bfe9ba0e09cca9bdf0a8015c36798168ccb74332c94a15ec527ebd425d58797"
+  },
+  {
+    "name": "invokeGMPlayerCommand",
+    "originalLine": 5596,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a6336c58e3665ec0f5b2d90df5dfbf396f23ba63463ae5092bea1c309b9da040"
+  },
+  {
+    "name": "resyncSelectedPlayer",
+    "originalLine": 5608,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "a8eb4d5c71c00bc828f810165f69e16e2124a2c1e92596c528e19b72fda7327a"
+  },
+  {
+    "name": "inspectSelectedConnection",
+    "originalLine": 5612,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "5b90233d8dcc0f825a15b9d1fed2067440402aa4b14b5116d3a013e4a0fb8c29"
+  },
+  {
+    "name": "hideSelectedCharacteristic",
+    "originalLine": 5622,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "929136a2eb823ce6ef9f1c06b9db30698a23a66a57c38bc4e5c4267ee5d36bba"
+  },
+  {
+    "name": "transferHostToSelectedPlayer",
+    "originalLine": 5627,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "2dfd2b3403d8758d3fb94378f610f361e8591b45c197804f0f514739c288d487"
+  },
+  {
+    "name": "kickSelectedPlayer",
+    "originalLine": 5633,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "668e6cdc0993ae3be1c9931096a2c1d523668c7416b9489a356e47f185119c5f"
+  },
+  {
+    "name": "changeSelectedConditionSeverity",
+    "originalLine": 5639,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "71c6b260de0cca81a81f6df03464f36bcb1076ab61f1127d3bca15b0c8e33630"
+  },
+  {
+    "name": "removeSelectedCondition",
+    "originalLine": 5644,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "866fc3192676b477fefb3621f6e8f02edd7771f86760388db07774a709dea45a"
+  },
+  {
+    "name": "showLobbySection",
+    "originalLine": 5650,
+    "domain": "gm/runtime.js",
+    "kind": "function",
+    "sha256": "acf7f3cf5c0b7be3a2f7cc4c221bfc999809c48ba653b18461f94ed2b35dd951"
+  },
+  {
+    "name": "showRoomSection",
+    "originalLine": 5655,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "5a344c0423e16eae209889d137f829c30b80bbcce02afa4765bb3613881ddb85"
+  },
+  {
+    "name": "updateRoomUI",
+    "originalLine": 5663,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "40243b069137f36c26236868db9012c11d94ddf55159a4b928e40936a6351f16"
+  },
+  {
+    "name": "updateGMSections",
+    "originalLine": 5764,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "628777c5ec6d92a00142cbb092e5f856958ac626d865bdb5d632cb9aefae7b73"
+  },
+  {
+    "name": "renderRoomsList",
+    "originalLine": 5769,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "05a0e91279bfb722cb3f2bfb1515a9b02422c2204881a8d12fb9d893db204961"
+  },
+  {
+    "name": "renderRoomPlayers",
+    "originalLine": 5797,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "e5eeff038e3041f2a37e1105c9695fddd4a662dee398c7d34fb451cf0303d0ec"
+  },
+  {
+    "name": "lobbyGet",
+    "originalLine": 5831,
+    "domain": "ui/runtime.js",
+    "kind": "arrow",
+    "sha256": "b1d2bd936cf2a30214c7588c72696fb463a116b8335eb74aa02c6b22d3dfebb1"
+  },
+  {
+    "name": "normalizeLobbySettings",
+    "originalLine": 5836,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "b65698aa7fd18d4c650a25f240da4fdb0c6d209189e14cbadd947643ba50dda1"
+  },
+  {
+    "name": "isLobbyConfiguredSystemEnabled",
+    "originalLine": 5879,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "ff80d853dab6fab38a8e077283339646882cf68996b6f9cc83832656c2cf7f63"
+  },
+  {
+    "name": "updateScenarioSectionVisibility",
+    "originalLine": 5884,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "66b6dd386a824bab16798541fb9c966e0c59c3031d168bc20974ef0c308ad806"
+  },
+  {
+    "name": "lobbyAmCurrentHost",
+    "originalLine": 5891,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "d8af0ec231c83e2aebc5ab8c4f1ff89d80256de2628f91deee41c9cdb12f19be"
+  },
+  {
+    "name": "syncLobbySettingsState",
+    "originalLine": 5896,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "dbcce358203fbe97c227965e530776c756c6683d7c66b464fd0a8f0086eabf79"
+  },
+  {
+    "name": "lobbyPresetLabel",
+    "originalLine": 5907,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "5894f8894ed3d1ccb28aa4a75069e549e41f0d7c3ba7dc0b18d7c5f26a41befb"
+  },
+  {
+    "name": "lobbyFrequencyLabel",
+    "originalLine": 5908,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "e395f70084930c5c54d4546a587c5dbb4c725e169e68fdb94a577f0b473d674a"
+  },
+  {
+    "name": "lobbyCapacityLabel",
+    "originalLine": 5909,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "516f7d00318f0b16cdc1c478c02edf2d9fc7e89745e4e8812eb9a286c714e325"
+  },
+  {
+    "name": "setLobbySettingsFeedback",
+    "originalLine": 5914,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "8b9d54eeb3dcfa717c39273aaf641f4a640e6898715498e487ecc2c591626269"
+  },
+  {
+    "name": "lobbyWarningText",
+    "originalLine": 5918,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "449fa649fdd5b33358abf9f47a08536cb7224b3548d213800e5b27b238d0e48c"
+  },
+  {
+    "name": "lobbyAuditLabel",
+    "originalLine": 5919,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "07bc775bb78304f49b77f1f93ad51ac96a6661e163763d794dad8f613ab59f0a"
+  },
+  {
+    "name": "ensureLobbyApocalypseCatalog",
+    "originalLine": 5921,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "04e5ac382457923a39d332a89f88e97b7af44a1383341a40066f6167412eca47"
+  },
+  {
+    "name": "markLobbyApocalypseDraftChanged",
+    "originalLine": 5938,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "24e54c02631683f4d8d3653d3427b055d1e7d69fe4439b25a05375be65753739"
+  },
+  {
+    "name": "updateLobbyActivationDraft",
+    "originalLine": 5945,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "a95ab1d816b0b3f14c63df2c7505aebf241c6b6a736b81e5930f8631d6d71698"
+  },
+  {
+    "name": "renderLobbyApocalypseActivation",
+    "originalLine": 5965,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "27f3a43c1e07515162473edd4911bad332015fb35f8e9105c3e80777cfa388ae"
+  },
+  {
+    "name": "renderLobbyApocalypseEditor",
+    "originalLine": 6009,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "06d0f8f54d9e613a12c070714ecf32d7a4090601bf82ebf91446f11bd3a36ac1"
+  },
+  {
+    "name": "buildLobbyApocalypseGroupedModel",
+    "originalLine": 6070,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "ff2d0491a1e71a8c58f21f20f03b4f71f5279253e6fb5bb1c36d64b075cfcd74"
+  },
+  {
+    "name": "createLobbyApocalypseOption",
+    "originalLine": 6083,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "2d7bc5a1230c5b7aeb62cd8ca29114136c0123fbd337aab31dec4a670e5fb868"
+  },
+  {
+    "name": "renderLobbyGameSetup",
+    "originalLine": 6091,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "7a55b0fdc00b8518f7c7b4c809ac43a29f3edead0425f6409fe0e1277954621c"
+  },
+  {
+    "name": "updateLobbySettingsDraft",
+    "originalLine": 6143,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "3e172552215ee5e9792a42edb5c41baebd3ff76b80a8670b65a71f2c7e074369"
+  },
+  {
+    "name": "loadLobbyServerPreset",
+    "originalLine": 6154,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "c049bdcc848c77a057aa33006e97f19359a975abb91097a924e3f130f67f32f8"
+  },
+  {
+    "name": "lobbySettingsHubPayload",
+    "originalLine": 6162,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "63100016f38133fdbdfe36676874eac68cc4f9a47ea0e229467bac2fe3e5702e"
+  },
+  {
+    "name": "applyLobbySettings",
+    "originalLine": 6190,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "09b699c1f5ebe9d9f6a47b04207a86f5e6006cebaaba9f0d6a553ccf2bfb261c"
+  },
+  {
+    "name": "readLobbyLocalPresets",
+    "originalLine": 6203,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "48858a97f5d12921ffe67cddf9ef45a20a181be71714cc85fd262284f957e9db"
+  },
+  {
+    "name": "writeLobbyLocalPresets",
+    "originalLine": 6204,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "1280068b25a78422a746577c3212506963fd20ab244533c4a0d8e4b00c493ae9"
+  },
+  {
+    "name": "renderLobbyLocalPresetOptions",
+    "originalLine": 6205,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "df6a186ae52dc1051e0c5fd39131af1e77fb2fad832a670854238063952bbfb1"
+  },
+  {
+    "name": "saveLobbyLocalPreset",
+    "originalLine": 6206,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "12ade186d6e7ca850d49710a353a38826f288acee8435e400aa4372c8230a2d9"
+  },
+  {
+    "name": "loadLobbyLocalPreset",
+    "originalLine": 6207,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "596429644e6aba1c102778f8055824b37863b19a4e2fb28d5a77f4c51052eaba"
+  },
+  {
+    "name": "deleteLobbyLocalPreset",
+    "originalLine": 6208,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "c80ea05be5b42a52a14e0d7a0493fe442b1ae38803c3016d0f039e6cd4dd5af6"
+  },
+  {
+    "name": "exportLobbyPreset",
+    "originalLine": 6209,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "ff515f212a6fd261e6fa6bf83b4ea3f06ab5f96e8d7b72167dee053d5ad37928"
+  },
+  {
+    "name": "importLobbyPresetFile",
+    "originalLine": 6210,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "4d90987006c71fb4115e74facca288833698b2c1523cd3a1b8840098f91721d4"
+  },
+  {
+    "name": "updateLobbyPassword",
+    "originalLine": 6212,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "3acee15b134308e070e12b5275d94dd733ba0638169bda1735e41f2acd8545ff"
+  },
+  {
+    "name": "resetLobbyMemberReady",
+    "originalLine": 6213,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "1b5d4fb74d75fb817c633431952931e049b8923367e53bc2b636247bc5e44c47"
+  },
+  {
+    "name": "kickLobbyMember",
+    "originalLine": 6214,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "1aad1d6a55c91c1302589d6373ccf4e31c53cbae02fbf9e05b5da0b29391ec94"
+  },
+  {
+    "name": "bindLobbySettingsControls",
+    "originalLine": 6216,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "d5114c359c88557e7b8d594209b8a8f4c1ae0d13e032154f65006d4917e01724"
+  },
+  {
+    "name": "isLobbyRunning",
+    "originalLine": 6228,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "3e204d91c0b337cb78b7868be8706683db302c1e6c9e6f1be899b82596911c74"
+  },
+  {
+    "name": "tryRenderRunningGameState",
+    "originalLine": 6234,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "d6d1a54d62bb754f61c284ac1c8d075256a2963bf23e7e52cb320ebb2d694193"
+  },
+  {
+    "name": "localizeLobbyLifecycle",
+    "originalLine": 6246,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "9a8bade9ad823cfed7189bdaa263cb5528d2435024aeb1cedf42c03339ada44e"
+  },
+  {
+    "name": "localizeLobbyRole",
+    "originalLine": 6247,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "1efb0129dfcd5d76cdb738db290bc4fcfac88775de5a55556ff3e48cc6465c20"
+  },
+  {
+    "name": "lobbyRoleHelp",
+    "originalLine": 6248,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "a130986921e72758442d79f09d255f14605042c88a1face94a823f703e7f2806"
+  },
+  {
+    "name": "localizeLobbyBlocker",
+    "originalLine": 6249,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "170c990cd3ce02b8ab821fa1983bef49be48c417c68eb1f00a95898f9e805d86"
+  },
+  {
+    "name": "renderLobbyPreviewSummary",
+    "originalLine": 6253,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "548b7814b8150a48b1ba67cd25fa5069cd84e60ec2293d84d52d0b20d77e4810"
+  },
+  {
+    "name": "isGuestGameplayLobbyMember",
+    "originalLine": 6265,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "eb28884d0a69f7186eb50a5f498cd9bea2514abd629603a6bb5b80bd075e3c43"
+  },
+  {
+    "name": "guestWarningStorageKey",
+    "originalLine": 6274,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "24501ee155a4bc470bd5a1200634735c22ca349b67e8578ea0ff4bbe251bff57"
+  },
+  {
+    "name": "showGuestWarningIfEligible",
+    "originalLine": 6278,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "b1fc8f0f1ce68d1610b681230fcc9173647c7be6cf808c3556fbe31a1fd3ef47"
+  },
+  {
+    "name": "hideGuestWarningModal",
+    "originalLine": 6295,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "9c1c73fe5285d90916176a2c595233aff1c8d34ad0afcfbc3baa8e7b89e9a7f8"
+  },
+  {
+    "name": "continueAsGuest",
+    "originalLine": 6304,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "4920eaebe5aee14e079078c9fc2f68cbd3fc46586c37a70ec5103f8871637dad"
+  },
+  {
+    "name": "registerFromGuestWarning",
+    "originalLine": 6308,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "247ad84408b5f8df8cb5057c088670e61f0e61fd08a4e37e93da5aa3fc00d01a"
+  },
+  {
+    "name": "handleGuestWarningKeydown",
+    "originalLine": 6313,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "bd4ba2953182d4e6112f94592d4a9ca714f93c27e25562bb8ae8b9106771fff4"
+  },
+  {
+    "name": "renderLobbyState",
+    "originalLine": 6334,
+    "domain": "lobby/runtime.js",
+    "kind": "function",
+    "sha256": "eaf2b6abe44a671ee6fcf62103f69d2634addc4e082a6f4c0e7a15be1c5cf888"
+  },
+  {
+    "name": "getMyStablePlayerId",
+    "originalLine": 6401,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "3ef2f264dcdd471b2756c18e07ee1f6e3728483d37556969cccd6b4c7f91f647"
+  },
+  {
+    "name": "isMyPlayerRef",
+    "originalLine": 6408,
+    "domain": "core/runtime.js",
+    "kind": "function",
+    "sha256": "74b69c191409284c17e6f2d71cc57a7430eaac95d7ced991a11f6290fb65442b"
+  },
+  {
+    "name": "renderSpecialCardIcon",
+    "originalLine": 6414,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "8a45e87dd2f5b59781ed2c83db06f0ec2c1dba00eed05763933f5f17d635121b"
+  },
+  {
+    "name": "resolveSpecialCardVisualVariant",
+    "originalLine": 6419,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "b24a4d51ddb6b4afcaea2c0c824ebcd70c2dfa1bf097c013de553a0467e41767"
+  },
+  {
+    "name": "resolveSpecialCardIconKey",
+    "originalLine": 6434,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "b14679d9abb4416461a9333747f7c95994046a14a6751d6e01a5730fb365f225"
+  },
+  {
+    "name": "getSpecialCardVariantLabel",
+    "originalLine": 6443,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "4af613d2ac4dc180cf8b7899e14c055f97b823bd4f4fb8014af79dbcc6a49fbc"
+  },
+  {
+    "name": "getSpecialCardStageLabel",
+    "originalLine": 6448,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "95de8cd4be331f307916834b706e643eaa0c721acde6014f7c741f0d1f1dc65b"
+  },
+  {
+    "name": "canUseSpecialCardNow",
+    "originalLine": 6452,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "6c9495f30e09fa0e56c38f6042f76a4162372ac32453b1f232d10d0d8c5f882e"
+  },
+  {
+    "name": "getSpecialCardSelectionKey",
+    "originalLine": 6460,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "9f5830d857cc2e33b768bad2530f756bf561c7cee0eb7131c8a11a8c23e564d5"
+  },
+  {
+    "name": "getSpecialCardTargetRef",
+    "originalLine": 6464,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "942d79104423641c6dad2bce631fda1930541606f71119897a7d5968df464f4c"
+  },
+  {
+    "name": "getSpecialCardStatusLabel",
+    "originalLine": 6468,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "7055fcf1fb160d0777f2a7bbc9c4656ec987ec7d83c6f063b15372d4c70ec997"
+  },
+  {
+    "name": "getSpecialCardPrivacyLabel",
+    "originalLine": 6480,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "baacc593446b4b170009804a18324c41efe08aae7bb048435edeb1350383ac39"
+  },
+  {
+    "name": "getSpecialCardPrivacyClass",
+    "originalLine": 6485,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "a706815acb9751e22f4c404346bcceb4f6448ade985e29ded4db02741ef15586"
+  },
+  {
+    "name": "getSpecialCardTargets",
+    "originalLine": 6490,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "df724c8db60cac697d509d51ab126b519d86c5fa204f011de4060421c38fbd73"
+  },
+  {
+    "name": "getAutomaticSpecialCardOrderLabel",
+    "originalLine": 6497,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "31dcc9304222be5c44347e202822659cff6ccb3c06220de27760c69e21e38d5e"
+  },
+  {
+    "name": "rememberSpecialCardSelection",
+    "originalLine": 6517,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "dfa3132d6dac39328db50cd2605bc4b172274c4b6cd4a454f57ae4c655fd4b4c"
+  },
+  {
+    "name": "captureSpecialCardSelections",
+    "originalLine": 6534,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "9c959d9c754da793f9af24a6e33417bd234c59e50a1f24a1940edce0ccba3c18"
+  },
+  {
+    "name": "resolveSpecialCardTooltipContent",
+    "originalLine": 6542,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "d26883274398eebd149cb2f069824175b274e568e824c034f93c5635d7aeec2d"
+  },
+  {
+    "name": "buildSpecialCardModel",
+    "originalLine": 6551,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "516c044063068e9d89ff811f61d2c5ce5066420e8179082ab0e351d67468efc5"
+  },
+  {
+    "name": "renderSpecialCardControls",
+    "originalLine": 6592,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "ffc279c866fa3539eb9211a066504ae065d10a36169624e0bfa9fcf8757ca263"
+  },
+  {
+    "name": "useSpecialCardFromCard",
+    "originalLine": 6637,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "33db46f6767f34cd3de37b0e73461aa9958171c18d7fb36334a5eac96273a979"
+  },
+  {
+    "name": "renderSpecialCard",
+    "originalLine": 6679,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "f7a35fa7ee2d440220004bd074693e322c78ab2f8ad4857becdb94ca713f15a2"
+  },
+  {
+    "name": "renderMySpecialCards",
+    "originalLine": 6701,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "3c718eebdf551fdec31294c5b09da9e85cbfefb0715091e96f3b8b1142c2a93a"
+  },
+  {
+    "name": "eventCardPlayerOptions",
+    "originalLine": 6723,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "92be8edd3935821685932b118858a78405d35fa2436a4d3727ce485502ec8667"
+  },
+  {
+    "name": "renderMyEventCards",
+    "originalLine": 6732,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "7ee686e219656924a6312349432ce5aaa3d1e9adc5916d3a3b3563aca2dae681"
+  },
+  {
+    "name": "useEventSpecialCard",
+    "originalLine": 6782,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "51bcf8219715263586069794586c58e2ccdd2c7c2a837180349bb776afecdf82"
+  },
+  {
+    "name": "buildSpecialCardRows",
+    "originalLine": 6804,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "9a3055c93e18ec129b4d25e5447089a2e575c277fc7df734f0b3a2b3a718c3a8"
+  },
+  {
+    "name": "buildGMSpecialCardRows",
+    "originalLine": 6811,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "11081e33e95f10c53326c8d8b3c31986d7896c53cb8474da0fe7dfda396aa07c"
+  },
+  {
+    "name": "renderSpecialCardRows",
+    "originalLine": 6815,
+    "domain": "special-cards/runtime.js",
+    "kind": "function",
+    "sha256": "7ad4c0c54dedd2e92a4a9c0c98c66ff67de29997b52e47120396a435a5332444"
+  },
+  {
+    "name": "updateSpecialCardsUI",
+    "originalLine": 6865,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "87002e14393bf12645676d382bf14139ff9a7f358b87b3452f29d45827a3deec"
+  },
+  {
+    "name": "isPublicGameplayPlayer",
+    "originalLine": 6888,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "c9f66f1a403bddf7344adf60e39286c66c5f4954182cc2ae65c927cce99f75c8"
+  },
+  {
+    "name": "getCanonicalPublicPlayerModels",
+    "originalLine": 6894,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "e9f8ef9acfea19e7ba19135fc32657d09e111cf1537024f9638e80cf3ed2cc3a"
+  },
+  {
+    "name": "getPublicActivePlayerSeat",
+    "originalLine": 6911,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "324076a8b8153c081108959f80c161055eb616fafcef710401809f3a1c4587d2"
+  },
+  {
+    "name": "resolveSelectedPublicPlayer",
+    "originalLine": 6922,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "a89ca847991cbc0d6f47636ec8fa4ba7c05596eeb7266f11ec4825bf969d2bd0"
+  },
+  {
+    "name": "selectPublicPlayerSeat",
+    "originalLine": 6943,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "5e2cb09a06222214dc36e1ee667836a8abbaf1a00cf0ced276e11fe1e81892c4"
+  },
+  {
+    "name": "navigatePublicPlayerOverview",
+    "originalLine": 6951,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "40a99ca4442890cc5f0917cd7b0d6d5087cdb58a5fe968e6ae6a8b791ea6afc5"
+  },
+  {
+    "name": "ensurePublicPlayerOverviewEvents",
+    "originalLine": 6960,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "c2fb8e676e3fcbee013fc0db0a54203b86e6d8e113fccf5ae7901f37cc93f393"
+  },
+  {
+    "name": "renderPublicPlayerBadges",
+    "originalLine": 6992,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "d3b71dfac312635f9226c1ccc1dd80ad21b8e7ca0e17bc6ea2e47608d81c3d1d"
+  },
+  {
+    "name": "renderPublicPlayerSelectorItem",
+    "originalLine": 7008,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "71cec09418e75179412a578c27e00cd4bddcba02e2ae4061a4d3e5622792da62"
+  },
+  {
+    "name": "renderPublicCharacteristicCard",
+    "originalLine": 7020,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "5955dc67f3c3b9b4866353ef303a8c85ba4b97061c50ffde91ea909e37a20cfb"
+  },
+  {
+    "name": "renderPublicPropertyDetails",
+    "originalLine": 7045,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "f3eef796170e3766176cbd58111459fe9e48f423b3f1c251bafd68c492d10e49"
+  },
+  {
+    "name": "getPublicRevealedCount",
+    "originalLine": 7054,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "59b75482a2fabba229bc99939258de7f4bdb51c16f9dca9dd0b9f2189047eb02"
+  },
+  {
+    "name": "sortPublicPlayerModels",
+    "originalLine": 7058,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "0e5c6c2c3b42663bd7ab4356029464267ccbfaaa7058fb3f02adf2e768a95c83"
+  },
+  {
+    "name": "renderComparisonCharacteristic",
+    "originalLine": 7071,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "803714312fa7246c3e9d0a9ad3571f3805e5fee06e7d8ad57ab6c0c7eab20233"
+  },
+  {
+    "name": "renderPlayerDossierCard",
+    "originalLine": 7096,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "c7092537aef1d5047a20c26ca6c8cc90eb434bae35ddd6566d7b639d4e6f22ee"
+  },
+  {
+    "name": "renderAllPlayersComparison",
+    "originalLine": 7109,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "657bd2078e41cf30e04634a4cb6c596d141cf5c2ccda9862a50f15b59d5a9944"
+  },
+  {
+    "name": "updatePublicPlayerComparisonToolbar",
+    "originalLine": 7122,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "e96f0d8df81c71b9f277d0d077a1bbab870499d5f06eba63106cd6b1f0ba36b1"
+  },
+  {
+    "name": "renderPublicPlayerOverview",
+    "originalLine": 7148,
+    "domain": "public-overview/runtime.js",
+    "kind": "function",
+    "sha256": "5a79602ee0d442caf9ca6bcfcdef648cfdb1c4a9f147e74dea093770444537cf"
+  },
+  {
+    "name": "formatAdditionalPhysicalCondition",
+    "originalLine": 7208,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "9e693ab586bb2b2ccfe560df0415524b6f66bf5d5e0145409201fa56994a2b50"
+  },
+  {
+    "name": "buildSharedHealthTooltip",
+    "originalLine": 7219,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "1e8149dfb8dd9fe66309e2276b9313cfa055a800a9516001aefbd35b8d61ea5c"
+  },
+  {
+    "name": "buildAdditionalPhysicalConditionTooltip",
+    "originalLine": 7247,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "18907022d684a666e086eb382f3d8d89436abb9bb533d115b5f7edb8bc4aa1e1"
+  },
+  {
+    "name": "renderAdditionalPhysicalCondition",
+    "originalLine": 7251,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "3ff44b45479e7d6dff12dd4bfa26eecf45480cd9d594b6e957e9a00ce67ba892"
+  },
+  {
+    "name": "renderAdditionalPhysicalConditionsForOverview",
+    "originalLine": 7263,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "d0a4d63fc7c3742cdf5e60d9ebf6c2ff19ef7625d77b7db6c2757baa5cad87ce"
+  },
+  {
+    "name": "normalizeProfessionIconTags",
+    "originalLine": 7273,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "65d9d78fa83a1a59356de6e5c0b7d469854cb273611414c7bd0e7dd0712816b3"
+  },
+  {
+    "name": "resolveProfessionIconKey",
+    "originalLine": 7278,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "d73c93c39e9c062ab7f41d16d57acd4d8c03db3cb4d5e55282c12f7ecf92a6ea"
+  },
+  {
+    "name": "renderCharacteristicIcon",
+    "originalLine": 7285,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "a52440bcfe53fd71c729e1f3a76d4f3c4bfe896aaa1e6648eec712a3b98dd198"
+  },
+  {
+    "name": "formatHobbyExperience",
+    "originalLine": 7290,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "b10c644573490025febb1a521d46577ef8c934891e50c55542627de49622858f"
+  },
+  {
+    "name": "formatHobbyRelatedItem",
+    "originalLine": 7311,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "3f13add4f9585cc19a56b9c9f111dc05c94006aa07aec71af2e6f79579f8a0a1"
+  },
+  {
+    "name": "nonEmptyCardDetail",
+    "originalLine": 7317,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "5938991c357ee618cc1fe2c2a2dbb46f4432dc558c3fc7d54c707101fc47fc1b"
+  },
+  {
+    "name": "buildHobbyCardDetails",
+    "originalLine": 7332,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "91609a77070805a73afef9e70baf8b53ca14de0031736fa81448f7ce173f850e"
+  },
+  {
+    "name": "resolveHobbyCardTooltip",
+    "originalLine": 7348,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "9e0d0c1765736848fc68b45a6aa838f249e9ccaa9cee6949a13dd9c4c8970aa2"
+  },
+  {
+    "name": "normalizeVariantMetadata",
+    "originalLine": 7360,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "410bbbb50e5118656105aca8bc44f0b89bffaf364cae28217b2806639e3cb0b5"
+  },
+  {
+    "name": "normalizeCharacteristicSeverity",
+    "originalLine": 7365,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "629ff52417384138642d85bd7fa022db0e2a217c78fd197fc268dae2da56831c"
+  },
+  {
+    "name": "resolveCharacteristicVisualVariant",
+    "originalLine": 7377,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "fdbe14d036440e4b64e3c0e7a60a5b496128b147598f4b5be03e5e24824f6b9f"
+  },
+  {
+    "name": "resolveCharacteristicTooltipContent",
+    "originalLine": 7392,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "6866d70fabd7850ed630233043848084704384b86aa317c986e8bd834a9e1fd1"
+  },
+  {
+    "name": "buildHealthCardPresentation",
+    "originalLine": 7406,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "102d7292f6067723a82a61c56258ffc619e4059ffb3645d5274ad293540d699f"
+  },
+  {
+    "name": "renderCharacteristicCard",
+    "originalLine": 7418,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "faae5a239d73cf62c08d6103207a9680673ae2e05ca17c50dfee59cd92042c17"
+  },
+  {
+    "name": "renderMyPlayerCards",
+    "originalLine": 7446,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "b50f6547b899be76f63c2efeba77cfc3904c84217c24734e8a5f73c21b79a828"
+  },
+  {
+    "name": "renderEliminatedRevealAllPanel",
+    "originalLine": 7542,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "55827ccdf00c991baa34a480a950a453eeb891751f7bf10083e87d17b2d841f5"
+  },
+  {
+    "name": "revealAllEliminatedPlayerCharacteristics",
+    "originalLine": 7579,
+    "domain": "characters/runtime.js",
+    "kind": "function",
+    "sha256": "85991116d2251b33e46f0f76c78ca99c27307f06fb2c97883f3f3b994e70b67f"
+  },
+  {
+    "name": "addEventMessage",
+    "originalLine": 7584,
+    "domain": "ui/runtime.js",
+    "kind": "function",
+    "sha256": "bb54ebfca71bb01e4de1bbec0a133ca4de941a385e6032c6c168019e831bb55a"
+  }
+]
