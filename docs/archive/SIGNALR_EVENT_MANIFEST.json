@@ -1,0 +1,794 @@
+{
+  "eventCount": 110,
+  "source": "wwwroot/js/bunker/core/signalr-events.js before decomposition",
+  "registrationOrderPreserved": true,
+  "domainFiles": {
+    "apocalypse": "wwwroot/js/bunker/apocalypse/signalr-events.js",
+    "lobby": "wwwroot/js/bunker/lobby/signalr-events.js",
+    "diagnostics": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+    "postgame": "wwwroot/js/bunker/postgame/signalr-events.js",
+    "gm": "wwwroot/js/bunker/gm/signalr-events.js",
+    "characters": "wwwroot/js/bunker/characters/signalr-events.js",
+    "specialCards": "wwwroot/js/bunker/special-cards/signalr-events.js",
+    "rounds": "wwwroot/js/bunker/rounds/signalr-events.js",
+    "threats": "wwwroot/js/bunker/threats/signalr-events.js",
+    "voting": "wwwroot/js/bunker/voting/signalr-events.js",
+    "ui": "wwwroot/js/bunker/ui/signalr-events.js",
+    "bunker": "wwwroot/js/bunker/bunker/signalr-events.js",
+    "timer": "wwwroot/js/bunker/timer/signalr-events.js",
+    "gameEvents": "wwwroot/js/bunker/events/signalr-events.js",
+    "inventory": "wwwroot/js/bunker/inventory/signalr-events.js"
+  },
+  "events": [
+    {
+      "index": 1,
+      "event": "ApocalypseEffectActivated",
+      "domain": "apocalypse",
+      "file": "wwwroot/js/bunker/apocalypse/signalr-events.js",
+      "pairSha256": "c577c410a6c37118f2b55683855476a22512d4ff6f632dc40110ca79d89f5611"
+    },
+    {
+      "index": 2,
+      "event": "ApocalypseEffectPersonalChanged",
+      "domain": "apocalypse",
+      "file": "wwwroot/js/bunker/apocalypse/signalr-events.js",
+      "pairSha256": "6ded7db9d2186c2cfc97f27a8b758c51122227f28ae0429ef06b1ac0ad7da9d5"
+    },
+    {
+      "index": 3,
+      "event": "RoomsListUpdated",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "05e33b3abe31015b329b69b2d47de8cbce9345e8cb6b0f8f29cec7faad05962f"
+    },
+    {
+      "index": 4,
+      "event": "RoomCreated",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "a3b4bc4a3f696c468814bb9a196cad3a008da5aee680bb9bbb837eab86efd48c"
+    },
+    {
+      "index": 5,
+      "event": "RoomJoined",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "76a9b2ac8e72296f1cba58729ad1c20ebadc45082ce4a9ac1414b094d3bbef15"
+    },
+    {
+      "index": 6,
+      "event": "PlayerJoinedRoom",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "1ca6a4bea6001aaa53e3b828a60c32d4d96c60ad3b1b0651f45fcad895bc84e3"
+    },
+    {
+      "index": 7,
+      "event": "DeveloperPresenceChanged",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "f436cdd75cae6d180053b71836b041136e5ec524588d74c38ea14a8fff5908a8"
+    },
+    {
+      "index": 8,
+      "event": "DeveloperAuthorityChanged",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "399573f839d8fb26b586fc1b43d0222953fc83a77d8a596caa96105bc4f60a4a"
+    },
+    {
+      "index": 9,
+      "event": "PostGameTransitionChanged",
+      "domain": "postgame",
+      "file": "wwwroot/js/bunker/postgame/signalr-events.js",
+      "pairSha256": "f2ffa1881da22d87700cafdeeee67756cc50c29f126552eaf29220c987c096e5"
+    },
+    {
+      "index": 10,
+      "event": "PlayerLeftRoom",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "b49a1a8d7d405dc8ed7b8b12c898d66cf86a82a6e5782d70042b4b81ac28530f"
+    },
+    {
+      "index": 11,
+      "event": "RoomPlayersUpdated",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "fbda5db5d3ab53970261518d9df01ead6abca026f4f2e6c8920f3ec16c1139f6"
+    },
+    {
+      "index": 12,
+      "event": "LobbyStateUpdated",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "f6c595c122c0d878b43f3c791b54c1ca87b924d450ede90390a793f6670ed8d8"
+    },
+    {
+      "index": 13,
+      "event": "GameReturnedToLobby",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "5a199e708dcc41ed067a4b9365f81496ac3ec4d3f81257993f9e6eb8493d1d17"
+    },
+    {
+      "index": 14,
+      "event": "LobbyKicked",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "d905a2c1f49aab3bfda8fdd16f78b6232ebfd97dcaf0f9064dfebafb9098bca6"
+    },
+    {
+      "index": 15,
+      "event": "OmniscientHiddenStateUpdated",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "51d0a5fffbf29481bf0f8319cf9e38cb1a84880b2f2df8c5cde5b0341bc0418d"
+    },
+    {
+      "index": 16,
+      "event": "PlayerStateResynced",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "f4c38c4139fca5dcc2e9b43ebd19a9c341c97acdcab5e8d1938794fc10844bf9"
+    },
+    {
+      "index": 17,
+      "event": "EventSpecialCardsUpdated",
+      "domain": "specialCards",
+      "file": "wwwroot/js/bunker/special-cards/signalr-events.js",
+      "pairSha256": "89c102196296c39d167c6fbc31cc670c40c6190c8ac214c9b68b6179cdb18029"
+    },
+    {
+      "index": 18,
+      "event": "PlayerKicked",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "8e1864616ce3cde81061594eb24aeff7c36cb5328a5d1e4bd9e0317789230dcd"
+    },
+    {
+      "index": 19,
+      "event": "HostChanged",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "b9acaf886f3bb260f152c776c03c8629b01f477731e9d6f0a6290b801af6bffc"
+    },
+    {
+      "index": 20,
+      "event": "StaleConnectionInspected",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "289052f033f822d16187758b2a018a8ae03210e46f0f2c898873bdef17850404"
+    },
+    {
+      "index": 21,
+      "event": "PlayerDisconnecting",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "8bdcfc921ccb2c877401dcda50cbc1e1af82b3f4ef44e85ec9e8473f1788d784"
+    },
+    {
+      "index": 22,
+      "event": "RoomLeft",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "d026bd1454f0edd84f909e278df9248d934083721dbe42e7a4f28a5ed142edb8"
+    },
+    {
+      "index": 23,
+      "event": "GameStarted",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "b10f08ab94ec664ea67700d9f02ba1a9d721a1dadad72849a963289b0fcf0802"
+    },
+    {
+      "index": 24,
+      "event": "CharacteristicRevealed",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "cf2a2b4b184b792b5433f66ccb73c485d515032b86c8cba698904187fad33a1d"
+    },
+    {
+      "index": 25,
+      "event": "RoundStateUpdated",
+      "domain": "rounds",
+      "file": "wwwroot/js/bunker/rounds/signalr-events.js",
+      "pairSha256": "6220cb5dca235e07c3b0d8d1574f8b34942c7388dded3524203790dd009f9298"
+    },
+    {
+      "index": 26,
+      "event": "RoundEnded",
+      "domain": "rounds",
+      "file": "wwwroot/js/bunker/rounds/signalr-events.js",
+      "pairSha256": "4c30810fa5f240877508010586f48a07bb928e8318faf8651ca7b36ac35a129c"
+    },
+    {
+      "index": 27,
+      "event": "RoundAdvanced",
+      "domain": "rounds",
+      "file": "wwwroot/js/bunker/rounds/signalr-events.js",
+      "pairSha256": "db8f6e92cb692102654ba90351d395dc5392d9ec63661212f5648434dbef4d80"
+    },
+    {
+      "index": 28,
+      "event": "RoundDiceRolled",
+      "domain": "rounds",
+      "file": "wwwroot/js/bunker/rounds/signalr-events.js",
+      "pairSha256": "2863f366eff2d56177e59271ab5b5909ea17165f04ebc3de8508427bc96eb07d"
+    },
+    {
+      "index": 29,
+      "event": "ThreatRevealed",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "9bf05da99af39ce8c991a35186751ac26ad30f7f521cde4ba629403108c5b420"
+    },
+    {
+      "index": 30,
+      "event": "VotingReadyCheckStarted",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "a228833957b6e6bd846f0a7266a9c72ba3a03519f824e1bba3cddb48e3133d00"
+    },
+    {
+      "index": 31,
+      "event": "AllPlayersMarkedReady",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "6c36229f8bd8bc37769db7eeb63d86d7402aa93f8b88882fa1de34e1f64103b3"
+    },
+    {
+      "index": 32,
+      "event": "VotingReadyStatusUpdated",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "fdad8966b16d1698af1cd84a1074dc96ef9402daad7aa4d24a449c982ab9d2e1"
+    },
+    {
+      "index": 33,
+      "event": "SpecialCardStateUpdated",
+      "domain": "specialCards",
+      "file": "wwwroot/js/bunker/special-cards/signalr-events.js",
+      "pairSha256": "b5199d80d419dda4ee4617741d62cdb889df83be8e52a97abe64891f31723283"
+    },
+    {
+      "index": 34,
+      "event": "SpecialCardActivated",
+      "domain": "specialCards",
+      "file": "wwwroot/js/bunker/special-cards/signalr-events.js",
+      "pairSha256": "021085699f9d1eb32e5ed737c15b0205afdc04eabffb98fe55f8c82ba1c3c009"
+    },
+    {
+      "index": 35,
+      "event": "SpecialCardPrivateResult",
+      "domain": "specialCards",
+      "file": "wwwroot/js/bunker/special-cards/signalr-events.js",
+      "pairSha256": "d277e7dfdf47463dc10937927a3f38392ad141542ff68b15f73ca8160e0669bb"
+    },
+    {
+      "index": 36,
+      "event": "SpecialCardTargetStateUpdated",
+      "domain": "specialCards",
+      "file": "wwwroot/js/bunker/special-cards/signalr-events.js",
+      "pairSha256": "d89f9b3d4455da4f0a22b3e4797b1b42dbb980cab6d6102b2a1415e1c858688e"
+    },
+    {
+      "index": 37,
+      "event": "CharacteristicHidden",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "9b34a0662c3da69514cf2c564f43e91be1402a150aaccc5d4f80398bb3c16407"
+    },
+    {
+      "index": 38,
+      "event": "CharacteristicUpdated",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "1bcb9f3d2775fdfcbd3236817a2b21fc569f12f9b616c2c981fd70653154ca9d"
+    },
+    {
+      "index": 39,
+      "event": "CharacteristicEdited",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "d90f1ed478f38ec6895b693dfa46c12cc78868ce7b210d360294701685798722"
+    },
+    {
+      "index": 40,
+      "event": "CharacteristicCleared",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "8faa5852121f9e7409f9bda994c2789688897bf2bc8f8c456a2bb936a674a688"
+    },
+    {
+      "index": 41,
+      "event": "CharacteristicRegenerated",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "f92bc2372c69db9797294925e58f33e1b035873a88ffe2186b8f645674789cad"
+    },
+    {
+      "index": 42,
+      "event": "PlayerEliminated",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "fa55ef504a159f738c3cf13d630b7e1725ecd04851deb64e3b9860f90e1d3cc0"
+    },
+    {
+      "index": 43,
+      "event": "GameFinished",
+      "domain": "postgame",
+      "file": "wwwroot/js/bunker/postgame/signalr-events.js",
+      "pairSha256": "15e15bd39114cea26f3fcbd37689ffbac4ddbd55184b4ee3149408d045a270b4"
+    },
+    {
+      "index": 44,
+      "event": "PlayerRestored",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "2e8dd13c295e7ea927fb541fc12cab51106e666c6d20b285f88046d53e73b154"
+    },
+    {
+      "index": 45,
+      "event": "EliminatedPlayerRevealedAll",
+      "domain": "characters",
+      "file": "wwwroot/js/bunker/characters/signalr-events.js",
+      "pairSha256": "363050879a7fd77f5d57ee4c2ac96ecfab40a3a7f332ca4ebde337db36ff8568"
+    },
+    {
+      "index": 46,
+      "event": "AllPlayersData",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "458288cdd9d2e6883ad4b9ff6096e1452fb5fdaac49c86070338b725bb82d2b0"
+    },
+    {
+      "index": 47,
+      "event": "GMActionSuccess",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "b709d7fce58b1620985258986f45ebda77d84f8fc7457b12ab67a17b9c3f2ee5"
+    },
+    {
+      "index": 48,
+      "event": "ReceiveError",
+      "domain": "ui",
+      "file": "wwwroot/js/bunker/ui/signalr-events.js",
+      "pairSha256": "d6c9a999eefedfab93b14cb6b54bd99b5123ed8963d2fb8cbfe9a05a0cc861f2"
+    },
+    {
+      "index": 49,
+      "event": "RejoinSuccess",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "3fc54976098cc7023acd144ccc94ca0a3f21bd8bb73fe38100379d426cd30fa0"
+    },
+    {
+      "index": 50,
+      "event": "RejoinFailed",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "39b466147ec39c84a9d11f28fbb4c31d769abbe812f99693444bae62eeada9a8"
+    },
+    {
+      "index": 51,
+      "event": "PlayerReconnected",
+      "domain": "lobby",
+      "file": "wwwroot/js/bunker/lobby/signalr-events.js",
+      "pairSha256": "5ecf90bebb451432303274c5cb03b9d52527d9bf25d047999ddc36661329abd1"
+    },
+    {
+      "index": 52,
+      "event": "CharacteristicPeeked",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "da431e6386f529f3d7d27a243529a80324827633d54b5832ed1126477c27bf7b"
+    },
+    {
+      "index": 53,
+      "event": "BunkerCapacityUpdated",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "82d32b51cb22d5a717d0583d8fecc646351a1dbf93d14c98697c0b783ff6265b"
+    },
+    {
+      "index": 54,
+      "event": "GamePauseUpdated",
+      "domain": "timer",
+      "file": "wwwroot/js/bunker/timer/signalr-events.js",
+      "pairSha256": "cae0646412d4ed7669477d53166dcdceca9348540b76237fa577833ec7a22b4a"
+    },
+    {
+      "index": 55,
+      "event": "GameTimerUpdated",
+      "domain": "timer",
+      "file": "wwwroot/js/bunker/timer/signalr-events.js",
+      "pairSha256": "dc0286b24bf7c040acc479ad280b864e056efd0ab7b8fa007abc2cd5a11f276a"
+    },
+    {
+      "index": 56,
+      "event": "RoundChangePreview",
+      "domain": "rounds",
+      "file": "wwwroot/js/bunker/rounds/signalr-events.js",
+      "pairSha256": "7c9aea50b23a797686e683a8c90e8cb31f220d2e600be02ebf3dfddb199e87de"
+    },
+    {
+      "index": 57,
+      "event": "BunkerCapacityRejected",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "f4a6a8f3fa87c8a5871c2a7ee1a7541981c92a749335115cb881f90c50482b01"
+    },
+    {
+      "index": 58,
+      "event": "BunkerChanged",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "a01e8907f7cff49533e1f4365030672b46eb4c1d6ea96e13b18cadcf65a28eb4"
+    },
+    {
+      "index": 59,
+      "event": "BunkerUpdated",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "46b7d751ef3e45fc9e8fb6c498eb902c78aac4f825923d5c040292dd664fd4f5"
+    },
+    {
+      "index": 60,
+      "event": "ApocalypseChanged",
+      "domain": "apocalypse",
+      "file": "wwwroot/js/bunker/apocalypse/signalr-events.js",
+      "pairSha256": "476c4b5c6237b4cd8124dfa88c941fe8013404c177710fe6244bd92ede1b07c3"
+    },
+    {
+      "index": 61,
+      "event": "GameEvent",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "ce4b41095b0da063db66c0765cd86b95b6aa696a7da362c3d8dbb61651d856c9"
+    },
+    {
+      "index": 62,
+      "event": "NewGameEvent",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "142cbeb2071837b125ecd83d762028e5f3bf32ccd946e0f3294cdd76ebd83807"
+    },
+    {
+      "index": 63,
+      "event": "ScenarioStarted",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "96dcf60c0f56db02cf9bdcc0b977936e8b33c6e5d288b0baae08fc2ba766d4b6"
+    },
+    {
+      "index": 64,
+      "event": "ScenarioPrivateOpened",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "72f2bc1b2aa5db1c58d875c69a9d9260bd0ecaf1904d81d00267c30c9326e497"
+    },
+    {
+      "index": 65,
+      "event": "EventCardPublicNotice",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "51ab665828db25bf62e61a96b37838c8a4bff6d93de7adc580efe858ab07f132"
+    },
+    {
+      "index": 66,
+      "event": "ScenarioResolved",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "b5016a9f8415702cac5c0df88edc4f691108d5c4df9b8b1455a413586b06fd3b"
+    },
+    {
+      "index": 67,
+      "event": "BunkerIntelRevealed",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "708f220cd5a28f40cc65e750b04cdb0e956fbea843d9e5bd8a3cc69481def282"
+    },
+    {
+      "index": 68,
+      "event": "EventEffectApplied",
+      "domain": "gameEvents",
+      "file": "wwwroot/js/bunker/events/signalr-events.js",
+      "pairSha256": "5d0b213f7404e1d5e14b7006f59602efde0ec9588db6733246cfd28ca54d55f6"
+    },
+    {
+      "index": 69,
+      "event": "AdditionalInventoryGranted",
+      "domain": "inventory",
+      "file": "wwwroot/js/bunker/inventory/signalr-events.js",
+      "pairSha256": "0386ea79babc123c07a4a0c8fcec70555e920e31643ace52a07076d0c2c7cded"
+    },
+    {
+      "index": 70,
+      "event": "ThreatStateUpdated",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "c79fdbf77634709f444222c93fabd964d586313ee050c0f1c52d3619eb28cc9a"
+    },
+    {
+      "index": 71,
+      "event": "RoomDiagnosticsUpdated",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "acc1a2d95f706f01ae7972a57a7c7fe171c85ff586b9fb962d55a86074262eee"
+    },
+    {
+      "index": 72,
+      "event": "RoomAutoFixPreviewed",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "386e7cf994ce91d2a42039701319768dcfe14ca5d741aae2edd39fea920f6580"
+    },
+    {
+      "index": 73,
+      "event": "RoomSnapshotsUpdated",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "e9d0ee7fb1da6b9dcba90d8adf574b3b0b24e5295044887a116de673ea28d1d3"
+    },
+    {
+      "index": 74,
+      "event": "RoomSnapshotRestorePreviewed",
+      "domain": "diagnostics",
+      "file": "wwwroot/js/bunker/diagnostics/signalr-events.js",
+      "pairSha256": "79316bfb9c84c56e28b4bcb6f92d9283c2195286972f6aad2e414a8396884b4a"
+    },
+    {
+      "index": 75,
+      "event": "RoomLocalEditorUpdated",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "be53a1858d3f65346dc476d3ef5c6c56ed7ef46fe7e10ad72df6b2a8918f36f8"
+    },
+    {
+      "index": 76,
+      "event": "RoomLocalEditPreviewed",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "722fbfdd965b089db535742fae2dcdbbec119c03b28481b8aa3cb2f0bcacbb16"
+    },
+    {
+      "index": 77,
+      "event": "GmAuditLogUpdated",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "33be00d02ba368bed6587ebb2c105af0a2691b022e3e242052f16682734947ce"
+    },
+    {
+      "index": 78,
+      "event": "GMThreatControlData",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "4ed7bb5101d255d0e99ed6f2cf734c9dfb6c26eadb2fc65c706e3305a3075744"
+    },
+    {
+      "index": 79,
+      "event": "GMThreatForcePreview",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "04b7c151a5fdcc1d462492e15e78cfcacc02b108f33aa46cc9c9e1e8a7092ba6"
+    },
+    {
+      "index": 80,
+      "event": "GMThreatForceRejected",
+      "domain": "gm",
+      "file": "wwwroot/js/bunker/gm/signalr-events.js",
+      "pairSha256": "85356da370daca5688ad7ac71d2d54d256d70093bab778b3fe5f2637ed5913a1"
+    },
+    {
+      "index": 81,
+      "event": "ThreatSupportDiceRolled",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "481d5f1aaf8fd7ee05e9088c46dad1497bd1cfbe2b2f50360699a0d66078509b"
+    },
+    {
+      "index": 82,
+      "event": "ThreatSupportDropAnnounced",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "7d6626dd2b092373b95d22aa48cbf96195703beb3d9cbd42cbd944dd8903b4eb"
+    },
+    {
+      "index": 83,
+      "event": "ThreatSupportItemReceived",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "917dca187c7a73756e1999efe8eff4aa9fb8ac1e45b6b46a9441ef6326477bee"
+    },
+    {
+      "index": 84,
+      "event": "ThreatPrivateMessage",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "070784695704ccf7923d6cd6fcf9cee042d81632b7b4a8848b28b6c1f302b306"
+    },
+    {
+      "index": 85,
+      "event": "ThreatContributionWithdrawn",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "4f61daa1d71a4c3eb98820274cabff4a88b5f77e70d34ff801a9f8e028449a0e"
+    },
+    {
+      "index": 86,
+      "event": "ThreatVolunteerSelected",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "d64c7d52fb54b639376860a0d85947487d95fb7fd3e007e5058ebbf9e03bdc7e"
+    },
+    {
+      "index": 87,
+      "event": "ThreatVolunteerVoteStarted",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "1b0b5055b70d21f372dbd3d7310634ae082c0a61597149f9565b945b4d57031a"
+    },
+    {
+      "index": 88,
+      "event": "ThreatVolunteerVoteProgress",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "f2650fb969646b937ab7bec667f4d1e82de88e7b86324857c0b401c722ebaa9e"
+    },
+    {
+      "index": 89,
+      "event": "ThreatVolunteerVoteCompleted",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "72dd88a28d0b3897bf25f9668dbef18034f248e00062c88c8adcfaed365eef16"
+    },
+    {
+      "index": 90,
+      "event": "ThreatVolunteerVoteClosed",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "3d6419b716d9184034c3289dbed1726415ae7b4d548ef8c3e89a3e0072ab86e6"
+    },
+    {
+      "index": 91,
+      "event": "ThreatResolved",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "86bc2e944c38875129d3627b93a5a83e03d1f7c0eedb43be0ac46520e20f448a"
+    },
+    {
+      "index": 92,
+      "event": "ThreatMiniGameStarted",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "8f42b909bb8fc46f4a77c3a0a31bef13684b648277c26d7ac3c0d2c6cbd44524"
+    },
+    {
+      "index": 93,
+      "event": "ThreatMiniGameUpdated",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "1d17819c47cb11525195efb098ffc63f1f4ff38926d5e7c072b1fdb20f8bb953"
+    },
+    {
+      "index": 94,
+      "event": "VotingStarted",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "62538482ada461bfc65180813cd0be10952f0463fef8aed68df84021055e4591"
+    },
+    {
+      "index": 95,
+      "event": "VoteCast",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "3fb80d8b0613fe74d0d19102de4dd1b7a1dea002d50299dbc0f657f83eabc213"
+    },
+    {
+      "index": 96,
+      "event": "VotingProgress",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "989ed7e547362da05634b2639a225ebe532273681cbdf79fd7c639724cc9930d"
+    },
+    {
+      "index": 97,
+      "event": "VotingEnded",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "fc83e478f698872b68a59fb948617a9a7bec3e9b019c331261675cd8fe30f942"
+    },
+    {
+      "index": 98,
+      "event": "VotingResolved",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "9427de9ab5608d55b8d7593ae9977af665d3bcf9f1fb83e1e4f2f238e6b2b939"
+    },
+    {
+      "index": 99,
+      "event": "VotingCancelled",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "5b64e3a39cd2da8460b64ac2ec571ca12e06cd0947b09b79597b0973f6be1f03"
+    },
+    {
+      "index": 100,
+      "event": "VotingAdminUpdated",
+      "domain": "voting",
+      "file": "wwwroot/js/bunker/voting/signalr-events.js",
+      "pairSha256": "dddf709595c7b9c4e4fa5ebe072c407535744ec607bf8342f16242340609ccd9"
+    },
+    {
+      "index": 101,
+      "event": "ApocalypseImageUpdated",
+      "domain": "apocalypse",
+      "file": "wwwroot/js/bunker/apocalypse/signalr-events.js",
+      "pairSha256": "6395cd692aad375104833fb7efbc208d5e904834230fe43c7aa67d7cc0701015"
+    },
+    {
+      "index": 102,
+      "event": "BunkerImageUpdated",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "65c132563b1c14f3aef0991ad72a94efe72b9e3a96a8522144def0882d3de62d"
+    },
+    {
+      "index": 103,
+      "event": "ThreatImageUpdated",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "dc30a60df1baf5a31e4ceacb2563d1c5ae6b4781903ec8df751980fef1762d0f"
+    },
+    {
+      "index": 104,
+      "event": "ApocalypseImageRemoved",
+      "domain": "apocalypse",
+      "file": "wwwroot/js/bunker/apocalypse/signalr-events.js",
+      "pairSha256": "fc0b3f28ef1a62213d7ab0ecf7686b90c0a343f52ea90cd7779c846fa4212473"
+    },
+    {
+      "index": 105,
+      "event": "BunkerImageRemoved",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "71d13734ac4e192a7752abea69ca170da4cc1310640e011414941084620ffcaa"
+    },
+    {
+      "index": 106,
+      "event": "ThreatImageRemoved",
+      "domain": "threats",
+      "file": "wwwroot/js/bunker/threats/signalr-events.js",
+      "pairSha256": "d6d4a853ce3e325a98d0e001a8fa5abae5a79e74b117b7d740ebb9afb02d8432"
+    },
+    {
+      "index": 107,
+      "event": "BunkerSuppliesAdded",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "f8d64051dc84a760f59cda7d549514e9e5dd0d9ee8c8ab3953bbe4a318bf8002"
+    },
+    {
+      "index": 108,
+      "event": "BunkerSuppliesRemoved",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "d7c7e24470da845b30b5dd1127b649f8cf434155781cc763c0ce41ab8f03864b"
+    },
+    {
+      "index": 109,
+      "event": "BunkerWaterAdded",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "ab98d35bede43d7b17dbc1ae4f12e7aa6e8dde4c32ffac96069147ce94e5ba3f"
+    },
+    {
+      "index": 110,
+      "event": "BunkerWaterRemoved",
+      "domain": "bunker",
+      "file": "wwwroot/js/bunker/bunker/signalr-events.js",
+      "pairSha256": "b4b74498438aae4ba6ad9228b8d15b5eadcaee979229892bd9e50fc5e1331b65"
+    }
+  ]
+}
