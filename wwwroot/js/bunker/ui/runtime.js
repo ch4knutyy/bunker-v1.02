@@ -52,9 +52,13 @@ function showRoomSection() {
 function updateRoomUI() {
 	if (!currentRoom) return;
 
-	console.log("[updateRoomUI] Called with currentRoom:", currentRoom);
-	console.log("[updateRoomUI] isHost:", isHost);
-	console.log("[updateRoomUI] currentRoom.state:", currentRoom.state);
+	if (window.BUNKER_DEBUG === true) {
+		console.debug("[updateRoomUI]", {
+			roomId: currentRoom.id || currentRoom.Id,
+			state: currentRoom.state || currentRoom.State,
+			isHost
+		});
+	}
 
 	const roomNameElement = document.getElementById('currentRoomName');
 	if (roomNameElement) {
@@ -111,7 +115,6 @@ function updateRoomUI() {
 	if (gmPanelBtn) {
 		if (isHost || isDeveloper || !!omniscientHiddenState) {
 			gmPanelBtn.style.display = 'inline-block';
-			console.log("[updateRoomUI] GM Panel button shown for host");
 		} else {
 			gmPanelBtn.style.display = 'none';
 		}

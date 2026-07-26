@@ -8,6 +8,8 @@ namespace Bunker.Models.Сharacteristics
     /// </summary>
     public class CharacterTrait
     {
+        public string Id { get; set; } = "";
+
         /// <summary>
         /// Назва риси характеру (1-3 слова)
         /// </summary>

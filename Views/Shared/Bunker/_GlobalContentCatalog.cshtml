@@ -10,53 +10,68 @@
 *@
 <section id="globalContentCatalog" class="global-content-catalog" style="display: none;" aria-labelledby="globalContentCatalogTitle">
 	<h3 id="globalContentCatalogTitle" data-gm-i18n="globalCatalogTitle">Global Content Catalog</h3>
-	<p class="global-catalog-warning" data-gm-i18n="globalCatalogDevelopmentWarning">Development-only, read-only catalog. Production access is disabled.</p>
-	<p data-gm-i18n="globalCatalogReadOnly">Read-only: saving, deleting, committing and rollback are unavailable.</p>
+	<p class="global-catalog-warning" data-gm-i18n="globalCatalogDevelopmentWarning">Development-only editor. Production access is disabled.</p>
+	<p data-gm-i18n="globalCatalogReadOnly">Catalog writes require an explicit server capability. Unsupported schemas stay read-only.</p>
 	<div class="global-catalog-toolbar">
 		<label for="globalCatalogCategory" data-gm-i18n="globalCatalogCategory">Category</label>
-		<select id="globalCatalogCategory" class="input-field" onchange="loadGlobalContentPage(1)"></select>
+		<select id="globalCatalogCategory" class="input-field" data-global-content-action="category"></select>
 		<label for="globalCatalogSearch" data-gm-i18n="globalCatalogSearch">Search</label>
-		<input id="globalCatalogSearch" class="input-field" type="search" maxlength="100" oninput="scheduleGlobalContentSearch()" />
+		<input id="globalCatalogSearch" class="input-field" type="search" maxlength="100" data-global-content-action="search" />
 	</div>
 	<div id="globalCatalogMetadata" class="global-catalog-metadata" aria-live="polite"></div>
 	<div id="globalCatalogEntries" class="global-catalog-entries" aria-live="polite"></div>
 	<div class="global-catalog-pagination">
-		<button id="globalCatalogPrevious" type="button" class="btn-secondary" data-gm-i18n="globalCatalogPrevious" onclick="changeGlobalContentPage(-1)">Previous</button>
+		<button id="globalCatalogPrevious" type="button" class="btn-secondary" data-gm-i18n="globalCatalogPrevious" data-global-content-action="previous">Previous</button>
 		<span id="globalCatalogPage">1</span>
-		<button id="globalCatalogNext" type="button" class="btn-secondary" data-gm-i18n="globalCatalogNext" onclick="changeGlobalContentPage(1)">Next</button>
+		<button id="globalCatalogNext" type="button" class="btn-secondary" data-gm-i18n="globalCatalogNext" data-global-content-action="next">Next</button>
 	</div>
-	<pre id="globalCatalogDetails" class="global-catalog-details" aria-live="polite"></pre>
+	<div id="globalCatalogDetails" class="global-catalog-details" aria-live="polite"></div>
 	<section id="globalCatalogDrafts" class="global-catalog-drafts">
 		<h4 data-gm-i18n="globalDraftsTitle">Drafts</h4>
-		<button id="globalDraftCreate" type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftCreate" onclick="createGlobalContentDraft()">Create draft</button>
+		<button id="globalDraftCreate" type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftCreate" data-global-content-action="create-draft">Create draft</button>
 		<div id="globalDraftBlocked" class="global-catalog-warning" aria-live="polite"></div>
-		<select id="globalDraftSelect" class="input-field" onchange="renderGlobalDraftState()"></select>
+		<select id="globalDraftSelect" class="input-field" data-global-content-action="draft"></select>
 		<div id="globalDraftStatus" class="global-catalog-metadata"></div>
 		<div class="global-catalog-toolbar">
 			<select id="globalDraftOperation" class="input-field"><option value="CreateEntry">Create</option><option value="UpdateEntry">Update</option><option value="DeleteEntry">Delete</option></select>
-			<input id="globalDraftEntryId" class="input-field" maxlength="100" placeholder="Entry ID" />
-			<input id="globalDraftName" class="input-field" maxlength="500" placeholder="Name" />
-			<input id="globalDraftDescription" class="input-field" maxlength="2000" placeholder="Description" />
-			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftApply" onclick="applyGlobalDraftCommand()">Apply to draft</button>
+			<input id="globalDraftEntryId" class="input-field" maxlength="100" placeholder="Entry ID" readonly />
+			<label for="globalContentScope" data-gm-i18n="globalEditorScope">Scope</label>
+			<select id="globalContentScope" class="input-field">
+				<option value="catalog_only" data-gm-i18n="globalScopeCatalogOnly">Catalog only</option>
+				<option value="room_only" disabled data-gm-i18n="globalScopeRoomOnly">Current game only — use runtime picker</option>
+				<option value="catalog_and_room" disabled data-gm-i18n="globalScopeCatalogAndRoom">Catalog and current game — unsupported</option>
+			</select>
+			<label for="globalContentLanguage" data-gm-i18n="globalEditorLanguage">Language</label>
+			<select id="globalContentLanguage" class="input-field" disabled>
+				<option value="all" data-gm-i18n="globalLanguageAll">All available</option>
+				<option value="uk">uk</option><option value="en">en</option><option value="ru">ru</option>
+			</select>
+			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftApply" data-global-content-action="apply-draft">Apply to draft</button>
 		</div>
+		<div id="globalContentEditorFields" class="global-content-editor-fields" aria-live="polite"></div>
 		<div class="global-catalog-toolbar">
-			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftValidate" onclick="validateGlobalDraft()">Validate</button>
-			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftPreview" onclick="previewGlobalDraftDiff()">Preview diff</button>
-			<button type="button" class="btn-danger global-draft-command" data-gm-i18n="globalDraftDiscard" onclick="discardGlobalDraft()">Discard</button>
-			<button id="globalDraftCommit" type="button" class="btn-success global-draft-command" data-gm-i18n="globalDraftCommit" onclick="commitGlobalDraft()" disabled>Commit</button>
+			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftValidate" data-global-content-action="validate-draft">Validate</button>
+			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalDraftPreview" data-global-content-action="preview-draft">Preview diff</button>
+			<button type="button" class="btn-danger global-draft-command" data-gm-i18n="globalDraftDiscard" data-global-content-action="discard-draft">Discard</button>
+			<button id="globalDraftCommit" type="button" class="btn-success global-draft-command" data-gm-i18n="globalDraftCommit" data-global-content-action="commit-draft" disabled>Commit</button>
 		</div>
 		<pre id="globalDraftResult" class="global-catalog-details" aria-live="polite"></pre>
 		<p class="global-catalog-warning" data-gm-i18n="globalRuntimeRestart">Changes take effect after application restart.</p>
 		<h4 data-gm-i18n="globalBackupsTitle">Backups</h4>
-		<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalBackupsRefresh" onclick="loadGlobalContentBackups()">Refresh backups</button>
+		<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalBackupsRefresh" data-global-content-action="refresh-backups">Refresh backups</button>
 		<select id="globalBackupSelect" class="input-field"></select>
-		<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalRollbackPreview" onclick="previewGlobalRollback()">Preview rollback</button>
-		<button id="globalRollbackExecute" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalRollbackExecute" onclick="executeGlobalRollback()" disabled>Rollback</button>
+		<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalRollbackPreview" data-global-content-action="preview-rollback">Preview rollback</button>
+		<button id="globalRollbackExecute" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalRollbackExecute" data-global-content-action="execute-rollback" disabled>Rollback</button>
 		<pre id="globalRollbackResult" class="global-catalog-details" aria-live="polite"></pre>
+		<details class="global-catalog-drafts">
+			<summary data-gm-i18n="globalHistoryTitle">Content change history</summary>
+			<button type="button" class="btn-secondary" data-gm-i18n="globalHistoryRefresh" data-global-content-action="refresh-history">Refresh history</button>
+			<pre id="globalContentHistory" class="global-catalog-details" aria-live="polite"></pre>
+		</details>
 		<section id="globalStableIdMigration" class="global-catalog-drafts" style="display: none;">
 			<h4 data-gm-i18n="globalMigrationTitle">Stable-ID migration required</h4>
-			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalMigrationPreview" onclick="previewStableIdMigration()">Preview migration</button>
-			<button id="globalMigrationApply" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalMigrationApply" onclick="applyStableIdMigration()" disabled>Apply migration</button>
+			<button type="button" class="btn-secondary global-draft-command" data-gm-i18n="globalMigrationPreview" data-global-content-action="preview-migration">Preview migration</button>
+			<button id="globalMigrationApply" type="button" class="btn-danger global-draft-command" data-gm-i18n="globalMigrationApply" data-global-content-action="apply-migration" disabled>Apply migration</button>
 			<pre id="globalMigrationResult" class="global-catalog-details" aria-live="polite"></pre>
 		</section>
 	</section>

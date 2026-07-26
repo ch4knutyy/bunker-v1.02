@@ -85,6 +85,11 @@ namespace Bunker.Hubs
                 allPlayersRevealed,
                 canStartVoting = votingAvailability.Allowed,
                 votingStartBlockedCode = votingAvailability.Allowed ? null : votingAvailability.Code,
+                recommendedStartRound = VotingSession.RecommendedStartRound,
+                votingStartedAtRound = room.CurrentVoting?.VotingStartedAtRound,
+                isEarlyVoting = room.CurrentVoting?.IsEarlyVoting ??
+                    (votingAvailability.Allowed &&
+                     room.CurrentRound < VotingSession.RecommendedStartRound),
                 revealedPlayers,
                 threatRevealed = room.IsThreatRevealed,
                 threatRevealedAtRound = room.ThreatRevealedAtRound,
@@ -119,6 +124,11 @@ namespace Bunker.Hubs
                         name = player.Name ?? "Unknown",
                         seatNumber = player.SeatNumber,
                         eliminationVoteImmunity = player.EliminationVoteImmunity,
+                        revealRequirementStatus = player.RevealRequirementSatisfiedByCredit
+                            ? "completed_by_credit"
+                            : player.HasCompletedRevealThisRound
+                                ? "completed"
+                                : "pending",
                         status
                     };
                 })
@@ -194,6 +204,19 @@ namespace Bunker.Hubs
             return CloneThreatData(selected);
         }
 
+        private async Task BeginRevealRound(Room room)
+        {
+            var consumedPlayers = RevealCreditService.BeginRound(room);
+            foreach (var player in consumedPlayers)
+            {
+                await SendPersonalPlayerSnapshot(
+                    player.ConnectionId,
+                    player,
+                    "reveal_credit_consumed",
+                    new { creditsUsed = 1 });
+            }
+        }
+
         private bool ShouldTriggerThreat(Room room, int completedRound)
         {
             var settings = _roomGameSettings.GetEffective(room);
@@ -208,16 +231,6 @@ namespace Bunker.Hubs
                 ThreatFrequencyMode.RandomEligibleRounds => _random.Next(0, 2) == 0,
                 _ => false
             };
-        }
-
-        private static bool IsVotingRound(Room room, int completedRound)
-        {
-            var settings = room.SettingsFrozen && room.FrozenGameSettings != null
-                ? RoomGameSettingsService.Migrate(room.FrozenGameSettings)
-                : RoomGameSettingsService.Migrate(room.GameSettings);
-            if (!settings.VotingEnabled || completedRound < settings.VotingStartRound) return false;
-            return settings.VotingFrequency == VotingFrequencyMode.EveryRound ||
-                   (completedRound - settings.VotingStartRound) % 2 == 0;
         }
 
         private void StartConfiguredRoundTimer(Room room)
@@ -269,6 +282,10 @@ namespace Bunker.Hubs
         private static BunkerInfo CloneBunkerInfo(BunkerInfo source) =>
             JsonSerializer.Deserialize<BunkerInfo>(JsonSerializer.Serialize(source)) ??
             throw new InvalidOperationException("Unable to clone bunker state.");
+
+        private static Apocalypse CloneApocalypse(Apocalypse source) =>
+            JsonSerializer.Deserialize<Apocalypse>(JsonSerializer.Serialize(source)) ??
+            throw new InvalidOperationException("Unable to clone apocalypse state.");
 
         private Item? DrawRandomInventoryItem()
         {

@@ -15,6 +15,7 @@ namespace Bunker.Models
     /// </summary>
     public class VotingSession
     {
+        public const int RecommendedStartRound = 3;
         public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
         public int Round { get; set; } = 1;
         public int VotingStartedAtRound { get; set; } = 1;
@@ -178,6 +179,9 @@ namespace Bunker.Models
                 phase = State.ToString(),
                 startedAt = StartedAt,
                 endedAt = EndedAt,
+                recommendedStartRound = RecommendedStartRound,
+                votingStartedAtRound = VotingStartedAtRound,
+                isEarlyVoting = IsEarlyVoting,
                 totalVoters = RequiredVoterCount,
                 eligiblePlayerCount = EligibleVoters.Count,
                 votedCount = realVotes.Count,

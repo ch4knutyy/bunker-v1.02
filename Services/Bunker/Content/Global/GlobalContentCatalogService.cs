@@ -15,23 +15,29 @@ public sealed class GlobalContentCatalogService
     public const int MaximumPageSize = 100;
     private const int ReadsPerMinute = 30;
 
-    private sealed record CategoryDefinition(string Slug, string RelativeFile, string? RootProperty);
+    private sealed record CategoryDefinition(string Slug, string RelativeFile, string? RootProperty, bool ReadOnly = false);
     private static readonly ReadOnlyDictionary<GlobalContentCategory, CategoryDefinition> Definitions =
         new(new Dictionary<GlobalContentCategory, CategoryDefinition>
         {
             [GlobalContentCategory.Professions] = new("professions", "professions.json", "professions"),
             [GlobalContentCategory.Hobbies] = new("hobbies", "hobbies.json", "hobbies"),
-            [GlobalContentCategory.MentalConditions] = new("mental_conditions", "Mental_conditions/mental_conditions.uk.json", null),
-            [GlobalContentCategory.PhysicalHealth] = new("physical_health", "Physical_conditions/physical_conditions.uk.json", null),
+            [GlobalContentCategory.MentalConditions] = new("mental_conditions", "Mental_conditions/mental_conditions.uk.json", null, true),
+            [GlobalContentCategory.PhysicalHealth] = new("physical_health", "Physical_conditions/physical_conditions.uk.json", null, true),
             [GlobalContentCategory.Phobias] = new("phobias", "phobias.json", "phobias"),
             [GlobalContentCategory.CharacterTraits] = new("character_traits", "character_traits.json", "character_traits"),
             [GlobalContentCategory.Facts] = new("facts", "facts.json", "facts"),
             [GlobalContentCategory.SpecialCards] = new("special_cards", "special_cards.json", "special_cards"),
-            [GlobalContentCategory.Apocalypses] = new("apocalypses", "apocalypses.json", "apocalypses"),
+            [GlobalContentCategory.Apocalypses] = new("apocalypses", "Apocalypses/apocalypses.json", "apocalypses"),
             [GlobalContentCategory.Bunkers] = new("bunkers", "bunkers.json", "bunkers"),
             [GlobalContentCategory.Items] = new("items", "items.json", "items"),
-            [GlobalContentCategory.Threats] = new("threats", "threats.json", "threats")
+            [GlobalContentCategory.Threats] = new("threats", "threats.json", "threats"),
+            [GlobalContentCategory.Properties] = new("properties", "property.json", "property", true),
+            [GlobalContentCategory.ScenarioEvents] = new("scenario_events", "scenario/scenario_events.json", "events", true),
+            [GlobalContentCategory.EventSpecialCards] = new("event_special_cards", "scenario/event_special_cards.json", "cards", true),
+            [GlobalContentCategory.SpyLocations] = new("spy_locations", "Spy_Locations/spy_locations.json", null, true)
         });
+    private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, EditorFieldSchema>> EditorSchemas =
+        BuildEditorSchemas();
 
     private readonly string _root;
     private readonly TimeProvider _timeProvider;
@@ -88,6 +94,39 @@ public sealed class GlobalContentCatalogService
         var entry = read.Entries.FirstOrDefault(x => string.Equals(GetString(x, "id"), stableId, StringComparison.Ordinal));
         if (entry.ValueKind == JsonValueKind.Undefined) throw new GlobalContentRequestException("entry_not_found");
         return new(read.Definition.Slug, stableId, DisplayName(entry), SafeFields(entry));
+    }
+
+    public ContentEditorDefinitionDto GetEditorDefinition(string category, string stableId)
+    {
+        if (string.IsNullOrWhiteSpace(stableId) || stableId.Length > 100)
+            throw new GlobalContentRequestException("invalid_stable_id");
+        var read = Read(category);
+        var entry = read.Entries.FirstOrDefault(x => string.Equals(GetString(x, "id"), stableId, StringComparison.Ordinal));
+        if (entry.ValueKind == JsonValueKind.Undefined) throw new GlobalContentRequestException("entry_not_found");
+        if (!EditorSchemas.TryGetValue(read.Definition.Slug, out var schema))
+            schema = new Dictionary<string, EditorFieldSchema>(StringComparer.Ordinal);
+
+        var fields = new List<ContentEditorFieldDefinitionDto>
+        {
+            new("id", "stable_id", true, false, 100, [], true, entry.GetProperty("id").Clone())
+        };
+        foreach (var field in schema)
+        {
+            if (!entry.TryGetProperty(field.Key, out var value)) continue;
+            fields.Add(new(field.Key, field.Value.FieldType, field.Value.Required, field.Value.Localized,
+                field.Value.MaxLength, field.Value.AllowedValues, read.Definition.ReadOnly || field.Value.ReadOnly, value.Clone()));
+        }
+
+        var writable = !read.Definition.ReadOnly &&
+            read.Metadata.EditableReadiness == GlobalContentEditableReadiness.Ready;
+        var supportStatus = read.Definition.ReadOnly
+            ? read.Definition.Slug is "mental_conditions" or "physical_health"
+                ? "read_only_multi_file_atomic_required"
+                : "read_only_specialized_validator_required"
+            : writable ? "catalog_only_restart_required" : read.Metadata.EditableReadiness.ToString();
+        return new(read.Definition.Slug, $"catalog:{read.Definition.Slug}", stableId, fields,
+            read.Metadata.FileVersion, read.Metadata.Fingerprint,
+            writable ? ["catalog_only"] : [], false, true, null, supportStatus);
     }
 
     public GlobalContentDraftSource ReadDraftSource(string category)
@@ -196,6 +235,7 @@ public sealed class GlobalContentCatalogService
             var stableStatus = missingIds > 0 ? $"Missing:{missingIds}" : duplicateIds > 0 ? $"Duplicates:{duplicateIds}" : "ValidUniqueDeterministic";
             var readiness = !schemaValid ? GlobalContentEditableReadiness.BlockedSchemaUnknown :
                 missingIds > 0 || duplicateIds > 0 ? GlobalContentEditableReadiness.BlockedMissingStableIds :
+                definition.ReadOnly ? GlobalContentEditableReadiness.ReadOnly :
                 GlobalContentEditableReadiness.Ready;
             var localization = GetLocalizationStatus(entries);
             var metadata = new GlobalContentMetadataDto(definition.Slug, entries.Count, fingerprint[..12], fingerprint,
@@ -244,12 +284,30 @@ public sealed class GlobalContentCatalogService
 
     private static bool Matches(JsonElement entry, string search) => string.IsNullOrEmpty(search) ||
         new[] { "id", "name", "profession", "hobby", "trait", "item", "fact", "description" }
-            .Select(field => GetString(entry, field)).Any(value => value.Contains(search, StringComparison.OrdinalIgnoreCase));
+            .Select(field => GetString(entry, field)).Append(LocalizedText(entry, "title")).Append(LocalizedText(entry, "localization"))
+            .Any(value => value.Contains(search, StringComparison.OrdinalIgnoreCase));
     private static GlobalContentEntrySummaryDto ToSummary(JsonElement entry) =>
         new(GetString(entry, "id"), DisplayName(entry), FirstNonEmpty(entry, "description", "type", "category"));
-    private static string DisplayName(JsonElement entry) => FirstNonEmpty(entry, "name", "profession", "hobby", "trait", "item", "fact", "id", "Без назви");
+    private static string DisplayName(JsonElement entry) => FirstNonEmpty(entry, "name", "profession", "hobby", "trait", "item", "fact")
+        is { Length: > 0 } direct ? direct : new[] { LocalizedText(entry, "title"), LocalizedText(entry, "localization"), GetString(entry, "id"), "Без назви" }
+            .First(x => !string.IsNullOrWhiteSpace(x));
     private static string FirstNonEmpty(JsonElement entry, params string[] fields) => fields.Select(x => GetString(entry, x)).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty;
     private static string GetString(JsonElement entry, string property) => entry.ValueKind == JsonValueKind.Object && entry.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : string.Empty;
+    private static string LocalizedText(JsonElement entry, string property)
+    {
+        if (entry.ValueKind != JsonValueKind.Object || !entry.TryGetProperty(property, out var value) || value.ValueKind != JsonValueKind.Object)
+            return string.Empty;
+        foreach (var language in new[] { "uk", "en", "ru" })
+        {
+            if (!value.TryGetProperty(language, out var localized)) continue;
+            if (localized.ValueKind == JsonValueKind.String) return localized.GetString() ?? string.Empty;
+            if (localized.ValueKind != JsonValueKind.Object) continue;
+            foreach (var field in new[] { "name", "title", "description" })
+                if (localized.TryGetProperty(field, out var text) && text.ValueKind == JsonValueKind.String)
+                    return text.GetString() ?? string.Empty;
+        }
+        return string.Empty;
+    }
     private static IReadOnlyDictionary<string, string> SafeFields(JsonElement entry) =>
         entry.EnumerateObject().Where(x => x.Value.ValueKind is JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False)
             .Take(30).ToDictionary(x => x.Name, x => x.Value.ToString(), StringComparer.Ordinal);
@@ -271,7 +329,33 @@ public sealed class GlobalContentCatalogService
             : $"IncompleteUkRuEn:{complete}/{entries.Count}";
     }
 
+    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, EditorFieldSchema>> BuildEditorSchemas()
+    {
+        static IReadOnlyDictionary<string, EditorFieldSchema> Fields(params (string Name, string Type, bool Required, bool Localized, int? Max, bool ReadOnly)[] fields) =>
+            fields.ToDictionary(x => x.Name, x => new EditorFieldSchema(x.Type, x.Required, x.Localized, x.Max, [], x.ReadOnly), StringComparer.Ordinal);
+        return new Dictionary<string, IReadOnlyDictionary<string, EditorFieldSchema>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["professions"] = Fields(("profession", "safe_text", true, false, 500, false), ("type", "discriminator", false, false, 100, true), ("bonus", "safe_text", false, false, 2000, false), ("_i18n", "localized_object", false, true, null, true), ("skills", "structured", false, false, null, true), ("items", "structured", false, false, null, true), ("capabilityTags", "structured", false, false, null, true)),
+            ["hobbies"] = Fields(("hobby", "safe_text", true, false, 500, false), ("type", "discriminator", false, false, 100, true), ("item", "safe_text", false, false, 500, false), ("bonus", "safe_text", false, false, 2000, false), ("_i18n", "localized_object", false, true, null, true), ("capabilityTags", "structured", false, false, null, true)),
+            ["character_traits"] = Fields(("trait", "safe_text", true, false, 500, false), ("type", "discriminator", false, false, 100, true), ("_i18n", "localized_object", false, true, null, true)),
+            ["mental_conditions"] = Fields(("category", "discriminator", false, false, 100, true), ("hasSeverity", "boolean", false, false, null, true), ("localization", "localized_object", true, true, null, true)),
+            ["physical_health"] = Fields(("hasSeverity", "boolean", false, false, null, true), ("localization", "localized_object", true, true, null, true)),
+            ["phobias"] = Fields(("name", "safe_text", true, false, 500, false), ("description", "safe_text", false, false, 2000, false), ("bunkerEffect", "safe_text", false, false, 2000, false), ("_i18n", "localized_object", false, true, null, true)),
+            ["facts"] = Fields(("fact", "safe_text", true, false, 500, false), ("description", "safe_text", false, false, 2000, false), ("source", "discriminator", false, false, 200, true), ("type", "discriminator", false, false, 100, true), ("category", "discriminator", false, false, 100, true), ("_i18n", "localized_object", false, true, null, true)),
+            ["special_cards"] = Fields(("name", "safe_text", true, false, 500, false), ("description", "safe_text", false, false, 2000, false), ("isSecret", "boolean", false, false, null, false), ("isOneTimeUse", "boolean", false, false, null, false), ("requiresTarget", "boolean", false, false, null, false), ("phase", "discriminator", false, false, 100, true), ("effectType", "technical_contract", true, false, 200, true), ("_i18n", "localized_object", false, true, null, true)),
+            ["apocalypses"] = Fields(("name", "safe_text", true, false, 500, false), ("description", "safe_text", false, false, 2000, false), ("severity", "discriminator", false, false, 100, true), ("duration", "safe_text", false, false, 500, false), ("_i18n", "localized_object", false, true, null, true), ("requirements", "structured", false, false, null, true), ("threats", "structured", false, false, null, true)),
+            ["bunkers"] = Fields(("name", "safe_text", true, false, 500, false), ("description", "safe_text", false, false, 2000, false), ("location", "safe_text", false, false, 500, false), ("condition", "safe_text", false, false, 1000, false), ("capacity", "number", false, false, null, false), ("suppliesMonths", "number", false, false, null, false), ("waterMonths", "number", false, false, null, false), ("_i18n", "localized_object", false, true, null, true), ("facilities", "structured", false, false, null, true), ("resources", "structured", false, false, null, true), ("problems", "structured", false, false, null, true)),
+            ["items"] = Fields(("item", "safe_text", true, false, 500, false), ("category", "discriminator", false, false, 100, true), ("_i18n", "localized_object", false, true, null, true), ("resourceTags", "structured", false, false, null, true), ("protectionTags", "structured", false, false, null, true), ("threatUsage", "technical_contract", false, false, null, true)),
+            ["threats"] = Fields(("name", "safe_text", true, false, 500, false), ("description", "safe_text", false, false, 2000, false), ("severity", "discriminator", false, false, 100, true), ("category", "discriminator", false, false, 100, true), ("_i18n", "localized_object", false, true, null, true), ("mechanics", "technical_contract", false, false, null, true), ("apocalypseTags", "structured", false, false, null, true), ("relatedApocalypseIds", "structured", false, false, null, true)),
+            ["properties"] = Fields(("item", "safe_text", true, false, 500, true), ("category", "discriminator", false, false, 100, true), ("_i18n", "localized_object", false, true, null, true), ("randomProperties", "technical_contract", false, false, null, true), ("conditionProfile", "technical_contract", false, false, null, true)),
+            ["scenario_events"] = Fields(("title", "localized_object", true, true, null, true), ("publicText", "localized_object", true, true, null, true), ("type", "discriminator", true, false, 100, true), ("resolutionMode", "technical_contract", true, false, 100, true), ("effects", "technical_contract", false, false, null, true)),
+            ["event_special_cards"] = Fields(("title", "localized_object", true, true, null, true), ("description", "localized_object", true, true, null, true), ("actions", "technical_contract", true, false, null, true)),
+            ["spy_locations"] = Fields(("category", "discriminator", false, false, 100, true), ("localization", "localized_object", true, true, null, true))
+        };
+    }
+
     private sealed record CatalogRead(CategoryDefinition Definition, GlobalContentMetadataDto Metadata, IReadOnlyList<JsonElement> Entries);
+    private sealed record EditorFieldSchema(string FieldType, bool Required, bool Localized, int? MaxLength, IReadOnlyList<string> AllowedValues, bool ReadOnly);
 }
 
 public sealed class GlobalContentRequestException(string code) : Exception(code)

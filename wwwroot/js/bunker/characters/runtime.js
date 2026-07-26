@@ -550,6 +550,9 @@ function normalizePlayer(player) {
 		eliminatedByVote: !!(player.eliminatedByVote ?? player.EliminatedByVote),
 		canRevealAllAfterElimination: !!(player.canRevealAllAfterElimination ?? player.CanRevealAllAfterElimination),
 		hasRevealedAllAfterElimination: !!(player.hasRevealedAllAfterElimination ?? player.HasRevealedAllAfterElimination),
+		futureRevealCredits: player.futureRevealCredits ?? player.FutureRevealCredits ?? 0,
+		hasCompletedRevealThisRound: !!(player.hasCompletedRevealThisRound ?? player.HasCompletedRevealThisRound),
+		revealRequirementSatisfiedByCredit: !!(player.revealRequirementSatisfiedByCredit ?? player.RevealRequirementSatisfiedByCredit),
 		eliminationVoteImmunity: normalizeEliminationVoteImmunity(player.eliminationVoteImmunity || player.EliminationVoteImmunity),
 		seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
 		_hasCharacter: hasGeneratedCharacterData(player),
@@ -1034,9 +1037,18 @@ function renderMyPlayerCards(player) {
 		{ type: 'Fact', categoryLabel: t('fact'), value: getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey: characteristicIconRegistry.fact, details: [], tooltip: fact.description || fact.tooltip || '', variantSource: fact, isRevealed: revealed.fact || revealed.Fact, canReveal: true, revealAction: 'Fact' }
 	];
 
-	container.innerHTML = `${renderEliminatedRevealAllPanel(player)}${models.map(renderCharacteristicCard).join('')}`;
+	container.innerHTML = `${renderRevealCreditStatus(player)}${renderEliminatedRevealAllPanel(player)}${models.map(renderCharacteristicCard).join('')}`;
 	window.reinitTooltips?.();
 
+}
+
+function renderRevealCreditStatus(player) {
+	const credits = Number(player?.futureRevealCredits ?? player?.FutureRevealCredits ?? 0);
+	const byCredit = !!(player?.revealRequirementSatisfiedByCredit ?? player?.RevealRequirementSatisfiedByCredit);
+	return `<div class="reveal-credit-status" role="status">
+		<strong>${escapeHtml(t('revealCreditsLabel'))}: ${Math.max(0, credits)}</strong>
+		${byCredit ? `<span>${escapeHtml(t('revealRequirementSatisfiedByCredit'))}</span>` : ''}
+	</div>`;
 }
 
 function renderEliminatedRevealAllPanel(player) {

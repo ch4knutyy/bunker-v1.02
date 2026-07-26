@@ -51,10 +51,19 @@ public sealed class GmPanelStateBuilder
 		var voting = room.CurrentVoting;
 		var threat = room.ThreatState;
 		var timer = room.GameTimer;
-		var players = (room.Players?.Values.AsEnumerable() ??
+		var roomPlayers = (room.Players?.Values.AsEnumerable() ??
 				Enumerable.Empty<Player>())
 			.Where(player => player is not null)
 			.DistinctBy(RoomService.GetPlayerKey)
+			.ToArray();
+		var gameplayPlayers = roomPlayers
+			.Where(player =>
+				!player.IsEliminated &&
+				!player.IsSpectatorGm &&
+				!player.IsLobbySpectator &&
+				player.GmRole != GmMode.TechnicalGm)
+			.ToArray();
+		var players = roomPlayers
 			.Select(player => new GmPanelPlayerSummaryDto(
 				RoomService.GetPlayerKey(player),
 				player.Name ?? "Unknown",
@@ -68,11 +77,56 @@ public sealed class GmPanelStateBuilder
 				CountRevealed(player.Revealed),
 				player.IsProtectedFromVote ||
 					player.EliminationVoteImmunity?.IsActive == true,
-				IsCurrentTurn(room, player)))
+				IsCurrentTurn(room, player),
+				player.RevealRequirementSatisfiedByCredit
+					? "completed_by_credit"
+					: player.HasCompletedRevealThisRound
+						? "completed"
+						: "pending",
+				isTechnical ? player.FutureRevealCredits : null))
 			.OrderByDescending(player => player.IsHost)
 			.ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
 			.ToArray();
 		var activePlayerCount = players.Count(player => player.IsActive);
+		var readyPlayerCount = room.State == RoomState.Lobby
+			? gameplayPlayers.Count(player => player.IsConnected && player.IsLobbyReady)
+			: gameplayPlayers.Count(player =>
+				room.VotingReadyResponses.TryGetValue(
+					RoomService.GetPlayerKey(player),
+					out var response) &&
+				string.Equals(response, "ready", StringComparison.OrdinalIgnoreCase));
+		var readyRequiredCount = gameplayPlayers.Count(player => player.IsConnected);
+		var activeVoting = voting?.State == VotingState.Active;
+		var unresolvedThreat = threat is not null &&
+			threat.ThreatStatus is not ("hidden" or "aborted" or "resolved_safely" or
+				"resolved_with_casualty" or "failed" or "completed" or "success" or "failure");
+		var allActivePlayersRevealed = gameplayPlayers.Length > 0 &&
+			gameplayPlayers.All(player =>
+			{
+				var playerKey = RoomService.GetPlayerKey(player);
+				return room.CurrentRoundReveals.ContainsKey(playerKey) ||
+					room.CurrentRoundReveals.ContainsKey(player.ConnectionId);
+			});
+		var canStartVoting = canManageGame &&
+			RoundVotingAdminService.CanStartVoting(room, unresolvedThreat).Allowed;
+		var canEndRound = canManageGame && !completed &&
+			room.CurrentPhase == GamePhase.RoundReveal &&
+			allActivePlayersRevealed;
+		var canStartGame = canManageGame && room.State == RoomState.Lobby;
+		var canEndVoting = canManageGame && !completed && activeVoting;
+		var canResumeTimer = canManageGame && !completed &&
+			timer?.Status == GameTimerStatus.Paused;
+		var canManageActiveThreat = canManageGame && !completed && unresolvedThreat;
+		var canFinishPostGameDiscussion = canManageGame &&
+			room.PostGamePhase == PostGamePhase.FinalDiscussion;
+		var primaryAction = canFinishPostGameDiscussion ? "finish-discussion" :
+			canStartGame ? "start-game" :
+			canResumeTimer ? "resume-timer" :
+			canEndVoting ? "end-voting" :
+			canManageActiveThreat ? "open-threat" :
+			canEndRound ? "end-round" :
+			canStartVoting ? "start-voting" :
+			"none";
 
 		return new GmPanelStateDto(
 			room.Id,
@@ -85,6 +139,8 @@ public sealed class GmPanelStateBuilder
 				: room.CurrentPhase.ToString(),
 			room.State == RoomState.Lobby ? 0 : room.CurrentRound,
 			activePlayerCount,
+			readyPlayerCount,
+			readyRequiredCount,
 			room.ResolvedBunkerCapacity ?? room.Bunker?.Capacity,
 			room.State == RoomState.Lobby
 				? "Inactive"
@@ -94,19 +150,38 @@ public sealed class GmPanelStateBuilder
 			voting?.RealVoteCount ?? 0,
 			voting?.RequiredVoterCount ?? 0,
 			voting?.IsTie ?? false,
+			VotingSession.RecommendedStartRound,
+			voting?.VotingStartedAtRound,
+			voting?.IsEarlyVoting ??
+				(canStartVoting &&
+				 room.CurrentRound < VotingSession.RecommendedStartRound),
 			threat?.ThreatStatus ?? (room.IsThreatRevealed ? "Revealed" : "Inactive"),
 			room.CurrentThreat?.Name,
 			completed,
+			room.PostGamePhase.ToString(),
 			permissions,
 			new GmPanelAvailableActionsDto(
-				CanStartGame: canManageGame && room.State == RoomState.Lobby,
+				CanStartGame: canStartGame,
 				CanAdvanceRound: canManageGame && !completed &&
 					room.CurrentVoting is null &&
 					room.CurrentPhase is GamePhase.RoundEnded or GamePhase.VotingResults,
-				CanEndRound: canManageGame && !completed &&
-					room.CurrentPhase == GamePhase.RoundReveal,
+				CanEndRound: canEndRound,
 				CanEndGame: canManageGame && !completed &&
-					room.State is RoomState.Playing or RoomState.Voting),
+					room.State is RoomState.Playing or RoomState.Voting,
+				CanStartVoting: canStartVoting,
+				CanEndVoting: canEndVoting,
+				CanCancelVoting: canEndVoting,
+				CanStartTimer: canManageGame && !completed &&
+					room.State is RoomState.Playing or RoomState.Voting &&
+					timer?.Status is not (GameTimerStatus.Running or GameTimerStatus.Paused),
+				CanPauseTimer: canManageGame && !completed &&
+					timer?.Status == GameTimerStatus.Running,
+				CanResumeTimer: canResumeTimer,
+				CanAdjustTimer: canManageGame && !completed && timer is not null &&
+					room.State is RoomState.Playing or RoomState.Voting,
+				CanManageActiveThreat: canManageActiveThreat,
+				CanFinishPostGameDiscussion: canFinishPostGameDiscussion,
+				PrimaryAction: primaryAction),
 			players);
 	}
 

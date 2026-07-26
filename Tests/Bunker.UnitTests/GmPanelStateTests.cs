@@ -142,6 +142,9 @@ public sealed class GmPanelStateTests
 		Assert.False(state.AvailableActions.CanAdvanceRound);
 		Assert.False(state.AvailableActions.CanEndRound);
 		Assert.False(state.AvailableActions.CanEndGame);
+		Assert.False(state.AvailableActions.CanEndVoting);
+		Assert.False(state.AvailableActions.CanStartTimer);
+		Assert.Equal("none", state.AvailableActions.PrimaryAction);
 	}
 
 	private static (Room Room, Player Host, Player Player) CreatePlayingRoom()

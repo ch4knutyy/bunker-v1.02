@@ -1,0 +1,369 @@
+/* Bunker interior theme. Apocalypse styles remain responsible for the world background. */
+body.bunker-theme-active {
+	--bunker-panel-bg: linear-gradient(145deg, #17191a 0%, #0d0f10 100%);
+	--bunker-panel-border: #596064;
+	--bunker-panel-shadow: inset 0 1px rgb(255 255 255 / 5%), inset 0 -10px 24px rgb(0 0 0 / 28%), 0 8px 24px rgb(0 0 0 / 30%);
+	--bunker-button-bg: linear-gradient(180deg, #303438, #171a1c);
+	--bunker-button-hover-bg: linear-gradient(180deg, #3a4145, #202427);
+	--bunker-button-active-bg: linear-gradient(180deg, #151719, #2a2e31);
+	--bunker-button-border: #737a7e;
+	--bunker-text-primary: #edf0ed;
+	--bunker-text-muted: #a7adaa;
+	--bunker-accent: #d29a45;
+	--bunker-danger: #df6259;
+	--bunker-success: #62b982;
+	--bunker-warning: #e0b54f;
+	--bunker-radius: 4px;
+	--bunker-border-width: 1px;
+	--bunker-dirt-opacity: .1;
+	--bunker-damage-opacity: .08;
+	--bunker-rust-opacity: .04;
+	--bunker-glow: 0 0 12px color-mix(in srgb, var(--bunker-accent) 18%, transparent);
+	--bunker-texture:
+		linear-gradient(115deg, transparent 0 43%, rgb(255 255 255 / 2%) 43.2% 43.5%, transparent 43.7%),
+		radial-gradient(circle at 12% 16%, rgb(255 255 255 / 4%) 0 1px, transparent 2px);
+	--bunker-edge-texture:
+		radial-gradient(ellipse at 5% 0%, rgb(0 0 0 / 34%), transparent 28%),
+		radial-gradient(ellipse at 96% 100%, color-mix(in srgb, var(--bunker-accent) 9%, transparent), transparent 30%);
+	--bunker-button-transform: translateY(1px);
+	--bunker-font-style: inherit;
+}
+
+body.bunker-theme-active[data-bunker-archetype="medical"] {
+	--bunker-panel-bg: linear-gradient(145deg, #d5dde0, #89969b 48%, #435158);
+	--bunker-panel-border: #b9e4ed;
+	--bunker-button-bg: linear-gradient(180deg, #e8eff0, #9daeb3);
+	--bunker-button-hover-bg: linear-gradient(180deg, #f3ffff, #acd1d8);
+	--bunker-button-active-bg: linear-gradient(180deg, #78949b, #d6e7e9);
+	--bunker-button-border: #cff7ff;
+	--bunker-text-primary: #f5ffff;
+	--bunker-text-muted: #c8d7da;
+	--bunker-accent: #7bd9ef;
+	--bunker-radius: 3px;
+	--bunker-glow: 0 0 14px rgb(90 211 237 / 28%);
+	--bunker-texture: repeating-linear-gradient(90deg, transparent 0 38px, rgb(210 250 255 / 5%) 39px 40px);
+}
+
+body.bunker-theme-active[data-bunker-archetype="military"] {
+	--bunker-panel-bg: linear-gradient(135deg, #31382c, #171c17 58%, #0d100e);
+	--bunker-panel-border: #657052;
+	--bunker-button-bg: linear-gradient(180deg, #4b5540, #242a21);
+	--bunker-button-hover-bg: linear-gradient(180deg, #5d6b4c, #30382b);
+	--bunker-button-active-bg: linear-gradient(180deg, #1c2119, #414a38);
+	--bunker-button-border: #7e8968;
+	--bunker-accent: #a7b56b;
+	--bunker-radius: 1px;
+	--bunker-border-width: 2px;
+	--bunker-texture: radial-gradient(circle at 9px 9px, #0a0c09 0 2px, #737b62 2.5px 3px, transparent 3.5px) 0 0 / 72px 72px;
+	--bunker-font-style: "Arial Narrow", "Roboto Condensed", sans-serif;
+}
+
+body.bunker-theme-active[data-bunker-archetype="industrial"] {
+	--bunker-panel-bg: linear-gradient(145deg, #282723, #111211 62%);
+	--bunker-panel-border: #8e763a;
+	--bunker-button-bg: linear-gradient(180deg, #4b4638, #24231f);
+	--bunker-button-hover-bg: linear-gradient(180deg, #665a39, #302d25);
+	--bunker-button-active-bg: linear-gradient(180deg, #171815, #423d30);
+	--bunker-button-border: #a4873c;
+	--bunker-accent: #e5b52e;
+	--bunker-radius: 0;
+	--bunker-border-width: 2px;
+	--bunker-texture: repeating-linear-gradient(135deg, rgb(229 181 46 / 8%) 0 9px, rgb(0 0 0 / 15%) 9px 18px);
+}
+
+body.bunker-theme-active[data-bunker-archetype="dirty"] {
+	--bunker-panel-bg: linear-gradient(150deg, #30271e, #161411 52%, #0b0b09);
+	--bunker-panel-border: #71462e;
+	--bunker-button-bg: linear-gradient(175deg, #463729, #211b16);
+	--bunker-button-hover-bg: linear-gradient(175deg, #5c422d, #2b2119);
+	--bunker-button-active-bg: linear-gradient(175deg, #17120f, #392b20);
+	--bunker-button-border: #895238;
+	--bunker-accent: #cb7a37;
+	--bunker-radius: 2px 6px 3px 1px;
+	--bunker-rust-opacity: .32;
+	--bunker-dirt-opacity: .34;
+	--bunker-texture: radial-gradient(ellipse at 7% 90%, rgb(104 52 27 / 28%), transparent 25%), radial-gradient(circle at 91% 7%, rgb(0 0 0 / 25%), transparent 18%);
+}
+
+body.bunker-theme-active[data-bunker-archetype="scientific"] {
+	--bunker-panel-bg: linear-gradient(135deg, #16252b, #091115 66%);
+	--bunker-panel-border: #42788a;
+	--bunker-button-bg: linear-gradient(180deg, #203c45, #0d1e24);
+	--bunker-button-hover-bg: linear-gradient(180deg, #28515d, #102a32);
+	--bunker-button-active-bg: linear-gradient(180deg, #07151a, #24444e);
+	--bunker-button-border: #55a8bd;
+	--bunker-accent: #54c9e2;
+	--bunker-radius: 2px;
+	--bunker-texture: linear-gradient(90deg, transparent 49.7%, rgb(84 201 226 / 7%) 50%, transparent 50.3%), linear-gradient(0deg, transparent 49.7%, rgb(84 201 226 / 5%) 50%, transparent 50.3%);
+}
+
+body.bunker-theme-active[data-bunker-archetype="improvised"] {
+	--bunker-panel-bg: linear-gradient(142deg, #312b26, #17191a 53%, #1d1714);
+	--bunker-panel-border: #81694f;
+	--bunker-button-bg: linear-gradient(177deg, #4c4136, #242525);
+	--bunker-button-hover-bg: linear-gradient(177deg, #65513d, #303132);
+	--bunker-button-active-bg: linear-gradient(177deg, #1b1d1d, #41362d);
+	--bunker-button-border: #9b744d;
+	--bunker-accent: #e0833f;
+	--bunker-radius: 5px 1px 7px 2px;
+	--bunker-border-width: 2px;
+	--bunker-texture: linear-gradient(84deg, transparent 0 22%, rgb(31 31 28 / 48%) 22.3% 26%, transparent 26.4%), repeating-linear-gradient(175deg, transparent 0 34px, rgb(255 255 255 / 3%) 35px 36px);
+}
+
+body.bunker-theme-active[data-bunker-archetype="luxury"] {
+	--bunker-panel-bg: linear-gradient(145deg, #34271f, #160f0d 60%, #080706);
+	--bunker-panel-border: #8f7245;
+	--bunker-button-bg: linear-gradient(180deg, #4b3528, #241813);
+	--bunker-button-hover-bg: linear-gradient(180deg, #624934, #302019);
+	--bunker-button-active-bg: linear-gradient(180deg, #160e0b, #443027);
+	--bunker-button-border: #b39255;
+	--bunker-accent: #d4ae64;
+	--bunker-radius: 7px;
+	--bunker-glow: 0 0 18px rgb(212 174 100 / 14%);
+	--bunker-texture: repeating-linear-gradient(96deg, rgb(255 222 166 / 2%) 0 2px, transparent 2px 15px);
+}
+
+body.bunker-theme-active[data-bunker-archetype="abandoned"] {
+	--bunker-panel-bg: linear-gradient(148deg, #24231f, #0c0d0d 57%, #050606);
+	--bunker-panel-border: #5c503b;
+	--bunker-button-bg: linear-gradient(175deg, #39342a, #181817);
+	--bunker-button-hover-bg: linear-gradient(175deg, #534632, #22211e);
+	--bunker-button-active-bg: linear-gradient(175deg, #0b0c0c, #2d2921);
+	--bunker-button-border: #6f5a36;
+	--bunker-accent: #c58b35;
+	--bunker-radius: 1px 5px 0 3px;
+	--bunker-dirt-opacity: .42;
+	--bunker-damage-opacity: .42;
+	--bunker-rust-opacity: .28;
+	--bunker-texture: linear-gradient(102deg, transparent 0 63%, rgb(0 0 0 / 42%) 63.3% 64%, transparent 64.3%), radial-gradient(ellipse at 82% 5%, rgb(126 79 35 / 24%), transparent 20%);
+}
+
+body.bunker-theme-active[data-bunker-archetype="nuclear"] { --bunker-accent: #b9d342; --bunker-panel-border: #758435; --bunker-panel-bg: linear-gradient(145deg, #263021, #0b100c); --bunker-radius: 2px; }
+body.bunker-theme-active[data-bunker-archetype="government"] { --bunker-accent: #b69a69; --bunker-panel-border: #746349; --bunker-panel-bg: linear-gradient(145deg, #292824, #101110); --bunker-radius: 3px; }
+body.bunker-theme-active[data-bunker-archetype="civilian"] { --bunker-accent: #c49b61; --bunker-panel-border: #675d51; --bunker-panel-bg: linear-gradient(145deg, #292824, #111211); --bunker-radius: 4px; }
+body.bunker-theme-active[data-bunker-archetype="underground-city"] { --bunker-accent: #d19b45; --bunker-panel-border: #686966; --bunker-panel-bg: linear-gradient(145deg, #30302d, #111211); --bunker-radius: 1px; --bunker-border-width: 2px; }
+body.bunker-theme-active[data-bunker-archetype="mine"] { --bunker-accent: #c18a45; --bunker-panel-border: #67503b; --bunker-panel-bg: linear-gradient(145deg, #2b241e, #100e0c); --bunker-radius: 2px; }
+body.bunker-theme-active[data-bunker-archetype="submarine"] { --bunker-accent: #4ba7a0; --bunker-panel-border: #426b68; --bunker-panel-bg: linear-gradient(145deg, #1c3333, #081212); --bunker-radius: 12px; --bunker-border-width: 2px; }
+body.bunker-theme-active[data-bunker-archetype="prison"] { --bunker-accent: #929c9d; --bunker-panel-border: #5e6667; --bunker-panel-bg: linear-gradient(145deg, #292d2d, #0d0f0f); --bunker-radius: 0; --bunker-border-width: 2px; }
+body.bunker-theme-active[data-bunker-archetype="religious"] { --bunker-accent: #c09355; --bunker-panel-border: #674f36; --bunker-panel-bg: linear-gradient(145deg, #2d211c, #100b0a); --bunker-radius: 3px 3px 9px 9px; }
+body.bunker-theme-active[data-bunker-archetype="agricultural"] { --bunker-accent: #72a45d; --bunker-panel-border: #52694b; --bunker-panel-bg: linear-gradient(145deg, #233022, #0c120d); --bunker-radius: 5px; }
+body.bunker-theme-active[data-bunker-archetype="cryogenic"] { --bunker-accent: #72c9f2; --bunker-panel-border: #6e9daf; --bunker-panel-bg: linear-gradient(145deg, #20323c, #081117); --bunker-radius: 8px; --bunker-glow: 0 0 18px rgb(114 201 242 / 22%); }
+
+body.bunker-theme-active[data-bunker-condition="excellent"] { --bunker-dirt-opacity: .02; --bunker-damage-opacity: 0; --bunker-rust-opacity: 0; }
+body.bunker-theme-active[data-bunker-condition="good"] { --bunker-dirt-opacity: .05; --bunker-damage-opacity: .02; }
+body.bunker-theme-active[data-bunker-condition="poor"],
+body.bunker-theme-active[data-bunker-condition="damaged"] { --bunker-dirt-opacity: .24; --bunker-damage-opacity: .28; --bunker-rust-opacity: .19; }
+body.bunker-theme-active[data-bunker-condition="critical"],
+body.bunker-theme-active[data-bunker-condition="abandoned"] { --bunker-dirt-opacity: .4; --bunker-damage-opacity: .46; --bunker-rust-opacity: .3; }
+body.bunker-theme-active[data-bunker-condition="flooded"] { --bunker-edge-texture: radial-gradient(ellipse at 50% 100%, rgb(36 105 118 / 28%), transparent 48%); }
+body.bunker-theme-active[data-bunker-condition="burned"] { --bunker-edge-texture: radial-gradient(ellipse at 4% 0%, rgb(0 0 0 / 72%), transparent 38%), radial-gradient(ellipse at 90% 100%, rgb(91 38 18 / 22%), transparent 32%); }
+body.bunker-theme-active[data-bunker-condition="contaminated"] { --bunker-edge-texture: radial-gradient(ellipse at 3% 3%, rgb(111 140 45 / 19%), transparent 30%); }
+
+body.bunker-theme-active[data-bunker-material="rusted-steel"] { --bunker-rust-opacity: max(var(--bunker-rust-opacity), .22); --bunker-border-width: 2px; }
+body.bunker-theme-active[data-bunker-material="concrete"] { --bunker-radius: 1px; --bunker-border-width: 2px; --bunker-panel-shadow: inset 0 2px 12px rgb(255 255 255 / 3%), 0 8px 22px rgb(0 0 0 / 35%); }
+body.bunker-theme-active[data-bunker-material="ceramic"] { --bunker-radius: 3px; --bunker-panel-shadow: inset 0 1px rgb(255 255 255 / 22%), 0 9px 22px rgb(0 0 0 / 25%); }
+body.bunker-theme-active[data-bunker-material="glass"] { --bunker-panel-shadow: inset 0 1px rgb(255 255 255 / 16%), inset 0 -14px 30px rgb(0 0 0 / 22%), var(--bunker-glow); }
+body.bunker-theme-active[data-bunker-material="wood"] { --bunker-texture: repeating-linear-gradient(94deg, rgb(255 220 170 / 3%) 0 2px, transparent 2px 13px); }
+body.bunker-theme-active[data-bunker-material="stone"] { --bunker-radius: 2px 5px 1px 4px; --bunker-border-width: 2px; }
+body.bunker-theme-active[data-bunker-material="mixed"] { --bunker-radius: 5px 1px 7px 2px; --bunker-border-width: 2px; }
+
+body.bunker-theme-active[data-bunker-cleanliness="sterile"] { --bunker-dirt-opacity: 0; }
+body.bunker-theme-active[data-bunker-cleanliness="clean"] { --bunker-dirt-opacity: .03; }
+body.bunker-theme-active[data-bunker-cleanliness="dirty"] { --bunker-dirt-opacity: max(var(--bunker-dirt-opacity), .24); }
+body.bunker-theme-active[data-bunker-cleanliness="filthy"],
+body.bunker-theme-active[data-bunker-cleanliness="contaminated"] { --bunker-dirt-opacity: max(var(--bunker-dirt-opacity), .4); }
+
+body.bunker-theme-active[data-bunker-technology="primitive"] { --bunker-radius: 1px; --bunker-button-transform: translateY(2px); }
+body.bunker-theme-active[data-bunker-technology="improvised"] { --bunker-button-transform: translate(1px, 2px) rotate(.2deg); }
+body.bunker-theme-active[data-bunker-technology="advanced"],
+body.bunker-theme-active[data-bunker-technology="experimental"] { --bunker-glow: 0 0 16px color-mix(in srgb, var(--bunker-accent) 30%, transparent); }
+
+body.bunker-theme-active[data-bunker-atmosphere="cold"],
+body.bunker-theme-active[data-bunker-atmosphere="clinical"] { --bunker-atmosphere-tint: rgb(90 190 225 / 5%); }
+body.bunker-theme-active[data-bunker-atmosphere="warm"] { --bunker-atmosphere-tint: rgb(225 145 70 / 6%); }
+body.bunker-theme-active[data-bunker-atmosphere="toxic"] { --bunker-atmosphere-tint: rgb(135 175 50 / 7%); }
+body.bunker-theme-active[data-bunker-atmosphere="dark"] { --bunker-atmosphere-tint: rgb(0 0 0 / 14%); }
+body.bunker-theme-active[data-bunker-atmosphere="damp"] { --bunker-atmosphere-tint: rgb(40 115 125 / 7%); }
+
+body.bunker-theme-active[data-bunker-variation="1"] { --bunker-texture-position: 17px 9px; --bunker-edge-texture: radial-gradient(ellipse at 92% 4%, rgb(0 0 0 / 32%), transparent 27%), radial-gradient(ellipse at 8% 94%, color-mix(in srgb, var(--bunker-accent) 9%, transparent), transparent 29%); }
+body.bunker-theme-active[data-bunker-variation="2"] { --bunker-texture-position: -11px 23px; --bunker-edge-texture: radial-gradient(ellipse at 4% 88%, rgb(0 0 0 / 32%), transparent 25%), radial-gradient(ellipse at 86% 12%, color-mix(in srgb, var(--bunker-accent) 8%, transparent), transparent 27%); }
+body.bunker-theme-active[data-bunker-variation="3"] { --bunker-texture-position: 29px -13px; --bunker-edge-texture: radial-gradient(ellipse at 50% 100%, rgb(0 0 0 / 30%), transparent 34%), radial-gradient(ellipse at 14% 9%, color-mix(in srgb, var(--bunker-accent) 10%, transparent), transparent 23%); }
+body.bunker-theme-active[data-bunker-texture="0"] { --bunker-texture-size: auto, 64px 64px, auto; }
+body.bunker-theme-active[data-bunker-texture="1"] { --bunker-texture-size: auto, 82px 58px, auto; }
+body.bunker-theme-active[data-bunker-texture="2"] { --bunker-texture-size: auto, 53px 89px, auto; }
+
+body.bunker-theme-active :is(
+	.site-command-bar, .site-round-hud, .site-hud-module, .scenario-immersive-panel,
+	.special-cards-section, .special-cards-table-wrap, .voting-panel, .events-section-main,
+	.events-panel, .gm-panel-v2-drawer, .modal-content, .player-overview-shell,
+	.player-comparison-shell, .player-selector-panel, .player-dossier-card,
+	.public-characteristic-card, .bunker-facility-shell, .bunker-content-card
+) {
+	color: var(--bunker-text-primary);
+	background-color: #111;
+	background-image: linear-gradient(var(--bunker-atmosphere-tint, transparent), var(--bunker-atmosphere-tint, transparent)), var(--bunker-texture), var(--bunker-panel-bg);
+	background-position: var(--bunker-texture-position, 0 0);
+	background-size: var(--bunker-texture-size, auto);
+	border-color: var(--bunker-panel-border);
+	border-width: var(--bunker-border-width);
+	border-radius: var(--bunker-radius);
+	box-shadow: var(--bunker-panel-shadow);
+}
+
+body.bunker-theme-active :is(.bunker-facility-shell, .player-dossier-card, .public-characteristic-card, .modal-content) {
+	position: relative;
+	isolation: isolate;
+}
+
+body.bunker-theme-active :is(.bunker-facility-shell, .player-dossier-card, .public-characteristic-card, .modal-content)::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	border-radius: inherit;
+	background: var(--bunker-edge-texture);
+	opacity: calc(var(--bunker-dirt-opacity) + var(--bunker-rust-opacity) + var(--bunker-damage-bias-opacity, 0));
+	pointer-events: none;
+}
+
+body.bunker-theme-active :is(.bunker-facility-shell, .player-dossier-card, .public-characteristic-card, .modal-content) > * {
+	position: relative;
+	z-index: 1;
+}
+
+body.bunker-theme-active :is(.special-cards-table, table) {
+	color: var(--bunker-text-primary);
+	border-color: var(--bunker-panel-border);
+	background: color-mix(in srgb, #090b0c 82%, var(--bunker-accent));
+}
+
+body.bunker-theme-active :is(.special-cards-table, table) th {
+	color: var(--bunker-text-primary);
+	border-color: var(--bunker-panel-border);
+	background: color-mix(in srgb, #171a1b 86%, var(--bunker-accent));
+	font-family: var(--bunker-font-style);
+	letter-spacing: .045em;
+}
+
+body.bunker-theme-active :is(.special-cards-table, table) td {
+	border-color: color-mix(in srgb, var(--bunker-panel-border) 58%, transparent);
+}
+
+body.bunker-theme-active :is(.special-cards-table, table) tbody tr:hover {
+	background: color-mix(in srgb, var(--bunker-accent) 10%, transparent);
+}
+
+body.bunker-theme-active :is(.special-cards-table, table) tbody tr:is(.selected, .is-selected, [aria-selected="true"]) {
+	background: color-mix(in srgb, var(--bunker-accent) 18%, transparent);
+	box-shadow: inset 3px 0 var(--bunker-accent);
+}
+
+body.bunker-theme-active :is(
+	button, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-vote,
+	.btn-gm, .char-btn, .special-card-use-btn, .gm-tab, .player-selector-item
+):not(.btn-close):not(.tooltip-trigger) {
+	color: var(--bunker-text-primary);
+	background: var(--bunker-button-bg);
+	border-color: var(--bunker-button-border);
+	border-width: var(--bunker-border-width);
+	border-radius: var(--bunker-radius);
+	box-shadow: inset 0 1px rgb(255 255 255 / 8%), var(--bunker-glow);
+	font-family: var(--bunker-font-style);
+	filter: hue-rotate(var(--bunker-accent-shift, 0deg));
+}
+
+body.bunker-theme-active :is(button, .char-btn, .special-card-use-btn, .gm-tab, .player-selector-item):not(:disabled):not(.disabled):hover {
+	color: #fff;
+	background: var(--bunker-button-hover-bg);
+	border-color: var(--bunker-accent);
+	box-shadow: inset 0 1px rgb(255 255 255 / 10%), 0 0 12px color-mix(in srgb, var(--bunker-accent) 30%, transparent);
+}
+
+body.bunker-theme-active :is(button, .char-btn, .special-card-use-btn, .gm-tab, .player-selector-item):not(:disabled):not(.disabled):active {
+	background: var(--bunker-button-active-bg);
+	transform: var(--bunker-button-transform);
+	box-shadow: inset 0 3px 7px rgb(0 0 0 / 45%);
+}
+
+body.bunker-theme-active :is(button, .char-btn, .special-card-use-btn, .gm-tab, .player-selector-item):focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--bunker-accent) 78%, white);
+	outline-offset: 2px;
+}
+
+body.bunker-theme-active :is(button, .char-btn, .special-card-use-btn):is(:disabled, .disabled, [aria-disabled="true"]) {
+	color: color-mix(in srgb, var(--bunker-text-muted) 82%, white);
+	background: color-mix(in srgb, var(--bunker-button-bg) 66%, #050606);
+	border-color: color-mix(in srgb, var(--bunker-button-border) 48%, #333);
+	box-shadow: inset 0 2px 5px rgb(0 0 0 / 40%);
+	opacity: .72;
+	filter: saturate(.45);
+}
+
+body.bunker-theme-active :is(.btn-danger, .danger, [data-variant="danger"]) { --bunker-button-border: var(--bunker-danger); }
+body.bunker-theme-active :is(.btn-success, .success, [data-variant="success"]) { --bunker-button-border: var(--bunker-success); }
+body.bunker-theme-active :is(.selected, .is-selected, [aria-selected="true"], .gm-tab.active) {
+	border-color: var(--bunker-accent);
+	box-shadow: inset 3px 0 var(--bunker-accent), var(--bunker-glow);
+}
+
+body.bunker-theme-active :is(.is-pending, .loading, [aria-busy="true"]) {
+	cursor: progress;
+	background-image: repeating-linear-gradient(110deg, transparent 0 10px, color-mix(in srgb, var(--bunker-accent) 12%, transparent) 10px 20px), var(--bunker-button-bg);
+}
+
+body.bunker-theme-active .player-cards-grid .vault-characteristic-card {
+	--card-accent: var(--bunker-accent);
+	border-color: var(--bunker-panel-border);
+	border-radius: var(--bunker-radius);
+	box-shadow: var(--bunker-panel-shadow);
+	filter: hue-rotate(var(--bunker-accent-shift, 0deg));
+}
+
+body.bunker-theme-active .tooltip-content {
+	color: var(--bunker-text-primary);
+	background: color-mix(in srgb, #080a0b 88%, var(--bunker-accent));
+	border-color: var(--bunker-panel-border);
+	box-shadow: var(--bunker-panel-shadow);
+}
+
+body.bunker-theme-active .bunker-hero,
+body.bunker-theme-active .bunker-hero-image {
+	border-radius: var(--bunker-radius) var(--bunker-radius) 0 0;
+}
+
+body.bunker-theme-active[data-bunker-condition="critical"] :is(.bunker-facility-shell, .site-round-hud, .is-pending),
+body.bunker-theme-active[data-bunker-atmosphere="emergency"] :is(.bunker-facility-shell, .site-round-hud, .is-pending) {
+	animation: bunker-emergency-light 4.8s steps(2, end) infinite;
+}
+
+body.bunker-theme-active[data-bunker-technology="advanced"] :is(.selected, .is-selected, .gm-tab.active),
+body.bunker-theme-active[data-bunker-technology="experimental"] :is(.selected, .is-selected, .gm-tab.active) {
+	animation: bunker-active-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes bunker-emergency-light {
+	0%, 91%, 100% { filter: none; }
+	93% { filter: brightness(.82); }
+	95% { filter: brightness(1.06); }
+}
+
+@keyframes bunker-active-pulse {
+	0%, 100% { box-shadow: inset 3px 0 var(--bunker-accent), 0 0 7px color-mix(in srgb, var(--bunker-accent) 20%, transparent); }
+	50% { box-shadow: inset 3px 0 var(--bunker-accent), 0 0 14px color-mix(in srgb, var(--bunker-accent) 34%, transparent); }
+}
+
+@media (max-width: 700px) {
+	body.bunker-theme-active {
+		--bunker-panel-shadow: inset 0 1px rgb(255 255 255 / 4%), 0 4px 12px rgb(0 0 0 / 24%);
+		--bunker-glow: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body.bunker-theme-active *,
+	body.bunker-theme-active *::before,
+	body.bunker-theme-active *::after {
+		animation: none !important;
+		transition-duration: .01ms !important;
+	}
+}

@@ -16,6 +16,22 @@ public sealed class RoundVotingAdminServiceTests
         Assert.True(RoundVotingAdminService.CanStartVoting(PlayableRoom(round, phase)).Allowed);
 
     [Fact]
+    public void RoundRevealRequiresEveryGameplayPlayerToCompleteRevealButEarlyFrequencyIsAdvisory()
+    {
+        var room = PlayableRoom(1, GamePhase.RoundReveal);
+        room.GameSettings.VotingFrequency = VotingFrequencyMode.EveryTwoRounds;
+        room.Players["player"] = new()
+        {
+            ConnectionId = "connection",
+            StablePlayerId = "player"
+        };
+
+        Assert.Equal("reveal_requirement_pending", RoundVotingAdminService.CanStartVoting(room).Code);
+        room.CurrentRoundReveals["player"] = "RevealCredit";
+        Assert.True(RoundVotingAdminService.CanStartVoting(room).Allowed);
+    }
+
+    [Fact]
     public void PauseAndExistingVotingRemainBlocked()
     {
         var room = PlayableRoom(3, GamePhase.ExtraInventory);
@@ -176,16 +192,16 @@ public sealed class RoundVotingAdminServiceTests
     [InlineData(2, 3, true)]
     [InlineData(3, 3, false)]
     [InlineData(4, 3, false)]
-    public void EarlyVotingFlagIsComputedCorrectlyFromStartRoundSettings(int currentRound, int votingStartRound, bool expectedIsEarly)
+    public void EarlyVotingFlagIsComputedFromServerRecommendation(int currentRound, int votingStartRound, bool expectedIsEarly)
     {
         var room = PlayableRoom(currentRound, GamePhase.PreVotingReadyCheck);
-        var settings = new RoomGameSettings { VotingStartRound = votingStartRound };
         var voting = new VotingSession
         {
             Round = room.CurrentRound,
             VotingStartedAtRound = room.CurrentRound,
-            IsEarlyVoting = room.CurrentRound < settings.VotingStartRound
+            IsEarlyVoting = room.CurrentRound < VotingSession.RecommendedStartRound
         };
+        Assert.Equal(VotingSession.RecommendedStartRound, votingStartRound);
         Assert.Equal(currentRound, voting.VotingStartedAtRound);
         Assert.Equal(expectedIsEarly, voting.IsEarlyVoting);
     }

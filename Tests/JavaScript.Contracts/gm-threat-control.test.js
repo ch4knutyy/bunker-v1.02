@@ -5,7 +5,9 @@ const test = require('node:test');
 
 const root = path.resolve(__dirname, '..', '..');
 const hub = fs.readFileSync(path.join(root, 'Hubs', 'BunkerHubGame', 'GameHub.GMThreats.cs'), 'utf8');
-const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8');
+const client = fs.readFileSync(path.join(root, 'wwwroot', 'js', 'game.js'), 'utf8') +
+  fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'gm', 'runtime.js'), 'utf8') +
+  fs.readFileSync(path.join(root, 'wwwroot', 'js', 'bunker', 'gm', 'signalr-events.js'), 'utf8');
 
 test('every GM threat command resolves the caller room through host authorization', () => {
   for (const method of ['GMGenerateRandomRareThreat', 'GMGenerateTextThreat', 'GMSelectThreat']) {

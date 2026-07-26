@@ -180,7 +180,7 @@ public partial class GameHub
     {
         RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
         room.CurrentRound = completedRound + 1;
-        room.CurrentRoundReveals.Clear();
+        await BeginRevealRound(room);
         room.VotingReadyResponses.Clear();
         room.CurrentPhase = GamePhase.RoundReveal;
         StartConfiguredRoundTimer(room);
@@ -222,23 +222,9 @@ public partial class GameHub
 
     private async Task ContinueAfterBlockingScenario(Room room, int completedRound)
     {
-        if (IsVotingRound(room, completedRound))
-        {
-            room.CurrentPhase = GamePhase.PreVotingReadyCheck;
-            var votingState = BuildRoundState(room);
-            await Clients.Group(room.Id).SendAsync("VotingReadyCheckStarted", new
-            {
-                round = room.CurrentRound,
-                message = "Всі готові до голосування?",
-                roundState = votingState
-            });
-            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", votingState);
-            return;
-        }
-
         RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
         room.CurrentRound = completedRound + 1;
-        room.CurrentRoundReveals.Clear();
+        await BeginRevealRound(room);
         room.VotingReadyResponses.Clear();
         room.CurrentPhase = GamePhase.RoundReveal;
         StartConfiguredRoundTimer(room);

@@ -5,6 +5,7 @@ namespace Bunker.Models
 {
 	public class Item
 	{
+		public string DefinitionId { get; set; } = "";
 		public string Name { get; set; } = "";
 		public string Description { get; set; } = "";
 		public int Quantity { get; set; }

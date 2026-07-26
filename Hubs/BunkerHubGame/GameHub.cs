@@ -45,6 +45,7 @@ namespace Bunker.Hubs
         private readonly ApocalypseActivationScheduler _apocalypseEffects;
         private readonly BunkerResourceService _bunkerResources;
         private readonly GmPanelStateBuilder _gmPanelStateBuilder;
+        private readonly CatalogItemService _catalogItems;
         private readonly ScenarioSchedulerService _scenarioScheduler;
         private readonly ScenarioRunnerService _scenarioRunner;
         private readonly BunkerIntelService _bunkerIntel;
@@ -85,7 +86,8 @@ namespace Bunker.Hubs
             ApocalypseActivationPolicyResolver? apocalypseActivation = null,
             ApocalypseActivationScheduler? apocalypseEffects = null,
             PostGameStoryService? postGameStories = null,
-            DeveloperAuthorityService? developerAuthority = null)
+            DeveloperAuthorityService? developerAuthority = null,
+            CatalogItemService? catalogItems = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -133,6 +135,7 @@ namespace Bunker.Hubs
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;
 			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
+            _catalogItems = catalogItems ?? new CatalogItemService(gameData);
 			_authorizationService = authorizationService;
             _bunkerIntel = bunkerIntel ?? new BunkerIntelService();
             if (scenarioScheduler == null || scenarioRunner == null || eventSpecialCards == null || scenarioContent == null)

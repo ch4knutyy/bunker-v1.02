@@ -141,7 +141,8 @@ namespace Bunker.Hubs
 				}
 			}
 
-			var resolution = await ApplySpecialCardEffect(room, player, card, targetPlayer, useMode, selectedCharacteristic);
+			var resolution = await ApplySpecialCardEffect(
+				room, player, card, targetPlayer, useMode, selectedCharacteristic, commandId);
 			if (!resolution.Success)
 			{
 				if (!string.IsNullOrWhiteSpace(commandId))
@@ -299,7 +300,8 @@ namespace Bunker.Hubs
 			SpecialCard card,
 			Player? target,
 			string useMode,
-			string? selectedCharacteristic = null)
+			string? selectedCharacteristic = null,
+			string? commandId = null)
 		{
 			var publicUse = !card.IsSecret || string.Equals(useMode, "public", StringComparison.OrdinalIgnoreCase)
 				? $"{owner.Name} використав карту «{card.Name}»."
@@ -314,29 +316,29 @@ namespace Bunker.Hubs
 						activateForVoting: true);
 
 				case "forceRevealProfession":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Profession" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "Profession" }, publicUse, commandId);
 				case "forceRevealPhysicalHealth":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "PhysicalHealth" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "PhysicalHealth" }, publicUse, commandId);
 				case "forceRevealMentalHealth":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "MentalHealth" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "MentalHealth" }, publicUse, commandId);
 				case "forceRevealHobby":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Hobby" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "Hobby" }, publicUse, commandId);
 				case "forceRevealTrait":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "CharacterTrait" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "CharacterTrait" }, publicUse, commandId);
 				case "forceRevealSecret":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Fact" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "Fact" }, publicUse, commandId);
 				case "forceRevealAllInventory":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Inventory" }, publicUse);
+					return await RevealCharacteristics(room, owner, card, target!, new[] { "Inventory" }, publicUse, commandId);
 				case "property_reveal":
 					return target == null ||
 						   !RoomService.IsGameplayParticipant(target) ||
 						   target.Property == null
 						? SpecialCardResolution.Fail("property_target_not_available")
-						: await RevealCharacteristics(room, owner, card, target, new[] { "Property" }, publicUse);
+						: await RevealCharacteristics(room, owner, card, target, new[] { "Property" }, publicUse, commandId);
 				case "forceRevealRandomCharacteristic":
-					return await RevealRandomCharacteristics(room, owner, card, target!, 1, publicUse);
+					return await RevealRandomCharacteristics(room, owner, card, target!, 1, publicUse, commandId);
 				case "forceRevealTwoRandomCharacteristics":
-					return await RevealRandomCharacteristics(room, owner, card, target!, 2, publicUse);
+					return await RevealRandomCharacteristics(room, owner, card, target!, 2, publicUse, commandId);
 
 				case "peekTargetSecret":
 					return PeekCharacteristics(target!, new[] { "Fact" }, publicUse);
@@ -385,9 +387,9 @@ namespace Bunker.Hubs
 				case "swapRandomCharacteristicWithTarget":
 					return await SwapRandomCharacteristic(room, owner, target!, GetSwappableCharacteristicKeys(), publicUse);
 				case "forceUpperPlayerRevealRandomCharacteristic":
-					return await RevealRandomCharacteristicsFromKeys(room, owner, card, GetNeighbor(room, owner, -1)!, GetRevealableCharacteristicKeys(), publicUse);
+					return await RevealRandomCharacteristicsFromKeys(room, owner, card, GetNeighbor(room, owner, -1)!, GetRevealableCharacteristicKeys(), publicUse, commandId);
 				case "forceLowerPlayerRevealRandomCharacteristic":
-					return await RevealRandomCharacteristicsFromKeys(room, owner, card, GetNeighbor(room, owner, 1)!, GetRevealableCharacteristicKeys(), publicUse);
+					return await RevealRandomCharacteristicsFromKeys(room, owner, card, GetNeighbor(room, owner, 1)!, GetRevealableCharacteristicKeys(), publicUse, commandId);
 				case "swapPhysicalHealthWithLowerPlayer":
 					return await SwapCharacteristic(room, owner, GetNeighbor(room, owner, 1)!, "PhysicalHealth", publicUse);
 				case "swapPhysicalHealthWithUpperPlayer":
@@ -433,11 +435,11 @@ namespace Bunker.Hubs
 				case "stealLowerPlayerRandomInventoryItem":
 					return TransferInventoryItemFromNeighbor(room, owner, GetNeighbor(room, owner, 1), publicUse);
 				case "forceNeighborsRevealSameRandomCharacteristicType":
-					return await ForceNeighborsRevealSameRandomCharacteristicType(room, owner, card, publicUse);
+					return await ForceNeighborsRevealSameRandomCharacteristicType(room, owner, card, publicUse, commandId);
 				case "revealUpperAndHideLowerCharacteristic":
-					return await RevealOneAndHideOther(room, owner, card, GetNeighbor(room, owner, -1)!, GetNeighbor(room, owner, 1)!, publicUse);
+					return await RevealOneAndHideOther(room, owner, card, GetNeighbor(room, owner, -1)!, GetNeighbor(room, owner, 1)!, publicUse, commandId);
 				case "revealLowerAndHideUpperCharacteristic":
-					return await RevealOneAndHideOther(room, owner, card, GetNeighbor(room, owner, 1)!, GetNeighbor(room, owner, -1)!, publicUse);
+					return await RevealOneAndHideOther(room, owner, card, GetNeighbor(room, owner, 1)!, GetNeighbor(room, owner, -1)!, publicUse, commandId);
 				case "stealRandomCharacteristicAndRerollTarget":
 					return await StealRandomCharacteristicAndRerollTarget(room, owner, target!, publicUse);
 				case "swapRandomRevealedCharacteristicWithTarget":
@@ -454,7 +456,8 @@ namespace Bunker.Hubs
 			SpecialCard card,
 			Player target,
 			int count,
-			string? publicLog)
+			string? publicLog,
+			string? commandId)
 		{
 			var hidden = GetOrdinaryCharacteristicKeys()
 				.Where(key => !IsCharacteristicRevealed(target, key))
@@ -467,7 +470,7 @@ namespace Bunker.Hubs
 				return SpecialCardResolution.Fail("У гравця немає прихованих характеристик");
 			}
 
-			return await RevealCharacteristics(room, owner, card, target, hidden, publicLog);
+			return await RevealCharacteristics(room, owner, card, target, hidden, publicLog, commandId);
 		}
 
 		private async Task<SpecialCardResolution> RevealRandomCharacteristicsFromKeys(
@@ -476,7 +479,8 @@ namespace Bunker.Hubs
 			SpecialCard card,
 			Player? target,
 			IEnumerable<string> allowedKeys,
-			string? publicLog)
+			string? publicLog,
+			string? commandId)
 		{
 			if (target == null || target.IsEliminated)
 				return SpecialCardResolution.Fail("Немає активного гравця для ефекту");
@@ -491,7 +495,7 @@ namespace Bunker.Hubs
 			if (hidden.Length == 0)
 				return SpecialCardResolution.Fail("У гравця немає прихованих характеристик");
 
-			return await RevealCharacteristics(room, owner, card, target, hidden, publicLog);
+			return await RevealCharacteristics(room, owner, card, target, hidden, publicLog, commandId);
 		}
 
 		private async Task<SpecialCardResolution> RevealCharacteristics(
@@ -500,7 +504,8 @@ namespace Bunker.Hubs
 			SpecialCard card,
 			Player target,
 			IReadOnlyCollection<string> characteristicKeys,
-			string? publicLog)
+			string? publicLog,
+			string? commandId = null)
 		{
 			if (target.CharacteristicsProtectedUntilRound >= room.CurrentRound)
 			{
@@ -508,6 +513,7 @@ namespace Bunker.Hubs
 			}
 
 			var revealedLabels = new List<string>();
+			var revealedKeys = new List<string>();
 			foreach (var key in characteristicKeys)
 			{
 				if (IsCharacteristicRevealed(target, key))
@@ -522,6 +528,7 @@ namespace Bunker.Hubs
 				}
 
 				SetCharacteristicRevealed(target, key);
+				revealedKeys.Add(key);
 				revealedLabels.Add(GetSpecialCardDataLabel(data, key));
 
 				await Clients.Group(room.Id).SendAsync("CharacteristicRevealed", new
@@ -539,6 +546,25 @@ namespace Bunker.Hubs
 			{
 				return SpecialCardResolution.Fail("Вказана характеристика вже розкрита");
 			}
+
+			var creditResult = RevealCreditService.ApplyForcedReveals(room, target, revealedKeys);
+			_gmAudit.Append(
+				room,
+				RoomService.GetPlayerKey(owner),
+				"forced_reveal_credits",
+				GmAuditResult.Success,
+				$"Round {room.CurrentRound}; actual reveals {creditResult.ActualRevealed}; credits delta {creditResult.CreditsAdded}.",
+				RoomService.GetPlayerKey(target),
+				commandId);
+			await SendPersonalPlayerSnapshot(
+				target.ConnectionId,
+				target,
+				"forced_reveal_credits_updated",
+				new
+				{
+					actualRevealed = creditResult.ActualRevealed,
+					creditsAdded = creditResult.CreditsAdded
+				});
 
 			return SpecialCardResolution.Ok(
 				$"Розкрито: {string.Join(", ", revealedLabels)}.",
@@ -930,7 +956,8 @@ namespace Bunker.Hubs
 			Room room,
 			Player owner,
 			SpecialCard card,
-			string? publicLog)
+			string? publicLog,
+			string? commandId)
 		{
 			if (!TryGetNeighbors(room, owner, out var upper, out var lower))
 				return SpecialCardResolution.Fail("Потрібно щонайменше 3 активні гравці");
@@ -942,9 +969,9 @@ namespace Bunker.Hubs
 				return SpecialCardResolution.Fail("Немає спільної прихованої характеристики у сусідів");
 
 			var key = keys[_random.Next(keys.Count)];
-			var upperResult = await RevealCharacteristics(room, owner, card, upper, new[] { key }, null);
+			var upperResult = await RevealCharacteristics(room, owner, card, upper, new[] { key }, null, commandId);
 			if (!upperResult.Success) return upperResult;
-			var lowerResult = await RevealCharacteristics(room, owner, card, lower, new[] { key }, null);
+			var lowerResult = await RevealCharacteristics(room, owner, card, lower, new[] { key }, null, commandId);
 			if (!lowerResult.Success) return lowerResult;
 
 			return SpecialCardResolution.Ok(
@@ -958,7 +985,8 @@ namespace Bunker.Hubs
 			SpecialCard card,
 			Player? revealTarget,
 			Player? hideTarget,
-			string? publicLog)
+			string? publicLog,
+			string? commandId)
 		{
 			if (revealTarget == null || hideTarget == null || revealTarget.IsEliminated || hideTarget.IsEliminated)
 				return SpecialCardResolution.Fail("Потрібно щонайменше 3 активні гравці");
@@ -975,7 +1003,7 @@ namespace Bunker.Hubs
 
 			var revealKey = revealCandidates[_random.Next(revealCandidates.Count)];
 			var hideKey = hideCandidates[_random.Next(hideCandidates.Count)];
-			var revealResult = await RevealCharacteristics(room, owner, card, revealTarget, new[] { revealKey }, null);
+			var revealResult = await RevealCharacteristics(room, owner, card, revealTarget, new[] { revealKey }, null, commandId);
 			if (!revealResult.Success) return revealResult;
 
 			SetCharacteristicHidden(hideTarget, hideKey);

@@ -18,13 +18,18 @@ public static class RoundVotingAdminService
             return new(false, "room_not_playing", "Голосування доступне тільки під час гри");
         if (!settings.VotingEnabled)
             return new(false, "voting_disabled", "Голосування вимкнено в налаштуваннях кімнати");
-        if (settings.VotingFrequency == VotingFrequencyMode.EveryTwoRounds &&
+        if (room.CurrentRound >= VotingSession.RecommendedStartRound &&
+            settings.VotingFrequency == VotingFrequencyMode.EveryTwoRounds &&
             (room.CurrentRound - settings.VotingStartRound) % 2 != 0)
             return new(false, "voting_not_scheduled", "Голосування не заплановано для цього раунду");
         if (hasUnresolvedBlockingThreat)
             return new(false, "threat_not_resolved", "Спершу завершіть інтерактивну загрозу");
-        if (room.CurrentPhase is not (GamePhase.ExtraInventory or GamePhase.PreVotingReadyCheck))
+        if (room.CurrentPhase is not (GamePhase.RoundReveal or GamePhase.ExtraInventory or GamePhase.PreVotingReadyCheck))
             return new(false, "invalid_phase", "Спершу завершіть поточний раунд");
+        if (room.CurrentPhase == GamePhase.RoundReveal &&
+            RoomService.GetGameplayPlayersSnapshot(room).Any(entry =>
+                !room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value))))
+            return new(false, "reveal_requirement_pending", "Спершу завершіть розкриття поточного раунду");
         if (room.CurrentVoting?.State is VotingState.Active or VotingState.Completed)
             return new(false, "voting_already_started", "Голосування вже розпочато");
 
@@ -60,10 +65,23 @@ public static class RoundVotingAdminService
             error = "Спочатку завершіть або скасуйте активне голосування";
             return false;
         }
+        var previousRound = room.CurrentRound;
         room.CurrentRound = round;
         room.State = RoomState.Playing;
         room.CurrentPhase = GamePhase.RoundReveal;
-        room.CurrentRoundReveals.Clear();
+        if (round > previousRound)
+        {
+            RevealCreditService.BeginRound(room);
+        }
+        else
+        {
+            room.CurrentRoundReveals.Clear();
+            foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
+            {
+                player.HasCompletedRevealThisRound = false;
+                player.RevealRequirementSatisfiedByCredit = false;
+            }
+        }
         room.VotingReadyResponses.Clear();
         return true;
     }

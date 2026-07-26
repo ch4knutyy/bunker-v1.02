@@ -11,7 +11,7 @@ function normalizeApocalypseVisualThemeId(value) {
 		: 'default-dark';
 }
 
-function resolveApocalypseVisualTheme(apocalypse) {
+function resolveApocalypseVisualThemeId(apocalypse) {
 	if (!apocalypse) return 'default-dark';
 	const hasThemeField = Object.prototype.hasOwnProperty.call(apocalypse, 'visualThemeId') ||
 		Object.prototype.hasOwnProperty.call(apocalypse, 'VisualThemeId');
@@ -40,6 +40,91 @@ function resolveApocalypseVisualTheme(apocalypse) {
 		['occult-indigo', /supernatural|mystical|occult|magic/]
 	];
 	return tagRules.find(([, pattern]) => pattern.test(tags))?.[0] || 'default-dark';
+}
+
+function apocalypseStableVisualHash(value) {
+	let hash = 2166136261;
+	for (const character of String(value || 'apocalypse-fallback')) {
+		hash ^= character.codePointAt(0);
+		hash = Math.imul(hash, 16777619);
+	}
+	return hash >>> 0;
+}
+
+function clampApocalypseIntensity(value, minimum, maximum, fallback) {
+	const numeric = Number(value);
+	return Number.isFinite(numeric) ? Math.max(minimum, Math.min(maximum, numeric)) : fallback;
+}
+
+function getApocalypseVisualMetadata(apocalypse) {
+	const id = String(apocalypse?.id ?? apocalypse?.Id ?? '').trim();
+	const registered = window.ApocalypseCategoryVisualRegistry?.getApocalypseVisualMetadata?.(id);
+	const tags = apocalypse?.tags ?? apocalypse?.Tags ?? [];
+	const modifiers = apocalypse?.visualModifierIds ?? apocalypse?.VisualModifierIds ?? registered?.visualModifierIds ?? [];
+	const localized = apocalypse?._i18n ?? apocalypse?.I18n ?? {};
+	const text = [
+		id,
+		apocalypse?.type, apocalypse?.Type, apocalypse?.categoryId, apocalypse?.CategoryId,
+		apocalypse?.category, apocalypse?.Category, apocalypse?.classification, apocalypse?.Classification,
+		apocalypse?.name, apocalypse?.Name,
+		...(Array.isArray(tags) ? tags : []),
+		...(Array.isArray(modifiers) ? modifiers : []),
+		...Object.values(localized).flatMap(entry => entry && typeof entry === 'object' ? Object.values(entry) : [entry])
+	].flat(Infinity).filter(value => typeof value === 'string').join(' ').toLocaleLowerCase().replace(/[_-]+/g, ' ');
+	return {
+		id,
+		category: normalizeApocalypseMetadataValue(apocalypse?.categoryId ?? apocalypse?.CategoryId ?? registered?.categoryId ?? apocalypse?.category ?? apocalypse?.Category),
+		modifiers: Array.isArray(modifiers) ? modifiers.map(normalizeApocalypseMetadataValue) : [],
+		text
+	};
+}
+
+function inferApocalypsePhysicalArchetype(apocalypse) {
+	const metadata = getApocalypseVisualMetadata(apocalypse);
+	const has = value => metadata.modifiers.includes(normalizeApocalypseMetadataValue(value));
+	const text = metadata.text;
+	if (has('radiation') || /(nuclear|atomic|radiation|fallout|ядер|атомн|радіац|радиац)/u.test(text)) return 'nuclear';
+	if (has('heat') || /(wildfire|fire sky|global fire|combust|пожеж|вогн|пожар|огнен)/u.test(text)) return 'fire';
+	if (has('frost') || /(ice age|extreme cold|nuclear winter|frozen|льодов|крижан|ледников|замерз)/u.test(text)) return 'ice';
+	if (has('flood') || /(flood|ocean rise|tsunami|затоп|повін|наводнен)/u.test(text)) return 'flood';
+	if (/(pandemic|epidemic|virus|plague|пандем|епідем|вірус|чума|эпидем)/u.test(text)) return 'pandemic';
+	if (has('spores') || has('mutation') || has('parasite') || /(biological contamination|fungal|organic bloom|біологіч|біозабруд|биологичес)/u.test(text)) return 'biological';
+	if (has('toxic') || has('air_hazard') || /(chemical|poison atmosphere|toxic gas|хіміч|отруйн|химичес|ядовит)/u.test(text)) return 'chemical';
+	if (has('ash') || /(volcan|eruption|ash ocean|вулкан|попіл|пепел)/u.test(text)) return 'volcanic';
+	if (has('drought') || /(desert|drought|sand storm|опустел|посух|засух|пустын)/u.test(text)) return 'desert';
+	if (has('darkness') || has('blackout') || /(sun disappearance|endless darkness|night without end|зникнен.{0,8}сонц|вічн.{0,8}темр|исчезновен.{0,8}солнц|вечн.{0,8}тьм)/u.test(text)) return 'darkness';
+	if (has('emp') || /(solar flare|electromagnetic|magnetic storm|сонячн.{0,8}спалах|електромагніт|солнечн.{0,8}вспыш|электромагнит)/u.test(text)) return 'solar';
+	if (has('unrest') || /(world war|civil war|machine war|війна|воєн|война|военн)/u.test(text)) return 'war';
+	if (has('machine') || metadata.category === 'technology' || /(artificial intelligence|machine uprising|robot|штучн.{0,8}інтелект|машин|искусственн.{0,8}интеллект|робот)/u.test(text)) return 'machine';
+	if (has('reality_fracture') || metadata.category === 'anomaly' || /(anomal|conscious object|reality|аномал|реальност)/u.test(text)) return 'anomalous';
+	return 'generic-collapse';
+}
+
+function resolveApocalypseVisualTheme(apocalypse) {
+	const themeId = resolveApocalypseVisualThemeId(apocalypse);
+	const archetype = apocalypse ? inferApocalypsePhysicalArchetype(apocalypse) : 'generic-collapse';
+	const profile = apocalypsePhysicalThemeProfiles[archetype] || apocalypsePhysicalThemeFallback;
+	const id = String(apocalypse?.id ?? apocalypse?.Id ?? 'apocalypse-fallback');
+	const hash = apocalypseStableVisualHash(id);
+	return Object.freeze({
+		themeId,
+		archetype,
+		lighting: profile.lighting,
+		air: profile.air,
+		contamination: profile.contamination,
+		damage: profile.damage,
+		visibility: profile.visibility,
+		accent: profile.accent,
+		intensity: clampApocalypseIntensity(profile.intensity, .08, .42, .18),
+		lightingIntensity: clampApocalypseIntensity(profile.lightingIntensity, .08, .32, .18),
+		contaminationIntensity: clampApocalypseIntensity(profile.contaminationIntensity, 0, .22, .08),
+		visibilityReduction: clampApocalypseIntensity(profile.visibilityReduction, 0, .18, .04),
+		animationIntensity: clampApocalypseIntensity(profile.animationIntensity, 0, .06, .03),
+		variation: hash % 4,
+		textureVariant: (hash >>> 4) % 3,
+		lightPosition: 12 + ((hash >>> 7) % 77),
+		temperatureShift: ((hash >>> 12) % 9) - 4
+	});
 }
 
 function resolveApocalypseVisualVariant(model) {

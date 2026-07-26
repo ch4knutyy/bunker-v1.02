@@ -33,8 +33,22 @@ async function setLobbyParticipation(playerId, spectator) {
 }
 
 async function transferLobbyHost(playerId) {
-	if (lobbyCommandPending || !confirm('Transfer host?')) return; lobbyCommandPending = true;
-	try { await connection.invoke('TransferHost', playerId, crypto.randomUUID()); } finally { lobbyCommandPending = false; }
+	if (lobbyCommandPending) return;
+	lobbyCommandPending = true;
+	try {
+		const preview = await connection.invoke('PreviewHostTransfer', playerId);
+		if (!(preview?.allowed ?? preview?.Allowed)) return;
+		const currentHost = preview?.currentHostName ?? preview?.CurrentHostName ?? '';
+		const target = preview?.targetPlayerName ?? preview?.TargetPlayerName ?? '';
+		if (!confirm(`${t('gmHostTransferConfirm')}\n${currentHost} → ${target}\n${t('gmHostTransferRestoreWarning')}`)) return;
+		await connection.invoke(
+			'TransferHost',
+			playerId,
+			crypto.randomUUID(),
+			preview?.fingerprint ?? preview?.Fingerprint);
+	} finally {
+		lobbyCommandPending = false;
+	}
 }
 
 function updateScenarioSectionVisibility() {

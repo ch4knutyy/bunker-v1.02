@@ -5,7 +5,8 @@ const service = fs.readFileSync('Services/Bunker/Content/Global/GlobalContentDra
 const hub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GlobalContentCatalog.cs', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
-const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const client = fs.readFileSync('wwwroot/js/game.js', 'utf8') +
+  fs.readFileSync('wwwroot/js/bunker/global-content/runtime.js', 'utf8');
 
 test('draft lifecycle is in-memory and exposes no commit or filesystem writer', () => {
   for (const method of ['GetGlobalContentDrafts','GetGlobalContentDraft','CreateGlobalContentDraft','ApplyGlobalContentDraftCommand','ValidateGlobalContentDraft','PreviewGlobalContentDraftDiff','DiscardGlobalContentDraft']) assert.match(hub, new RegExp(method));
@@ -32,4 +33,15 @@ test('draft UI has guarded actions and no commit controls', () => {
   assert.match(client, /if \(globalDraftPending\) return/);
   assert.match(client, /confirm\('Delete entry from draft\?'\)/);
   assert.match(client, /confirm\('Discard draft\?'\)/);
+});
+
+test('schema-driven editor exposes explicit safe contracts without raw JSON or inline handlers', () => {
+  const section = view.match(/<section id="globalContentCatalog"[\s\S]*?<\/section>/)?.[0] || '';
+  assert.match(hub, /GetGlobalContentEditorDefinition/);
+  assert.match(client, /GetGlobalContentEditorDefinition/);
+  assert.match(section, /globalContentEditorFields/);
+  assert.match(section, /globalScopeCatalogOnly/);
+  assert.match(section, /globalScopeCatalogAndRoom[^>]*>Catalog and current game — unsupported/);
+  assert.doesNotMatch(section, /<textarea|on(?:click|change|input)=/i);
+  assert.doesNotMatch(client, /connection\.invoke\(\s*(?:action|method|actionName)\b/);
 });

@@ -49,6 +49,13 @@ public partial class GameHub
         return Task.FromResult(SafeRequest(() => _globalContentCatalog.GetEntry(category, stableId)));
     }
 
+    public Task<ContentEditorDefinitionDto> GetGlobalContentEditorDefinition(string category, string stableId)
+    {
+        DemandGlobalContentAccess();
+        ConsumeGlobalContentRead();
+        return Task.FromResult(SafeRequest(() => _globalContentCatalog.GetEditorDefinition(category, stableId)));
+    }
+
     public Task<IReadOnlyList<GlobalContentDraftDto>> GetGlobalContentDrafts()
     {
         var room = DemandGlobalContentAccess(); ConsumeGlobalContentRead();

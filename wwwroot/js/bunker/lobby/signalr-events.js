@@ -318,6 +318,14 @@ window.BunkerSignalREvents.lobby = {
 			if (roomPlayers[oldId]) roomPlayers[oldId].isHost = false;
 			if (roomPlayers[newId]) roomPlayers[newId].isHost = true;
 			isHost = newId === myConnectionId;
+			if (oldId === myConnectionId && !isHost && typeof closeGMPanel === 'function') {
+				closeGMPanel();
+				gmPlayersData = {};
+			}
+			if (isHost) {
+				if (typeof refreshGmPanelV2State === 'function') refreshGmPanelV2State();
+				connection.invoke('GetAllPlayersData').catch(() => {});
+			}
 			renderCurrentGameUI();
 		});
 	},
@@ -602,7 +610,6 @@ window.BunkerSignalREvents.lobby = {
 				currentRoom.state === 'Started';
 
 			showRoomSection();
-			renderCurrentGameUI();
 
 			if (isFinishedState) {
 				currentApocalypse = data.apocalypse || data.Apocalypse;
@@ -611,7 +618,6 @@ window.BunkerSignalREvents.lobby = {
 				document.getElementById('roomLobby').style.display = 'none';
 				document.getElementById('gameSection').style.display = 'block';
 				document.getElementById('myPlayerSection').style.display = 'block';
-				renderCurrentGameUI();
 				renderGameFinished(rejoinCompletion, { source: 'rejoin' });
 				window.PostGameStoryDirector?.applyState(data.postGameStory || data.PostGameStory, true);
 			} else if (isGameState) {
@@ -631,12 +637,6 @@ window.BunkerSignalREvents.lobby = {
 					startBtn.style.display = 'none';
 					startBtn.disabled = true;
 				}
-
-				updateRoundStatusUI();
-
-				if (currentApocalypse) renderApocalypse(currentApocalypse);
-				if (currentBunker) renderBunker(currentBunker);
-				if (currentThreat) renderThreatPanel(currentThreat);
 
 				if (currentVoting) {
 					const votingState = currentVoting.state || currentVoting.State || currentRoom.state;

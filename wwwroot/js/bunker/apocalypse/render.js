@@ -12,6 +12,10 @@ function clearApocalypseVisualTheme() {
 	root.classList.remove('apocalypse-theme-active', 'apocalypse-theme-revealing', 'apocalypse-ambient-paused');
 	delete root.dataset.apocalypseTheme;
 	delete root.dataset.apocalypseCategory;
+	for (const key of ['apocalypseArchetype', 'apocalypseLighting', 'apocalypseAir', 'apocalypseContamination', 'apocalypseDamage', 'apocalypseVisibility', 'apocalypseAccent', 'apocalypseVariation', 'apocalypseTexture'])
+		delete root.dataset[key];
+	for (const property of ['--apocalypse-light-intensity', '--apocalypse-contamination-intensity', '--apocalypse-visibility-reduction', '--apocalypse-animation-intensity', '--apocalypse-light-position', '--apocalypse-temperature-shift'])
+		root.style.removeProperty(property);
 	const ambient = document.getElementById?.('apocalypseAmbientRoot');
 	if (ambient) ambient.setAttribute('hidden', '');
 	if (typeof stopApocalypseAmbientScheduler === 'function') stopApocalypseAmbientScheduler();
@@ -20,27 +24,46 @@ function clearApocalypseVisualTheme() {
 	if (typeof clearApocalypseCategoryVisualState === 'function') clearApocalypseCategoryVisualState();
 }
 
-function applyApocalypseVisualTheme(apocalypse) {
+function applyApocalypseVisualTheme(themeOrApocalypse) {
 	const root = document.body;
 	if (!root) return 'default-dark';
-	const themeId = resolveApocalypseVisualTheme(apocalypse);
+	const theme = themeOrApocalypse?.archetype && themeOrApocalypse?.themeId
+		? themeOrApocalypse
+		: resolveApocalypseVisualTheme(themeOrApocalypse);
+	const themeId = theme.themeId;
 	if (themeId === 'default-dark') {
 		clearApocalypseVisualTheme();
-		return themeId;
 	}
 
-	const definition = apocalypseVisualThemeRegistry[themeId];
+	const definition = apocalypseVisualThemeRegistry[themeId] || { categoryId: 'generic' };
 	if (root.dataset.apocalypseTheme === themeId &&
 		root.dataset.apocalypseCategory === definition.categoryId &&
-		root.classList.contains('apocalypse-theme-active')) return themeId;
+		root.dataset.apocalypseArchetype === theme.archetype &&
+		root.dataset.apocalypseVariation === String(theme.variation) &&
+		root.classList.contains('apocalypse-theme-active')) return theme;
 
 	clearApocalypseVisualTheme();
 	const ambient = document.getElementById?.('apocalypseAmbientRoot');
 	ambient?.removeAttribute(['hid', 'den'].join(''));
 	root.dataset.apocalypseTheme = themeId;
 	root.dataset.apocalypseCategory = definition.categoryId;
+	root.dataset.apocalypseArchetype = theme.archetype;
+	root.dataset.apocalypseLighting = theme.lighting;
+	root.dataset.apocalypseAir = theme.air;
+	root.dataset.apocalypseContamination = theme.contamination;
+	root.dataset.apocalypseDamage = theme.damage;
+	root.dataset.apocalypseVisibility = theme.visibility;
+	root.dataset.apocalypseAccent = theme.accent;
+	root.dataset.apocalypseVariation = String(theme.variation);
+	root.dataset.apocalypseTexture = String(theme.textureVariant);
+	root.style.setProperty('--apocalypse-light-intensity', String(theme.lightingIntensity));
+	root.style.setProperty('--apocalypse-contamination-intensity', String(theme.contaminationIntensity));
+	root.style.setProperty('--apocalypse-visibility-reduction', String(theme.visibilityReduction));
+	root.style.setProperty('--apocalypse-animation-intensity', String(theme.animationIntensity));
+	root.style.setProperty('--apocalypse-light-position', `${theme.lightPosition}%`);
+	root.style.setProperty('--apocalypse-temperature-shift', `${theme.temperatureShift}deg`);
 	root.classList.add('apocalypse-theme-active');
-	return themeId;
+	return theme;
 }
 
 function syncApocalypseVisualTheme(apocalypse) {

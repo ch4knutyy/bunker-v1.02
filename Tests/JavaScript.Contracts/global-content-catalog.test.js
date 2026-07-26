@@ -7,11 +7,13 @@ const service = fs.readFileSync('Services/Bunker/Content/Global/GlobalContentCat
 const model = fs.readFileSync('Models/Game/Content/GlobalContentCatalog.cs', 'utf8');
 const { readBunkerView } = require('./bunker-view-test-helpers');
 const view = readBunkerView();
-const client = fs.readFileSync('wwwroot/js/game.js', 'utf8');
+const client = fs.readFileSync('wwwroot/js/game.js', 'utf8') +
+  fs.readFileSync('wwwroot/js/bunker/gm/runtime.js', 'utf8') +
+  fs.readFileSync('wwwroot/js/bunker/global-content/runtime.js', 'utf8');
 const i18n = fs.readFileSync('wwwroot/js/bunker/i18n/translations.js', 'utf8');
 
-test('catalog is read-only, allowlisted and capability guarded', () => {
-  assert.match(hub, /GmCapability\.ManageGlobalContent/);
+test('catalog is allowlisted and capability guarded', () => {
+  assert.match(hub, /RoomActorCapability\.EditGlobalContent/);
   assert.match(hub, /_globalContentAccess\.CanAccess/);
   assert.doesNotMatch(service, /File\.(Write|Move|Delete|Copy)/);
   assert.match(service, /ReadOnlyDictionary<GlobalContentCategory/);
@@ -27,7 +29,7 @@ test('safe metadata and bounded read API expose no filesystem path', () => {
   assert.match(service, /TryConsumeRead/);
 });
 
-test('read-only UI stays hidden until server capability response', () => {
+test('editor UI stays hidden until server capability response', () => {
   const catalog = view.match(/<section id="globalContentCatalog"[\s\S]*?<\/section>/)?.[0] || '';
   assert.match(view, /id="globalContentCatalog"[^>]*display: none/);
   assert.match(client, /globalCatalogAllowed = access\?\.allowed === true/);

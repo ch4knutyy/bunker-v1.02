@@ -359,6 +359,9 @@ namespace Bunker.Services
 
             return new CharacterTrait
             {
+                Id = string.IsNullOrWhiteSpace(data.Id)
+                    ? CatalogItemService.LegacyId("characterTrait", data.Trait, data.Type)
+                    : data.Id,
                 Name = data.Trait,
                 Type = data.Type,
                 I18n = data.I18n
@@ -381,14 +384,16 @@ namespace Bunker.Services
                 return inventory;
 
             var itemData = _gameData.Items[_random.Next(_gameData.Items.Count)];
-            inventory.Items.Add(CreateInventoryItem(
+            var generatedItem = CreateInventoryItem(
                 itemData.Item,
                 $"Категорія: {itemData.Category}",
                 itemData.I18n,
                 itemData.ResourceTags,
                 itemData.ProtectionTags,
                 itemData.ThreatUsage
-            ));
+            );
+            generatedItem.DefinitionId = itemData.Id;
+            inventory.Items.Add(generatedItem);
 
             return inventory;
         }
@@ -425,6 +430,7 @@ namespace Bunker.Services
                     catalogItem.ResourceTags,
                     catalogItem.ProtectionTags,
                     catalogItem.ThreatUsage);
+                item.DefinitionId = catalogItem.Id;
                 item.InstanceId = $"profession:{Guid.NewGuid():N}";
                 item.Source = "profession";
                 return item;
@@ -560,6 +566,9 @@ namespace Bunker.Services
 
 			return new Profession
 			{
+				Id = string.IsNullOrWhiteSpace(data.Id)
+					? CatalogItemService.LegacyId("profession", data.Profession, data.Type)
+					: data.Id,
 				Name = parsedProfession.Name,
 				Type = data.Type,
 				ProfessionalLevel = GenerateProfessionalLevel(),
@@ -685,6 +694,9 @@ namespace Bunker.Services
 
             return new Hobby
             {
+                Id = string.IsNullOrWhiteSpace(data.Id)
+                    ? CatalogItemService.LegacyId("hobby", data.Hobby, data.Type)
+                    : data.Id,
                 Name = data.Hobby,
                 Type = data.Type,
                 Item = data.Item,

@@ -7,6 +7,7 @@ const helpers = fs.readFileSync('wwwroot/js/bunker/apocalypse/helpers.js', 'utf8
 const render = fs.readFileSync('wwwroot/js/bunker/apocalypse/render.js', 'utf8');
 const visualConfig = fs.readFileSync('wwwroot/js/bunker/apocalypse/visual-config.js', 'utf8');
 const css = fs.readFileSync('wwwroot/css/game.css', 'utf8');
+const physicalCss = fs.readFileSync('wwwroot/css/apocalypse-physical-theme.css', 'utf8');
 
 function method(source, name) {
   const start = source.indexOf(`function ${name}(`);
@@ -40,6 +41,11 @@ function buildThemeHarness() {
   let addCalls = 0;
   const body = {
     dataset: {},
+    style: {
+      values: new Map(),
+      setProperty(name, value) { this.values.set(name, value); },
+      removeProperty(name) { this.values.delete(name); }
+    },
     classList: {
       add(...names) { addCalls += 1; names.forEach(name => classNames.add(name)); },
       remove(...names) { names.forEach(name => classNames.delete(name)); },
@@ -49,8 +55,15 @@ function buildThemeHarness() {
   const source = [
     constant(visualConfig, 'apocalypseVisualThemeRegistry'),
     constant(visualConfig, 'apocalypseCategoryThemeRegistry'),
+    constant(visualConfig, 'apocalypsePhysicalThemeFallback'),
+    constant(visualConfig, 'apocalypsePhysicalThemeProfiles'),
     method(helpers, 'normalizeApocalypseMetadataValue'),
     method(helpers, 'normalizeApocalypseVisualThemeId'),
+    method(helpers, 'resolveApocalypseVisualThemeId'),
+    method(helpers, 'apocalypseStableVisualHash'),
+    method(helpers, 'clampApocalypseIntensity'),
+    method(helpers, 'getApocalypseVisualMetadata'),
+    method(helpers, 'inferApocalypsePhysicalArchetype'),
     method(helpers, 'resolveApocalypseVisualTheme'),
     method(render, 'clearApocalypseVisualTheme'),
     method(render, 'applyApocalypseVisualTheme'),
@@ -65,12 +78,12 @@ function buildThemeHarness() {
 
 test('site theme resolution prioritizes allowlisted VisualThemeId and rejects unknown values', () => {
   const themes = buildThemeHarness();
-  assert.equal(themes.resolveApocalypseVisualTheme({ visualThemeId: 'storm-blue', categoryId: 'biological', tags: ['zombie'] }), 'storm-blue');
-  assert.equal(themes.resolveApocalypseVisualTheme({ visualThemeId: 'evil injected class', categoryId: 'biological' }), 'default-dark');
-  assert.equal(themes.resolveApocalypseVisualTheme({ visualThemeId: '' }), 'default-dark');
-  assert.equal(themes.resolveApocalypseVisualTheme({ categoryId: 'biological' }), 'biohazard-green');
-  assert.equal(themes.resolveApocalypseVisualTheme({ tags: ['radiation'] }), 'extinction-red');
-  assert.doesNotMatch(method(helpers, 'resolveApocalypseVisualTheme'), /name|title|description/i);
+  assert.equal(themes.resolveApocalypseVisualTheme({ visualThemeId: 'storm-blue', categoryId: 'biological', tags: ['zombie'] }).themeId, 'storm-blue');
+  assert.equal(themes.resolveApocalypseVisualTheme({ visualThemeId: 'evil injected class', categoryId: 'biological' }).themeId, 'default-dark');
+  assert.equal(themes.resolveApocalypseVisualTheme({ categoryId: 'biological', id: 'pandemic_rage' }).archetype, 'pandemic');
+  assert.equal(themes.resolveApocalypseVisualTheme({ tags: ['radiation'], id: 'nuclear_test' }).archetype, 'nuclear');
+  assert.equal(themes.resolveApocalypseVisualTheme({ id: 'unknown' }).archetype, 'generic-collapse');
+  assert.deepEqual(themes.resolveApocalypseVisualTheme({ id: 'stable', tags: ['radiation'] }), themes.resolveApocalypseVisualTheme({ id: 'stable', tags: ['radiation'] }));
 });
 
 test('apply is allowlisted, replaces old state, is idempotent and null clears it', () => {
@@ -78,6 +91,7 @@ test('apply is allowlisted, replaces old state, is idempotent and null clears it
   themes.applyApocalypseVisualTheme({ visualThemeId: 'biohazard-green' });
   assert.equal(themes.body.dataset.apocalypseTheme, 'biohazard-green');
   assert.equal(themes.body.dataset.apocalypseCategory, 'biological');
+  assert.equal(themes.body.dataset.apocalypseArchetype, 'generic-collapse');
   assert(themes.classNames.has('apocalypse-theme-active'));
   const afterFirstApply = themes.addCalls();
 
@@ -94,8 +108,9 @@ test('apply is allowlisted, replaces old state, is idempotent and null clears it
   assert.equal(themes.classNames.size, 0);
 
   themes.applyApocalypseVisualTheme({ visualThemeId: 'theme; background:url(evil)' });
-  assert.equal(themes.body.dataset.apocalypseTheme, undefined);
-  assert.equal(themes.classNames.size, 0);
+  assert.equal(themes.body.dataset.apocalypseTheme, 'default-dark');
+  assert.equal(themes.body.dataset.apocalypseArchetype, 'generic-collapse');
+  assert(themes.classNames.has('apocalypse-theme-active'));
 });
 
 test('renderApocalypse is the single canonical synchronization point', () => {
@@ -149,6 +164,17 @@ test('ambient layer is inert and reduced motion disables theme motion', () => {
   assert.match(css, /body\.apocalypse-theme-active::before\s*\{[^}]*pointer-events:\s*none[^}]*user-select:\s*none/s);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*body\.apocalypse-theme-active::before[\s\S]*animation:\s*none/);
   assert.match(css, /body\.apocalypse-theme-revealing[\s\S]*900ms/);
+});
+
+test('physical apocalypse layer is bounded and leaves bunker materials authoritative', () => {
+  for (const archetype of ['nuclear', 'fire', 'ice', 'flood', 'pandemic', 'biological', 'chemical', 'volcanic', 'desert', 'darkness', 'solar', 'war', 'machine', 'anomalous']) {
+    assert.match(physicalCss, new RegExp(`data-apocalypse-archetype="${archetype}"`));
+  }
+  assert.match(physicalCss, /apocalypse-light-intensity/);
+  assert.match(physicalCss, /apocalypse-contamination-intensity/);
+  assert.match(physicalCss, /apocalypse-visibility-reduction/);
+  assert.match(physicalCss, /bunker-theme-active[\s\S]*--bunker-button-border/);
+  assert.match(physicalCss, /prefers-reduced-motion[\s\S]*animation:\s*none\s*!important/);
 });
 
 test('card variants still prioritize canonical themes and retain tag fallback', () => {

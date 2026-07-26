@@ -40,6 +40,16 @@ window.BunkerSignalREvents.characters = {
 
 			myPlayerData = normalizedPlayer;
 			pendingCharacteristicReveals.clear();
+			const reason = data?.reason ?? data?.Reason ?? "";
+			const notification = data?.notification ?? data?.Notification ?? {};
+			if (reason === "forced_reveal_credits_updated") {
+				const creditsAdded = notification.creditsAdded ?? notification.CreditsAdded ?? 0;
+				addEventMessage(creditsAdded > 0
+					? t('revealCreditsAdded').replace('{count}', creditsAdded)
+					: t('revealRequirementCompletedByForcedReveal'));
+			} else if (reason === "reveal_credit_consumed") {
+				addEventMessage(t('revealCreditConsumed'));
+			}
 
 			tryRenderRunningGameState();
 
@@ -116,9 +126,12 @@ window.BunkerSignalREvents.characters = {
 					}
 				}
 
-				renderCurrentGameUI();
+				renderMyPlayerCards(myPlayerData);
+				renderMySpecialCards(myPlayerData);
+				renderMyEventCards(myPlayerData);
 			}
 
+			updateRoundStatusUI();
 			renderPublicPlayerOverview();
 			triggerApocalypseVisualReaction('characteristic-reveal', { duration: 500 });
 			addEventMessage(`<span class="event-player">${info.playerName}</span> розкрив: <span class="revealed-label">${info.data.label}</span>`);

@@ -52,7 +52,8 @@ namespace Bunker.Hubs
 
             room.CurrentRoundReveals ??= new();
             var playerKey = RoomService.GetPlayerKey(player);
-            if (room.CurrentRoundReveals.ContainsKey(playerKey))
+            if (room.CurrentRoundReveals.ContainsKey(playerKey) &&
+                !player.RevealRequirementSatisfiedByCredit)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "У цьому раунді ви вже розкрили характеристику");
                 return;
@@ -99,6 +100,8 @@ namespace Bunker.Hubs
             // Позначаємо характеристику як відкриту
             SetCharacteristicRevealed(player, characteristicName);
             room.CurrentRoundReveals[playerKey] = characteristicName;
+            player.HasCompletedRevealThisRound = true;
+            player.RevealRequirementSatisfiedByCredit = false;
 
             // Оновлюємо гравця в сервісі
             _roomService.UpdatePlayer(Context.ConnectionId, player);

@@ -42,6 +42,7 @@ window.BunkerSignalREvents.voting = {
 			myVote = null;
 			showVotingPanel(data);
 			renderCurrentGameUI();
+			syncEndVotingControls();
 			triggerApocalypseVisualReaction('voting-start');
 			addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round || data.Round || getCurrentRoundNumber()}`);
 		});
@@ -64,6 +65,7 @@ window.BunkerSignalREvents.voting = {
 		connection.on("VotingProgress", function (data) {
 			console.log("Voting progress:", data);
 			document.getElementById('votingProgressText').textContent = `${data.votedCount}/${data.totalVoters} проголосували`;
+			window.gmPanelV2OnStateChanged?.();
 		});
 	},
 
@@ -72,12 +74,15 @@ window.BunkerSignalREvents.voting = {
 		connection.on("VotingEnded", function (data) {
 			console.log("Voting ended:", data);
 			currentVoting = data;
+			endVotingPending = false;
 
 			// Ховаємо панель голосування
 			document.getElementById('votingPanel').style.display = 'none';
+			syncEndVotingControls();
 
 			// Показуємо результати (тільки хосту показуємо кнопки)
 			showVotingResults(data);
+			window.gmPanelV2OnStateChanged?.();
 
 			addEventMessage(`<span class="event-voting">🗳️ Голосування завершено!</span> Лідер: ${data.topVotedPlayerName || 'Нічия'}`);
 		});
@@ -88,12 +93,14 @@ window.BunkerSignalREvents.voting = {
 		connection.on("VotingResolved", function (data) {
 			console.log("Voting resolved:", data);
 			currentVoting = data.voting || data.Voting || currentVoting;
+			endVotingPending = false;
 			if (currentRoom) {
 				currentRoom.state = "Playing";
 				currentRoom.currentRound = data.currentRound || data.CurrentRound || data.nextRound || data.NextRound || currentRoom.currentRound;
 			}
 			applyRoundState(data.roundState || data.RoundState);
 			document.getElementById('votingPanel').style.display = 'none';
+			syncEndVotingControls();
 			if (currentVoting) {
 				showVotingResults(currentVoting);
 			}
@@ -111,11 +118,14 @@ window.BunkerSignalREvents.voting = {
 		connection.on("VotingCancelled", function (data) {
 			console.log("Voting cancelled:", data);
 			currentVoting = null;
+			endVotingPending = false;
 			if (currentRoom) currentRoom.state = "Playing";
 			applyRoundState(data.roundState || data.RoundState);
 
 			document.getElementById('votingPanel').style.display = 'none';
 			document.getElementById('votingResultsPanel').style.display = 'none';
+			syncEndVotingControls();
+			window.gmPanelV2OnStateChanged?.();
 
 			addEventMessage(`<span class="event-warning">⚠️ ${data.message}</span>`);
 		});
@@ -133,6 +143,7 @@ window.BunkerSignalREvents.voting = {
 				eligibleVoters: data.eligibleVoters || data.EligibleVoters || []
 			};
 			renderGmVotingAdmin();
+			window.gmPanelV2OnStateChanged?.();
 			finishGmRoundCommand('');
 		});
 	}

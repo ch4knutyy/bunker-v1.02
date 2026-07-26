@@ -48,7 +48,12 @@ window.BunkerSignalREvents.rounds = {
 			const value = roll?.value || '?';
 			const round = roll?.round || getCurrentRoundNumber();
 			const roller = roll?.rolledByPlayerName || 'GM';
-			addEventMessage(`${escapeHtml(roller)} кинув кубик у раунді ${round}: <strong>${value}</strong>`);
+			addEventMessage(
+				t('gmDiceFeedResult')
+					.replace('{player}', escapeHtml(roller))
+					.replace('{round}', round)
+					.replace('{value}', `<strong>${value}</strong>`)
+			);
 		});
 	},
 
