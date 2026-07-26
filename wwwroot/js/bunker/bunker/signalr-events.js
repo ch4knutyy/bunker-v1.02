@@ -21,6 +21,7 @@ window.BunkerSignalREvents.bunker = {
 			const feedback = document.getElementById('gmBunkerCapacityFeedback');
 			if (feedback) feedback.textContent = t('gmCapacitySaved');
 			renderBunker(currentBunker);
+			window.gmPanelV2OnStateChanged?.();
 			addEventMessage(`<span class="event-gm">GM</span> ${escapeHtml(t('capacity'))}: <strong>${escapeHtml(capacity)}</strong>`);
 		});
 	},
@@ -59,6 +60,7 @@ window.BunkerSignalREvents.bunker = {
 			currentBunker = bunker;
 			currentBunkerCapacity = getBunkerCapacityValue(bunker, currentBunkerCapacity);
 			renderBunker(currentBunker);
+			window.gmPanelV2OnStateChanged?.();
 		});
 	},
 
@@ -110,6 +112,7 @@ window.BunkerSignalREvents.bunker = {
 				if ('SuppliesMonths' in currentBunker) currentBunker.SuppliesMonths = supplies;
 				renderBunker(currentBunker);
 			}
+			window.gmPanelV2OnStateChanged?.();
 
 			addEventMessage(`<span class="event-success">📦 ${escapeHtml(t('supplies'))}: +${data.addedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
 		});
@@ -126,6 +129,7 @@ window.BunkerSignalREvents.bunker = {
 				if ('SuppliesMonths' in currentBunker) currentBunker.SuppliesMonths = supplies;
 				renderBunker(currentBunker);
 			}
+			window.gmPanelV2OnStateChanged?.();
 
 			addEventMessage(`<span class="event-warning">📦 ${escapeHtml(t('supplies'))}: −${data.removedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
 		});
@@ -140,6 +144,7 @@ window.BunkerSignalREvents.bunker = {
 				if ('WaterMonths' in currentBunker) currentBunker.WaterMonths = water;
 				renderBunker(currentBunker);
 			}
+			window.gmPanelV2OnStateChanged?.();
 			addEventMessage(`<span class="event-success">💧 ${escapeHtml(t('water'))}: +${data.addedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
 		});
 	},
@@ -153,6 +158,7 @@ window.BunkerSignalREvents.bunker = {
 				if ('WaterMonths' in currentBunker) currentBunker.WaterMonths = water;
 				renderBunker(currentBunker);
 			}
+			window.gmPanelV2OnStateChanged?.();
 			addEventMessage(`<span class="event-warning">💧 ${escapeHtml(t('water'))}: −${data.removedMonths} ${escapeHtml(t('bunkerMonths'))}</span>`);
 		});
 	}

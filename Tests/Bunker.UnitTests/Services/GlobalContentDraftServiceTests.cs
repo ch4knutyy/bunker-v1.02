@@ -92,16 +92,15 @@ public sealed class GlobalContentDraftServiceTests : IDisposable
     }
 
     [Fact]
-    public void HealthLocalizationAndMentalPhobiaValidationAreDeterministic()
+    public void MultiFileHealthCatalogRequiresAtomicSetWriter()
     {
         Directory.CreateDirectory(Path.Combine(_root, "Mental_conditions"));
         File.WriteAllText(Path.Combine(_root, "Mental_conditions", "mental_conditions.uk.json"), """[{"id":"m1","category":"mood","localization":{"uk":{"name":"Стан"},"ru":{"name":"Состояние"},"en":{"name":"Condition"}}}]""");
         var service = new GlobalContentDraftService(new GlobalContentCatalogService(_root), _time);
-        var draft = service.Create("mental_conditions", "actor", "1");
-        service.Apply(Command(draft, GlobalContentDraftCommandType.UpdateEntry, "m1", "2", new { category = "phobia", localization = new { uk = new { name = "X" } } }), "actor");
-        var result = service.Validate(draft.DraftId, "actor");
-        Assert.Contains(result.Issues, x => x.Code == "mental_phobia_forbidden");
-        Assert.Contains(result.Issues, x => x.Code == "localization_incomplete");
+        Assert.Equal("category_multi_file_atomic_required",
+            Assert.Throws<GlobalContentRequestException>(() => service.Create("mental_conditions", "actor", "1")).Code);
+        Assert.Equal(GlobalContentEditableReadiness.ReadOnly,
+            new GlobalContentCatalogService(_root).GetMetadata("mental_conditions").EditableReadiness);
     }
 
     [Fact]
@@ -111,6 +110,26 @@ public sealed class GlobalContentDraftServiceTests : IDisposable
         var service = new GlobalContentDraftService(new GlobalContentCatalogService(_root), _time);
         var draft = service.Create("threats", "actor", "1");
         Assert.Contains(service.Validate(draft.DraftId, "actor").Issues, x => x.Code == "duplicate_plan_id");
+    }
+
+    [Fact]
+    public void PrepareCommitPreservesRecordOrderAndTechnicalFieldsAreReadOnly()
+    {
+        File.WriteAllText(Path.Combine(_root, "professions.json"), """{"professions":[{"id":"z","profession":"First","unknown":{"keep":true}},{"id":"a","profession":"Second"}]}""");
+        var service = new GlobalContentDraftService(new GlobalContentCatalogService(_root), _time);
+        var draft = service.Create("professions", "actor", "order");
+        service.Apply(Command(draft, GlobalContentDraftCommandType.UpdateEntry, "z", "update", new { profession = "Updated" }), "actor");
+        service.Validate(draft.DraftId, "actor");
+        var package = service.PrepareCommit(draft.DraftId, "actor");
+        Assert.Contains("\"id\":\"z\"", package.Entries[0]);
+        Assert.Contains("\"unknown\":{\"keep\":true}", package.Entries[0]);
+        Assert.Contains("\"id\":\"a\"", package.Entries[1]);
+
+        File.WriteAllText(Path.Combine(_root, "special_cards.json"), """{"special_cards":[{"id":"c1","name":"Card","effectType":"technical"}]}""");
+        var cards = new GlobalContentDraftService(new GlobalContentCatalogService(_root), _time);
+        var cardDraft = cards.Create("special_cards", "actor", "card");
+        Assert.Equal("unknown_field", Assert.Throws<GlobalContentRequestException>(() =>
+            cards.Apply(Command(cardDraft, GlobalContentDraftCommandType.UpdateEntry, "c1", "effect", new { effectType = "changed" }), "actor")).Code);
     }
 
     private static GlobalContentDraftCommandDto Command(GlobalContentDraftDto draft, GlobalContentDraftCommandType type, string id, string commandId, object? fields, bool confirm = false) =>

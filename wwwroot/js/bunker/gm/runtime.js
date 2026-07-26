@@ -136,15 +136,15 @@ function handleBunkerCapacityKeydown(event) {
 }
 
 function regenerateBunker() {
-	if (confirm('Згенерувати новий бункер?')) {
-		connection.invoke("RegenerateBunker")
+	if (confirm(t('gmRegenerateBunkerConfirm'))) {
+		connection.invoke("RegenerateBunker", gmPlayerCommandId())
 			.catch(function (err) { console.error("RegenerateBunker error:", err); });
 	}
 }
 
 function regenerateApocalypse() {
-	if (confirm('Згенерувати новий апокаліпсис?')) {
-		connection.invoke("RegenerateApocalypse")
+	if (confirm(t('gmRegenerateApocalypseConfirm'))) {
+		connection.invoke("RegenerateApocalypse", gmPlayerCommandId())
 			.catch(function (err) { console.error("RegenerateApocalypse error:", err); });
 	}
 }
@@ -349,7 +349,15 @@ function diagnosticsCommand(method, args = []) {
 	setGmDiagnosticsPending(true);
 	const feedback = document.getElementById('gmDiagnosticsFeedback');
 	if (feedback) feedback.textContent = '';
-	connection.invoke(method, ...args).catch(error => {
+	let invocation;
+	switch (method) {
+		case 'RunRoomIntegrityCheck': invocation = connection.invoke('RunRoomIntegrityCheck', args[0]); break;
+		case 'PreviewRoomAutoFix': invocation = connection.invoke('PreviewRoomAutoFix', args[0]); break;
+		case 'ApplyRoomAutoFix': invocation = connection.invoke('ApplyRoomAutoFix', args[0], args[1], args[2]); break;
+		case 'GetGmAuditLog': invocation = connection.invoke('GetGmAuditLog'); break;
+		default: setGmDiagnosticsPending(false); return;
+	}
+	invocation.catch(error => {
 		setGmDiagnosticsPending(false);
 		if (feedback) feedback.textContent = error?.message || t('unavailableNow');
 	});
@@ -384,7 +392,16 @@ function invokeSnapshotCommand(method, args = []) {
 	setGmSnapshotPending(true);
 	const feedback = document.getElementById('gmSnapshotFeedback');
 	if (feedback) feedback.textContent = '';
-	connection.invoke(method, ...args).catch(error => {
+	let invocation;
+	switch (method) {
+		case 'GetRoomSnapshots': invocation = connection.invoke('GetRoomSnapshots'); break;
+		case 'CreateManualRoomSnapshot': invocation = connection.invoke('CreateManualRoomSnapshot', args[0], args[1]); break;
+		case 'PreviewRoomSnapshotRestore': invocation = connection.invoke('PreviewRoomSnapshotRestore', args[0]); break;
+		case 'RestoreRoomSnapshot': invocation = connection.invoke('RestoreRoomSnapshot', args[0], args[1], args[2], args[3]); break;
+		case 'UndoLastGmAction': invocation = connection.invoke('UndoLastGmAction', args[0]); break;
+		default: setGmSnapshotPending(false); return;
+	}
+	invocation.catch(error => {
 		setGmSnapshotPending(false);
 		if (feedback) feedback.textContent = error?.message || t('unavailableNow');
 	});
@@ -501,7 +518,16 @@ function handleGmRoundCommandError(error) {
 function invokeGmRoundCommand(method, args = []) {
 	if (gmRoundCommandPending) return;
 	setGmRoundCommandPending(true);
-	connection.invoke(method, ...args, gmRoundCommandId()).catch(handleGmRoundCommandError);
+	const commandId = gmRoundCommandId();
+	let invocation;
+	switch (method) {
+		case 'SetGamePaused': invocation = connection.invoke('SetGamePaused', args[0], args[1], commandId); break;
+		case 'ResetRoundReadiness': invocation = connection.invoke('ResetRoundReadiness', commandId); break;
+		case 'ClearCurrentVotes': invocation = connection.invoke('ClearCurrentVotes', commandId); break;
+		case 'RemoveCurrentVote': invocation = connection.invoke('RemoveCurrentVote', args[0], commandId); break;
+		default: finishGmRoundCommand(); return;
+	}
+	invocation.catch(handleGmRoundCommandError);
 }
 
 function setGamePause(paused) {
@@ -557,7 +583,19 @@ function invokeGameTimerCommand(method, args = []) {
 	document.querySelectorAll('.gm-timer-command').forEach(button => button.disabled = true);
 	const feedback = document.getElementById('gmTimerFeedback');
 	if (feedback) feedback.textContent = '';
-	connection.invoke(method, ...args, gameTimerCommandId()).catch(error => {
+	const commandId = gameTimerCommandId();
+	let invocation;
+	switch (method) {
+		case 'StartGameTimer': invocation = connection.invoke('StartGameTimer', args[0], args[1], args[2], commandId); break;
+		case 'SetGameTimer': invocation = connection.invoke('SetGameTimer', args[0], commandId); break;
+		case 'AdjustGameTimer': invocation = connection.invoke('AdjustGameTimer', args[0], commandId); break;
+		case 'PauseGameTimer': invocation = connection.invoke('PauseGameTimer', commandId); break;
+		case 'ResumeGameTimer': invocation = connection.invoke('ResumeGameTimer', commandId); break;
+		case 'RestartGameTimer': invocation = connection.invoke('RestartGameTimer', commandId); break;
+		case 'StopGameTimer': invocation = connection.invoke('StopGameTimer', commandId); break;
+		default: gameTimerCommandPending = false; return;
+	}
+	invocation.catch(error => {
 		gameTimerCommandPending = false;
 		if (feedback) feedback.textContent = error?.message || t('unavailableNow');
 		renderGameTimer();
@@ -614,6 +652,9 @@ function renderGMPanelState() {
 	document.querySelectorAll('[data-gm-i18n-placeholder]').forEach(element => {
 		element.placeholder = t(element.dataset.gmI18nPlaceholder);
 	});
+	document.querySelectorAll('[data-gm-i18n-aria-label]').forEach(element => {
+		element.setAttribute('aria-label', t(element.dataset.gmI18nAriaLabel));
+	});
 	const round = getCurrentRoundNumber();
 	const capacityInput = document.getElementById('gmBunkerCapacity');
 	if (capacityInput && !bunkerCapacityPending && currentBunker?.capacity != null) {
@@ -639,7 +680,7 @@ function renderGMThreatControl() {
 		const threat = gmThreatControlData.currentThreat;
 		current.textContent = threat
 			? `${threat.name || threat.Name} — ${getThreatStatusLabel(threat.status || threat.Status || '—')}`
-			: 'Поточна загроза відсутня';
+			: t('gmThreatNone');
 	}
 	if (select) {
 		const previous = select.value;
@@ -661,11 +702,13 @@ function renderGMThreatControl() {
 	const abort = document.getElementById('gmThreatAbort');
 	const forceSuccess = document.getElementById('gmThreatForceSuccess');
 	const forceFailure = document.getElementById('gmThreatForceFailure');
+	const emergency = document.getElementById('gmThreatEmergencyBlock');
 	if (resync) resync.style.display = hasThreat ? '' : 'none';
 	if (reset) reset.style.display = canRecover ? '' : 'none';
 	if (abort) abort.style.display = canRecover ? '' : 'none';
 	if (forceSuccess) forceSuccess.style.display = canForce ? '' : 'none';
 	if (forceFailure) forceFailure.style.display = canForce ? '' : 'none';
+	if (emergency) emergency.hidden = !hasThreat;
 	renderUnifiedGmAudit();
 }
 
@@ -828,7 +871,22 @@ function invokeGMThreatCommand(method, args, confirmationMessage) {
 	if (!confirmed) return;
 	gmThreatCommandPending = true;
 	document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = true);
-	connection.invoke(method, ...args, confirmed)
+	let invocation;
+	switch (method) {
+		case 'GMGenerateRandomRareThreat':
+			invocation = connection.invoke('GMGenerateRandomRareThreat', args[0], confirmed);
+			break;
+		case 'GMGenerateTextThreat':
+			invocation = connection.invoke('GMGenerateTextThreat', args[0], confirmed);
+			break;
+		case 'GMSelectThreat':
+			invocation = connection.invoke('GMSelectThreat', args[0], args[1], confirmed);
+			break;
+		default:
+			gmThreatCommandPending = false;
+			return;
+	}
+	invocation
 		.catch(err => {
 			const result = document.getElementById('gmThreatCommandResult');
 			if (result) result.textContent = err?.message || 'Помилка GM-команди';
@@ -944,7 +1002,23 @@ function invokeGMThreatEmergency(method, confirmationMessage) {
 	if (confirmationMessage && !confirm(confirmationMessage)) return;
 	gmThreatCommandPending = true;
 	document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = true);
-	connection.invoke(method, gmThreatCommandId()).catch(error => {
+	const commandId = gmThreatCommandId();
+	let invocation;
+	switch (method) {
+		case 'GMCancelCurrentThreat':
+			invocation = connection.invoke('GMCancelCurrentThreat', commandId);
+			break;
+		case 'GMRestartCurrentThreat':
+			invocation = connection.invoke('GMRestartCurrentThreat', commandId);
+			break;
+		case 'GMResyncThreatRoom':
+			invocation = connection.invoke('GMResyncThreatRoom', commandId);
+			break;
+		default:
+			gmThreatCommandPending = false;
+			return;
+	}
+	invocation.catch(error => {
 		const result = document.getElementById('gmThreatCommandResult');
 		if (result) result.textContent = error?.message || t('unavailableNow');
 	}).finally(() => {
@@ -986,6 +1060,11 @@ function loadPlayerDataForGM() {
 	if (!playerData) {
 		document.getElementById('gmPlayerInfo').style.display = 'none';
 		return;
+	}
+	const transferHostButton = document.getElementById('gmTransferHostButton');
+	if (transferHostButton) {
+		transferHostButton.disabled = !(playerData.canReceiveHost ?? playerData.CanReceiveHost);
+		transferHostButton.title = transferHostButton.disabled ? t('gmHostTransferIneligible') : '';
 	}
 
 	// Reset revealed characteristics for new player
@@ -1096,73 +1175,9 @@ function editCharacteristic(charName) {
 		alert('Виберіть гравця');
 		return;
 	}
-
-	const playerData = gmPlayersData[selectedPlayerForGM];
-	if (!playerData) return;
-
-	let currentValue = '';
-	switch (charName) {
-		case 'Personality': currentValue = formatPersonality(playerData.personality || playerData.Personality); break;
-		case 'Body': currentValue = formatBody(playerData.body || playerData.Body); break;
-		case 'Profession': currentValue = getCharValue(playerData, 'profession', 'Profession') || ''; break;
-		case 'PhysicalHealth': currentValue = getCharValue(playerData, 'physicalHealth', 'PhysicalHealth') || ''; break;
-		case 'MentalHealth': currentValue = getCharValue(playerData, 'mentalHealth', 'MentalHealth') || ''; break;
-		case 'Hobby': currentValue = getCharValue(playerData, 'hobby', 'Hobby') || ''; break;
-		case 'CharacterTrait': currentValue = getCharValue(playerData, 'characterTrait', 'CharacterTrait') || ''; break;
-		case 'Phobia': currentValue = getCharValue(playerData, 'phobia', 'Phobia') || ''; break;
-		case 'Fact':
-			const fact = playerData.fact || playerData.Fact;
-			const factName = fact?.name ?? fact?.Name ?? '';
-			currentValue = factName;
-			break;
-		case 'Inventory':
-			const inv = playerData.inventory || playerData.Inventory;
-			const items = inv?.items ?? inv?.Items ?? [];
-			currentValue = Array.isArray(items)
-				? items.map(item => item.name ?? item.Name).filter(Boolean).join(', ')
-				: '';
-			break;
+	if (typeof openCatalogItemPicker === 'function') {
+		openCatalogItemPicker(charName, selectedPlayerForGM);
 	}
-
-	const playerName = playerData.name || playerData.Name || 'Гравець';
-	document.getElementById('editCharInfo').textContent = `Гравець: ${playerName} | Характеристика: ${charName}`;
-	document.getElementById('editCharValue').value = currentValue;
-	document.getElementById('editCharName').value = charName;
-	document.getElementById('editCharModal').style.display = 'flex';
-}
-
-function submitEditCharacteristic() {
-	if (!selectedPlayerForGM) return;
-
-	const charName = document.getElementById('editCharName').value;
-	const newValue = document.getElementById('editCharValue').value.trim();
-
-	if (!newValue) {
-		alert('Введіть значення');
-		return;
-	}
-
-	connection.invoke("EditPlayerCharacteristic", selectedPlayerForGM, charName, newValue)
-		.catch(err => console.error(err));
-
-	closeEditCharModal();
-}
-
-function clearCharacteristic() {
-	if (!selectedPlayerForGM) return;
-
-	const charName = document.getElementById('editCharName').value;
-
-	if (confirm(`Очистити характеристику ${charName}?`)) {
-		connection.invoke("ClearPlayerCharacteristic", selectedPlayerForGM, charName)
-			.catch(err => console.error(err));
-		closeEditCharModal();
-	}
-}
-
-function closeEditCharModal() {
-	document.getElementById('editCharModal').style.display = 'none';
-	document.getElementById('editCharValue').value = '';
 }
 
 function regenerateCharacteristic(charName) {
@@ -1170,10 +1185,8 @@ function regenerateCharacteristic(charName) {
 		alert('Виберіть гравця');
 		return;
 	}
-
-	if (confirm(`Регенерувати характеристику ${charName}?`)) {
-		connection.invoke("RegeneratePlayerCharacteristic", selectedPlayerForGM, charName)
-			.catch(err => console.error(err));
+	if (typeof openCatalogItemPicker === 'function') {
+		openCatalogItemPicker(charName, selectedPlayerForGM);
 	}
 }
 
@@ -1223,7 +1236,17 @@ function invokeGMPlayerCommand(method, args) {
 	if (gmPlayerCommandPending || !selectedPlayerForGM) return;
 	gmPlayerCommandPending = true;
 	document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = true);
-	connection.invoke(method, ...args, gmPlayerCommandId()).catch(error => {
+	const commandId = gmPlayerCommandId();
+	let invocation;
+	switch (method) {
+		case 'ResyncPlayer': invocation = connection.invoke('ResyncPlayer', args[0], commandId); break;
+		case 'HideRevealedCharacteristic': invocation = connection.invoke('HideRevealedCharacteristic', args[0], args[1], commandId); break;
+		case 'KickPlayer': invocation = connection.invoke('KickPlayer', args[0], commandId); break;
+		case 'ChangeAdditionalConditionSeverity': invocation = connection.invoke('ChangeAdditionalConditionSeverity', args[0], args[1], args[2], commandId); break;
+		case 'RemoveAdditionalCondition': invocation = connection.invoke('RemoveAdditionalCondition', args[0], args[1], commandId); break;
+		default: gmPlayerCommandPending = false; return;
+	}
+	invocation.catch(error => {
 		gmPlayerCommandPending = false;
 		document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
 		const result = document.getElementById('gmPlayerCommandResult');
@@ -1250,10 +1273,36 @@ function hideSelectedCharacteristic() {
 	if (characteristic) invokeGMPlayerCommand('HideRevealedCharacteristic', [selectedPlayerForGM, characteristic]);
 }
 
-function transferHostToSelectedPlayer() {
+async function transferHostToSelectedPlayer() {
 	const player = gmPlayersData[selectedPlayerForGM];
-	if (confirm(`${t('gmTransferHost')}: ${player?.name || player?.Name || ''}?`))
-		invokeGMPlayerCommand('TransferHost', [selectedPlayerForGM]);
+	const canReceiveHost = player?.canReceiveHost ?? player?.CanReceiveHost;
+	const result = document.getElementById('gmPlayerCommandResult');
+	if (!selectedPlayerForGM || !player || canReceiveHost === false) {
+		if (result) result.textContent = t('gmHostTransferIneligible');
+		return;
+	}
+	if (gmPlayerCommandPending) return;
+	gmPlayerCommandPending = true;
+	document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = true);
+	try {
+		const preview = await connection.invoke('PreviewHostTransfer', selectedPlayerForGM);
+		const allowed = preview?.allowed ?? preview?.Allowed;
+		if (!allowed) {
+			if (result) result.textContent = t('gmHostTransferIneligible');
+			return;
+		}
+		const currentHost = preview?.currentHostName ?? preview?.CurrentHostName ?? '';
+		const target = preview?.targetPlayerName ?? preview?.TargetPlayerName ?? '';
+		const warning = t('gmHostTransferRestoreWarning');
+		if (!confirm(`${t('gmHostTransferConfirm')}\n${currentHost} → ${target}\n${warning}`)) return;
+		const fingerprint = preview?.fingerprint ?? preview?.Fingerprint;
+		await connection.invoke('TransferHost', selectedPlayerForGM, gmPlayerCommandId(), fingerprint);
+	} catch (error) {
+		if (result) result.textContent = error?.message || t('unavailableNow');
+	} finally {
+		gmPlayerCommandPending = false;
+		document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+	}
 }
 
 function kickSelectedPlayer() {

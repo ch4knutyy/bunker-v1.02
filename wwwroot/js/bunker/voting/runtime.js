@@ -19,7 +19,9 @@ function rollRoundDice() {
 		return;
 	}
 
-	connection.invoke("RollRoundDice")
+	const commandId = globalThis.crypto?.randomUUID?.() ||
+		`round-dice-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	connection.invoke("RollRoundDice", commandId)
 		.catch(err => console.error("RollRoundDice error:", err));
 }
 
@@ -36,12 +38,13 @@ function submitVotingReadyStatus(status) {
 
 function startVoting() {
 	if (!canStartVotingNow()) {
-		addEventMessage('Помилка: голосування доступне тільки після завершення 3 раунду та готовності гравців');
+		addEventMessage(`Помилка: ${t('gmVotingUnavailable')}`);
 		return;
 	}
 
-	if (confirm('Почати голосування?')) {
-		connection.invoke("StartVoting")
+	const early = currentRoundState?.isEarlyVoting === true;
+	if (confirm(t(early ? 'gmConfirmEarlyVoting' : 'gmConfirmVoting'))) {
+		connection.invoke("StartVoting", crypto.randomUUID())
 			.catch(err => console.error("StartVoting error:", err));
 	}
 }
@@ -102,6 +105,7 @@ function showVotingPanel(data) {
 
 	// Ховаємо кнопку голосування
 	document.getElementById('startVotingBtn').style.display = 'none';
+	syncEndVotingControls();
 }
 
 function updateVotingCandidates() {
@@ -127,11 +131,48 @@ function voteFor(targetConnectionId) {
 		.catch(err => console.error("Vote error:", err));
 }
 
-function endVotingEarly() {
-	if (confirm('Завершити голосування достроково?')) {
-		connection.invoke("EndVoting")
-			.catch(err => console.error("EndVoting error:", err));
+let endVotingPending = false;
+
+function isVotingActive() {
+	const state = currentVoting?.state || currentVoting?.State || '';
+	return currentRoom?.state === 'Voting' && (!state || state === 'Active');
+}
+
+function syncEndVotingControls() {
+	document.querySelectorAll('[data-voting-action="end"]').forEach(button => {
+		const available = isHost && isVotingActive();
+		button.hidden = !available;
+		button.disabled = !available || endVotingPending;
+	});
+}
+
+async function endVotingEarly() {
+	if (endVotingPending || !isVotingActive()) {
+		syncEndVotingControls();
+		return;
 	}
+	if (!confirm('Завершити голосування достроково?')) return;
+
+	endVotingPending = true;
+	syncEndVotingControls();
+	try {
+		await connection.invoke("EndVoting");
+	} catch (err) {
+		console.error("EndVoting error:", err);
+		addEventMessage(`Помилка: ${localizeServerMessage(err?.message || 'EndVoting')}`);
+	} finally {
+		endVotingPending = false;
+		syncEndVotingControls();
+	}
+}
+
+function initializeVotingControls() {
+	if (document.documentElement.dataset.votingControlsBound === 'true') return;
+	document.documentElement.dataset.votingControlsBound = 'true';
+	document.addEventListener('click', event => {
+		if (event.target.closest('[data-voting-action="end"]')) endVotingEarly();
+	});
+	syncEndVotingControls();
 }
 
 function cancelVoting() {

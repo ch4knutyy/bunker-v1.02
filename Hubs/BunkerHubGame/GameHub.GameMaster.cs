@@ -5,6 +5,8 @@ using Bunker.Services;
 using Bunker.Models.ViewModels;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -57,6 +59,16 @@ namespace Bunker.Hubs
                     IsConnected = player.IsConnected,
                     IsEliminated = player.IsEliminated,
                     IsSpectatorGm = player.IsSpectatorGm,
+                    CanReceiveHost = !room.IsHost(player) && RoomService.CanReceiveHost(player),
+                    HostEligibilityCode = room.IsHost(player)
+                        ? "current_host"
+                        : RoomService.CanReceiveHost(player)
+                            ? "eligible"
+                            : !player.IsConnected
+                                ? "offline"
+                                : player.IsEliminated
+                                    ? "eliminated"
+                                    : "spectator",
                     EliminatedAtRound = player.EliminatedAtRound,
                     EliminatedByVote = player.EliminatedByVote,
                     CanRevealAllAfterElimination = player.CanRevealAllAfterElimination,
@@ -131,11 +143,15 @@ namespace Bunker.Hubs
             return clientPlayer;
         }
 
-        private async Task SendPersonalPlayerSnapshot(string connectionId, Player player, string reason)
+        private async Task SendPersonalPlayerSnapshot(
+            string connectionId,
+            Player player,
+            string reason,
+            object? notification = null)
         {
             await Clients.Client(connectionId).SendAsync(
                 "PlayerStateResynced",
-                new { player = BuildPlayerClientState(player), reason });
+                new { player = BuildPlayerClientState(player), reason, notification });
             await SendEventSpecialCardsUpdate(connectionId, player, reason);
         }
 
@@ -182,6 +198,11 @@ namespace Bunker.Hubs
             }
 
             characteristicName = NormalizeCharacteristicName(characteristicName);
+            if (CatalogItemService.IsCatalogCategory(characteristicName))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "catalog_picker_required");
+                return;
+            }
             if (await RejectHiddenSpecialCardAccess(characteristicName)) return;
 
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
@@ -254,6 +275,11 @@ namespace Bunker.Hubs
             }
 
             characteristicName = NormalizeCharacteristicName(characteristicName);
+            if (CatalogItemService.IsCatalogCategory(characteristicName))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "catalog_picker_required");
+                return;
+            }
             if (await RejectHiddenSpecialCardAccess(characteristicName)) return;
 
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
@@ -317,6 +343,11 @@ namespace Bunker.Hubs
             }
 
             characteristicName = NormalizeCharacteristicName(characteristicName);
+            if (CatalogItemService.IsCatalogCategory(characteristicName))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "catalog_picker_required");
+                return;
+            }
             if (await RejectHiddenSpecialCardAccess(characteristicName)) return;
 
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
@@ -410,7 +441,8 @@ namespace Bunker.Hubs
 
             room.CurrentRoundReveals ??= new();
             var playerKey = RoomService.GetPlayerKey(player);
-            if (room.CurrentRoundReveals.ContainsKey(playerKey))
+            if (room.CurrentRoundReveals.ContainsKey(playerKey) &&
+                !player.RevealRequirementSatisfiedByCredit)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Цей гравець уже розкрив характеристику в поточному раунді");
                 return;
@@ -424,6 +456,8 @@ namespace Bunker.Hubs
 
             SetCharacteristicRevealed(player, characteristicName);
             room.CurrentRoundReveals[playerKey] = characteristicName;
+            player.HasCompletedRevealThisRound = true;
+            player.RevealRequirementSatisfiedByCredit = false;
             _roomService.UpdatePlayer(targetCurrentConnectionId, player);
 
             var revealedData = GetRevealedDataForCharacteristic(player, characteristicName);
@@ -469,7 +503,6 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
                 return;
             }
-
             if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.RoundReveal)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Раунд можна завершити тільки під час фази розкриття характеристик");
@@ -521,26 +554,9 @@ namespace Bunker.Hubs
                 await Clients.Group(roomId).SendAsync("RoundStateUpdated", extraInventoryState);
             }
 
-            if (IsVotingRound(room, completedRound))
-            {
-                if (!threatTriggered)
-                {
-                    room.CurrentPhase = GamePhase.PreVotingReadyCheck;
-                    var postRoundState = BuildRoundState(room);
-                    await Clients.Group(roomId).SendAsync("VotingReadyCheckStarted", new
-                    {
-                        round = room.CurrentRound,
-                        message = "Всі готові до голосування?",
-                        roundState = postRoundState
-                    });
-                    await Clients.Group(roomId).SendAsync("RoundStateUpdated", postRoundState);
-                }
-                return;
-            }
-
             RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
             room.CurrentRound = completedRound + 1;
-            room.CurrentRoundReveals.Clear();
+            await BeginRevealRound(room);
             room.VotingReadyResponses.Clear();
             room.CurrentPhase = GamePhase.RoundReveal;
             StartConfiguredRoundTimer(room);
@@ -565,7 +581,7 @@ namespace Bunker.Hubs
         /// <summary>
         /// Кинути кубик після того, як усі активні гравці відкрили характеристику в раунді.
         /// </summary>
-        public async Task RollRoundDice()
+        public async Task RollRoundDice(string commandId)
         {
             if (!IsCallerHost())
             {
@@ -586,6 +602,11 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
                 return;
             }
+            if (string.IsNullOrWhiteSpace(commandId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "command_id_required");
+                return;
+            }
 
             if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.RoundReveal)
             {
@@ -601,34 +622,71 @@ namespace Bunker.Hubs
 
             var round = room.CurrentRound <= 0 ? 1 : room.CurrentRound;
             room.RoundDiceRolls ??= new();
-            if (room.RoundDiceRolls.ContainsKey(round))
+            RoundDiceRoll? roll;
+            var idempotent = false;
+            lock (room.ProcessedGmPlayerCommandIds)
+            {
+                if (room.ProcessedGmPlayerCommandIds.Contains(commandId))
+                {
+                    room.RoundDiceRolls.TryGetValue(round, out roll);
+                    idempotent = true;
+                }
+                else if (room.RoundDiceRolls.ContainsKey(round))
+                {
+                    roll = null;
+                }
+                else
+                {
+                    _roomService.TryResolvePlayer(
+                        room,
+                        Context.ConnectionId,
+                        out var hostConnectionId,
+                        out var hostPlayer);
+                    roll = new RoundDiceRoll
+                    {
+                        Round = round,
+                        Value = _random.Next(1, 7),
+                        RolledAt = DateTime.UtcNow,
+                        RolledByConnectionId = hostConnectionId ?? Context.ConnectionId,
+                        RolledByPlayerId = hostPlayer == null ? "" : RoomService.GetPlayerKey(hostPlayer),
+                        RolledByPlayerName = hostPlayer?.Name ?? "GM"
+                    };
+                    room.RoundDiceRolls[round] = roll;
+                    room.ProcessedGmPlayerCommandIds.Add(commandId);
+                }
+            }
+            if (roll is null)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Кубик у цьому раунді вже кинуто");
                 return;
             }
-
-            _roomService.TryResolvePlayer(room, Context.ConnectionId, out var hostConnectionId, out var hostPlayer);
-            var roll = new RoundDiceRoll
-            {
-                Round = round,
-                Value = _random.Next(1, 7),
-                RolledAt = DateTime.UtcNow,
-                RolledByConnectionId = hostConnectionId ?? Context.ConnectionId,
-                RolledByPlayerId = hostPlayer == null ? "" : RoomService.GetPlayerKey(hostPlayer),
-                RolledByPlayerName = hostPlayer?.Name ?? "GM"
-            };
-
-            room.RoundDiceRolls[round] = roll;
             var roundState = BuildRoundState(room);
 
-            await Clients.Group(roomId).SendAsync("RoundDiceRolled", new
+            var payload = new
             {
                 roll,
                 diceRoll = roll,
                 roundState,
-                message = $"Кубик: {roll.Value}"
-            });
+                message = $"Кубик: {roll.Value}",
+                idempotent
+            };
+            if (idempotent)
+            {
+                await Clients.Caller.SendAsync("RoundDiceRolled", payload);
+                return;
+            }
+
+            await Clients.Group(roomId).SendAsync("RoundDiceRolled", payload);
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            await AppendGmAudit(
+                room,
+                roll.RolledByPlayerId,
+                "round_dice_roll",
+                GmAuditResult.Success,
+                $"Server dice roll; room:{room.Id}; round:{round}; result:{roll.Value}; purpose:round_reveal; timestamp:{roll.RolledAt:O}.",
+                commandId: commandId,
+                allowUndo: false);
+            QueueRoomRecovery(room, "round_dice_roll");
 
             _logger.LogInformation(
                 "Хост {HostName} кинув кубик у кімнаті {RoomName}, раунд {Round}: {Value}",
@@ -663,9 +721,9 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (room.State != RoomState.Playing || room.CurrentRound < 3 || room.CurrentPhase != GamePhase.ExtraInventory)
+            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.ExtraInventory)
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Готовність до голосування доступна тільки після завершення 3 раунду, загрози та додаткового інвентарю");
+                await Clients.Caller.SendAsync("ReceiveError", "Готовність до голосування доступна після завершення поточного раунду, загрози та додаткового інвентарю");
                 return;
             }
 
@@ -760,7 +818,7 @@ namespace Bunker.Hubs
                 }
                 RestoreExpiredTemporarySpecialCardEffects(room, room.CurrentRound);
                 room.CurrentRound++;
-                room.CurrentRoundReveals.Clear();
+                await BeginRevealRound(room);
                 room.VotingReadyResponses.Clear();
                 room.CurrentPhase = GamePhase.RoundReveal;
                 StartConfiguredRoundTimer(room);
@@ -903,31 +961,50 @@ namespace Bunker.Hubs
         /// <summary>
         /// Змінити бункер на інший (тільки хост)
         /// </summary>
-        public async Task RegenerateBunker()
+        public async Task RegenerateBunker(string commandId)
         {
-            if (!IsCallerHost())
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати бункер");
-                return;
-            }
-
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-            if (room == null)
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                await Clients.Caller.SendAsync("ReceiveError", "bunker_management_denied");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(commandId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "command_id_required");
+                return;
+            }
+            if (room.State == RoomState.Finished || _gameData.Bunkers.Count == 0)
+            {
+                await Clients.Caller.SendAsync(
+                    "ReceiveError",
+                    room.State == RoomState.Finished ? "game_finished" : "bunker_catalog_empty");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("BunkerChanged", new
+                {
+                    bunker = _bunkerIntel.Project(room, null),
+                    idempotent = true
+                });
                 return;
             }
 
-            if (_gameData.Bunkers.Count == 0)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Немає доступних бункерів");
-                return;
-            }
-
+            var snapshot = CreateMutationSnapshot(
+                room, GetGmActorId(room), "bunker_regenerate", commandId, "Before bunker regeneration");
             room.Bunker = CloneBunkerInfo(_gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)]);
-
-            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
+            await Clients.Group(room.Id).SendAsync("BunkerChanged", new
+            {
+                bunker = _bunkerIntel.Project(room, null),
+                idempotent = false
+            });
             await BroadcastBunkerIntelProjection(room);
+            QueueRoomRecovery(room, "bunker_regenerate");
+            await AppendGmAudit(
+                room, GetGmActorId(room), "bunker_regenerate", GmAuditResult.Success,
+                $"Bunker was regenerated from canonical record {room.Bunker.Id}.",
+                commandId: commandId, snapshot: snapshot);
 
             _logger.LogInformation($"GM змінив бункер на {room.Bunker.Name} в кімнаті {room.Name}");
         }
@@ -935,35 +1012,51 @@ namespace Bunker.Hubs
         /// <summary>
         /// Змінити апокаліпсис (тільки хост)
         /// </summary>
-        public async Task RegenerateApocalypse()
+        public async Task RegenerateApocalypse(string commandId)
         {
-            if (!IsCallerHost())
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може змінювати апокаліпсис");
-                return;
-            }
-
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-            if (room == null)
+            if (room == null || !HasGmCapability(room, GmCapability.ManagePublicGameState))
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Кімнату не знайдено");
+                await Clients.Caller.SendAsync("ReceiveError", "apocalypse_management_denied");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(commandId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "command_id_required");
+                return;
+            }
+            if (room.State == RoomState.Finished || _gameData.Apocalypses.Count == 0)
+            {
+                await Clients.Caller.SendAsync(
+                    "ReceiveError",
+                    room.State == RoomState.Finished ? "game_finished" : "apocalypse_catalog_empty");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("ApocalypseChanged", new
+                {
+                    apocalypse = room.Apocalypse?.ToClientInfo(),
+                    idempotent = true
+                });
                 return;
             }
 
-            if (_gameData.Apocalypses.Count == 0)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Немає доступних апокаліпсисів");
-                return;
-            }
-
-            room.Apocalypse = _gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)];
+            var snapshot = CreateMutationSnapshot(
+                room, GetGmActorId(room), "apocalypse_regenerate", commandId, "Before apocalypse regeneration");
+            room.Apocalypse = CloneApocalypse(_gameData.Apocalypses[_random.Next(_gameData.Apocalypses.Count)]);
             room.ApocalypseRevealed = true;
 
-            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId)!;
-            await Clients.Group(roomId).SendAsync("ApocalypseChanged", new
+            await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new
             {
-                apocalypse = room.Apocalypse.ToClientInfo()
+                apocalypse = room.Apocalypse.ToClientInfo(),
+                idempotent = false
             });
+            QueueRoomRecovery(room, "apocalypse_regenerate");
+            await AppendGmAudit(
+                room, GetGmActorId(room), "apocalypse_regenerate", GmAuditResult.Success,
+                $"Apocalypse was regenerated from canonical record {room.Apocalypse.Id}.",
+                commandId: commandId, snapshot: snapshot);
 
             _logger.LogInformation($"GM змінив апокаліпсис на {room.Apocalypse.Name} в кімнаті {room.Name}");
         }
@@ -1717,45 +1810,159 @@ namespace Bunker.Hubs
                 "Player public state was resynchronized.", GetSafeAuditPlayerId(player), commandId);
         }
 
-        public async Task TransferHost(string targetPlayerId, string? commandId = null)
+        public Task<HostTransferPreviewDto> PreviewHostTransfer(string targetPlayerId)
         {
-            if (!TryGetManagedPlayer(targetPlayerId, out var room, out var connectionId, out var player))
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !IsCallerHost())
+                throw new HubException("host_transfer_access_denied");
+            if (!_roomService.TryResolvePlayer(room, targetPlayerId, out var connectionId, out var player))
+                throw new HubException("player_not_found");
+            return Task.FromResult(BuildHostTransferPreview(room, connectionId, player));
+        }
+
+        public async Task TransferHost(
+            string targetPlayerId,
+            string? commandId = null,
+            string? previewFingerprint = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null)
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Недостатньо прав або гравця не знайдено");
+                await Clients.Caller.SendAsync("ReceiveError", "room_not_found");
                 return;
             }
-            if (!RememberPlayerCommand(room, commandId)) return;
+
+            var duplicateCommand = false;
+            if (!string.IsNullOrWhiteSpace(commandId))
+            {
+                lock (room.ProcessedGmPlayerCommandIds)
+                    duplicateCommand = room.ProcessedGmPlayerCommandIds.Contains(commandId);
+            }
+            if (duplicateCommand)
+            {
+                await Clients.Caller.SendAsync("HostChanged", new
+                {
+                    newHostConnectionId = room.HostConnectionId,
+                    newHostPlayerId = room.HostPlayerId,
+                    newHostName = room.HostName,
+                    gmMode = room.GmMode.ToString(),
+                    idempotent = true
+                });
+                return;
+            }
+
+            if (!IsCallerHost() ||
+                !_roomService.TryResolvePlayer(room, targetPlayerId, out var connectionId, out var player))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "host_transfer_access_denied");
+                return;
+            }
             if (room.IsHost(player))
             {
                 await SendPlayerHostControlData(room);
                 return;
             }
-            if (!player.IsConnected)
+
+            var preview = BuildHostTransferPreview(room, connectionId, player);
+            if (!preview.Allowed)
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
+                await Clients.Caller.SendAsync("ReceiveError", preview.Code);
                 return;
             }
+            if (!string.IsNullOrWhiteSpace(previewFingerprint) &&
+                !string.Equals(previewFingerprint, preview.Fingerprint, StringComparison.Ordinal))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "stale_host_transfer_preview");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("HostChanged", new
+                {
+                    newHostConnectionId = room.HostConnectionId,
+                    newHostPlayerId = room.HostPlayerId,
+                    newHostName = room.HostName,
+                    gmMode = room.GmMode.ToString(),
+                    idempotent = true
+                });
+                return;
+            }
+
             var oldHostConnectionId = room.HostConnectionId;
-            var oldHostPlayerId = GetGmActorId(room);
-            var transferSnapshot = CreateMutationSnapshot(room, oldHostPlayerId, "host_transfer", commandId, "Before host transfer");
+            var oldHostPlayerId = room.HostPlayerId;
+            var oldHostName = room.HostName;
             if (!_roomService.TransferHost(room, connectionId, out _))
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Хоста можна передати лише активному гравцю");
+                if (!string.IsNullOrWhiteSpace(commandId))
+                {
+                    lock (room.ProcessedGmPlayerCommandIds)
+                        room.ProcessedGmPlayerCommandIds.Remove(commandId);
+                }
+                await Clients.Caller.SendAsync("ReceiveError", "host_transfer_target_ineligible");
                 return;
             }
             await Clients.Group(room.Id).SendAsync("HostChanged", new
             {
                 oldHostConnectionId,
+                oldHostPlayerId,
+                oldHostName,
                 newHostConnectionId = connectionId,
+                newHostPlayerId = RoomService.GetPlayerKey(player),
                 newHostName = player.Name,
-                gmMode = GmMode.PlayerHost.ToString()
+                gmMode = GmMode.PlayerHost.ToString(),
+                idempotent = false
             });
             await Clients.Client(connectionId).SendAsync("AllPlayersData", BuildPlayerHostControlData(room));
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "transfer_host", playerName = player.Name });
             await SendPublicPlayersUpdate(room);
             await AppendGmAudit(room, oldHostPlayerId, "host_transfer", GmAuditResult.Success,
-                "Host role was transferred.", GetSafeAuditPlayerId(player), commandId, snapshot: transferSnapshot, allowUndo: false);
+                $"Host role was transferred from {oldHostName} to {player.Name}; room restore does not restore host topology.",
+                GetSafeAuditPlayerId(player), commandId, allowUndo: false);
             await BroadcastLobbyState(room);
+        }
+
+        private static HostTransferPreviewDto BuildHostTransferPreview(
+            Room room,
+            string targetConnectionId,
+            Player target)
+        {
+            var targetId = RoomService.GetPlayerKey(target);
+            var self = room.IsHost(target);
+            var eligible = !self && RoomService.CanReceiveHost(target);
+            var code = self
+                ? "host_transfer_self_noop"
+                : eligible
+                    ? "available"
+                    : !target.IsConnected
+                        ? "host_transfer_target_offline"
+                        : target.IsEliminated
+                            ? "host_transfer_target_eliminated"
+                            : "host_transfer_target_spectator";
+            var fingerprintSource = string.Join(
+                "|",
+                room.Id,
+                room.HostPlayerId,
+                room.HostConnectionId,
+                targetId,
+                targetConnectionId,
+                target.IsConnected,
+                target.IsEliminated,
+                target.IsSpectatorGm,
+                target.IsLobbySpectator,
+                target.GmRole);
+            var fingerprint = Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes(fingerprintSource))).ToLowerInvariant();
+            return new(
+                eligible,
+                code,
+                room.HostPlayerId,
+                room.HostName,
+                targetId,
+                target.Name,
+                target.IsConnected,
+                RoomService.CanReceiveHost(target),
+                "Звичайне відновлення кімнати не повертає попереднього ведучого.",
+                fingerprint);
         }
 
         public async Task InspectStalePlayerConnection(string targetConnectionId, bool fix = false)

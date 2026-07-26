@@ -7,6 +7,8 @@ async function startRoom(room) {
   await expect(room.host.locator('#lobbySummary')).toContainText(/2 (із|of|из) 2/, { timeout: 15000 });
   await room.host.locator('#lobbyStartPreviewButton').click();
   await expect(room.host.locator('#lobbyStartPreview')).toContainText(/готова до старту|ready to start|готова к старту/i);
+  const guestWarning = room.host.locator('#guestAccountWarningModal');
+  if (await guestWarning.isVisible()) await room.host.locator('#guestWarningContinueButton').click();
   await room.host.locator('#startGameBtn').click();
   await expect(room.host.locator('#bunkerContent .bunker-facility-shell')).toHaveCount(1, { timeout: 15000 });
 }
@@ -115,6 +117,51 @@ test('desktop no-image and broken-image states retain a restrained fallback patt
     await expect(hero).toHaveClass(/no-image/);
     await expect(hero.locator('.bunker-hero-media')).toHaveCount(0);
     expect(await hero.locator('.bunker-hero-pattern').evaluate(element => Number(getComputedStyle(element).opacity))).toBe(.14);
+  } finally {
+    await room.close();
+  }
+});
+
+test('bunker composition is deterministic, survives refresh and keeps controls functional', async ({ browser }) => {
+  const room = await createTwoPlayerRoom(browser, `Bunker theme ${Date.now()}`);
+  const errors = [];
+  room.host.on('pageerror', error => errors.push(error.message));
+  try {
+    await startRoom(room);
+    const initial = await room.host.evaluate(() => ({
+      bunkerId: currentBunker?.id || currentBunker?.Id,
+      archetype: document.body.dataset.bunkerArchetype,
+      signature: [
+        document.body.dataset.bunkerArchetype,
+        document.body.dataset.bunkerCondition,
+        document.body.dataset.bunkerMaterial,
+        document.body.dataset.bunkerCleanliness,
+        document.body.dataset.bunkerTechnology,
+        document.body.dataset.bunkerAtmosphere,
+        document.body.dataset.bunkerVariation
+      ].join('|')
+    }));
+    expect(initial.bunkerId).toBeTruthy();
+    expect(initial.archetype).toMatch(/^(medical|military|industrial|dirty|scientific|nuclear|government|luxury|civilian|improvised|underground-city|mine|submarine|prison|religious|agricultural|cryogenic|abandoned)$/);
+
+    await room.host.reload();
+    await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+    await expect.poll(() => room.host.evaluate(() => [
+      document.body.dataset.bunkerArchetype,
+      document.body.dataset.bunkerCondition,
+      document.body.dataset.bunkerMaterial,
+      document.body.dataset.bunkerCleanliness,
+      document.body.dataset.bunkerTechnology,
+      document.body.dataset.bunkerAtmosphere,
+      document.body.dataset.bunkerVariation
+    ].join('|'))).toBe(initial.signature);
+
+    await room.host.evaluate(nextBunker => { currentBunker = nextBunker; renderBunker(currentBunker); }, fixture());
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-archetype', 'military');
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-condition', 'fair');
+    await room.host.locator('[data-player-view="single"]').click();
+    await expect(room.host.locator('#singlePlayerOverview')).toBeVisible();
+    expect(errors).toEqual([]);
   } finally {
     await room.close();
   }

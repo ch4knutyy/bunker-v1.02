@@ -16,7 +16,17 @@ public sealed record GmPanelAvailableActionsDto(
 	bool CanStartGame,
 	bool CanAdvanceRound,
 	bool CanEndRound,
-	bool CanEndGame);
+	bool CanEndGame,
+	bool CanStartVoting,
+	bool CanEndVoting,
+	bool CanCancelVoting,
+	bool CanStartTimer,
+	bool CanPauseTimer,
+	bool CanResumeTimer,
+	bool CanAdjustTimer,
+	bool CanManageActiveThreat,
+	bool CanFinishPostGameDiscussion,
+	string PrimaryAction);
 
 public sealed record GmPanelPlayerSummaryDto(
 	string PlayerId,
@@ -27,7 +37,9 @@ public sealed record GmPanelPlayerSummaryDto(
 	bool IsHost,
 	int RevealedCount,
 	bool IsProtectedFromVote,
-	bool IsCurrentTurn);
+	bool IsCurrentTurn,
+	string RevealRequirementStatus,
+	int? FutureRevealCredits);
 
 public sealed record GmPanelStateDto(
 	string RoomCode,
@@ -36,6 +48,8 @@ public sealed record GmPanelStateDto(
 	string Phase,
 	int Round,
 	int ActivePlayerCount,
+	int ReadyPlayerCount,
+	int ReadyRequiredCount,
 	int? BunkerCapacity,
 	string TimerStatus,
 	int TimerRemainingSeconds,
@@ -43,9 +57,13 @@ public sealed record GmPanelStateDto(
 	int VotesCast,
 	int RequiredVotes,
 	bool VotingIsTie,
+	int RecommendedStartRound,
+	int? VotingStartedAtRound,
+	bool IsEarlyVoting,
 	string ThreatStatus,
 	string? ThreatName,
 	bool IsCompleted,
+	string PostGamePhase,
 	GmPanelPermissionsDto Permissions,
 	GmPanelAvailableActionsDto AvailableActions,
 	IReadOnlyList<GmPanelPlayerSummaryDto> Players);

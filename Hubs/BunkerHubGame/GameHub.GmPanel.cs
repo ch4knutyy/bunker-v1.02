@@ -90,6 +90,92 @@ public partial class GameHub
 		}
 	}
 
+	public async Task AdjustRevealCredits(
+		string targetPlayerId,
+		int delta,
+		string commandId)
+	{
+		var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+		if (room is null ||
+			!_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var actor) ||
+			!_developerAuthority.IsDeveloper(actor) ||
+			!HasActiveRoomCapability(room, actor, RoomActorCapability.UseDeveloperTools))
+		{
+			throw new HubException("developer_required");
+		}
+		if (delta is not (-1 or 1))
+		{
+			throw new HubException("invalid_credit_adjustment");
+		}
+		if (!_roomService.TryResolvePlayer(
+				room,
+				targetPlayerId,
+				out var targetConnectionId,
+				out var target) ||
+			!RoomService.IsGameplayParticipant(target))
+		{
+			throw new HubException("player_not_found");
+		}
+		if (string.IsNullOrWhiteSpace(commandId))
+		{
+			throw new HubException("command_id_required");
+		}
+		if (!RememberPlayerCommand(room, commandId))
+		{
+			await Clients.Caller.SendAsync("GMActionSuccess", new
+			{
+				action = "reveal_credit_adjusted",
+				playerName = target.Name,
+				futureRevealCredits = target.FutureRevealCredits,
+				idempotent = true
+			});
+			return;
+		}
+
+		var before = target.FutureRevealCredits;
+		var after = Math.Max(0, before + delta);
+		var appliedDelta = after - before;
+		var snapshot = CreateMutationSnapshot(
+			room,
+			RoomService.GetPlayerKey(actor),
+			"reveal_credit_adjust",
+			commandId,
+			"Before reveal credit adjustment");
+		target.FutureRevealCredits = after;
+		_roomService.UpdatePlayer(targetConnectionId, target);
+
+		_developerAuthority.Audit(
+			room,
+			actor,
+			RoomActorCapability.UseDeveloperTools,
+			"reveal_credit_adjust",
+			"success",
+			RoomService.GetPlayerKey(target),
+			commandId);
+		await AppendGmAudit(
+			room,
+			RoomService.GetPlayerKey(actor),
+			"reveal_credit_adjust",
+			GmAuditResult.Success,
+			$"Reveal credits adjusted at round {room.CurrentRound}; delta:{appliedDelta}; total:{after}.",
+			RoomService.GetPlayerKey(target),
+			commandId,
+			snapshot: snapshot);
+		await SendPersonalPlayerSnapshot(
+			targetConnectionId,
+			target,
+			"reveal_credit_adjusted");
+		QueueRoomRecovery(room, "reveal_credit_adjusted");
+		await Clients.Caller.SendAsync("GMActionSuccess", new
+		{
+			action = "reveal_credit_adjusted",
+			playerName = target.Name,
+			futureRevealCredits = after,
+			delta = appliedDelta,
+			idempotent = false
+		});
+	}
+
 	public Task<PropertyEditorDataDto> GetPlayerPropertyEditor(
 		string targetPlayerId,
 		string? language = null)

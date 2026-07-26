@@ -255,7 +255,7 @@ test('host can roll dice once after all players reveal in a round', async ({ bro
 		await expect(room.host.locator('#rollDiceBtn')).toBeVisible({ timeout: 15000 });
 		await expect(room.host.locator('#rollDiceBtn')).toBeDisabled();
 
-		await room.host.evaluate(() => connection.invoke('RollRoundDice'));
+		await room.host.evaluate(() => connection.invoke('RollRoundDice', crypto.randomUUID()));
 		await expect(room.host.locator('#events')).toContainText('Кубик доступний після reveal усіх активних гравців', {
 			timeout: 15000,
 		});
@@ -270,7 +270,7 @@ test('host can roll dice once after all players reveal in a round', async ({ bro
 		await expect(room.host.locator('#rollDiceBtn')).toBeDisabled({ timeout: 15000 });
 
 		const diceText = await room.host.locator('#roundDiceResult').innerText();
-		await room.host.evaluate(() => connection.invoke('RollRoundDice'));
+		await room.host.evaluate(() => connection.invoke('RollRoundDice', crypto.randomUUID()));
 		await expect(room.host.locator('#events')).toContainText('Кубик у цьому раунді вже кинуто', {
 			timeout: 15000,
 		});

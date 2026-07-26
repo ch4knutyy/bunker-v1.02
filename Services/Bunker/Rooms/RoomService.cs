@@ -187,18 +187,33 @@ namespace Bunker.Services
         {
             newHost = null;
             if (!TryResolvePlayer(room, targetConnectionId, out var currentConnectionId, out var player) ||
-                !player.IsConnected)
+                !CanReceiveHost(player))
             {
                 return false;
             }
 
-            room.HostConnectionId = currentConnectionId;
-            room.HostPlayerId = GetPlayerKey(player);
-            room.HostName = player.Name ?? "Unknown";
-            room.GmMode = GmMode.PlayerHost;
-            newHost = player;
-            return true;
+            lock (room.Players)
+            {
+                if (!TryResolvePlayer(room, currentConnectionId, out currentConnectionId, out player) ||
+                    !CanReceiveHost(player))
+                    return false;
+
+                room.HostConnectionId = currentConnectionId;
+                room.HostPlayerId = GetPlayerKey(player);
+                room.HostName = player.Name ?? "Unknown";
+                room.GmMode = GmMode.PlayerHost;
+                newHost = player;
+                return true;
+            }
         }
+
+        public static bool CanReceiveHost(Player? player) =>
+            player is not null &&
+            player.IsConnected &&
+            !player.IsEliminated &&
+            !player.IsSpectatorGm &&
+            !player.IsLobbySpectator &&
+            player.GmRole != GmMode.TechnicalGm;
 
         public StaleConnectionResult InspectStaleConnection(Room room, string connectionId, bool fix)
         {
@@ -359,7 +374,7 @@ namespace Bunker.Services
 			room.CurrentPhase = GamePhase.RoundReveal;
 			room.CurrentTurnPlayerId = null;
 			room.CurrentVoting = null;
-			room.CurrentRoundReveals.Clear();
+			RevealCreditService.ResetForNewGame(room);
 			room.RoundDiceRolls.Clear();
 			room.AdditionalInventoryGrantedAfterRound3 = false;
 			room.CurrentThreat = null;

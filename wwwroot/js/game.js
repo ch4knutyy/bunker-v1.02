@@ -74,6 +74,7 @@ let globalCatalogSearchTimer = null;
 let globalCatalogAccessRoomId = null;
 let globalDrafts = [];
 let globalDraftPending = false;
+let globalContentEditorDefinition = null;
 let globalRollbackPreview = null;
 let globalMigrationPreview = null;
 let currentGameTimer = null;
@@ -515,6 +516,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Ініціалізація tooltip для мобільних
 	initMobileTooltips();
+	initializeVotingControls();
 });
 
 // Обробка перепідключення
@@ -527,6 +529,7 @@ connection.onreconnected(connectionId => {
 	console.log("SignalR reconnected, connectionId:", connectionId);
 	myConnectionId = connectionId;
 	updateConnectionStatus("✓ Перепідключено");
+	window.refreshGmPanelV2State?.();
 	if (!tryRejoin()) {
 		connection.invoke("GetRooms");
 	}
@@ -1289,4 +1292,3 @@ const lobbySettingBooleanKeys = new Set(['spectatorsAllowed', 'allowSpectatorsAf
 // revealAllEliminatedPlayerCharacteristics moved to ~/js/bunker/characters/runtime.js
 
 // addEventMessage moved to ~/js/bunker/ui/runtime.js
-

@@ -263,7 +263,7 @@ function clearApocalypseCardRevealWave(options = {}) {
 function triggerApocalypseCardRevealWave(apocalypse) {
 	if (!apocalypse) return false;
 	const id = String(apocalypse.id ?? apocalypse.Id ?? '').trim();
-	const revealKey = id || `${resolveApocalypseVisualTheme(apocalypse)}:${String(apocalypse.categoryId ?? apocalypse.CategoryId ?? '')}`;
+	const revealKey = id || `${resolveApocalypseVisualTheme(apocalypse).themeId}:${String(apocalypse.categoryId ?? apocalypse.CategoryId ?? '')}`;
 	if (!revealKey || revealKey === lastApocalypseCardRevealKey) return false;
 	lastApocalypseCardRevealKey = revealKey;
 	if (getApocalypseEffectsLevel() === 'off' || prefersReducedApocalypseMotion()) return false;

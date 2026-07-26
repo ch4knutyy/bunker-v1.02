@@ -1,40 +1,88 @@
 (function setupGmPanelV2() {
-    const allowedTabs = ["game", "players", "voting", "threats", "bunker", "events", "technical", "overview"];
-    const liveEvents = [
-        "RoundStateUpdated",
-        "GameTimerUpdated",
-        "VotingStarted",
-        "VotingProgress",
-        "VotingEnded",
-        "VotingResolved",
-        "VotingCancelled",
-        "VotingAdminUpdated",
-        "ThreatStateUpdated",
-        "GMThreatControlData",
-        "BunkerCapacityUpdated",
-        "BunkerSuppliesAdded",
-        "BunkerSuppliesRemoved",
-        "BunkerWaterAdded",
-        "BunkerWaterRemoved",
-        "BunkerUpdated",
-        "RoomJoined",
-        "RejoinSuccess",
-        "RoomPlayersUpdated",
-        "PlayerReconnected",
-        "PlayerEliminated",
-        "PlayerRestored",
-        "GameCompleted"
-    ];
+    const allowedTabs = ["game", "players", "events", "history", "tools", "diagnostics", "recovery", "overview"];
     let gmPanelV2State = null;
     let selectedStablePlayerId = null;
     let refreshTimer = null;
     let commandPending = false;
     let propertyEditorData = null;
     let propertyEditorPending = false;
-    let panelMode = "simple";
 
     function value(source, camel, pascal) {
         return source?.[camel] ?? source?.[pascal];
+    }
+
+    function text(key, fallback = "—") {
+        if (typeof t !== "function") return fallback;
+        const translated = t(key);
+        return translated && translated !== key ? translated : fallback;
+    }
+
+    const statusTranslationKeys = Object.freeze({
+        waiting: "gmValueWaiting",
+        lobby: "gmValueLobby",
+        playing: "gmValuePlaying",
+        voting: "gmValueVoting",
+        finished: "gmValueFinished",
+        roundreveal: "gmValueRoundReveal",
+        roundended: "gmValueRoundEnded",
+        threat: "gmValueThreat",
+        discussion: "gmValueDiscussion",
+        results: "gmValueResults",
+        extrainventory: "gmValueExtraInventory",
+        prevotingreadycheck: "gmValuePreVotingReadyCheck",
+        votingresults: "gmValueVotingResults",
+        finaldiscussion: "gmValueFinalDiscussion",
+        hostdecision: "gmValueHostDecision",
+        storyrequested: "gmValueStoryRequested",
+        storypreparation: "gmValueStoryPreparation",
+        storypublished: "gmValueStoryPublished",
+        inactive: "gmValueInactive",
+        active: "gmValueActive",
+        completed: "gmValueCompleted",
+        resolved: "gmValueResolved",
+        hidden: "gmValueHidden",
+        visible: "gmValueVisible",
+        revealed: "gmValueRevealed",
+        stopped: "gmValueStopped",
+        running: "gmValueRunning",
+        paused: "gmValuePaused",
+        expired: "gmValueExpired",
+        aborted: "gmValueAborted",
+        resolvedsafely: "gmValueSuccess",
+        resolvedwithcasualty: "gmValueCompleted",
+        failed: "gmValueFailure",
+        success: "gmValueSuccess",
+        failure: "gmValueFailure",
+        collectingcontributions: "gmValueCollecting",
+        none: "gmValueNone",
+        unknown: "gmValueUnknown"
+    });
+    const roleTranslationKeys = Object.freeze({
+        host: "gmRoleHost",
+        developer: "gmRoleDeveloper",
+        omniscientgm: "gmRoleOmniscient",
+        technicalgm: "gmRoleTechnical"
+    });
+
+    function normalizedTechnicalValue(rawValue) {
+        return String(rawValue ?? "")
+            .trim()
+            .toLocaleLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+    }
+
+    function localizedGmValue(rawValue, domain = "") {
+        const normalized = normalizedTechnicalValue(rawValue);
+        const domainKey = domain === "threat" && normalized === "hidden"
+            ? "gmValueThreatHidden"
+            : null;
+        const key = domainKey || statusTranslationKeys[normalized];
+        return key ? text(key, text("gmValueUnknown", "—")) : text("gmValueUnknown", "—");
+    }
+
+    function localizedRole(rawRole) {
+        const key = roleTranslationKeys[normalizedTechnicalValue(rawRole)];
+        return key ? text(key, text("gmValueUnknown", "—")) : text("gmValueUnknown", "—");
     }
 
     function permissions() {
@@ -56,16 +104,85 @@
         return `gm-panel-v2:${roomCode()}:${role()}:${suffix}`;
     }
 
+    function readStorage(storageName, key) {
+        try {
+            return globalThis[storageName]?.getItem(key) ?? null;
+        } catch {
+            return null;
+        }
+    }
+
+    function writeStorage(storageName, key, content) {
+        try {
+            globalThis[storageName]?.setItem(key, content);
+        } catch {
+            // Storage may be disabled by browser privacy settings.
+        }
+    }
+
+    function removeStorage(storageName, key) {
+        try {
+            globalThis[storageName]?.removeItem(key);
+        } catch {
+            // Storage may be disabled by browser privacy settings.
+        }
+    }
+
+    function setAccordionOpen(accordion, opening, persist = true) {
+        const toggle = accordion?.querySelector(":scope > .gm-accordion-toggle");
+        const panelId = toggle?.getAttribute("aria-controls");
+        const panel = panelId ? document.getElementById(panelId) : null;
+        if (!toggle || !panel) return;
+
+        if (opening) {
+            document.querySelectorAll("[data-gm-accordion].is-open").forEach(other => {
+                if (other !== accordion) setAccordionOpen(other, false, false);
+            });
+        }
+        accordion.classList.toggle("is-open", opening);
+        toggle.setAttribute("aria-expanded", String(opening));
+        panel.hidden = !opening;
+        if (persist && roomCode()) {
+            if (opening) {
+                writeStorage("localStorage", preferenceKey("accordion"), accordion.id || toggle.id);
+            } else {
+                removeStorage("localStorage", preferenceKey("accordion"));
+            }
+        }
+    }
+
+    function restoreAccordionPreference() {
+        if (document.querySelector("[data-gm-accordion].is-open")) return;
+        const stored = readStorage("localStorage", preferenceKey("accordion"));
+        if (!stored) return;
+        const accordion = document.getElementById(stored)?.matches("[data-gm-accordion]")
+            ? document.getElementById(stored)
+            : document.getElementById(stored)?.closest("[data-gm-accordion]");
+        if (accordion && getComputedStyle(accordion).display !== "none") {
+            setAccordionOpen(accordion, true, false);
+        }
+    }
+
     function canShowTab(tab) {
         const access = permissions();
-        if (panelMode === "simple" && tab === "events") return false;
-        if (tab === "technical") return Boolean(value(access, "canUseTechnicalTools", "CanUseTechnicalTools"));
+        if (tab === "tools" || tab === "diagnostics")
+            return Boolean(value(access, "canUseTechnicalTools", "CanUseTechnicalTools"));
+        if (tab === "recovery") {
+            return Boolean(value(access, "canRestoreSnapshots", "CanRestoreSnapshots"));
+        }
         if (tab === "overview") return Boolean(value(access, "canViewOmniscientData", "CanViewOmniscientData"));
         if (tab === "players") return Boolean(value(access, "canManagePlayers", "CanManagePlayers"));
-        if (tab === "voting") return Boolean(value(access, "canManageVoting", "CanManageVoting"));
-        if (tab === "threats") return Boolean(value(access, "canManageThreats", "CanManageThreats"));
-        if (tab === "bunker") return Boolean(value(access, "canManageBunker", "CanManageBunker"));
-        if (tab === "events") return Boolean(value(access, "canManageRounds", "CanManageRounds"));
+        if (tab === "events") {
+            return Boolean(
+                value(access, "canManageRounds", "CanManageRounds") ||
+                value(access, "canManageThreats", "CanManageThreats") ||
+                value(access, "canManageBunker", "CanManageBunker"));
+        }
+        if (tab === "history") {
+            return Boolean(
+                value(access, "canManageRounds", "CanManageRounds") ||
+                value(access, "canUseTechnicalTools", "CanUseTechnicalTools"));
+        }
         return Boolean(value(access, "canManageRounds", "CanManageRounds"));
     }
 
@@ -86,7 +203,7 @@
         backdrop.setAttribute("aria-hidden", String(!opening));
         document.body.classList.toggle("gm-panel-v2-open", opening);
         if (persist && roomCode()) {
-            localStorage.setItem(preferenceKey("open"), opening ? "1" : "0");
+            writeStorage("localStorage", preferenceKey("open"), opening ? "1" : "0");
         }
     }
 
@@ -98,15 +215,15 @@
         container.hidden = state === "ready";
         retry.hidden = state !== "error";
         const errors = {
-            connection_unavailable: "З’єднання із сервером ще не готове.",
-            room_not_joined: "Спочатку приєднайтеся до кімнати.",
-            room_not_found: "Кімнату для поточного з’єднання не знайдено.",
-            gm_panel_access_denied: "Немає доступу до GM-панелі.",
-            gm_panel_state_failed: "Сервер не зміг побудувати стан GM-панелі."
+            connection_unavailable: text("gmPanelConnectionUnavailable"),
+            room_not_joined: text("gmPanelRoomNotJoined"),
+            room_not_found: text("gmPanelRoomNotFound"),
+            gm_panel_access_denied: text("gmPanelAccessDenied"),
+            gm_panel_state_failed: text("gmPanelStateFailed")
         };
         message.textContent = state === "error"
-            ? errors[errorCode] || "Не вдалося завантажити стан GM-панелі."
-            : "Завантаження панелі ведучого…";
+            ? errors[errorCode] || text("gmPanelLoadFailed")
+            : text("gmPanelLoading");
     }
 
     function gmPanelErrorCode(error) {
@@ -124,7 +241,7 @@
 
     window.switchGMTab = function switchGMTabV2(tab) {
         activeGMTab = safeTab(tab);
-        if (roomCode()) localStorage.setItem(preferenceKey("active-tab"), activeGMTab);
+        if (roomCode()) writeStorage("localStorage", preferenceKey("active-tab"), activeGMTab);
         document.querySelectorAll("[data-gm-tab]").forEach(section => {
             const active = section.dataset.gmTab === activeGMTab;
             if (section.id === "gmPlayerInfo") {
@@ -140,14 +257,6 @@
             button.tabIndex = active ? 0 : -1;
         });
         renderGmPanelV2();
-    };
-
-    window.setGmPanelMode = function setGmPanelMode(mode) {
-        panelMode = mode === "advanced" ? "advanced" : "simple";
-        if (roomCode()) localStorage.setItem(preferenceKey("mode"), panelMode);
-        activeGMTab = safeTab(activeGMTab);
-        renderGmPanelV2();
-        window.switchGMTab(activeGMTab);
     };
 
     window.toggleGMPanel = function toggleGmPanelV2() {
@@ -183,7 +292,7 @@
 
             const status = document.getElementById("gmPanelConnectionStatus");
             if (status) {
-                status.textContent = "Не вдалося синхронізувати";
+                status.textContent = text("gmPanelSyncFailed");
             }
 
             setPanelLoadState("error", gmPanelErrorCode(error));
@@ -206,23 +315,23 @@
         const players = value(state, "players", "Players") || [];
         const restoredPlayerId =
             selectedStablePlayerId ||
-            sessionStorage.getItem(preferenceKey("selected-player"));
+            readStorage("sessionStorage", preferenceKey("selected-player"));
         selectedStablePlayerId = players.some(player =>
             value(player, "playerId", "PlayerId") === restoredPlayerId)
             ? restoredPlayerId
             : null;
         if (!selectedStablePlayerId) {
             selectedPlayerForGM = null;
-            sessionStorage.removeItem(preferenceKey("selected-player"));
+            removeStorage("sessionStorage", preferenceKey("selected-player"));
         }
-        const restored = localStorage.getItem(preferenceKey("active-tab"));
-        panelMode = localStorage.getItem(preferenceKey("mode")) === "advanced" ? "advanced" : "simple";
+        const restored = readStorage("localStorage", preferenceKey("active-tab"));
         activeGMTab = safeTab(restored || activeGMTab || "game");
-        if (localStorage.getItem(preferenceKey("open")) === "1") {
+        if (readStorage("localStorage", preferenceKey("open")) === "1") {
             setPanelOpen(true, false);
         }
         renderGmPanelV2();
         window.switchGMTab(activeGMTab);
+        restoreAccordionPreference();
         if (selectedStablePlayerId) {
             selectPlayerImmediately(selectedStablePlayerId);
         }
@@ -231,48 +340,49 @@
     function renderGmPanelV2() {
         if (!gmPanelV2State) return;
         renderHeader();
-        renderPanelMode();
         renderRecommendedAction();
         renderTabs();
         renderOverview();
+        renderActionAvailability();
         renderVoting();
         renderPlayerCards();
     }
 
-    function renderPanelMode() {
-        const panel = document.getElementById("gmPanel");
-        if (panel) panel.dataset.gmMode = panelMode;
-        const simple = document.getElementById("gmPanelSimpleMode");
-        const advanced = document.getElementById("gmPanelAdvancedMode");
-        if (simple) simple.setAttribute("aria-pressed", String(panelMode === "simple"));
-        if (advanced) advanced.setAttribute("aria-pressed", String(panelMode === "advanced"));
-    }
-
     function renderRecommendedAction() {
         const target = document.getElementById("gmRecommendedActionText");
-        if (!target) return;
-        const roomState = value(gmPanelV2State, "roomState", "RoomState") || "Lobby";
-        const phase = value(gmPanelV2State, "phase", "Phase") || "Lobby";
-        const votingState = value(gmPanelV2State, "votingStatus", "VotingStatus") || "Inactive";
-        const threatState = value(gmPanelV2State, "threatStatus", "ThreatStatus") || "Inactive";
-        const postGamePhase = typeof currentPostGameTransition !== "undefined" ? currentPostGameTransition?.phase : null;
-        target.textContent = postGamePhase === "FinalDiscussion" ? "Завершіть фінальне обговорення"
-            : postGamePhase === "HostDecision" ? "Оберіть нову гру або фінальну історію"
-            : postGamePhase === "StoryRequested" || postGamePhase === "StoryPreparation" ? "Дочекайтеся публікації або скасуйте фінальну історію"
-            : roomState === "Lobby" ? "Перевірте готовність гравців і почніть гру"
-            : votingState !== "Inactive" ? "Завершіть поточне голосування"
-            : threatState !== "Inactive" && threatState !== "Resolved" ? "Розв’яжіть поточну загрозу"
-            : phase === "RoundReveal" ? "Дочекайтеся розкриття характеристик і завершіть раунд"
-            : "Перевірте стан раунду та виконайте наступну основну дію";
+        const button = document.getElementById("gmPrimaryActionButton");
+        if (!target || !button) return;
+        const actions = value(gmPanelV2State, "availableActions", "AvailableActions") || {};
+        const action = value(actions, "primaryAction", "PrimaryAction") || "none";
+        const labels = {
+            "finish-discussion": text("gmPrimaryFinishDiscussion"),
+            "start-game": text("gmPrimaryStartGame"),
+            "resume-timer": text("gmPrimaryResumeTimer"),
+            "end-voting": text("gmPrimaryEndVoting"),
+            "open-threat": text("gmPrimaryOpenThreat"),
+            "end-round": text("gmPrimaryEndRound"),
+            "start-voting": text("gmPrimaryStartVoting"),
+            "none": text("gmPrimaryNone")
+        };
+        target.textContent = labels[action] || labels.none;
+        button.hidden = action === "none";
+        button.dataset.gmPrimaryAction = action;
+        button.textContent = labels[action] || labels.none;
     }
 
     function renderHeader() {
         const roleBadge = document.getElementById("gmPanelRoleBadge");
         const room = document.getElementById("gmPanelRoomCode");
         const connectionStatus = document.getElementById("gmPanelConnectionStatus");
-        if (roleBadge) roleBadge.textContent = role();
+        if (roleBadge) {
+            roleBadge.textContent = localizedRole(role());
+            roleBadge.title = Boolean(value(
+                permissions(),
+                "canUseTechnicalTools",
+                "CanUseTechnicalTools")) ? role() : "";
+        }
         if (room) room.textContent = roomCode();
-        if (connectionStatus) connectionStatus.textContent = "Синхронізовано";
+        if (connectionStatus) connectionStatus.textContent = text("gmConnectionSynced");
     }
 
     function renderTabs() {
@@ -280,11 +390,32 @@
             permissions(),
             "canUseTechnicalTools",
             "CanUseTechnicalTools"));
+        const canRestore = Boolean(value(
+            permissions(),
+            "canRestoreSnapshots",
+            "CanRestoreSnapshots"));
+        syncCapabilityContent(
+            "gmToolsCapabilityTemplate",
+            "tools",
+            technical);
+        syncCapabilityContent(
+            "gmDiagnosticsCapabilityTemplate",
+            "diagnostics",
+            technical);
+        syncCapabilityContent(
+            "gmRecoveryCapabilityTemplate",
+            "recovery",
+            canRestore);
         document.querySelectorAll("[data-gm-tab-button]").forEach(button => {
             button.hidden = !canShowTab(button.dataset.gmTabButton);
         });
         const emergency = document.getElementById("gmThreatEmergencyBlock");
-        if (emergency) emergency.hidden = !technical;
+        if (emergency) {
+            emergency.hidden = !Boolean(value(
+                permissions(),
+                "canManageThreats",
+                "CanManageThreats"));
+        }
         const manualRound = document.getElementById("gmManualRoundHeading")?.closest("section");
         if (manualRound) manualRound.hidden = !technical;
         document.querySelectorAll(".gm-round-danger-zone, .gm-player-danger").forEach(section => {
@@ -307,6 +438,35 @@
                 "canManagePlayers",
                 "CanManagePlayers"));
         }
+        document.querySelectorAll('[data-gm-requires-capability="CanUseTechnicalTools"]').forEach(section => {
+            section.hidden = !technical;
+        });
+        document.querySelectorAll('[data-gm-requires-capability="CanRestoreSnapshots"]').forEach(section => {
+            section.hidden = !canRestore;
+        });
+    }
+
+    function syncCapabilityContent(templateId, contentKey, allowed) {
+        const existing = document.querySelector(
+            `[data-gm-capability-content="${contentKey}"]`);
+        if (!allowed) {
+            existing?.remove();
+            return;
+        }
+        if (existing) return;
+        const template = document.getElementById(templateId);
+        if (template instanceof HTMLTemplateElement) {
+            const content = template.content.cloneNode(true);
+            content.querySelectorAll("[data-gm-i18n]").forEach(element => {
+                element.textContent = text(element.dataset.gmI18n, element.textContent);
+            });
+            content.querySelectorAll("[data-gm-i18n-placeholder]").forEach(element => {
+                element.placeholder = text(
+                    element.dataset.gmI18nPlaceholder,
+                    element.placeholder);
+            });
+            template.before(content);
+        }
     }
 
     function summaryCard(label, content) {
@@ -323,32 +483,77 @@
     function renderOverview() {
         const target = document.getElementById("gmGameStateSummary");
         if (!target) return;
-        target.replaceChildren(
-            summaryCard("Стан", value(gmPanelV2State, "roomState", "RoomState")),
-            summaryCard("Фаза", value(gmPanelV2State, "phase", "Phase")),
-            summaryCard("Раунд", value(gmPanelV2State, "round", "Round")),
-            summaryCard("Активні", value(gmPanelV2State, "activePlayerCount", "ActivePlayerCount")),
-            summaryCard("Місткість", value(gmPanelV2State, "bunkerCapacity", "BunkerCapacity")),
-            summaryCard("Таймер", value(gmPanelV2State, "timerStatus", "TimerStatus")),
-            summaryCard("Голосування", value(gmPanelV2State, "votingStatus", "VotingStatus")),
-            summaryCard("Загроза", value(gmPanelV2State, "threatStatus", "ThreatStatus"))
-        );
+        const cards = [
+            summaryCard(text("gmSummaryStateFull"), localizedGmValue(value(gmPanelV2State, "roomState", "RoomState"), "room")),
+            summaryCard(text("gmSummaryPhaseFull"), localizedGmValue(value(gmPanelV2State, "phase", "Phase"), "phase")),
+            summaryCard(text("gmSummaryRound"), value(gmPanelV2State, "round", "Round")),
+            summaryCard(text("gmSummaryActiveFull"), value(gmPanelV2State, "activePlayerCount", "ActivePlayerCount")),
+            summaryCard(
+                text("gmSummaryReadinessFull"),
+                `${value(gmPanelV2State, "readyPlayerCount", "ReadyPlayerCount") || 0} ${text("gmOf")} ${value(gmPanelV2State, "readyRequiredCount", "ReadyRequiredCount") || 0}`),
+            summaryCard(text("gmSummaryTimerFull"), localizedGmValue(value(gmPanelV2State, "timerStatus", "TimerStatus"), "timer")),
+            summaryCard(text("gmSummaryVotingFull"), localizedGmValue(value(gmPanelV2State, "votingStatus", "VotingStatus"), "voting")),
+            summaryCard(text("gmSummaryThreatFull"), localizedGmValue(value(gmPanelV2State, "threatStatus", "ThreatStatus"), "threat"))
+        ];
+        const postGamePhase = value(gmPanelV2State, "postGamePhase", "PostGamePhase");
+        if (normalizedTechnicalValue(postGamePhase) !== "none") {
+            cards.push(summaryCard(
+                text("gmSummaryPostGameFull"),
+                localizedGmValue(postGamePhase, "postgame")));
+        }
+        target.replaceChildren(...cards);
     }
 
     function renderVoting() {
         const target = document.getElementById("gmVotingV2Summary");
         if (!target) return;
         target.replaceChildren(
-            summaryCard("Стан", value(gmPanelV2State, "votingStatus", "VotingStatus")),
+            summaryCard(text("gmSummaryVotingFull"), localizedGmValue(value(gmPanelV2State, "votingStatus", "VotingStatus"), "voting")),
             summaryCard(
-                "Голоси",
-                `${value(gmPanelV2State, "votesCast", "VotesCast") || 0}/${value(gmPanelV2State, "requiredVotes", "RequiredVotes") || 0}`),
-            summaryCard("Нічия", value(gmPanelV2State, "votingIsTie", "VotingIsTie") ? "Так" : "Ні")
+                text("gmSummaryVotes"),
+                `${value(gmPanelV2State, "votesCast", "VotesCast") || 0} ${text("gmOf")} ${value(gmPanelV2State, "requiredVotes", "RequiredVotes") || 0}`),
+            summaryCard(text("gmSummaryTie"), value(gmPanelV2State, "votingIsTie", "VotingIsTie") ? text("gmYes") : text("gmNo"))
         );
         const hint = document.getElementById("gmVotingV2Hint");
         if (hint) {
-            const round = Number(value(gmPanelV2State, "round", "Round") || 0);
-            hint.hidden = round >= 3;
+            hint.hidden = false;
+            hint.textContent = value(gmPanelV2State, "isEarlyVoting", "IsEarlyVoting")
+                ? text("gmEarlyVotingHint")
+                : text("gmVotingAvailabilityHint");
+        }
+        const actions = value(gmPanelV2State, "availableActions", "AvailableActions") || {};
+        const start = document.getElementById("gmVotingStartButton");
+        const end = document.getElementById("gmEndVotingBtn");
+        const cancel = document.getElementById("gmVotingCancelButton");
+        if (start) {
+            start.disabled = !Boolean(value(actions, "canStartVoting", "CanStartVoting"));
+            start.textContent = value(gmPanelV2State, "isEarlyVoting", "IsEarlyVoting")
+                ? text("gmStartEarlyVotingAction")
+                : text("gmStartVotingAction");
+        }
+        if (end) end.disabled = !Boolean(value(actions, "canEndVoting", "CanEndVoting"));
+        if (cancel) cancel.disabled = !Boolean(value(actions, "canCancelVoting", "CanCancelVoting"));
+    }
+
+    function renderActionAvailability() {
+        const actions = value(gmPanelV2State, "availableActions", "AvailableActions") || {};
+        const setDisabled = (id, camel, pascal) => {
+            const button = document.getElementById(id);
+            if (button) button.disabled = !Boolean(value(actions, camel, pascal));
+        };
+        setDisabled("endRoundBtn", "canEndRound", "CanEndRound");
+        setDisabled("gmStartVotingBtn", "canStartVoting", "CanStartVoting");
+        setDisabled("gmTimerStart", "canStartTimer", "CanStartTimer");
+        setDisabled("gmTimerPause", "canPauseTimer", "CanPauseTimer");
+        setDisabled("gmTimerResume", "canResumeTimer", "CanResumeTimer");
+        setDisabled("gmTimerRestart", "canAdjustTimer", "CanAdjustTimer");
+        setDisabled("gmTimerStop", "canAdjustTimer", "CanAdjustTimer");
+        const threatAction = document.getElementById("gmThreatPrimaryAction");
+        if (threatAction) {
+            threatAction.hidden = !Boolean(value(
+                actions,
+                "canManageActiveThreat",
+                "CanManageActiveThreat"));
         }
     }
 
@@ -357,6 +562,7 @@
         if (!target) return;
         target.replaceChildren();
         const players = value(gmPanelV2State, "players", "Players") || [];
+        syncRevealCreditDeveloperOptions(players);
         players.forEach(player => {
             const playerId = value(player, "playerId", "PlayerId");
             const button = document.createElement("button");
@@ -364,13 +570,21 @@
             button.className = "gm-player-card-v2";
             button.classList.toggle("is-selected", playerId === selectedStablePlayerId);
             const name = document.createElement("strong");
-            name.textContent = value(player, "name", "Name") || "Unknown";
+            name.textContent = value(player, "name", "Name") || text("gmValueUnknown");
             const state = document.createElement("span");
             state.textContent = [
-                value(player, "isConnected", "IsConnected") ? "online" : "offline",
-                value(player, "isEliminated", "IsEliminated") ? "eliminated" : "active",
-                `${value(player, "revealedCount", "RevealedCount") || 0} відкрито`,
-                value(player, "isCurrentTurn", "IsCurrentTurn") ? "хід" : ""
+                value(player, "isConnected", "IsConnected") ? text("gmPlayerOnline") : text("gmPlayerOffline"),
+                value(player, "isEliminated", "IsEliminated") ? text("gmPlayerEliminated") : text("gmPlayerActive"),
+                `${text("gmPlayerRevealed")}: ${value(player, "revealedCount", "RevealedCount") || 0}`,
+                value(player, "revealRequirementStatus", "RevealRequirementStatus") === "completed_by_credit"
+                    ? text("gmRevealCompletedByCredit")
+                    : value(player, "revealRequirementStatus", "RevealRequirementStatus") === "completed"
+                        ? text("gmRevealCompleted")
+                        : text("gmRevealPending"),
+                value(player, "futureRevealCredits", "FutureRevealCredits") == null
+                    ? ""
+                    : `${text("revealCreditsLabel")}: ${value(player, "futureRevealCredits", "FutureRevealCredits")}`,
+                value(player, "isCurrentTurn", "IsCurrentTurn") ? text("gmPlayerCurrentTurn") : ""
             ].filter(Boolean).join(" · ");
             button.append(name, state);
             button.addEventListener("click", () => selectPlayerImmediately(playerId));
@@ -378,9 +592,29 @@
         });
     }
 
+    function syncRevealCreditDeveloperOptions(players) {
+        const select = document.getElementById("gmRevealCreditPlayer");
+        if (!select) return;
+        const selected = select.value;
+        select.replaceChildren();
+        players
+            .filter(player => value(player, "futureRevealCredits", "FutureRevealCredits") != null)
+            .forEach(player => {
+                const option = document.createElement("option");
+                option.value = value(player, "playerId", "PlayerId");
+                option.textContent =
+                    `${value(player, "name", "Name") || text("gmValueUnknown")} · ` +
+                    `${text("revealCreditsLabel")}: ${value(player, "futureRevealCredits", "FutureRevealCredits")}`;
+                select.append(option);
+            });
+        if ([...select.options].some(option => option.value === selected)) {
+            select.value = selected;
+        }
+    }
+
     function selectPlayerImmediately(stablePlayerId) {
         selectedStablePlayerId = stablePlayerId;
-        sessionStorage.setItem(preferenceKey("selected-player"), stablePlayerId);
+        writeStorage("sessionStorage", preferenceKey("selected-player"), stablePlayerId);
         const entry = Object.entries(gmPlayersData || {}).find(([, player]) =>
             value(player, "stablePlayerId", "StablePlayerId") === stablePlayerId);
         if (entry) {
@@ -393,7 +627,7 @@
         }
         connection.invoke("GetAllPlayersData").catch(() => {
             const result = document.getElementById("gmPlayerCommandResult");
-            if (result) result.textContent = "Дані гравця недоступні.";
+            if (result) result.textContent = text("gmPlayerDataUnavailable");
         });
     }
 
@@ -645,6 +879,195 @@
     };
 
     window.gmPanelV2OnStateChanged = scheduleGmPanelV2Refresh;
+    window.refreshGmPanelV2State = refreshGmPanelV2State;
+    window.localizeGmStatus = localizedGmValue;
+
+    const delegatedLegacyCommands = new Set([
+        "addBunkerSupplies", "addBunkerWater", "adjustGameTimer",
+        "applyDirectorAction", "applyRoomAutoFix", "applyRoomLocalEdit",
+        "cancelVoting", "clearCurrentVotes", "closeGmPropertyEditor",
+        "createManualRoomSnapshot", "editCharacteristic", "eliminateSelectedPlayer",
+        "endRound", "enterOmniscientGm", "forceReveal", "gmCancelThreat",
+        "gmGenerateRareThreat", "gmGenerateTextThreat", "gmRestartThreat",
+        "gmResyncThreatRoom", "gmSelectSpecificThreat", "gmSkipScenarioChoice",
+        "hideSelectedCharacteristic", "inspectSelectedConnection",
+        "invokeGameTimerCommand", "kickSelectedPlayer", "markAllPlayersReady",
+        "openGmPropertyEditor", "peekCharacteristic", "previewDirectorAction",
+        "previewEnterOmniscientGm", "previewManualRoundChange",
+        "previewRoomAutoFix", "previewRoomLocalEdit", "refreshGmAudit",
+        "refreshRoomSnapshots", "regenerateApocalypse", "regenerateBunker",
+        "regenerateCharacteristic", "regenerateGmPropertyPreview",
+        "removeBunkerSupplies", "removeBunkerWater", "removeSelectedVote",
+        "requestGMThreatForcePreview", "resetRoundReadiness", "restartGameTimer",
+        "restoreSelectedPlayer", "resyncOmniscientHiddenState",
+        "resyncSelectedPlayer", "resyncVotingAdmin", "rollRoundDice",
+        "runRoomIntegrityCheck", "saveGmPropertyEdit", "sendGameEvent",
+        "sendQuickEvent", "setGamePause", "setGameTimer", "startGameTimer",
+        "startVoting", "stopGameTimer", "submitBunkerCapacity", "toggleGMPanel",
+        "transferHostToSelectedPlayer", "undoLastGmAction"
+    ]);
+
+    function parseDelegatedArguments(source) {
+        if (!source.trim()) return [];
+        const tokenPattern = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|true|false|null|-?\d+(?:\.\d+)?/g;
+        const tokens = source.match(tokenPattern) || [];
+        const remainder = source.replace(tokenPattern, "").replace(/[\s,]/g, "");
+        if (remainder) return null;
+        return tokens.map(token => {
+            if (token === "true") return true;
+            if (token === "false") return false;
+            if (token === "null") return null;
+            if (/^-?\d/.test(token)) return Number(token);
+            return token
+                .slice(1, -1)
+                .replace(/\\'/g, "'")
+                .replace(/\\"/g, '"')
+                .replace(/\\\\/g, "\\");
+        });
+    }
+
+    function invokeDelegatedCommand(command) {
+        const match = command.trim().match(/^([A-Za-z_$][\w$]*)\s*\(([\s\S]*)\)$/);
+        if (!match || !delegatedLegacyCommands.has(match[1])) return;
+        const args = parseDelegatedArguments(match[2]);
+        const handler = globalThis[match[1]];
+        if (args && typeof handler === "function") handler(...args);
+    }
+
+    document.addEventListener("click", async event => {
+        const accordionToggle = event.target.closest(".gm-accordion-toggle");
+        if (accordionToggle) {
+            const accordion = accordionToggle.closest("[data-gm-accordion]");
+            setAccordionOpen(
+                accordion,
+                accordionToggle.getAttribute("aria-expanded") !== "true");
+            return;
+        }
+
+        const eventTemplate = event.target.closest("[data-gm-event-template]");
+        if (eventTemplate) {
+            const templateKey = eventTemplate.dataset.gmEventTemplate;
+            const eventText = document.getElementById("gmEventText");
+            const eventType = document.getElementById("gmEventType");
+            const translationKey = {
+                earthquake: "gmEventTemplateEarthquakeText",
+                infection: "gmEventTemplateInfectionText",
+                survivors: "gmEventTemplateSurvivorsText",
+                generator: "gmEventTemplateGeneratorText"
+            }[templateKey];
+            if (eventText && translationKey) {
+                eventText.value = text(translationKey, "");
+                eventText.focus();
+            }
+            if (eventType) eventType.value = eventTemplate.dataset.gmEventType || "info";
+            return;
+        }
+
+        const resourceAction = event.target.closest("[data-gm-resource-action]");
+        if (resourceAction) {
+            const months = Number.parseInt(
+                document.getElementById("gmBunkerResourceMonths")?.value || "",
+                10);
+            switch (resourceAction.dataset.gmResourceAction) {
+                case "add-supplies":
+                    addBunkerSupplies(months);
+                    break;
+                case "remove-supplies":
+                    removeBunkerSupplies(months);
+                    break;
+                case "add-water":
+                    addBunkerWater(months);
+                    break;
+                case "remove-water":
+                    removeBunkerWater(months);
+                    break;
+            }
+            return;
+        }
+
+        const creditAdjustment = event.target.closest("[data-gm-credit-adjustment]");
+        if (creditAdjustment) {
+            const targetPlayerId = document.getElementById("gmRevealCreditPlayer")?.value;
+            const feedback = document.getElementById("gmRevealCreditFeedback");
+            if (!targetPlayerId) return;
+            try {
+                await window.gmPanelV2Command(creditAdjustment, commandId =>
+                    connection.invoke(
+                        "AdjustRevealCredits",
+                        targetPlayerId,
+                        Number.parseInt(creditAdjustment.dataset.gmCreditAdjustment, 10),
+                        commandId));
+                if (feedback) feedback.textContent = text("gmRevealCreditAdjusted");
+                await refreshGmPanelV2State();
+            } catch (error) {
+                if (feedback) feedback.textContent = gmPanelErrorCode(error);
+            }
+            return;
+        }
+
+        if (event.target.closest('[data-gm-panel-action="open-threat-controls"]')) {
+            const threatAccordion = document.getElementById("gmThreatOperations");
+            if (threatAccordion) setAccordionOpen(threatAccordion, true);
+            return;
+        }
+
+        const delegated = event.target.closest("[data-gm-click]");
+        if (delegated) {
+            invokeDelegatedCommand(delegated.dataset.gmClick || "");
+            return;
+        }
+
+        const tab = event.target.closest("[data-gm-tab-button]");
+        if (tab) {
+            window.switchGMTab(tab.dataset.gmTabButton);
+            return;
+        }
+
+        if (event.target.closest('[data-gm-panel-action="retry"]')) {
+            window.retryGmPanelV2();
+            return;
+        }
+
+        const primary = event.target.closest("[data-gm-primary-action]");
+        if (!primary) return;
+        switch (primary.dataset.gmPrimaryAction) {
+            case "finish-discussion":
+                if (typeof finishPostGameDiscussion === "function") {
+                    finishPostGameDiscussion();
+                }
+                break;
+            case "start-game":
+                if (typeof startGame === "function") startGame();
+                break;
+            case "resume-timer":
+                if (typeof invokeGameTimerCommand === "function") {
+                    invokeGameTimerCommand("ResumeGameTimer");
+                }
+                break;
+            case "end-voting":
+                if (typeof endVotingEarly === "function") endVotingEarly();
+                break;
+            case "open-threat":
+                window.switchGMTab("events");
+                break;
+            case "end-round":
+                if (typeof endRound === "function") endRound();
+                break;
+            case "start-voting":
+                if (typeof startVoting === "function") startVoting();
+                break;
+        }
+    });
+
+    document.addEventListener("input", event => {
+        if (event.target.id !== "gmDeveloperToolSearch") return;
+        const query = event.target.value.trim().toLocaleLowerCase();
+        document.querySelectorAll("[data-gm-developer-tool]").forEach(tool => {
+            const searchText = `${tool.dataset.gmDeveloperTool || ""} ${tool.querySelector(".gm-accordion-toggle")?.textContent || ""}`
+                .toLocaleLowerCase();
+            tool.hidden = Boolean(query) && !searchText.includes(query);
+        });
+    });
 
     document.addEventListener("keydown", event => {
         const panel = document.getElementById("gmPanel");
@@ -661,12 +1084,4 @@
         }
     });
 
-    if (globalThis.connection?.on) {
-        liveEvents.forEach(eventName => connection.on(eventName, scheduleGmPanelV2Refresh));
-        connection.on("AllPlayersData", () => {
-            if (selectedStablePlayerId) selectPlayerImmediately(selectedStablePlayerId);
-            renderPlayerCards();
-        });
-        connection.onreconnected?.(() => refreshGmPanelV2State());
-    }
 })();

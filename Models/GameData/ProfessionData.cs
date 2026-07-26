@@ -5,6 +5,9 @@ namespace Bunker.Models.GameData
 {
     public class ProfessionData
     {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = "";
+
         [JsonPropertyName("profession")]
         public string Profession { get; set; } = "";
         

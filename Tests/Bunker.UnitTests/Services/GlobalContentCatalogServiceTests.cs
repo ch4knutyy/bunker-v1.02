@@ -114,6 +114,19 @@ public sealed class GlobalContentCatalogServiceTests : IDisposable
     }
 
     [Fact]
+    public void EditorDefinitionUsesLogicalSourceAndExplicitReadOnlyTechnicalFields()
+    {
+        File.WriteAllText(Path.Combine(_root, "special_cards.json"), """{"special_cards":[{"id":"c1","name":"Card","description":"Text","effectType":"technical"}]}""");
+        var definition = Service().GetEditorDefinition("special_cards", "c1");
+        Assert.Equal("catalog:special_cards", definition.SourceId);
+        Assert.Equal(new[] { "catalog_only" }, definition.SupportedScopes);
+        Assert.False(definition.CanReloadLive);
+        Assert.True(definition.RequiresRoomRefresh);
+        Assert.True(definition.Fields.Single(x => x.Name == "id").ReadOnly);
+        Assert.True(definition.Fields.Single(x => x.Name == "effectType").ReadOnly);
+    }
+
+    [Fact]
     public void RateLimitIsPerClientAndBounded()
     {
         var service = Service();

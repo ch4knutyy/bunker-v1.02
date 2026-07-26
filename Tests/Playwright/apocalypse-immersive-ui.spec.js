@@ -36,12 +36,28 @@ function fixture(name = 'Контрольований атмосферний с�
 
 test('desktop renders immediately, survives reconnect and live event replaces rather than duplicates', async ({ browser }) => {
   const room = await createTwoPlayerRoom(browser, `Apocalypse desktop ${Date.now()}`);
+  const pageErrors = [];
+  room.host.on('pageerror', error => pageErrors.push(error.message));
   try {
     await startRoom(room);
     const appliedTheme = await room.host.locator('body').getAttribute('data-apocalypse-theme');
     expect(['extinction-red', 'storm-blue', 'biohazard-green', 'seismic-amber', 'cosmic-violet', 'machine-cyan', 'wasteland-olive', 'collapse-rust', 'glitch-magenta', 'occult-indigo']).toContain(appliedTheme);
     await expect(room.host.locator('body')).toHaveClass(/apocalypse-theme-active/);
     await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-category', /.+/);
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-archetype', /.+/);
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-archetype', /.+/);
+    const physicalSignature = await room.host.locator('body').evaluate(body => [
+      body.dataset.apocalypseArchetype,
+      body.dataset.apocalypseLighting,
+      body.dataset.apocalypseAir,
+      body.dataset.apocalypseContamination,
+      body.dataset.apocalypseVariation
+    ].join('|'));
+    const bunkerSignature = await room.host.locator('body').evaluate(body => [
+      body.dataset.bunkerArchetype,
+      body.dataset.bunkerMaterial,
+      body.dataset.bunkerTechnology
+    ].join('|'));
     const shell = room.host.locator('#apocalypseContent .apocalypse-scenario-shell');
     await expect(shell.locator('.apocalypse-hero')).toBeVisible();
     await expect(shell.locator('.apocalypse-title')).not.toBeEmpty();
@@ -57,6 +73,18 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
     await expect(room.host.locator('#apocalypseContent .apocalypse-scenario-shell')).toHaveCount(1, { timeout: 15000 });
     await expect(room.host.locator('.apocalypse-title')).toHaveText(originalTitle);
     await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-theme', appliedTheme);
+    await expect.poll(() => room.host.locator('body').evaluate(body => [
+      body.dataset.apocalypseArchetype,
+      body.dataset.apocalypseLighting,
+      body.dataset.apocalypseAir,
+      body.dataset.apocalypseContamination,
+      body.dataset.apocalypseVariation
+    ].join('|'))).toBe(physicalSignature);
+    await expect.poll(() => room.host.locator('body').evaluate(body => [
+      body.dataset.bunkerArchetype,
+      body.dataset.bunkerMaterial,
+      body.dataset.bunkerTechnology
+    ].join('|'))).toBe(bunkerSignature);
 
     await room.host.evaluate(nextScenario => {
       // Apply the same current-snapshot + renderer pair used by ApocalypseChanged.
@@ -72,6 +100,12 @@ test('desktop renders immediately, survives reconnect and live event replaces ra
     await expect(room.host.locator('.apocalypse-scenario-shell')).toHaveClass(/variant-nuclear/);
     await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-theme', 'extinction-red');
     await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-category', 'armageddon');
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-archetype', 'nuclear');
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-lighting', 'emergency-amber');
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-archetype', /.+/);
+    await room.host.locator('[data-player-view="single"]').click();
+    await expect(room.host.locator('#singlePlayerOverview')).toBeVisible();
+    expect(pageErrors).toEqual([]);
     const heroImage = room.host.locator('.apocalypse-hero-media .apocalypse-hero-image');
     await expect(heroImage).toBeVisible();
     await expect.poll(() => heroImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);

@@ -4,18 +4,28 @@
 function sendGameEvent() {
 	var text = document.getElementById('gmEventText').value.trim();
 	var type = document.getElementById('gmEventType').value;
+	var feedback = document.getElementById('gmEventFeedback');
 	if (!text) {
-		alert('Введіть текст події');
+		if (feedback) feedback.textContent = t('gmEventTextRequired');
 		return;
 	}
+	if (feedback) feedback.textContent = '';
 	connection.invoke("SendGameEvent", text, type)
-		.catch(function (err) { console.error("SendGameEvent error:", err); });
+		.catch(function (err) {
+			console.error("SendGameEvent error:", err);
+			if (feedback) feedback.textContent = t('gmEventSendFailed');
+		});
 	document.getElementById('gmEventText').value = '';
 }
 
 function sendQuickEvent(text, type) {
-	connection.invoke("SendGameEvent", text, type)
-		.catch(function (err) { console.error("SendGameEvent error:", err); });
+	const input = document.getElementById('gmEventText');
+	const select = document.getElementById('gmEventType');
+	if (input) {
+		input.value = text || '';
+		input.focus();
+	}
+	if (select) select.value = type || 'info';
 }
 
 function closeScenarioPublicModal() {

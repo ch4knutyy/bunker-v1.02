@@ -11,6 +11,7 @@ using Bunker.Services.Threats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var processStartedAtUtc = DateTime.UtcNow;
 var builder = WebApplication.CreateBuilder(args);
@@ -71,6 +72,7 @@ builder.Services.AddSingleton<ThreatScalingService>();
 builder.Services.AddSingleton<ThreatAuditService>();
 builder.Services.AddSingleton<GmAuditService>();
 builder.Services.AddSingleton<GmPanelStateBuilder>();
+builder.Services.AddSingleton<CatalogItemService>();
 builder.Services.AddSingleton<PlayerDisconnectCleanupCoordinator>();
 builder.Services.AddSingleton<RoomIntegrityService>();
 builder.Services.AddSingleton<RoomSnapshotService>();
@@ -188,6 +190,11 @@ using (var scope = app.Services.CreateScope())
 			processStartedAtUtc,
 			"startup_recovery");
 }
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+	ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 if (!app.Environment.IsDevelopment())
 {

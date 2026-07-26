@@ -29,6 +29,7 @@ function renderCurrentGameUI() {
 	if (typeof updateGMPlayerSelect === "function") updateGMPlayerSelect();
 	if (selectedPlayerForGM && typeof loadPlayerDataForGM === "function") loadPlayerDataForGM();
 	if (currentGameCompletion) setGameFinishedMutationState(true);
+	window.gmPanelV2OnStateChanged?.();
 }
 
 function resetClientGameStateForNewRoom() {
@@ -46,6 +47,7 @@ function resetClientGameStateForNewRoom() {
 	currentApocalypse = null;
 	if (typeof renderApocalypse === "function") renderApocalypse(null);
 	currentBunker = null;
+	if (typeof clearBunkerVisualTheme === "function") clearBunkerVisualTheme();
 	currentThreat = null;
 	currentVoting = null;
 	currentRoundState = null;

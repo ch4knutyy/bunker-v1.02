@@ -59,6 +59,24 @@ public sealed class GmPlayerControlTests
     }
 
     [Fact]
+    public void TransferHost_RejectsEliminatedAndSpectatorTargetsWithoutPartialMutation()
+    {
+        var (service, room, target) = CreateRoom();
+        target.IsEliminated = true;
+
+        Assert.False(service.TransferHost(room, target.ConnectionId, out _));
+        Assert.Equal("host-connection", room.HostConnectionId);
+        Assert.Equal("host-player", room.HostPlayerId);
+
+        target.IsEliminated = false;
+        target.IsLobbySpectator = true;
+
+        Assert.False(service.TransferHost(room, target.ConnectionId, out _));
+        Assert.Equal("host-connection", room.HostConnectionId);
+        Assert.Equal("host-player", room.HostPlayerId);
+    }
+
+    [Fact]
     public void StaleCleanup_DoesNotRemoveActiveMapping()
     {
         var (service, room, target) = CreateRoom();

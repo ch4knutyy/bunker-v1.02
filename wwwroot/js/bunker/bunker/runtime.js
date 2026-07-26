@@ -5,7 +5,7 @@ function bunkerResourceCommandId() {
 	return globalThis.crypto?.randomUUID?.() || `bunker-resource-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-async function mutateBunkerResource(method, resourceKey, months = null) {
+async function mutateBunkerResource(invokeMutation, resourceKey, months = null) {
 	if (!isHost) {
 		alert("Тільки хост може змінювати ресурси бункера");
 		return;
@@ -25,20 +25,40 @@ async function mutateBunkerResource(method, resourceKey, months = null) {
 		return;
 	}
 	try {
-		await connection.invoke(method, amount, bunkerResourceCommandId());
+		await invokeMutation(amount, bunkerResourceCommandId());
 	} catch (err) {
-		console.error(`[${method}] Error:`, err);
+		console.error(`[BunkerResource:${resourceKey}] Error:`, err);
 		alert(`Помилка зміни ресурсу:\n${err?.message ?? String(err)}`);
 	}
 }
 
-function addBunkerSupplies(months = null) { return mutateBunkerResource("AddBunkerSupplies", "supplies", months); }
+function addBunkerSupplies(months = null) {
+	return mutateBunkerResource(
+		(amount, commandId) => connection.invoke("AddBunkerSupplies", amount, commandId),
+		"supplies",
+		months);
+}
 
-function removeBunkerSupplies(months = null) { return mutateBunkerResource("RemoveBunkerSupplies", "supplies", months); }
+function removeBunkerSupplies(months = null) {
+	return mutateBunkerResource(
+		(amount, commandId) => connection.invoke("RemoveBunkerSupplies", amount, commandId),
+		"supplies",
+		months);
+}
 
-function addBunkerWater(months = null) { return mutateBunkerResource("AddBunkerWater", "water", months); }
+function addBunkerWater(months = null) {
+	return mutateBunkerResource(
+		(amount, commandId) => connection.invoke("AddBunkerWater", amount, commandId),
+		"water",
+		months);
+}
 
-function removeBunkerWater(months = null) { return mutateBunkerResource("RemoveBunkerWater", "water", months); }
+function removeBunkerWater(months = null) {
+	return mutateBunkerResource(
+		(amount, commandId) => connection.invoke("RemoveBunkerWater", amount, commandId),
+		"water",
+		months);
+}
 
 function normalizeBunkerMetadataValue(value) {
 	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
@@ -195,6 +215,7 @@ function renderBunkerFacility(model) {
 }
 
 function renderBunker(bunker) {
+	syncBunkerVisualTheme(bunker);
 	const container = document.getElementById('bunkerContent');
 	if (!container) return;
 	const panel = document.getElementById('bunkerPanel');

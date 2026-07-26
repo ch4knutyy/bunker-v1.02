@@ -31,35 +31,53 @@ test('GM pause and forward round correction update live without duplicate comman
   }
 });
 
-test('normal rounds 1 to 3 enable voting live and start an active session', async ({ browser }) => {
-  const room = await createTwoPlayerRoom(browser, `Round 3 Voting ${Date.now()}`);
+test('round 1 early voting survives refresh and the next round does not auto-start voting', async ({ browser }) => {
+  const room = await createTwoPlayerRoom(browser, `Early Voting ${Date.now()}`);
+  const hostErrors = [];
+  const hostRoomRenders = [];
+  room.host.on('pageerror', error => hostErrors.push(error.message));
+  room.host.on('console', message => {
+    if (message.text().includes('[updateRoomUI]')) hostRoomRenders.push(message.text());
+  });
   try {
     await room.host.locator('#startGameBtn').click();
     await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+    await room.host.evaluate(() => { window.BUNKER_DEBUG = true; });
 
-    for (let round = 1; round <= 3; round++) {
-      for (const page of [room.host, room.guest]) {
-        await page.locator('#myPlayerCards .char-btn.locked:not(:disabled)').first().click();
+    for (const page of [room.host, room.guest]) {
+      const renderCountBeforeReveal = hostRoomRenders.length;
+      await page.locator('#myPlayerCards .char-btn.locked:not(:disabled)').first().click();
+      if (page === room.host) {
+        await expect.poll(() => hostRoomRenders.length - renderCountBeforeReveal).toBe(0);
       }
-      await room.host.locator('#gmPanelBtn').click();
-      await room.host.locator('[data-gm-tab-button="round"]').click();
-      await expect(room.host.locator('#endRoundBtn')).toBeEnabled({ timeout: 15000 });
-      await room.host.locator('#endRoundBtn').click();
-      if (round < 3) await expect(room.host.locator('#gmCurrentRound')).toContainText(String(round + 1), { timeout: 15000 });
-      await room.host.locator('#gmPanel .btn-close').click();
     }
 
     await room.host.locator('#gmPanelBtn').click();
     await room.host.locator('[data-gm-tab-button="round"]').click();
     const startVoting = room.host.locator('#gmStartVotingBtn');
     await expect(startVoting).toBeEnabled({ timeout: 15000 });
+    await expect(startVoting).toContainText(/дострок|early|досроч/i);
+    await room.guest.evaluate(() =>
+      connection.invoke('StartVoting', crypto.randomUUID()));
+    await expect(room.guest.locator('#votingPanel')).toBeHidden();
     await room.host.reload();
     await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
     await room.host.locator('#gmPanelBtn').click();
     await room.host.locator('[data-gm-tab-button="round"]').click();
     await expect(room.host.locator('#gmStartVotingBtn')).toBeEnabled({ timeout: 15000 });
+    room.host.once('dialog', dialog => dialog.accept());
     await room.host.locator('#gmStartVotingBtn').click();
     await expect(room.host.locator('#votingPanel')).toBeVisible({ timeout: 15000 });
+    await room.host.locator('#gmVotingCancelButton').click();
+    await expect(room.host.locator('#votingPanel')).toBeHidden({ timeout: 15000 });
+    await expect(room.host.locator('#endRoundBtn')).toBeEnabled({ timeout: 15000 });
+    await room.host.locator('#endRoundBtn').click();
+    await expect(room.host.locator('#gmCurrentRound')).toContainText('2', { timeout: 15000 });
+    await expect(room.host.locator('#votingPanel')).toBeHidden();
+    expect(hostErrors.filter(message => /Voting|ReferenceError/.test(message))).toEqual([]);
+    await room.host.reload();
+    await expect(room.host.locator('#gameSection')).toBeVisible({ timeout: 15000 });
+    await expect(room.host.locator('#votingPanel')).toBeHidden();
   } finally {
     await room.close();
   }

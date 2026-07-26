@@ -15,7 +15,11 @@ public enum GlobalContentCategory
     Apocalypses,
     Bunkers,
     Items,
-    Threats
+    Threats,
+    Properties,
+    ScenarioEvents,
+    EventSpecialCards,
+    SpyLocations
 }
 
 public enum GlobalContentEditableReadiness
@@ -49,6 +53,27 @@ public sealed record GlobalContentEntryDto(
     string StableId,
     string DisplayName,
     IReadOnlyDictionary<string, string> Fields);
+public sealed record ContentEditorFieldDefinitionDto(
+    string Name,
+    string FieldType,
+    bool Required,
+    bool Localized,
+    int? MaxLength,
+    IReadOnlyList<string> AllowedValues,
+    bool ReadOnly,
+    JsonElement Value);
+public sealed record ContentEditorDefinitionDto(
+    string Category,
+    string SourceId,
+    string RecordId,
+    IReadOnlyList<ContentEditorFieldDefinitionDto> Fields,
+    string Version,
+    string Fingerprint,
+    IReadOnlyList<string> SupportedScopes,
+    bool CanReloadLive,
+    bool RequiresRoomRefresh,
+    int? RuntimeUsageCount,
+    string SupportStatus);
 public sealed record GlobalContentAccessDto(bool Allowed, bool FeatureEnabled, bool IsDevelopment, string Reason);
 
 public sealed class GlobalContentCatalogOptions

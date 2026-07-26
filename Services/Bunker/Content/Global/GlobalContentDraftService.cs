@@ -28,6 +28,7 @@ public sealed class GlobalContentDraftService
     private static readonly HashSet<string> Editable = new(StringComparer.OrdinalIgnoreCase)
     { "professions", "hobbies", "mental_conditions", "physical_health", "phobias", "character_traits", "facts", "special_cards", "apocalypses", "bunkers", "items", "threats" };
     private static readonly HashSet<string> Blocked = new(StringComparer.OrdinalIgnoreCase) { "hobbies", "character_traits" };
+    private static readonly HashSet<string> MultiFileReadOnly = new(StringComparer.OrdinalIgnoreCase) { "mental_conditions", "physical_health" };
     private static readonly IReadOnlyDictionary<string, HashSet<string>> Fields = BuildFields();
 
     private readonly GlobalContentCatalogService _catalog;
@@ -65,6 +66,7 @@ public sealed class GlobalContentDraftService
         {
             Cleanup(); ValidateCommandId(commandId);
             if (!Editable.Contains(category)) throw new GlobalContentRequestException(Blocked.Contains(category) ? "category_missing_stable_ids" : "unsupported_category");
+            if (MultiFileReadOnly.Contains(category)) throw new GlobalContentRequestException("category_multi_file_atomic_required");
             if (_drafts.Values.Count(IsActive) >= MaximumActiveDrafts) throw new GlobalContentRequestException("draft_limit");
             if (_drafts.Values.Count(x => IsActive(x) && x.Metadata.CreatedByPlayerId == actor) >= MaximumActorDrafts) throw new GlobalContentRequestException("actor_draft_limit");
             var catalogMetadata = _catalog.GetMetadata(category);
@@ -154,7 +156,7 @@ public sealed class GlobalContentDraftService
             if (Fingerprint(state.Entries) != state.Metadata.DraftFingerprint) throw new GlobalContentRequestException("draft_fingerprint_mismatch");
             var diff = Diff(state).ToList();
             Audit("commit_started", state.Metadata, actor, "", "started");
-            return new(state.Metadata, state.Entries.OrderBy(x => x.Key).Select(x => x.Value.ToJsonString()).ToList(), diff);
+            return new(state.Metadata, state.Entries.Select(x => x.Value.ToJsonString()).ToList(), diff);
         }
     }
 
@@ -289,13 +291,13 @@ public sealed class GlobalContentDraftService
         {
             ["professions"] = Set("profession","type","skills","items","bonus","_i18n","capabilityTags"), ["hobbies"] = Set("hobby","type","item","bonus","_i18n","capabilityTags"),
             ["character_traits"] = Set("trait","type","_i18n"),
-            ["mental_conditions"] = Set("category","hasSeverity","localization"), ["physical_health"] = Set("hasSeverity","localization"),
-            ["phobias"] = Set("name","description","bunkerEffect","_i18n"), ["facts"] = Set("source","type","category","fact","description","_i18n"),
-            ["special_cards"] = Set("name","description","isSecret","isOneTimeUse","phase","effectType","requiresTarget","_i18n"),
-            ["apocalypses"] = Set("name","description","severity","survivalChance","duration","threats","requirements","_i18n","tags"),
-            ["bunkers"] = Set("name","description","capacity","location","suppliesMonths","waterMonths","facilities","resources","problems","condition","_i18n","tags"),
-            ["items"] = Set("item","category","_i18n","resourceTags","protectionTags","threatUsage"),
-            ["threats"] = Set("name","description","severity","round","category","apocalypseTags","relatedApocalypseIds","isUniversalFallback","tags","_i18n","mechanics")
+            ["mental_conditions"] = Set(), ["physical_health"] = Set(),
+            ["phobias"] = Set("name","description","bunkerEffect"), ["facts"] = Set("fact","description"),
+            ["special_cards"] = Set("name","description","isSecret","isOneTimeUse","requiresTarget"),
+            ["apocalypses"] = Set("name","description","duration"),
+            ["bunkers"] = Set("name","description","capacity","location","suppliesMonths","waterMonths","condition"),
+            ["items"] = Set("item"),
+            ["threats"] = Set("name","description")
         };
     }
 }

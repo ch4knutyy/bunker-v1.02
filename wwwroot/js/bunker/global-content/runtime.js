@@ -40,10 +40,61 @@ async function loadGlobalContentEntry(stableId) {
 	const category = document.getElementById('globalCatalogCategory')?.value;
 	if (!globalCatalogAllowed || !category) return;
 	try {
-		const entry = await connection.invoke('GetGlobalContentEntry', category, stableId);
-		const details = document.getElementById('globalCatalogDetails');
-		if (details) details.textContent = Object.entries(entry.fields || entry.Fields || {}).map(([key, value]) => `${key}: ${value}`).join('\n');
+		globalContentEditorDefinition = await connection.invoke('GetGlobalContentEditorDefinition', category, stableId);
+		renderGlobalContentEditorDefinition(globalContentEditorDefinition);
 	} catch (error) { renderGlobalCatalogError(error); }
+}
+
+function contentDefinitionValue(field, key) { return field[key] ?? field[key[0].toUpperCase() + key.slice(1)]; }
+
+function renderGlobalContentEditorDefinition(definition) {
+	const details = document.getElementById('globalCatalogDetails');
+	const fieldsPanel = document.getElementById('globalContentEditorFields');
+	const recordId = definition?.recordId || definition?.RecordId || '';
+	const sourceId = definition?.sourceId || definition?.SourceId || '';
+	const version = definition?.version || definition?.Version || '';
+	const fingerprint = definition?.fingerprint || definition?.Fingerprint || '';
+	const status = definition?.supportStatus || definition?.SupportStatus || '';
+	if (details) {
+		details.replaceChildren();
+		[sourceId, recordId, `${version} · ${fingerprint}`, status].forEach(value => {
+			const line = document.createElement('div'); line.textContent = value; details.appendChild(line);
+		});
+	}
+	const entryId = document.getElementById('globalDraftEntryId');
+	if (entryId) entryId.value = recordId;
+	const operation = document.getElementById('globalDraftOperation');
+	if (operation) operation.value = 'UpdateEntry';
+	if (!fieldsPanel) return;
+	fieldsPanel.replaceChildren();
+	(definition?.fields || definition?.Fields || []).forEach(field => {
+		const name = contentDefinitionValue(field, 'name');
+		const fieldType = contentDefinitionValue(field, 'fieldType');
+		const readOnly = contentDefinitionValue(field, 'readOnly') === true;
+		const value = contentDefinitionValue(field, 'value');
+		const wrapper = document.createElement('label');
+		wrapper.className = 'global-content-editor-field';
+		const title = document.createElement('span');
+		title.textContent = `${name}${readOnly ? ` · ${t('globalEditorReadOnly')}` : ''}`;
+		wrapper.appendChild(title);
+		let control;
+		if (fieldType === 'boolean' && !readOnly) {
+			control = document.createElement('input'); control.type = 'checkbox'; control.checked = value === true;
+		} else {
+			control = document.createElement('input');
+			control.type = fieldType === 'number' ? 'number' : 'text';
+			control.value = typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '');
+			control.readOnly = readOnly;
+			const maxLength = contentDefinitionValue(field, 'maxLength');
+			if (maxLength) control.maxLength = maxLength;
+		}
+		control.className = 'input-field';
+		control.dataset.editorField = name;
+		control.dataset.editorType = fieldType;
+		control.disabled = readOnly;
+		wrapper.appendChild(control);
+		fieldsPanel.appendChild(wrapper);
+	});
 }
 
 function changeGlobalContentPage(delta) { loadGlobalContentPage(Math.max(1, globalCatalogPage + delta)); }
@@ -84,10 +135,16 @@ async function loadGlobalContentDrafts() {
 function renderGlobalDraftState() {
 	const id = selectedGlobalDraftId(); const draft = globalDrafts.find(x => (x.draftId || x.DraftId) === id); const status = document.getElementById('globalDraftStatus');
 	if (status) status.textContent = draft ? `${draft.status || draft.Status} · ${draft.entryCount ?? draft.EntryCount} · ${draft.expiresAtUtc || draft.ExpiresAtUtc}` : '';
-	const category = document.getElementById('globalCatalogCategory')?.value; const blocked = ['hobbies', 'character_traits'].includes(category); const warning = document.getElementById('globalDraftBlocked');
-	if (warning) warning.textContent = blocked ? 'BlockedMissingStableIds' : '';
+	const category = document.getElementById('globalCatalogCategory')?.value;
+	const metadata = globalCatalogMetadata.find(item => (item.category || item.Category) === category);
+	const readiness = metadata?.editableReadiness ?? metadata?.EditableReadiness;
+	const blocked = readiness !== 0 && readiness !== 'Ready';
+	const migrationRequired = ['hobbies', 'character_traits'].includes(category) &&
+		(readiness === 1 || readiness === 'BlockedMissingStableIds');
+	const warning = document.getElementById('globalDraftBlocked');
+	if (warning) warning.textContent = blocked ? String(readiness) : '';
 	const create = document.getElementById('globalDraftCreate'); if (create) create.disabled = globalDraftPending || blocked;
-	const migration = document.getElementById('globalStableIdMigration'); if (migration) migration.style.display = blocked ? 'block' : 'none';
+	const migration = document.getElementById('globalStableIdMigration'); if (migration) migration.style.display = migrationRequired ? 'block' : 'none';
 	const commit = document.getElementById('globalDraftCommit'); if (commit) commit.disabled = globalDraftPending || !draft || (draft.status || draft.Status) !== 'Validated';
 }
 
@@ -101,8 +158,13 @@ async function runGlobalDraftCommand(action) {
 function createGlobalContentDraft() { const category = document.getElementById('globalCatalogCategory')?.value; if (category) runGlobalDraftCommand(() => connection.invoke('CreateGlobalContentDraft', category, crypto.randomUUID())); }
 
 function applyGlobalDraftCommand() {
-	const draftId = selectedGlobalDraftId(); const category = globalDrafts.find(x => (x.draftId || x.DraftId) === draftId)?.category; const type = document.getElementById('globalDraftOperation')?.value; const entryId = document.getElementById('globalDraftEntryId')?.value.trim();
-	if (!draftId || !entryId) return; const fields = {}; const name = document.getElementById('globalDraftName')?.value.trim(); const description = document.getElementById('globalDraftDescription')?.value.trim(); const nameField = category === 'professions' ? 'profession' : category === 'items' ? 'item' : category === 'facts' ? 'fact' : 'name'; if (name) fields[nameField] = name; if (description) fields.description = description;
+	const draftId = selectedGlobalDraftId(); const selectedDraft = globalDrafts.find(x => (x.draftId || x.DraftId) === draftId); const category = selectedDraft?.category || selectedDraft?.Category; const type = document.getElementById('globalDraftOperation')?.value; const entryId = document.getElementById('globalDraftEntryId')?.value.trim();
+	if (!draftId || !entryId) return;
+	const fields = {};
+	document.querySelectorAll('#globalContentEditorFields [data-editor-field]:not(:disabled)').forEach(control => {
+		const fieldType = control.dataset.editorType;
+		fields[control.dataset.editorField] = fieldType === 'boolean' ? control.checked : fieldType === 'number' ? Number(control.value) : control.value;
+	});
 	const deleting = type === 'DeleteEntry'; if (deleting && !confirm('Delete entry from draft?')) return;
 	runGlobalDraftCommand(() => connection.invoke('ApplyGlobalContentDraftCommand', { draftId, category, type, entryId, fields: deleting ? null : fields, confirmDelete: deleting, commandId: crypto.randomUUID() }));
 }
@@ -131,6 +193,24 @@ async function loadGlobalContentBackups() {
 	catch (error) { const result = document.getElementById('globalRollbackResult'); if (result) result.textContent = error?.message || t('unavailableNow'); }
 }
 
+async function loadGlobalContentAudit() {
+	if (!globalCatalogAllowed) return;
+	const output = document.getElementById('globalContentHistory');
+	try {
+		const audit = await connection.invoke('GetGlobalContentDraftAudit');
+		if (output) output.textContent = (audit || []).slice(-100).reverse().map(entry => {
+			const timestamp = entry.timestampUtc || entry.TimestampUtc;
+			const category = entry.category || entry.Category;
+			const record = entry.entryId || entry.EntryId || '—';
+			const action = entry.action || entry.Action;
+			const result = entry.result || entry.Result;
+			return `${timestamp} · ${category}/${record} · ${action} · ${result}`;
+		}).join('\n');
+	} catch (error) {
+		if (output) output.textContent = error?.message || t('unavailableNow');
+	}
+}
+
 async function previewGlobalRollback() {
 	if (globalDraftPending) return; const category = document.getElementById('globalCatalogCategory')?.value; const backupId = document.getElementById('globalBackupSelect')?.value; if (!category || !backupId) return;
 	setGlobalDraftPending(true); try { globalRollbackPreview = await connection.invoke('PreviewGlobalContentRollback', category, backupId); const result = document.getElementById('globalRollbackResult'); if (result) result.textContent = JSON.stringify(globalRollbackPreview, null, 2); const execute = document.getElementById('globalRollbackExecute'); if (execute) execute.disabled = !(globalRollbackPreview.canRollback ?? globalRollbackPreview.CanRollback); } finally { setGlobalDraftPending(false); }
@@ -157,3 +237,32 @@ async function applyStableIdMigration() {
 	catch (error) { if (output) output.textContent = error?.message || t('unavailableNow'); }
 	finally { setGlobalDraftPending(false); }
 }
+
+function initializeGlobalContentEditor() {
+	const handlers = {
+		category: () => loadGlobalContentPage(1),
+		search: scheduleGlobalContentSearch,
+		previous: () => changeGlobalContentPage(-1),
+		next: () => changeGlobalContentPage(1),
+		'create-draft': createGlobalContentDraft,
+		draft: renderGlobalDraftState,
+		'apply-draft': applyGlobalDraftCommand,
+		'validate-draft': validateGlobalDraft,
+		'preview-draft': previewGlobalDraftDiff,
+		'discard-draft': discardGlobalDraft,
+		'commit-draft': commitGlobalDraft,
+		'refresh-backups': loadGlobalContentBackups,
+		'refresh-history': loadGlobalContentAudit,
+		'preview-rollback': previewGlobalRollback,
+		'execute-rollback': executeGlobalRollback,
+		'preview-migration': previewStableIdMigration,
+		'apply-migration': applyStableIdMigration
+	};
+	document.querySelectorAll('[data-global-content-action]').forEach(element => {
+		const action = element.dataset.globalContentAction;
+		const eventName = action === 'search' ? 'input' : action === 'category' || action === 'draft' ? 'change' : 'click';
+		if (handlers[action]) element.addEventListener(eventName, handlers[action]);
+	});
+}
+
+initializeGlobalContentEditor();

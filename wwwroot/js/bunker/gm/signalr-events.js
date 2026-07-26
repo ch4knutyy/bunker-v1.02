@@ -120,6 +120,7 @@ window.BunkerSignalREvents.gm = {
 				closeGMThreatForceModal();
 			}
 			renderGMThreatControl();
+			window.gmPanelV2OnStateChanged?.();
 			markGMServerUpdate();
 		});
 	},

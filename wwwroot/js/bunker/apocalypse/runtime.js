@@ -89,7 +89,7 @@ function renderApocalypse(apocalypse) {
 		return;
 	}
 	const nextTheme = resolveApocalypseVisualTheme(apocalypse);
-	if (document.body?.dataset.apocalypseTheme && document.body.dataset.apocalypseTheme !== nextTheme)
+	if (document.body?.dataset.apocalypseTheme && document.body.dataset.apocalypseTheme !== nextTheme.themeId)
 		clearApocalypseVisualReactions();
 	ensureApocalypseAmbientRoot();
 	clearApocalypseCardRevealWave();

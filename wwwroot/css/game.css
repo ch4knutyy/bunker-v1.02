@@ -7263,6 +7263,18 @@
     overflow-wrap: anywhere;
 }
 
+.global-content-editor-fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+}
+
+.global-content-editor-field {
+	display: grid;
+	gap: 0.35rem;
+}
+
 .global-catalog-drafts {
     margin-top: 1rem;
     padding-top: 1rem;
@@ -9043,12 +9055,37 @@ body.gm-panel-v2-open .modal {
     background: #10100f;
 }
 
-.gm-panel-mode-switch { display: inline-flex; gap: .25rem; padding: .2rem; border: 1px solid rgba(255,255,255,.14); border-radius: .6rem; }
-.gm-panel-mode-switch .btn-gm-action { min-height: 2rem; padding: .3rem .65rem; }
-.gm-panel-mode-switch .btn-gm-action[aria-pressed="true"] { color: #101518; background: #e0b16f; }
 .gm-recommended-action { display: grid; gap: .25rem; margin-bottom: .8rem; padding: .75rem .9rem; border-left: 3px solid #d5a467; background: rgba(213,164,103,.08); }
 .gm-recommended-action span { color: #d5a467; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
-.gm-panel-v2-drawer[data-gm-mode="simple"] [data-gm-advanced] { display: none !important; }
+.gm-recommended-action .gm-action-primary { width: 100%; margin-top: .35rem; }
+.gm-threat-status-card {
+    display: grid;
+    gap: .75rem;
+    padding: .85rem;
+    border: 1px solid rgba(224, 177, 111, .32);
+    border-radius: .75rem;
+    background: rgba(224, 177, 111, .08);
+}
+
+.reveal-credit-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: .75rem 1rem;
+    border: 1px solid rgba(224, 177, 111, .32);
+    border-radius: .75rem;
+    background: rgba(224, 177, 111, .08);
+}
+
+.reveal-credit-status span {
+    color: var(--color-text-muted);
+}
+
+.gm-bunker-resource-controls .gm-field {
+    min-width: 8rem;
+}
 
     .gm-panel-v2-header h3 {
         margin: 0;
@@ -9088,14 +9125,15 @@ body.gm-panel-v2-open .modal {
     flex: 0 0 auto;
     gap: 0.35rem;
     padding: 0.65rem 0.75rem;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow-x: hidden;
     border-bottom: 1px solid rgba(203, 166, 79, 0.25);
     background: #0e0e0e;
     scrollbar-width: thin;
 }
 
 .gm-panel-v2-drawer .gm-tab {
-    flex: 0 0 auto;
+    flex: 1 1 7rem;
     min-height: 40px;
     padding: 0.55rem 0.75rem;
     color: #aaa69d;
@@ -9148,22 +9186,114 @@ body.gm-panel-v2-open .modal {
 .gm-panel-v2-drawer .gm-section,
 .gm-panel-v2-drawer .gm-player-info {
     margin: 0 0 0.75rem;
-    padding: 0.8rem;
-    border: 1px solid rgba(203, 166, 79, 0.2);
+    padding: 0.65rem;
+    border: 1px solid rgba(128, 76, 177, 0.28);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.025);
+    background: rgba(12, 10, 15, 0.72);
 }
 
 .gm-panel-v2-drawer .gm-status-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid rgba(132, 79, 181, 0.22);
 }
 
 .gm-panel-v2-drawer .gm-status-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(8rem, auto);
+    align-items: center;
+    gap: 0.8rem;
     min-width: 0;
-    padding: 0.65rem;
-    border-color: rgba(203, 166, 79, 0.2);
-    background: #141413;
+    padding: 0.55rem 0.25rem;
+    border: 0;
+    border-bottom: 1px solid rgba(132, 79, 181, 0.18);
+    border-radius: 0;
+    background: transparent;
+}
+
+.gm-panel-v2-drawer .gm-status-card span {
+    color: #aaa3b2;
+    font-size: 0.78rem;
+}
+
+.gm-panel-v2-drawer .gm-status-card strong {
+    color: #eee8f3;
+    font-size: 0.86rem;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.gm-accordion {
+    min-width: 0;
+    margin-bottom: 0.55rem;
+    border: 1px solid rgba(131, 78, 181, 0.38);
+    border-radius: 9px;
+    background: #100d13;
+    overflow: clip;
+}
+
+.gm-accordion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 46px;
+    padding: 0.65rem 0.75rem;
+    color: #e5deeb;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.gm-accordion-toggle:hover {
+    background: rgba(132, 79, 181, 0.09);
+}
+
+.gm-accordion-arrow {
+    flex: 0 0 auto;
+    color: #c8a8e0;
+    font-size: 1.1rem;
+    transform: rotate(-90deg);
+    transition: transform 140ms ease;
+}
+
+.gm-accordion.is-open {
+    border-color: rgba(150, 91, 205, 0.75);
+    box-shadow: 0 0 16px rgba(121, 68, 167, 0.14);
+}
+
+.gm-accordion.is-open > .gm-accordion-toggle {
+    color: #f1d783;
+    background: rgba(132, 79, 181, 0.12);
+}
+
+.gm-accordion.is-open > .gm-accordion-toggle .gm-accordion-arrow {
+    transform: rotate(0);
+}
+
+.gm-accordion-panel {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.7rem;
+    border-top: 1px solid rgba(132, 79, 181, 0.24);
+    background: rgba(4, 3, 6, 0.35);
+}
+
+.gm-accordion-panel[hidden] {
+    display: none;
+}
+
+.gm-developer-toolbox {
+    max-height: min(58dvh, 620px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.gm-developer-search {
+    width: 100%;
+    margin-bottom: 0.65rem;
 }
 
 .gm-player-cards-v2 {
@@ -9184,6 +9314,7 @@ body.gm-panel-v2-open .modal {
     background: #151514;
     text-align: left;
     cursor: pointer;
+    overflow-wrap: anywhere;
 }
 
     .gm-player-card-v2 span {
@@ -9207,11 +9338,13 @@ body.gm-panel-v2-open .modal {
     min-height: 42px;
 }
 
-.gm-panel-v2-drawer [data-gm-tab="technical"] details {
+.gm-panel-v2-drawer [data-gm-tab="diagnostics"] details,
+.gm-panel-v2-drawer [data-gm-tab="recovery"] details,
+.gm-panel-v2-drawer [data-gm-tab="history"] details {
     margin-top: 0.55rem;
 }
 
-    .gm-panel-v2-drawer [data-gm-tab="technical"] details:not([open]) > :not(summary) {
+    .gm-panel-v2-drawer details:not([open]) > :not(summary) {
         display: none;
     }
 
@@ -9336,6 +9469,15 @@ body.gm-panel-v2-open .modal {
     .gm-panel-v2-content {
         padding: 0.65rem;
         padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .gm-panel-v2-drawer .gm-status-card {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+
+    .gm-panel-v2-drawer .gm-status-card strong {
+        text-align: left;
     }
 
     .gm-panel-v2-drawer .gm-round-actions > *,
@@ -10326,4 +10468,56 @@ body.apocalypse-ambient-paused :is(.scenario-immersive-panel, .voting-panel, .ev
     #publicGameTimer.timer-expired { animation: none !important; transition: none !important; transform: none !important; }
     #apocalypsePanel .apocalypse-card-border-light { opacity: .24; background-position: 50% 0; }
     #apocalypsePanel .apocalypse-card-reveal-wave { display: none; }
+}
+
+.catalog-item-picker {
+    width: min(1080px, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 1px solid rgba(143, 109, 225, .58);
+    border-radius: 18px;
+    color: #f1edf9;
+    background: #111017;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .7);
+}
+
+.catalog-item-picker::backdrop { background: rgba(5, 4, 9, .8); backdrop-filter: blur(5px); }
+.catalog-picker-shell { display: grid; grid-template-rows: auto auto minmax(260px, 1fr) auto auto auto; max-height: calc(100dvh - 2rem); }
+.catalog-picker-header,
+.catalog-picker-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; border-bottom: 1px solid rgba(143, 109, 225, .25); }
+.catalog-picker-footer { position: sticky; bottom: 0; justify-content: flex-end; border-top: 1px solid rgba(143, 109, 225, .25); border-bottom: 0; background: rgba(17, 16, 23, .97); }
+.catalog-picker-kicker { margin: 0 0 .25rem; color: #ae91f4; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }
+.catalog-picker-header h4,
+.catalog-picker-header p { margin: 0; }
+.catalog-picker-toolbar,
+.catalog-picker-advanced-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; padding: .9rem 1.2rem; }
+.catalog-picker-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); min-height: 0; overflow: hidden; }
+.catalog-picker-results,
+.catalog-picker-preview { min-width: 0; padding: 1rem 1.2rem; overflow: auto; }
+.catalog-picker-preview { border-left: 1px solid rgba(143, 109, 225, .25); background: rgba(31, 28, 42, .55); }
+.catalog-picker-list { display: grid; gap: .55rem; }
+.catalog-picker-card { display: grid; gap: .25rem; width: 100%; min-height: 74px; padding: .75rem .85rem; border: 1px solid rgba(143, 109, 225, .25); border-radius: 10px; color: inherit; text-align: left; background: #191720; }
+.catalog-picker-card:hover,
+.catalog-picker-card[aria-selected="true"] { border-color: #9f7cf0; background: #242032; box-shadow: 0 0 0 1px rgba(159, 124, 240, .25), 0 0 24px rgba(112, 74, 205, .18); }
+.catalog-picker-card span,
+.catalog-picker-card small,
+.catalog-picker-preview p { color: #bdb5ca; }
+.catalog-picker-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: .8rem 0; }
+.catalog-picker-tags span { padding: .2rem .5rem; border-radius: 999px; color: #d9cdf8; background: rgba(119, 82, 207, .2); }
+.catalog-picker-pagination { display: flex; align-items: center; justify-content: center; gap: .75rem; padding-top: .8rem; }
+.catalog-picker-advanced { margin: 0 1.2rem; border-top: 1px solid rgba(143, 109, 225, .25); }
+.catalog-picker-advanced summary { padding: .8rem 0; cursor: pointer; color: #d8caf9; }
+.catalog-picker-operation-preview { grid-column: 1 / -1; min-height: 3rem; white-space: pre-wrap; }
+#catalogPickerFeedback { min-height: 1.4rem; margin: 0; padding: .4rem 1.2rem; }
+
+@media (max-width: 720px) {
+    .catalog-item-picker { width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; border-radius: 0; }
+    .catalog-picker-shell { height: 100dvh; max-height: none; overflow: auto; }
+    .catalog-picker-toolbar,
+    .catalog-picker-advanced-grid,
+    .catalog-picker-body { grid-template-columns: 1fr; }
+    .catalog-picker-body { overflow: visible; }
+    .catalog-picker-results,
+    .catalog-picker-preview { max-height: none; overflow: visible; }
+    .catalog-picker-preview { border-top: 1px solid rgba(143, 109, 225, .25); border-left: 0; }
 }

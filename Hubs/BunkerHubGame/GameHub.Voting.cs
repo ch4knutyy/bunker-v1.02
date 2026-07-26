@@ -14,7 +14,7 @@ namespace Bunker.Hubs
         /// <summary>
         /// Почати голосування (тільки хост)
         /// </summary>
-        public async Task StartVoting()
+        public async Task StartVoting(string? commandId = null)
         {
             if (!IsCallerHost())
             {
@@ -37,21 +37,42 @@ namespace Bunker.Hubs
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(commandId))
+            {
+                lock (room.ProcessedGmPlayerCommandIds)
+                {
+                    if (room.ProcessedGmPlayerCommandIds.Contains(commandId))
+                        return;
+                }
+            }
+
             var availability = GetVotingStartAvailability(room);
             if (!availability.Allowed)
             {
                 await Clients.Caller.SendAsync("ReceiveError", availability.Message, availability.Code);
                 return;
             }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                return;
+            }
 
-            var settings = _roomGameSettings.GetEffective(room);
+            var actorId = _roomService.GetPlayer(Context.ConnectionId) is { } actor
+                ? RoomService.GetPlayerKey(actor)
+                : "unknown";
+            var votingSnapshot = CreateMutationSnapshot(
+                room,
+                actorId,
+                "voting_start",
+                commandId,
+                "Before voting start");
 
             // Створюємо нову сесію голосування
             var voting = new VotingSession
             {
                 Round = room.CurrentRound,
                 VotingStartedAtRound = room.CurrentRound,
-                IsEarlyVoting = room.CurrentRound < settings.VotingStartRound
+                IsEarlyVoting = room.CurrentRound < VotingSession.RecommendedStartRound
             };
 
             var playersSnapshot = RoomService.GetPlayersSnapshot(room);
@@ -74,6 +95,9 @@ namespace Bunker.Hubs
             {
                 votingId = voting.Id,
                 round = voting.Round,
+                recommendedStartRound = VotingSession.RecommendedStartRound,
+                votingStartedAtRound = voting.VotingStartedAtRound,
+                isEarlyVoting = voting.IsEarlyVoting,
                 eligibleVoters = voting.EligibleVoters.Count,
                 totalVoters = voting.RequiredVoterCount,
                 blockedVoterIds = voting.BlockedVoterIds.ToList(),
@@ -115,6 +139,15 @@ namespace Bunker.Hubs
                     })
             });
 
+            await AppendGmAudit(
+                room,
+                actorId,
+                "voting_start",
+                GmAuditResult.Success,
+                $"Voting started at round {voting.VotingStartedAtRound}; early:{voting.IsEarlyVoting}.",
+                commandId: commandId,
+                snapshot: votingSnapshot);
+            QueueRoomRecovery(room, "voting_started");
             _logger.LogInformation($"Голосування почалось в кімнаті {room.Name}, раунд {voting.Round}");
         }
 
@@ -247,7 +280,12 @@ namespace Bunker.Hubs
         /// </summary>
         private async Task EndVotingInternal(Room room, string roomId)
         {
-            var voting = room.CurrentVoting!;
+            if (room.CurrentVoting?.State != VotingState.Active)
+            {
+                return;
+            }
+
+            var voting = room.CurrentVoting;
             voting.State = VotingState.Completed;
             voting.EndedAt = DateTime.UtcNow;
 
