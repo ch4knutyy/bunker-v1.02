@@ -56,6 +56,54 @@ function clampApocalypseIntensity(value, minimum, maximum, fallback) {
 	return Number.isFinite(numeric) ? Math.max(minimum, Math.min(maximum, numeric)) : fallback;
 }
 
+function readApocalypsePhysicalThemeValue(source, key) {
+	const explicit = source?.visualTheme ?? source?.VisualTheme ?? source?.theme ?? source?.Theme;
+	if (!explicit || typeof explicit !== 'object') return undefined;
+	const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+	return explicit[key] ?? explicit[pascalKey];
+}
+
+function normalizeApocalypsePhysicalToken(value) {
+	return String(value ?? '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+}
+
+function validApocalypsePhysicalThemeValue(key, value, fallback) {
+	const normalized = normalizeApocalypsePhysicalToken(value);
+	if (!normalized) return fallback;
+	if (key === 'archetype') return apocalypsePhysicalThemeProfiles[normalized] ? normalized : fallback;
+	const allowed = new Set(Object.values(apocalypsePhysicalThemeProfiles).map(profile => normalizeApocalypsePhysicalToken(profile[key])));
+	return allowed.has(normalized) ? normalized : fallback;
+}
+
+const apocalypseRealisticFamilyProfileIds = Object.freeze({
+	contamination: 'chemical',
+	thermal: 'fire',
+	cryogenic: 'extreme-cold',
+	atmospheric: 'solar-flare',
+	hydrological: 'flood',
+	biological: 'biological',
+	ecological: 'desert',
+	structural: 'war',
+	cosmic: 'anomalous',
+	technological: 'machine-uprising',
+	societal: 'war',
+	psychological: 'anomalous',
+	anomalous: 'anomalous',
+	occult: 'anomalous'
+});
+
+function resolveApocalypseClassificationProfile(classification) {
+	const archetype = normalizeApocalypsePhysicalToken(classification?.realisticVisualArchetypeId).replace(/-/g, '_');
+	const family = normalizeApocalypsePhysicalToken(classification?.realisticVisualFamilyId);
+	const profileId = ({
+		fallout_radiation: 'nuclear',
+		extreme_heat: 'desert',
+		infection_quarantine: 'pandemic',
+		darkness_light_loss: 'darkness'
+	})[archetype] || apocalypseRealisticFamilyProfileIds[family] || 'generic-collapse';
+	return apocalypsePhysicalThemeProfiles[profileId] || apocalypsePhysicalThemeFallback;
+}
+
 function getApocalypseVisualMetadata(apocalypse) {
 	const id = String(apocalypse?.id ?? apocalypse?.Id ?? '').trim();
 	const registered = window.ApocalypseCategoryVisualRegistry?.getApocalypseVisualMetadata?.(id);
@@ -81,11 +129,13 @@ function getApocalypseVisualMetadata(apocalypse) {
 
 function inferApocalypsePhysicalArchetype(apocalypse) {
 	const metadata = getApocalypseVisualMetadata(apocalypse);
+	const explicit = validApocalypsePhysicalThemeValue('archetype', readApocalypsePhysicalThemeValue(apocalypse, 'archetype'), '');
+	if (explicit) return explicit;
 	const has = value => metadata.modifiers.includes(normalizeApocalypseMetadataValue(value));
 	const text = metadata.text;
 	if (has('radiation') || /(nuclear|atomic|radiation|fallout|ядер|атомн|радіац|радиац)/u.test(text)) return 'nuclear';
 	if (has('heat') || /(wildfire|fire sky|global fire|combust|пожеж|вогн|пожар|огнен)/u.test(text)) return 'fire';
-	if (has('frost') || /(ice age|extreme cold|nuclear winter|frozen|льодов|крижан|ледников|замерз)/u.test(text)) return 'ice';
+	if (has('frost') || /(ice age|extreme cold|nuclear winter|frozen|льодов|крижан|ледников|замерз)/u.test(text)) return 'extreme-cold';
 	if (has('flood') || /(flood|ocean rise|tsunami|затоп|повін|наводнен)/u.test(text)) return 'flood';
 	if (/(pandemic|epidemic|virus|plague|пандем|епідем|вірус|чума|эпидем)/u.test(text)) return 'pandemic';
 	if (has('spores') || has('mutation') || has('parasite') || /(biological contamination|fungal|organic bloom|біологіч|біозабруд|биологичес)/u.test(text)) return 'biological';
@@ -93,33 +143,74 @@ function inferApocalypsePhysicalArchetype(apocalypse) {
 	if (has('ash') || /(volcan|eruption|ash ocean|вулкан|попіл|пепел)/u.test(text)) return 'volcanic';
 	if (has('drought') || /(desert|drought|sand storm|опустел|посух|засух|пустын)/u.test(text)) return 'desert';
 	if (has('darkness') || has('blackout') || /(sun disappearance|endless darkness|night without end|зникнен.{0,8}сонц|вічн.{0,8}темр|исчезновен.{0,8}солнц|вечн.{0,8}тьм)/u.test(text)) return 'darkness';
-	if (has('emp') || /(solar flare|electromagnetic|magnetic storm|сонячн.{0,8}спалах|електромагніт|солнечн.{0,8}вспыш|электромагнит)/u.test(text)) return 'solar';
+	if (has('emp') || /(solar flare|electromagnetic|magnetic storm|сонячн.{0,8}спалах|електромагніт|солнечн.{0,8}вспыш|электромагнит)/u.test(text)) return 'solar-flare';
 	if (has('unrest') || /(world war|civil war|machine war|війна|воєн|война|военн)/u.test(text)) return 'war';
-	if (has('machine') || metadata.category === 'technology' || /(artificial intelligence|machine uprising|robot|штучн.{0,8}інтелект|машин|искусственн.{0,8}интеллект|робот)/u.test(text)) return 'machine';
+	if (has('machine') || metadata.category === 'technology' || /(artificial intelligence|machine uprising|robot|штучн.{0,8}інтелект|машин|искусственн.{0,8}интеллект|робот)/u.test(text)) return 'machine-uprising';
+	if (/(antimatter|антиматер)/u.test(text)) return 'antimatter';
 	if (has('reality_fracture') || metadata.category === 'anomaly' || /(anomal|conscious object|reality|аномал|реальност)/u.test(text)) return 'anomalous';
 	return 'generic-collapse';
 }
 
-function resolveApocalypseVisualTheme(apocalypse) {
+function resolveApocalypseVisualTheme(apocalypse, classification = null) {
+	const id = String(apocalypse?.id ?? apocalypse?.Id ?? 'apocalypse-fallback');
+	const registered = classification || (typeof getApocalypseVisualClassification === 'function'
+		? getApocalypseVisualClassification(id)
+		: null);
+	if (registered) {
+		const profile = resolveApocalypseClassificationProfile(registered);
+		const hash = apocalypseStableVisualHash(id);
+		const variation = Number.isInteger(registered.stableVariation)
+			? Math.max(0, Math.min(3, registered.stableVariation))
+			: hash % 4;
+		return Object.freeze({
+			id,
+			themeId: normalizeApocalypseVisualThemeId(registered.legacyVisualThemeId),
+			category: normalizeApocalypseMetadataValue(registered.contentCategoryId),
+			family: normalizeApocalypsePhysicalToken(registered.realisticVisualFamilyId) || 'atmospheric',
+			archetype: normalizeApocalypseMetadataValue(registered.realisticVisualArchetypeId) || 'generic_collapse',
+			lighting: profile.lighting,
+			air: profile.air,
+			contamination: profile.contamination,
+			damage: profile.damage,
+			visibility: profile.visibility,
+			accent: profile.accent,
+			modifiers: Object.freeze(Array.isArray(registered.sourceVisualModifierIds) ? [...registered.sourceVisualModifierIds] : []),
+			effects: Object.freeze(Array.isArray(registered.environmentalEffectIds) ? [...registered.environmentalEffectIds] : []),
+			intensity: clampApocalypseIntensity(profile.intensity, .08, .42, .18),
+			lightingIntensity: clampApocalypseIntensity(profile.lightingIntensity, .08, .32, .18),
+			contaminationIntensity: clampApocalypseIntensity(profile.contaminationIntensity, 0, .22, .08),
+			visibilityReduction: clampApocalypseIntensity(profile.visibilityReduction, 0, .18, .04),
+			animationIntensity: clampApocalypseIntensity(profile.animationIntensity, 0, .06, .03),
+			variation,
+			textureVariant: (hash >>> 4) % 3,
+			lightPosition: 12 + ((hash >>> 7) % 77),
+			temperatureShift: ((hash >>> 12) % 9) - 4
+		});
+	}
+
 	const themeId = resolveApocalypseVisualThemeId(apocalypse);
 	const archetype = apocalypse ? inferApocalypsePhysicalArchetype(apocalypse) : 'generic-collapse';
 	const profile = apocalypsePhysicalThemeProfiles[archetype] || apocalypsePhysicalThemeFallback;
-	const id = String(apocalypse?.id ?? apocalypse?.Id ?? 'apocalypse-fallback');
 	const hash = apocalypseStableVisualHash(id);
 	return Object.freeze({
+		id,
 		themeId,
+		category: normalizeApocalypseMetadataValue(apocalypse?.categoryId ?? apocalypse?.CategoryId) || 'generic',
+		family: 'atmospheric',
 		archetype,
-		lighting: profile.lighting,
-		air: profile.air,
-		contamination: profile.contamination,
-		damage: profile.damage,
-		visibility: profile.visibility,
-		accent: profile.accent,
-		intensity: clampApocalypseIntensity(profile.intensity, .08, .42, .18),
-		lightingIntensity: clampApocalypseIntensity(profile.lightingIntensity, .08, .32, .18),
-		contaminationIntensity: clampApocalypseIntensity(profile.contaminationIntensity, 0, .22, .08),
-		visibilityReduction: clampApocalypseIntensity(profile.visibilityReduction, 0, .18, .04),
-		animationIntensity: clampApocalypseIntensity(profile.animationIntensity, 0, .06, .03),
+		lighting: validApocalypsePhysicalThemeValue('lighting', readApocalypsePhysicalThemeValue(apocalypse, 'lighting'), profile.lighting),
+		air: validApocalypsePhysicalThemeValue('air', readApocalypsePhysicalThemeValue(apocalypse, 'air'), profile.air),
+		contamination: validApocalypsePhysicalThemeValue('contamination', readApocalypsePhysicalThemeValue(apocalypse, 'contamination'), profile.contamination),
+		damage: validApocalypsePhysicalThemeValue('damage', readApocalypsePhysicalThemeValue(apocalypse, 'damage'), profile.damage),
+		visibility: validApocalypsePhysicalThemeValue('visibility', readApocalypsePhysicalThemeValue(apocalypse, 'visibility'), profile.visibility),
+		accent: validApocalypsePhysicalThemeValue('accent', readApocalypsePhysicalThemeValue(apocalypse, 'accent'), profile.accent),
+		modifiers: Object.freeze([]),
+		effects: Object.freeze([]),
+		intensity: clampApocalypseIntensity(readApocalypsePhysicalThemeValue(apocalypse, 'intensity') ?? profile.intensity, .08, .42, .18),
+		lightingIntensity: clampApocalypseIntensity(readApocalypsePhysicalThemeValue(apocalypse, 'lightingIntensity') ?? profile.lightingIntensity, .08, .32, .18),
+		contaminationIntensity: clampApocalypseIntensity(readApocalypsePhysicalThemeValue(apocalypse, 'contaminationIntensity') ?? profile.contaminationIntensity, 0, .22, .08),
+		visibilityReduction: clampApocalypseIntensity(readApocalypsePhysicalThemeValue(apocalypse, 'visibilityReduction') ?? profile.visibilityReduction, 0, .18, .04),
+		animationIntensity: clampApocalypseIntensity(readApocalypsePhysicalThemeValue(apocalypse, 'animationIntensity') ?? profile.animationIntensity, 0, .06, .03),
 		variation: hash % 4,
 		textureVariant: (hash >>> 4) % 3,
 		lightPosition: 12 + ((hash >>> 7) % 77),

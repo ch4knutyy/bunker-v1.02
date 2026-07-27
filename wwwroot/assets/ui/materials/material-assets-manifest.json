@@ -1,0 +1,346 @@
+{
+  "version": 2,
+  "baseMaterialCount": 44,
+  "overlayCount": 27,
+  "baseMaterials": [
+    {
+      "id": "acoustic-felt",
+      "path": "/assets/ui/materials/acoustic-felt/base.webp"
+    },
+    {
+      "id": "advanced-carbon-composite",
+      "path": "/assets/ui/materials/advanced-carbon-composite/base.webp"
+    },
+    {
+      "id": "aged-bakelite",
+      "path": "/assets/ui/materials/aged-bakelite/base.webp"
+    },
+    {
+      "id": "aged-brass",
+      "path": "/assets/ui/materials/aged-brass/base.webp"
+    },
+    {
+      "id": "aged-copper",
+      "path": "/assets/ui/materials/aged-copper/base.webp"
+    },
+    {
+      "id": "aged-dark-wood",
+      "path": "/assets/ui/materials/aged-dark-wood/base.webp"
+    },
+    {
+      "id": "aged-leather",
+      "path": "/assets/ui/materials/aged-leather/base.webp"
+    },
+    {
+      "id": "aged-utility-pvc",
+      "path": "/assets/ui/materials/aged-utility-pvc/base.webp"
+    },
+    {
+      "id": "anodized-aluminum",
+      "path": "/assets/ui/materials/anodized-aluminum/base.webp"
+    },
+    {
+      "id": "bitumen-waterproofing",
+      "path": "/assets/ui/materials/bitumen-waterproofing/base.webp"
+    },
+    {
+      "id": "brushed-stainless-steel",
+      "path": "/assets/ui/materials/brushed-stainless-steel/base.webp"
+    },
+    {
+      "id": "chemical-fluoropolymer",
+      "path": "/assets/ui/materials/chemical-fluoropolymer/base.webp"
+    },
+    {
+      "id": "compact-clinical-laminate",
+      "path": "/assets/ui/materials/compact-clinical-laminate/base.webp"
+    },
+    {
+      "id": "cryogenic-insulated-composite",
+      "path": "/assets/ui/materials/cryogenic-insulated-composite/base.webp"
+    },
+    {
+      "id": "dark-glass",
+      "path": "/assets/ui/materials/dark-glass/base.webp"
+    },
+    {
+      "id": "dark-steel",
+      "path": "/assets/ui/materials/dark-steel/base.webp"
+    },
+    {
+      "id": "fiberglass-composite",
+      "path": "/assets/ui/materials/fiberglass-composite/base.webp"
+    },
+    {
+      "id": "fireproof-mineral-board",
+      "path": "/assets/ui/materials/fireproof-mineral-board/base.webp"
+    },
+    {
+      "id": "galvanized-steel",
+      "path": "/assets/ui/materials/galvanized-steel/base.webp"
+    },
+    {
+      "id": "glazed-clinical-ceramic",
+      "path": "/assets/ui/materials/glazed-clinical-ceramic/base.webp"
+    },
+    {
+      "id": "industrial-rubber",
+      "path": "/assets/ui/materials/industrial-rubber/base.webp"
+    },
+    {
+      "id": "institutional-painted-concrete",
+      "path": "/assets/ui/materials/institutional-painted-concrete/base.webp"
+    },
+    {
+      "id": "laboratory-plastic",
+      "path": "/assets/ui/materials/laboratory-plastic/base.webp"
+    },
+    {
+      "id": "lead-shielding-metal",
+      "path": "/assets/ui/materials/lead-shielding-metal/base.webp"
+    },
+    {
+      "id": "marine-steel",
+      "path": "/assets/ui/materials/marine-steel/base.webp"
+    },
+    {
+      "id": "medical-ceramic",
+      "path": "/assets/ui/materials/medical-ceramic/base.webp"
+    },
+    {
+      "id": "military-painted-steel",
+      "path": "/assets/ui/materials/military-painted-steel/base.webp"
+    },
+    {
+      "id": "natural-stone",
+      "path": "/assets/ui/materials/natural-stone/base.webp"
+    },
+    {
+      "id": "painted-metal",
+      "path": "/assets/ui/materials/painted-metal/base.webp"
+    },
+    {
+      "id": "phenolic-laminate",
+      "path": "/assets/ui/materials/phenolic-laminate/base.webp"
+    },
+    {
+      "id": "powder-coated-steel",
+      "path": "/assets/ui/materials/powder-coated-steel/base.webp"
+    },
+    {
+      "id": "quarantine-frosted-glass",
+      "path": "/assets/ui/materials/quarantine-frosted-glass/base.webp"
+    },
+    {
+      "id": "refractory-fireclay",
+      "path": "/assets/ui/materials/refractory-fireclay/base.webp"
+    },
+    {
+      "id": "rough-concrete",
+      "path": "/assets/ui/materials/rough-concrete/base.webp"
+    },
+    {
+      "id": "rusted-metal",
+      "path": "/assets/ui/materials/rusted-metal/base.webp"
+    },
+    {
+      "id": "salvaged-mixed-metal",
+      "path": "/assets/ui/materials/salvaged-mixed-metal/base.webp"
+    },
+    {
+      "id": "sanitation-hdpe",
+      "path": "/assets/ui/materials/sanitation-hdpe/base.webp"
+    },
+    {
+      "id": "sealed-plywood",
+      "path": "/assets/ui/materials/sealed-plywood/base.webp"
+    },
+    {
+      "id": "smoked-polycarbonate",
+      "path": "/assets/ui/materials/smoked-polycarbonate/base.webp"
+    },
+    {
+      "id": "submarine-enamel-steel",
+      "path": "/assets/ui/materials/submarine-enamel-steel/base.webp"
+    },
+    {
+      "id": "titanium-alloy",
+      "path": "/assets/ui/materials/titanium-alloy/base.webp"
+    },
+    {
+      "id": "waxed-canvas",
+      "path": "/assets/ui/materials/waxed-canvas/base.webp"
+    },
+    {
+      "id": "white-enamel-steel",
+      "path": "/assets/ui/materials/white-enamel-steel/base.webp"
+    },
+    {
+      "id": "wired-safety-glass",
+      "path": "/assets/ui/materials/wired-safety-glass/base.webp"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "chips-edge-damage",
+      "path": "/assets/ui/materials/overlays/edge/chips-edge-damage.png",
+      "usage": "edge"
+    },
+    {
+      "id": "corroded-edge-chips",
+      "path": "/assets/ui/materials/overlays/edge/corroded-edge-chips.png",
+      "usage": "edge"
+    },
+    {
+      "id": "frost-ice",
+      "path": "/assets/ui/materials/overlays/edge/frost-ice.png",
+      "usage": "edge"
+    },
+    {
+      "id": "soot-ash",
+      "path": "/assets/ui/materials/overlays/edge/soot-ash.png",
+      "usage": "edge"
+    },
+    {
+      "id": "biological-contamination",
+      "path": "/assets/ui/materials/overlays/local/biological-contamination.png",
+      "usage": "local"
+    },
+    {
+      "id": "chemical-etching",
+      "path": "/assets/ui/materials/overlays/local/chemical-etching.png",
+      "usage": "local"
+    },
+    {
+      "id": "condensation-moisture",
+      "path": "/assets/ui/materials/overlays/local/condensation-moisture.png",
+      "usage": "local"
+    },
+    {
+      "id": "dried-water-stains",
+      "path": "/assets/ui/materials/overlays/local/dried-water-stains.png",
+      "usage": "local"
+    },
+    {
+      "id": "electric-arc-scorch",
+      "path": "/assets/ui/materials/overlays/local/electric-arc-scorch.png",
+      "usage": "local"
+    },
+    {
+      "id": "faded-warning-markings",
+      "path": "/assets/ui/materials/overlays/local/faded-warning-markings.png",
+      "usage": "local"
+    },
+    {
+      "id": "fingerprints-handling",
+      "path": "/assets/ui/materials/overlays/local/fingerprints-handling.png",
+      "usage": "local"
+    },
+    {
+      "id": "grime-dust",
+      "path": "/assets/ui/materials/overlays/local/grime-dust.png",
+      "usage": "local"
+    },
+    {
+      "id": "impact-abrasion",
+      "path": "/assets/ui/materials/overlays/local/impact-abrasion.png",
+      "usage": "local"
+    },
+    {
+      "id": "mold-mildew",
+      "path": "/assets/ui/materials/overlays/local/mold-mildew.png",
+      "usage": "local"
+    },
+    {
+      "id": "oil-smear",
+      "path": "/assets/ui/materials/overlays/local/oil-smear.png",
+      "usage": "local"
+    },
+    {
+      "id": "paint-fading-bleaching",
+      "path": "/assets/ui/materials/overlays/local/paint-fading-bleaching.png",
+      "usage": "local"
+    },
+    {
+      "id": "peeling-paint-fragments",
+      "path": "/assets/ui/materials/overlays/local/peeling-paint-fragments.png",
+      "usage": "local"
+    },
+    {
+      "id": "quarantine-marking-remnants",
+      "path": "/assets/ui/materials/overlays/local/quarantine-marking-remnants.png",
+      "usage": "local"
+    },
+    {
+      "id": "rust-streaks-drips",
+      "path": "/assets/ui/materials/overlays/local/rust-streaks-drips.png",
+      "usage": "local"
+    },
+    {
+      "id": "waterline-stains",
+      "path": "/assets/ui/materials/overlays/local/waterline-stains.png",
+      "usage": "local"
+    },
+    {
+      "id": "weld-burn-heat-marks",
+      "path": "/assets/ui/materials/overlays/local/weld-burn-heat-marks.png",
+      "usage": "local"
+    },
+    {
+      "id": "fine-ash-fall",
+      "path": "/assets/ui/materials/overlays/universal/fine-ash-fall.png",
+      "usage": "universal"
+    },
+    {
+      "id": "light-dust-speckles",
+      "path": "/assets/ui/materials/overlays/universal/light-dust-speckles.png",
+      "usage": "universal"
+    },
+    {
+      "id": "metal-micro-pitting",
+      "path": "/assets/ui/materials/overlays/universal/metal-micro-pitting.png",
+      "usage": "universal"
+    },
+    {
+      "id": "sand-grit",
+      "path": "/assets/ui/materials/overlays/universal/sand-grit.png",
+      "usage": "universal"
+    },
+    {
+      "id": "small-paint-chips",
+      "path": "/assets/ui/materials/overlays/universal/small-paint-chips.png",
+      "usage": "universal"
+    },
+    {
+      "id": "surface-scratches",
+      "path": "/assets/ui/materials/overlays/universal/surface-scratches.png",
+      "usage": "universal"
+    }
+  ],
+  "seamCleanup": {
+    "baseMaterialsProcessed": 44,
+    "largePatternCleanup": [
+      "advanced-carbon-composite",
+      "aged-leather",
+      "bitumen-waterproofing",
+      "galvanized-steel",
+      "industrial-rubber",
+      "military-painted-steel",
+      "natural-stone",
+      "quarantine-frosted-glass",
+      "refractory-fireclay",
+      "salvaged-mixed-metal",
+      "smoked-polycarbonate",
+      "submarine-enamel-steel"
+    ],
+    "universalOverlaysProcessed": [
+      "fine-ash-fall",
+      "light-dust-speckles",
+      "metal-micro-pitting",
+      "sand-grit",
+      "small-paint-chips",
+      "surface-scratches"
+    ],
+    "method": "low-frequency periodic resynthesis for selected textures plus opposing-edge blend"
+  }
+}

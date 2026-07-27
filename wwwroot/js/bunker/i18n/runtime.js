@@ -66,6 +66,8 @@ function applyStaticTranslations() {
 		if (specialCardHeaderLabels[index]) th.textContent = specialCardHeaderLabels[index];
 	});
 
+	if (typeof initVisualThemePreview === 'function') initVisualThemePreview();
+	else if (typeof initApocalypseEffectPreview === 'function') initApocalypseEffectPreview();
 }
 
 function rerenderLocalizedUI() {

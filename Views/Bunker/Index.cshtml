@@ -1,3 +1,4 @@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 @{
     ViewData["Title"] = "Грати";
 }
@@ -6,8 +7,11 @@
 <link rel="stylesheet" href="~/css/apocalypse-category-effects.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/post-game-story.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/character-cards.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/visual-foundation.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/bunker-theme.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/bunker-materials.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/apocalypse-physical-theme.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/assets/ui/apocalypse-effects/apocalypse-effects.css" asp-append-version="true" />
 
 <div class="game-container site-game-shell">
     <div class="top-bar site-titlebar">
@@ -490,6 +494,79 @@
     </div>
 </div>
 
+@if (HostEnvironment.IsDevelopment())
+{
+    <details id="apocalypseEffectPreview" class="apocalypse-effect-preview visual-theme-preview">
+        <summary id="apocalypseEffectPreviewTitle"></summary>
+        <div class="apocalypse-effect-preview-toolbar">
+            <label for="bunkerMaterialPreviewSelect" id="bunkerMaterialPreviewLabel"></label>
+            <select id="bunkerMaterialPreviewSelect"></select>
+            <label for="bunkerConditionPreviewSelect" id="bunkerConditionPreviewLabel"></label>
+            <select id="bunkerConditionPreviewSelect"></select>
+            <label for="apocalypseEffectPreviewSelect" id="apocalypseEffectPreviewLabel"></label>
+            <select id="apocalypseEffectPreviewSelect"></select>
+            <label class="visual-theme-preview-toggle">
+                <input id="bunkerConditionPreviewEnabled" type="checkbox" checked>
+                <span id="bunkerConditionPreviewEnabledLabel"></span>
+            </label>
+            <label class="visual-theme-preview-toggle">
+                <input id="bunkerApocalypsePreviewEnabled" type="checkbox" checked>
+                <span id="bunkerApocalypsePreviewEnabledLabel"></span>
+            </label>
+            <label class="visual-theme-preview-toggle">
+                <input id="bunkerGrayscalePreviewEnabled" type="checkbox">
+                <span id="bunkerGrayscalePreviewEnabledLabel"></span>
+            </label>
+        </div>
+        <p id="apocalypseEffectPreviewDetails" class="apocalypse-effect-preview-details"></p>
+        <div class="apocalypse-effect-preview-grid">
+            <article class="apocalypse-effect-preview-card visual-theme-preview-card bunker-visual-root" data-preview-card="primary">
+                <div class="bunker-material-stack" aria-hidden="true">
+                    <div class="bunker-material-layer bunker-material-layer--base"></div>
+                    <div class="bunker-material-layer bunker-material-layer--secondary"></div>
+                    <div class="bunker-condition-stack"></div>
+                </div>
+                <div class="bunker-chassis-frame" aria-hidden="true"></div>
+                <div class="apocalypse-effect-stack bunker-apocalypse-effect-stack" aria-hidden="true"></div>
+                <div class="bunker-readability-veil" aria-hidden="true"></div>
+                <div class="bunker-visual-content">
+                    <header class="bunker-hero no-image">
+                        <div class="bunker-hero-overlay" aria-hidden="true"></div>
+                        <div class="bunker-hero-pattern" aria-hidden="true"></div>
+                        <div class="bunker-status-medallion" aria-hidden="true"><span class="bunker-status-icon">◈</span></div>
+                        <div class="bunker-hero-content"><span class="bunker-badge">Bunker</span><h3></h3><p data-preview-copy="primary"></p></div>
+                    </header>
+                    <section class="bunker-instrument-deck">
+                        <div class="bunker-metrics">
+                            <div class="bunker-metric"><span class="bunker-metric-label">Capacity</span><strong>6</strong></div>
+                            <div class="bunker-metric metric-condition"><span class="bunker-metric-label">Condition</span><strong>Fair</strong></div>
+                            <div class="bunker-metric"><span class="bunker-metric-label">Reserve</span><strong>18 mo.</strong></div>
+                        </div>
+                    </section>
+                    <section class="bunker-console-deck">
+                        <div class="bunker-content-grid">
+                            <section class="bunker-content-card"><h4 class="bunker-content-title" data-preview-copy="table"></h4><table class="visual-theme-preview-table"><tbody><tr><th>01</th><td>Pressure seal</td><td>Nominal</td></tr><tr><th>02</th><td>Air filtration</td><td>Standby</td></tr></tbody></table></section>
+                            <section class="bunker-content-card visual-theme-preview-modal"><h4 class="bunker-content-title" data-preview-copy="modal"></h4><p>Containment diagnostics · 72%</p></section>
+                        </div>
+                    </section>
+                    <footer class="bunker-footer bunker-control-deck"><span class="bunker-footer-kicker">Control deck</span><button type="button" class="btn-secondary bunker-open-image" data-preview-copy="control"></button></footer>
+                </div>
+            </article>
+            <article class="apocalypse-effect-preview-card visual-theme-preview-card bunker-visual-root is-compact" data-preview-card="compact">
+                <div class="bunker-material-stack" aria-hidden="true">
+                    <div class="bunker-material-layer bunker-material-layer--base"></div>
+                    <div class="bunker-material-layer bunker-material-layer--secondary"></div>
+                    <div class="bunker-condition-stack"></div>
+                </div>
+                <div class="bunker-chassis-frame" aria-hidden="true"></div>
+                <div class="apocalypse-effect-stack bunker-apocalypse-effect-stack" aria-hidden="true"></div>
+                <div class="bunker-readability-veil" aria-hidden="true"></div>
+                <div class="bunker-visual-content"><h3></h3><p data-preview-copy="compact"></p></div>
+            </article>
+        </div>
+    </details>
+}
+
 <script src="~/js/signalr-lite.js" asp-append-version="true"></script>
 <script src="~/js/bunker/game-utils.js" asp-append-version="true"></script>
 <script src="~/js/bunker/i18n/translations.js" asp-append-version="true"></script>
@@ -500,13 +577,19 @@
 <script src="~/js/bunker/special-cards/icons.js" asp-append-version="true"></script>
 <script src="~/js/bunker/characters/icons.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/icons.js" asp-append-version="true"></script>
+<script src="~/js/bunker/core/visual-theme-registries.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/visual-config.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/state.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/helpers.js" asp-append-version="true"></script>
+<script src="~/js/bunker/apocalypse/effect-assets.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/render.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/effects.js" asp-append-version="true"></script>
 <script src="~/js/bunker/bunker/theme-resolver.js" asp-append-version="true"></script>
+<script src="~/js/bunker/bunker/material-assets.js" asp-append-version="true"></script>
+<script src="~/js/bunker/bunker/material-profiles.js" asp-append-version="true"></script>
+<script src="~/js/bunker/bunker/material-resolver.js" asp-append-version="true"></script>
 <script src="~/js/bunker/bunker/theme-manager.js" asp-append-version="true"></script>
+<script src="~/js/bunker/bunker/visual-preview.js" asp-append-version="true"></script>
 <script src="~/js/bunker/core/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/i18n/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/characters/runtime.js" asp-append-version="true"></script>

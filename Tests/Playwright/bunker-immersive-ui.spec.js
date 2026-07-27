@@ -31,6 +31,19 @@ function fixture(name = 'Військовий командний комплек�
   };
 }
 
+function apocalypseFixture(id) {
+  return {
+    id,
+    name: id,
+    severity: 'critical',
+    survivalChance: 12,
+    duration: 'Невідомо',
+    threats: ['Зовнішня загроза'],
+    requirements: ['Герметизація'],
+    tags: []
+  };
+}
+
 test('desktop facility renders, capacity updates live and current snapshot rerenders without duplication', async ({ browser }) => {
   const room = await createTwoPlayerRoom(browser, `Bunker facility ${Date.now()}`);
   try {
@@ -128,6 +141,10 @@ test('bunker composition is deterministic, survives refresh and keeps controls f
   room.host.on('pageerror', error => errors.push(error.message));
   try {
     await startRoom(room);
+    await room.host.waitForFunction(() =>
+      visualThemeRegistryState.loaded &&
+      visualThemeRegistryState.bunkerById.size === 205 &&
+      visualThemeRegistryState.apocalypseById.size === 220);
     const initial = await room.host.evaluate(() => ({
       bunkerId: currentBunker?.id || currentBunker?.Id,
       archetype: document.body.dataset.bunkerArchetype,
@@ -156,11 +173,54 @@ test('bunker composition is deterministic, survives refresh and keeps controls f
       document.body.dataset.bunkerVariation
     ].join('|'))).toBe(initial.signature);
 
-    await room.host.evaluate(nextBunker => { currentBunker = nextBunker; renderBunker(currentBunker); }, fixture());
-    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-archetype', 'military');
-    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-condition', 'fair');
+    const medical = { ...fixture('Медичний карантинний комплекс'), id:'hospital_bunker' };
+    await room.host.evaluate(({ bunker, apocalypse }) => {
+      currentBunker = bunker;
+      currentApocalypse = apocalypse;
+      renderBunker(currentBunker);
+      renderApocalypse(currentApocalypse);
+    }, { bunker:medical, apocalypse:apocalypseFixture('pandemic_super_virus') });
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-archetype', 'medical');
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-family', 'clinical_technical');
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-archetype', 'infection_quarantine');
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-family', 'biological');
+    const medicalMaterial = await room.host.evaluate(() => {
+      const style = element => getComputedStyle(document.querySelector(element));
+      return {
+        button: style('[data-player-view="single"]').backgroundImage,
+        card: style('.vault-characteristic-card').backgroundImage,
+        table: style('.special-cards-table').backgroundColor,
+        overviewChannels: style('.player-overview-shell').backgroundColor.match(/\d+/g).slice(0, 3).map(Number)
+      };
+    });
+    expect(Math.max(...medicalMaterial.overviewChannels)).toBeLessThan(120);
+
+    const underground = { ...fixture('Підземне місто'), id:'underground_city' };
+    await room.host.evaluate(({ bunker, apocalypse }) => {
+      currentBunker = bunker;
+      currentApocalypse = apocalypse;
+      renderBunker(currentBunker);
+      renderApocalypse(currentApocalypse);
+    }, { bunker:underground, apocalypse:apocalypseFixture('anti_matter_leak') });
+    await expect(room.host.locator('body')).toHaveAttribute('data-bunker-archetype', 'underground-city');
+    await expect(room.host.locator('body')).toHaveAttribute('data-apocalypse-archetype', 'celestial_anomaly');
+    const undergroundMaterial = await room.host.evaluate(() => {
+      const style = element => getComputedStyle(document.querySelector(element));
+      return {
+        button: style('[data-player-view="single"]').backgroundImage,
+        card: style('.vault-characteristic-card').backgroundImage,
+        table: style('.special-cards-table').backgroundColor
+      };
+    });
+    expect(undergroundMaterial.button).not.toBe(medicalMaterial.button);
+    expect(undergroundMaterial.card).not.toBe(medicalMaterial.card);
+    expect(undergroundMaterial.table).not.toBe('');
+
     await room.host.locator('[data-player-view="single"]').click();
     await expect(room.host.locator('#singlePlayerOverview')).toBeVisible();
+    const profession = room.host.locator('[data-characteristic-type="Profession"]');
+    await profession.locator('.vault-card-reveal').click();
+    await expect(profession.locator('.status-revealed')).toBeVisible({ timeout: 15000 });
     expect(errors).toEqual([]);
   } finally {
     await room.close();

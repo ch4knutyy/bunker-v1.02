@@ -1,0 +1,3884 @@
+{
+  "version": 1,
+  "sourceFile": "bunkers.json",
+  "recordsTotal": 205,
+  "classificationPrinciple": "Primary category describes physical architecture and material language; condition, cleanliness, technology and modifiers describe state without replacing the base category.",
+  "visualFamilies": [
+    "agricultural",
+    "civic_cultural",
+    "clinical_technical",
+    "cold_environment",
+    "degraded",
+    "digital_technical",
+    "industrial_utility",
+    "infrastructure",
+    "luxury",
+    "maritime",
+    "mineral_heritage",
+    "reinforced",
+    "sealed_hazard",
+    "shelter_community"
+  ],
+  "categoryCatalog": [
+    {
+      "id": "military_command",
+      "visualFamilyId": "reinforced",
+      "defaultMaterialProfileId": "armored-steel",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Військовий командний"
+        },
+        "description": {
+          "uk": "Армовані панелі, масивні перемикачі, трафаретні маркування, болти й функціональна геометрія."
+        }
+      },
+      "count": 12,
+      "bunkerIds": [
+        "military_bunker",
+        "missile_silo_bunker",
+        "nato_base_bunker",
+        "special_forces_bunker",
+        "anti_aircraft_bunker",
+        "border_fortress_bunker",
+        "underground_command_center",
+        "tank_depot_bunker",
+        "emp_hardened_bunker",
+        "soviet_era_bunker",
+        "warsaw_pact_bunker",
+        "aircraft_hangar_bunker"
+      ]
+    },
+    {
+      "id": "government_security",
+      "visualFamilyId": "reinforced",
+      "defaultMaterialProfileId": "painted-steel-concrete",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Урядовий та безпековий"
+        },
+        "description": {
+          "uk": "Стримані захищені панелі, службові таблички, контроль доступу, офіційна геометрія."
+        }
+      },
+      "count": 7,
+      "bunkerIds": [
+        "government_shelter",
+        "police_headquarters_bunker",
+        "fire_station_bunker",
+        "embassy_bunker",
+        "intelligence_bunker",
+        "kgb_safe_house_bunker",
+        "embassy_district_tunnel"
+      ]
+    },
+    {
+      "id": "medical_clinical",
+      "visualFamilyId": "clinical_technical",
+      "defaultMaterialProfileId": "ceramic-composite-steel",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Медичний та клінічний"
+        },
+        "description": {
+          "uk": "Гладкі стерильні поверхні, точні рамки, медичні індикатори та контрольоване холодне світло."
+        }
+      },
+      "count": 5,
+      "bunkerIds": [
+        "hospital_bunker",
+        "hospital_wing",
+        "pharmaceutical_bunker",
+        "blood_bank_bunker",
+        "dental_clinic_bunker"
+      ]
+    },
+    {
+      "id": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "defaultMaterialProfileId": "dark-glass-composite",
+      "defaultTechnologyLevel": "experimental",
+      "_i18n": {
+        "name": {
+          "uk": "Науково-лабораторний"
+        },
+        "description": {
+          "uk": "Лабораторне скло, композити, датчики, технічні шкали та акуратні складні панелі."
+        }
+      },
+      "count": 19,
+      "bunkerIds": [
+        "research_bunker",
+        "university_lab",
+        "biolab_bunker",
+        "space_research_bunker",
+        "nuclear_research_bunker",
+        "genetics_lab_bunker",
+        "quantum_lab_bunker",
+        "weather_station_bunker",
+        "experimental_bunker",
+        "ark_bunker",
+        "biodome_bunker",
+        "weather_control_bunker",
+        "observatory_bunker",
+        "radiation_lab_bunker",
+        "rainforest_research_bunker",
+        "geology_survey_bunker",
+        "science_park_lab",
+        "archaeological_dig_bunker",
+        "radio_telescope_bunker"
+      ]
+    },
+    {
+      "id": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "defaultMaterialProfileId": "anodized-metal-dark-glass",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Цифровий та керувальний"
+        },
+        "description": {
+          "uk": "Серверний метал, темне скло, статусні індикатори, локальні екрани без суцільного неону."
+        }
+      },
+      "count": 10,
+      "bunkerIds": [
+        "data_center_bunker",
+        "ai_bunker",
+        "blockchain_vault_bunker",
+        "cybersecurity_bunker",
+        "satellite_control_bunker",
+        "ham_radio_bunker",
+        "startup_bunker",
+        "hackerspace_bunker",
+        "telecom_hub_bunker",
+        "telecommunications_tower_bunker"
+      ]
+    },
+    {
+      "id": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "defaultMaterialProfileId": "heavy-painted-steel",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Важкий промисловий"
+        },
+        "description": {
+          "uk": "Товстий метал, зварні шви, мастило, подряпини та локальні попереджувальні маркування."
+        }
+      },
+      "count": 7,
+      "bunkerIds": [
+        "factory_bunker",
+        "warehouse_bunker",
+        "chemical_plant_bunker",
+        "steel_mill_bunker",
+        "textile_factory_bunker",
+        "printing_house_bunker",
+        "car_dealership_bunker"
+      ]
+    },
+    {
+      "id": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "defaultMaterialProfileId": "insulated-steel-concrete",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Енергетична інфраструктура"
+        },
+        "description": {
+          "uk": "Ізольовані силові панелі, високовольтні маркування, кабелі, контрольні прилади та масивні конструкції."
+        }
+      },
+      "count": 12,
+      "bunkerIds": [
+        "power_plant_bunker",
+        "oil_depot_bunker",
+        "pipeline_station_bunker",
+        "nuclear_power_shelter",
+        "electric_substation_bunker",
+        "natural_gas_storage",
+        "hydroelectric_bunker",
+        "solar_farm_bunker",
+        "wind_farm_bunker",
+        "geothermal_plant_bunker",
+        "decommissioned_reactor_bunker",
+        "hydroelectric_dam_tunnels"
+      ]
+    },
+    {
+      "id": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "defaultMaterialProfileId": "wet-painted-metal-concrete",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Водна та санітарна інфраструктура"
+        },
+        "description": {
+          "uk": "Вологий бетон, труби, клапани, резервуари, конденсат і локальна корозія."
+        }
+      },
+      "count": 8,
+      "bunkerIds": [
+        "canal_tunnel_bunker",
+        "water_treatment_bunker",
+        "sewage_system_bunker",
+        "sewage_treatment_plant",
+        "mountain_water_reservoir",
+        "artesian_aquifer_bunker",
+        "rainwater_harvesting_bunker",
+        "desalination_plant_bunker"
+      ]
+    },
+    {
+      "id": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "defaultMaterialProfileId": "concrete-enamel-steel",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Транспортна інфраструктура"
+        },
+        "description": {
+          "uk": "Секційний бетон, емальований метал, навігація, технічні тунелі та довгі модульні панелі."
+        }
+      },
+      "count": 10,
+      "bunkerIds": [
+        "metro_bunker",
+        "parking_bunker",
+        "subway_station_b",
+        "airport_bunker",
+        "highway_tunnel_bunker",
+        "railway_station_bunker",
+        "cable_car_base_bunker",
+        "train_tunnel_bunker",
+        "shopping_center_parking",
+        "container_terminal_bunker"
+      ]
+    },
+    {
+      "id": "mining_extraction",
+      "visualFamilyId": "mineral_heritage",
+      "defaultMaterialProfileId": "rock-steel-timber",
+      "defaultTechnologyLevel": "legacy",
+      "_i18n": {
+        "name": {
+          "uk": "Шахтний та видобувний"
+        },
+        "description": {
+          "uk": "Камінь, пил, металеві або дерев’яні опори, грубе світло й механічні елементи."
+        }
+      },
+      "count": 4,
+      "bunkerIds": [
+        "mining_bunker",
+        "salt_mine_bunker",
+        "diamond_mine_bunker",
+        "copper_mine_bunker"
+      ]
+    },
+    {
+      "id": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "defaultMaterialProfileId": "marine-steel",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Морський та підводний"
+        },
+        "description": {
+          "uk": "Корабельна сталь, герметичні панелі, клапани, морська корозія та вузька модульна геометрія."
+        }
+      },
+      "count": 13,
+      "bunkerIds": [
+        "submarine_base",
+        "shipyard_bunker",
+        "oceanographic_bunker",
+        "coast_guard_bunker",
+        "underwater_cave",
+        "tsunami_zone_bunker",
+        "lighthouse_bunker",
+        "submarine_bunker",
+        "oil_rig_bunker",
+        "underwater_habitat",
+        "harbor_fortress_bunker",
+        "coral_reef_station",
+        "luxury_yacht_marina_bunker"
+      ]
+    },
+    {
+      "id": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "defaultMaterialProfileId": "painted-metal-wood-plastic",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Аграрний та харчовий"
+        },
+        "description": {
+          "uk": "Практичний метал, дерево, харчові ємності, тепличні системи й органічні сліди використання."
+        }
+      },
+      "count": 15,
+      "bunkerIds": [
+        "farm_bunker",
+        "brewery_bunker",
+        "cold_storage_bunker",
+        "wine_cellar_bunker",
+        "grain_silo_bunker",
+        "greenhouse_bunker",
+        "dairy_farm_bunker",
+        "orchard_bunker",
+        "fish_processing_bunker",
+        "brewery_underground",
+        "wine_museum_cellar",
+        "seed_vault_bunker",
+        "grain_elevator_bunker",
+        "botanical_garden_greenhouse_bunker",
+        "old_brewery_cellars"
+      ]
+    },
+    {
+      "id": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "defaultMaterialProfileId": "dark-wood-leather-brass",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Елітний та готельний"
+        },
+        "description": {
+          "uk": "Темне дерево, шкіра, латунь, дорогі матові поверхні й приглушене тепле освітлення."
+        }
+      },
+      "count": 7,
+      "bunkerIds": [
+        "luxury_bunker",
+        "hotel_bunker",
+        "casino_bunker",
+        "alpine_chalet_bunker",
+        "ski_resort_bunker",
+        "billionaire_doomsday_bunker",
+        "underground_nightclub"
+      ]
+    },
+    {
+      "id": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "defaultMaterialProfileId": "painted-concrete-plastic",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Громадський та комерційний"
+        },
+        "description": {
+          "uk": "Практичні громадські матеріали, зрозуміла навігація, фарбований бетон, пластик і метал."
+        }
+      },
+      "count": 12,
+      "bunkerIds": [
+        "mall_bunker",
+        "office_bunker",
+        "stadium_bunker",
+        "theme_park_underground",
+        "zoo_underground_bunker",
+        "aquarium_bunker",
+        "boxing_club_bunker",
+        "shooting_range_bunker",
+        "martial_arts_dojo_bunker",
+        "swimming_pool_bunker",
+        "sports_complex_bunker",
+        "high_rise_basement"
+      ]
+    },
+    {
+      "id": "subterranean_urban",
+      "visualFamilyId": "infrastructure",
+      "defaultMaterialProfileId": "reinforced-concrete-industrial-metal",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Підземне місто"
+        },
+        "description": {
+          "uk": "Монументальний залізобетон, великі секції, підземні вулиці, індустріальна навігація та масштаб."
+        }
+      },
+      "count": 1,
+      "bunkerIds": [
+        "underground_city"
+      ]
+    },
+    {
+      "id": "detention",
+      "visualFamilyId": "reinforced",
+      "defaultMaterialProfileId": "concrete-steel-bars",
+      "defaultTechnologyLevel": "legacy",
+      "_i18n": {
+        "name": {
+          "uk": "Тюремний"
+        },
+        "description": {
+          "uk": "Холодний бетон, сталь, решітчасті мотиви, номери камер і жорстка геометрія."
+        }
+      },
+      "count": 3,
+      "bunkerIds": [
+        "prison_bunker",
+        "prison_island_bunker",
+        "old_prison_basement"
+      ]
+    },
+    {
+      "id": "historic_fortified",
+      "visualFamilyId": "mineral_heritage",
+      "defaultMaterialProfileId": "stone-brick-aged-metal",
+      "defaultTechnologyLevel": "legacy",
+      "_i18n": {
+        "name": {
+          "uk": "Історичний укріплений"
+        },
+        "description": {
+          "uk": "Старий камінь, цегла, важкі двері, аркові проходи та сліди довгого використання."
+        }
+      },
+      "count": 4,
+      "bunkerIds": [
+        "catacombs_bunker",
+        "pyramid_bunker",
+        "ancient_fortress_bunker",
+        "old_fort_underground"
+      ]
+    },
+    {
+      "id": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "defaultMaterialProfileId": "stone-wood-aged-brass",
+      "defaultTechnologyLevel": "legacy",
+      "_i18n": {
+        "name": {
+          "uk": "Релігійний та ритуальний"
+        },
+        "description": {
+          "uk": "Камінь, темне дерево, латунь, символічна геометрія й локальне тепле світло."
+        }
+      },
+      "count": 7,
+      "bunkerIds": [
+        "church_bunker",
+        "monastery_bunker",
+        "masonic_lodge_bunker",
+        "mountain_monastery_bunker",
+        "underground_monastery_zen",
+        "doomsday_cult_bunker",
+        "monastery_wine_cellar"
+      ]
+    },
+    {
+      "id": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "defaultMaterialProfileId": "rock-earth-natural",
+      "defaultTechnologyLevel": "primitive",
+      "_i18n": {
+        "name": {
+          "uk": "Природний печерний"
+        },
+        "description": {
+          "uk": "Природна порода, земля, нерівні стіни, волога або пил і мінімум штучних поверхонь."
+        }
+      },
+      "count": 11,
+      "bunkerIds": [
+        "cave_bunker",
+        "lava_tube_bunker",
+        "island_bunker",
+        "jungle_shelter",
+        "desert_bunker",
+        "thermal_spring_bunker",
+        "volcano_bunker",
+        "mangrove_bunker",
+        "underground_lake_shelter",
+        "natural_salt_cave",
+        "geothermal_cave_shelter"
+      ]
+    },
+    {
+      "id": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "defaultMaterialProfileId": "insulated-steel-frosted-glass",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Полярний та кріогенний"
+        },
+        "description": {
+          "uk": "Ізольований метал, іній, запітніле скло, температурні індикатори та холодне світло."
+        }
+      },
+      "count": 7,
+      "bunkerIds": [
+        "glacier_bunker",
+        "cryogenic_bunker",
+        "arctic_station_bunker",
+        "antarctic_base_bunker",
+        "permafrost_bunker",
+        "polar_research_station_bunker",
+        "glacial_meltwater_bunker"
+      ]
+    },
+    {
+      "id": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "defaultMaterialProfileId": "concrete-painted-steel",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Цивільна оборона"
+        },
+        "description": {
+          "uk": "Прості масові укриття, фарбований бетон, функціональні таблички, лави й базові панелі."
+        }
+      },
+      "count": 9,
+      "bunkerIds": [
+        "school_bunker",
+        "fallout_shelter_50s",
+        "emergency_fema_bunker",
+        "civil_defense_bunker",
+        "disaster_relief_bunker",
+        "shelter_in_place_bunker",
+        "prepper_compound",
+        "mountain_rescue_base",
+        "refugee_camp_underground"
+      ]
+    },
+    {
+      "id": "community_improvised",
+      "visualFamilyId": "shelter_community",
+      "defaultMaterialProfileId": "mixed-salvaged-materials",
+      "defaultTechnologyLevel": "improvised",
+      "_i18n": {
+        "name": {
+          "uk": "Імпровізований громадський"
+        },
+        "description": {
+          "uk": "Різні матеріали, ручний ремонт, дроти, стрічка, саморобні написи та нерівні панелі."
+        }
+      },
+      "count": 3,
+      "bunkerIds": [
+        "influencer_bunker",
+        "survivalist_commune_bunker",
+        "anarchist_bunker"
+      ]
+    },
+    {
+      "id": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "defaultMaterialProfileId": "dark-wood-climate-metal",
+      "defaultTechnologyLevel": "standard",
+      "_i18n": {
+        "name": {
+          "uk": "Архівний та культурний"
+        },
+        "description": {
+          "uk": "Сховища, темне дерево, кліматичні панелі, каталогізація й стримане музейне освітлення."
+        }
+      },
+      "count": 7,
+      "bunkerIds": [
+        "library_bunker",
+        "theater_bunker",
+        "museum_bunker",
+        "time_capsule_bunker",
+        "national_archive_bunker",
+        "underground_art_gallery",
+        "concert_hall_basement"
+      ]
+    },
+    {
+      "id": "fortified_vault",
+      "visualFamilyId": "reinforced",
+      "defaultMaterialProfileId": "reinforced-steel-concrete",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Броньоване сховище"
+        },
+        "description": {
+          "uk": "Товсті двері, броньована сталь, бетон, механічні замки та дуже компактні захищені панелі."
+        }
+      },
+      "count": 3,
+      "bunkerIds": [
+        "bank_vault_bunker",
+        "gold_vault_bunker",
+        "auction_house_vault"
+      ]
+    },
+    {
+      "id": "contaminated_isolation",
+      "visualFamilyId": "sealed_hazard",
+      "defaultMaterialProfileId": "sealed-steel-composite",
+      "defaultTechnologyLevel": "advanced",
+      "_i18n": {
+        "name": {
+          "uk": "Карантинний та заражений"
+        },
+        "description": {
+          "uk": "Герметичні шлюзи, ізобокси, фільтри, попереджувальні знаки й сліди знезараження."
+        }
+      },
+      "count": 4,
+      "bunkerIds": [
+        "chernobyl_bunker",
+        "plague_hospital_bunker",
+        "toxic_waste_bunker",
+        "quarantine_zone_bunker"
+      ]
+    },
+    {
+      "id": "abandoned_damaged",
+      "visualFamilyId": "degraded",
+      "defaultMaterialProfileId": "damaged-mixed-materials",
+      "defaultTechnologyLevel": "legacy",
+      "_i18n": {
+        "name": {
+          "uk": "Покинутий та пошкоджений"
+        },
+        "description": {
+          "uk": "Зламані панелі, пил, тріщини, залишки старих матеріалів і частково непрацююче освітлення."
+        }
+      },
+      "count": 5,
+      "bunkerIds": [
+        "flooded_bunker",
+        "collapsed_bunker",
+        "abandoned_bunker",
+        "ghost_town_bunker",
+        "carnival_bunker"
+      ]
+    }
+  ],
+  "bunkers": [
+    {
+      "id": "military_bunker",
+      "name": "Військовий бункер",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold",
+        "degraded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "luxury_bunker",
+      "name": "Елітний бункер",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp",
+        "refined"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "metro_bunker",
+      "name": "Станція метро",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "dusty"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "farm_bunker",
+      "name": "Фермерське укриття",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hospital_bunker",
+      "name": "Підземний госпіталь",
+      "visualCategoryId": "medical_clinical",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "ceramic-composite-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "school_bunker",
+      "name": "Шкільне бомбосховище",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "claustrophobic"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "research_bunker",
+      "name": "Науково-дослідний комплекс",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "sterile"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "church_bunker",
+      "name": "Катакомби під церквою",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "isolated",
+        "dusty",
+        "ritual"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "submarine_base",
+      "name": "База підводних човнів",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mining_bunker",
+      "name": "Покинута шахта",
+      "visualCategoryId": "mining_extraction",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-steel-timber",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "degraded",
+        "dusty",
+        "monumental"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mall_bunker",
+      "name": "Торговий центр",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "monumental"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "bank_vault_bunker",
+      "name": "Банківське сховище",
+      "visualCategoryId": "fortified_vault",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "reinforced-steel-concrete",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "claustrophobic"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "office_bunker",
+      "name": "Підвал офісного центру",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "parking_bunker",
+      "name": "Підземний паркінг",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "dusty",
+        "monumental"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hotel_bunker",
+      "name": "Підземний готель",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "refined"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "library_bunker",
+      "name": "Підвал бібліотеки",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "theater_bunker",
+      "name": "Підвали театру",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "labyrinthine"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "subway_station_b",
+      "name": "Вузлова станція метро",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "monumental"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "casino_bunker",
+      "name": "Підземелля казино",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "refined"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "stadium_bunker",
+      "name": "Підвали стадіону",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "monumental"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "airport_bunker",
+      "name": "Підземелля аеропорту",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "labyrinthine",
+        "monumental"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "museum_bunker",
+      "name": "Сховища музею",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "chemical-hazard"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "prison_bunker",
+      "name": "Тюремний підвал",
+      "visualCategoryId": "detention",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "concrete-steel-bars",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "claustrophobic",
+        "labyrinthine",
+        "dusty"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hospital_wing",
+      "name": "Підземне крило лікарні",
+      "visualCategoryId": "medical_clinical",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "ceramic-composite-steel",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "sterile"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "university_lab",
+      "name": "Університетські підвали",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "factory_bunker",
+      "name": "Підземелля заводу",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "power_plant_bunker",
+      "name": "Підземелля електростанції",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "labyrinthine"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "oil_depot_bunker",
+      "name": "Нафтовий склад",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp",
+        "chemical-hazard"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "data_center_bunker",
+      "name": "Дата-центр",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "warehouse_bunker",
+      "name": "Промисловий склад",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "monumental"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "chemical_plant_bunker",
+      "name": "Хімічний завод",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "poor",
+      "cleanliness": "contaminated",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "contaminated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "brewery_bunker",
+      "name": "Підвали пивоварні",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "steel_mill_bunker",
+      "name": "Металургійний завод",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "hot"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cold_storage_bunker",
+      "name": "Холодильний комплекс",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "textile_factory_bunker",
+      "name": "Підвали текстильної фабрики",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "shipyard_bunker",
+      "name": "Суднобудівний завод",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "biolab_bunker",
+      "name": "Біологічна лабораторія",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "biological-hazard",
+        "isolated",
+        "sterile"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ai_bunker",
+      "name": "AI-комплекс",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "experimental",
+      "visualModifierIds": [
+        "radiological",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "space_research_bunker",
+      "name": "Космічний науковий комплекс",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated",
+        "sterile"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "nuclear_research_bunker",
+      "name": "Ядерний дослідний центр",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "genetics_lab_bunker",
+      "name": "Генетична лабораторія",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "experimental",
+      "visualModifierIds": [
+        "sterile"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "quantum_lab_bunker",
+      "name": "Квантова лабораторія",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "experimental",
+      "visualModifierIds": [
+        "cold",
+        "isolated",
+        "sterile"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "weather_station_bunker",
+      "name": "Метеорологічна станція",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "oceanographic_bunker",
+      "name": "Підводна дослідна станція",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "missile_silo_bunker",
+      "name": "Ракетна шахта",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold",
+        "radiological",
+        "dusty"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "nato_base_bunker",
+      "name": "База НАТО",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "special_forces_bunker",
+      "name": "Укриття спецназу",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "coast_guard_bunker",
+      "name": "Берегова охорона",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "anti_aircraft_bunker",
+      "name": "Зенітний комплекс",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "border_fortress_bunker",
+      "name": "Прикордонний форт",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_command_center",
+      "name": "Підземний командний центр",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "radiological"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "tank_depot_bunker",
+      "name": "Підземний танковий парк",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cave_bunker",
+      "name": "Природна печера",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "damp",
+        "cold",
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "lava_tube_bunker",
+      "name": "Лавовий тунель",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "hot",
+        "chemical-hazard",
+        "labyrinthine",
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "glacier_bunker",
+      "name": "Льодовиковий бункер",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "island_bunker",
+      "name": "Острівне укриття",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "corroded",
+        "biological-hazard",
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "jungle_shelter",
+      "name": "Підземне джунглеве сховище",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "biological-hazard",
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "desert_bunker",
+      "name": "Пустельне укриття",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "hot",
+        "isolated",
+        "dusty"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underwater_cave",
+      "name": "Підводна печера",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "claustrophobic",
+        "labyrinthine"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "salt_mine_bunker",
+      "name": "Соляна шахта",
+      "visualCategoryId": "mining_extraction",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-steel-timber",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "labyrinthine",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "thermal_spring_bunker",
+      "name": "Гейзерне укриття",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "hot",
+        "chemical-hazard",
+        "degraded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_city",
+      "name": "Підземне місто",
+      "visualCategoryId": "subterranean_urban",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "reinforced-concrete-industrial-metal",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "monumental"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cryogenic_bunker",
+      "name": "Кріогенний комплекс",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "experimental",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "experimental_bunker",
+      "name": "Експериментальний комплекс",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "experimental",
+      "visualModifierIds": [
+        "radiological",
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ark_bunker",
+      "name": "Ковчег — підземне сховище",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "isolated",
+        "sterile"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "time_capsule_bunker",
+      "name": "Часова капсула",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "biodome_bunker",
+      "name": "Підземний біодом",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "biological-hazard"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "chernobyl_bunker",
+      "name": "Бункер у зоні відчуження",
+      "visualCategoryId": "contaminated_isolation",
+      "visualFamilyId": "sealed_hazard",
+      "materialProfileId": "sealed-steel-composite",
+      "condition": "poor",
+      "cleanliness": "contaminated",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "contaminated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_hospital_bunker",
+      "name": "Зараженний шпиталь",
+      "visualCategoryId": "contaminated_isolation",
+      "visualFamilyId": "sealed_hazard",
+      "materialProfileId": "sealed-steel-composite",
+      "condition": "good",
+      "cleanliness": "contaminated",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "contaminated",
+        "biological-hazard"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "flooded_bunker",
+      "name": "Частково затоплений бункер",
+      "visualCategoryId": "abandoned_damaged",
+      "visualFamilyId": "degraded",
+      "materialProfileId": "damaged-mixed-materials",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "claustrophobic"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "collapsed_bunker",
+      "name": "Частково зруйнований бункер",
+      "visualCategoryId": "abandoned_damaged",
+      "visualFamilyId": "degraded",
+      "materialProfileId": "damaged-mixed-materials",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "degraded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "toxic_waste_bunker",
+      "name": "Сховище токсичних відходів",
+      "visualCategoryId": "contaminated_isolation",
+      "visualFamilyId": "sealed_hazard",
+      "materialProfileId": "sealed-steel-composite",
+      "condition": "poor",
+      "cleanliness": "contaminated",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "contaminated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "abandoned_bunker",
+      "name": "Покинутий бункер часів Холодної війни",
+      "visualCategoryId": "abandoned_damaged",
+      "visualFamilyId": "degraded",
+      "materialProfileId": "damaged-mixed-materials",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "cold",
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "quarantine_zone_bunker",
+      "name": "Карантинна зона",
+      "visualCategoryId": "contaminated_isolation",
+      "visualFamilyId": "sealed_hazard",
+      "materialProfileId": "sealed-steel-composite",
+      "condition": "good",
+      "cleanliness": "contaminated",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "contaminated",
+        "biological-hazard",
+        "claustrophobic",
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "volcano_bunker",
+      "name": "Бункер поблизу вулкана",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "hot",
+        "chemical-hazard",
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "tsunami_zone_bunker",
+      "name": "Бункер у цунамі-зоні",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "monastery_bunker",
+      "name": "Монастирські підземелля",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "labyrinthine",
+        "isolated",
+        "ritual"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "masonic_lodge_bunker",
+      "name": "Масонська ложа",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "dusty",
+        "ritual"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "catacombs_bunker",
+      "name": "Паризькі катакомби",
+      "visualCategoryId": "historic_fortified",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-brick-aged-metal",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "labyrinthine",
+        "monumental"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "pyramid_bunker",
+      "name": "Підземелля під пірамідою",
+      "visualCategoryId": "historic_fortified",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-brick-aged-metal",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ancient_fortress_bunker",
+      "name": "Підземелля середньовічного замку",
+      "visualCategoryId": "historic_fortified",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-brick-aged-metal",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "highway_tunnel_bunker",
+      "name": "Автодорожній тунель",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "labyrinthine"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "railway_station_bunker",
+      "name": "Залізничний вокзал",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "labyrinthine",
+        "monumental"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "canal_tunnel_bunker",
+      "name": "Канальний тунель",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "claustrophobic",
+        "labyrinthine"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cable_car_base_bunker",
+      "name": "Підземна база підвісної дороги",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "lighthouse_bunker",
+      "name": "Підземелля маяка",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "claustrophobic",
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "pipeline_station_bunker",
+      "name": "Підземна насосна станція",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "wine_cellar_bunker",
+      "name": "Винний льох",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "cold"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "grain_silo_bunker",
+      "name": "Зернове сховище",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "dusty"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "greenhouse_bunker",
+      "name": "Підземна теплиця",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "biological-hazard"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dairy_farm_bunker",
+      "name": "Молочна ферма",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "biological-hazard"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "orchard_bunker",
+      "name": "Підземна садова комора",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fish_processing_bunker",
+      "name": "Рибопереробний завод",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "cold"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "government_shelter",
+      "name": "Урядовий бункер",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "police_headquarters_bunker",
+      "name": "Підвал поліцейського управління",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fire_station_bunker",
+      "name": "Підвал пожежної станції",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "embassy_bunker",
+      "name": "Підземелля посольства",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "intelligence_bunker",
+      "name": "Бункер спецслужб",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "weather_control_bunker",
+      "name": "Центр управління погодою",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "arctic_station_bunker",
+      "name": "Арктична наукова станція",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "antarctic_base_bunker",
+      "name": "Антарктична база",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "permafrost_bunker",
+      "name": "Вічна мерзлота — схованка",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "submarine_bunker",
+      "name": "Підводний човен",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "claustrophobic"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "oil_rig_bunker",
+      "name": "Морська нафтова платформа",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underwater_habitat",
+      "name": "Підводний хабітат",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "claustrophobic"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "harbor_fortress_bunker",
+      "name": "Портова фортеця",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "labyrinthine",
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "alpine_chalet_bunker",
+      "name": "Альпійський шале-бункер",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated",
+        "refined"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mountain_monastery_bunker",
+      "name": "Гірський монастир-фортеця",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated",
+        "ritual"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ski_resort_bunker",
+      "name": "Підземелля гірськолижного курорту",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "labyrinthine",
+        "refined"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "observatory_bunker",
+      "name": "Підземелля обсерваторії",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fallout_shelter_50s",
+      "name": "Сховище від ядерного удару 50-х",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "claustrophobic",
+        "isolated",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "nuclear_power_shelter",
+      "name": "Сховище атомної станції",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "emp_hardened_bunker",
+      "name": "Бункер захищений від ЕМІ",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "radiation_lab_bunker",
+      "name": "Радіаційна лабораторія",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "biological-hazard",
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "blockchain_vault_bunker",
+      "name": "Блокчейн-сховище",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cybersecurity_bunker",
+      "name": "Кібербезпековий центр",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "satellite_control_bunker",
+      "name": "Центр управління супутниками",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ham_radio_bunker",
+      "name": "Бункер радіоаматорів",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "corroded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "prison_island_bunker",
+      "name": "Острів-в'язниця",
+      "visualCategoryId": "detention",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "concrete-steel-bars",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "claustrophobic",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ghost_town_bunker",
+      "name": "Бункер у місті-примарі",
+      "visualCategoryId": "abandoned_damaged",
+      "visualFamilyId": "degraded",
+      "materialProfileId": "damaged-mixed-materials",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "degraded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "carnival_bunker",
+      "name": "Підземелля занедбаного парку",
+      "visualCategoryId": "abandoned_damaged",
+      "visualFamilyId": "degraded",
+      "materialProfileId": "damaged-mixed-materials",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "labyrinthine",
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "theme_park_underground",
+      "name": "Підземна зона тематичного парку",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "labyrinthine"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "zoo_underground_bunker",
+      "name": "Підземелля зоопарку",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "aquarium_bunker",
+      "name": "Підземелля акваріуму",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "emergency_fema_bunker",
+      "name": "Аварійне FEMA-сховище",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "monumental"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "civil_defense_bunker",
+      "name": "Бункер цивільної оборони",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "degraded",
+        "monumental"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "disaster_relief_bunker",
+      "name": "Центр допомоги при катастрофах",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "shelter_in_place_bunker",
+      "name": "Домашнє сховище",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "claustrophobic"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "prepper_compound",
+      "name": "Підземний комплекс препера",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "startup_bunker",
+      "name": "Технологічний стартап-бункер",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "influencer_bunker",
+      "name": "Інфлюенсер-бункер",
+      "visualCategoryId": "community_improvised",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "mixed-salvaged-materials",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "improvised",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hackerspace_bunker",
+      "name": "Хакерспейс-бункер",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "boxing_club_bunker",
+      "name": "Підвал боксерського клубу",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "shooting_range_bunker",
+      "name": "Підземний тир",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "degraded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "martial_arts_dojo_bunker",
+      "name": "Підвал додзьо",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "pharmaceutical_bunker",
+      "name": "Фармацевтичний склад",
+      "visualCategoryId": "medical_clinical",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "ceramic-composite-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "blood_bank_bunker",
+      "name": "Банк крові",
+      "visualCategoryId": "medical_clinical",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "ceramic-composite-steel",
+      "condition": "excellent",
+      "cleanliness": "sterile",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "sterile"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dental_clinic_bunker",
+      "name": "Підвал стоматологічної клініки",
+      "visualCategoryId": "medical_clinical",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "ceramic-composite-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "soviet_era_bunker",
+      "name": "Радянський бункер 70-х",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "kgb_safe_house_bunker",
+      "name": "Конспіративна квартира КДБ",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "dusty"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "warsaw_pact_bunker",
+      "name": "Бункер Варшавського договору",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "radiological",
+        "degraded"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mangrove_bunker",
+      "name": "Укриття в мангрових заростях",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "biological-hazard",
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "coral_reef_station",
+      "name": "Станція на кораловому рифі",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "rainforest_research_bunker",
+      "name": "Дослідна станція в тропіках",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "biological-hazard",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "billionaire_doomsday_bunker",
+      "name": "Бункер мільярдера",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "experimental",
+      "visualModifierIds": [
+        "refined"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_nightclub",
+      "name": "Підземний нічний клуб",
+      "visualCategoryId": "luxury_hospitality",
+      "visualFamilyId": "luxury",
+      "materialProfileId": "dark-wood-leather-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated",
+        "degraded",
+        "refined"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_monastery_zen",
+      "name": "Дзен-монастир під землею",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "ritual"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "survivalist_commune_bunker",
+      "name": "Комуна виживальників",
+      "visualCategoryId": "community_improvised",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "mixed-salvaged-materials",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "improvised",
+      "visualModifierIds": [
+        "corroded",
+        "monumental"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "doomsday_cult_bunker",
+      "name": "Бункер культу кінця світу",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "ritual"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "anarchist_bunker",
+      "name": "Анархістський підземний простір",
+      "visualCategoryId": "community_improvised",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "mixed-salvaged-materials",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "improvised",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "train_tunnel_bunker",
+      "name": "Старий залізничний тунель",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "degraded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "diamond_mine_bunker",
+      "name": "Алмазна шахта",
+      "visualCategoryId": "mining_extraction",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-steel-timber",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "copper_mine_bunker",
+      "name": "Мідна шахта",
+      "visualCategoryId": "mining_extraction",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-steel-timber",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "gold_vault_bunker",
+      "name": "Золоте сховище",
+      "visualCategoryId": "fortified_vault",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "reinforced-steel-concrete",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "claustrophobic"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "brewery_underground",
+      "name": "Підземна пивоварня",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "printing_house_bunker",
+      "name": "Підвал друкарні",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "chemical-hazard"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "auction_house_vault",
+      "name": "Сховище аукціонного дому",
+      "visualCategoryId": "fortified_vault",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "reinforced-steel-concrete",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "claustrophobic"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "car_dealership_bunker",
+      "name": "Підвал автосалону",
+      "visualCategoryId": "industrial_production",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "heavy-painted-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "swimming_pool_bunker",
+      "name": "Підземний басейн",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "wine_museum_cellar",
+      "name": "Катедральний погреб музею вина",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "geology_survey_bunker",
+      "name": "Геологічна дослідна станція",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "embassy_district_tunnel",
+      "name": "Дипломатичний тунель",
+      "visualCategoryId": "government_security",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "painted-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "labyrinthine"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "seed_vault_bunker",
+      "name": "Глобальне насіннєве сховище",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "water_treatment_bunker",
+      "name": "Водоочисна станція",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "chemical-hazard"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sewage_system_bunker",
+      "name": "Підземна каналізаційна система",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "poor",
+      "cleanliness": "filthy",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "chemical-hazard",
+        "biological-hazard",
+        "labyrinthine"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "electric_substation_bunker",
+      "name": "Підземна електропідстанція",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "telecom_hub_bunker",
+      "name": "Телекомунікаційний вузол",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "natural_gas_storage",
+      "name": "Підземне газове сховище",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hydroelectric_bunker",
+      "name": "Гідроелектростанція",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "solar_farm_bunker",
+      "name": "Підземна база сонячної ферми",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "wind_farm_bunker",
+      "name": "Підземна база вітроферми",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "geothermal_plant_bunker",
+      "name": "Геотермальна електростанція",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "hot",
+        "chemical-hazard",
+        "degraded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "old_prison_basement",
+      "name": "Підвал старовинної тюрми",
+      "visualCategoryId": "detention",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "concrete-steel-bars",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "cold",
+        "labyrinthine",
+        "dusty"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "shopping_center_parking",
+      "name": "Підземний паркінг ТРЦ",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "monumental"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "science_park_lab",
+      "name": "Технопарк — підземні лабораторії",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "archaeological_dig_bunker",
+      "name": "Археологічний розкоп",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "labyrinthine",
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "grain_elevator_bunker",
+      "name": "Зерновий елеватор",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "dusty"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "container_terminal_bunker",
+      "name": "Підземелля контейнерного терміналу",
+      "visualCategoryId": "transit_infrastructure",
+      "visualFamilyId": "infrastructure",
+      "materialProfileId": "concrete-enamel-steel",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "aircraft_hangar_bunker",
+      "name": "Підземний авіаційний ангар",
+      "visualCategoryId": "military_command",
+      "visualFamilyId": "reinforced",
+      "materialProfileId": "armored-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sports_complex_bunker",
+      "name": "Підземелля спортивного комплексу",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "monumental"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "telecommunications_tower_bunker",
+      "name": "Підземелля телевежі",
+      "visualCategoryId": "digital_control",
+      "visualFamilyId": "digital_technical",
+      "materialProfileId": "anodized-metal-dark-glass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "luxury_yacht_marina_bunker",
+      "name": "Підземелля яхтового клубу",
+      "visualCategoryId": "maritime_underwater",
+      "visualFamilyId": "maritime",
+      "materialProfileId": "marine-steel",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "corroded",
+        "isolated"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "botanical_garden_greenhouse_bunker",
+      "name": "Підземелля ботанічного саду",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "biological-hazard"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "national_archive_bunker",
+      "name": "Підземний національний архів",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "claustrophobic"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mountain_rescue_base",
+      "name": "Гірська рятувальна станція",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "cold",
+        "isolated"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "refugee_camp_underground",
+      "name": "Підземний табір біженців",
+      "visualCategoryId": "civil_defense",
+      "visualFamilyId": "shelter_community",
+      "materialProfileId": "concrete-painted-steel",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "biological-hazard",
+        "monumental"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "monastery_wine_cellar",
+      "name": "Монастирський погреб",
+      "visualCategoryId": "religious_ritual",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-wood-aged-brass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "isolated",
+        "dusty",
+        "ritual"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "high_rise_basement",
+      "name": "Підвали хмарочоса",
+      "visualCategoryId": "civic_public",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "painted-concrete-plastic",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_lake_shelter",
+      "name": "Укриття над підземним озером",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "old_fort_underground",
+      "name": "Підземелля старовинного форту",
+      "visualCategoryId": "historic_fortified",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "stone-brick-aged-metal",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "primitive",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "radio_telescope_bunker",
+      "name": "Підземна база радіотелескопа",
+      "visualCategoryId": "scientific_laboratory",
+      "visualFamilyId": "clinical_technical",
+      "materialProfileId": "dark-glass-composite",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sewage_treatment_plant",
+      "name": "Очисні споруди каналізації",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "poor",
+      "cleanliness": "filthy",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "chemical-hazard",
+        "biological-hazard"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mountain_water_reservoir",
+      "name": "Підземний гірський резервуар",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "cold",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "natural_salt_cave",
+      "name": "Природна соляна печера",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "isolated",
+        "degraded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "old_brewery_cellars",
+      "name": "Старовинні підвали ґуральні",
+      "visualCategoryId": "agricultural_food",
+      "visualFamilyId": "agricultural",
+      "materialProfileId": "painted-metal-wood-plastic",
+      "condition": "poor",
+      "cleanliness": "dirty",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "corroded",
+        "cold",
+        "degraded",
+        "dusty"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_art_gallery",
+      "name": "Підземна галерея мистецтва",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "excellent",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "chemical-hazard",
+        "claustrophobic"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "geothermal_cave_shelter",
+      "name": "Геотермальна печерна схованка",
+      "visualCategoryId": "natural_cavern",
+      "visualFamilyId": "mineral_heritage",
+      "materialProfileId": "rock-earth-natural",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "legacy",
+      "visualModifierIds": [
+        "damp",
+        "hot",
+        "chemical-hazard",
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "decommissioned_reactor_bunker",
+      "name": "Виведений з експлуатації реактор",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "contaminated",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "radiological",
+        "contaminated"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "concert_hall_basement",
+      "name": "Підвали концертного залу",
+      "visualCategoryId": "archive_cultural",
+      "visualFamilyId": "civic_cultural",
+      "materialProfileId": "dark-wood-climate-metal",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "labyrinthine"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "polar_research_station_bunker",
+      "name": "Полярна дослідна станція",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "cold",
+        "labyrinthine",
+        "isolated"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "glacial_meltwater_bunker",
+      "name": "Льодовиковий водозбір",
+      "visualCategoryId": "polar_cryogenic",
+      "visualFamilyId": "cold_environment",
+      "materialProfileId": "insulated-steel-frosted-glass",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp",
+        "cold"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "artesian_aquifer_bunker",
+      "name": "Станція артезіанського водозабору",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp",
+        "biological-hazard"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hydroelectric_dam_tunnels",
+      "name": "Сервісні тунелі гідроелектростанції",
+      "visualCategoryId": "energy_infrastructure",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "insulated-steel-concrete",
+      "condition": "fair",
+      "cleanliness": "used",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp",
+        "labyrinthine"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "rainwater_harvesting_bunker",
+      "name": "Підземний центр збору дощової води",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "standard",
+      "visualModifierIds": [
+        "damp",
+        "biological-hazard",
+        "degraded"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "desalination_plant_bunker",
+      "name": "Підземна опріснювальна станція",
+      "visualCategoryId": "water_sanitation",
+      "visualFamilyId": "industrial_utility",
+      "materialProfileId": "wet-painted-metal-concrete",
+      "condition": "good",
+      "cleanliness": "clean",
+      "technologyLevel": "advanced",
+      "visualModifierIds": [
+        "damp",
+        "corroded"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    }
+  ]
+}

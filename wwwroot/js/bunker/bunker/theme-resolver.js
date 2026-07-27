@@ -26,7 +26,7 @@ const bunkerThemeAllowedValues = Object.freeze({
 		'wood', 'plastic', 'stone', 'composite', 'mixed'
 	]),
 	cleanliness: new Set(['sterile', 'clean', 'used', 'dirty', 'filthy', 'contaminated']),
-	technology: new Set(['primitive', 'improvised', 'standard', 'advanced', 'experimental']),
+	technology: new Set(['primitive', 'improvised', 'legacy', 'standard', 'advanced', 'experimental']),
 	atmosphere: new Set([
 		'cold', 'warm', 'oppressive', 'emergency', 'toxic', 'dark', 'damp',
 		'dusty', 'clinical', 'claustrophobic'
@@ -75,8 +75,41 @@ const bunkerArchetypeDefaults = Object.freeze({
 	abandoned: ['rusted-steel', 'filthy', 'primitive', 'dark', 'emergency-amber']
 });
 
+const bunkerClassificationArchetypes = Object.freeze({
+	military_command: 'military',
+	government_security: 'government',
+	medical_clinical: 'medical',
+	scientific_laboratory: 'scientific',
+	digital_control: 'scientific',
+	industrial_production: 'industrial',
+	energy_infrastructure: 'industrial',
+	water_sanitation: 'industrial',
+	transit_infrastructure: 'underground-city',
+	mining_extraction: 'mine',
+	maritime_underwater: 'submarine',
+	agricultural_food: 'agricultural',
+	luxury_hospitality: 'luxury',
+	civic_public: 'civilian',
+	subterranean_urban: 'underground-city',
+	detention: 'prison',
+	historic_fortified: 'mine',
+	religious_ritual: 'religious',
+	natural_cavern: 'mine',
+	polar_cryogenic: 'cryogenic',
+	civil_defense: 'civilian',
+	community_improvised: 'improvised',
+	archive_cultural: 'luxury',
+	fortified_vault: 'military',
+	contaminated_isolation: 'medical',
+	abandoned_damaged: 'abandoned'
+});
+
 function normalizeBunkerThemeToken(value) {
 	return String(value ?? '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+}
+
+function normalizeBunkerClassificationId(value) {
+	return String(value ?? '').trim().toLowerCase().replace(/[-\s]+/g, '_');
 }
 
 function readBunkerThemeValue(source, key) {
@@ -177,22 +210,87 @@ function bunkerThemeStableHash(value) {
 	return hash >>> 0;
 }
 
-function resolveBunkerVisualTheme(bunker) {
+function resolveBunkerMaterialKind(materialProfileId, fallback) {
+	const material = normalizeBunkerThemeToken(materialProfileId);
+	if (material.includes('wood')) return 'wood';
+	if (material.includes('rock') || material.includes('stone') || material.includes('brick')) return 'stone';
+	if (material.includes('glass')) return 'glass';
+	if (material.includes('ceramic')) return 'ceramic';
+	if (material.includes('plastic')) return 'plastic';
+	if (material.includes('concrete')) return 'concrete';
+	if (material.includes('salvaged') || material.includes('mixed')) return 'mixed';
+	if (material.includes('steel') || material.includes('metal')) return 'steel';
+	return fallback;
+}
+
+function resolveBunkerClassificationAtmosphere(modifiers, archetype, condition) {
+	if (modifiers.includes('damp')) return 'damp';
+	if (modifiers.some(value => ['contaminated', 'biological-hazard', 'chemical-hazard', 'radiological'].includes(value))) return 'toxic';
+	if (modifiers.includes('cold')) return archetype === 'medical' ? 'clinical' : 'cold';
+	if (modifiers.includes('hot')) return 'warm';
+	if (modifiers.includes('dusty')) return 'dusty';
+	if (modifiers.includes('claustrophobic')) return 'claustrophobic';
+	if (condition === 'poor') return 'oppressive';
+	return bunkerArchetypeDefaults[archetype]?.[3] || bunkerThemeFallback.atmosphere;
+}
+
+function resolveBunkerVisualTheme(bunker, classification = null) {
 	const source = bunker && typeof bunker === 'object' ? bunker : {};
+	const id = String(source.id ?? source.Id ?? source.name ?? source.Name ?? 'bunker-fallback');
+	const registered = classification || (typeof getBunkerVisualClassification === 'function'
+		? getBunkerVisualClassification(id)
+		: null);
+	if (registered) {
+		const category = normalizeBunkerClassificationId(registered.visualCategoryId);
+		const archetype = bunkerClassificationArchetypes[category] || bunkerThemeFallback.archetype;
+		const defaults = bunkerArchetypeDefaults[archetype] || bunkerArchetypeDefaults.civilian;
+		const modifiers = Array.isArray(registered.visualModifierIds)
+			? registered.visualModifierIds.map(normalizeBunkerThemeToken).filter(Boolean)
+			: [];
+		const condition = validBunkerThemeValue('condition', registered.condition, bunkerThemeFallback.condition);
+		const materialProfile = normalizeBunkerThemeToken(registered.materialProfileId) || bunkerThemeFallback.material;
+		const variation = Number.isInteger(registered.stableVariation)
+			? Math.max(0, Math.min(3, registered.stableVariation))
+			: bunkerThemeStableHash(id) % 4;
+		const hash = bunkerThemeStableHash(id);
+		return Object.freeze({
+			id,
+			family: normalizeBunkerClassificationId(registered.visualFamilyId) || 'shelter_community',
+			category,
+			archetype,
+			condition,
+			material: resolveBunkerMaterialKind(materialProfile, defaults[0]),
+			materialProfile,
+			cleanliness: validBunkerThemeValue('cleanliness', registered.cleanliness, defaults[1]),
+			technology: validBunkerThemeValue('technology', registered.technologyLevel, defaults[2]),
+			atmosphere: resolveBunkerClassificationAtmosphere(modifiers, archetype, condition),
+			accent: defaults[4],
+			modifiers: Object.freeze(modifiers),
+			variation,
+			textureVariant: (hash >>> 3) % 3,
+			accentShift: (hash % 13) - 6,
+			damageBias: (hash >>> 7) % 4
+		});
+	}
+
 	const text = bunkerThemeText(source);
 	const archetype = inferBunkerArchetype(source, text);
 	const condition = inferBunkerCondition(source, text);
 	const defaults = bunkerArchetypeDefaults[archetype] || bunkerArchetypeDefaults.civilian;
-	const id = String(source.id ?? source.Id ?? source.name ?? source.Name ?? 'bunker-fallback');
 	const hash = bunkerThemeStableHash(id);
 	return Object.freeze({
+		id,
+		family: 'shelter-community',
+		category: 'fallback',
 		archetype,
 		condition,
 		material: inferModifier('material', source, text, archetype, condition),
+		materialProfile: inferModifier('material', source, text, archetype, condition),
 		cleanliness: inferModifier('cleanliness', source, text, archetype, condition),
 		technology: inferModifier('technology', source, text, archetype, condition),
 		atmosphere: inferModifier('atmosphere', source, text, archetype, condition),
 		accent: normalizeBunkerThemeToken(readBunkerThemeValue(source, 'accent')) || defaults[4],
+		modifiers: Object.freeze([]),
 		variation: hash % 4,
 		textureVariant: (hash >>> 3) % 3,
 		accentShift: (hash % 13) - 6,

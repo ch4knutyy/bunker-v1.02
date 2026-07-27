@@ -15,6 +15,9 @@ const fixture = theme => ({
 
 test('ambient root, theme switch, reaction dedupe and reset are idempotent', async ({ page }) => {
   await page.goto('/Bunker');
+  await page.waitForFunction(() =>
+    apocalypseEffectAssetState.loaded && apocalypseEffectAssetState.byId.size === 80 &&
+    bunkerMaterialAssetState.loaded && bunkerMaterialAssetState.materialsById.size === 44);
   const revealReactionStarted = await page.evaluate(apocalypse => {
     currentPublicGameSettings.apocalypseThemeEnabled = true;
     currentApocalypse = apocalypse;
@@ -28,10 +31,29 @@ test('ambient root, theme switch, reaction dedupe and reset are idempotent', asy
   await expect(page.locator('#apocalypseAmbientRoot')).toBeVisible();
   await expect(page.locator('#apocalypseAmbientRoot')).toHaveCount(1);
 
-  await page.evaluate(apocalypse => { currentApocalypse = apocalypse; renderApocalypse(currentApocalypse); }, fixture('machine-cyan'));
+  await page.evaluate(apocalypse => { currentApocalypse = apocalypse; renderApocalypse(currentApocalypse); }, { ...fixture('machine-cyan'), id:'consciousness_epidemic' });
   await expect(page.locator('body')).toHaveAttribute('data-apocalypse-theme', 'machine-cyan');
   await expect(page.locator('#apocalypseAmbientRoot')).toHaveCount(1);
   await expect(page.locator('body')).not.toHaveClass(/apocalypse-reaction-apocalypse-reveal/);
+  await expect(page.locator('.apocalypse-scenario-shell .apocalypse-effect-layer')).toHaveCount(3);
+  expect(await page.locator('.apocalypse-scenario-shell .apocalypse-effect-layer').evaluateAll(
+    layers => layers.map(layer => layer.dataset.effectUsage)
+  )).toEqual(['local', 'edge', 'ui']);
+  await expect(page.locator('.apocalypse-scenario-shell .apocalypse-effect-layer').first()).toHaveCSS('background-repeat', 'no-repeat');
+
+  await page.locator('#apocalypseEffectPreview > summary').click();
+  await page.locator('#bunkerMaterialPreviewSelect').selectOption('marine-steel');
+  await page.locator('#bunkerConditionPreviewSelect').selectOption('poor');
+  await page.locator('#apocalypseEffectPreviewSelect').selectOption('nuclear-fallout');
+  await expect(page.locator('[data-preview-card="primary"] .apocalypse-effect-layer')).toHaveCount(3);
+  await expect(page.locator('[data-preview-card="primary"] .bunker-condition-layer')).toHaveCount(2);
+  await expect(page.locator('[data-preview-card="compact"] .bunker-condition-layer:visible')).toHaveCount(1);
+  expect(await page.locator('[data-preview-card="primary"]').evaluate(card => {
+    const veil = Number(getComputedStyle(card.querySelector('.bunker-readability-veil')).zIndex);
+    const content = Number(getComputedStyle(card.querySelector('.bunker-visual-content')).zIndex);
+    return content > veil;
+  })).toBe(true);
+  await page.locator('[data-preview-copy="control"]').click();
 
   await page.evaluate(() => { currentApocalypse = null; renderApocalypse(null); });
   await expect(page.locator('body')).not.toHaveAttribute('data-apocalypse-theme', /.+/);

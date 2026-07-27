@@ -1,7 +1,14 @@
 const bunkerThemeDatasetKeys = Object.freeze([
-	'bunkerArchetype', 'bunkerCondition', 'bunkerMaterial', 'bunkerCleanliness',
+	'bunkerFamily', 'bunkerCategory', 'bunkerArchetype', 'bunkerCondition', 'bunkerMaterial',
+	'bunkerMaterialProfile', 'bunkerCleanliness', 'bunkerModifiers',
 	'bunkerTechnology', 'bunkerAtmosphere', 'bunkerAccent', 'bunkerVariation',
-	'bunkerTexture'
+	'bunkerTexture', 'bunkerStructureFamily', 'bunkerBaseMaterial', 'bunkerSecondaryMaterial',
+	'bunkerAccentMaterial', 'bunkerGlassMaterial'
+]);
+
+const bunkerMaterialStyleProperties = Object.freeze([
+	'--bunker-base-material-image', '--bunker-secondary-material-image',
+	'--bunker-accent-material-image', '--bunker-glass-material-image', '--bunker-material-scale'
 ]);
 
 let appliedBunkerThemeSignature = '';
@@ -14,6 +21,7 @@ function clearBunkerVisualTheme() {
 	root.style.removeProperty('--bunker-accent-shift');
 	root.style.removeProperty('--bunker-damage-bias');
 	root.style.removeProperty('--bunker-damage-bias-opacity');
+	bunkerMaterialStyleProperties.forEach(property => root.style.removeProperty(property));
 	appliedBunkerThemeSignature = '';
 }
 
@@ -24,17 +32,22 @@ function applyBunkerVisualTheme(theme) {
 		return null;
 	}
 	const signature = [
-		theme.archetype, theme.condition, theme.material, theme.cleanliness,
+		theme.family, theme.category, theme.archetype, theme.condition, theme.material,
+		theme.materialProfile, theme.cleanliness, theme.modifiers?.join(' '),
 		theme.technology, theme.atmosphere, theme.accent, theme.variation,
 		theme.textureVariant, theme.accentShift, theme.damageBias
 	].join('|');
 	if (signature === appliedBunkerThemeSignature && root.classList.contains('bunker-theme-active')) return theme;
 
 	root.classList.add('bunker-theme-active');
+	root.dataset.bunkerFamily = theme.family;
+	root.dataset.bunkerCategory = theme.category;
 	root.dataset.bunkerArchetype = theme.archetype;
 	root.dataset.bunkerCondition = theme.condition;
 	root.dataset.bunkerMaterial = theme.material;
+	root.dataset.bunkerMaterialProfile = theme.materialProfile;
 	root.dataset.bunkerCleanliness = theme.cleanliness;
+	root.dataset.bunkerModifiers = theme.modifiers?.join(' ') || '';
 	root.dataset.bunkerTechnology = theme.technology;
 	root.dataset.bunkerAtmosphere = theme.atmosphere;
 	root.dataset.bunkerAccent = theme.accent;
