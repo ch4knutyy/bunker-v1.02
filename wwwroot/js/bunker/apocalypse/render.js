@@ -12,7 +12,7 @@ function clearApocalypseVisualTheme() {
 	root.classList.remove('apocalypse-theme-active', 'apocalypse-theme-revealing', 'apocalypse-ambient-paused');
 	delete root.dataset.apocalypseTheme;
 	delete root.dataset.apocalypseCategory;
-	for (const key of ['apocalypseArchetype', 'apocalypseLighting', 'apocalypseAir', 'apocalypseContamination', 'apocalypseDamage', 'apocalypseVisibility', 'apocalypseAccent', 'apocalypseVariation', 'apocalypseTexture'])
+	for (const key of ['apocalypseFamily', 'apocalypseArchetype', 'apocalypseLighting', 'apocalypseAir', 'apocalypseContamination', 'apocalypseDamage', 'apocalypseVisibility', 'apocalypseAccent', 'apocalypseModifiers', 'apocalypseEffects', 'apocalypseVariation', 'apocalypseTexture'])
 		delete root.dataset[key];
 	for (const property of ['--apocalypse-light-intensity', '--apocalypse-contamination-intensity', '--apocalypse-visibility-reduction', '--apocalypse-animation-intensity', '--apocalypse-light-position', '--apocalypse-temperature-shift'])
 		root.style.removeProperty(property);
@@ -37,7 +37,8 @@ function applyApocalypseVisualTheme(themeOrApocalypse) {
 
 	const definition = apocalypseVisualThemeRegistry[themeId] || { categoryId: 'generic' };
 	if (root.dataset.apocalypseTheme === themeId &&
-		root.dataset.apocalypseCategory === definition.categoryId &&
+		root.dataset.apocalypseCategory === (theme.category || definition.categoryId) &&
+		root.dataset.apocalypseFamily === theme.family &&
 		root.dataset.apocalypseArchetype === theme.archetype &&
 		root.dataset.apocalypseVariation === String(theme.variation) &&
 		root.classList.contains('apocalypse-theme-active')) return theme;
@@ -46,7 +47,8 @@ function applyApocalypseVisualTheme(themeOrApocalypse) {
 	const ambient = document.getElementById?.('apocalypseAmbientRoot');
 	ambient?.removeAttribute(['hid', 'den'].join(''));
 	root.dataset.apocalypseTheme = themeId;
-	root.dataset.apocalypseCategory = definition.categoryId;
+	root.dataset.apocalypseCategory = theme.category || definition.categoryId;
+	root.dataset.apocalypseFamily = theme.family;
 	root.dataset.apocalypseArchetype = theme.archetype;
 	root.dataset.apocalypseLighting = theme.lighting;
 	root.dataset.apocalypseAir = theme.air;
@@ -54,6 +56,8 @@ function applyApocalypseVisualTheme(themeOrApocalypse) {
 	root.dataset.apocalypseDamage = theme.damage;
 	root.dataset.apocalypseVisibility = theme.visibility;
 	root.dataset.apocalypseAccent = theme.accent;
+	root.dataset.apocalypseModifiers = theme.modifiers?.join(' ') || '';
+	root.dataset.apocalypseEffects = theme.effects?.join(' ') || '';
 	root.dataset.apocalypseVariation = String(theme.variation);
 	root.dataset.apocalypseTexture = String(theme.textureVariant);
 	root.style.setProperty('--apocalypse-light-intensity', String(theme.lightingIntensity));
@@ -111,6 +115,7 @@ function renderApocalypseScenario(model) {
 	return `<article class="scenario-immersive-shell apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
 		<div class="apocalypse-card-border-light" aria-hidden="true"></div>
 		<div class="apocalypse-card-reveal-wave" aria-hidden="true"></div>
+		${renderApocalypseEffectLayers()}
 		<header class="scenario-immersive-hero apocalypse-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
 			${heroImage}
 			<div class="apocalypse-hero-overlay" aria-hidden="true"></div>

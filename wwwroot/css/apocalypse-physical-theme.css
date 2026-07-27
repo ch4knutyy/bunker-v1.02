@@ -40,7 +40,8 @@ body.apocalypse-theme-active {
 		linear-gradient(rgb(5 7 8 / 52%), rgb(5 7 8 / 76%));
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="nuclear"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="nuclear"],
+body.apocalypse-theme-active[data-apocalypse-archetype="fallout_radiation"] {
 	--apocalypse-accent: #8f8751;
 	--apocalypse-light-color: rgb(164 133 62 / 17%);
 	--apocalypse-air-texture: radial-gradient(circle, rgb(158 151 125 / 16%) 0 1px, transparent 1.8px), repeating-linear-gradient(87deg, transparent 0 67px, rgb(111 108 79 / 4%) 68px 69px);
@@ -52,7 +53,8 @@ body.apocalypse-theme-active[data-apocalypse-archetype="nuclear"] {
 	--apocalypse-local-light-shadow: 0 0 18px rgb(155 127 64 / 12%);
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="fire"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="fire"],
+body.apocalypse-theme-active[data-apocalypse-archetype="fire_ash"] {
 	--apocalypse-accent: #9d6542;
 	--apocalypse-light-color: rgb(151 77 40 / 17%);
 	--apocalypse-air-texture: radial-gradient(ellipse at 50% 100%, rgb(93 55 37 / 18%), transparent 49%), radial-gradient(circle, rgb(126 115 105 / 13%) 0 1px, transparent 2px);
@@ -65,7 +67,9 @@ body.apocalypse-theme-active[data-apocalypse-archetype="fire"] {
 	--apocalypse-local-light-shadow: 0 0 20px rgb(132 69 37 / 11%);
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="ice"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="ice"],
+body.apocalypse-theme-active[data-apocalypse-archetype="extreme-cold"],
+body.apocalypse-theme-active[data-apocalypse-archetype="frost_ice"] {
 	--apocalypse-accent: #758892;
 	--apocalypse-light-color: rgb(116 145 158 / 15%);
 	--apocalypse-air-texture: linear-gradient(115deg, transparent 0 63%, rgb(186 205 210 / 6%) 63.4% 63.7%, transparent 64%), radial-gradient(ellipse at 50% 0, rgb(173 192 198 / 7%), transparent 55%);
@@ -75,7 +79,8 @@ body.apocalypse-theme-active[data-apocalypse-archetype="ice"] {
 	--apocalypse-local-light-shadow: 0 0 18px rgb(112 139 151 / 10%);
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="flood"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="flood"],
+body.apocalypse-theme-active[data-apocalypse-archetype="flood_moisture"] {
 	--apocalypse-accent: #607e7c;
 	--apocalypse-light-color: rgb(82 116 116 / 16%);
 	--apocalypse-air-texture: repeating-linear-gradient(104deg, transparent 0 42px, rgb(134 158 156 / 6%) 43px 44px), radial-gradient(ellipse at 50% 100%, rgb(47 79 79 / 13%), transparent 45%);
@@ -86,7 +91,8 @@ body.apocalypse-theme-active[data-apocalypse-archetype="flood"] {
 	--apocalypse-local-light-shadow: 0 0 19px rgb(73 105 105 / 10%);
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="pandemic"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="pandemic"],
+body.apocalypse-theme-active[data-apocalypse-archetype="infection_quarantine"] {
 	--apocalypse-accent: #818769;
 	--apocalypse-light-color: rgb(145 153 133 / 13%);
 	--apocalypse-air-texture: repeating-linear-gradient(90deg, transparent 0 74px, rgb(190 194 177 / 4%) 75px 76px), radial-gradient(ellipse at 50% 0, rgb(174 184 174 / 6%), transparent 48%);
@@ -95,7 +101,8 @@ body.apocalypse-theme-active[data-apocalypse-archetype="pandemic"] {
 	--apocalypse-stain-opacity: .1;
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="biological"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="biological"],
+body.apocalypse-theme-active[data-apocalypse-family="biological"] {
 	--apocalypse-accent: #73794f;
 	--apocalypse-light-color: rgb(109 119 77 / 13%);
 	--apocalypse-air-texture: radial-gradient(circle, rgb(126 137 92 / 13%) 0 1px, transparent 2px), radial-gradient(circle, rgb(92 105 69 / 9%) 0 2px, transparent 3px);
@@ -104,7 +111,9 @@ body.apocalypse-theme-active[data-apocalypse-archetype="biological"] {
 	--apocalypse-stain-opacity: .2;
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="chemical"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="chemical"],
+body.apocalypse-theme-active[data-apocalypse-archetype="toxic_air"],
+body.apocalypse-theme-active[data-apocalypse-archetype="corrosive_decay"] {
 	--apocalypse-accent: #938750;
 	--apocalypse-light-color: rgb(143 131 76 / 14%);
 	--apocalypse-air-texture: radial-gradient(ellipse at 50% 42%, rgb(133 135 107 / 13%), transparent 62%), repeating-linear-gradient(12deg, transparent 0 76px, rgb(152 141 80 / 4%) 77px 78px);
@@ -124,7 +133,9 @@ body.apocalypse-theme-active[data-apocalypse-archetype="volcanic"] {
 	--apocalypse-stain-opacity: .17;
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="desert"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="desert"],
+body.apocalypse-theme-active[data-apocalypse-family="ecological"],
+body.apocalypse-theme-active[data-apocalypse-archetype="extreme_heat"] {
 	--apocalypse-accent: #948469;
 	--apocalypse-light-color: rgb(151 135 105 / 14%);
 	--apocalypse-air-texture: radial-gradient(circle, rgb(175 157 126 / 16%) 0 1px, transparent 1.7px), repeating-linear-gradient(9deg, transparent 0 58px, rgb(151 130 94 / 5%) 59px 60px);
@@ -133,7 +144,8 @@ body.apocalypse-theme-active[data-apocalypse-archetype="desert"] {
 	--apocalypse-damage-opacity: .11;
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="darkness"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="darkness"],
+body.apocalypse-theme-active[data-apocalypse-archetype="darkness_light_loss"] {
 	--apocalypse-accent: #77776f;
 	--apocalypse-light-color: rgb(133 121 91 / 9%);
 	--apocalypse-air-texture: radial-gradient(ellipse at var(--apocalypse-light-position) 12%, rgb(157 148 122 / 5%), transparent 22%);
@@ -142,7 +154,10 @@ body.apocalypse-theme-active[data-apocalypse-archetype="darkness"] {
 }
 
 body.apocalypse-theme-active[data-apocalypse-archetype="solar"],
-body.apocalypse-theme-active[data-apocalypse-archetype="machine"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="solar-flare"],
+body.apocalypse-theme-active[data-apocalypse-archetype="machine"],
+body.apocalypse-theme-active[data-apocalypse-archetype="machine-uprising"],
+body.apocalypse-theme-active[data-apocalypse-family="technological"] {
 	--apocalypse-accent: #788589;
 	--apocalypse-light-color: rgb(126 143 147 / 13%);
 	--apocalypse-air-texture: repeating-linear-gradient(0deg, transparent 0 9px, rgb(151 162 164 / 4%) 10px 11px), linear-gradient(90deg, transparent 0 81%, rgb(130 146 149 / 5%) 81.3% 81.6%, transparent 82%);
@@ -151,7 +166,9 @@ body.apocalypse-theme-active[data-apocalypse-archetype="machine"] {
 	--apocalypse-local-light-shadow: 0 0 16px rgb(114 132 136 / 9%);
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="war"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="war"],
+body.apocalypse-theme-active[data-apocalypse-family="societal"],
+body.apocalypse-theme-active[data-apocalypse-family="structural"] {
 	--apocalypse-accent: #777352;
 	--apocalypse-light-color: rgb(142 111 62 / 14%);
 	--apocalypse-air-texture: radial-gradient(circle, rgb(157 147 128 / 15%) 0 1px, transparent 1.8px), repeating-linear-gradient(27deg, transparent 0 61px, rgb(128 111 84 / 5%) 62px 63px);
@@ -161,12 +178,35 @@ body.apocalypse-theme-active[data-apocalypse-archetype="war"] {
 	--apocalypse-flicker-intensity: .035;
 }
 
-body.apocalypse-theme-active[data-apocalypse-archetype="anomalous"] {
+body.apocalypse-theme-active[data-apocalypse-archetype="anomalous"],
+body.apocalypse-theme-active[data-apocalypse-archetype="antimatter"],
+body.apocalypse-theme-active[data-apocalypse-family="cosmic"],
+body.apocalypse-theme-active[data-apocalypse-family="psychological"],
+body.apocalypse-theme-active[data-apocalypse-family="anomalous"],
+body.apocalypse-theme-active[data-apocalypse-family="occult"] {
 	--apocalypse-accent: #77727b;
 	--apocalypse-light-color: rgb(128 124 132 / 11%);
 	--apocalypse-air-texture: linear-gradient(89.7deg, transparent 0 49.7%, rgb(144 139 148 / 5%) 50%, transparent 50.3%), radial-gradient(ellipse at 47% 31%, rgb(123 119 129 / 6%), transparent 35%);
 	--apocalypse-contamination-texture: linear-gradient(121deg, transparent 0 72%, rgb(82 78 87 / 9%) 72.2% 72.6%, transparent 72.9%);
 }
+
+body.apocalypse-theme-active[data-apocalypse-archetype="storm_electric"] {
+	--apocalypse-air-texture: repeating-linear-gradient(104deg, transparent 0 54px, rgb(140 151 151 / 5%) 55px 56px), radial-gradient(ellipse at 50% 0, rgb(126 143 147 / 8%), transparent 48%);
+	--apocalypse-flicker-intensity: .05;
+}
+
+body.apocalypse-theme-active[data-apocalypse-archetype="fog_low_visibility"] { --apocalypse-fog-opacity: .18; }
+body.apocalypse-theme-active[data-apocalypse-effects~="ash"] { --apocalypse-ash-opacity: max(var(--apocalypse-ash-opacity), .17); }
+body.apocalypse-theme-active[data-apocalypse-effects~="dust"],
+body.apocalypse-theme-active[data-apocalypse-effects~="dry-dust"] { --apocalypse-dust-opacity: max(var(--apocalypse-dust-opacity), .16); }
+body.apocalypse-theme-active[data-apocalypse-effects~="smoke"] { --apocalypse-smoke-opacity: max(var(--apocalypse-smoke-opacity), .18); }
+body.apocalypse-theme-active[data-apocalypse-effects~="fog"] { --apocalypse-fog-opacity: max(var(--apocalypse-fog-opacity), .17); }
+body.apocalypse-theme-active[data-apocalypse-effects~="frost"] { --apocalypse-frost-opacity: max(var(--apocalypse-frost-opacity), .17); }
+body.apocalypse-theme-active[data-apocalypse-effects~="condensation"],
+body.apocalypse-theme-active[data-apocalypse-effects~="water-stains"] { --apocalypse-condensation-opacity: max(var(--apocalypse-condensation-opacity), .15); }
+body.apocalypse-theme-active[data-apocalypse-effects~="corrosion"],
+body.apocalypse-theme-active[data-apocalypse-effects~="material-decay"] { --apocalypse-damage-opacity: max(var(--apocalypse-damage-opacity), .17); --apocalypse-stain-opacity: max(var(--apocalypse-stain-opacity), .15); }
+body.apocalypse-theme-active[data-apocalypse-effects~="optical-distortion"] { --apocalypse-contamination-intensity: min(var(--apocalypse-contamination-intensity), .08); }
 
 body.apocalypse-theme-active[data-apocalypse-variation="1"] { --apocalypse-air-position: 21px -9px; }
 body.apocalypse-theme-active[data-apocalypse-variation="2"] { --apocalypse-air-position: -17px 31px; }

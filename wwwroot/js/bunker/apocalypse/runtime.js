@@ -73,6 +73,8 @@ function renderApocalypse(apocalypse) {
 	if (panel) { panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none'; }
 	if (!apocalypse || !enabled) {
 		if (container) container.innerHTML = '';
+		clearApocalypseEffectLayers();
+		if (typeof applyBunkerApocalypseLayers === 'function') applyBunkerApocalypseLayers(undefined, false);
 		clearApocalypseVisualReactions();
 		stopApocalypseAmbientScheduler();
 		clearApocalypseCardRevealWave({ resetKey: true });
@@ -94,6 +96,8 @@ function renderApocalypse(apocalypse) {
 	ensureApocalypseAmbientRoot();
 	clearApocalypseCardRevealWave();
 	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse));
+	applyApocalypseVisualState(apocalypse, container.querySelector('.apocalypse-scenario-shell'));
+	if (typeof applyBunkerApocalypseLayers === 'function') applyBunkerApocalypseLayers();
 	syncApocalypseVisualTheme(apocalypse);
 	syncApocalypseCategoryVisualState(apocalypse);
 	renderApocalypseCategoryBadge(apocalypse);

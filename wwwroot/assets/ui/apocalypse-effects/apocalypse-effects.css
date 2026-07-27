@@ -1,0 +1,162 @@
+/* Apocalypse effect layer standard */
+.apocalypse-scenario-shell,
+.apocalypse-effect-preview-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.apocalypse-effect-stack {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.apocalypse-effect-layer {
+    position: absolute;
+    inset: -3%;
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    background-image: none;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: var(--apocalypse-effect-size, cover);
+    mix-blend-mode: var(--apocalypse-effect-blend, soft-light);
+    opacity: var(--apocalypse-effect-opacity, 0.12);
+}
+
+.apocalypse-effect-layer[data-effect-usage="edge"] {
+    inset: 0;
+    z-index: 2;
+    background-size: var(--apocalypse-effect-size, 100% 100%);
+}
+
+.apocalypse-effect-layer[data-effect-usage="ui"] {
+    inset: 0;
+    z-index: 3;
+    background-size: var(--apocalypse-effect-size, cover);
+    opacity: min(var(--apocalypse-effect-opacity, .07), .09);
+}
+
+.apocalypse-scenario-shell > :is(
+    .apocalypse-hero,
+    .apocalypse-metrics,
+    .apocalypse-content-grid,
+    .apocalypse-footer
+) {
+    position: relative;
+    z-index: 2;
+}
+
+.apocalypse-tone-radiation { --apocalypse-card-tone: rgb(126 119 73 / 6%); }
+.apocalypse-tone-fire { --apocalypse-card-tone: rgb(113 66 43 / 7%); }
+.apocalypse-tone-bio { --apocalypse-card-tone: rgb(83 94 67 / 6%); }
+.apocalypse-tone-chemical { --apocalypse-card-tone: rgb(111 104 67 / 6%); }
+.apocalypse-tone-cold { --apocalypse-card-tone: rgb(90 116 127 / 7%); }
+.apocalypse-tone-moisture { --apocalypse-card-tone: rgb(68 99 99 / 7%); }
+.apocalypse-tone-arid { --apocalypse-card-tone: rgb(119 104 78 / 6%); }
+.apocalypse-tone-signal { --apocalypse-card-tone: rgb(83 101 105 / 5%); }
+.apocalypse-tone-anomaly { --apocalypse-card-tone: rgb(91 87 96 / 5%); }
+.apocalypse-tone-structural { --apocalypse-card-tone: rgb(100 88 72 / 6%); }
+.apocalypse-tone-neutral { --apocalypse-card-tone: rgb(105 101 91 / 4%); }
+
+.apocalypse-scenario-shell[class*="apocalypse-tone-"]::after,
+.apocalypse-effect-preview-card[class*="apocalypse-tone-"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--apocalypse-card-tone, transparent);
+    pointer-events: none;
+}
+
+body[data-apocalypse-effects-level="off"] .apocalypse-effect-stack {
+    display: none;
+}
+
+.apocalypse-effect-preview {
+    margin: 24px auto;
+    width: min(1180px, calc(100% - 32px));
+    color: #d9dcda;
+    border: 1px solid #555d5d;
+    border-radius: 5px;
+    background: #0d0f10;
+    box-shadow: 0 16px 38px rgb(0 0 0 / 40%);
+}
+
+.apocalypse-effect-preview > summary {
+    padding: 14px 16px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.apocalypse-effect-preview-toolbar,
+.apocalypse-effect-preview-details {
+    margin: 0;
+    padding: 10px 16px;
+}
+
+.apocalypse-effect-preview-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.apocalypse-effect-preview-toolbar select {
+    min-width: 180px;
+}
+
+.visual-theme-preview-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.apocalypse-effect-preview-details {
+    color: #9da4a1;
+    overflow-wrap: anywhere;
+}
+
+.apocalypse-effect-preview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    gap: 14px;
+    padding: 0 16px 16px;
+}
+
+.apocalypse-effect-preview-card {
+    min-height: 220px;
+    padding: 24px;
+    color: #e6e9e6;
+    border: 1px solid #555d5d;
+    border-radius: 4px;
+    background: linear-gradient(145deg, #202325, #0d0f10);
+    box-shadow: inset 0 1px rgb(255 255 255 / 4%);
+}
+
+.apocalypse-effect-preview-card > :not(.apocalypse-effect-stack):not(.bunker-material-stack):not(.bunker-readability-veil) {
+    position: relative;
+    z-index: 3;
+}
+
+.apocalypse-effect-preview-card.is-compact {
+    min-height: 160px;
+}
+
+@media (max-width: 720px) {
+    .apocalypse-effect-preview-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .apocalypse-effect-layer {
+        animation: none !important;
+        transition: none !important;
+    }
+}

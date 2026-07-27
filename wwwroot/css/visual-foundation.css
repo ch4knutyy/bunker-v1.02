@@ -1,0 +1,60 @@
+/* Neutral composition contract. Theme layers provide material and atmosphere. */
+body {
+	--surface-page: #070809;
+	--surface-main: linear-gradient(150deg, #17191b, #090b0c);
+	--surface-raised: linear-gradient(145deg, #1c1f21, #0d0f10);
+	--surface-inset: rgb(4 6 7 / 78%);
+	--surface-interactive: linear-gradient(180deg, #303437, #171a1c);
+	--surface-interactive-hover: linear-gradient(180deg, #3a3f42, #202427);
+	--surface-interactive-active: linear-gradient(180deg, #141617, #292d30);
+	--surface-selected: color-mix(in srgb, #aa8a54 14%, #111315);
+	--surface-disabled: #121415;
+	--material-texture: none;
+	--material-overlay: none;
+	--material-overlay-opacity: 0;
+	--border-subtle: rgb(255 255 255 / 8%);
+	--border-default: #565c5f;
+	--border-active: #aa8a54;
+	--border-danger: #b95d55;
+	--text-primary: #eceeea;
+	--text-secondary: #b6bab6;
+	--text-muted: #888e8b;
+	--button-surface: var(--surface-interactive);
+	--button-hover: var(--surface-interactive-hover);
+	--button-active: var(--surface-interactive-active);
+	--button-disabled: var(--surface-disabled);
+	--local-light: 0 0 0 transparent;
+	--local-light-opacity: 0;
+	--damage-opacity: 0;
+	--dirt-opacity: 0;
+	--rust-opacity: 0;
+	--frost-opacity: 0;
+	--condensation-opacity: 0;
+	--ash-opacity: 0;
+	--panel-radius: 5px;
+	--button-radius: 4px;
+	--border-width: 1px;
+	--shadow-raised: inset 0 1px rgb(255 255 255 / 4%), 0 10px 26px rgb(0 0 0 / 34%);
+	--shadow-inset: inset 0 2px 7px rgb(0 0 0 / 44%);
+}
+
+.game-container :where(button, [role="button"], select, input, textarea) {
+	font: inherit;
+}
+
+.game-container :where(button, [role="button"]):focus-visible {
+	outline: 2px solid var(--border-active);
+	outline-offset: 3px;
+}
+
+.game-container :where(button, [role="button"]):is(:disabled, [aria-disabled="true"]) {
+	cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.game-container *,
+	.game-container *::before,
+	.game-container *::after {
+		scroll-behavior: auto !important;
+	}
+}

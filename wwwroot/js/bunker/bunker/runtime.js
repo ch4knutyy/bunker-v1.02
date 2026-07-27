@@ -188,7 +188,9 @@ function renderBunkerFacility(model) {
 	</div>` : '';
 	const actions = `${imageButton}${hostControls}`;
 
-	return `<article class="scenario-immersive-shell bunker-facility-shell variant-${variant} condition-${model.conditionSemantic}" aria-labelledby="bunker-facility-title">
+	return `<article class="scenario-immersive-shell bunker-facility-shell bunker-visual-root variant-${variant} condition-${model.conditionSemantic}" aria-labelledby="bunker-facility-title">
+		${renderBunkerMaterialLayers()}
+		<div class="bunker-visual-content">
 		<header class="scenario-immersive-hero bunker-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
 			${media}<div class="bunker-hero-overlay" aria-hidden="true"></div><div class="bunker-hero-pattern" aria-hidden="true"></div>
 			<div class="bunker-status-medallion" aria-hidden="true"><span class="bunker-status-icon">${renderBunkerIcon(variant)}</span></div>
@@ -198,24 +200,29 @@ function renderBunkerFacility(model) {
 				${model.shortDescription ? `<p class="bunker-subtitle">${escapeHtml(model.shortDescription)}</p>` : ''}
 			</div>
 		</header>
-		<section class="bunker-metrics" aria-label="${escapeHtml(t('bunkerFacilityRecord'))}">
-			<div class="bunker-metric metric-capacity"><span class="bunker-metric-label">${escapeHtml(t('capacity'))}</span><strong>${escapeHtml(capacityValue)}</strong></div>
-			<div class="bunker-metric metric-condition"><span class="bunker-metric-label">${escapeHtml(t('condition'))}</span><strong>${escapeHtml(getBunkerConditionLabel(model.conditionKey))}</strong></div>
-			<div class="bunker-metric metric-supplies"><span class="bunker-metric-label">${escapeHtml(t('supplies'))}</span><strong>${suppliesValue}</strong></div>
-			<div class="bunker-metric metric-water"><span class="bunker-metric-label">${escapeHtml(t('water'))}</span><strong>${waterValue}</strong></div>
-			<div class="bunker-metric metric-location"><span class="bunker-metric-label">${escapeHtml(t('location'))}</span><strong>${escapeHtml(locationValue)}</strong></div>
+		<section class="bunker-instrument-deck">
+			<section class="bunker-metrics" aria-label="${escapeHtml(t('bunkerFacilityRecord'))}">
+				<div class="bunker-metric metric-capacity"><span class="bunker-metric-label">${escapeHtml(t('capacity'))}</span><strong>${escapeHtml(capacityValue)}</strong></div>
+				<div class="bunker-metric metric-condition"><span class="bunker-metric-label">${escapeHtml(t('condition'))}</span><strong>${escapeHtml(getBunkerConditionLabel(model.conditionKey))}</strong></div>
+				<div class="bunker-metric metric-supplies"><span class="bunker-metric-label">${escapeHtml(t('supplies'))}</span><strong>${suppliesValue}</strong></div>
+				<div class="bunker-metric metric-water"><span class="bunker-metric-label">${escapeHtml(t('water'))}</span><strong>${waterValue}</strong></div>
+				<div class="bunker-metric metric-location"><span class="bunker-metric-label">${escapeHtml(t('location'))}</span><strong>${escapeHtml(locationValue)}</strong></div>
+			</section>
 		</section>
-		<div class="bunker-content-grid">
-			${renderBunkerContentSection('rooms', t('bunkerRooms'), model.rooms)}
-			${renderBunkerContentSection('resources', t('bunkerResources'), model.resources)}
-			${renderBunkerContentSection('problems', t('bunkerProblems'), model.problems)}
+		<section class="bunker-console-deck">
+			<div class="bunker-content-grid">
+				${renderBunkerContentSection('rooms', t('bunkerRooms'), model.rooms)}
+				${renderBunkerContentSection('resources', t('bunkerResources'), model.resources)}
+				${renderBunkerContentSection('problems', t('bunkerProblems'), model.problems)}
+			</div>
+		</section>
+		<footer class="bunker-footer bunker-control-deck"><span class="bunker-footer-kicker">${escapeHtml(t('bunkerFacilityRecord'))}</span>${actions ? `<div class="bunker-footer-actions">${actions}</div>` : ''}</footer>
 		</div>
-		${actions ? `<footer class="bunker-footer"><span class="bunker-footer-kicker">${escapeHtml(t('bunkerFacilityRecord'))}</span><div class="bunker-footer-actions">${actions}</div></footer>` : ''}
 	</article>`;
 }
 
 function renderBunker(bunker) {
-	syncBunkerVisualTheme(bunker);
+	const theme = syncBunkerVisualTheme(bunker);
 	const container = document.getElementById('bunkerContent');
 	if (!container) return;
 	const panel = document.getElementById('bunkerPanel');
@@ -223,6 +230,7 @@ function renderBunker(bunker) {
 	if (panel) { panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none'; }
 	if (!enabled) { container.innerHTML = ''; updateScenarioSectionVisibility(); return; }
 	container.innerHTML = renderBunkerFacility(buildBunkerFacilityModel(bunker));
+	applyBunkerMaterialPresentation(theme, container.querySelector('.bunker-visual-root'));
 	updateScenarioSectionVisibility();
 }
 

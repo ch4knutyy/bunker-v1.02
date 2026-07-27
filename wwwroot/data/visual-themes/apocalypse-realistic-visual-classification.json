@@ -1,0 +1,5214 @@
+{
+  "version": 1,
+  "sourceFiles": [
+    "apocalypses.json",
+    "apocalypse-category-index.json",
+    "apocalypse-category-visual-registry.json"
+  ],
+  "recordsTotal": 220,
+  "classificationPrinciple": "Canonical content category is preserved. A separate realistic visual archetype describes physical environmental presentation and replaces hue-led styling as the primary visual selector.",
+  "canonicalCategoryValidation": {
+    "categoryCount": 10,
+    "allIdsPresentInIndex": true,
+    "allIdsPresentInLegacyVisualRegistry": true
+  },
+  "visualFamilyCatalog": [
+    "anomalous",
+    "atmospheric",
+    "biological",
+    "contamination",
+    "cosmic",
+    "cryogenic",
+    "ecological",
+    "hydrological",
+    "occult",
+    "psychological",
+    "societal",
+    "structural",
+    "technological",
+    "thermal"
+  ],
+  "realisticVisualArchetypeCatalog": [
+    {
+      "id": "fallout_radiation",
+      "visualFamilyId": "contamination",
+      "_i18n": {
+        "name": {
+          "uk": "Ядерні опади та радіація"
+        },
+        "description": {
+          "uk": "Пил, дезактиваційні сліди, аварійне бурштинове світло та локальні радіаційні попередження."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "dust",
+        "radiation-warning",
+        "decontamination-stains",
+        "emergency-amber"
+      ],
+      "count": 2,
+      "apocalypseIds": [
+        "nuclear_war",
+        "nuclear_winter"
+      ]
+    },
+    {
+      "id": "fire_ash",
+      "visualFamilyId": "thermal",
+      "_i18n": {
+        "name": {
+          "uk": "Вогонь, попіл і сажа"
+        },
+        "description": {
+          "uk": "Темний дим, сажа, попіл, обпалені краї та слабкі локальні відблиски жару."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "count": 9,
+      "apocalypseIds": [
+        "supervolcano_eruption",
+        "sky_burning",
+        "volcano_chain",
+        "volcano_ocean",
+        "volcanic_winter_forever",
+        "fire_sky",
+        "surface_extinction_countdown",
+        "underground_fire_network",
+        "ash_ocean"
+      ]
+    },
+    {
+      "id": "extreme_heat",
+      "visualFamilyId": "thermal",
+      "_i18n": {
+        "name": {
+          "uk": "Спека та висушення"
+        },
+        "description": {
+          "uk": "Теплове марево, сухий пил, вицвілі поверхні та тьмяне гаряче світло."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "heat-haze",
+        "dry-dust",
+        "bleached-surfaces"
+      ],
+      "count": 4,
+      "apocalypseIds": [
+        "climate_collapse",
+        "drought_permanent",
+        "mega_drought",
+        "boiling_seas"
+      ]
+    },
+    {
+      "id": "frost_ice",
+      "visualFamilyId": "cryogenic",
+      "_i18n": {
+        "name": {
+          "uk": "Мороз і зледеніння"
+        },
+        "description": {
+          "uk": "Іній по краях, конденсат, запітніле скло та холодне сталеве освітлення."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "frost",
+        "condensation",
+        "cold-light"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "ice_age_rapid",
+        "ice_wall_rising",
+        "frozen_equator"
+      ]
+    },
+    {
+      "id": "storm_electric",
+      "visualFamilyId": "atmospheric",
+      "_i18n": {
+        "name": {
+          "uk": "Буря та електрична нестабільність"
+        },
+        "description": {
+          "uk": "Дощ, вітер, локальні спалахи, вібрація й нестабільне живлення без суцільного синього tint."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "count": 6,
+      "apocalypseIds": [
+        "blood_rain",
+        "perpetual_storm",
+        "weather_control_loss",
+        "sentient_weather",
+        "global_salt_storms",
+        "living_storm_fronts"
+      ]
+    },
+    {
+      "id": "flood_moisture",
+      "visualFamilyId": "hydrological",
+      "_i18n": {
+        "name": {
+          "uk": "Затоплення та волога"
+        },
+        "description": {
+          "uk": "Водяні сліди, конденсат, мокрі відблиски, протікання та корозія."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "condensation",
+        "water-stains",
+        "wet-reflections",
+        "corrosion"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "sky_ocean",
+        "ocean_rise_rapid",
+        "ocean_jellification"
+      ]
+    },
+    {
+      "id": "fog_low_visibility",
+      "visualFamilyId": "atmospheric",
+      "_i18n": {
+        "name": {
+          "uk": "Туман і низька видимість"
+        },
+        "description": {
+          "uk": "Низькоконтрастний туман, запітніння та приглушене локальне світло."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "fog",
+        "condensation",
+        "low-contrast"
+      ],
+      "count": 1,
+      "apocalypseIds": [
+        "permanent_superfog"
+      ]
+    },
+    {
+      "id": "toxic_air",
+      "visualFamilyId": "contamination",
+      "_i18n": {
+        "name": {
+          "uk": "Отруєне повітря"
+        },
+        "description": {
+          "uk": "Хімічний серпанок, забруднені фільтри, потьмянілі поверхні та локальні попередження."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "count": 7,
+      "apocalypseIds": [
+        "carbon_dioxide_surge",
+        "oxygen_depletion",
+        "poison_atmosphere",
+        "aquifer_memory_poison",
+        "oxygen_decline",
+        "red_rain_pathogen",
+        "methane_atmosphere_release"
+      ]
+    },
+    {
+      "id": "corrosive_decay",
+      "visualFamilyId": "contamination",
+      "_i18n": {
+        "name": {
+          "uk": "Корозійний розпад матеріалів"
+        },
+        "description": {
+          "uk": "Точкова корозія, розшарування матеріалу, пошкоджені стики та крихкі поверхні."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "corrosion",
+        "pitting",
+        "material-decay"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "iron_plague",
+        "silicon_plague",
+        "plastic_decay_bacteria"
+      ]
+    },
+    {
+      "id": "infection_quarantine",
+      "visualFamilyId": "biological",
+      "_i18n": {
+        "name": {
+          "uk": "Зараження та карантин"
+        },
+        "description": {
+          "uk": "Карантинні маркування, ізоляційні смуги, холодне клінічне світло та забруднені фільтри."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "quarantine-markings",
+        "sealed-zones",
+        "filter-contamination"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "pandemic_super_virus",
+        "bioterrorism_plague",
+        "invisible_plague"
+      ]
+    },
+    {
+      "id": "fungal_spore",
+      "visualFamilyId": "biological",
+      "_i18n": {
+        "name": {
+          "uk": "Спори та грибкове зараження"
+        },
+        "description": {
+          "uk": "Повітряні спори, органічний наліт, забиті фільтри й вологі сліди росту."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "count": 6,
+      "apocalypseIds": [
+        "fungal_apocalypse",
+        "fungal_mind_hive",
+        "mind_parasite_spores",
+        "glass_spore_plague",
+        "gigantism_spore_bloom",
+        "allergy_bloom_pandemic"
+      ]
+    },
+    {
+      "id": "parasite_infestation",
+      "visualFamilyId": "biological",
+      "_i18n": {
+        "name": {
+          "uk": "Паразитарне зараження"
+        },
+        "description": {
+          "uk": "Локальні органічні сліди, біологічні попередження та тривожні ознаки зараження."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "organic-traces",
+        "bio-warning",
+        "unease"
+      ],
+      "count": 2,
+      "apocalypseIds": [
+        "parasite_mind_control",
+        "phobia_seeding_plague"
+      ]
+    },
+    {
+      "id": "mutation_body",
+      "visualFamilyId": "biological",
+      "_i18n": {
+        "name": {
+          "uk": "Мутації та тілесні зміни"
+        },
+        "description": {
+          "uk": "Медичні тривоги, нестабільні біометричні індикатори та стримані органічні деформації."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "count": 16,
+      "apocalypseIds": [
+        "mutation_wave",
+        "flesh_virus",
+        "crystal_growth_virus",
+        "reverse_evolution",
+        "dna_rewrite",
+        "bone_plague",
+        "plague_of_speed",
+        "plague_empowerment",
+        "mass_feralization",
+        "hypercaloric_food_virus",
+        "metabolic_wasting_plague",
+        "miniaturization_fever",
+        "myostatin_collapse",
+        "muscle_atrophy_fog",
+        "regenerative_rejuvenation_plague",
+        "mutation_pulse_storm"
+      ]
+    },
+    {
+      "id": "ecological_collapse",
+      "visualFamilyId": "ecological",
+      "_i18n": {
+        "name": {
+          "uk": "Колапс екосистем"
+        },
+        "description": {
+          "uk": "Суха органічна деградація, мертва рослинність, забруднення та ознаки руйнування природних циклів."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "dry-decay",
+        "dead-organic-matter",
+        "ecosystem-warning"
+      ],
+      "count": 4,
+      "apocalypseIds": [
+        "ocean_collapse",
+        "food_chain_reversal",
+        "photosynthesis_failure",
+        "plague_of_plenty"
+      ]
+    },
+    {
+      "id": "overgrowth_swarm",
+      "visualFamilyId": "ecological",
+      "_i18n": {
+        "name": {
+          "uk": "Рої та неконтрольоване розростання"
+        },
+        "description": {
+          "uk": "Коріння, комахи, органічні нарости й локальне захоплення конструкцій."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "roots",
+        "insects",
+        "organic-overgrowth"
+      ],
+      "count": 5,
+      "apocalypseIds": [
+        "insect_swarm_apocalypse",
+        "plant_revolt",
+        "predator_evolution",
+        "predatory_flora_bloom",
+        "insect_empire"
+      ]
+    },
+    {
+      "id": "resource_scarcity",
+      "visualFamilyId": "ecological",
+      "_i18n": {
+        "name": {
+          "uk": "Дефіцит ресурсів"
+        },
+        "description": {
+          "uk": "Тьмяне світло, порожні індикатори, пил, раціонні позначення й відчуття виснаження."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "count": 7,
+      "apocalypseIds": [
+        "water_depletion",
+        "resource_depletion",
+        "protein_collapse",
+        "metabolic_famine",
+        "synthetic_food_collapse",
+        "freshwater_crystallization",
+        "soil_sterility"
+      ]
+    },
+    {
+      "id": "seismic_ruin",
+      "visualFamilyId": "structural",
+      "_i18n": {
+        "name": {
+          "uk": "Сейсмічне та конструктивне руйнування"
+        },
+        "description": {
+          "uk": "Тріщини, пил, зміщені панелі, уламки та нерівні конструктивні шви."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "cracks",
+        "dust",
+        "misalignment",
+        "debris"
+      ],
+      "count": 4,
+      "apocalypseIds": [
+        "mega_earthquake",
+        "hollow_earth",
+        "perpetual_earthquake",
+        "concrete_crumbling"
+      ]
+    },
+    {
+      "id": "cosmic_impact",
+      "visualFamilyId": "cosmic",
+      "_i18n": {
+        "name": {
+          "uk": "Космічні удари та уламки"
+        },
+        "description": {
+          "uk": "Пил від ударів, локальні зовнішні спалахи, вібрації й пошкодження оболонки."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "impact-dust",
+        "external-flashes",
+        "vibration"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "asteroid_storm",
+        "moon_shard_rain",
+        "orbital_debris_cascade"
+      ]
+    },
+    {
+      "id": "cosmic_radiation",
+      "visualFamilyId": "cosmic",
+      "_i18n": {
+        "name": {
+          "uk": "Космічна радіація"
+        },
+        "description": {
+          "uk": "Холодні білі спалахи, статичні перешкоди, радіаційні попередження та нестабільні сенсори."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "cold-white-flare",
+        "static",
+        "radiation-alert"
+      ],
+      "count": 1,
+      "apocalypseIds": [
+        "solar_radiation_storm"
+      ]
+    },
+    {
+      "id": "celestial_anomaly",
+      "visualFamilyId": "cosmic",
+      "_i18n": {
+        "name": {
+          "uk": "Небесна або космічна аномалія"
+        },
+        "description": {
+          "uk": "Незвичне світло, глибокі тіні, локальна оптична деформація й рідкісні енергетичні спалахи."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "unusual-light",
+        "deep-shadow",
+        "optical-distortion"
+      ],
+      "count": 5,
+      "apocalypseIds": [
+        "second_moon",
+        "alien_terraforming",
+        "anti_matter_leak",
+        "color_sun",
+        "iron_sky"
+      ]
+    },
+    {
+      "id": "blackout_emp",
+      "visualFamilyId": "technological",
+      "_i18n": {
+        "name": {
+          "uk": "ЕМІ та відключення енергії"
+        },
+        "description": {
+          "uk": "Мертві екрани, аварійні лампи, електричний шум і локальні перезапуски систем."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "count": 10,
+      "apocalypseIds": [
+        "magnetic_pole_flip",
+        "solar_flare_emp",
+        "magnetic_reversal",
+        "electromagnetic_life",
+        "magnetic_storm_permanent",
+        "energy_drain",
+        "anti_technology_field",
+        "electronic_silence",
+        "universal_power_blackout",
+        "solar_flicker"
+      ]
+    },
+    {
+      "id": "nanotech_corrosion",
+      "visualFamilyId": "technological",
+      "_i18n": {
+        "name": {
+          "uk": "Нанотехнологічний розпад"
+        },
+        "description": {
+          "uk": "Мікроскопічне руйнування, повзуча корозія, нестабільні сенсори та деградація технічних поверхонь."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "micro-corrosion",
+        "sensor-failure",
+        "material-decay"
+      ],
+      "count": 4,
+      "apocalypseIds": [
+        "nanobot_plague",
+        "nano_gray_goo",
+        "plague_machines",
+        "rust_nanite_inheritance"
+      ]
+    },
+    {
+      "id": "machine_uprising",
+      "visualFamilyId": "technological",
+      "_i18n": {
+        "name": {
+          "uk": "Повстання машин"
+        },
+        "description": {
+          "uk": "Заблоковані органи керування, ворожі статуси, холодне механічне світло й локальні збої."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "count": 10,
+      "apocalypseIds": [
+        "ai_takeover",
+        "cybernetic_rebellion",
+        "war_of_clones",
+        "tech_singularity_gone_wrong",
+        "ancient_machine_war",
+        "biological_robots",
+        "swarm_intelligence",
+        "consciousness_epidemic",
+        "digital_to_real",
+        "autonomous_factory_war"
+      ]
+    },
+    {
+      "id": "digital_failure",
+      "visualFamilyId": "technological",
+      "_i18n": {
+        "name": {
+          "uk": "Цифровий та системний збій"
+        },
+        "description": {
+          "uk": "Пошкоджені дані, частково згаслі екрани, локальні scanline-перешкоди й помилки навігації."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "data-corruption",
+        "dead-screens",
+        "local-scanlines"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "digital_virus_reality",
+        "internet_collapse",
+        "global_navigation_failure"
+      ]
+    },
+    {
+      "id": "civil_collapse",
+      "visualFamilyId": "societal",
+      "_i18n": {
+        "name": {
+          "uk": "Цивілізаційний розпад"
+        },
+        "description": {
+          "uk": "Паперові оголошення, саморобні ремонти, втрата обслуговування та ознаки розвалу порядку."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "paper-notices",
+        "improvised-repairs",
+        "low-maintenance"
+      ],
+      "count": 4,
+      "apocalypseIds": [
+        "economic_total_collapse",
+        "stone_age_regression",
+        "currency_memory_collapse",
+        "city_state_fragmentation"
+      ]
+    },
+    {
+      "id": "war_unrest",
+      "visualFamilyId": "societal",
+      "_i18n": {
+        "name": {
+          "uk": "Війна та масові заворушення"
+        },
+        "description": {
+          "uk": "Ударні пошкодження, пил, барикадні позначення й локальне аварійне червоне світло."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "impact-damage",
+        "dust",
+        "barricade-markings",
+        "emergency-red-local"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "war_of_beliefs",
+        "permanent_civil_war",
+        "global_prison_break"
+      ]
+    },
+    {
+      "id": "cognitive_epidemic",
+      "visualFamilyId": "psychological",
+      "_i18n": {
+        "name": {
+          "uk": "Когнітивна та психічна епідемія"
+        },
+        "description": {
+          "uk": "Дуже слабка нестабільність тексту й індикаторів, тривожні статуси та мінімальні психологічні ефекти без шкоди читабельності."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "count": 21,
+      "apocalypseIds": [
+        "memory_loss_plague",
+        "language_breakdown",
+        "mass_insanity",
+        "sleep_plague",
+        "hivemind_virus",
+        "emotion_plague",
+        "plague_of_truth",
+        "plague_of_forgetting",
+        "plague_empathy",
+        "pandemic_rage",
+        "mind_plague",
+        "storm_of_ideas",
+        "pandemic_telepathy",
+        "plague_of_purpose",
+        "plague_wisdom",
+        "plague_laughter",
+        "absolute_truth_pandemic",
+        "worldwide_insomnia",
+        "language_ai_poisoning",
+        "universal_false_memories",
+        "panic_resonance_field"
+      ]
+    },
+    {
+      "id": "sensory_resonance",
+      "visualFamilyId": "psychological",
+      "_i18n": {
+        "name": {
+          "uk": "Сенсорний та звуковий розлад"
+        },
+        "description": {
+          "uk": "Локальні хвильові індикатори, короткі контрастні зсуви й стримані перешкоди сприйняття."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "count": 9,
+      "apocalypseIds": [
+        "color_blindness_epidemic",
+        "sound_plague",
+        "death_echo",
+        "sound_silence",
+        "color_drain",
+        "inversion_of_senses",
+        "sound_weaponization",
+        "lethal_sound_resonance",
+        "global_earth_hum"
+      ]
+    },
+    {
+      "id": "reality_fracture",
+      "visualFamilyId": "anomalous",
+      "_i18n": {
+        "name": {
+          "uk": "Розлом реальності"
+        },
+        "description": {
+          "uk": "Локальні оптичні викривлення, зміщені лінії, нестабільна геометрія й рідкісні візуальні розриви."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "count": 10,
+      "apocalypseIds": [
+        "simulation_failure",
+        "dimension_tears",
+        "reality_glitches",
+        "quantum_uncertainty",
+        "mass_teleportation",
+        "mirror_world",
+        "dimensional_overlap",
+        "reverse_entropy",
+        "heat_death_local",
+        "reality_echoes"
+      ]
+    },
+    {
+      "id": "temporal_distortion",
+      "visualFamilyId": "anomalous",
+      "_i18n": {
+        "name": {
+          "uk": "Часова деформація"
+        },
+        "description": {
+          "uk": "Розсинхронізовані годинники, слабке ghosting, повторювані мітки й локальні часові збої."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "count": 6,
+      "apocalypseIds": [
+        "time_loop_collapse",
+        "temporal_storm",
+        "temporal_decay",
+        "rebirth_loop",
+        "crystal_time",
+        "temporal_compression"
+      ]
+    },
+    {
+      "id": "gravity_distortion",
+      "visualFamilyId": "anomalous",
+      "_i18n": {
+        "name": {
+          "uk": "Гравітаційна деформація"
+        },
+        "description": {
+          "uk": "Зміщений пил, нахилені або завислі дрібні предмети та нестандартний напрямок тіней."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "count": 6,
+      "apocalypseIds": [
+        "gravity_instability",
+        "black_hole_effect",
+        "anti_gravity_zones",
+        "gravity_reversal",
+        "weight_anomaly",
+        "hypergravity_burden"
+      ]
+    },
+    {
+      "id": "identity_distortion",
+      "visualFamilyId": "anomalous",
+      "_i18n": {
+        "name": {
+          "uk": "Порушення ідентичності"
+        },
+        "description": {
+          "uk": "Невідповідність біометрії, дубльовані мітки, нестабільні портрети й помилки персональних даних."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "count": 18,
+      "apocalypseIds": [
+        "consciousness_transfer",
+        "reverse_aging",
+        "age_acceleration",
+        "mind_upload_disaster",
+        "genetic_lock",
+        "plague_of_youth",
+        "plague_beauty",
+        "plague_transparency",
+        "age_flux_plague",
+        "identity_rotation",
+        "exchange_plague",
+        "accelerated_aging_syndrome",
+        "skill_erasure_plague",
+        "personality_inversion_wave",
+        "consciousness_body_rotation",
+        "clone_convergence_event",
+        "memory_theft_cycle",
+        "identity_fragmentation_wave"
+      ]
+    },
+    {
+      "id": "occult_manifestation",
+      "visualFamilyId": "occult",
+      "_i18n": {
+        "name": {
+          "uk": "Окультний прояв"
+        },
+        "description": {
+          "uk": "Глибокі тіні, кіптява, старі символічні позначення й локальні теплі джерела світла."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "deep-shadow",
+        "soot",
+        "symbolic-marks",
+        "warm-local-light"
+      ],
+      "count": 5,
+      "apocalypseIds": [
+        "ancient_gods_awakening",
+        "cursed_world",
+        "magic_collapse",
+        "soul_separation",
+        "immortality_curse"
+      ]
+    },
+    {
+      "id": "shadow_haunting",
+      "visualFamilyId": "occult",
+      "_i18n": {
+        "name": {
+          "uk": "Тіні, привиди та сни"
+        },
+        "description": {
+          "uk": "Неприродні тіні, холодні плями, аномалії віддзеркалень і дуже слабкий рух у периферії."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "count": 8,
+      "apocalypseIds": [
+        "shadow_plague",
+        "ghost_world",
+        "collective_nightmare",
+        "dream_bleed",
+        "fear_materialization",
+        "shadow_duplication",
+        "mirror_entities",
+        "dream_invasion"
+      ]
+    },
+    {
+      "id": "darkness_light_loss",
+      "visualFamilyId": "atmospheric",
+      "_i18n": {
+        "name": {
+          "uk": "Зникнення світла"
+        },
+        "description": {
+          "uk": "Глибокі тіні, локальні аварійні лампи, світло екранів і сильне падіння видимості фону."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "count": 6,
+      "apocalypseIds": [
+        "night_sun",
+        "death_of_stars",
+        "endless_darkness",
+        "light_eaters",
+        "night_without_end",
+        "daylight_disappearance"
+      ]
+    },
+    {
+      "id": "undead",
+      "visualFamilyId": "biological",
+      "_i18n": {
+        "name": {
+          "uk": "Нежить"
+        },
+        "description": {
+          "uk": "Барикадні сліди, висохла кров, занепад, низьке освітлення й локальні біологічні попередження."
+        }
+      },
+      "defaultEnvironmentalEffectIds": [
+        "barricades",
+        "dried-blood-local",
+        "decay",
+        "low-light"
+      ],
+      "count": 3,
+      "apocalypseIds": [
+        "zombie_pandemic",
+        "reverse_death",
+        "undead_sleepers"
+      ]
+    }
+  ],
+  "apocalypses": [
+    {
+      "id": "nuclear_war",
+      "name": "Ядерна війна",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "fallout_radiation",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "heat",
+        "radiation",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "dust",
+        "radiation-warning",
+        "decontamination-stains",
+        "emergency-amber"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ai_takeover",
+      "name": "Захоплення штучним інтелектом",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "zombie_pandemic",
+      "name": "Зомбі-пандемія",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "undead",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "undead"
+      ],
+      "environmentalEffectIds": [
+        "barricades",
+        "dried-blood-local",
+        "decay",
+        "low-light"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "supervolcano_eruption",
+      "name": "Виверження супервулкана",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "ash",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "nanobot_plague",
+      "name": "Нанобот-чума",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "nanotech_corrosion",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "nanotech",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "micro-corrosion",
+        "sensor-failure",
+        "material-decay"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "climate_collapse",
+      "name": "Кліматичний колапс",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "extreme_heat",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "heat",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "heat-haze",
+        "dry-dust",
+        "bleached-surfaces"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "simulation_failure",
+      "name": "Збій симуляції",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "memory_loss_plague",
+      "name": "Чума втрати пам'яті",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ancient_gods_awakening",
+      "name": "Пробудження стародавніх богів",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "occult_manifestation",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "soot",
+        "symbolic-marks",
+        "warm-local-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "gravity_instability",
+      "name": "Нестабільність гравітації",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "gravity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "spores",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "pandemic_super_virus",
+      "name": "Супервірус",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "infection_quarantine",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "quarantine-markings",
+        "sealed-zones",
+        "filter-contamination"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "solar_radiation_storm",
+      "name": "Сонячна радіаційна буря",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "cosmic_radiation",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "heat",
+        "radiation",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "cold-white-flare",
+        "static",
+        "radiation-alert"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dimension_tears",
+      "name": "Розриви вимірів",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "spores",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "economic_total_collapse",
+      "name": "Тотальний економічний колапс",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "civil_collapse",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "paper-notices",
+        "improvised-repairs",
+        "low-maintenance"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "parasite_mind_control",
+      "name": "Паразит-маніпулятор",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "parasite_infestation",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "spores",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "organic-traces",
+        "bio-warning",
+        "unease"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "language_breakdown",
+      "name": "Розпад мови",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "asteroid_storm",
+      "name": "Астероїдний шторм",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "cosmic_impact",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "cosmic-impact",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "impact-dust",
+        "external-flashes",
+        "vibration"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "reality_glitches",
+      "name": "Глюки реальності",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "magnetic_pole_flip",
+      "name": "Зміна магнітних полюсів",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "radiation",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fungal_apocalypse",
+      "name": "Грибковий апокаліпсис",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "fungal_spore",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "spores",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ocean_collapse",
+      "name": "Колапс океанів",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "ecological_collapse",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dry-decay",
+        "dead-organic-matter",
+        "ecosystem-warning"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "time_loop_collapse",
+      "name": "Колапс петлі часу",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "temporal_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mega_earthquake",
+      "name": "Мегаземлетрус",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "seismic_ruin",
+      "realisticVisualFamilyId": "structural",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "cracks",
+        "dust",
+        "misalignment",
+        "debris"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "black_hole_effect",
+      "name": "Ефект чорної діри",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "gravity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "water_depletion",
+      "name": "Виснаження прісної води",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "drought",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mutation_wave",
+      "name": "Хвиля мутацій",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cursed_world",
+      "name": "Проклятий світ",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "occult_manifestation",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "soot",
+        "symbolic-marks",
+        "warm-local-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "resource_depletion",
+      "name": "Виснаження ресурсів",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "drought",
+        "resource-scarcity"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "bioterrorism_plague",
+      "name": "Біотерористична чума",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "infection_quarantine",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection"
+      ],
+      "environmentalEffectIds": [
+        "quarantine-markings",
+        "sealed-zones",
+        "filter-contamination"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "solar_flare_emp",
+      "name": "Сонячний спалах — ЕМІ",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "heat",
+        "radiation",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "magnetic_reversal",
+      "name": "Зворотне поле",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "radiation",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ice_age_rapid",
+      "name": "Стрімке зледеніння",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "frost_ice",
+      "realisticVisualFamilyId": "cryogenic",
+      "sourceVisualModifierIds": [
+        "frost",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "frost",
+        "condensation",
+        "cold-light"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "flesh_virus",
+      "name": "Вірус плоті",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sky_burning",
+      "name": "Небо у вогні",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "heat",
+        "radiation",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "anti_gravity_zones",
+      "name": "Зони антигравітації",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "gravity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mass_insanity",
+      "name": "Масове божевілля",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "protein_collapse",
+      "name": "Білковий колапс",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "swarm",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "iron_plague",
+      "name": "Залізна чума",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "corrosive_decay",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "corrosion",
+        "pitting",
+        "material-decay"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sleep_plague",
+      "name": "Чума сну",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "second_moon",
+      "name": "Другий місяць",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "celestial_anomaly",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "storm",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "unusual-light",
+        "deep-shadow",
+        "optical-distortion"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "silicon_plague",
+      "name": "Кремнієва чума",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "corrosive_decay",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "infection",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "corrosion",
+        "pitting",
+        "material-decay"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "color_blindness_epidemic",
+      "name": "Епідемія сліпоти кольорів",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "carbon_dioxide_surge",
+      "name": "Сплеск CO2",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "crystal_growth_virus",
+      "name": "Вірус кристалізації",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "flood",
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "magic_collapse",
+      "name": "Колапс магії",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "occult_manifestation",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "radiation",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "soot",
+        "symbolic-marks",
+        "warm-local-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "digital_virus_reality",
+      "name": "Цифровий вірус в реальності",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "digital_failure",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "data-corruption",
+        "dead-screens",
+        "local-scanlines"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "night_sun",
+      "name": "Нічне сонце",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "darkness_light_loss",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "darkness"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "insect_swarm_apocalypse",
+      "name": "Апокаліпсис комах",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "overgrowth_swarm",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "roots",
+        "insects",
+        "organic-overgrowth"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "blood_rain",
+      "name": "Кривавий дощ",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "storm_electric",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "storm",
+        "toxic",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "shadow_plague",
+      "name": "Тіньова чума",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sound_plague",
+      "name": "Звукова чума",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "alien_terraforming",
+      "name": "Чужопланетне тераформування",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "celestial_anomaly",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "unusual-light",
+        "deep-shadow",
+        "optical-distortion"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "quantum_uncertainty",
+      "name": "Квантова невизначеність",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "drought_permanent",
+      "name": "Постійна посуха",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "extreme_heat",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "drought",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "heat-haze",
+        "dry-dust",
+        "bleached-surfaces"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plant_revolt",
+      "name": "Повстання рослин",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "overgrowth_swarm",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "heat",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "roots",
+        "insects",
+        "organic-overgrowth"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "gravity_reversal",
+      "name": "Реверс гравітації",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "gravity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "storm",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "nano_gray_goo",
+      "name": "Сіра слиз",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "nanotech_corrosion",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "nanotech",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "micro-corrosion",
+        "sensor-failure",
+        "material-decay"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fungal_mind_hive",
+      "name": "Грибковий вулик розуму",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "fungal_spore",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "spores",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "oxygen_depletion",
+      "name": "Виснаження кисню",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "predator_evolution",
+      "name": "Еволюція хижаків",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "overgrowth_swarm",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "heat",
+        "swarm",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "roots",
+        "insects",
+        "organic-overgrowth"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "consciousness_transfer",
+      "name": "Перенесення свідомості",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "perpetual_storm",
+      "name": "Вічна буря",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "storm_electric",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "storm",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "anti_matter_leak",
+      "name": "Витік антиматерії",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "celestial_anomaly",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "unusual-light",
+        "deep-shadow",
+        "optical-distortion"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "food_chain_reversal",
+      "name": "Реверс харчового ланцюга",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "ecological_collapse",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dry-decay",
+        "dead-organic-matter",
+        "ecosystem-warning"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "soul_separation",
+      "name": "Відокремлення душ",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "occult_manifestation",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "soot",
+        "symbolic-marks",
+        "warm-local-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "reverse_aging",
+      "name": "Зворотне старіння",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "mutation",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "volcano_chain",
+      "name": "Ланцюг вулканів",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "ash",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hivemind_virus",
+      "name": "Вірус колективного розуму",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "photosynthesis_failure",
+      "name": "Відмова фотосинтезу",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "ecological_collapse",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "flood",
+        "swarm",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dry-decay",
+        "dead-organic-matter",
+        "ecosystem-warning"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ghost_world",
+      "name": "Світ привидів",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mega_drought",
+      "name": "Мегапосуха",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "extreme_heat",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "drought",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "heat-haze",
+        "dry-dust",
+        "bleached-surfaces"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "nuclear_winter",
+      "name": "Ядерна зима",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "fallout_radiation",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "frost",
+        "radiation",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dust",
+        "radiation-warning",
+        "decontamination-stains",
+        "emergency-amber"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "emotion_plague",
+      "name": "Чума емоцій",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "reverse_evolution",
+      "name": "Зворотна еволюція",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "temporal_storm",
+      "name": "Темпоральний шторм",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "temporal_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "storm",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "electromagnetic_life",
+      "name": "Електромагнітне Життя",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "collective_nightmare",
+      "name": "Колективний кошмар",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "stone_age_regression",
+      "name": "Регрес до кам'яного віку",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "civil_collapse",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "swarm",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "paper-notices",
+        "improvised-repairs",
+        "low-maintenance"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ice_wall_rising",
+      "name": "Зростаюча льодова стіна",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "frost_ice",
+      "realisticVisualFamilyId": "cryogenic",
+      "sourceVisualModifierIds": [
+        "frost",
+        "spores",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "frost",
+        "condensation",
+        "cold-light"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hollow_earth",
+      "name": "Порожня Земля",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "seismic_ruin",
+      "realisticVisualFamilyId": "structural",
+      "sourceVisualModifierIds": [
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "cracks",
+        "dust",
+        "misalignment",
+        "debris"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "immortality_curse",
+      "name": "Прокляття безсмертя",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "occult_manifestation",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "soot",
+        "symbolic-marks",
+        "warm-local-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "color_sun",
+      "name": "Кольорове сонце",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "celestial_anomaly",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "unusual-light",
+        "deep-shadow",
+        "optical-distortion"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "death_of_stars",
+      "name": "Смерть зірок",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "darkness_light_loss",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "heat",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "cybernetic_rebellion",
+      "name": "Кіберпанківське повстання",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_of_truth",
+      "name": "Чума правди",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "death_echo",
+      "name": "Луна смерті",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "age_acceleration",
+      "name": "Прискорене старіння",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "radiation",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sound_silence",
+      "name": "Абсолютна тиша",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_of_forgetting",
+      "name": "Чума забуття",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "war_of_clones",
+      "name": "Війна клонів",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mind_upload_disaster",
+      "name": "Катастрофа завантаження розуму",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "volcano_ocean",
+      "name": "Вулкани в океані",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "ash",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dream_bleed",
+      "name": "Кровотеча снів",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_empathy",
+      "name": "Чума емпатії",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "tech_singularity_gone_wrong",
+      "name": "Хибна сингулярність",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "endless_darkness",
+      "name": "Нескінченна темрява",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "darkness_light_loss",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "radiation",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mass_teleportation",
+      "name": "Масова телепортація",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fear_materialization",
+      "name": "Матеріалізація страхів",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "magnetic_storm_permanent",
+      "name": "Постійна магнітна буря",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "storm",
+        "radiation",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "genetic_lock",
+      "name": "Генетичний замок",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ancient_machine_war",
+      "name": "Війна стародавніх машин",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "invisible_plague",
+      "name": "Невидима чума",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "infection_quarantine",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "quarantine-markings",
+        "sealed-zones",
+        "filter-contamination"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "weather_control_loss",
+      "name": "Втрата контролю над погодою",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "storm_electric",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "heat",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "biological_robots",
+      "name": "Біологічні роботи",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "energy_drain",
+      "name": "Дренаж енергії",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "blackout"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "swarm_intelligence",
+      "name": "Інтелект рою",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "nanotech",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "pandemic_rage",
+      "name": "Пандемія люті",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "perpetual_earthquake",
+      "name": "Вічний землетрус",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "seismic_ruin",
+      "realisticVisualFamilyId": "structural",
+      "sourceVisualModifierIds": [
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "cracks",
+        "dust",
+        "misalignment",
+        "debris"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mirror_world",
+      "name": "Дзеркальний світ",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "poison_atmosphere",
+      "name": "Отруєна атмосфера",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "toxic"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_of_plenty",
+      "name": "Чума достатку",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "ecological_collapse",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dry-decay",
+        "dead-organic-matter",
+        "ecosystem-warning"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sentient_weather",
+      "name": "Розумна погода",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "storm_electric",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "flood",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "consciousness_epidemic",
+      "name": "Епідемія свідомості",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sky_ocean",
+      "name": "Небесний океан",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "flood_moisture",
+      "realisticVisualFamilyId": "hydrological",
+      "sourceVisualModifierIds": [
+        "flood",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "condensation",
+        "water-stains",
+        "wet-reflections",
+        "corrosion"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_of_youth",
+      "name": "Чума молодості",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "reverse_death",
+      "name": "Зворотна смерть",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "undead",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "barricades",
+        "dried-blood-local",
+        "decay",
+        "low-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mind_plague",
+      "name": "Чума розуму",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "iron_sky",
+      "name": "Залізне небо",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "celestial_anomaly",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "unusual-light",
+        "deep-shadow",
+        "optical-distortion"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_machines",
+      "name": "Чума машин",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "nanotech_corrosion",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "micro-corrosion",
+        "sensor-failure",
+        "material-decay"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dimensional_overlap",
+      "name": "Перетин вимірів",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_beauty",
+      "name": "Чума краси",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "heat",
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "war_of_beliefs",
+      "name": "Війна переконань",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "war_unrest",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "impact-damage",
+        "dust",
+        "barricade-markings",
+        "emergency-red-local"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "reverse_entropy",
+      "name": "Зворотна ентропія",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "volcanic_winter_forever",
+      "name": "Вічна вулканічна зима",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "ash",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dna_rewrite",
+      "name": "Перезапис ДНК",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "storm_of_ideas",
+      "name": "Буря ідей",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "storm",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "bone_plague",
+      "name": "Чума кісток",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "heat_death_local",
+      "name": "Локальна теплова смерть",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "frost",
+        "toxic",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "pandemic_telepathy",
+      "name": "Пандемія телепатії",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_of_purpose",
+      "name": "Чума безцілі",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "color_drain",
+      "name": "Відтік кольорів",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "weight_anomaly",
+      "name": "Аномалія ваги",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "gravity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_transparency",
+      "name": "Чума прозорості",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "fire_sky",
+      "name": "Небо в огні",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "heat",
+        "radiation",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "digital_to_real",
+      "name": "Вторгнення цифрового",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ocean_rise_rapid",
+      "name": "Стрімке підняття океанів",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "flood_moisture",
+      "realisticVisualFamilyId": "hydrological",
+      "sourceVisualModifierIds": [
+        "flood",
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "condensation",
+        "water-stains",
+        "wet-reflections",
+        "corrosion"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_wisdom",
+      "name": "Чума мудрості",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "light_eaters",
+      "name": "Пожирачі світла",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "darkness_light_loss",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "heat",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_laughter",
+      "name": "Чума сміху",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "inversion_of_senses",
+      "name": "Інверсія відчуттів",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "temporal_decay",
+      "name": "Часовий розпад",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "temporal_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "anti_technology_field",
+      "name": "Антитехнологічне поле",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "swarm",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_of_speed",
+      "name": "Чума швидкості",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "frost",
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "night_without_end",
+      "name": "Ніч без кінця",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "darkness_light_loss",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "sound_weaponization",
+      "name": "Зброєзація звуку",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "rebirth_loop",
+      "name": "Петля перероджень",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "temporal_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "crystal_time",
+      "name": "Кришталевий час",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "temporal_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plague_empowerment",
+      "name": "Чума сили",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mind_parasite_spores",
+      "name": "Спори ментального паразита",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "fungal_spore",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "spores",
+        "parasite",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "internet_collapse",
+      "name": "Колапс інтернету",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "digital_failure",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "data-corruption",
+        "dead-screens",
+        "local-scanlines"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "age_flux_plague",
+      "name": "Чума мінливого віку",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "mutation",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "surface_extinction_countdown",
+      "name": "Останні дві години поверхні",
+      "contentCategoryId": "armageddon",
+      "legacyVisualThemeId": "extinction-red",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "heat",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "metabolic_famine",
+      "name": "Метаболічний голод",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "aquifer_memory_poison",
+      "name": "Отруєний водоносний горизонт",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "drought",
+        "toxic",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "electronic_silence",
+      "name": "Електронна тиша",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "emp",
+        "communication-failure"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "absolute_truth_pandemic",
+      "name": "Пандемія абсолютної правди",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "identity_rotation",
+      "name": "Ротація особистостей",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "temporal_compression",
+      "name": "Стиснення часу",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "temporal_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "clock-desync",
+        "ghosting-local",
+        "repeated-marks"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hypergravity_burden",
+      "name": "Хвиля надгравітації",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "gravity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "floating-particles",
+        "tilted-debris",
+        "directional-shadow"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "exchange_plague",
+      "name": "Чума обміну",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "moon_shard_rain",
+      "name": "Дощ уламків Місяця",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "cosmic_impact",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "cosmic-impact",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "impact-dust",
+        "external-flashes",
+        "vibration"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "plastic_decay_bacteria",
+      "name": "Бактерія, що поїдає пластик",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "corrosive_decay",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "corrosion",
+        "pitting",
+        "material-decay"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "oxygen_decline",
+      "name": "Падіння рівня кисню",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "permanent_superfog",
+      "name": "Вічний супертуман",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "fog_low_visibility",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "fog",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "fog",
+        "condensation",
+        "low-contrast"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "global_salt_storms",
+      "name": "Глобальні соляні бурі",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "storm_electric",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "storm",
+        "toxic",
+        "resource-scarcity"
+      ],
+      "environmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ocean_jellification",
+      "name": "Желатинові океани",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "flood_moisture",
+      "realisticVisualFamilyId": "hydrological",
+      "sourceVisualModifierIds": [
+        "flood",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "condensation",
+        "water-stains",
+        "wet-reflections",
+        "corrosion"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "predatory_flora_bloom",
+      "name": "Цвітіння хижої флори",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "overgrowth_swarm",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "roots",
+        "insects",
+        "organic-overgrowth"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "worldwide_insomnia",
+      "name": "Всесвітнє безсоння",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "lethal_sound_resonance",
+      "name": "Смертельний звуковий резонанс",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "concrete_crumbling",
+      "name": "Крихкий бетон",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "seismic_ruin",
+      "realisticVisualFamilyId": "structural",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "cracks",
+        "dust",
+        "misalignment",
+        "debris"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "underground_fire_network",
+      "name": "Підземні вогняні ріки",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "heat",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "orbital_debris_cascade",
+      "name": "Каскад орбітального сміття",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "cosmic_impact",
+      "realisticVisualFamilyId": "cosmic",
+      "sourceVisualModifierIds": [
+        "cosmic-impact",
+        "communication-failure"
+      ],
+      "environmentalEffectIds": [
+        "impact-dust",
+        "external-flashes",
+        "vibration"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "frozen_equator",
+      "name": "Замерзлий екватор",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "frost_ice",
+      "realisticVisualFamilyId": "cryogenic",
+      "sourceVisualModifierIds": [
+        "frost",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "frost",
+        "condensation",
+        "cold-light"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "boiling_seas",
+      "name": "Киплячі моря",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "extreme_heat",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "heat",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "heat-haze",
+        "dry-dust",
+        "bleached-surfaces"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "universal_power_blackout",
+      "name": "Вічне відключення електрики",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "darkness",
+        "blackout",
+        "communication-failure"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "autonomous_factory_war",
+      "name": "Війна автономних фабрик",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "machine_uprising",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "locked-controls",
+        "hostile-status",
+        "cold-machine-light",
+        "local-glitch"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "synthetic_food_collapse",
+      "name": "Колапс синтетичної їжі",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "toxic",
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "global_navigation_failure",
+      "name": "Загибель навігації",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "digital_failure",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "data-corruption",
+        "dead-screens",
+        "local-scanlines"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "language_ai_poisoning",
+      "name": "Отруєння мови алгоритмами",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "machine"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mass_feralization",
+      "name": "Масове здичавіння",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "glass_spore_plague",
+      "name": "Скляні спори",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "fungal_spore",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "spores"
+      ],
+      "environmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "red_rain_pathogen",
+      "name": "Патоген червоного дощу",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "storm",
+        "infection",
+        "toxic"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "insect_empire",
+      "name": "Імперія комах",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "overgrowth_swarm",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "roots",
+        "insects",
+        "organic-overgrowth"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "freshwater_crystallization",
+      "name": "Кристалізація прісної води",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "drought",
+        "toxic",
+        "resource-scarcity"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "soil_sterility",
+      "name": "Стерильна земля",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "resource_scarcity",
+      "realisticVisualFamilyId": "ecological",
+      "sourceVisualModifierIds": [
+        "drought",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "dim-light",
+        "empty-indicators",
+        "ration-markings",
+        "dust"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "currency_memory_collapse",
+      "name": "Забута цінність грошей",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "civil_collapse",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "paper-notices",
+        "improvised-repairs",
+        "low-maintenance"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "permanent_civil_war",
+      "name": "Вічна громадянська війна",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "war_unrest",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "impact-damage",
+        "dust",
+        "barricade-markings",
+        "emergency-red-local"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "global_prison_break",
+      "name": "Глобальний розпад систем утримання",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "war_unrest",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "impact-damage",
+        "dust",
+        "barricade-markings",
+        "emergency-red-local"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "city_state_fragmentation",
+      "name": "Епоха міст-держав",
+      "contentCategoryId": "social",
+      "legacyVisualThemeId": "collapse-rust",
+      "realisticVisualArchetypeId": "civil_collapse",
+      "realisticVisualFamilyId": "societal",
+      "sourceVisualModifierIds": [
+        "unrest"
+      ],
+      "environmentalEffectIds": [
+        "paper-notices",
+        "improvised-repairs",
+        "low-maintenance"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "universal_false_memories",
+      "name": "Епідемія чужих спогадів",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "reality_echoes",
+      "name": "Відлуння реальності",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "reality_fracture",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "optical-distortion",
+        "misaligned-lines",
+        "local-fracture"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "shadow_duplication",
+      "name": "Дублікати з тіней",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "daylight_disappearance",
+      "name": "Зникнення денного світла",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "darkness_light_loss",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "blackout"
+      ],
+      "environmentalEffectIds": [
+        "deep-shadow",
+        "emergency-light",
+        "screen-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "solar_flicker",
+      "name": "Мерехтіння Сонця",
+      "contentCategoryId": "cosmic",
+      "legacyVisualThemeId": "cosmic-violet",
+      "realisticVisualArchetypeId": "blackout_emp",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "storm",
+        "radiation",
+        "emp"
+      ],
+      "environmentalEffectIds": [
+        "dead-screens",
+        "emergency-light",
+        "electrical-noise"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "global_earth_hum",
+      "name": "Гул Землі",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "sensory_resonance",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "wave-markers",
+        "localized-interference",
+        "contrast-shift-local"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "methane_atmosphere_release",
+      "name": "Метанова атмосфера",
+      "contentCategoryId": "ecological",
+      "legacyVisualThemeId": "wasteland-olive",
+      "realisticVisualArchetypeId": "toxic_air",
+      "realisticVisualFamilyId": "contamination",
+      "sourceVisualModifierIds": [
+        "air-hazard",
+        "toxic",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "toxic-haze",
+        "filter-contamination",
+        "warning-amber"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "ash_ocean",
+      "name": "Океан попелу",
+      "contentCategoryId": "geological",
+      "legacyVisualThemeId": "seismic-amber",
+      "realisticVisualArchetypeId": "fire_ash",
+      "realisticVisualFamilyId": "thermal",
+      "sourceVisualModifierIds": [
+        "ash",
+        "toxic",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "ash",
+        "smoke",
+        "soot",
+        "ember-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "undead_sleepers",
+      "name": "Мертві, що сплять",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "undead",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "barricades",
+        "dried-blood-local",
+        "decay",
+        "low-light"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mirror_entities",
+      "name": "Істоти по той бік дзеркал",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "dream_invasion",
+      "name": "Вторгнення через сни",
+      "contentCategoryId": "supernatural",
+      "legacyVisualThemeId": "occult-indigo",
+      "realisticVisualArchetypeId": "shadow_haunting",
+      "realisticVisualFamilyId": "occult",
+      "sourceVisualModifierIds": [
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "moving-shadow-local",
+        "cold-spots",
+        "reflection-anomaly"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "living_storm_fronts",
+      "name": "Живі грозові фронти",
+      "contentCategoryId": "weather",
+      "legacyVisualThemeId": "storm-blue",
+      "realisticVisualArchetypeId": "storm_electric",
+      "realisticVisualFamilyId": "atmospheric",
+      "sourceVisualModifierIds": [
+        "storm",
+        "emp",
+        "structural-damage"
+      ],
+      "environmentalEffectIds": [
+        "rain",
+        "wind",
+        "lightning-local",
+        "power-flicker"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "hypercaloric_food_virus",
+      "name": "Вірус гіперкалорійності",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "mutation",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "accelerated_aging_syndrome",
+      "name": "Синдром прискореного старіння",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "mutation",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "metabolic_wasting_plague",
+      "name": "Чума метаболічного виснаження",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "mutation",
+        "resource-scarcity"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "gigantism_spore_bloom",
+      "name": "Спори гігантизму",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "fungal_spore",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "spores",
+        "mutation"
+      ],
+      "environmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "miniaturization_fever",
+      "name": "Лихоманка мініатюризації",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "infection",
+        "mutation"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "myostatin_collapse",
+      "name": "Колапс міостатину",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "mutation",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "muscle_atrophy_fog",
+      "name": "Туман м'язової атрофії",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "fog",
+        "toxic",
+        "mutation"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "skill_erasure_plague",
+      "name": "Чума стирання навичок",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "infection",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "personality_inversion_wave",
+      "name": "Хвиля інверсії особистості",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "consciousness_body_rotation",
+      "name": "Ротація свідомостей",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "panic_resonance_field",
+      "name": "Поле панічного резонансу",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "cognitive_epidemic",
+      "realisticVisualFamilyId": "psychological",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "subtle-ui-drift",
+        "status-instability",
+        "low-frequency-pulse"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "phobia_seeding_plague",
+      "name": "Чума насаджених фобій",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "parasite_infestation",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "parasite",
+        "psychological"
+      ],
+      "environmentalEffectIds": [
+        "organic-traces",
+        "bio-warning",
+        "unease"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "allergy_bloom_pandemic",
+      "name": "Пандемія алергічного цвітіння",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "fungal_spore",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "allergens",
+        "vegetation-collapse"
+      ],
+      "environmentalEffectIds": [
+        "spores",
+        "organic-stains",
+        "filter-clogging"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "clone_convergence_event",
+      "name": "Конвергенція клонів",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "rust_nanite_inheritance",
+      "name": "Спадкові наніти корозії",
+      "contentCategoryId": "technology",
+      "legacyVisualThemeId": "machine-cyan",
+      "realisticVisualArchetypeId": "nanotech_corrosion",
+      "realisticVisualFamilyId": "technological",
+      "sourceVisualModifierIds": [
+        "nanotech",
+        "resource-scarcity"
+      ],
+      "environmentalEffectIds": [
+        "micro-corrosion",
+        "sensor-failure",
+        "material-decay"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "regenerative_rejuvenation_plague",
+      "name": "Чума регенеративного омолодження",
+      "contentCategoryId": "biological",
+      "legacyVisualThemeId": "biohazard-green",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "mutation",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 1,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "mutation_pulse_storm",
+      "name": "Буря мутаційних імпульсів",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "mutation_body",
+      "realisticVisualFamilyId": "biological",
+      "sourceVisualModifierIds": [
+        "storm",
+        "mutation",
+        "reality-fracture"
+      ],
+      "environmentalEffectIds": [
+        "medical-alerts",
+        "unstable-biometrics",
+        "organic-deformation"
+      ],
+      "stableVariation": 2,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "memory_theft_cycle",
+      "name": "Цикл крадіжки пам'яті",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 0,
+      "classificationConfidence": "high"
+    },
+    {
+      "id": "identity_fragmentation_wave",
+      "name": "Хвиля фрагментації особистості",
+      "contentCategoryId": "anomaly",
+      "legacyVisualThemeId": "glitch-magenta",
+      "realisticVisualArchetypeId": "identity_distortion",
+      "realisticVisualFamilyId": "anomalous",
+      "sourceVisualModifierIds": [
+        "reality-fracture",
+        "identity-shift"
+      ],
+      "environmentalEffectIds": [
+        "biometric-mismatch",
+        "duplicated-labels",
+        "portrait-interference"
+      ],
+      "stableVariation": 3,
+      "classificationConfidence": "high"
+    }
+  ]
+}
