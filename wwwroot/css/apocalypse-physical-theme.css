@@ -44,7 +44,7 @@ body.apocalypse-theme-active[data-apocalypse-archetype="nuclear"],
 body.apocalypse-theme-active[data-apocalypse-archetype="fallout_radiation"] {
 	--apocalypse-accent: #8f8751;
 	--apocalypse-light-color: rgb(164 133 62 / 17%);
-	--apocalypse-air-texture: radial-gradient(circle, rgb(158 151 125 / 16%) 0 1px, transparent 1.8px), repeating-linear-gradient(87deg, transparent 0 67px, rgb(111 108 79 / 4%) 68px 69px);
+	--apocalypse-air-texture: radial-gradient(circle, rgb(158 151 125 / 16%) 0 1px, transparent 1.8px), radial-gradient(ellipse at 68% 18%, rgb(111 108 79 / 7%), transparent 44%);
 	--apocalypse-contamination-texture: radial-gradient(ellipse at 3% 72%, rgb(105 105 58 / 22%), transparent 25%), radial-gradient(ellipse at 96% 17%, rgb(116 103 48 / 17%), transparent 22%);
 	--apocalypse-dust-opacity: .18;
 	--apocalypse-radiation-noise-opacity: .12;
@@ -83,7 +83,7 @@ body.apocalypse-theme-active[data-apocalypse-archetype="flood"],
 body.apocalypse-theme-active[data-apocalypse-archetype="flood_moisture"] {
 	--apocalypse-accent: #607e7c;
 	--apocalypse-light-color: rgb(82 116 116 / 16%);
-	--apocalypse-air-texture: repeating-linear-gradient(104deg, transparent 0 42px, rgb(134 158 156 / 6%) 43px 44px), radial-gradient(ellipse at 50% 100%, rgb(47 79 79 / 13%), transparent 45%);
+	--apocalypse-air-texture: radial-gradient(ellipse at 22% 36%, rgb(134 158 156 / 8%), transparent 42%), radial-gradient(ellipse at 50% 100%, rgb(47 79 79 / 13%), transparent 45%);
 	--apocalypse-contamination-texture: radial-gradient(ellipse at 4% 0, rgb(62 90 81 / 22%), transparent 28%), radial-gradient(ellipse at 95% 100%, rgb(76 85 65 / 21%), transparent 31%);
 	--apocalypse-condensation-opacity: .18;
 	--apocalypse-stain-opacity: .16;
@@ -95,7 +95,7 @@ body.apocalypse-theme-active[data-apocalypse-archetype="pandemic"],
 body.apocalypse-theme-active[data-apocalypse-archetype="infection_quarantine"] {
 	--apocalypse-accent: #818769;
 	--apocalypse-light-color: rgb(145 153 133 / 13%);
-	--apocalypse-air-texture: repeating-linear-gradient(90deg, transparent 0 74px, rgb(190 194 177 / 4%) 75px 76px), radial-gradient(ellipse at 50% 0, rgb(174 184 174 / 6%), transparent 48%);
+	--apocalypse-air-texture: radial-gradient(ellipse at 24% 72%, rgb(190 194 177 / 7%), transparent 46%), radial-gradient(ellipse at 50% 0, rgb(174 184 174 / 6%), transparent 48%);
 	--apocalypse-contamination-texture: linear-gradient(132deg, transparent 0 83%, rgb(149 132 72 / 9%) 83.2% 84%, transparent 84.2%), radial-gradient(ellipse at 2% 90%, rgb(99 107 82 / 15%), transparent 22%);
 	--apocalypse-condensation-opacity: .08;
 	--apocalypse-stain-opacity: .1;
@@ -116,7 +116,7 @@ body.apocalypse-theme-active[data-apocalypse-archetype="toxic_air"],
 body.apocalypse-theme-active[data-apocalypse-archetype="corrosive_decay"] {
 	--apocalypse-accent: #938750;
 	--apocalypse-light-color: rgb(143 131 76 / 14%);
-	--apocalypse-air-texture: radial-gradient(ellipse at 50% 42%, rgb(133 135 107 / 13%), transparent 62%), repeating-linear-gradient(12deg, transparent 0 76px, rgb(152 141 80 / 4%) 77px 78px);
+	--apocalypse-air-texture: radial-gradient(ellipse at 50% 42%, rgb(133 135 107 / 13%), transparent 62%), radial-gradient(ellipse at 82% 72%, rgb(152 141 80 / 7%), transparent 42%);
 	--apocalypse-contamination-texture: radial-gradient(ellipse at 3% 82%, rgb(117 106 53 / 22%), transparent 26%), radial-gradient(ellipse at 97% 18%, rgb(92 102 62 / 18%), transparent 24%);
 	--apocalypse-fog-opacity: .18;
 	--apocalypse-stain-opacity: .18;
@@ -138,7 +138,7 @@ body.apocalypse-theme-active[data-apocalypse-family="ecological"],
 body.apocalypse-theme-active[data-apocalypse-archetype="extreme_heat"] {
 	--apocalypse-accent: #948469;
 	--apocalypse-light-color: rgb(151 135 105 / 14%);
-	--apocalypse-air-texture: radial-gradient(circle, rgb(175 157 126 / 16%) 0 1px, transparent 1.7px), repeating-linear-gradient(9deg, transparent 0 58px, rgb(151 130 94 / 5%) 59px 60px);
+	--apocalypse-air-texture: radial-gradient(circle, rgb(175 157 126 / 16%) 0 1px, transparent 1.7px), radial-gradient(ellipse at 72% 22%, rgb(151 130 94 / 8%), transparent 42%);
 	--apocalypse-contamination-texture: radial-gradient(ellipse at 4% 100%, rgb(126 102 69 / 22%), transparent 28%), radial-gradient(ellipse at 97% 88%, rgb(117 98 72 / 16%), transparent 22%);
 	--apocalypse-dust-opacity: .2;
 	--apocalypse-damage-opacity: .11;
@@ -160,7 +160,7 @@ body.apocalypse-theme-active[data-apocalypse-archetype="machine-uprising"],
 body.apocalypse-theme-active[data-apocalypse-family="technological"] {
 	--apocalypse-accent: #788589;
 	--apocalypse-light-color: rgb(126 143 147 / 13%);
-	--apocalypse-air-texture: repeating-linear-gradient(0deg, transparent 0 9px, rgb(151 162 164 / 4%) 10px 11px), linear-gradient(90deg, transparent 0 81%, rgb(130 146 149 / 5%) 81.3% 81.6%, transparent 82%);
+	--apocalypse-air-texture: radial-gradient(ellipse at 50% 48%, rgb(151 162 164 / 7%), transparent 56%), linear-gradient(90deg, transparent 0 81%, rgb(130 146 149 / 5%) 81.3% 81.6%, transparent 82%);
 	--apocalypse-contamination-texture: linear-gradient(118deg, transparent 0 68%, rgb(122 135 136 / 7%) 68.2% 68.5%, transparent 68.8%);
 	--apocalypse-flicker-intensity: .05;
 	--apocalypse-local-light-shadow: 0 0 16px rgb(114 132 136 / 9%);
@@ -171,7 +171,7 @@ body.apocalypse-theme-active[data-apocalypse-family="societal"],
 body.apocalypse-theme-active[data-apocalypse-family="structural"] {
 	--apocalypse-accent: #777352;
 	--apocalypse-light-color: rgb(142 111 62 / 14%);
-	--apocalypse-air-texture: radial-gradient(circle, rgb(157 147 128 / 15%) 0 1px, transparent 1.8px), repeating-linear-gradient(27deg, transparent 0 61px, rgb(128 111 84 / 5%) 62px 63px);
+	--apocalypse-air-texture: radial-gradient(circle, rgb(157 147 128 / 15%) 0 1px, transparent 1.8px), radial-gradient(ellipse at 74% 34%, rgb(128 111 84 / 8%), transparent 44%);
 	--apocalypse-contamination-texture: radial-gradient(ellipse at 3% 92%, rgb(77 62 43 / 27%), transparent 28%), radial-gradient(ellipse at 94% 4%, rgb(71 65 49 / 21%), transparent 25%);
 	--apocalypse-dust-opacity: .18;
 	--apocalypse-damage-opacity: .23;
@@ -191,7 +191,7 @@ body.apocalypse-theme-active[data-apocalypse-family="occult"] {
 }
 
 body.apocalypse-theme-active[data-apocalypse-archetype="storm_electric"] {
-	--apocalypse-air-texture: repeating-linear-gradient(104deg, transparent 0 54px, rgb(140 151 151 / 5%) 55px 56px), radial-gradient(ellipse at 50% 0, rgb(126 143 147 / 8%), transparent 48%);
+	--apocalypse-air-texture: radial-gradient(ellipse at 20% 46%, rgb(140 151 151 / 8%), transparent 46%), radial-gradient(ellipse at 50% 0, rgb(126 143 147 / 8%), transparent 48%);
 	--apocalypse-flicker-intensity: .05;
 }
 

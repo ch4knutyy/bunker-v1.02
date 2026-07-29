@@ -2,6 +2,33 @@
 // Loaded before core/signalr-events.js; handlers are registered by the central orchestrator.
 window.BunkerSignalREvents = window.BunkerSignalREvents || {};
 
+function clearHiddenPublicCharacteristicState(player, charKey) {
+	if (!player) return;
+	if (player.revealed) player.revealed[charKey] = false;
+	if (player.revealedData) delete player.revealedData[charKey];
+	if (player.revealedSources) delete player.revealedSources[charKey];
+	if (player.revealedTooltips) delete player.revealedTooltips[charKey];
+	if (charKey === 'physicalHealth') {
+		player.additionalConditionEffects = [];
+		player.additionalPhysicalConditions = [];
+	}
+	if (charKey === 'fact') delete player.fact;
+}
+
+function publicCharacteristicRevisionKey(connectionId, charKey) {
+	return `${String(connectionId || '')}:${String(charKey || '')}`;
+}
+
+function shouldApplyPublicCharacteristicRevision(connectionId, charKey, revision) {
+	const parsedRevision = Number(revision);
+	if (!Number.isFinite(parsedRevision) || parsedRevision <= 0) return true;
+	const key = publicCharacteristicRevisionKey(connectionId, charKey);
+	const currentRevision = publicCharacteristicRevisions.get(key) || 0;
+	if (parsedRevision < currentRevision) return false;
+	publicCharacteristicRevisions.set(key, parsedRevision);
+	return true;
+}
+
 window.BunkerSignalREvents.characters = {
 	PlayerStateResynced() {
 		connection.off("PlayerStateResynced");
@@ -40,17 +67,7 @@ window.BunkerSignalREvents.characters = {
 
 			myPlayerData = normalizedPlayer;
 			pendingCharacteristicReveals.clear();
-			const reason = data?.reason ?? data?.Reason ?? "";
-			const notification = data?.notification ?? data?.Notification ?? {};
-			if (reason === "forced_reveal_credits_updated") {
-				const creditsAdded = notification.creditsAdded ?? notification.CreditsAdded ?? 0;
-				addEventMessage(creditsAdded > 0
-					? t('revealCreditsAdded').replace('{count}', creditsAdded)
-					: t('revealRequirementCompletedByForcedReveal'));
-			} else if (reason === "reveal_credit_consumed") {
-				addEventMessage(t('revealCreditConsumed'));
-			}
-
+			pendingCharacteristicHides.clear();
 			tryRenderRunningGameState();
 
 			if (!isLobbyRunning()) {
@@ -63,49 +80,51 @@ window.BunkerSignalREvents.characters = {
 		connection.off("CharacteristicRevealed");
 		connection.on("CharacteristicRevealed", function (info) {
 			console.log("Characteristic revealed:", info);
-			applyRoundState(info.roundState || info.RoundState);
 			const characteristicKey = normalizeCharacteristicKey(info.characteristicKey || info.CharacteristicKey || '');
 			const charKey = normalizeCharacteristicKey(toCamelCase(characteristicKey));
+			const connectionId = info.connectionId || info.ConnectionId;
+			if (!shouldApplyPublicCharacteristicRevision(connectionId, charKey, info.revealRevision || info.RevealRevision)) return;
+			applyRoundState(info.roundState || info.RoundState);
 			pendingCharacteristicReveals.delete(characteristicKey);
 
-			if (roomPlayers[info.connectionId]) {
-				if (!roomPlayers[info.connectionId].revealed) {
-					roomPlayers[info.connectionId].revealed = {};
+			if (roomPlayers[connectionId]) {
+				if (!roomPlayers[connectionId].revealed) {
+					roomPlayers[connectionId].revealed = {};
 				}
-				if (!roomPlayers[info.connectionId].revealedData) {
-					roomPlayers[info.connectionId].revealedData = {};
+				if (!roomPlayers[connectionId].revealedData) {
+					roomPlayers[connectionId].revealedData = {};
 				}
-				if (!roomPlayers[info.connectionId].revealedTooltips) {
-					roomPlayers[info.connectionId].revealedTooltips = {};
+				if (!roomPlayers[connectionId].revealedTooltips) {
+					roomPlayers[connectionId].revealedTooltips = {};
 				}
-				if (!roomPlayers[info.connectionId].revealedSources) {
-					roomPlayers[info.connectionId].revealedSources = {};
+				if (!roomPlayers[connectionId].revealedSources) {
+					roomPlayers[connectionId].revealedSources = {};
 				}
-				roomPlayers[info.connectionId].revealed[charKey] = true;
-				roomPlayers[info.connectionId].revealedData[charKey] = info.data.value;
+				roomPlayers[connectionId].revealed[charKey] = true;
+				roomPlayers[connectionId].revealedData[charKey] = info.data.value;
 				const source = info.data.source || info.data.Source || info.data.fact || info.data.Fact || null;
 				if (source) {
-					roomPlayers[info.connectionId].revealedSources[charKey] = source;
+					roomPlayers[connectionId].revealedSources[charKey] = source;
 				}
 				if (charKey === 'physicalHealth') {
-					roomPlayers[info.connectionId].additionalConditionEffects = normalizeAdditionalPhysicalConditions(
+					roomPlayers[connectionId].additionalConditionEffects = normalizeAdditionalPhysicalConditions(
 						info.data.additionalConditionEffects || info.data.AdditionalConditionEffects || []
 					);
 				}
 				if (charKey === 'fact') {
-					roomPlayers[info.connectionId].fact = normalizeFactFromPlayer({ fact: source || info.data.fact || info.data.Fact, revealedData: { fact: info.data } });
+					roomPlayers[connectionId].fact = normalizeFactFromPlayer({ fact: source || info.data.fact || info.data.Fact, revealedData: { fact: info.data } });
 				}
 				if (charKey === 'specialCard' && source) {
-					roomPlayers[info.connectionId].specialCard = normalizeSpecialCard(source);
+					roomPlayers[connectionId].specialCard = normalizeSpecialCard(source);
 				}
 				if (info.data.tooltip && info.data.hasTooltip) {
 					const kind = charKey === 'physicalHealth' ? 'physicalHealth' : charKey === 'mentalHealth' ? 'mentalHealth' : charKey;
-					roomPlayers[info.connectionId].revealedTooltips[charKey] = buildLocalizedTooltip(source, kind) || cleanTooltipText(info.data.tooltip);
+					roomPlayers[connectionId].revealedTooltips[charKey] = buildLocalizedTooltip(source, kind) || cleanTooltipText(info.data.tooltip);
 				}
 			}
 
 			// Оновлюємо свої картки якщо це я
-			if (info.connectionId === myConnectionId && myPlayerData) {
+			if (connectionId === myConnectionId && myPlayerData) {
 				if (!myPlayerData.revealed) {
 					myPlayerData.revealed = {};
 				}
@@ -144,17 +163,20 @@ window.BunkerSignalREvents.characters = {
 			const connectionId = data.connectionId || data.ConnectionId;
 			const hiddenCharacteristic = data.characteristicKey || data.CharacteristicKey || '';
 			const charKey = normalizeCharacteristicKey(toCamelCase(hiddenCharacteristic));
+			if (!shouldApplyPublicCharacteristicRevision(connectionId, charKey, data.revealRevision || data.RevealRevision)) return;
 			pendingCharacteristicReveals.delete(hiddenCharacteristic);
+			pendingCharacteristicHides.delete(hiddenCharacteristic);
 			const player = roomPlayers[connectionId];
-			if (player) {
-				if (player.revealed) player.revealed[charKey] = false;
-				if (player.revealedData) delete player.revealedData[charKey];
-				if (player.revealedSources) delete player.revealedSources[charKey];
-			}
+			clearHiddenPublicCharacteristicState(player, charKey);
 			if (connectionId === myConnectionId && myPlayerData?.revealed) {
 				myPlayerData.revealed[charKey] = false;
+				renderMyPlayerCards(myPlayerData);
+				addEventMessage(t('characteristicHidden'));
 			}
-			renderCurrentGameUI();
+			applyRoundState(data.roundState || data.RoundState);
+			updateRoundStatusUI();
+			if (typeof patchPublicCharacteristicHidden === 'function') patchPublicCharacteristicHidden(connectionId, charKey);
+			else renderPublicPlayerOverview();
 		});
 	},
 

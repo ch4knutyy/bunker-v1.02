@@ -24,7 +24,7 @@ namespace Bunker.Services
         // Дозволені розширення файлів
         private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
-            ".jpg", ".jpeg", ".png", ".webp", ".gif"
+            ".jpg", ".jpeg", ".png", ".webp"
         };
         
         // Максимальний розмір файлу (5 MB)

@@ -52,6 +52,19 @@ public sealed class DeveloperAuthorityService
     public bool Has(Room room, Player player, RoomActorCapability capability) =>
         (Resolve(room, player) & capability) == capability && FeatureAllows(capability);
 
+    // A verified Developer is an effective room administrator without becoming the room's canonical host.
+    public bool CanUseHostControls(Room room, Player player) =>
+        IsDeveloper(player) || (room.IsHost(player) && !player.IsSpectatorGm);
+
+    public bool CanUseGmControls(Room room, Player player, GmCapability capability) =>
+        IsDeveloper(player) ||
+        (room.IsHost(player) && GmCapabilities.Allows(room.GmMode, capability));
+
+    public bool CanViewOmniscientState(Room room, Player player, GmCapability capability) =>
+        IsDeveloper(player) ||
+        player.IsSpectatorGm && player.GmRole == GmMode.OmniscientGm &&
+        GmCapabilities.Allows(player.GmRole, capability);
+
     public bool FeatureAllows(RoomActorCapability capability)
     {
         var options = _options.Value;

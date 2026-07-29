@@ -73,12 +73,9 @@ namespace Bunker.Controllers
                 room.Apocalypse.ImageUrl = imageUrl;
             }
 
-            // Надсилаємо оновлення всім гравцям в кімнаті
-            await _hubContext.Clients.Group(roomId).SendAsync("ApocalypseImageUpdated", new
-            {
-                apocalypseId = apocalypseId,
-                imageUrl = imageUrl
-            });
+            // Lobby previews are secret; the Developer client refreshes from the HTTP response.
+            if (room.State != RoomState.Lobby)
+                await _hubContext.Clients.Group(roomId).SendAsync("ApocalypseImageUpdated", new { apocalypseId, imageUrl });
 
             _logger.LogInformation($"Зображення апокаліпсису {apocalypseId} завантажено для кімнати {roomId}");
             _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
@@ -130,12 +127,9 @@ namespace Bunker.Controllers
                 room.Bunker.ImageUrl = imageUrl;
             }
 
-            // Надсилаємо оновлення всім гравцям в кімнаті
-            await _hubContext.Clients.Group(roomId).SendAsync("BunkerImageUpdated", new
-            {
-                bunkerId = bunkerId,
-                imageUrl = imageUrl
-            });
+            // Lobby previews are secret; the Developer client refreshes from the HTTP response.
+            if (room.State != RoomState.Lobby)
+                await _hubContext.Clients.Group(roomId).SendAsync("BunkerImageUpdated", new { bunkerId, imageUrl });
 
             _logger.LogInformation($"Зображення бункера {bunkerId} завантажено для кімнати {roomId}");
             _developerAuthority.Audit(room, hostRoomResult.Actor!, RoomActorCapability.ManageScenarioImages,
@@ -385,9 +379,6 @@ namespace Bunker.Controllers
                 return new DeveloperRoomResult(null, null, DeveloperRoomFailure.FeatureDisabled);
             if (!_developerAuthority.TryGetDeveloperRoomActor(room, User, out var actor))
                 return new DeveloperRoomResult(null, null, DeveloperRoomFailure.DeveloperRequired);
-            if (!_developerAuthority.EnsureActiveOperator(room, actor, actor.ConnectionId) ||
-                !_developerAuthority.IsActiveOperator(room, actor, actor.ConnectionId))
-                return new DeveloperRoomResult(null, null, DeveloperRoomFailure.OperatorRequired);
 
             return new DeveloperRoomResult(room, actor, null);
         }
@@ -399,7 +390,6 @@ namespace Bunker.Controllers
                 DeveloperRoomFailure.RoomNotFound => NotFound(new { error = "room_not_found" }),
                 DeveloperRoomFailure.FeatureDisabled => StatusCode(StatusCodes.Status403Forbidden, new { error = "feature_disabled" }),
                 DeveloperRoomFailure.DeveloperRequired => StatusCode(StatusCodes.Status403Forbidden, new { error = "developer_required" }),
-                DeveloperRoomFailure.OperatorRequired => StatusCode(StatusCodes.Status409Conflict, new { error = "developer_operator_required" }),
                 _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null)
             };
         }
@@ -410,8 +400,7 @@ namespace Bunker.Controllers
         {
             RoomNotFound,
             FeatureDisabled,
-            DeveloperRequired,
-            OperatorRequired
+            DeveloperRequired
         }
     }
 }

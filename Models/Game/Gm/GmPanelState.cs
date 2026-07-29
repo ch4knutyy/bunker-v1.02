@@ -37,9 +37,7 @@ public sealed record GmPanelPlayerSummaryDto(
 	bool IsHost,
 	int RevealedCount,
 	bool IsProtectedFromVote,
-	bool IsCurrentTurn,
-	string RevealRequirementStatus,
-	int? FutureRevealCredits);
+	bool IsCurrentTurn);
 
 public sealed record GmPanelStateDto(
 	string RoomCode,

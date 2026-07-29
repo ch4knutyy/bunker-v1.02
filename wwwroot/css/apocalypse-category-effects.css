@@ -65,7 +65,7 @@
 body.apocalypse-theme-active { --apoc-mod-env-opacity: .18; --apoc-mod-contamination-opacity: .14; --apoc-mod-world-opacity: .12; }
 .apocalypse-modifier-frost { --apoc-mod-env-accent: #b9e1ff; --apoc-mod-env-overlay: linear-gradient(135deg,transparent,#b9e1ff); }
 .apocalypse-modifier-heat { --apoc-mod-env-accent: #ff762c; --apoc-mod-env-overlay: linear-gradient(135deg,transparent,#ffb749); }
-.apocalypse-modifier-drought { --apoc-mod-env-accent: #b68b44; --apoc-mod-env-overlay: repeating-linear-gradient(118deg,transparent 0 36px,#b68b44 37px 38px,transparent 39px 76px); }
+.apocalypse-modifier-drought { --apoc-mod-env-accent: #b68b44; --apoc-mod-env-overlay: radial-gradient(ellipse at 72% 18%, rgb(182 139 68 / 22%), transparent 48%); }
 .apocalypse-modifier-flood { --apoc-mod-env-accent: #3f8fbc; --apoc-mod-env-overlay: linear-gradient(180deg,transparent,#5fbfd9); }
 .apocalypse-modifier-storm { --apoc-mod-env-accent: #6793d0; --apoc-mod-env-overlay: linear-gradient(145deg,transparent,#aacaff); }
 .apocalypse-modifier-fog { --apoc-mod-env-accent: #becac7; --apoc-mod-env-overlay: radial-gradient(ellipse,#dce2de,transparent 65%); }

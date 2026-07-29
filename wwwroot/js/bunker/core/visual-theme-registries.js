@@ -40,13 +40,9 @@ async function fetchVisualThemeRegistry(kind, collectionName) {
 }
 
 function resyncLoadedVisualThemes() {
-	if (typeof currentBunker !== 'undefined' && currentBunker && typeof syncBunkerVisualTheme === 'function') {
-		syncBunkerVisualTheme(currentBunker);
-		if (typeof syncBunkerMaterialVisual === 'function') syncBunkerMaterialVisual(currentBunker);
-	}
+	// Registry completion must not mutate the live DOM. Entry performance owns the
+	// one deferred visual application after the selected assets have been decoded.
 	if (typeof validateBunkerMaterialIntegration === 'function') validateBunkerMaterialIntegration();
-	if (typeof currentApocalypse !== 'undefined' && currentApocalypse && typeof syncApocalypseVisualTheme === 'function')
-		syncApocalypseVisualTheme(currentApocalypse);
 }
 
 function loadVisualThemeRegistries() {
@@ -90,5 +86,3 @@ function getApocalypseVisualClassification(apocalypseId) {
 	if (!record) warnMissingVisualClassification('apocalypse', id);
 	return record;
 }
-
-loadVisualThemeRegistries();

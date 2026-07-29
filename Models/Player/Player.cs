@@ -46,9 +46,6 @@ namespace Bunker.Models
 
 		// Відстеження відкритих характеристик
 		public RevealedCharacteristics Revealed { get; set; } = new();
-        public int FutureRevealCredits { get; set; }
-        public bool HasCompletedRevealThisRound { get; set; }
-        public bool RevealRequirementSatisfiedByCredit { get; set; }
         
         // Статус гравця в грі
         public bool IsEliminated { get; set; } = false;

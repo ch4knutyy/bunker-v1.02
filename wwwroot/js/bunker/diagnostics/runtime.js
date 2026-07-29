@@ -5,6 +5,7 @@ function applyDeveloperAccessState(value) {
 	const projection = value || {};
 	const roomProjection = projection.isDeveloper ?? projection.IsDeveloper;
 	isDeveloper = !!roomProjection;
+	if (!isDeveloper && !isHost) gmPlayersData = {};
 	developerState = isDeveloper ? {
 		isDeveloper: true,
 		participationMode: projection.participationMode || projection.ParticipationMode || 'player',
@@ -40,7 +41,7 @@ function renderDeveloperAuthorityUi() {
 	const observer = document.getElementById('developerObserverOption');
 	if (observer) observer.hidden = !isDeveloper;
 	const status = document.getElementById('developerOperatorStatus');
-	if (status) status.textContent = developerState?.isActiveOperator ? 'Active developer operator' : developerState?.canTakeOverOperator ? 'Read-only: another developer tab owns the operator lease.' : 'Developer authority verified.';
+	if (status) status.textContent = developerState?.isActiveOperator ? 'Active developer operator' : developerState?.canTakeOverOperator ? 'Developer authority verified; another tab owns the content-workspace lease.' : 'Developer authority verified.';
 	const takeover = document.getElementById('developerTakeoverButton');
 	if (takeover) takeover.hidden = !developerState?.canTakeOverOperator;
 	const checklist = document.getElementById('developerChecklist');

@@ -38,7 +38,7 @@ function renderPostGameCommandState() {
 	const hostDecision = phase === 'HostDecision';
 	const storyActive = phase === 'StoryRequested' || phase === 'StoryPreparation';
 	const canStartAgain = phase === 'HostDecision' || phase === 'StoryRequested' || phase === 'StoryPreparation' || phase === 'StoryPublished' || phase === 'Completed';
-	const canManagePostGame = isHost || (isDeveloper && developerState?.isActiveOperator);
+	const canManagePostGame = isHost || isDeveloper;
 	setPostGameButton('finishPostGameDiscussionButton', canManagePostGame && inFinalDiscussion);
 	setPostGameButton('revealPostGameCharacteristicsButton', inFinalDiscussion);
 	setPostGameButton('returnFinishedGameButton', canManagePostGame && canStartAgain);
@@ -57,7 +57,7 @@ function renderPostGameCommandState() {
 }
 
 async function finishPostGameDiscussion() {
-	if (!isHost && !(isDeveloper && developerState?.isActiveOperator)) return;
+	if (!isHost && !isDeveloper) return;
 	try { await connection.invoke('FinishPostGameDiscussion', crypto.randomUUID()); }
 	catch (error) { alert(localizeServerMessage(error?.message || 'post_game_transition_failed')); }
 }
@@ -75,7 +75,7 @@ async function requestPostGameStoryMode(mode, parentEntryId = null) {
 function requestFinalPostGameStory() { return requestPostGameStoryMode('final_story'); }
 
 async function cancelPostGameStoryRequest() {
-	if (!isHost && !(isDeveloper && developerState?.isActiveOperator)) return;
+	if (!isHost && !isDeveloper) return;
 	try { await connection.invoke('CancelPostGameStoryRequest', crypto.randomUUID()); }
 	catch (error) { alert(localizeServerMessage(error?.message || 'post_game_story_failed')); }
 }
@@ -183,8 +183,6 @@ function renderGameFinished(completion, context = {}) {
 	}
 	const copyButton = document.getElementById('copyGameSummaryButton');
 	if (copyButton) copyButton.textContent = t('gameFinishedCopy');
-	const stateLabel = document.getElementById('currentRoomState');
-	if (stateLabel) stateLabel.textContent = t('gameFinishedTitle');
 
 	setGameFinishedMutationState(true);
 	renderPostGameCommandState();
@@ -219,7 +217,7 @@ async function copyGameSummary() {
 }
 
 async function returnFinishedGameToLobby() {
-	if ((!isHost && !(isDeveloper && developerState?.isActiveOperator)) || returnFinishedGamePending || !currentGameCompletion) return;
+	if ((!isHost && !isDeveloper) || returnFinishedGamePending || !currentGameCompletion) return;
 	if (!confirm(t('gameFinishedConfirmReturn'))) return;
 	returnFinishedGamePending = true;
 	renderGameFinished(currentGameCompletion, { source: 'return-request' });

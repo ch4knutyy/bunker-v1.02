@@ -74,7 +74,6 @@ internal static class GameResetService
 			room.GameSessionId = null;
 			room.CurrentVoting = null;
 			room.VotingReadyResponses = new();
-			room.CurrentRoundReveals = new();
 			room.RoundDiceRolls = new();
 			room.AdditionalInventoryGrantedAfterRound3 = false;
 			room.CurrentThreat = null;

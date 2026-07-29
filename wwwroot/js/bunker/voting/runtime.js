@@ -1,21 +1,32 @@
 // Extracted from wwwroot/js/game.js.
 // Classic-script globals are intentional; do not convert to ES modules without a separate migration.
 
+function roundCommandId() {
+	return globalThis.crypto?.randomUUID?.() || `round-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 function endRound() {
-	if (!canEndRoundNow()) {
-		addEventMessage('Помилка: раунд можна завершити після reveal усіх активних гравців');
+	if (!((isHost || isDeveloper) && currentRoom?.state === 'Playing' && getCurrentPhase() === 'RoundReveal')) {
+		addEventMessage(t('unavailableNow'));
 		return;
 	}
-
-	if (confirm('Завершити поточний раунд?')) {
-		connection.invoke("EndRound")
+	const statuses = currentRoundState?.readyStatuses || [];
+	const notReady = statuses.filter(player => player.status === 'not_ready').length;
+	const unanswered = statuses.filter(player => !player.status || player.status === 'pending').length;
+	const offline = statuses.filter(player => player.status === 'offline').length;
+	const warning = t('gmForceEndRoundConfirm')
+		.replace('{notReady}', notReady)
+		.replace('{unanswered}', unanswered)
+		.replace('{offline}', offline);
+	if (confirm(warning)) {
+		connection.invoke("EndRound", roundCommandId())
 			.catch(err => console.error("EndRound error:", err));
 	}
 }
 
 function rollRoundDice() {
 	if (!canRollRoundDiceNow()) {
-		addEventMessage('Помилка: кубик доступний після reveal усіх активних гравців і тільки один раз за раунд');
+		addEventMessage(t('gmDiceUnavailable'));
 		return;
 	}
 
@@ -25,14 +36,27 @@ function rollRoundDice() {
 		.catch(err => console.error("RollRoundDice error:", err));
 }
 
-function markAllPlayersReady() {
+function startVotingReadyCheck() {
 	if (!isHost) return;
-	connection.invoke("MarkAllPlayersReady")
-		.catch(err => console.error("MarkAllPlayersReady error:", err));
+	const activeCheck = currentRoundState?.readinessCheck || currentRoundState?.ReadinessCheck;
+	const statuses = currentRoundState?.readyStatuses || [];
+	if (activeCheck && statuses.some(player => player.status && player.status !== 'pending') &&
+		!confirm(t('gmRepeatReadyCheckConfirm'))) return;
+	connection.invoke("StartVotingReadyCheck", roundCommandId())
+		.catch(err => console.error("StartVotingReadyCheck error:", err));
+}
+
+function cancelVotingReadyCheck() {
+	if (!isHost || !confirm(t('gmCancelReadyCheckConfirm'))) return;
+	connection.invoke("CancelVotingReadyCheck", roundCommandId())
+		.catch(err => console.error("CancelVotingReadyCheck error:", err));
 }
 
 function submitVotingReadyStatus(status) {
-	connection.invoke("SubmitVotingReadyStatus", status)
+	const readinessCheck = currentRoundState?.readinessCheck || currentRoundState?.ReadinessCheck;
+	const readinessCheckId = readinessCheck?.id || readinessCheck?.Id;
+	if (!readinessCheckId) return;
+	connection.invoke("SubmitVotingReadyStatus", status, readinessCheckId, roundCommandId())
 		.catch(err => console.error("SubmitVotingReadyStatus error:", err));
 }
 

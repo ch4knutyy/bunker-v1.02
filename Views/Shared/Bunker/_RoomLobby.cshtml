@@ -181,6 +181,12 @@
 			</div>
 			<div id="lobbyStartPreview" class="lobby-preview-summary" aria-live="polite"></div>
 		</section>
+		<section id="preparedScenarioPanel" class="prepared-scenario-panel site-panel" hidden aria-live="polite">
+			<header class="lobby-section-heading"><div><span class="lobby-section-kicker" data-lobby-i18n="preparedScenarioKicker">Scenario preparation</span><h3 data-lobby-i18n="preparedScenarioTitle">Підготовка сценарію</h3></div></header>
+			<p id="preparedScenarioSummary"></p>
+			<div id="preparedScenarioCards" class="prepared-scenario-cards"></div>
+			<div class="prepared-scenario-actions"><button type="button" class="btn-secondary" onclick="cancelPreparedGameScenario()" data-lobby-i18n="cancelPreparation">Скасувати підготовку</button></div>
+		</section>
 	</section>
 	<p class="waiting-text" id="waitingText">Очікування гравців для початку гри...</p>
 </div>
@@ -198,4 +204,3 @@
 		</div>
 	</div>
 </div>
-<div id="roomPlayersList" class="room-players-grid site-player-status-row" style="display:none;"></div>

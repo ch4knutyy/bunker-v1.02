@@ -66,7 +66,16 @@ function syncPublicGameSettings(payload) {
 	return currentPublicGameSettings;
 }
 
-function renderApocalypse(apocalypse) {
+function applyApocalypseVisualEnhancement(apocalypse, container = document.getElementById('apocalypseContent')) {
+	if (!apocalypse || !container) return;
+	applyApocalypseVisualState(apocalypse, container.querySelector('.apocalypse-scenario-shell'));
+	if (typeof applyBunkerApocalypseLayers === 'function') applyBunkerApocalypseLayers();
+	syncApocalypseVisualTheme(apocalypse);
+	syncApocalypseCategoryVisualState(apocalypse);
+	startApocalypseAmbientScheduler();
+}
+
+function renderApocalypse(apocalypse, options = {}) {
 	const container = document.getElementById('apocalypseContent');
 	const panel = document.getElementById('apocalypsePanel');
 	const enabled = isLobbyConfiguredSystemEnabled('apocalypseEnabled');
@@ -95,12 +104,9 @@ function renderApocalypse(apocalypse) {
 		clearApocalypseVisualReactions();
 	ensureApocalypseAmbientRoot();
 	clearApocalypseCardRevealWave();
-	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse));
-	applyApocalypseVisualState(apocalypse, container.querySelector('.apocalypse-scenario-shell'));
-	if (typeof applyBunkerApocalypseLayers === 'function') applyBunkerApocalypseLayers();
-	syncApocalypseVisualTheme(apocalypse);
-	syncApocalypseCategoryVisualState(apocalypse);
+	container.innerHTML = renderApocalypseScenario(buildApocalypseScenarioModel(apocalypse), options);
 	renderApocalypseCategoryBadge(apocalypse);
-	startApocalypseAmbientScheduler();
+	prepareApocalypseHeroImage(container);
+	if (!options.deferVisuals) applyApocalypseVisualEnhancement(apocalypse, container);
 	updateScenarioSectionVisibility();
 }

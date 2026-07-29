@@ -25,7 +25,9 @@ function localizeServerMessage(message) {
 		"У гравця немає великого предмета": "noBigItem",
 		"У гравця немає малого предмета": "noSmallItem",
 		"У гравця немає предметів": "noItems",
-		"У гравця немає спеціальних карт": "noSpecialCards"
+		"У гравця немає спеціальних карт": "noSpecialCards",
+		"characteristic_hide_unavailable": "characteristicHideFailed",
+		"characteristic_already_hidden": "characteristicAlreadyHidden"
 	};
 	return keys[message] ? t(keys[message]) : message;
 }

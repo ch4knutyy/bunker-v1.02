@@ -34,7 +34,7 @@ function registerSignalREvents() {
 	events.rounds.RoundDiceRolled();
 	events.threats.ThreatRevealed();
 	events.voting.VotingReadyCheckStarted();
-	events.voting.AllPlayersMarkedReady();
+	events.voting.VotingReadyCheckClosed();
 	events.voting.VotingReadyStatusUpdated();
 	events.specialCards.SpecialCardStateUpdated();
 	events.specialCards.SpecialCardActivated();

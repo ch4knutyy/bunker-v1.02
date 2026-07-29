@@ -32,6 +32,9 @@ public partial class GameHub
 		var room = RequireLobbyHost();
 		var actor = _roomService.GetPlayer(Context.ConnectionId)!;
 		var result = _roomGameSettings.Apply(room, actor, request);
+		if (result.Success && room.PreparedScenario is { Status: "Prepared" } prepared &&
+			!string.Equals(prepared.SelectionFingerprint, PreparedScenarioFingerprint(_roomGameSettings.GetCanonical(room)), StringComparison.Ordinal))
+			prepared.Status = "Stale";
 		if (result.Success && !result.IsDuplicate) await BroadcastLobbyState(room);
 		return result;
 	}
@@ -140,6 +143,65 @@ public partial class GameHub
 		return preview;
 	}
 
+	public async Task<PreparedScenarioPreviewDto> PrepareGameScenario()
+	{
+		var room = RequireLobbyHost();
+		var host = _roomService.GetPlayer(Context.ConnectionId)!;
+		if (!_developerAuthority.IsDeveloper(host)) throw new HubException("developer_required");
+		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
+		var settings = _roomGameSettings.GetCanonical(room);
+		var fingerprint = PreparedScenarioFingerprint(settings);
+		if (room.PreparedScenario is { Status: "Prepared" } prepared && prepared.SelectionFingerprint == fingerprint)
+			return BuildPreparedScenarioPreview(room, prepared);
+
+		room.Apocalypse = settings.ApocalypseEnabled
+			? CloneApocalypse(_apocalypseSelection.SelectCandidate(settings, _random.Next))
+			: null;
+		if (room.Apocalypse != null) _imageService.UpdateApocalypseImageUrl(room.Apocalypse);
+		room.Bunker = settings.BunkerScenarioEnabled && _gameData.Bunkers.Count > 0
+			? CloneBunkerInfo(_gameData.Bunkers[_random.Next(_gameData.Bunkers.Count)])
+			: null;
+		if (room.Bunker != null) _imageService.UpdateBunkerImageUrl(room.Bunker);
+		room.PreparedScenario = new PreparedScenarioState
+		{
+			ApocalypseId = room.Apocalypse?.Id ?? "",
+			BunkerId = room.Bunker?.Id ?? "",
+			SelectionFingerprint = fingerprint
+		};
+		await BroadcastLobbyState(room);
+		return BuildPreparedScenarioPreview(room, room.PreparedScenario);
+	}
+
+	public Task<PreparedScenarioPreviewDto?> GetPreparedGameScenario()
+	{
+		var room = RequireLobbyMember();
+		var actor = _roomService.GetPlayer(Context.ConnectionId)!;
+		if (!_developerAuthority.IsDeveloper(actor)) throw new HubException("developer_required");
+		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
+		return Task.FromResult(room.PreparedScenario is { } prepared ? BuildPreparedScenarioPreview(room, prepared) : null);
+	}
+
+	public async Task CancelPreparedGameScenario(string commandId)
+	{
+		var room = RequireLobbyHost();
+		var host = _roomService.GetPlayer(Context.ConnectionId)!;
+		if (!_developerAuthority.IsDeveloper(host)) throw new HubException("developer_required");
+		if (string.IsNullOrWhiteSpace(commandId)) throw new HubException("command_id_required");
+		room.PreparedScenario = null;
+		room.Apocalypse = null;
+		room.Bunker = null;
+		await BroadcastLobbyState(room);
+	}
+
+	private PreparedScenarioPreviewDto BuildPreparedScenarioPreview(Room room, PreparedScenarioState prepared) => new(
+		prepared.GenerationId, prepared.PreparedAtUtc, prepared.Status,
+		room.Apocalypse?.ToClientInfo(), room.Bunker?.ToClientInfo());
+
+	private static string PreparedScenarioFingerprint(RoomGameSettings settings) => string.Join('|',
+		settings.ApocalypseEnabled, settings.ApocalypseSelectionMode, settings.SelectedApocalypseId,
+		string.Join(',', settings.AllowedApocalypseCategoryIds ?? []), string.Join(',', settings.ApocalypseCustomPoolIds ?? []),
+		settings.AllowInteractiveApocalypses, settings.InteractiveApocalypseChancePercent, settings.BunkerScenarioEnabled);
+
 	public async Task StartGameFromLobby(
 	string previewToken,
 	bool confirmation,
@@ -165,6 +227,22 @@ public partial class GameHub
 
 		lock (room.GameSettingsSyncRoot)
 		{
+			if (room.PreparedScenario is { Status: "Prepared" } prepared &&
+				!string.Equals(prepared.SelectionFingerprint, PreparedScenarioFingerprint(_roomGameSettings.GetCanonical(room)), StringComparison.Ordinal))
+			{
+				prepared.Status = "Stale";
+				if (_developerAuthority.IsDeveloper(host)) throw new HubException("prepared_scenario_stale");
+				room.PreparedScenario = null;
+				room.Apocalypse = null;
+				room.Bunker = null;
+			}
+			if (room.PreparedScenario is { Status: "Stale" })
+			{
+				if (_developerAuthority.IsDeveloper(host)) throw new HubException("prepared_scenario_stale");
+				room.PreparedScenario = null;
+				room.Apocalypse = null;
+				room.Bunker = null;
+			}
 			lock (room.ProcessedLobbyCommandIds)
 			{
 				if (room.ProcessedLobbyCommandIds.Contains(commandId))

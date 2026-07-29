@@ -182,9 +182,12 @@ public partial class GameHub
         RoomSnapshot? snapshot = null, bool allowUndo = true)
     {
         var canUndo = snapshot != null && allowUndo && _roomSnapshots.IsRestorable(room, snapshot.SnapshotId);
+        var currentActor = _roomService.GetPlayer(Context.ConnectionId);
+        if (currentActor != null && _developerAuthority.IsDeveloper(currentActor) &&
+            string.Equals(RoomService.GetPlayerKey(currentActor), actorPlayerId, StringComparison.OrdinalIgnoreCase))
+            summary = $"Developer override: {summary}";
         _gmAudit.Append(room, actorPlayerId, actionType, result, summary, targetPlayerId, commandId, errorCode,
             snapshot?.SnapshotId, canUndo);
-        var currentActor = _roomService.GetPlayer(Context.ConnectionId);
         if (currentActor != null &&
             _developerAuthority.IsDeveloper(currentActor) &&
             string.Equals(RoomService.GetPlayerKey(currentActor), actorPlayerId, StringComparison.OrdinalIgnoreCase))

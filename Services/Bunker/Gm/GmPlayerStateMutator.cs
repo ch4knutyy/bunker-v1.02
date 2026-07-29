@@ -4,9 +4,14 @@ namespace Bunker.Services;
 
 public static class GmPlayerStateMutator
 {
-    public static bool CanHideCharacteristic(string key) => key is
-        "Personality" or "Body" or "Profession" or "PhysicalHealth" or "MentalHealth" or "Hobby" or
-        "CharacterTrait" or "Phobia" or "Inventory" or "Property" or "Fact" or "SpecialCard";
+    public static IReadOnlyList<string> PublicCharacteristicKeys { get; } =
+    [
+        "Personality", "Body", "Profession", "PhysicalHealth", "MentalHealth", "Hobby",
+        "CharacterTrait", "Phobia", "Inventory", "Property", "Fact"
+    ];
+
+    public static bool CanHideCharacteristic(string key) =>
+        PublicCharacteristicKeys.Contains(key, StringComparer.Ordinal) || key == "SpecialCard";
 
     public static bool HideCharacteristic(Player player, string key)
     {

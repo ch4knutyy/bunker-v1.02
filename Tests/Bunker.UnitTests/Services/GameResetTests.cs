@@ -40,7 +40,6 @@ public class GameResetTests
         Assert.Null(room.Players["host-connection"].ApocalypseProfessionSuppression);
         Assert.False(room.SettingsFrozen);
         Assert.Null(room.FrozenGameSettings);
-        Assert.Empty(room.CurrentRoundReveals);
         Assert.Empty(room.RoundDiceRolls);
         Assert.Empty(room.ProcessedSpecialCardCommandIds);
         Assert.Empty(room.VotingReadyResponses);
@@ -157,7 +156,6 @@ public class GameResetTests
             SettingsFrozen = true,
             FrozenGameSettings = new RoomGameSettings(),
             ResolvedBunkerCapacity = 1,
-            CurrentRoundReveals = new() { [player.StablePlayerId] = "Profession" },
             RoundDiceRolls = new() { [5] = new RoundDiceRoll() },
             VotingReadyResponses = new() { [player.StablePlayerId] = "ready" },
             GameTimer = new GameTimerState { Status = GameTimerStatus.Running }

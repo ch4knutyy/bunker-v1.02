@@ -550,9 +550,6 @@ function normalizePlayer(player) {
 		eliminatedByVote: !!(player.eliminatedByVote ?? player.EliminatedByVote),
 		canRevealAllAfterElimination: !!(player.canRevealAllAfterElimination ?? player.CanRevealAllAfterElimination),
 		hasRevealedAllAfterElimination: !!(player.hasRevealedAllAfterElimination ?? player.HasRevealedAllAfterElimination),
-		futureRevealCredits: player.futureRevealCredits ?? player.FutureRevealCredits ?? 0,
-		hasCompletedRevealThisRound: !!(player.hasCompletedRevealThisRound ?? player.HasCompletedRevealThisRound),
-		revealRequirementSatisfiedByCredit: !!(player.revealRequirementSatisfiedByCredit ?? player.RevealRequirementSatisfiedByCredit),
 		eliminationVoteImmunity: normalizeEliminationVoteImmunity(player.eliminationVoteImmunity || player.EliminationVoteImmunity),
 		seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
 		_hasCharacter: hasGeneratedCharacterData(player),
@@ -707,6 +704,24 @@ async function reveal(characteristicName) {
 		renderMyPlayerCards(myPlayerData);
 		console.error("RevealCharacteristic error:", err);
 		addEventMessage(`Помилка: ${localizeServerMessage(err?.message || '')}`);
+	}
+}
+
+async function hideOwnRevealedCharacteristic(characteristicName) {
+	if (pendingCharacteristicHides.has(characteristicName)) return;
+	pendingCharacteristicHides.add(characteristicName);
+	renderMyPlayerCards(myPlayerData);
+	try {
+		const hidden = await connection.invoke("HideOwnRevealedCharacteristic", characteristicName);
+		if (!hidden) {
+			pendingCharacteristicHides.delete(characteristicName);
+			renderMyPlayerCards(myPlayerData);
+		}
+	} catch (err) {
+		pendingCharacteristicHides.delete(characteristicName);
+		renderMyPlayerCards(myPlayerData);
+		console.error("HideOwnRevealedCharacteristic error:", err);
+		addEventMessage(`${t('characteristicHideFailed')}: ${localizeServerMessage(err?.message || '')}`);
 	}
 }
 
@@ -926,11 +941,12 @@ function renderCharacteristicCard(model) {
 	const visualVariant = resolveCharacteristicVisualVariant(model);
 	const visualFamily = model.visualFamily || 'neutral';
 	const pending = pendingCharacteristicReveals.has(model.revealAction);
+	const hidePending = pendingCharacteristicHides.has(model.revealAction);
 	const blockedReason = model.canReveal && !model.isRevealed ? getRevealBlockedReason() : '';
 	const disabled = pending || !!blockedReason;
 	const detailRows = details.map(detail => `<div class="char-row vault-card-detail"><span class="char-label">${escapeHtml(detail.label)}</span><span class="char-value">${escapeHtml(detail.value)}</span></div>`).join('');
 	const action = model.isRevealed
-		? `<span class="status-revealed vault-card-status">${t('cardRevealed')}</span>`
+		? `<button type="button" class="char-btn vault-card-reveal vault-card-hide${hidePending ? ' disabled' : ''}" data-characteristic="${escapeHtml(model.type)}" onclick="hideOwnRevealedCharacteristic('${escapeHtml(model.revealAction)}')" ${hidePending ? 'disabled aria-disabled="true"' : ''} aria-label="${escapeHtml(`${t('hideCharacteristic')} ${model.categoryLabel}`)}">${t('hideCharacteristic')}</button>`
 		: `<button type="button" class="char-btn locked vault-card-reveal${disabled ? ' disabled' : ''}" data-characteristic="${escapeHtml(model.type)}" onclick="reveal('${model.revealAction}')" ${disabled ? 'disabled aria-disabled="true"' : ''}${blockedReason ? ` aria-label="${escapeHtml(blockedReason)}"` : ''}><span class="vault-lock-icon">${renderCharacteristicIcon('lock')}</span>${pending ? t('cardRevealPending') : t('reveal')}</button>`;
 	const tooltipMarkup = tooltipContent
 		? `<span class="characteristic-with-tooltip vault-card-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(t('cardTooltipLabel'))}" aria-controls="${tooltipId}" aria-expanded="false">?</button><span id="${tooltipId}" class="tooltip-content">${tooltipContent.html || escapeHtml(tooltipContent.text)}</span></span>`
@@ -1037,18 +1053,9 @@ function renderMyPlayerCards(player) {
 		{ type: 'Fact', categoryLabel: t('fact'), value: getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || t('noFact'), iconKey: characteristicIconRegistry.fact, details: [], tooltip: fact.description || fact.tooltip || '', variantSource: fact, isRevealed: revealed.fact || revealed.Fact, canReveal: true, revealAction: 'Fact' }
 	];
 
-	container.innerHTML = `${renderRevealCreditStatus(player)}${renderEliminatedRevealAllPanel(player)}${models.map(renderCharacteristicCard).join('')}`;
+	container.innerHTML = `${renderEliminatedRevealAllPanel(player)}${models.map(renderCharacteristicCard).join('')}`;
 	window.reinitTooltips?.();
 
-}
-
-function renderRevealCreditStatus(player) {
-	const credits = Number(player?.futureRevealCredits ?? player?.FutureRevealCredits ?? 0);
-	const byCredit = !!(player?.revealRequirementSatisfiedByCredit ?? player?.RevealRequirementSatisfiedByCredit);
-	return `<div class="reveal-credit-status" role="status">
-		<strong>${escapeHtml(t('revealCreditsLabel'))}: ${Math.max(0, credits)}</strong>
-		${byCredit ? `<span>${escapeHtml(t('revealRequirementSatisfiedByCredit'))}</span>` : ''}
-	</div>`;
 }
 
 function renderEliminatedRevealAllPanel(player) {

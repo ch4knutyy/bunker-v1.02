@@ -6,16 +6,11 @@ window.BunkerSignalREvents.rounds = {
 	RoundStateUpdated() {
 		connection.off("RoundStateUpdated");
 		connection.on("RoundStateUpdated", function (data) {
-			const wasComplete = currentRoundState?.allPlayersRevealed;
 			applyRoundState(data);
 			renderCurrentGameUI();
 			if (isFinishedGameState(data, currentGameCompletion)) {
 				renderGameFinished(currentGameCompletion || data?.completion || data?.Completion, { source: 'round-state' });
 				return;
-			}
-
-			if (isHost && currentRoundState?.allPlayersRevealed && !wasComplete) {
-				addEventMessage(`Усі активні гравці відкрили характеристику в раунді ${getCurrentRoundNumber()}. Можна завершити раунд.`);
 			}
 		});
 	},

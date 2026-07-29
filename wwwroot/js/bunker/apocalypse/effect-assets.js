@@ -72,9 +72,6 @@ function loadApocalypseEffectManifest() {
 		})
 		.then(state => {
 			state.loaded = true;
-			if (typeof currentApocalypse !== 'undefined' && currentApocalypse &&
-				typeof applyApocalypseVisualState === 'function') applyApocalypseVisualState(currentApocalypse);
-			initApocalypseEffectPreview();
 			return state;
 		});
 	return apocalypseEffectAssetState.loadPromise;
@@ -249,55 +246,3 @@ function applyApocalypseVisualState(apocalypse, root = document.querySelector('.
 function clearApocalypseEffectLayers() {
 	document.querySelectorAll?.('.apocalypse-effect-stack').forEach(stack => stack.replaceChildren());
 }
-
-function apocalypseEffectPreviewText() {
-	const language = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'en';
-	return ({
-		uk: { title: 'Development preview ефектів апокаліпсису', preset: 'Preset', primary: 'Основна картка', compact: 'Компактна картка', primaryCopy: 'Заголовок, показники виживання та критичні дії залишаються над шарами ефектів.', compactCopy: 'Компактний preview-текст і статусні значення.', control: 'Перевірити кнопку', empty: 'Ефекти відсутні' },
-		ru: { title: 'Development preview эффектов апокалипсиса', preset: 'Preset', primary: 'Основная карточка', compact: 'Компактная карточка', primaryCopy: 'Заголовок, показатели выживания и критические действия остаются над слоями эффектов.', compactCopy: 'Компактный preview-текст и статусные значения.', control: 'Проверить кнопку', empty: 'Эффекты отсутствуют' },
-		en: { title: 'Apocalypse effects development preview', preset: 'Preset', primary: 'Primary card', compact: 'Compact card', primaryCopy: 'The title, survival metrics and critical actions remain above the effect layers.', compactCopy: 'Compact preview text and status values.', control: 'Test control', empty: 'No effects' }
-	})[language] || null;
-}
-
-function renderApocalypseEffectPreviewPreset() {
-	const select = document.getElementById('apocalypseEffectPreviewSelect');
-	const details = document.getElementById('apocalypseEffectPreviewDetails');
-	const preview = document.getElementById('apocalypseEffectPreview');
-	if (!select || !details || !preview) return;
-	const preset = apocalypseVisualPresets[select.value] || apocalypseVisualPresets['neutral-industrial'];
-	const layers = buildApocalypseEffectLayers(preset);
-	preview.querySelectorAll('.apocalypse-effect-preview-card').forEach(card => applyApocalypsePresetToRoot(preset, card));
-	details.textContent = layers.length
-		? layers.map(layer => `${layer.asset.id} · ${layer.asset.usage} · ${layer.opacity.toFixed(3)} · ${layer.asset.blendMode}`).join(' | ')
-		: apocalypseEffectPreviewText().empty;
-}
-
-function initApocalypseEffectPreview() {
-	if (typeof initVisualThemePreview === 'function') {
-		initVisualThemePreview();
-		return;
-	}
-	const root = document.getElementById('apocalypseEffectPreview');
-	const select = document.getElementById('apocalypseEffectPreviewSelect');
-	if (!root || !select) return;
-	const text = apocalypseEffectPreviewText();
-	document.getElementById('apocalypseEffectPreviewTitle').textContent = text.title;
-	document.getElementById('apocalypseEffectPreviewLabel').textContent = text.preset;
-	root.querySelector('[data-preview-card="primary"] h3').textContent = text.primary;
-	root.querySelector('[data-preview-card="compact"] h3').textContent = text.compact;
-	root.querySelector('[data-preview-copy="primary"]').textContent = text.primaryCopy;
-	root.querySelector('[data-preview-copy="compact"]').textContent = text.compactCopy;
-	root.querySelector('[data-preview-copy="control"]').textContent = text.control;
-	if (!select.options.length) {
-		select.replaceChildren(...Object.values(apocalypseVisualPresets).map(preset => {
-			const option = document.createElement('option');
-			option.value = preset.id;
-			option.textContent = preset.id;
-			return option;
-		}));
-		select.addEventListener('change', renderApocalypseEffectPreviewPreset);
-	}
-	renderApocalypseEffectPreviewPreset();
-}
-
-loadApocalypseEffectManifest();

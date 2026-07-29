@@ -156,6 +156,75 @@ function renderPublicPlayerSelectorItem(model, activeSeat) {
 	</button>`;
 }
 
+function getPublicRevealedSource(player, key) {
+	return player?.revealedSources?.[key] || null;
+}
+
+function getPublicCharacteristicValue(player, key) {
+	const source = getPublicRevealedSource(player, key);
+	if (key === 'profession' && source) return getProfessionDisplayName(source) || t('noData');
+	if (key === 'hobby' && source) return getLocalizedByFields(source, ['hobby', 'name'], source.name || source.Name || t('noData'));
+	if (key === 'property' && source) return getPropertyPresentation(source).title || t('propertyUnavailable');
+	return player?.revealedData?.[key] || t('noData');
+}
+
+function getPublicInfoValue(value, allowZero = false) {
+	if (value === null || value === undefined) return '';
+	if (!allowZero && typeof value === 'number' && value === 0) return '';
+	const text = String(value).trim();
+	return text ? text : '';
+}
+
+function getPublicCharacteristicInfo(player, key) {
+	const source = getPublicRevealedSource(player, key);
+	if (!source) return null;
+	const details = [];
+	let professionBonus = '';
+	const add = (label, value, allowZero = false) => {
+		const normalizedLabel = getPublicInfoValue(label, true);
+		const normalized = getPublicInfoValue(value, allowZero);
+		if (normalizedLabel && normalized) details.push({ label: normalizedLabel, value: normalized });
+	};
+
+	if (key === 'property') {
+		getPropertyPresentation(source).details.forEach(detail => add(detail.label, detail.value, true));
+	} else if (key === 'profession') {
+		add(t('qualification'), source.professionalLevel ?? source.ProfessionalLevel);
+		const experience = Number(source.experienceYears ?? source.ExperienceYears);
+		if (Number.isFinite(experience) && experience > 0) add(t('experience'), `${experience} ${t('years')}`);
+		const professionItem = source.professionItem?.name || source.professionItem?.Name || source.ProfessionItem?.name || source.ProfessionItem?.Name;
+		add(t('professionalItem'), professionItem || source.selectedItem || source.SelectedItem);
+		professionBonus = getPublicInfoValue(source.bonus ?? source.Bonus);
+		add(t('bonus'), professionBonus);
+	} else if (key === 'hobby') {
+		add(t('experience'), source.experienceYears ?? source.ExperienceYears ?? source.level ?? source.Level);
+		add(t('hobbyRelatedItem'), source.item ?? source.Item ?? source.relatedItem ?? source.RelatedItem);
+		add(t('bonus'), source.bonus ?? source.Bonus);
+	}
+
+	const tooltip = cleanTooltipText(
+		source.tooltip ?? source.Tooltip ?? source.description ?? source.Description ??
+		source.gameEffect ?? source.GameEffect ?? source.bunkerEffect ?? source.BunkerEffect ?? '');
+	const description = key === 'profession' && professionBonus && tooltip === professionBonus
+		? ''
+		: tooltip;
+	return details.length || description ? { details, description } : null;
+}
+
+function renderPublicCharacteristicTooltip(player, definition, context) {
+	const info = getPublicCharacteristicInfo(player, definition.key);
+	if (!info) return '';
+	const identity = String(player.connectionId || player.ConnectionId || player.stablePlayerId || player.StablePlayerId || 'player')
+		.replace(/[^a-z0-9_-]/gi, '');
+	const tooltipId = `public-info-${context}-${identity}-${definition.key}`;
+	const label = t(definition.labelKey);
+	const details = info.details.map(detail => `<div class="public-tooltip-detail-row"><span class="public-tooltip-detail-label">${escapeHtml(detail.label)}</span><strong class="public-tooltip-detail-value">${escapeHtml(detail.value)}</strong></div>`).join('');
+	return `<span class="characteristic-with-tooltip public-characteristic-tooltip ${context}-tooltip">
+		<button type="button" class="tooltip-trigger public-info-trigger" aria-label="${escapeHtml(t('additionalInformationAria').replace('{characteristic}', label))}" aria-expanded="false" aria-controls="${tooltipId}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 10.5v5M12 7.5h.01"></path></svg><span class="visually-hidden">${escapeHtml(t('additionalInformation'))}</span></button>
+		<span id="${tooltipId}" class="tooltip-content public-characteristic-tooltip-content ${details ? 'is-detailed' : 'is-compact'}" role="tooltip"><span class="public-tooltip-header">${escapeHtml(label)}</span>${info.description ? `<p class="public-tooltip-description">${escapeHtml(info.description)}</p>` : ''}${details ? `<div class="public-tooltip-details">${details}</div>` : ''}</span>
+	</span>`;
+}
+
 function renderPublicCharacteristicCard(player, definition) {
 	const { key, labelKey, icon } = definition;
 	const label = t(labelKey);
@@ -167,27 +236,15 @@ function renderPublicCharacteristicCard(player, definition) {
 		</article>`;
 	}
 
-	const value = getLocalizedRevealedValue(player, key) || t('noData');
-	const tooltipData = getLocalizedRevealedTooltip(player, key);
-	const tooltip = tooltipData ? `<span class="characteristic-with-tooltip public-characteristic-tooltip"><button type="button" class="tooltip-trigger ${getTooltipTypeClass(key)}" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button><span class="tooltip-content">${escapeHtml(tooltipData)}</span></span>` : '';
+	const value = getPublicCharacteristicValue(player, key);
+	const tooltip = renderPublicCharacteristicTooltip(player, definition, 'card');
 	const additional = key === 'physicalHealth'
 		? renderAdditionalPhysicalConditionsForOverview(player)
-		: key === 'property'
-			? renderPublicPropertyDetails(player)
 			: '';
 	return `<article class="public-characteristic-card is-revealed type-${key}" data-characteristic="${key}" data-revealed="true">
 		<header><span class="public-characteristic-icon">${renderCharacteristicIcon(icon)}</span><h4>${escapeHtml(label)}</h4>${tooltip}</header>
 		<div class="public-characteristic-value">${escapeHtml(value)}</div>${additional}
 	</article>`;
-}
-
-function renderPublicPropertyDetails(player) {
-	const presentation = getPropertyPresentation(getRevealedSource(player, 'property'));
-	return presentation.details.length
-		? `<div class="public-property-details">${presentation.details.map(detail =>
-			`<div class="public-property-detail"><span>${escapeHtml(detail.label)}</span><strong>${escapeHtml(detail.value)}</strong></div>`
-		).join('')}</div>`
-		: '';
 }
 
 function getPublicRevealedCount(player) {
@@ -218,13 +275,10 @@ function renderComparisonCharacteristic(player, definition) {
 		</div>`;
 	}
 
-	const value = getLocalizedRevealedValue(player, key) || t('noData');
-	const tooltipData = getLocalizedRevealedTooltip(player, key);
-	const tooltip = tooltipData ? `<span class="characteristic-with-tooltip comparison-tooltip"><button type="button" class="tooltip-trigger ${getTooltipTypeClass(key)}" aria-label="${escapeHtml(label)}" aria-expanded="false">!</button><span class="tooltip-content">${escapeHtml(tooltipData)}</span></span>` : '';
+	const value = getPublicCharacteristicValue(player, key);
+	const tooltip = renderPublicCharacteristicTooltip(player, definition, 'comparison');
 	const additional = key === 'physicalHealth'
 		? renderAdditionalPhysicalConditionsForOverview(player)
-		: key === 'property'
-			? renderPublicPropertyDetails(player)
 			: '';
 	return `<div class="comparison-characteristic is-revealed type-${key}" data-characteristic="${key}" data-revealed="true">
 		<span class="comparison-characteristic-icon" aria-hidden="true">${renderCharacteristicIcon(icon)}</span>
@@ -341,5 +395,47 @@ function renderPublicPlayerOverview() {
 		<div class="selected-player-heading"><span class="selected-player-kicker">${t('playerLabel')} #${seat}</span><h3>${escapeHtml(player.name || player.Name || t('playerLabel'))}</h3><div class="selected-player-status">${renderPublicPlayerBadges(player, seat, activeSeat)}</div></div>
 		<div class="selected-player-tools"><span class="selected-player-progress">${escapeHtml(progress)}</span><div class="selected-player-navigation" aria-label="${t('playerOverviewTitle')}"><button type="button" data-overview-nav="previous" aria-label="${t('previousPlayer')}"${disableNavigation}>‹</button><button type="button" data-overview-nav="next" aria-label="${t('nextPlayer')}"${disableNavigation}>›</button></div></div>
 	</header><div class="public-characteristics-grid">${publicCharacteristicDefinitions.map(definition => renderPublicCharacteristicCard(player, definition)).join('')}</div>`;
+	window.reinitTooltips?.();
+}
+
+function patchPublicCharacteristicHidden(connectionId, characteristicKey) {
+	if (['revealed-desc', 'revealed-asc'].includes(publicPlayerSortMode)) {
+		renderPublicPlayerOverview();
+		return;
+	}
+
+	const model = getCanonicalPublicPlayerModels().find(entry =>
+		String(entry.player.connectionId || entry.player.ConnectionId || '') === String(connectionId || ''));
+	const definition = publicCharacteristicDefinitions.find(entry => entry.key === characteristicKey);
+	if (!model || !definition) {
+		renderPublicPlayerOverview();
+		return;
+	}
+
+	const { player, seat } = model;
+	const selector = `[data-characteristic="${characteristicKey}"]`;
+	let patched = false;
+	for (const card of document.querySelectorAll(`.player-dossier-card[data-canonical-seat="${seat}"] ${selector}`)) {
+		card.outerHTML = renderComparisonCharacteristic(player, definition);
+		patched = true;
+	}
+
+	if (selectedPublicPlayerSeat === seat) {
+		const card = document.querySelector(`#selectedPlayerPanel ${selector}`);
+		if (card) {
+			card.outerHTML = renderPublicCharacteristicCard(player, definition);
+			patched = true;
+		}
+	}
+
+	const revealedCount = getPublicRevealedCount(player);
+	const progress = t('revealedProgress').replace('{shown}', revealedCount).replace('{total}', publicCharacteristicDefinitions.length);
+	document.querySelectorAll(`.player-dossier-card[data-canonical-seat="${seat}"] .player-dossier-progress`).forEach(node => { node.textContent = progress; });
+	if (selectedPublicPlayerSeat === seat) document.querySelectorAll('#selectedPlayerPanel .selected-player-progress').forEach(node => { node.textContent = progress; });
+
+	if (!patched) {
+		renderPublicPlayerOverview();
+		return;
+	}
 	window.reinitTooltips?.();
 }

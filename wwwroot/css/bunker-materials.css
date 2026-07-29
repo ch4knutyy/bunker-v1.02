@@ -29,22 +29,14 @@
 		0 18px 44px rgb(0 0 0 / 38%);
 }
 
-body.bunker-theme-active .bunker-facility-shell::before,
-body.bunker-theme-active .bunker-facility-shell::after {
+body.bunker-theme-active .bunker-cinematic-shell::before,
+body.bunker-theme-active .bunker-cinematic-shell::after {
 	content: none;
 }
 
 body.bunker-theme-active .bunker-visual-root > :is(
 	.bunker-material-stack,
-	.bunker-chassis-frame,
-	.bunker-apocalypse-effect-stack,
-	.bunker-readability-veil
-),
-.visual-theme-preview-card > :is(
-	.bunker-material-stack,
-	.bunker-chassis-frame,
-	.bunker-apocalypse-effect-stack,
-	.bunker-readability-veil
+	.bunker-apocalypse-effect-stack
 ) {
 	position: absolute;
 	inset: 0;
@@ -52,8 +44,7 @@ body.bunker-theme-active .bunker-visual-root > :is(
 	pointer-events: none;
 }
 
-body.bunker-theme-active .bunker-visual-root > .bunker-material-stack,
-.visual-theme-preview-card > .bunker-material-stack {
+body.bunker-theme-active .bunker-visual-root > .bunker-material-stack {
 	z-index: 0;
 	overflow: hidden;
 	background: #0a0c0d;
@@ -115,57 +106,13 @@ body.bunker-theme-active .bunker-visual-root > .bunker-material-stack,
 	background-size: 100% 100%;
 }
 
-body.bunker-theme-active .bunker-visual-root > .bunker-chassis-frame,
-.visual-theme-preview-card > .bunker-chassis-frame {
-	inset: var(--bunker-frame-inset);
-	z-index: 1;
-	border: 2px solid color-mix(in srgb, var(--bunker-panel-border, #666) 74%, #111);
-	border-radius: max(0px, calc(var(--bunker-chassis-radius) - 2px));
-	box-shadow:
-		inset 0 0 0 2px rgb(0 0 0 / 42%),
-		inset 0 0 18px rgb(0 0 0 / 34%);
-}
-
-.bunker-chassis-frame::before,
-.bunker-chassis-frame::after {
-	content: "";
-	position: absolute;
-	left: 2.5%;
-	right: 2.5%;
-	height: 7px;
-	border: 1px solid rgb(0 0 0 / 48%);
-	background-image:
-		linear-gradient(90deg, rgb(255 255 255 / 8%), transparent 20% 80%, rgb(0 0 0 / 28%)),
-		var(--bunker-accent-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-control-material-scale);
-	box-shadow: inset 0 1px rgb(255 255 255 / 7%), 0 2px 5px rgb(0 0 0 / 45%);
-	opacity: .74;
-}
-
-.bunker-chassis-frame::before { top: -4px; }
-.bunker-chassis-frame::after { bottom: -4px; }
-
-body.bunker-theme-active .bunker-visual-root > .bunker-apocalypse-effect-stack,
-.visual-theme-preview-card > .bunker-apocalypse-effect-stack {
+body.bunker-theme-active .bunker-visual-root > .bunker-apocalypse-effect-stack {
 	z-index: 2;
 	overflow: hidden;
 	opacity: .6;
 }
 
-body.bunker-theme-active .bunker-visual-root > .bunker-readability-veil,
-.visual-theme-preview-card > .bunker-readability-veil {
-	z-index: 3;
-	background:
-		linear-gradient(90deg, rgb(5 7 8 / calc(var(--bunker-readability-opacity) * .18)), transparent 14% 86%, rgb(5 7 8 / calc(var(--bunker-readability-opacity) * .2))),
-		linear-gradient(180deg, transparent 0 76%, rgb(5 7 8 / calc(var(--bunker-readability-opacity) * .22)));
-	box-shadow:
-		inset 0 1px rgb(255 255 255 / 5%),
-		inset 0 -16px 32px rgb(0 0 0 / 16%);
-}
-
-body.bunker-theme-active .bunker-visual-root > .bunker-visual-content,
-.visual-theme-preview-card > .bunker-visual-content {
+body.bunker-theme-active .bunker-visual-root > .bunker-visual-content {
 	position: relative;
 	z-index: 4;
 	display: grid;
@@ -173,14 +120,13 @@ body.bunker-theme-active .bunker-visual-root > .bunker-visual-content,
 	padding: calc(var(--bunker-frame-inset) + 7px);
 }
 
-/* Панель героя: зображення залишається заглибленим екраном усередині додаткової рамки. */
-body.bunker-theme-active .bunker-visual-root .bunker-hero,
-.visual-theme-preview-card .bunker-hero {
+/* Cinematic cover: матеріал лишається fallback-скімом без окремої рамки. */
+body.bunker-theme-active .bunker-visual-root .bunker-hero {
 	position: relative;
-	min-height: clamp(285px, 30vw, 390px);
+	min-height: var(--cinematic-cover-min-height);
 	margin: 0;
 	overflow: hidden;
-	border: 1px solid color-mix(in srgb, var(--bunker-panel-border, #666) 70%, #101112);
+	border: 0;
 	border-radius: var(--bunker-module-radius);
 	background-color: #111416;
 	background-image:
@@ -194,12 +140,12 @@ body.bunker-theme-active .bunker-visual-root .bunker-hero,
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-hero-media {
-	inset: 8px;
-	width: auto;
-	height: auto;
-	border: 1px solid rgb(255 255 255 / 7%);
-	border-radius: max(0px, calc(var(--bunker-module-radius) - 1px));
-	box-shadow: inset 0 0 24px rgb(0 0 0 / 38%);
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-hero-image {
@@ -207,35 +153,20 @@ body.bunker-theme-active .bunker-visual-root .bunker-hero-image {
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-hero-overlay {
-	inset: 8px;
-	width: auto;
-	height: auto;
-	border-radius: max(0px, calc(var(--bunker-module-radius) - 1px));
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
 	background:
-		linear-gradient(90deg, rgb(3 5 6 / 65%) 0%, rgb(3 5 6 / 27%) 58%, rgb(3 5 6 / 8%) 100%),
+		linear-gradient(90deg, rgb(3 5 6 / 58%) 0%, rgb(3 5 6 / 28%) 50%, rgb(3 5 6 / 12%) 100%),
 		linear-gradient(0deg, rgb(3 5 6 / 64%) 0%, rgb(3 5 6 / 12%) 55%, transparent 82%);
 }
 
-body.bunker-theme-active .bunker-visual-root .bunker-hero-pattern {
-	inset: 8px;
-	width: auto;
-	height: auto;
-	opacity: 0;
-}
-
-body.bunker-theme-active .bunker-visual-root:is(.bunker-structure-advanced) .bunker-hero-pattern {
-	opacity: .05;
-	background-image:
-		linear-gradient(rgb(185 205 207 / 40%) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(185 205 207 / 32%) 1px, transparent 1px);
-	background-size: 54px 54px;
-}
-
 body.bunker-theme-active .bunker-visual-root .bunker-hero-content {
-	width: min(760px, 76%);
-	padding: clamp(1.35rem, 3vw, 2.6rem);
-	border-left: 3px solid color-mix(in srgb, var(--bunker-accent, #aaa) 55%, transparent);
-	background: linear-gradient(90deg, rgb(4 6 7 / 38%), transparent);
+	width: min(980px, 100%);
+	padding: 0;
+	border: 0;
+	background: none;
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-title {
@@ -249,8 +180,7 @@ body.bunker-theme-active .bunker-visual-root .bunker-subtitle {
 }
 
 /* Скляний матеріал формує компактний захищений індикатор стану. */
-body.bunker-theme-active .bunker-visual-root .bunker-status-medallion,
-.visual-theme-preview-card .bunker-status-medallion {
+body.bunker-theme-active .bunker-visual-root .bunker-status-medallion {
 	top: 24px;
 	right: 24px;
 	width: 82px;
@@ -274,57 +204,41 @@ body.bunker-theme-active .bunker-visual-root .bunker-status-medallion::before {
 	box-shadow: inset 0 0 14px rgb(0 0 0 / 44%);
 }
 
-/* Приладова панель має додатковий корпус та окремі матеріальні індикатори. */
-.bunker-instrument-deck {
-	position: relative;
-	padding: 10px;
-	border: 1px solid color-mix(in srgb, var(--bunker-panel-border, #666) 66%, #090a0b);
-	border-radius: var(--bunker-module-radius);
-	background-color: #101315;
-	background-image:
-		linear-gradient(180deg, rgb(255 255 255 / 5%), rgb(2 4 5 / 35%)),
-		var(--bunker-secondary-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-medium-material-scale);
-	box-shadow: inset 0 0 18px rgb(0 0 0 / 42%);
-}
-
 body.bunker-theme-active .bunker-visual-root .bunker-metrics {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
-	gap: 8px;
-	border: 0;
-	background: transparent;
+	gap: 1px;
+	border: 1px solid var(--bunker-divider);
+	border-bottom: 0;
+	background: var(--bunker-divider);
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-metric {
 	position: relative;
-	min-height: 96px;
+	min-height: 104px;
 	overflow: hidden;
-	border: 1px solid rgb(210 217 214 / 12%);
-	border-radius: var(--bunker-module-radius);
+	border: 0;
+	border-radius: 0;
 	background-color: #0b0e0f;
 	background-image:
 		linear-gradient(160deg, rgb(7 9 10 / 72%), rgb(7 9 10 / 87%)),
 		var(--bunker-secondary-material-image);
 	background-repeat: no-repeat, repeat;
 	background-size: cover, var(--bunker-small-material-scale);
-	box-shadow:
-		inset 0 3px 9px rgb(0 0 0 / 52%),
-		inset 0 1px rgb(255 255 255 / 5%);
+	box-shadow: none;
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-metric::before {
 	content: "";
 	position: absolute;
 	inset: 0 0 auto;
-	height: 4px;
+	height: 1px;
 	background-image:
 		linear-gradient(90deg, rgb(255 255 255 / 8%), rgb(0 0 0 / 20%)),
 		var(--bunker-accent-material-image);
 	background-repeat: no-repeat, repeat;
 	background-size: cover, var(--bunker-control-material-scale);
-	opacity: .72;
+	opacity: .52;
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-metric.metric-condition {
@@ -341,23 +255,9 @@ body.bunker-theme-active .bunker-visual-root .bunker-metric strong {
 	color: rgb(237 239 234 / 92%);
 }
 
-/* Консольна панель та встановлені в неї інформаційні модулі. */
-.bunker-console-deck {
-	position: relative;
-	border: 1px solid color-mix(in srgb, var(--bunker-panel-border, #666) 58%, #080a0b);
-	border-radius: var(--bunker-module-radius);
-	background-color: #0b0e0f;
-	background-image:
-		linear-gradient(rgb(5 7 8 / 42%), rgb(5 7 8 / 58%)),
-		var(--bunker-base-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-material-scale);
-	box-shadow: inset 0 8px 18px rgb(0 0 0 / 35%);
-}
-
 body.bunker-theme-active .bunker-visual-root .bunker-content-grid {
-	gap: 12px;
-	padding: clamp(1rem, 2vw, 1.45rem);
+	gap: 1rem;
+	padding: clamp(1.15rem, 3vw, 2rem);
 }
 
 body.bunker-theme-active .bunker-visual-root .bunker-content-card {
@@ -365,7 +265,7 @@ body.bunker-theme-active .bunker-visual-root .bunker-content-card {
 	overflow: hidden;
 	padding: 0;
 	border: 1px solid rgb(220 224 220 / 13%);
-	border-radius: var(--bunker-module-radius);
+	border-radius: 12px;
 	background-color: #0a0d0e;
 	background-image:
 		linear-gradient(150deg, rgb(5 7 8 / 76%), rgb(5 7 8 / 87%)),
@@ -492,16 +392,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-readability-opacity: .38;
 }
 
-.bunker-structure-armored > .bunker-visual-content {
-	clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
-}
-
-.bunker-structure-armored .bunker-chassis-frame::before {
-	left: 1%;
-	right: 18%;
-	height: 10px;
-}
-
 .bunker-structure-clinical {
 	--bunker-chassis-radius: 5px;
 	--bunker-module-radius: 4px;
@@ -511,11 +401,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-material-opacity: .56;
 	--bunker-secondary-opacity: .58;
 	--bunker-readability-opacity: .3;
-}
-
-.bunker-structure-clinical .bunker-instrument-deck {
-	padding: 7px;
-	box-shadow: inset 0 0 0 1px rgb(230 239 238 / 8%);
 }
 
 .bunker-structure-industrial {
@@ -542,15 +427,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-readability-opacity: .4;
 }
 
-.bunker-structure-concrete .bunker-chassis-frame {
-	border-width: 3px;
-	box-shadow: inset 0 0 0 4px rgb(0 0 0 / 38%), inset 0 0 24px rgb(0 0 0 / 48%);
-}
-
-.bunker-structure-concrete .bunker-instrument-deck {
-	padding: 13px;
-}
-
 .bunker-structure-maritime {
 	--bunker-chassis-radius: 16px;
 	--bunker-module-radius: 10px;
@@ -559,14 +435,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-deck-gap: 9px;
 	--bunker-material-opacity: .66;
 	--bunker-readability-opacity: .35;
-}
-
-.bunker-structure-maritime .bunker-chassis-frame {
-	border-width: 4px;
-	box-shadow:
-		inset 0 0 0 4px rgb(4 8 9 / 72%),
-		inset 0 0 0 6px rgb(210 220 216 / 8%),
-		inset 0 0 24px rgb(0 0 0 / 45%);
 }
 
 .bunker-structure-maritime .bunker-metric {
@@ -584,12 +452,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-readability-opacity: .31;
 }
 
-.bunker-structure-luxury .bunker-chassis-frame::before,
-.bunker-structure-luxury .bunker-chassis-frame::after {
-	height: 3px;
-	opacity: .62;
-}
-
 .bunker-structure-luxury .bunker-content-card {
 	box-shadow: inset 0 2px 8px rgb(0 0 0 / 46%), 0 5px 12px rgb(0 0 0 / 26%);
 }
@@ -605,20 +467,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-readability-opacity: .41;
 }
 
-.bunker-structure-improvised .bunker-chassis-frame::after {
-	left: auto;
-	right: 8%;
-	bottom: 2%;
-	width: 24%;
-	height: 38px;
-	transform: rotate(-1.2deg);
-	background-image:
-		linear-gradient(165deg, rgb(255 255 255 / 5%), rgb(0 0 0 / 26%)),
-		var(--bunker-secondary-material-image);
-	background-size: cover, 360px;
-	opacity: .5;
-}
-
 .bunker-structure-advanced {
 	--bunker-chassis-radius: 3px;
 	--bunker-module-radius: 2px;
@@ -628,11 +476,6 @@ body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck
 	--bunker-material-opacity: .58;
 	--bunker-secondary-opacity: .55;
 	--bunker-readability-opacity: .32;
-}
-
-.bunker-structure-advanced .bunker-chassis-frame {
-	border-width: 1px;
-	box-shadow: inset 0 0 0 1px rgb(223 232 230 / 7%), inset 0 0 13px rgb(0 0 0 / 32%);
 }
 
 /* Загальний ігровий інтерфейс отримує стриману матеріальну виразність без текстури в кожній комірці. */
@@ -719,115 +562,84 @@ body.bunker-theme-active :is(.player-dossier-card, .public-characteristic-card):
 	pointer-events: none;
 }
 
-.visual-theme-preview.is-grayscale .visual-theme-preview-card {
-	filter: grayscale(1);
-}
-
-.visual-theme-preview-card .bunker-metrics {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 8px;
+/*
+ * Спільна оболонка гри: усі матеріальні профілі залишаються джерелом текстури,
+ * акценту й стану, але користуються однією щільністю панелей та ієрархією.
+ * Цей шар не залежить від id, назви чи категорії конкретного бункера.
+ */
+body.bunker-theme-active #bunkerContent .bunker-visual-root {
+	--bunker-shell-material-visibility: .46;
+	--bunker-shell-secondary-visibility: .34;
+	--bunker-shell-readability-strength: .62;
+	--bunker-shell-border-strength: 66%;
+	--bunker-chassis-radius: 3px;
+	--bunker-module-radius: 3px;
+	--bunker-chassis-border: 1px;
+	--bunker-frame-inset: 6px;
+	--bunker-deck-gap: 9px;
+	--bunker-material-opacity: var(--bunker-shell-material-visibility);
+	--bunker-secondary-opacity: var(--bunker-shell-secondary-visibility);
+	--bunker-readability-opacity: var(--bunker-shell-readability-strength);
 	border: 0;
-	background: transparent;
+	background: var(--bunker-surface);
+	box-shadow: none;
 }
 
-.visual-theme-preview-card .bunker-metric {
-	position: relative;
-	min-height: 86px;
-	padding: 1rem;
-	border: 1px solid rgb(220 224 220 / 13%);
-	border-radius: var(--bunker-module-radius);
+/* Фото лишається головним носієм атмосфери; без фото працює лише темний матеріал профілю. */
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-hero {
+	border: 0;
 	background-image:
-		linear-gradient(160deg, rgb(5 7 8 / 72%), rgb(5 7 8 / 87%)),
+		linear-gradient(145deg, rgb(255 255 255 / 4%), rgb(4 6 7 / 48%)),
 		var(--bunker-secondary-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-small-material-scale);
-	box-shadow: inset 0 3px 9px rgb(0 0 0 / 52%);
+	box-shadow: none;
 }
 
-.visual-theme-preview-card .bunker-metric::before,
-.visual-theme-preview-card .bunker-content-card::before,
-.visual-theme-preview-card .bunker-footer::before {
-	content: "";
-	position: absolute;
-	inset: 0 0 auto;
-	height: 5px;
-	background-image: var(--bunker-accent-material-image);
-	background-repeat: repeat;
-	background-size: var(--bunker-control-material-scale);
-	opacity: .68;
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-hero-overlay {
+	background:
+		linear-gradient(90deg, rgb(3 5 6 / 58%) 0%, rgb(3 5 6 / 30%) 50%, rgb(3 5 6 / 14%) 100%),
+		linear-gradient(0deg, rgb(3 5 6 / 72%) 0%, rgb(3 5 6 / 16%) 56%, transparent 84%);
 }
 
-.visual-theme-preview-card .metric-condition {
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-hero.no-image .bunker-hero-overlay {
+	background:
+		linear-gradient(90deg, rgb(3 5 6 / 72%), rgb(3 5 6 / 38%)),
+		linear-gradient(0deg, rgb(3 5 6 / 66%), transparent 78%);
+}
+
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-hero-content {
+	width: min(980px, 100%);
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-metric,
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-content-card {
+	border-color: rgb(220 224 220 / 11%);
 	background-image:
-		linear-gradient(160deg, rgb(5 7 8 / 72%), rgb(5 7 8 / 88%)),
-		var(--bunker-glass-material-image);
-}
-
-.visual-theme-preview-card .bunker-content-grid {
-	display: grid;
-	grid-template-columns: 1.4fr 1fr;
-	gap: 10px;
-	padding: 12px;
-}
-
-.visual-theme-preview-card .bunker-content-card {
-	position: relative;
-	overflow: hidden;
-	padding: 12px;
-	border: 1px solid rgb(220 224 220 / 13%);
-	border-radius: var(--bunker-module-radius);
-	background-image:
-		linear-gradient(150deg, rgb(5 7 8 / 76%), rgb(5 7 8 / 87%)),
+		linear-gradient(150deg, rgb(5 7 8 / 84%), rgb(5 7 8 / 93%)),
 		var(--bunker-secondary-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-medium-material-scale);
-	box-shadow: inset 0 3px 10px rgb(0 0 0 / 48%);
+	box-shadow: inset 0 1px rgb(255 255 255 / 4%), inset 0 3px 10px rgb(0 0 0 / 40%);
 }
 
-.visual-theme-preview-card .bunker-footer {
-	position: relative;
-	min-height: 60px;
-	padding: 10px 12px;
-	border: 1px solid rgb(220 224 220 / 13%);
-	border-radius: var(--bunker-module-radius);
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-metric::before,
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-content-card::before,
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-footer::before {
+	height: 2px;
+	opacity: .52;
+}
+
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-footer {
+	min-height: 58px;
 	background-image:
-		linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(4 6 7 / 55%)),
+		linear-gradient(180deg, rgb(5 7 8 / 86%), rgb(4 6 7 / 94%)),
 		var(--bunker-secondary-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-medium-material-scale);
 }
 
-.visual-theme-preview-card .bunker-open-image {
-	background-image:
-		linear-gradient(180deg, rgb(255 255 255 / 9%), rgb(0 0 0 / 32%)),
-		var(--bunker-accent-material-image);
-	background-repeat: no-repeat, repeat;
-	background-size: cover, var(--bunker-control-material-scale);
-}
-
-.visual-theme-preview-card.is-compact .bunker-material-layer--secondary,
-.visual-theme-preview-card.is-compact .bunker-condition-layer:nth-child(n+2),
-.visual-theme-preview-card.is-compact .bunker-apocalypse-effect-stack {
-	display: none;
-}
-
-.visual-theme-preview-table {
-	width: 100%;
-	border-collapse: collapse;
-	background: rgb(8 10 11 / 78%);
-}
-
-.visual-theme-preview-table :is(th, td) {
-	padding: 8px;
-	border: 1px solid var(--bunker-panel-border, #555);
-}
-
-.visual-theme-preview-modal {
-	margin-top: 12px;
-	padding: 14px;
-	border: 1px solid var(--bunker-panel-border, #555);
-	background: rgb(9 11 12 / 84%);
+body.bunker-theme-active #bunkerContent .bunker-visual-root .bunker-control-deck :is(button.bunker-open-image, button.btn-scenario-image) {
+	border-color: color-mix(in srgb, var(--bunker-panel-border, #777) 62%, #111);
+	background-color: #141718;
+	box-shadow: inset 0 1px rgb(255 255 255 / 7%), 0 1px 3px rgb(0 0 0 / 28%);
 }
 
 @media (max-width: 900px) {
@@ -854,13 +666,12 @@ body.bunker-theme-active :is(.player-dossier-card, .public-characteristic-card):
 	}
 
 	body.bunker-theme-active .bunker-visual-root .bunker-hero {
-		min-height: 285px;
+		min-height: min(72svh, 560px);
 	}
 
 	body.bunker-theme-active .bunker-visual-root .bunker-hero-content {
 		width: 100%;
-		padding: 1rem;
-		padding-top: 5.2rem;
+		padding: 0;
 	}
 
 	body.bunker-theme-active .bunker-visual-root .bunker-content-grid {

@@ -49,6 +49,8 @@ namespace Bunker.Models
 		public long RecoveryRevision { get; set; }
 		public RoomGameSettings GameSettings { get; set; } = new();
 		public RoomGameSettings? FrozenGameSettings { get; set; }
+		[System.Text.Json.Serialization.JsonIgnore]
+		public PreparedScenarioState? PreparedScenario { get; set; }
 		public ResolvedApocalypseActivationPolicy? ApocalypseActivationPolicy { get; set; }
 		public ApocalypseEffectRuntimeState? ApocalypseEffectRuntime { get; set; }
 		[System.Text.Json.Serialization.JsonIgnore]
@@ -151,7 +153,6 @@ namespace Bunker.Models
 		/// Яку характеристику кожен гравець уже відкрив у поточному раунді.
 		/// Ключем є стабільний PlayerId, якщо він доступний.
 		/// </summary>
-		public Dictionary<string, string> CurrentRoundReveals { get; set; } = new();
 
 		/// <summary>
 		/// Результати кидка кубика по раундах.
@@ -195,13 +196,22 @@ namespace Bunker.Models
 		public Dictionary<string, RoomSnapshotRestoreResult> SnapshotCommandResults { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		[System.Text.Json.Serialization.JsonIgnore]
 		public object SnapshotSyncRoot { get; } = new();
+		public long PublicRevealRevision { get; set; }
 		public HashSet<string> ProcessedRoomEditorCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Відповіді гравців на перевірку готовності до голосування.
 		/// Ключем є stable player id, якщо він доступний.
 		/// </summary>
-		public Dictionary<string, string> VotingReadyResponses { get; set; } = new();
+	public Dictionary<string, string> VotingReadyResponses { get; set; } = new();
+
+	/// <summary>
+	/// Поточна перевірка готовності. Ідентифікатор відокремлює відповіді старого запиту
+	/// від нового та не є постійним станом гравця.
+	/// </summary>
+	public string? ReadinessCheckId { get; set; }
+	public int? ReadinessCheckRound { get; set; }
+	public DateTimeOffset? ReadinessCheckStartedAtUtc { get; set; }
 
 		/// <summary>
 		/// ConnectionId гравця, чия черга

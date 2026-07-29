@@ -1,4 +1,3 @@
-@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 @{
     ViewData["Title"] = "Грати";
 }
@@ -13,11 +12,19 @@
 <link rel="stylesheet" href="~/css/apocalypse-physical-theme.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/assets/ui/apocalypse-effects/apocalypse-effects.css" asp-append-version="true" />
 
-<div class="game-container site-game-shell">
-    <div class="top-bar site-titlebar">
-        <h1 class="page-title">Vault Judgment</h1>
+<div class="game-container site-game-shell bunker-game-page">
+    <div id="bunkerEntryLoading"
+         class="bunker-entry-loading"
+         role="status"
+         aria-live="polite"
+         aria-busy="false"
+         hidden>
+        <div class="bunker-entry-loading-card">
+            <span class="bunker-entry-loading-mark" aria-hidden="true"></span>
+            <strong data-i18n="bunkerEntryTitle">Підготовка бункера</strong>
+            <span id="bunkerEntryLoadingStatus" data-i18n="bunkerEntryRoomState">Отримання стану кімнати…</span>
+        </div>
     </div>
-
     @* Вибір і створення кімнати *@
     <div id="lobbySection">
         <div class="lobby-container">
@@ -97,61 +104,51 @@
 
     @* Поточна кімната: lobby та активна гра *@
     <div id="roomSection" style="display: none;">
-        <div class="room-header site-command-bar">
-            <div class="room-info site-command-identity">
-                <h2 class="room-name" id="currentRoomName">Кімната</h2>
-                <span class="room-id" id="currentRoomId">ID: ---</span>
-                <span class="room-state" id="currentRoomState">Лобі</span>
-            </div>
-
-            <div class="room-actions site-command-actions">
-                <button id="copyInviteLinkBtn"
-                        class="btn-secondary"
+        <div id="roomFloatingControls" class="room-floating-controls" hidden>
+            <button id="gmPanelBtn"
+                    type="button"
+                    class="room-floating-control room-floating-gm"
+                    onclick="toggleGMPanel()"
+                    aria-label="GM panel"
+                    title="GM panel"
+                    style="display: none;">GM</button>
+            <button id="developerToolsButton"
+                    type="button"
+                    class="room-floating-control room-floating-dev developer-only-control"
+                    onclick="toggleDeveloperTools()"
+                    aria-label="Developer tools"
+                    title="Developer tools"
+                    hidden>DEV</button>
+            <div class="room-actions-menu-shell">
+                <button id="roomActionsMenuButton"
                         type="button"
-                        data-testid="copy-invite-link-btn"
-                        onclick="copyInviteLink()">
-                    Посилання
-                </button>
-
-                <button id="gmPanelBtn"
-                        type="button"
-                        class="btn-gm"
-                        onclick="toggleGMPanel()"
-                        style="display: none;">
-                    🎮 GM Панель
-                </button>
-
-                <button id="developerToolsButton"
-                        type="button"
-                        class="btn-secondary developer-only-control"
-                        onclick="toggleDeveloperTools()"
-                        hidden>
-                    Developer Tools
-                </button>
-
-                <button id="startVotingBtn"
-                        type="button"
-                        class="btn-vote"
-                        onclick="startVoting()"
-                        style="display: none;">
-                    🗳️ Голосування
-                </button>
-
-                <button id="startGameBtn"
-                        type="button"
-                        class="btn-success"
-                        onclick="startGame()"
-                        style="display: none;">
-                    Почати гру
-                </button>
-
-                <button type="button"
-                        class="btn-danger"
-                        onclick="leaveRoom()">
-                    Покинути кімнату
-                </button>
+                        class="room-floating-control room-floating-menu"
+                        aria-label="Room actions"
+                        aria-expanded="false"
+                        aria-controls="roomActionsMenu"
+                        title="Room actions"
+                        onclick="toggleRoomActionsMenu()">⋯</button>
+                <div id="roomActionsMenu" class="room-actions-menu" hidden>
+                    <button id="copyInviteLinkBtn"
+                            class="btn-secondary"
+                            type="button"
+                            data-testid="copy-invite-link-btn"
+                            onclick="copyInviteLink()"
+                            hidden>Скопіювати посилання</button>
+                    <button id="startVotingBtn"
+                            type="button"
+                            class="btn-vote"
+                            onclick="startVoting()"
+                            style="display: none;">🗳️ Голосування</button>
+                    <button id="leaveRoomButton" type="button" class="btn-danger" onclick="leaveRoom()">Покинути кімнату</button>
+                </div>
             </div>
         </div>
+
+        <aside id="publicGameTimer" class="public-game-timer" hidden aria-live="polite" aria-atomic="true">
+            <strong id="publicGameTimerValue">00:00</strong>
+            <span id="publicGameTimerStatus"></span>
+        </aside>
 
         <div id="omniscientGmBanner"
              class="global-catalog-warning"
@@ -176,26 +173,6 @@
                     data-testid="apocalypse-effect-dismiss">×</button>
         </aside>
 
-        @* Публічний стан поточного раунду *@
-        <div id="roundStatusPanel" class="round-status-panel site-round-hud" style="display: none;">
-            <div class="round-status-main site-hud-module module-round">
-                <span class="round-status-label">Поточний раунд</span>
-                <strong id="roundStatusNumber">Раунд 1</strong>
-            </div>
-
-            <div class="round-status-details site-hud-module module-phase">
-                <span id="roundStatusPhase">Розкриття характеристик</span>
-                <span id="roundStatusProgress">0/0 відкрили</span>
-                <span id="roundDiceResult" class="round-dice-result" style="display: none;"></span>
-            </div>
-
-            <div id="publicGameTimer" class="public-game-timer site-hud-module module-timer">
-                <strong id="publicGameTimerValue">05:00</strong>
-                <span id="publicGameTimerStatus">Зупинено</span>
-                <small id="publicGameTimerLabel"></small>
-            </div>
-        </div>
-
         <section id="gameFinishedPanel"
                  class="game-finished-panel"
                  style="display: none;"
@@ -203,7 +180,6 @@
                  aria-live="polite">
 
             <div class="game-finished-heading">
-                <span class="game-finished-kicker">Vault Judgment</span>
                 <h2 id="gameFinishedTitle">Гру завершено</h2>
                 <p id="gameFinishedReason">Місткість бункера досягнута.</p>
             </div>
@@ -323,16 +299,16 @@
         </div>
 
         @* Перевірка готовності до голосування *@
-        <div id="readyCheckPanel" class="ready-check-panel site-panel" style="display: none;">
+        <div id="readyCheckPanel" class="ready-check-panel site-panel" style="display: none;" aria-live="polite">
             <div class="ready-check-header">
-                <strong>Всі готові до голосування?</strong>
-                <span id="readyCheckSummary">Очікуємо відповіді гравців</span>
+                <strong data-i18n="readyCheckPrompt">Ви готові завершити раунд?</strong>
+                <span id="readyCheckSummary" data-i18n="readyCheckWaiting">Очікуємо відповіді гравців</span>
             </div>
+			<p data-i18n="readyCheckHint">Host перевіряє, чи можна переходити далі. Відповідь можна змінити, поки перевірка відкрита.</p>
 
             <div class="ready-check-actions">
-                <button type="button" onclick="submitVotingReadyStatus('ready')">Готовий</button>
-                <button type="button" onclick="submitVotingReadyStatus('add')">Хочу щось додати</button>
-                <button type="button" onclick="submitVotingReadyStatus('special')">Хочу використати карту</button>
+                <button type="button" data-i18n="readyCheckReady" data-ready-status="ready" onclick="submitVotingReadyStatus('ready')">Готовий</button>
+                <button type="button" data-i18n="readyCheckNotReady" data-ready-status="not_ready" onclick="submitVotingReadyStatus('not_ready')">Не готовий</button>
             </div>
         </div>
 
@@ -345,6 +321,9 @@
         @* Приватні характеристики та спеціальні карти поточного гравця *@
         <div id="myPlayerSection" class="site-major-section" style="display:none;">
             <h2 class="section-title site-section-heading">Мої характеристики (бачу тільки я)</h2>
+            <p id="roundStatusPanel" class="round-status-inline" hidden aria-live="polite">
+                <span id="roundStatusNumber">Раунд 1</span><span aria-hidden="true"> · </span><span id="roundStatusPhase">Обговорення</span>
+            </p>
             <div id="myPlayerCards" class="player-cards-grid"></div>
 
             <section id="mySpecialCardsSection" class="my-special-cards-section">
@@ -494,79 +473,6 @@
     </div>
 </div>
 
-@if (HostEnvironment.IsDevelopment())
-{
-    <details id="apocalypseEffectPreview" class="apocalypse-effect-preview visual-theme-preview">
-        <summary id="apocalypseEffectPreviewTitle"></summary>
-        <div class="apocalypse-effect-preview-toolbar">
-            <label for="bunkerMaterialPreviewSelect" id="bunkerMaterialPreviewLabel"></label>
-            <select id="bunkerMaterialPreviewSelect"></select>
-            <label for="bunkerConditionPreviewSelect" id="bunkerConditionPreviewLabel"></label>
-            <select id="bunkerConditionPreviewSelect"></select>
-            <label for="apocalypseEffectPreviewSelect" id="apocalypseEffectPreviewLabel"></label>
-            <select id="apocalypseEffectPreviewSelect"></select>
-            <label class="visual-theme-preview-toggle">
-                <input id="bunkerConditionPreviewEnabled" type="checkbox" checked>
-                <span id="bunkerConditionPreviewEnabledLabel"></span>
-            </label>
-            <label class="visual-theme-preview-toggle">
-                <input id="bunkerApocalypsePreviewEnabled" type="checkbox" checked>
-                <span id="bunkerApocalypsePreviewEnabledLabel"></span>
-            </label>
-            <label class="visual-theme-preview-toggle">
-                <input id="bunkerGrayscalePreviewEnabled" type="checkbox">
-                <span id="bunkerGrayscalePreviewEnabledLabel"></span>
-            </label>
-        </div>
-        <p id="apocalypseEffectPreviewDetails" class="apocalypse-effect-preview-details"></p>
-        <div class="apocalypse-effect-preview-grid">
-            <article class="apocalypse-effect-preview-card visual-theme-preview-card bunker-visual-root" data-preview-card="primary">
-                <div class="bunker-material-stack" aria-hidden="true">
-                    <div class="bunker-material-layer bunker-material-layer--base"></div>
-                    <div class="bunker-material-layer bunker-material-layer--secondary"></div>
-                    <div class="bunker-condition-stack"></div>
-                </div>
-                <div class="bunker-chassis-frame" aria-hidden="true"></div>
-                <div class="apocalypse-effect-stack bunker-apocalypse-effect-stack" aria-hidden="true"></div>
-                <div class="bunker-readability-veil" aria-hidden="true"></div>
-                <div class="bunker-visual-content">
-                    <header class="bunker-hero no-image">
-                        <div class="bunker-hero-overlay" aria-hidden="true"></div>
-                        <div class="bunker-hero-pattern" aria-hidden="true"></div>
-                        <div class="bunker-status-medallion" aria-hidden="true"><span class="bunker-status-icon">◈</span></div>
-                        <div class="bunker-hero-content"><span class="bunker-badge">Bunker</span><h3></h3><p data-preview-copy="primary"></p></div>
-                    </header>
-                    <section class="bunker-instrument-deck">
-                        <div class="bunker-metrics">
-                            <div class="bunker-metric"><span class="bunker-metric-label">Capacity</span><strong>6</strong></div>
-                            <div class="bunker-metric metric-condition"><span class="bunker-metric-label">Condition</span><strong>Fair</strong></div>
-                            <div class="bunker-metric"><span class="bunker-metric-label">Reserve</span><strong>18 mo.</strong></div>
-                        </div>
-                    </section>
-                    <section class="bunker-console-deck">
-                        <div class="bunker-content-grid">
-                            <section class="bunker-content-card"><h4 class="bunker-content-title" data-preview-copy="table"></h4><table class="visual-theme-preview-table"><tbody><tr><th>01</th><td>Pressure seal</td><td>Nominal</td></tr><tr><th>02</th><td>Air filtration</td><td>Standby</td></tr></tbody></table></section>
-                            <section class="bunker-content-card visual-theme-preview-modal"><h4 class="bunker-content-title" data-preview-copy="modal"></h4><p>Containment diagnostics · 72%</p></section>
-                        </div>
-                    </section>
-                    <footer class="bunker-footer bunker-control-deck"><span class="bunker-footer-kicker">Control deck</span><button type="button" class="btn-secondary bunker-open-image" data-preview-copy="control"></button></footer>
-                </div>
-            </article>
-            <article class="apocalypse-effect-preview-card visual-theme-preview-card bunker-visual-root is-compact" data-preview-card="compact">
-                <div class="bunker-material-stack" aria-hidden="true">
-                    <div class="bunker-material-layer bunker-material-layer--base"></div>
-                    <div class="bunker-material-layer bunker-material-layer--secondary"></div>
-                    <div class="bunker-condition-stack"></div>
-                </div>
-                <div class="bunker-chassis-frame" aria-hidden="true"></div>
-                <div class="apocalypse-effect-stack bunker-apocalypse-effect-stack" aria-hidden="true"></div>
-                <div class="bunker-readability-veil" aria-hidden="true"></div>
-                <div class="bunker-visual-content"><h3></h3><p data-preview-copy="compact"></p></div>
-            </article>
-        </div>
-    </details>
-}
-
 <script src="~/js/signalr-lite.js" asp-append-version="true"></script>
 <script src="~/js/bunker/game-utils.js" asp-append-version="true"></script>
 <script src="~/js/bunker/i18n/translations.js" asp-append-version="true"></script>
@@ -577,6 +483,7 @@
 <script src="~/js/bunker/special-cards/icons.js" asp-append-version="true"></script>
 <script src="~/js/bunker/characters/icons.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/icons.js" asp-append-version="true"></script>
+<script src="~/js/bunker/core/world-settings.js" asp-append-version="true"></script>
 <script src="~/js/bunker/core/visual-theme-registries.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/visual-config.js" asp-append-version="true"></script>
 <script src="~/js/bunker/apocalypse/state.js" asp-append-version="true"></script>
@@ -589,7 +496,8 @@
 <script src="~/js/bunker/bunker/material-profiles.js" asp-append-version="true"></script>
 <script src="~/js/bunker/bunker/material-resolver.js" asp-append-version="true"></script>
 <script src="~/js/bunker/bunker/theme-manager.js" asp-append-version="true"></script>
-<script src="~/js/bunker/bunker/visual-preview.js" asp-append-version="true"></script>
+<script src="~/js/bunker/core/story-flow.js" asp-append-version="true"></script>
+<script src="~/js/bunker/core/entry-performance.js" asp-append-version="true"></script>
 <script src="~/js/bunker/core/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/i18n/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/characters/runtime.js" asp-append-version="true"></script>

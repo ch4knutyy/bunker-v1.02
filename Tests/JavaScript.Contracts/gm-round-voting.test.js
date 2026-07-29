@@ -17,9 +17,9 @@ const lobbyEvents = fs.readFileSync('wwwroot/js/bunker/lobby/signalr-events.js',
 const gmPanelV2 = fs.readFileSync('wwwroot/js/bunker/gm-panel-v2.js', 'utf8');
 const gmRuntime = fs.readFileSync('wwwroot/js/bunker/gm/runtime.js', 'utf8');
 const votingModel = fs.readFileSync('Models/Game/Voting/VotingSession.cs', 'utf8');
-const revealCredits = fs.readFileSync('Services/Bunker/GameFlow/RevealCreditService.cs', 'utf8');
 const specialCards = fs.readFileSync('Hubs/BunkerHubGame/GameHub.SpecialCards.cs', 'utf8');
 const gmPanelHub = fs.readFileSync('Hubs/BunkerHubGame/GameHub.GmPanel.cs', 'utf8');
+const scenarios = fs.readFileSync('Hubs/BunkerHubGame/GameHub.Scenarios.cs', 'utf8');
 
 test('voting availability has one server rule and live public state', () => {
   assert.match(service, /CanStartVoting\(Room room,/);
@@ -43,18 +43,22 @@ test('early voting is server-authoritative, optional, and localized', () => {
   }
 });
 
-test('forced reveal credits use actual transitions and developer adjustments are explicit', () => {
+test('forced reveals stay actual transitions without credits or a round quota', () => {
   assert.match(specialCards, /revealedKeys\.Add\(key\)/);
-  assert.match(specialCards, /RevealCreditService\.ApplyForcedReveals/);
   assert.match(specialCards, /ProcessedSpecialCardCommandIds\.Contains\(commandId\)/);
-  assert.match(revealCredits, /actualKeys\.Length - usedForCurrentRound/);
-  assert.match(revealCredits, /player\.FutureRevealCredits--/);
-  assert.match(gameActions, /!player\.RevealRequirementSatisfiedByCredit/);
-  assert.match(client, /revealRequirementSatisfiedByCredit \|\| self\.RevealRequirementSatisfiedByCredit/);
-  assert.match(gmPanelHub, /Task AdjustRevealCredits\(/);
-  assert.match(gmPanelHub, /RoomActorCapability\.UseDeveloperTools/);
-  assert.match(gmPanelV2, /connection\.invoke\(\s*\"AdjustRevealCredits\"/);
+  assert.doesNotMatch(specialCards, /RevealCreditService|credit/i);
+  assert.doesNotMatch(gameActions, /CurrentRoundReveals|RevealRequirement|FutureRevealCredits/);
+  assert.doesNotMatch(client, /hasCurrentPlayerRevealedThisRound|revealRequirement/i);
+  assert.doesNotMatch(gmPanelHub, /AdjustRevealCredits|reveal_credit/i);
+  assert.doesNotMatch(gmPanelV2, /AdjustRevealCredits|gmRevealCredit/i);
   assert.doesNotMatch(gmPanelV2, /\beval\s*\(|new Function\s*\(/);
+});
+
+test('scenario round transitions keep lifecycle work without the removed reveal-quota helper', () => {
+  assert.doesNotMatch(scenarios, /BeginRevealRound|RevealCreditService|CurrentRoundReveals/);
+  assert.match(scenarios, /AdvanceRoundAfterVotingScenario[\s\S]*room\.CurrentRound = completedRound \+ 1;[\s\S]*room\.VotingReadyResponses\.Clear\(\)[\s\S]*room\.CurrentPhase = GamePhase\.RoundReveal[\s\S]*StartConfiguredRoundTimer\(room\)/);
+  assert.match(scenarios, /ContinueAfterBlockingScenario[\s\S]*_bunkerIntel\.RevealNextPublic\(room, completedRound\)[\s\S]*"RoundAdvanced"[\s\S]*"RoundStateUpdated"/);
+  assert.doesNotMatch(helpers, /BeginRevealRound|revealedCount|allPlayersRevealed|revealedPlayers/);
 });
 
 test('round recovery commands require public-state capability and idempotency', () => {

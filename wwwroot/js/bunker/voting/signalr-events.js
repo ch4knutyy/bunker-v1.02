@@ -12,12 +12,12 @@ window.BunkerSignalREvents.voting = {
 		});
 	},
 
-	AllPlayersMarkedReady() {
-		connection.off("AllPlayersMarkedReady");
-		connection.on("AllPlayersMarkedReady", function (data) {
+	VotingReadyCheckClosed() {
+		connection.off("VotingReadyCheckClosed");
+		connection.on("VotingReadyCheckClosed", function (data) {
 			applyRoundState(data.roundState || data.RoundState);
 			renderCurrentGameUI();
-			addEventMessage(t('allPlayersReady'));
+			addEventMessage(t('gmReadyCheckCancelled'));
 		});
 	},
 
@@ -42,6 +42,7 @@ window.BunkerSignalREvents.voting = {
 			myVote = null;
 			showVotingPanel(data);
 			renderCurrentGameUI();
+			window.syncBunkerVotingStoryState?.();
 			syncEndVotingControls();
 			triggerApocalypseVisualReaction('voting-start');
 			addEventMessage(`<span class="event-voting">🗳️ Голосування почалось!</span> Раунд ${data.round || data.Round || getCurrentRoundNumber()}`);
@@ -82,7 +83,9 @@ window.BunkerSignalREvents.voting = {
 
 			// Показуємо результати (тільки хосту показуємо кнопки)
 			showVotingResults(data);
+			window.syncBunkerVotingStoryState?.();
 			window.gmPanelV2OnStateChanged?.();
+			window.syncBunkerVotingStoryState?.();
 
 			addEventMessage(`<span class="event-voting">🗳️ Голосування завершено!</span> Лідер: ${data.topVotedPlayerName || 'Нічия'}`);
 		});

@@ -7,6 +7,34 @@
     let propertyEditorData = null;
     let propertyEditorPending = false;
 
+    function panelScrollState() {
+        const container = document.querySelector("#gmPanel .gm-panel-v2-content");
+        if (!container) return null;
+        return {
+            container,
+            top: container.scrollTop,
+            nearBottom: container.scrollHeight - container.clientHeight - container.scrollTop <= 48
+        };
+    }
+
+    function restorePanelScroll(state) {
+        if (!state || !state.container.isConnected) return;
+        const restore = () => {
+            const maxTop = Math.max(0, state.container.scrollHeight - state.container.clientHeight);
+            state.container.scrollTop = state.nearBottom ? maxTop : Math.min(state.top, maxTop);
+        };
+        restore();
+        globalThis.requestAnimationFrame?.(restore);
+    }
+
+    // Legacy GM renderers update journal and diagnostic fragments independently.
+    // They use this small shared boundary instead of ever taking ownership of scroll.
+    window.preserveGmPanelScroll = function preserveGmPanelScroll(render) {
+        const state = panelScrollState();
+        render();
+        restorePanelScroll(state);
+    };
+
     function value(source, camel, pascal) {
         return source?.[camel] ?? source?.[pascal];
     }
@@ -194,14 +222,10 @@
 
     function setPanelOpen(opening, persist) {
         const panel = document.getElementById("gmPanel");
-        const backdrop = document.getElementById("gmPanelBackdrop");
-        if (!panel || !backdrop) return;
+        if (!panel) return;
         panel.style.removeProperty("display");
         panel.classList.toggle("is-open", opening);
-        backdrop.classList.toggle("is-open", opening);
         panel.setAttribute("aria-hidden", String(!opening));
-        backdrop.setAttribute("aria-hidden", String(!opening));
-        document.body.classList.toggle("gm-panel-v2-open", opening);
         if (persist && roomCode()) {
             writeStorage("localStorage", preferenceKey("open"), opening ? "1" : "0");
         }
@@ -239,9 +263,7 @@
         return Boolean(currentRoom?.id || currentRoom?.Id);
     }
 
-    window.switchGMTab = function switchGMTabV2(tab) {
-        activeGMTab = safeTab(tab);
-        if (roomCode()) writeStorage("localStorage", preferenceKey("active-tab"), activeGMTab);
+    function syncGMTabVisibility() {
         document.querySelectorAll("[data-gm-tab]").forEach(section => {
             const active = section.dataset.gmTab === activeGMTab;
             if (section.id === "gmPlayerInfo") {
@@ -256,6 +278,12 @@
             button.setAttribute("aria-selected", String(active));
             button.tabIndex = active ? 0 : -1;
         });
+    }
+
+    window.switchGMTab = function switchGMTabV2(tab) {
+        activeGMTab = safeTab(tab);
+        if (roomCode()) writeStorage("localStorage", preferenceKey("active-tab"), activeGMTab);
+        syncGMTabVisibility();
         renderGmPanelV2();
     };
 
@@ -267,7 +295,7 @@
         if (opening) {
             setPanelLoadState("loading");
             refreshGmPanelV2State();
-            window.setTimeout(() => panel.querySelector('[role="tab"]:not([hidden])')?.focus(), 0);
+            window.setTimeout(() => panel.querySelector('[role="tab"]:not([hidden])')?.focus({ preventScroll: true }), 0);
         }
     };
 
@@ -311,6 +339,7 @@
     }
 
     function applyGmPanelV2State(state) {
+        const previousPlayerId = selectedStablePlayerId;
         gmPanelV2State = state;
         const players = value(state, "players", "Players") || [];
         const restoredPlayerId =
@@ -329,10 +358,12 @@
         if (readStorage("localStorage", preferenceKey("open")) === "1") {
             setPanelOpen(true, false);
         }
+        const scrollState = panelScrollState();
+        syncGMTabVisibility();
         renderGmPanelV2();
-        window.switchGMTab(activeGMTab);
         restoreAccordionPreference();
-        if (selectedStablePlayerId) {
+        restorePanelScroll(scrollState);
+        if (selectedStablePlayerId && selectedStablePlayerId !== previousPlayerId) {
             selectPlayerImmediately(selectedStablePlayerId);
         }
     }
@@ -562,7 +593,6 @@
         if (!target) return;
         target.replaceChildren();
         const players = value(gmPanelV2State, "players", "Players") || [];
-        syncRevealCreditDeveloperOptions(players);
         players.forEach(player => {
             const playerId = value(player, "playerId", "PlayerId");
             const button = document.createElement("button");
@@ -576,40 +606,12 @@
                 value(player, "isConnected", "IsConnected") ? text("gmPlayerOnline") : text("gmPlayerOffline"),
                 value(player, "isEliminated", "IsEliminated") ? text("gmPlayerEliminated") : text("gmPlayerActive"),
                 `${text("gmPlayerRevealed")}: ${value(player, "revealedCount", "RevealedCount") || 0}`,
-                value(player, "revealRequirementStatus", "RevealRequirementStatus") === "completed_by_credit"
-                    ? text("gmRevealCompletedByCredit")
-                    : value(player, "revealRequirementStatus", "RevealRequirementStatus") === "completed"
-                        ? text("gmRevealCompleted")
-                        : text("gmRevealPending"),
-                value(player, "futureRevealCredits", "FutureRevealCredits") == null
-                    ? ""
-                    : `${text("revealCreditsLabel")}: ${value(player, "futureRevealCredits", "FutureRevealCredits")}`,
                 value(player, "isCurrentTurn", "IsCurrentTurn") ? text("gmPlayerCurrentTurn") : ""
             ].filter(Boolean).join(" · ");
             button.append(name, state);
             button.addEventListener("click", () => selectPlayerImmediately(playerId));
             target.append(button);
         });
-    }
-
-    function syncRevealCreditDeveloperOptions(players) {
-        const select = document.getElementById("gmRevealCreditPlayer");
-        if (!select) return;
-        const selected = select.value;
-        select.replaceChildren();
-        players
-            .filter(player => value(player, "futureRevealCredits", "FutureRevealCredits") != null)
-            .forEach(player => {
-                const option = document.createElement("option");
-                option.value = value(player, "playerId", "PlayerId");
-                option.textContent =
-                    `${value(player, "name", "Name") || text("gmValueUnknown")} · ` +
-                    `${text("revealCreditsLabel")}: ${value(player, "futureRevealCredits", "FutureRevealCredits")}`;
-                select.append(option);
-            });
-        if ([...select.options].some(option => option.value === selected)) {
-            select.value = selected;
-        }
     }
 
     function selectPlayerImmediately(stablePlayerId) {
@@ -887,11 +889,11 @@
         "applyDirectorAction", "applyRoomAutoFix", "applyRoomLocalEdit",
         "cancelVoting", "clearCurrentVotes", "closeGmPropertyEditor",
         "createManualRoomSnapshot", "editCharacteristic", "eliminateSelectedPlayer",
-        "endRound", "enterOmniscientGm", "forceReveal", "gmCancelThreat",
+        "endRound", "enterOmniscientGm", "executeHostCharacteristicOverride", "forceReveal", "gmCancelThreat",
         "gmGenerateRareThreat", "gmGenerateTextThreat", "gmRestartThreat",
         "gmResyncThreatRoom", "gmSelectSpecificThreat", "gmSkipScenarioChoice",
         "hideSelectedCharacteristic", "inspectSelectedConnection",
-        "invokeGameTimerCommand", "kickSelectedPlayer", "markAllPlayersReady",
+        "invokeGameTimerCommand", "kickSelectedPlayer",
         "openGmPropertyEditor", "peekCharacteristic", "previewDirectorAction",
         "previewEnterOmniscientGm", "previewManualRoundChange",
         "previewRoomAutoFix", "previewRoomLocalEdit", "refreshGmAudit",
@@ -903,7 +905,7 @@
         "resyncSelectedPlayer", "resyncVotingAdmin", "rollRoundDice",
         "runRoomIntegrityCheck", "saveGmPropertyEdit", "sendGameEvent",
         "sendQuickEvent", "setGamePause", "setGameTimer", "startGameTimer",
-        "startVoting", "stopGameTimer", "submitBunkerCapacity", "toggleGMPanel",
+        "startVoting", "startVotingReadyCheck", "cancelVotingReadyCheck", "stopGameTimer", "submitBunkerCapacity", "toggleGMPanel",
         "transferHostToSelectedPlayer", "undoLastGmAction"
     ]);
 
@@ -981,26 +983,6 @@
                 case "remove-water":
                     removeBunkerWater(months);
                     break;
-            }
-            return;
-        }
-
-        const creditAdjustment = event.target.closest("[data-gm-credit-adjustment]");
-        if (creditAdjustment) {
-            const targetPlayerId = document.getElementById("gmRevealCreditPlayer")?.value;
-            const feedback = document.getElementById("gmRevealCreditFeedback");
-            if (!targetPlayerId) return;
-            try {
-                await window.gmPanelV2Command(creditAdjustment, commandId =>
-                    connection.invoke(
-                        "AdjustRevealCredits",
-                        targetPlayerId,
-                        Number.parseInt(creditAdjustment.dataset.gmCreditAdjustment, 10),
-                        commandId));
-                if (feedback) feedback.textContent = text("gmRevealCreditAdjusted");
-                await refreshGmPanelV2State();
-            } catch (error) {
-                if (feedback) feedback.textContent = gmPanelErrorCode(error);
             }
             return;
         }

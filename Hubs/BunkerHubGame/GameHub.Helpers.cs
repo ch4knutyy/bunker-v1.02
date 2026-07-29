@@ -33,32 +33,9 @@ namespace Bunker.Hubs
 
         private object BuildRoundState(Room room)
         {
-            room.CurrentRoundReveals ??= new();
             room.RoundDiceRolls ??= new();
 
             var activePlayers = RoomService.GetGameplayPlayersSnapshot(room).ToList();
-
-            var revealedPlayers = activePlayers
-                .Where(entry => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value)))
-                .Select(entry =>
-                {
-                    var player = entry.Value;
-                    var playerKey = RoomService.GetPlayerKey(player);
-
-                    return new
-                    {
-                        connectionId = string.IsNullOrWhiteSpace(player.ConnectionId) ? entry.Key : player.ConnectionId,
-                        stablePlayerId = playerKey,
-                        name = player.Name ?? "Unknown",
-                        characteristicKey = room.CurrentRoundReveals[playerKey]
-                    };
-                })
-                .ToList();
-
-            var allPlayersRevealed = room.State == RoomState.Playing &&
-                room.CurrentPhase == GamePhase.RoundReveal &&
-                activePlayers.Count > 0 &&
-                activePlayers.All(entry => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value)));
             var readyStatuses = BuildVotingReadyStatuses(room, activePlayers);
             var specialCards = BuildSpecialCardsPublicState(room);
             var threatState = BuildThreatPublicState(room);
@@ -81,8 +58,6 @@ namespace Bunker.Hubs
                 pausedAtUtc = room.PausedAtUtc,
                 gameTimer = _gameTimerService.GetDto(room),
                 activePlayerCount = activePlayers.Count,
-                revealedCount = revealedPlayers.Count,
-                allPlayersRevealed,
                 canStartVoting = votingAvailability.Allowed,
                 votingStartBlockedCode = votingAvailability.Allowed ? null : votingAvailability.Code,
                 recommendedStartRound = VotingSession.RecommendedStartRound,
@@ -90,11 +65,16 @@ namespace Bunker.Hubs
                 isEarlyVoting = room.CurrentVoting?.IsEarlyVoting ??
                     (votingAvailability.Allowed &&
                      room.CurrentRound < VotingSession.RecommendedStartRound),
-                revealedPlayers,
                 threatRevealed = room.IsThreatRevealed,
                 threatRevealedAtRound = room.ThreatRevealedAtRound,
                 threat = room.IsThreatRevealed ? room.CurrentThreat : null,
                 threatState,
+                readinessCheck = room.ReadinessCheckId == null ? null : new
+                {
+                    id = room.ReadinessCheckId,
+                    round = room.ReadinessCheckRound,
+                    startedAtUtc = room.ReadinessCheckStartedAtUtc
+                },
                 readyStatuses,
                 specialCards,
                 diceRoll = currentDiceRoll,
@@ -113,9 +93,12 @@ namespace Bunker.Hubs
                 {
                     var player = entry.Value;
                     var playerKey = RoomService.GetPlayerKey(player);
-                    var status = room.VotingReadyResponses.TryGetValue(playerKey, out var storedStatus)
-                        ? storedStatus
+                    var storedStatus = room.VotingReadyResponses.TryGetValue(playerKey, out var response)
+                        ? response
                         : "pending";
+                    var status = !player.IsConnected
+                        ? "offline"
+                        : storedStatus;
 
                     return new
                     {
@@ -124,32 +107,15 @@ namespace Bunker.Hubs
                         name = player.Name ?? "Unknown",
                         seatNumber = player.SeatNumber,
                         eliminationVoteImmunity = player.EliminationVoteImmunity,
-                        revealRequirementStatus = player.RevealRequirementSatisfiedByCredit
-                            ? "completed_by_credit"
-                            : player.HasCompletedRevealThisRound
-                                ? "completed"
-                                : "pending",
-                        status
+                        status,
+                        response = storedStatus,
+                        isConnected = player.IsConnected
                     };
                 })
                 .OrderBy(player => player.seatNumber == 0 ? int.MaxValue : player.seatNumber)
                 .ThenBy(player => player.name)
                 .Cast<object>()
                 .ToList();
-        }
-
-        private bool HaveAllActivePlayersRevealedThisRound(Room room)
-        {
-            room.CurrentRoundReveals ??= new();
-
-            var activePlayers = RoomService.GetGameplayPlayersSnapshot(room)
-                .Select(entry => entry.Value)
-                .ToList();
-
-            return room.State == RoomState.Playing &&
-                room.CurrentPhase == GamePhase.RoundReveal &&
-                activePlayers.Count > 0 &&
-                activePlayers.All(player => room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(player)));
         }
 
         private Bunker.Models.GameData.ThreatData? DrawThreatForRound(Room room, int round)
@@ -204,16 +170,11 @@ namespace Bunker.Hubs
             return CloneThreatData(selected);
         }
 
-        private async Task BeginRevealRound(Room room)
+        private long AdvancePublicRevealRevision(Room room)
         {
-            var consumedPlayers = RevealCreditService.BeginRound(room);
-            foreach (var player in consumedPlayers)
+            lock (room.SnapshotSyncRoot)
             {
-                await SendPersonalPlayerSnapshot(
-                    player.ConnectionId,
-                    player,
-                    "reveal_credit_consumed",
-                    new { creditsUsed = 1 });
+                return ++room.PublicRevealRevision;
             }
         }
 

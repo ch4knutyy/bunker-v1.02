@@ -12,6 +12,7 @@
         <div class="spy-room-code">
             <span data-i18n="roomCode">Код кімнати</span>
             <strong id="spyRoomCode">-</strong>
+            <button id="spyCopyRoomCode" type="button" class="spy-button compact" data-i18n="copyCode">Копіювати</button>
         </div>
     </div>
 
@@ -41,7 +42,9 @@
                 <p class="spy-label" data-i18n="roundStatus">Статус раунду</p>
                 <h2 id="spyRoundStatus" data-i18n="waitingPlayers">Очікування гравців</h2>
                 <p id="spyRoundNumber"></p>
+                <p id="spyTimer" class="spy-timer" hidden></p>
                 <div id="spyPrivateCard" class="spy-private-card"></div>
+                <div id="spyPlayerActions" class="spy-actions"></div>
             </article>
 
             <article class="spy-panel">
@@ -51,21 +54,49 @@
         </div>
 
         <article id="spyRevealPanel" class="spy-panel spy-reveal-panel" hidden>
+            <h2 data-i18n="roundResult">Результат раунду</h2>
+            <p id="spyResultSummary"></p>
             <p><span data-i18n="spyWas">Шпигун був</span>: <strong id="spyRevealedSpy">-</strong></p>
             <p><span data-i18n="locationWas">Локація була</span>: <strong id="spyRevealedLocation">-</strong></p>
         </article>
 
         <article id="spyHostControls" class="spy-panel spy-host-controls" hidden>
-            <p class="spy-label">Host</p>
+            <p class="spy-label" data-i18n="hostControls">Керування host</p>
+            <div id="spySettings" class="spy-settings">
+                <label for="spyRoundDuration" data-i18n="roundDuration">Тривалість раунду (сек.)</label>
+                <input id="spyRoundDuration" class="spy-input" type="number" min="60" max="3600" step="30" />
+                <label for="spyMinimumPlayers" data-i18n="minimumPlayers">Мінімум гравців</label>
+                <input id="spyMinimumPlayers" class="spy-input" type="number" min="3" max="20" />
+                <button id="spySaveSettings" type="button" class="spy-button" data-i18n="saveSettings">Зберегти</button>
+            </div>
             <div class="spy-actions">
-                <button type="button" class="spy-button primary" onclick="startSpyRound()" data-i18n="startRound">Почати раунд</button>
-                <button type="button" class="spy-button" onclick="endSpyRound()" data-i18n="endRound">Завершити раунд</button>
-                <button type="button" class="spy-button" onclick="newSpyRound()" data-i18n="newRound">Новий раунд</button>
-                <button type="button" class="spy-button danger" onclick="revealSpyRoles()" data-i18n="revealRoles">Розкрити ролі</button>
+                <button id="spyStartRound" type="button" class="spy-button primary" data-i18n="startRound">Почати раунд</button>
+                <button id="spyEndRound" type="button" class="spy-button danger" data-i18n="endRound">Завершити раунд</button>
+                <button id="spyNewRound" type="button" class="spy-button primary" data-i18n="newRound">Новий раунд</button>
+                <button id="spyReturnLobby" type="button" class="spy-button danger" data-i18n="returnLobby">Повернутися до lobby</button>
             </div>
             <p class="spy-hint" data-i18n="minPlayersRequired">Потрібно мінімум 3 гравці</p>
+
+            <details id="spyRecovery" class="spy-recovery">
+                <summary data-i18n="recovery">Відновлення</summary>
+                <div id="spySnapshotsList"></div>
+                <div id="spySnapshotPreview" class="spy-private-card" hidden></div>
+                <div class="spy-actions">
+                    <button id="spyRestoreSnapshot" type="button" class="spy-button danger" disabled data-i18n="restore">Відновити</button>
+                    <button id="spyCancelRestore" type="button" class="spy-button" data-i18n="cancel">Скасувати</button>
+                </div>
+            </details>
         </article>
 
+        <article class="spy-panel">
+            <p class="spy-label" data-i18n="eventJournal">Події гри</p>
+            <div id="spyJournal" class="spy-journal"></div>
+        </article>
+
+        <div class="spy-actions">
+            <button id="spyReady" type="button" class="spy-button primary" data-i18n="ready">Готовий</button>
+            <button id="spyLeaveRoom" type="button" class="spy-button danger" data-i18n="leaveRoom">Вийти з кімнати</button>
+        </div>
         <p id="spyInviteInfo" class="spy-invite-info"></p>
     </div>
 </section>

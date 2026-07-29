@@ -1,6 +1,6 @@
 .story-root[hidden], .story-root [hidden] { display: none !important; }
 .developer-tools-panel[hidden], .developer-only-control[hidden], .developer-observer-option[hidden] { display: none !important; }
-.developer-tools-panel { position: fixed; z-index: 2800; top: 5rem; right: 1rem; width: min(430px, calc(100% - 2rem)); max-height: calc(100vh - 6rem); overflow: auto; padding: 1rem; color: #f2eee5; background: #101518; border: 1px solid #8d633a; box-shadow: 0 18px 60px #000a; }
+.developer-tools-panel { position: fixed; z-index: 3905; top: 5rem; right: 1rem; width: min(430px, calc(100% - 2rem)); max-height: calc(100vh - 6rem); overflow: auto; padding: 1rem; color: #f2eee5; background: #101518; border: 1px solid #8d633a; box-shadow: 0 18px 60px #000a; }
 .developer-tools-panel header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .developer-tools-panel h2 { margin: .15rem 0 .5rem; }
 .developer-label, .player-role-developer { color: #ffd08a; font-size: .72rem; font-weight: 800; letter-spacing: .14em; }

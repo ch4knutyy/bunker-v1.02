@@ -180,7 +180,6 @@ public partial class GameHub
     {
         RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
         room.CurrentRound = completedRound + 1;
-        await BeginRevealRound(room);
         room.VotingReadyResponses.Clear();
         room.CurrentPhase = GamePhase.RoundReveal;
         StartConfiguredRoundTimer(room);
@@ -224,7 +223,6 @@ public partial class GameHub
     {
         RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
         room.CurrentRound = completedRound + 1;
-        await BeginRevealRound(room);
         room.VotingReadyResponses.Clear();
         room.CurrentPhase = GamePhase.RoundReveal;
         StartConfiguredRoundTimer(room);

@@ -41,20 +41,6 @@ test('ambient root, theme switch, reaction dedupe and reset are idempotent', asy
   )).toEqual(['local', 'edge', 'ui']);
   await expect(page.locator('.apocalypse-scenario-shell .apocalypse-effect-layer').first()).toHaveCSS('background-repeat', 'no-repeat');
 
-  await page.locator('#apocalypseEffectPreview > summary').click();
-  await page.locator('#bunkerMaterialPreviewSelect').selectOption('marine-steel');
-  await page.locator('#bunkerConditionPreviewSelect').selectOption('poor');
-  await page.locator('#apocalypseEffectPreviewSelect').selectOption('nuclear-fallout');
-  await expect(page.locator('[data-preview-card="primary"] .apocalypse-effect-layer')).toHaveCount(3);
-  await expect(page.locator('[data-preview-card="primary"] .bunker-condition-layer')).toHaveCount(2);
-  await expect(page.locator('[data-preview-card="compact"] .bunker-condition-layer:visible')).toHaveCount(1);
-  expect(await page.locator('[data-preview-card="primary"]').evaluate(card => {
-    const veil = Number(getComputedStyle(card.querySelector('.bunker-readability-veil')).zIndex);
-    const content = Number(getComputedStyle(card.querySelector('.bunker-visual-content')).zIndex);
-    return content > veil;
-  })).toBe(true);
-  await page.locator('[data-preview-copy="control"]').click();
-
   await page.evaluate(() => { currentApocalypse = null; renderApocalypse(null); });
   await expect(page.locator('body')).not.toHaveAttribute('data-apocalypse-theme', /.+/);
   await expect(page.locator('#apocalypseAmbientRoot')).toBeHidden();

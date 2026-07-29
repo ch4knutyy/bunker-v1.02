@@ -11,7 +11,7 @@ async function uploadApocalypseImage(input) {
 	}
 
 	// Валідація типу
-	const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+	const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 	if (!allowedTypes.includes(file.type)) {
 		alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
 		return;
@@ -20,7 +20,7 @@ async function uploadApocalypseImage(input) {
 	const formData = new FormData();
 	formData.append('file', file);
 	formData.append('roomId', currentRoom?.id || '');
-	formData.append('apocalypseId', currentApocalypse?.id || '');
+	formData.append('apocalypseId', currentApocalypse?.id || window.preparedScenarioPreview?.apocalypse?.id || window.preparedScenarioPreview?.Apocalypse?.Id || '');
 
 	try {
 		const response = await fetch('/api/ScenarioImage/apocalypse', {
@@ -29,11 +29,15 @@ async function uploadApocalypseImage(input) {
 			body: formData
 		});
 
+		const data = await response.json();
 		if (!response.ok) {
-			const error = await response.json();
-			alert(error.error || 'Помилка завантаження');
+			alert(data.error || 'Помилка завантаження');
 			return;
 		}
+		const prepared = window.preparedScenarioPreview;
+		if (prepared?.apocalypse) prepared.apocalypse.imageUrl = data.imageUrl;
+		if (prepared?.Apocalypse) prepared.Apocalypse.ImageUrl = data.imageUrl;
+		window.renderPreparedScenarioPreview?.();
 
 		console.log('[uploadApocalypseImage] Success');
 	} catch (error) {
@@ -58,7 +62,7 @@ async function uploadBunkerImage(input) {
 	}
 
 	// Валідація типу
-	const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+	const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 	if (!allowedTypes.includes(file.type)) {
 		alert('Непідтримуваний формат. Дозволено: JPG, PNG, WebP, GIF');
 		return;
@@ -67,7 +71,7 @@ async function uploadBunkerImage(input) {
 	const formData = new FormData();
 	formData.append('file', file);
 	formData.append('roomId', currentRoom?.id || '');
-	formData.append('bunkerId', currentBunker?.id || currentBunker?.Id || '');
+	formData.append('bunkerId', currentBunker?.id || currentBunker?.Id || window.preparedScenarioPreview?.bunker?.id || window.preparedScenarioPreview?.Bunker?.Id || '');
 
 	try {
 		const response = await fetch('/api/ScenarioImage/bunker', {
@@ -76,11 +80,15 @@ async function uploadBunkerImage(input) {
 			body: formData
 		});
 
+		const data = await response.json();
 		if (!response.ok) {
-			const error = await response.json();
-			alert(error.error || 'Помилка завантаження');
+			alert(data.error || 'Помилка завантаження');
 			return;
 		}
+		const prepared = window.preparedScenarioPreview;
+		if (prepared?.bunker) prepared.bunker.imageUrl = data.imageUrl;
+		if (prepared?.Bunker) prepared.Bunker.ImageUrl = data.imageUrl;
+		window.renderPreparedScenarioPreview?.();
 
 		console.log('[uploadBunkerImage] Success');
 	} catch (error) {

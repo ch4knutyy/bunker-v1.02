@@ -251,8 +251,6 @@ namespace Bunker.Services
         {
             if (room.CurrentTurnPlayerId == connectionId || room.CurrentTurnPlayerId == playerId)
                 room.CurrentTurnPlayerId = null;
-            room.CurrentRoundReveals.Remove(playerId);
-            room.CurrentRoundReveals.Remove(connectionId);
             room.VotingReadyResponses.Remove(playerId);
             room.VotingReadyResponses.Remove(connectionId);
 
@@ -374,7 +372,6 @@ namespace Bunker.Services
 			room.CurrentPhase = GamePhase.RoundReveal;
 			room.CurrentTurnPlayerId = null;
 			room.CurrentVoting = null;
-			RevealCreditService.ResetForNewGame(room);
 			room.RoundDiceRolls.Clear();
 			room.AdditionalInventoryGrantedAfterRound3 = false;
 			room.CurrentThreat = null;

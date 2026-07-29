@@ -64,6 +64,9 @@ namespace Bunker.Hubs
 
 				room.State = RoomState.Finished;
 				room.CurrentPhase = GamePhase.Finished;
+				room.ReadinessCheckId = null;
+				room.ReadinessCheckRound = null;
+				room.ReadinessCheckStartedAtUtc = null;
 				room.Completion = completionState;
 				room.PostGamePhase = PostGamePhase.FinalDiscussion;
 

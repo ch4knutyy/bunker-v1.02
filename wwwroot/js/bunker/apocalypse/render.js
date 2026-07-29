@@ -88,18 +88,35 @@ function renderApocalypseContentSection(kind, title, items) {
 	</section>`;
 }
 
-function renderApocalypseScenario(model) {
+function renderApocalypseSurvivorMetric(survivalChance) {
+	const presentation = buildApocalypseSurvivorPresentation(survivalChance);
+	const tooltipId = 'apocalypse-survivors-tooltip';
+	const tooltip = presentation.isValid
+		? `<span class="characteristic-with-tooltip apocalypse-survivor-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(presentation.tooltip)}" aria-controls="${tooltipId}" aria-expanded="false">?</button><span id="${tooltipId}" class="tooltip-content" role="tooltip">${escapeHtml(presentation.tooltip)}</span></span>`
+		: '';
+	const percentage = presentation.isValid
+		? `<small class="apocalypse-survivor-percentage">${escapeHtml(presentation.percentage)}</small>`
+		: '';
+	return `<div class="apocalypse-metric metric-survival"><span class="apocalypse-metric-label">${escapeHtml(t('peopleRemaining'))}</span><div class="apocalypse-survivor-value-row"><strong class="apocalypse-survivor-value" aria-label="${escapeHtml(presentation.ariaLabel)}">${escapeHtml(presentation.compact)}</strong>${tooltip}</div>${percentage}</div>`;
+}
+
+function renderApocalypseCoverSurvivors(survivalChance) {
+	const presentation = buildApocalypseSurvivorPresentation(survivalChance);
+	return `<div class="apocalypse-cover-survivors"><span>${escapeHtml(t('peopleRemaining'))}</span><strong aria-label="${escapeHtml(presentation.ariaLabel)}">${escapeHtml(presentation.compact)}</strong>${presentation.isValid ? `<small>${escapeHtml(presentation.percentage)}</small>` : ''}</div>`;
+}
+
+function renderApocalypseHeroImage(imageUrl) {
+	if (!imageUrl) return '';
+	return `<div class="apocalypse-hero-media is-loading" aria-hidden="true">
+		<img class="apocalypse-hero-image" src="${escapeHtml(imageUrl)}" alt="" loading="eager" decoding="async">
+	</div>`;
+}
+
+function renderApocalypseScenario(model, options = {}) {
 	if (!model) return `<p class="apocalypse-empty">${escapeHtml(t('unknown'))}</p>`;
 	const variant = model.visualVariant || resolveApocalypseVisualVariant(model);
-	const survivalValue = model.survivalChance === '' || model.survivalChance == null
-		? t('unknown')
-		: `${escapeHtml(model.survivalChance)}${typeof model.survivalChance === 'number' || /^\d+(?:[.,]\d+)?$/.test(String(model.survivalChance)) ? '%' : ''}`;
 	const durationValue = model.duration || t('unknown');
-	const heroImage = model.imageUrl
-		? `<div class="apocalypse-hero-media" aria-hidden="true">
-			<img class="apocalypse-hero-image" src="${escapeHtml(model.imageUrl)}" alt="" loading="eager" onerror="handleApocalypseHeroImageError(this)">
-		</div>`
-		: '';
+	const heroImage = renderApocalypseHeroImage(model.imageUrl);
 	const imageButton = model.imageUrl
 		? `<button type="button" class="apocalypse-open-image" onclick="openCurrentApocalypseImage()">${escapeHtml(t('apocOpenImage'))}</button>`
 		: '';
@@ -112,32 +129,37 @@ function renderApocalypseScenario(model) {
 	const details = model.description && model.description !== model.shortDescription
 		? `<p class="apocalypse-footer-description">${escapeHtml(model.description)}</p>` : '';
 
-	return `<article class="scenario-immersive-shell apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
+	return `<article class="scenario-immersive-shell cinematic-section apocalypse-scenario-shell variant-${variant}" aria-labelledby="apocalypse-scenario-title">
 		<div class="apocalypse-card-border-light" aria-hidden="true"></div>
 		<div class="apocalypse-card-reveal-wave" aria-hidden="true"></div>
-		${renderApocalypseEffectLayers()}
-		<header class="scenario-immersive-hero apocalypse-hero ${model.imageUrl ? 'has-image' : 'no-image'}">
-			${heroImage}
-			<div class="apocalypse-hero-overlay" aria-hidden="true"></div>
-			<div class="apocalypse-hero-pattern" aria-hidden="true"></div>
-			<div class="apocalypse-theme-mark" aria-hidden="true">${renderApocalypseIcon(variant)}</div>
-			<div class="apocalypse-hero-content apocalypse-hero-copy">
-				<span class="apocalypse-badge">${escapeHtml(t('apocBadge'))}</span>
-				<h4 id="apocalypse-scenario-title" class="apocalypse-title">${escapeHtml(model.name)}</h4>
-				${model.shortDescription ? `<p class="apocalypse-subtitle">${escapeHtml(model.shortDescription)}</p>` : ''}
-			</div>
-		</header>
-		<section class="apocalypse-metrics" aria-label="${escapeHtml(t('apocBadge'))}">
+		${options.deferVisuals ? '<div class="apocalypse-effect-stack" aria-hidden="true"></div>' : renderApocalypseEffectLayers()}
+		<div class="cinematic-cover apocalypse-cinematic-stage">
+			<header class="scenario-immersive-hero cinematic-cover__hero apocalypse-hero ${model.imageUrl ? 'has-image is-image-loading' : 'no-image'}">
+				${heroImage}
+				<div class="apocalypse-hero-overlay" aria-hidden="true"></div>
+				<div class="apocalypse-hero-pattern" aria-hidden="true"></div>
+				<div class="apocalypse-theme-mark" aria-hidden="true">${renderApocalypseIcon(variant)}</div>
+				<div class="apocalypse-hero-content apocalypse-hero-copy apocalypse-cover__content">
+					<span class="apocalypse-badge">${escapeHtml(t('apocBadge'))}</span>
+					<h4 id="apocalypse-scenario-title" class="apocalypse-title">${escapeHtml(model.name)}</h4>
+					${model.shortDescription ? `<p class="apocalypse-subtitle">${escapeHtml(model.shortDescription)}</p>` : ''}
+					${renderApocalypseCoverSurvivors(model.survivalChance)}
+				</div>
+			</header>
+		</div>
+		<section class="cinematic-details">
+		<section class="cinematic-details__metrics apocalypse-metrics" aria-label="${escapeHtml(t('apocBadge'))}">
 			<div class="apocalypse-metric metric-danger" data-danger="${model.dangerKey}"><span class="apocalypse-metric-label">${escapeHtml(t('apocDanger'))}</span><strong>${escapeHtml(getApocalypseDangerLabel(model.dangerKey))}</strong></div>
-			<div class="apocalypse-metric metric-survival"><span class="apocalypse-metric-label">${escapeHtml(t('survivalChance'))}</span><strong>${survivalValue}</strong></div>
+			${renderApocalypseSurvivorMetric(model.survivalChance)}
 			<div class="apocalypse-metric metric-duration"><span class="apocalypse-metric-label">${escapeHtml(t('duration'))}</span><strong>${escapeHtml(durationValue)}</strong></div>
 		</section>
-		<div class="apocalypse-content-grid">
+		<div class="cinematic-details__columns apocalypse-content-grid apocalypse-primary-content-grid">
 			${renderApocalypseContentSection('threats', t('apocMainThreats'), model.threats)}
 			${renderApocalypseContentSection('requirements', t('apocSurvivalRequirements'), model.requirements)}
-			${renderApocalypseContentSection('consequences', t('apocConsequences'), model.consequences)}
 		</div>
-		<footer class="apocalypse-footer"><div><span class="apocalypse-footer-kicker">${escapeHtml(t('apocScenarioBrief'))}</span>${details}</div><div class="apocalypse-footer-actions">${imageButton}${hostControls}</div></footer>
+		${model.consequences?.length ? `<div class="apocalypse-consequences">${renderApocalypseContentSection('consequences', t('apocConsequences'), model.consequences)}</div>` : ''}
+		<footer class="cinematic-developer-toolbar apocalypse-footer"><div><span class="apocalypse-footer-kicker">${escapeHtml(t('apocScenarioBrief'))}</span>${details}</div><div class="apocalypse-footer-actions">${imageButton}${hostControls}</div></footer>
+		</section>
 	</article>`;
 }
 
@@ -160,9 +182,92 @@ function renderApocalypseCategoryBadge(apocalypse) {
 function handleApocalypseHeroImageError(image) {
 	const hero = image?.closest?.('.apocalypse-hero');
 	if (!hero) return;
+	const media = image.closest('.apocalypse-hero-media');
+	media?.remove();
+	hero.classList.remove('is-image-loading');
+	const fallbackImage = hero.querySelector('.apocalypse-hero-media');
+	if (fallbackImage) {
+		fallbackImage.classList.remove('is-replacing', 'is-retiring');
+		return;
+	}
 	hero.classList.remove('has-image');
 	hero.classList.add('no-image');
-	image.closest('.apocalypse-hero-media')?.remove();
+}
+
+function completeApocalypseHeroImageLoad(image) {
+	const hero = image?.closest?.('.apocalypse-hero');
+	const media = image?.closest?.('.apocalypse-hero-media');
+	if (!hero || !media || !image.naturalWidth) return handleApocalypseHeroImageError(image);
+	media.classList.remove('is-loading');
+	media.classList.add('is-ready');
+	hero.classList.remove('is-image-loading', 'no-image');
+	hero.classList.add('has-image');
+	syncApocalypseHeroImageActions();
+	for (const previous of hero.querySelectorAll('.apocalypse-hero-media.is-replacing')) {
+		if (previous === media) continue;
+		previous.classList.add('is-retiring');
+		window.setTimeout(() => previous.remove(), 180);
+	}
+}
+
+function syncApocalypseHeroImageActions() {
+	const actions = document.querySelector('.apocalypse-footer-actions');
+	if (!actions) return;
+	if (!actions.querySelector('.apocalypse-open-image')) {
+		const openImage = document.createElement('button');
+		openImage.type = 'button';
+		openImage.className = 'apocalypse-open-image';
+		openImage.textContent = t('apocOpenImage');
+		openImage.addEventListener('click', openCurrentApocalypseImage);
+		actions.prepend(openImage);
+	}
+	const controls = actions.querySelector('.apocalypse-image-controls');
+	if (controls && !controls.querySelector('.btn-remove')) {
+		const removeImage = document.createElement('button');
+		removeImage.type = 'button';
+		removeImage.className = 'btn-scenario-image btn-remove';
+		removeImage.textContent = t('remove');
+		removeImage.addEventListener('click', removeApocalypseImage);
+		controls.append(removeImage);
+	}
+}
+
+function prepareApocalypseHeroImage(container = document) {
+	const image = container?.querySelector?.('.apocalypse-hero-image:not([data-apocalypse-image-ready])');
+	if (!image) return;
+	image.dataset.apocalypseImageReady = 'true';
+	const finish = async () => {
+		try {
+			if (typeof image.decode === 'function') await image.decode();
+		} catch (_) {
+			// A decoded cached image may reject in some browsers; naturalWidth remains authoritative.
+		} finally {
+			if (image.naturalWidth) completeApocalypseHeroImageLoad(image);
+			else handleApocalypseHeroImageError(image);
+		}
+	};
+	if (image.complete) {
+		finish();
+		return;
+	}
+	image.addEventListener('load', finish, { once: true });
+	image.addEventListener('error', () => handleApocalypseHeroImageError(image), { once: true });
+}
+
+function updateApocalypseHeroImage(imageUrl) {
+	const hero = document.querySelector('.apocalypse-hero');
+	if (!hero || !imageUrl) return false;
+	const currentImage = hero.querySelector('.apocalypse-hero-media:not(.is-replacing) .apocalypse-hero-image');
+	if (currentImage?.getAttribute('src') === imageUrl) return true;
+	for (const media of hero.querySelectorAll('.apocalypse-hero-media')) media.classList.add('is-replacing');
+	const template = document.createElement('template');
+	template.innerHTML = renderApocalypseHeroImage(imageUrl).trim();
+	const media = template.content.firstElementChild;
+	const overlay = hero.querySelector('.apocalypse-hero-overlay');
+	hero.insertBefore(media, overlay || null);
+	hero.classList.add('is-image-loading');
+	prepareApocalypseHeroImage(media);
+	return true;
 }
 
 function openCurrentApocalypseImage() {

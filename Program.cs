@@ -67,6 +67,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GameTimerService>();
 builder.Services.AddHostedService<GameTimerExpiryService>();
 builder.Services.AddSingleton<SpyRoomService>();
+builder.Services.AddHostedService<SpyTimerExpiryService>();
 builder.Services.AddSingleton<ScenarioImageService>();
 builder.Services.AddSingleton<ThreatScalingService>();
 builder.Services.AddSingleton<ThreatAuditService>();

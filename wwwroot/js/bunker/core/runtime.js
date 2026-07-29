@@ -6,7 +6,35 @@ function getRoomIdFromPath() {
 	return match ? decodeURIComponent(match[1]) : null;
 }
 
-function renderCurrentGameUI() {
+function setRoomActionsMenuOpen(opening) {
+	const menu = document.getElementById('roomActionsMenu');
+	const button = document.getElementById('roomActionsMenuButton');
+	if (!menu || !button) return;
+	menu.hidden = !opening;
+	button.setAttribute('aria-expanded', String(opening));
+}
+
+function toggleRoomActionsMenu() {
+	const menu = document.getElementById('roomActionsMenu');
+	if (menu) setRoomActionsMenuOpen(menu.hidden);
+}
+
+function closeRoomActionsMenu() {
+	setRoomActionsMenuOpen(false);
+}
+
+if (!window.__roomActionsMenuListenersBound) {
+	window.__roomActionsMenuListenersBound = true;
+	document.addEventListener('click', event => {
+		if (!event.target.closest('#roomFloatingControls')) closeRoomActionsMenu();
+	});
+	document.addEventListener('keydown', event => {
+		if (event.key === 'Escape') closeRoomActionsMenu();
+	});
+}
+
+function renderCurrentGameUI(options = {}) {
+	if (typeof organizeBunkerGameStory === 'function') organizeBunkerGameStory();
 	applyStaticTranslations();
 	if (typeof updateRoomUI === "function") updateRoomUI();
 	if (typeof renderMyPlayerCards === "function") {
@@ -20,8 +48,10 @@ function renderCurrentGameUI() {
 			if (container) container.innerHTML = `<p style="color: var(--color-text-muted);">${t('noData')}</p>`;
 		}
 	}
-	if (typeof renderApocalypse === "function") renderApocalypse(currentApocalypse);
-	if (currentBunker && typeof renderBunker === "function") renderBunker(currentBunker);
+	if (typeof renderApocalypse === "function")
+		renderApocalypse(currentApocalypse, { deferVisuals: options.deferApocalypseVisuals === true });
+	if (currentBunker && typeof renderBunker === "function")
+		renderBunker(currentBunker, { deferVisuals: options.deferBunkerVisuals === true });
 	if (typeof renderThreatPanel === "function") renderThreatPanel(currentThreat);
 	if (typeof updateRoundStatusUI === "function") updateRoundStatusUI();
 	if (typeof renderPublicPlayerOverview === "function") renderPublicPlayerOverview();
@@ -30,15 +60,76 @@ function renderCurrentGameUI() {
 	if (selectedPlayerForGM && typeof loadPlayerDataForGM === "function") loadPlayerDataForGM();
 	if (currentGameCompletion) setGameFinishedMutationState(true);
 	window.gmPanelV2OnStateChanged?.();
+	if (typeof syncBunkerVotingStoryState === 'function') syncBunkerVotingStoryState();
+}
+
+let canonicalRoomResyncPromise = null;
+
+function applyCanonicalRoomStateSnapshot(state) {
+	if (!state) return false;
+	const room = state.room || state.Room;
+	if (!room) return false;
+	currentRoom = { ...(currentRoom || {}), ...room };
+	syncPublicGameSettings(state);
+	const nextPlayers = {};
+	(state.players || state.Players || []).forEach(player => {
+		const connectionId = player.connectionId || player.ConnectionId;
+		if (!connectionId) return;
+		const revealedValues = normalizeRevealedValues(player.revealedValues || player.RevealedValues || {});
+		nextPlayers[connectionId] = {
+			...player,
+			connectionId,
+			revealed: normalizeRevealedState(player.revealed || player.Revealed || {}),
+			revealedData: revealedValues.revealedData,
+			revealedTooltips: revealedValues.revealedTooltips,
+			revealedSources: normalizeRevealedSources(player.revealedSources || player.RevealedSources || {}),
+			additionalConditionEffects: normalizeAdditionalPhysicalConditions(player.additionalConditionEffects || player.AdditionalConditionEffects || [])
+		};
+	});
+	roomPlayers = nextPlayers;
+	const me = Object.values(roomPlayers).find(player => isMyPlayerRef(player.connectionId, player.stablePlayerId || player.StablePlayerId));
+	if (me) isHost = !!(me.isHost ?? me.IsHost);
+	applyRoundState(state.roundState || state.RoundState);
+	applyDeveloperPresence(state.developerPresence || state.DeveloperPresence);
+	applyDeveloperAccessState(state.developer || state.Developer || null);
+	const omniscient = state.omniscient || state.Omniscient || null;
+	if (omniscient) {
+		omniscientHiddenStateVersion = Number(omniscient.stateVersion ?? omniscient.StateVersion ?? 0);
+		omniscientHiddenState = omniscient;
+		if (typeof renderOmniscientHiddenState === 'function') renderOmniscientHiddenState();
+	} else if (typeof clearOmniscientHiddenState === 'function') {
+		clearOmniscientHiddenState();
+	}
+	applyPostGameTransition(state.postGameTransition || state.PostGameTransition || null);
+	if (state.apocalypse || state.Apocalypse) currentApocalypse = state.apocalypse || state.Apocalypse;
+	if (state.bunker || state.Bunker) currentBunker = state.bunker || state.Bunker;
+	publicCharacteristicRevisions.clear();
+	renderCurrentGameUI();
+	return true;
+}
+
+function resyncCurrentRoomState() {
+	if (canonicalRoomResyncPromise || !currentRoom?.id || connection?.state !== signalR.HubConnectionState.Connected)
+		return canonicalRoomResyncPromise || Promise.resolve(false);
+	canonicalRoomResyncPromise = connection.invoke('GetRoomState')
+		.then(applyCanonicalRoomStateSnapshot)
+		.catch(error => {
+			console.warn('Canonical room resync failed:', error);
+			return false;
+		})
+		.finally(() => { canonicalRoomResyncPromise = null; });
+	return canonicalRoomResyncPromise;
 }
 
 function resetClientGameStateForNewRoom() {
 	clearOmniscientHiddenState();
+	if (typeof clearPreparedGameScenarioPreview === 'function') clearPreparedGameScenarioPreview();
 	lobbyState = null; lobbyStartPreview = null; lobbyCommandPending = false;
 	currentRoom = null;
 	myPlayerData = null;
 	isHost = false;
 	roomPlayers = {};
+	publicCharacteristicRevisions.clear();
 	selectedPublicPlayerSeat = null;
 	gmPlayersData = {};
 	selectedPlayerForGM = null;
@@ -80,15 +171,19 @@ function resetClientGameStateForNewRoom() {
 	gmLastCommandError = '';
 	bunkerCapacityPending = false;
 
-	['myPlayerCards', 'publicPlayerSelector', 'selectedPlayerPanel', 'roomPlayersList', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent', 'specialCardsTableBody', 'gmSpecialCardsList'].forEach(id => {
+	['myPlayerCards', 'publicPlayerSelector', 'selectedPlayerPanel', 'apocalypseContent', 'bunkerContent', 'votingCandidates', 'votingResultsContent', 'specialCardsTableBody', 'gmSpecialCardsList'].forEach(id => {
 		const el = document.getElementById(id);
 		if (el) el.innerHTML = '';
 	});
 
-	['gameSection', 'votingPanel', 'votingResultsPanel', 'gmPanel', 'gmPlayerInfo', 'roundStatusPanel', 'specialCardsSection'].forEach(id => {
+	['gameSection', 'votingPanel', 'votingResultsPanel', 'gmPanel', 'gmPlayerInfo', 'specialCardsSection'].forEach(id => {
 		const el = document.getElementById(id);
 		if (el) el.style.display = 'none';
 	});
+	document.getElementById('roundStatusPanel')?.setAttribute('hidden', '');
+	document.getElementById('publicGameTimer')?.setAttribute('hidden', '');
+	document.getElementById('roomFloatingControls')?.setAttribute('hidden', '');
+	closeRoomActionsMenu();
 }
 
 function clearLegacyRoomStateOnly() {

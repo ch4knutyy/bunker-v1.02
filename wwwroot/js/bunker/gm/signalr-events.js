@@ -54,7 +54,7 @@ window.BunkerSignalREvents.gm = {
 			if (playerResult) playerResult.textContent = action;
 			markGMServerUpdate();
 			// Оновлюємо дані гравців
-			if (isHost) {
+			if (isHost || isDeveloper) {
 				connection.invoke("GetAllPlayersData").catch(err => console.error(err));
 			}
 		});

@@ -41,8 +41,8 @@ public sealed class LobbyStartService
             members.Count(x => x.IsTechnicalGm), members.Count(x => x.IsOmniscientGm), requiredMembers.Count(x => x.IsReady),
             members.Count(x => x.IsConnected), blockers.Count == 0, blockers, Version(room), time.GetUtcNow(), members,
             requiredMembers.Count, room.HasPassword, settings.ToDto(room), room.SettingsRevision, room.SettingsFrozen,
-            settings.GetWarnings(room), recentEvents, room.GuestWarningRevision,
-            _guestWarningRequests.GetValueOrDefault(room.Id));
+			settings.GetWarnings(room), recentEvents, room.GuestWarningRevision,
+			_guestWarningRequests.GetValueOrDefault(room.Id), room.PreparedScenario is { Status: "Prepared" or "Stale" });
     }
 
     public LobbyStartPreviewDto Preview(Room room, Player host)

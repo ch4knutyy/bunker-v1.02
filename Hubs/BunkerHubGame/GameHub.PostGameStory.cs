@@ -178,9 +178,6 @@ public partial class GameHub
         var actor = _roomService.GetPlayer(Context.ConnectionId) ?? throw new HubException("room_membership_required");
         if (!_developerAuthority.IsDeveloper(actor) || !_developerAuthority.FeatureAllows(capability))
             throw new HubException(_developerAuthority.IsDeveloper(actor) ? "feature_disabled" : "developer_required");
-        if (!_developerAuthority.EnsureActiveOperator(room, actor, Context.ConnectionId) ||
-            !_developerAuthority.IsActiveOperator(room, actor, Context.ConnectionId))
-            throw new HubException("developer_operator_read_only");
         return (room, actor);
     }
 

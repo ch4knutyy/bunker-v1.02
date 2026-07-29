@@ -24,24 +24,19 @@ namespace Bunker.Hubs
             var room = _roomService.GetPlayerRoom(Context.ConnectionId);
             return room != null &&
                 _roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) &&
-                (HasActiveRoomCapability(room, player, RoomActorCapability.ManageRoom) ||
-                 (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value)));
+                (_developerAuthority.CanUseHostControls(room, player) ||
+                  (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value)));
         }
 
         private bool HasActiveRoomCapability(Room room, Player player, RoomActorCapability capability)
         {
-            if (!_developerAuthority.Has(room, player, capability)) return false;
-            if (!_developerAuthority.IsDeveloper(player)) return true;
-            return _developerAuthority.EnsureActiveOperator(room, player, Context.ConnectionId) &&
-                _developerAuthority.IsActiveOperator(room, player, Context.ConnectionId);
+            return _developerAuthority.Has(room, player, capability);
         }
 
         private bool HasGmCapability(Room room, GmCapability capability)
         {
             if (!_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player)) return false;
-            if (_developerAuthority.IsDeveloper(player))
-                return HasActiveRoomCapability(room, player, RoomActorCapability.UseDeveloperTools);
-            return (room.IsHost(player) && GmCapabilities.Allows(room.GmMode, capability)) ||
+            return _developerAuthority.CanUseGmControls(room, player, capability) ||
                 (_activeDirectorCapability != null && IsAuthorizedDirector(player, _activeDirectorCapability.Value));
         }
 
@@ -334,7 +329,7 @@ namespace Bunker.Hubs
         /// <summary>
         /// Регенерувати характеристику гравця (тільки хост)
         /// </summary>
-        public async Task RegeneratePlayerCharacteristic(string targetConnectionId, string characteristicName)
+        public async Task RegeneratePlayerCharacteristic(string targetConnectionId, string characteristicName, string? commandId = null)
         {
             if (!IsCallerHost())
             {
@@ -354,6 +349,17 @@ namespace Bunker.Hubs
             if (room == null || !_roomService.TryResolvePlayer(room, targetConnectionId, out var targetCurrentConnectionId, out var player))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Гравця не знайдено");
+                return;
+            }
+
+            if (room.State != RoomState.Playing || !GmPlayerStateMutator.CanHideCharacteristic(characteristicName))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "characteristic_override_unavailable");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await SendPlayerHostControlData(room);
                 return;
             }
 
@@ -398,13 +404,16 @@ namespace Bunker.Hubs
 
             await BroadcastRoundStateAfterSpecialCardChange(room, characteristicName);
 
+            await AppendGmAudit(room, GetGmActorId(room), "characteristic_regenerate", GmAuditResult.Success,
+                "A player characteristic was regenerated without changing its visibility.", GetSafeAuditPlayerId(player), commandId);
+
             _logger.LogInformation($"GM регенерував {characteristicName} гравця {player.Name}");
         }
 
         /// <summary>
         /// Примусово розкрити характеристику гравця (тільки хост)
         /// </summary>
-        public async Task ForceRevealCharacteristic(string targetConnectionId, string characteristicName)
+        public async Task ForceRevealCharacteristic(string targetConnectionId, string characteristicName, string? commandId = null)
         {
             if (!IsCallerHost())
             {
@@ -428,40 +437,23 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (room.CurrentPhase != GamePhase.RoundReveal)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Зараз не фаза розкриття характеристик");
-                return;
-            }
-
-            if (room.CurrentRound <= 0)
-            {
-                room.CurrentRound = 1;
-            }
-
-            room.CurrentRoundReveals ??= new();
-            var playerKey = RoomService.GetPlayerKey(player);
-            if (room.CurrentRoundReveals.ContainsKey(playerKey) &&
-                !player.RevealRequirementSatisfiedByCredit)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Цей гравець уже розкрив характеристику в поточному раунді");
-                return;
-            }
-
-            if (IsCharacteristicRevealed(player, characteristicName))
+            if (!GmPlayerStateMutator.CanHideCharacteristic(characteristicName) ||
+                IsCharacteristicRevealed(player, characteristicName))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Характеристика вже розкрита");
                 return;
             }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await SendPlayerHostControlData(room);
+                return;
+            }
 
             SetCharacteristicRevealed(player, characteristicName);
-            room.CurrentRoundReveals[playerKey] = characteristicName;
-            player.HasCompletedRevealThisRound = true;
-            player.RevealRequirementSatisfiedByCredit = false;
             _roomService.UpdatePlayer(targetCurrentConnectionId, player);
 
             var revealedData = GetRevealedDataForCharacteristic(player, characteristicName);
-            var roundState = BuildRoundState(room);
+            var revealRevision = AdvancePublicRevealRevision(room);
 
             await Clients.Group(room.Id).SendAsync("CharacteristicRevealed", new
             {
@@ -470,11 +462,13 @@ namespace Bunker.Hubs
                 characteristicKey = characteristicName,
                 data = revealedData,
                 forcedByGM = true,
-                currentRound = room.CurrentRound,
-                roundState
+                revealRevision
             });
 
-            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", roundState);
+            await SendPublicPlayersUpdate(room);
+            await SendPlayerHostControlData(room);
+            await AppendGmAudit(room, GetGmActorId(room), "characteristic_force_reveal", GmAuditResult.Success,
+                "A player characteristic was force-revealed by the host.", GetSafeAuditPlayerId(player), commandId);
 
             _logger.LogInformation($"GM примусово розкрив {characteristicName} гравця {player.Name}");
         }
@@ -482,7 +476,7 @@ namespace Bunker.Hubs
         /// <summary>
         /// Завершити поточний reveal-раунд. Голосування відкривається тільки після 3-го раунду.
         /// </summary>
-        public async Task EndRound()
+        public async Task EndRound(string? commandId = null)
         {
             if (!IsCallerHost())
             {
@@ -509,9 +503,9 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (!HaveAllActivePlayersRevealedThisRound(room))
+            if (!RememberPlayerCommand(room, commandId))
             {
-                await Clients.Caller.SendAsync("ReceiveError", "Не всі активні гравці відкрили характеристику в цьому раунді");
+                await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room));
                 return;
             }
 
@@ -525,6 +519,9 @@ namespace Bunker.Hubs
             });
             _gameTimerService.Stop(room);
             room.VotingReadyResponses.Clear();
+            room.ReadinessCheckId = null;
+            room.ReadinessCheckRound = null;
+            room.ReadinessCheckStartedAtUtc = null;
 
             await ProcessEventCardRoundBoundary(room, completedRound);
             await ActivateApocalypseEffectsWithoutBreakingFlow(
@@ -556,7 +553,6 @@ namespace Bunker.Hubs
 
             RestoreExpiredTemporarySpecialCardEffects(room, completedRound);
             room.CurrentRound = completedRound + 1;
-            await BeginRevealRound(room);
             room.VotingReadyResponses.Clear();
             room.CurrentPhase = GamePhase.RoundReveal;
             StartConfiguredRoundTimer(room);
@@ -575,11 +571,14 @@ namespace Bunker.Hubs
                 roundState = nextRoundState
             });
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", nextRoundState);
+            await AppendGmAudit(room, GetGmActorId(room), "round_force_end", GmAuditResult.Success,
+                "The host forced the round transition without modifying player readiness.", commandId: commandId,
+                allowUndo: false);
             _logger.LogInformation("Раунд {CompletedRound} завершено в кімнаті {RoomName}, стартував раунд {CurrentRound}", completedRound, room.Name, room.CurrentRound);
         }
 
         /// <summary>
-        /// Кинути кубик після того, як усі активні гравці відкрили характеристику в раунді.
+        /// Кинути кубик під час обговорення раунду.
         /// </summary>
         public async Task RollRoundDice(string commandId)
         {
@@ -611,12 +610,6 @@ namespace Bunker.Hubs
             if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.RoundReveal)
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Кубик можна кидати тільки під час фази розкриття характеристик");
-                return;
-            }
-
-            if (!HaveAllActivePlayersRevealedThisRound(room))
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Кубик доступний після reveal усіх активних гравців");
                 return;
             }
 
@@ -699,7 +692,7 @@ namespace Bunker.Hubs
         /// <summary>
         /// Позначити, що група готова переходити до голосування.
         /// </summary>
-        public async Task StartVotingReadyCheck()
+        public async Task StartVotingReadyCheck(string? commandId = null)
         {
             if (!IsCallerHost())
             {
@@ -721,9 +714,15 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.ExtraInventory)
+            if (room.State != RoomState.Playing || room.CurrentPhase is not (GamePhase.ExtraInventory or GamePhase.PreVotingReadyCheck))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Готовність до голосування доступна після завершення поточного раунду, загрози та додаткового інвентарю");
+                return;
+            }
+
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room));
                 return;
             }
 
@@ -760,107 +759,56 @@ namespace Bunker.Hubs
                 });
             }
             room.VotingReadyResponses.Clear();
+            room.ReadinessCheckId = Guid.NewGuid().ToString("N");
+            room.ReadinessCheckRound = room.CurrentRound;
+            room.ReadinessCheckStartedAtUtc = DateTimeOffset.UtcNow;
             var roundState = BuildRoundState(room);
 
             await Clients.Group(roomId).SendAsync("VotingReadyCheckStarted", new
             {
                 round = room.CurrentRound,
+                readinessCheckId = room.ReadinessCheckId,
                 message = "Всі готові до голосування?",
                 roundState
             });
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
 
+            await AppendGmAudit(room, GetGmActorId(room), "readiness_check_started", GmAuditResult.Success,
+                "A new readiness check was started.", commandId: commandId, allowUndo: false);
+
             _logger.LogInformation("Хост запустив готовність до голосування в кімнаті {RoomName}", room.Name);
+        }
+
+        public async Task CancelVotingReadyCheck(string? commandId = null)
+        {
+            var room = _roomService.GetPlayerRoom(Context.ConnectionId);
+            if (room == null || !IsCallerHost() || room.State != RoomState.Playing ||
+                room.CurrentPhase != GamePhase.PreVotingReadyCheck || string.IsNullOrWhiteSpace(room.ReadinessCheckId))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "readiness_check_not_active");
+                return;
+            }
+            if (!RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room));
+                return;
+            }
+
+            room.VotingReadyResponses.Clear();
+            room.ReadinessCheckId = null;
+            room.ReadinessCheckRound = null;
+            room.ReadinessCheckStartedAtUtc = null;
+            room.CurrentPhase = GamePhase.ExtraInventory;
+            var roundState = BuildRoundState(room);
+            await Clients.Group(room.Id).SendAsync("VotingReadyCheckClosed", new { roundState });
+            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", roundState);
+            await AppendGmAudit(room, GetGmActorId(room), "readiness_check_cancelled", GmAuditResult.Success,
+                "The host cancelled the active readiness check.", commandId: commandId, allowUndo: false);
         }
 
         public async Task MarkAllPlayersReady()
         {
-            if (!IsCallerHost())
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Тільки хост може підтвердити готовність усіх гравців");
-                return;
-            }
-
-            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
-            var room = string.IsNullOrWhiteSpace(roomId) ? null : _roomService.GetRoom(roomId);
-            if (room == null || room.State != RoomState.Playing)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Готовність доступна тільки під час гри");
-                return;
-            }
-            if (room.PendingElimination != null)
-            {
-                if (!await FinalizePendingEliminationInternal(room, force: false))
-                {
-                    await Clients.Caller.SendAsync("ReceiveError", "pending_elimination_window");
-                    return;
-                }
-                if (room.State == RoomState.Finished) return;
-            }
-
-            if (room.CurrentPhase == GamePhase.VotingResults)
-            {
-                var postVotingScenario = await TryRunScenarioAfterRound(
-                    room,
-                    room.CurrentRound,
-                    configuredThreatAlreadyDue: false,
-                    triggerPhase: "after_voting");
-                if (postVotingScenario is { Success: true })
-                {
-                    if (postVotingScenario.Public?.ResolutionMode == "existing_threat_flow")
-                    {
-                        await StartCanonicalScenarioThreat(room, room.CurrentRound);
-                        room.CurrentPhase = GamePhase.ExtraInventory;
-                        await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
-                        return;
-                    }
-                    if (postVotingScenario.BlocksVoting) return;
-                }
-                RestoreExpiredTemporarySpecialCardEffects(room, room.CurrentRound);
-                room.CurrentRound++;
-                await BeginRevealRound(room);
-                room.VotingReadyResponses.Clear();
-                room.CurrentPhase = GamePhase.RoundReveal;
-                StartConfiguredRoundTimer(room);
-                var bunkerReveal = _bunkerIntel.RevealNextPublic(room, room.CurrentRound - 1);
-                if (bunkerReveal.Success)
-                {
-                    await Clients.Group(room.Id).SendAsync("BunkerIntelRevealed", bunkerReveal);
-                    await BroadcastBunkerIntelProjection(room);
-                }
-                var nextRoundState = BuildRoundState(room);
-                await Clients.Group(room.Id).SendAsync("RoundAdvanced", new
-                {
-                    currentRound = room.CurrentRound,
-                    roundState = nextRoundState
-                });
-                await Clients.Group(room.Id).SendAsync("RoundStateUpdated", nextRoundState);
-                return;
-            }
-
-            foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
-            {
-                room.VotingReadyResponses[RoomService.GetPlayerKey(player)] = "ready";
-            }
-
-            if (room.CurrentPhase == GamePhase.ExtraInventory)
-            {
-                room.CurrentPhase = GamePhase.PreVotingReadyCheck;
-            }
-
-            var roundState = BuildRoundState(room);
-            await Clients.Group(room.Id).SendAsync("AllPlayersMarkedReady", new
-            {
-                round = room.CurrentRound,
-                roundState
-            });
-            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", roundState);
-
-            if (room.CurrentPhase == GamePhase.RoundReveal &&
-                HaveAllActivePlayersRevealedThisRound(room))
-            {
-                await EndRound();
-            }
+            await Clients.Caller.SendAsync("ReceiveError", "mark_all_ready_deprecated");
         }
 
         /// <summary>
@@ -1467,7 +1415,7 @@ namespace Bunker.Hubs
                 targetRound,
                 allowed = blockedReason == null,
                 blockedReason,
-                clears = new[] { "currentRoundReveals", "votingReadyResponses" },
+                clears = new[] { "votingReadyResponses" },
                 preserves = new[] { "characteristics", "threatEffects", "bunker" }
             });
         }
@@ -1720,6 +1668,12 @@ namespace Bunker.Hubs
 				return;
 			}
 
+			if (!IsCharacteristicRevealed(player, characteristicName))
+			{
+				await Clients.Caller.SendAsync("ReceiveError", "Характеристика ще не розкрита");
+				return;
+			}
+
 			var hideSnapshot = CreateMutationSnapshot(
 				room,
 				GetGmActorId(room),
@@ -1736,21 +1690,6 @@ namespace Bunker.Hubs
 				return;
 			}
 
-			room.CurrentRoundReveals ??= new();
-
-			var playerKey = RoomService.GetPlayerKey(player);
-
-			if (room.CurrentRoundReveals.TryGetValue(
-					playerKey,
-					out var revealedThisRound)
-				&& string.Equals(
-					revealedThisRound,
-					characteristicName,
-					StringComparison.OrdinalIgnoreCase))
-			{
-				room.CurrentRoundReveals.Remove(playerKey);
-			}
-
 			_roomService.UpdatePlayer(connectionId, player);
 
 			await SendPersonalPlayerSnapshot(
@@ -1763,17 +1702,12 @@ namespace Bunker.Hubs
 				new
 				{
 					connectionId,
-					characteristicKey = characteristicName
+					characteristicKey = characteristicName,
+					revealRevision = AdvancePublicRevealRevision(room)
 				});
 
 			await SendPublicPlayersUpdate(room);
 			await SendPlayerHostControlData(room);
-
-			var roundState = BuildRoundState(room);
-
-			await Clients.Group(room.Id).SendAsync(
-				"RoundStateUpdated",
-				roundState);
 
 			await Clients.Caller.SendAsync(
 				"GMActionSuccess",
@@ -1915,10 +1849,15 @@ namespace Bunker.Hubs
             await Clients.Client(connectionId).SendAsync("AllPlayersData", BuildPlayerHostControlData(room));
             await Clients.Caller.SendAsync("GMActionSuccess", new { action = "transfer_host", playerName = player.Name });
             await SendPublicPlayersUpdate(room);
+            await Clients.Group(room.Id).SendAsync("RoundStateUpdated", BuildRoundState(room));
+            if (room.Bunker != null) await BroadcastBunkerIntelProjection(room);
+            if (room.ApocalypseRevealed && room.Apocalypse != null)
+                await Clients.Group(room.Id).SendAsync("ApocalypseChanged", new { apocalypse = GetPublicApocalypse(room), gameSettings = BuildPublicGameSettings(room) });
             await AppendGmAudit(room, oldHostPlayerId, "host_transfer", GmAuditResult.Success,
                 $"Host role was transferred from {oldHostName} to {player.Name}; room restore does not restore host topology.",
                 GetSafeAuditPlayerId(player), commandId, allowUndo: false);
             await BroadcastLobbyState(room);
+            await BroadcastDeveloperAuthorityState(room);
         }
 
         private static HostTransferPreviewDto BuildHostTransferPreview(

@@ -226,7 +226,6 @@ function renderThreatIcon(variant) {
 
 function renderHiddenThreatScenario() {
 	return `<article class="scenario-immersive-shell threat-scenario-shell is-sealed" aria-labelledby="threat-hidden-title">
-		<div class="threat-sealed-pattern" aria-hidden="true"></div>
 		<div class="threat-sealed-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 28v-8c0-8 4-13 11-13s11 5 11 13v8M32 38v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></div>
 		<div class="threat-sealed-copy"><span class="threat-badge">${escapeHtml(t('threat'))}</span><h4 id="threat-hidden-title" class="threat-title">${escapeHtml(t('unknown'))}</h4><p class="threat-description">${escapeHtml(t('threatUnknownDescription'))}</p></div>
 	</article>`;
@@ -249,7 +248,7 @@ function renderThreatScenario(model) {
 	const footerControls = developerFeatureEnabled('scenarioImages') ? `<input type="file" id="threatImageInput" accept="image/*" hidden onchange="uploadThreatImage(this)"><button type="button" class="btn-scenario-image" onclick="document.getElementById('threatImageInput').click()">${escapeHtml(t('uploadImage'))}</button><button type="button" class="btn-scenario-image btn-generate" onclick="generateThreatPrompt()">${escapeHtml(t('generatePrompt'))}</button>${model.imageUrl ? `<button type="button" class="btn-scenario-image" onclick="openCurrentThreatImage()">${escapeHtml(t('threatOpenImage'))}</button><button type="button" class="btn-scenario-image btn-remove" onclick="removeThreatImage()">${escapeHtml(t('remove'))}</button>` : ''}` : '';
 
 	return `<article class="scenario-immersive-shell threat-scenario-shell variant-${variant} severity-${severity.semantic}" aria-labelledby="threat-scenario-title">
-		<header class="scenario-immersive-hero threat-hero ${model.imageUrl ? 'has-image' : 'no-image'}">${media}<div class="threat-hero-overlay" aria-hidden="true"></div><div class="threat-hero-pattern" aria-hidden="true"></div>
+		<header class="scenario-immersive-hero threat-hero ${model.imageUrl ? 'has-image' : 'no-image'}">${media}<div class="threat-hero-overlay" aria-hidden="true"></div>
 			<div class="threat-medallion" aria-hidden="true"><span>${renderThreatIcon(variant)}</span></div>
 			<div class="threat-hero-content"><span class="threat-badge">${escapeHtml(t('threat'))}</span><h4 id="threat-scenario-title" class="threat-title">${escapeHtml(model.name)}</h4>${model.shortDescription ? `<p class="threat-description">${escapeHtml(model.shortDescription)}</p>` : ''}</div>
 		</header>
@@ -262,14 +261,40 @@ function renderThreatScenario(model) {
 
 function renderThreatPanel(threat) {
 	const panel = document.getElementById('threatPanel');
-	const content = panel?.querySelector('.panel-content');
-	if (!panel || !content) return;
+	if (!panel) return;
 	const enabled = isLobbyConfiguredSystemEnabled('threatsEnabled');
-	panel.hidden = !enabled; panel.style.display = enabled ? '' : 'none';
-	if (!enabled) { content.innerHTML = ''; updateScenarioSectionVisibility(); return; }
 	const isRevealed = !!currentRoundState?.threatRevealed && !!threat;
+	const isPublicThreat = enabled && isRevealed;
+	const storySection = document.getElementById('threatGameSection');
+	if (!isPublicThreat) {
+		panel.hidden = true;
+		panel.style.display = 'none';
+		panel.classList.remove('threat-unknown');
+		panel.replaceChildren();
+		if (storySection) storySection.hidden = true;
+		updateScenarioSectionVisibility();
+		return;
+	}
+
+	panel.hidden = false;
+	panel.style.display = '';
+	if (storySection) storySection.hidden = false;
+	let title = panel.querySelector('.threat-panel-title');
+	if (!title) {
+		title = document.createElement('h3');
+		title.className = 'panel-title threat-panel-title';
+		title.textContent = `⚠️ ${t('threat')}`;
+		panel.append(title);
+	}
+	let content = panel.querySelector('.panel-content');
+	if (!content) {
+		content = document.createElement('div');
+		content.className = 'panel-content';
+		content.id = 'threatContent';
+		panel.append(content);
+	}
 	content.innerHTML = renderThreatScenario(buildThreatScenarioModel(threat, isRevealed));
-	panel.classList.toggle('threat-unknown', !isRevealed);
+	panel.classList.remove('threat-unknown');
 	updateScenarioSectionVisibility();
 }
 

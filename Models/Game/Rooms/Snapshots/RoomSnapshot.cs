@@ -43,7 +43,6 @@ public sealed class RoomSnapshotState
     public DateTimeOffset? PausedAtUtc { get; set; }
     public string? PausedByPlayerId { get; set; }
     public GameTimerState GameTimer { get; set; } = new();
-    public Dictionary<string, string> CurrentRoundReveals { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<int, RoundDiceRoll> RoundDiceRolls { get; set; } = new();
     public bool AdditionalInventoryGrantedAfterRound3 { get; set; }
     public int ThreatsTriggeredCount { get; set; }

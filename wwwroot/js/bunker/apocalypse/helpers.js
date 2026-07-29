@@ -4,6 +4,51 @@ function normalizeApocalypseMetadataValue(value) {
 	return String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
 
+function calculateApocalypseSurvivorPopulation(survivalChance) {
+	if (typeof survivalChance !== 'number' || !Number.isFinite(survivalChance) || survivalChance < 0 || survivalChance > 100) return null;
+	return Math.round(worldPopulationSettings.beforeApocalypse * survivalChance / 100);
+}
+
+function getApocalypsePopulationLocale(language = getCurrentLanguage()) {
+	return ({ uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' })[language] || 'uk-UA';
+}
+
+function formatApocalypsePopulationCompact(population, language = getCurrentLanguage()) {
+	if (!Number.isSafeInteger(population) || population < 0) return t('unknown');
+	const suffixes = language === 'en'
+		? [[1_000_000_000, 'B'], [1_000_000, 'M'], [1_000, 'K']]
+		: [[1_000_000_000, ' млрд'], [1_000_000, ' млн'], [1_000, ' тис.']];
+	const match = suffixes.find(([threshold]) => population >= threshold);
+	if (!match) return new Intl.NumberFormat(getApocalypsePopulationLocale(language)).format(population);
+	const [threshold, suffix] = match;
+	const rounded = Math.round((population / threshold) * 100) / 100;
+	const compactNumber = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/0+$/, '');
+	return `${language === 'en' ? compactNumber : compactNumber.replace('.', ',')}${suffix}`;
+}
+
+function formatApocalypsePopulationExact(population, language = getCurrentLanguage()) {
+	if (!Number.isSafeInteger(population) || population < 0) return t('unknown');
+	return new Intl.NumberFormat(getApocalypsePopulationLocale(language)).format(population);
+}
+
+function buildApocalypseSurvivorPresentation(survivalChance, language = getCurrentLanguage()) {
+	const population = calculateApocalypseSurvivorPopulation(survivalChance);
+	if (population === null) {
+		return { isValid: false, population: null, compact: t('unknown'), percentage: '', tooltip: '', ariaLabel: `${t('peopleRemaining')}: ${t('unknown')}` };
+	}
+	const formattedPercentage = new Intl.NumberFormat(getApocalypsePopulationLocale(language), { maximumFractionDigits: 2 }).format(survivalChance);
+	const exactPopulation = formatApocalypsePopulationExact(population, language);
+	const basePopulation = formatApocalypsePopulationExact(worldPopulationSettings.beforeApocalypse, language);
+	return {
+		isValid: true,
+		population,
+		compact: formatApocalypsePopulationCompact(population, language),
+		percentage: t('survivorPopulationPercent').replace('{percent}', formattedPercentage),
+		tooltip: t('survivorPopulationTooltip').replace('{survivors}', exactPopulation).replace('{population}', basePopulation),
+		ariaLabel: t('survivorPopulationAria').replace('{survivors}', exactPopulation).replace('{percent}', formattedPercentage)
+	};
+}
+
 function normalizeApocalypseVisualThemeId(value) {
 	const normalized = String(value ?? '').trim().toLowerCase();
 	return Object.prototype.hasOwnProperty.call(apocalypseVisualThemeRegistry, normalized)

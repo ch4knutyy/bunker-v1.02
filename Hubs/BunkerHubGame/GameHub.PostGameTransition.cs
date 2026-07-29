@@ -9,16 +9,26 @@ public partial class GameHub
     public object GetRoomState()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("room_membership_required");
-        if (!_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out _))
+        if (!_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player))
             throw new HubException("room_membership_required");
+        var isDeveloper = _developerAuthority.IsDeveloper(player);
+        var canViewOmniscientState = _developerAuthority.CanViewOmniscientState(room, player, GmCapability.ViewHiddenRoomState);
+        var elevatedBunkerAccess = isDeveloper || player.GmRole is GmMode.TechnicalGm or GmMode.OmniscientGm ||
+            player.IsSpectatorGm && player.HasSeenOmniscientState;
         return new
         {
             room = room.ToPublicInfo(),
             players = BuildRoomPlayersPayload(room),
             roundState = BuildRoundState(room),
+            publicRevealRevision = room.PublicRevealRevision,
+            apocalypse = GetPublicApocalypse(room),
+            bunker = _bunkerIntel.Project(room, player, elevatedBunkerAccess),
+            omniscient = canViewOmniscientState ? BuildOmniscientHiddenState(room, player) : null,
+            gameSettings = BuildPublicGameSettings(room),
             completion = room.Completion,
             postGameTransition = BuildPostGameTransition(room),
-            developerPresence = _developerAuthority.Presence(room)
+            developerPresence = _developerAuthority.Presence(room),
+            developer = isDeveloper ? _developerAuthority.PrivateState(room, player, Context.ConnectionId) : null
         };
     }
 

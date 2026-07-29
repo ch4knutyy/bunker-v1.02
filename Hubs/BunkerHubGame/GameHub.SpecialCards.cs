@@ -547,24 +547,15 @@ namespace Bunker.Hubs
 				return SpecialCardResolution.Fail("Вказана характеристика вже розкрита");
 			}
 
-			var creditResult = RevealCreditService.ApplyForcedReveals(room, target, revealedKeys);
 			_gmAudit.Append(
 				room,
 				RoomService.GetPlayerKey(owner),
-				"forced_reveal_credits",
+				"forced_reveal",
 				GmAuditResult.Success,
-				$"Round {room.CurrentRound}; actual reveals {creditResult.ActualRevealed}; credits delta {creditResult.CreditsAdded}.",
+				$"Round {room.CurrentRound}; actual reveals {revealedKeys.Count}.",
 				RoomService.GetPlayerKey(target),
 				commandId);
-			await SendPersonalPlayerSnapshot(
-				target.ConnectionId,
-				target,
-				"forced_reveal_credits_updated",
-				new
-				{
-					actualRevealed = creditResult.ActualRevealed,
-					creditsAdded = creditResult.CreditsAdded
-				});
+			await SendPersonalPlayerSnapshot(target.ConnectionId, target, "forced_characteristics_revealed");
 
 			return SpecialCardResolution.Ok(
 				$"Розкрито: {string.Join(", ", revealedLabels)}.",
