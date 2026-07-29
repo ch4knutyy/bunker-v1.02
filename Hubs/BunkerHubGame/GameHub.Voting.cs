@@ -88,6 +88,9 @@ namespace Bunker.Hubs
 
             room.CurrentVoting = voting;
             room.State = RoomState.Voting;
+            room.ReadinessCheckId = null;
+            room.ReadinessCheckRound = null;
+            room.ReadinessCheckStartedAtUtc = null;
             room.CurrentPhase = GamePhase.Voting;
 
             // Повідомляємо всіх про початок голосування

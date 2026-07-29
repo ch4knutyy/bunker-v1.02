@@ -16,7 +16,7 @@ public sealed class RoundVotingAdminServiceTests
         Assert.True(RoundVotingAdminService.CanStartVoting(PlayableRoom(round, phase)).Allowed);
 
     [Fact]
-    public void RoundRevealRequiresEveryGameplayPlayerToCompleteRevealButEarlyFrequencyIsAdvisory()
+    public void RoundRevealAllowsVotingWithoutCharacteristicRevealRequirement()
     {
         var room = PlayableRoom(1, GamePhase.RoundReveal);
         room.GameSettings.VotingFrequency = VotingFrequencyMode.EveryTwoRounds;
@@ -26,8 +26,6 @@ public sealed class RoundVotingAdminServiceTests
             StablePlayerId = "player"
         };
 
-        Assert.Equal("reveal_requirement_pending", RoundVotingAdminService.CanStartVoting(room).Code);
-        room.CurrentRoundReveals["player"] = "RevealCredit";
         Assert.True(RoundVotingAdminService.CanStartVoting(room).Allowed);
     }
 

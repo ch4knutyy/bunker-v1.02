@@ -77,13 +77,7 @@ public sealed class GmPanelStateBuilder
 				CountRevealed(player.Revealed),
 				player.IsProtectedFromVote ||
 					player.EliminationVoteImmunity?.IsActive == true,
-				IsCurrentTurn(room, player),
-				player.RevealRequirementSatisfiedByCredit
-					? "completed_by_credit"
-					: player.HasCompletedRevealThisRound
-						? "completed"
-						: "pending",
-				isTechnical ? player.FutureRevealCredits : null))
+				IsCurrentTurn(room, player)))
 			.OrderByDescending(player => player.IsHost)
 			.ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
 			.ToArray();
@@ -100,18 +94,10 @@ public sealed class GmPanelStateBuilder
 		var unresolvedThreat = threat is not null &&
 			threat.ThreatStatus is not ("hidden" or "aborted" or "resolved_safely" or
 				"resolved_with_casualty" or "failed" or "completed" or "success" or "failure");
-		var allActivePlayersRevealed = gameplayPlayers.Length > 0 &&
-			gameplayPlayers.All(player =>
-			{
-				var playerKey = RoomService.GetPlayerKey(player);
-				return room.CurrentRoundReveals.ContainsKey(playerKey) ||
-					room.CurrentRoundReveals.ContainsKey(player.ConnectionId);
-			});
 		var canStartVoting = canManageGame &&
 			RoundVotingAdminService.CanStartVoting(room, unresolvedThreat).Allowed;
 		var canEndRound = canManageGame && !completed &&
-			room.CurrentPhase == GamePhase.RoundReveal &&
-			allActivePlayersRevealed;
+			room.CurrentPhase == GamePhase.RoundReveal;
 		var canStartGame = canManageGame && room.State == RoomState.Lobby;
 		var canEndVoting = canManageGame && !completed && activeVoting;
 		var canResumeTimer = canManageGame && !completed &&

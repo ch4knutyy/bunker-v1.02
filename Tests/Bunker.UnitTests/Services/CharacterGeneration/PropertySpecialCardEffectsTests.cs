@@ -188,7 +188,6 @@ public sealed class PropertySpecialCardEffectsTests
         Assert.Equal(11, context.Target.Property.GeneratedValues["conditionLevel"]);
         Assert.True(context.Owner.Revealed.Property);
         Assert.False(context.Target.Revealed.Property);
-        Assert.Empty(context.Room.CurrentRoundReveals);
     }
 
     [Fact]
@@ -222,7 +221,6 @@ public sealed class PropertySpecialCardEffectsTests
             conditionField.Min,
             conditionField.Max);
         Assert.True(context.Owner.Revealed.Property);
-        Assert.Empty(context.Room.CurrentRoundReveals);
     }
 
     [Fact]
@@ -250,7 +248,6 @@ public sealed class PropertySpecialCardEffectsTests
 
         Assert.True(ResultSuccess(revealed));
         Assert.True(context.Target.Revealed.Property);
-        Assert.Empty(context.Room.CurrentRoundReveals);
         Assert.Contains(context.Clients.Calls, call => call.Method == "CharacteristicRevealed");
     }
 

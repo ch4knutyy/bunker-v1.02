@@ -2,6 +2,10 @@
 /* TOOLTIP & ЗНАК ОКЛИКУ ДЛЯ ХАРАКТЕРИСТИК           */
 /* ================================================== */
 
+:root {
+    --z-tooltip-overlay: 3000;
+}
+
 /* Контейнер для характеристики з tooltip */
 .characteristic-with-tooltip {
     display: inline-flex;
@@ -135,10 +139,10 @@
 
 .tooltip-portal {
     position: fixed;
-    z-index: 100000;
+    z-index: var(--z-tooltip-overlay, 3000);
     width: max-content;
-    min-width: 200px;
-    max-width: min(360px, calc(100vw - 24px));
+    min-width: 0;
+    max-width: min(380px, calc(100vw - 24px));
     max-height: calc(100vh - 24px);
     overflow: auto;
     padding: 12px 16px;
@@ -151,8 +155,9 @@
     line-height: 1.5;
     text-align: left;
     white-space: normal;
-    overflow-wrap: anywhere;
-    pointer-events: none;
+    overflow-wrap: break-word;
+    word-break: normal;
+    pointer-events: auto;
 }
 
 .tooltip-portal[hidden] {

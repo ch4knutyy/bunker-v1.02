@@ -11,8 +11,8 @@ test('blocker codes are mapped and never inserted as visible text', () => {
   assert.match(client, /lobbyBlockFallback/); assert.doesNotMatch(client, /escapeHtml\(String\(blocker\)\)/);
 });
 test('lobby uses one member surface and lifecycle visibility', () => {
-  assert.equal((view.match(/id="lobbyMembers"/g) || []).length, 1); assert.equal((view.match(/id="roomPlayersList"/g) || []).length, 1);
-  assert.match(client, /roomPlayersList'\)\.style\.display = lifecycle === 'Lobby' \? 'none'/);
+  assert.equal((view.match(/id="lobbyMembers"/g) || []).length, 1); assert.equal((view.match(/id="roomPlayersList"/g) || []).length, 0);
+  assert.doesNotMatch(client, /roomPlayersList/);
   assert.match(client, /focusedKey/); assert.match(client, /connection\.off\("LobbyStateUpdated"\)/);
 });
 test('responsive hierarchy defines 2x2 summaries and touch controls', () => {

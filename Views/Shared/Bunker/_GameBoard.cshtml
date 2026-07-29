@@ -6,14 +6,7 @@
     й публічний стан учасників.
 *@
 <div id="gameSection" class="site-major-section" style="display: none;">
-    <section class="scenario-immersive-section" aria-labelledby="scenarioSectionTitle">
-        @* Заголовок сценарію бункера та апокаліпсису *@
-        <div class="scenario-section-header site-section-heading">
-            <div class="section-header-line"></div>
-            <h2 class="section-header-title" id="scenarioSectionTitle">🎭 Бункер та Апокаліпсис</h2>
-            <div class="section-header-line"></div>
-        </div>
-
+    <section class="scenario-immersive-section">
         @* Інформація про апокаліпсис, бункер і поточну загрозу *@
         <div class="game-info-panels scenario-immersive-grid">
             <div class="apocalypse-panel scenario-immersive-panel" id="apocalypsePanel">
@@ -28,26 +21,11 @@
                     <p>Завантаження...</p>
                 </div>
             </div>
-            <div id="threatPanel" class="threat-panel scenario-immersive-panel">
-                <h3 class="panel-title threat-panel-title">Загроза</h3>
-                <div class="panel-content" id="threatContent">
-                    <article class="scenario-immersive-shell threat-scenario-shell is-sealed" aria-labelledby="threat-hidden-title">
-                        <div class="threat-sealed-pattern" aria-hidden="true"></div>
-                        <div class="threat-sealed-icon" aria-hidden="true">
-                            <svg viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="4" /><path d="M21 28v-8c0-8 4-13 11-13s11 5 11 13v8M32 38v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" /></svg>
-                        </div>
-                        <div class="threat-sealed-copy">
-                            <span class="threat-badge">Загроза</span>
-                            <h4 id="threat-hidden-title" class="threat-title">Невідомо</h4>
-                            <p class="threat-description">Загроза ще не розкрита.</p>
-                        </div>
-                    </article>
-                </div>
-            </div>
+            <div id="threatPanel" class="threat-panel scenario-immersive-panel" hidden style="display: none;"></div>
         </div>
     </section>
 
-    <h2 class="section-title site-section-heading">
+    <h2 id="playersOverviewHeading" class="section-title site-section-heading">
         Гравці в бункері: <span class="bunker-count" id="playerCount">0/6</span>
     </h2>
 

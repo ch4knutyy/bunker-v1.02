@@ -40,9 +40,11 @@ window.BunkerSignalREvents.threats = (() => {
 			connection.on("ThreatRevealed", function (data) {
 				currentThreat = data.threat || data.Threat || null;
 				applyRoundState(data.roundState || data.RoundState);
-				renderCurrentGameUI();
+				renderThreatPanel(currentThreat);
+				updateRoundStatusUI();
+				syncBunkerVotingStoryState();
 				triggerApocalypseVisualReaction('threat-reveal');
-				const threatName = currentThreat ? (getLocalizedValue(currentThreat, 'name') || currentThreat.name || currentThreat.Name) : 'нова загроза';
+				const threatName = currentThreat ? (getLocalizedValue(currentThreat, 'name') || currentThreat.name || currentThreat.Name) : t('threat');
 				addEventMessage(`<span class="event-warning">${t('threatRevealed')}:</span> ${escapeHtml(threatName)}`);
 			});
 		},
@@ -57,8 +59,15 @@ window.BunkerSignalREvents.threats = (() => {
 					renderThreatOperationModal();
 					document.getElementById('threatOperationModal').style.display = 'flex';
 				}
-				renderCurrentGameUI();
-				markGMServerUpdate();
+				renderThreatPanel(currentThreat);
+				updateRoundStatusUI();
+				if ((data.players || data.Players || []).length) renderPublicPlayerOverview();
+				if (data.player || data.Player) {
+					renderMyPlayerCards(myPlayerData);
+					renderMySpecialCards(myPlayerData);
+					renderMyEventCards(myPlayerData);
+				}
+				syncBunkerVotingStoryState();
 				markGMServerUpdate();
 			});
 		},

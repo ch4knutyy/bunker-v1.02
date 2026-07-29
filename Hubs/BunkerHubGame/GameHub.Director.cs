@@ -111,8 +111,9 @@ public partial class GameHub
     private (Room Room, Player Actor) RequireDirectorCaller(GmCapability capability)
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
-        if (room == null || !_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var actor) || !IsAuthorizedDirector(actor, capability) ||
-            !room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(actor))) throw new HubException("director_access_denied");
+        if (room == null || !_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var actor) ||
+            (!_developerAuthority.IsDeveloper(actor) &&
+             (!IsAuthorizedDirector(actor, capability) || !room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(actor))))) throw new HubException("director_access_denied");
         return (room, actor);
     }
     private bool IsAuthorizedDirector(Player player, GmCapability capability) => _omniscientAccess.CanViewHidden(player, capability);

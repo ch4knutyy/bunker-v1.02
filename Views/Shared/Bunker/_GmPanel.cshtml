@@ -7,14 +7,10 @@
     Приховування елементів інтерфейсу не є перевіркою прав:
     доступ до команд повинен перевірятися на backend.
 *@
-<div id="gmPanelBackdrop"
-	 class="gm-panel-v2-backdrop"
-	 aria-hidden="true"
-	 data-gm-click="toggleGMPanel()"></div>
+@using Bunker.Services
 <aside id="gmPanel"
 	   class="gm-panel-v2-drawer"
-	   role="dialog"
-	   aria-modal="true"
+	   role="complementary"
 	   aria-hidden="true"
 	   aria-labelledby="gmPanelTitle">
 	<div class="gm-panel-v2-header">
@@ -89,7 +85,6 @@
 				<div class="gm-round-summary">
 					<span id="gmCurrentRound">Раунд 1</span>
 					<strong id="gmCurrentPhase">Розкриття характеристик</strong>
-					<small id="gmRoundProgress">0/0 відкрили</small>
 					<small id="gmDiceResult" class="gm-dice-result" style="display: none;"></small>
 					<span id="gmPauseBadge" class="gm-status-badge">Гра триває</span>
 					<small id="gmPauseReasonSummary" class="gm-pause-reason-summary" style="display: none;"></small>
@@ -105,11 +100,12 @@
 				</div>
 				<div class="gm-round-actions gm-round-main-actions">
 					<button id="rollDiceBtn" class="btn-gm-action" data-gm-click="rollRoundDice()" disabled>Кинути кубик</button>
-					<button id="endRoundBtn" class="btn-gm-action gm-action-secondary" data-gm-i18n="gmEndRoundAction" data-gm-click="endRound()" disabled>Перейти до наступного етапу</button>
-					<button id="startReadyCheckBtn" class="btn-gm-action" data-gm-i18n="gmMarkAllReadyAction" data-gm-click="markAllPlayersReady()" disabled>Позначити всіх готовими</button>
+					<button id="endRoundBtn" class="btn-gm-action gm-action-secondary" data-gm-i18n="gmForceEndRoundAction" data-gm-click="endRound()" disabled>Примусово завершити раунд</button>
+					<button id="startReadyCheckBtn" class="btn-gm-action" data-gm-i18n="gmAskReadyAction" data-gm-click="startVotingReadyCheck()" disabled>Запитати, чи всі готові</button>
+					<button id="cancelReadyCheckBtn" class="btn-gm-action gm-action-secondary" data-gm-i18n="gmCancelReadyCheckAction" data-gm-click="cancelVotingReadyCheck()" style="display: none;">Скасувати перевірку</button>
 					<button id="gmStartVotingBtn" class="btn-gm-action" data-gm-i18n="gmStartVotingAction" data-gm-click="startVoting()" style="display: none;">Почати голосування</button>
 				</div>
-				<p id="gmVotingLockedHint" class="gm-round-hint" data-gm-i18n="gmVotingRevealRequirementHint">Голосування можна почати після виконання вимоги розкриття.</p>
+				<p id="gmVotingLockedHint" class="gm-round-hint" data-gm-i18n="gmVotingAvailabilityHint">Доступність голосування визначає поточний стан гри.</p>
 				<div id="gmReadyStatusList" class="gm-ready-status-list" style="display: none;"></div>
 				<div id="gmSpecialCardsList" class="gm-special-cards-list" style="display: none;"></div>
 			</section>
@@ -330,36 +326,21 @@
 					</button>
 				</div>
 
-				<label class="gm-label"
-					   for="gmHideCharacteristicSelect"
-					   data-gm-i18n="gmHideCharacteristic">
-					Сховати розкриту характеристику
-				</label>
-
-				<div class="gm-round-actions">
-					<select id="gmHideCharacteristicSelect"
-							name="gmHideCharacteristicSelect"
-							class="gm-select">
-						<option value="Personality">Особистість</option>
-						<option value="Body">Статура</option>
-						<option value="Profession">Професія</option>
-						<option value="PhysicalHealth">Фізичне здоров'я</option>
-						<option value="MentalHealth">Психічне здоров'я</option>
-						<option value="Hobby">Хобі</option>
-						<option value="CharacterTrait">Риса характеру</option>
-						<option value="Phobia">Фобія</option>
-						<option value="Inventory">Інвентар</option>
-						<option value="Property">Майно</option>
-						<option value="Fact">Факт</option>
+				<section class="gm-characteristic-override" aria-labelledby="gmCharacteristicOverrideHeading">
+					<h5 id="gmCharacteristicOverrideHeading" data-gm-i18n="gmCharacteristicOverrideTitle">Керування характеристиками</h5>
+					<label class="gm-label" for="gmCharacteristicOverrideSelect" data-gm-i18n="gmCharacteristicOverrideCategory">Характеристика</label>
+					<select id="gmCharacteristicOverrideSelect" name="gmCharacteristicOverrideSelect" class="gm-select">
+						@foreach (var characteristicKey in GmPlayerStateMutator.PublicCharacteristicKeys)
+						{
+							<option value="@characteristicKey">@characteristicKey</option>
+						}
 					</select>
-
-					<button type="button"
-							class="btn-gm-action gm-player-command"
-							data-gm-i18n="gmHide"
-							data-gm-click="hideSelectedCharacteristic()">
-						Сховати
-					</button>
-				</div>
+					<div class="gm-round-actions">
+						<button type="button" class="btn-gm-action gm-player-command" data-gm-i18n="gmForceReveal" data-gm-click="executeHostCharacteristicOverride('reveal')">Примусово розкрити</button>
+						<button type="button" class="btn-gm-action gm-player-command" data-gm-i18n="gmHide" data-gm-click="executeHostCharacteristicOverride('hide')">Сховати</button>
+						<button type="button" class="btn-gm-action gm-player-command" data-gm-i18n="gmRegenerateCharacteristic" data-gm-click="executeHostCharacteristicOverride('regenerate')">Перегенерувати</button>
+					</div>
+				</section>
 
 				<div id="gmAdditionalConditions"></div>
 			</details>
@@ -706,21 +687,6 @@
 					<button class="btn-gm-action gm-editor-command" data-gm-i18n="gmUndoLastAction" data-gm-click="undoLastGmAction()">Undo</button>
 				</div>
 				<p id="gmEditorFeedback" class="gm-round-hint" aria-live="polite"></p>
-				</div>
-			</section>
-			<section id="gmRevealCreditTools" class="gm-accordion" data-gm-accordion data-gm-developer-tool="reveal credit player">
-				<button id="gmRevealCreditToolsToggle" type="button" class="gm-accordion-toggle" aria-expanded="false" aria-controls="gmRevealCreditToolsPanel">
-					<span data-gm-i18n="gmRevealCreditTools">Тестові кредити розкриття</span>
-					<span class="gm-accordion-arrow" aria-hidden="true">⌄</span>
-				</button>
-				<div id="gmRevealCreditToolsPanel" class="gm-accordion-panel" role="region" aria-labelledby="gmRevealCreditToolsToggle" hidden>
-					<p data-gm-i18n="gmRevealCreditToolsHint">Явна developer-команда; кожна зміна потрапляє до audit і snapshot.</p>
-					<select id="gmRevealCreditPlayer" class="input-field" aria-label="Reveal credit player"></select>
-					<div class="gm-diagnostics-actions">
-						<button type="button" class="btn-gm-action" data-gm-credit-adjustment="1" data-gm-i18n="gmAddRevealCredit">Додати 1 кредит</button>
-						<button type="button" class="btn-gm-action" data-gm-credit-adjustment="-1" data-gm-i18n="gmRemoveRevealCredit">Зняти 1 кредит</button>
-					</div>
-					<p id="gmRevealCreditFeedback" class="gm-round-hint" aria-live="polite"></p>
 				</div>
 			</section>
 			<section id="gmOmniscientMode" class="gm-accordion" data-gm-accordion data-gm-developer-tool="omniscient observer role">

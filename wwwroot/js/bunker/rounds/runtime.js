@@ -4,7 +4,6 @@
 function normalizeRoundState(source) {
 	if (!source) return null;
 
-	const revealedPlayers = source.revealedPlayers || source.RevealedPlayers || [];
 	const readyStatuses = source.readyStatuses || source.ReadyStatuses || [];
 	const specialCards = source.specialCards || source.SpecialCards || [];
 	const threatRevealed = !!(source.threatRevealed ?? source.ThreatRevealed);
@@ -23,8 +22,6 @@ function normalizeRoundState(source) {
 		activePlayerConnectionId: source.activePlayerConnectionId || source.ActivePlayerConnectionId || source.currentPlayerConnectionId || source.CurrentPlayerConnectionId || source.turnPlayerConnectionId || source.TurnPlayerConnectionId || "",
 		activePlayerStableId: source.activePlayerStableId || source.ActivePlayerStableId || source.currentPlayerStableId || source.CurrentPlayerStableId || source.turnPlayerStableId || source.TurnPlayerStableId || "",
 		activePlayerCount: source.activePlayerCount ?? source.ActivePlayerCount ?? 0,
-		revealedCount: source.revealedCount ?? source.RevealedCount ?? 0,
-		allPlayersRevealed: source.allPlayersRevealed ?? source.AllPlayersRevealed ?? false,
 		canStartVoting: source.canStartVoting ?? source.CanStartVoting ?? false,
 		votingStartBlockedCode: source.votingStartBlockedCode || source.VotingStartBlockedCode || null,
 		recommendedStartRound: source.recommendedStartRound ?? source.RecommendedStartRound ?? 3,
@@ -41,16 +38,9 @@ function normalizeRoundState(source) {
 			stablePlayerId: player.stablePlayerId || player.StablePlayerId || "",
 			name: player.name || player.Name || "",
 			seatNumber: player.seatNumber ?? player.SeatNumber ?? 0,
-			revealRequirementStatus: player.revealRequirementStatus || player.RevealRequirementStatus || "pending",
 			status: player.status || player.Status || "pending"
 		})),
-		specialCards: specialCards.map(card => normalizeSpecialCardState(card)),
-		revealedPlayers: revealedPlayers.map(player => ({
-			connectionId: player.connectionId || player.ConnectionId || "",
-			stablePlayerId: player.stablePlayerId || player.StablePlayerId || "",
-			name: player.name || player.Name || "",
-			characteristicKey: player.characteristicKey || player.CharacteristicKey || ""
-		}))
+		specialCards: specialCards.map(card => normalizeSpecialCardState(card))
 	};
 }
 
@@ -98,24 +88,9 @@ function normalizeDiceRoll(source) {
 	};
 }
 
-function hasCurrentPlayerRevealedThisRound() {
-	if (!currentRoundState?.revealedPlayers) return false;
-
-	const self = roomPlayers?.[myConnectionId] || {};
-	if (self.revealRequirementSatisfiedByCredit || self.RevealRequirementSatisfiedByCredit) {
-		return false;
-	}
-	const selfStableId = self.stablePlayerId || stablePlayerId || "";
-
-	return currentRoundState.revealedPlayers.some(player =>
-		player.connectionId === myConnectionId ||
-		(selfStableId && player.stablePlayerId === selfStableId)
-	);
-}
-
 function canRevealThisRound() {
 	const state = currentRoom?.state;
-	return (state === "Playing" || state === "Started") && getCurrentPhase() === "RoundReveal" && !hasCurrentPlayerRevealedThisRound();
+	return state === "Playing" || state === "Started";
 }
 
 function getRevealBlockedReason() {
@@ -126,22 +101,6 @@ function getRevealBlockedReason() {
 			: getCurrentLanguage() === "ru"
 				? "Игра еще не началась"
 				: "Гра ще не почалась";
-	}
-
-	if (getCurrentPhase() !== "RoundReveal") {
-		return getCurrentLanguage() === "en"
-			? "Revealing is not active now"
-			: getCurrentLanguage() === "ru"
-				? "Сейчас не фаза раскрытия характеристик"
-				: "Зараз не фаза розкриття характеристик";
-	}
-
-	if (hasCurrentPlayerRevealedThisRound()) {
-		return getCurrentLanguage() === "en"
-			? "You already revealed a characteristic this round"
-			: getCurrentLanguage() === "ru"
-				? "Вы уже раскрыли характеристику в этом раунде"
-				: "У цьому раунді ви вже розкрили характеристику";
 	}
 
 	return "";
@@ -167,8 +126,7 @@ function getPhaseLabel(phase = getCurrentPhase()) {
 function canEndRoundNow() {
 	return (isHost || isDeveloper) &&
 		currentRoom?.state === "Playing" &&
-		getCurrentPhase() === "RoundReveal" &&
-		currentRoundState?.allPlayersRevealed === true;
+		getCurrentPhase() === "RoundReveal";
 }
 
 function canRollRoundDiceNow() {
@@ -203,19 +161,16 @@ function updateRoundStatusUI() {
 	const panel = document.getElementById('roundStatusPanel');
 
 	if (panel) {
-		panel.style.display = shouldShow ? 'grid' : 'none';
+		panel.hidden = !shouldShow;
 		panel.classList.toggle('is-paused', shouldShow && currentRoundState?.isPaused === true);
 		panel.classList.toggle('is-running', shouldShow && currentRoundState?.isPaused !== true);
 	}
 
 	const roundText = `${t('round')} ${round > 0 ? round : '—'}`;
-	const revealProgress = `${t('gmPlayerRevealed')}: ${currentRoundState?.revealedCount ?? 0}/${currentRoundState?.activePlayerCount ?? 0}`;
 	setText('#roundStatusNumber', roundText);
 	setText('#roundStatusPhase', getPhaseLabel(phase));
-	setText('#roundStatusProgress', revealProgress);
 	setText('#gmCurrentRound', roundText);
 	setText('#gmCurrentPhase', getPhaseLabel(phase));
-	setText('#gmRoundProgress', revealProgress);
 	const pauseBadge = document.getElementById('gmPauseBadge');
 	if (pauseBadge) pauseBadge.textContent = currentRoundState?.isPaused ? t('gmStatusPaused') : t('gmStatusRunning');
 	const pauseReasonSummary = document.getElementById('gmPauseReasonSummary');
@@ -228,10 +183,7 @@ function updateRoundStatusUI() {
 	if (manualRound && document.activeElement !== manualRound) manualRound.value = round || 1;
 	const diceRoll = currentRoundState?.diceRoll || null;
 	const diceText = diceRoll ? t('gmDiceResult').replace('{value}', diceRoll.value) : '';
-	setText('#roundDiceResult', diceText);
 	setText('#gmDiceResult', diceText);
-	const roundDiceResult = document.getElementById('roundDiceResult');
-	if (roundDiceResult) roundDiceResult.style.display = diceRoll ? 'inline-flex' : 'none';
 	const gmDiceResult = document.getElementById('gmDiceResult');
 	if (gmDiceResult) gmDiceResult.style.display = diceRoll ? 'inline-flex' : 'none';
 
@@ -250,18 +202,25 @@ function updateRoundStatusUI() {
 	if (endRoundBtn) {
 		endRoundBtn.disabled = !canEndRoundNow();
 		endRoundBtn.title = endRoundBtn.disabled
-			? 'Раунд можна завершити після reveal усіх активних гравців'
+			? t('unavailableNow')
 			: '';
 	}
 
 	const readyBtn = document.getElementById('startReadyCheckBtn');
 	if (readyBtn) {
-		const canMarkReady = isHost &&
+		const canAskReady = isHost &&
 			currentRoom?.state === "Playing" &&
-			['RoundReveal', 'ExtraInventory', 'PreVotingReadyCheck', 'VotingResults'].includes(phase);
+			['ExtraInventory', 'PreVotingReadyCheck'].includes(phase);
 		readyBtn.style.display = isHost && currentRoom?.state !== "Lobby" ? 'inline-flex' : 'none';
-		readyBtn.disabled = !canMarkReady;
-		readyBtn.title = canMarkReady ? '' : t('unavailableNow');
+		readyBtn.disabled = !canAskReady;
+		readyBtn.title = canAskReady ? '' : t('unavailableNow');
+	}
+
+	const cancelReadyBtn = document.getElementById('cancelReadyCheckBtn');
+	if (cancelReadyBtn) {
+		const activeCheck = currentRoundState?.readinessCheck || currentRoundState?.ReadinessCheck;
+		cancelReadyBtn.style.display = isHost && activeCheck ? 'inline-flex' : 'none';
+		cancelReadyBtn.disabled = !activeCheck;
 	}
 
 	const gmStartVotingBtn = document.getElementById('gmStartVotingBtn');
@@ -279,8 +238,6 @@ function updateRoundStatusUI() {
 			hint.textContent = 'Голосування відкриється після старту гри.';
 		} else if (currentRoundState?.isEarlyVoting && canStartVotingNow()) {
 			hint.textContent = t('gmEarlyVotingHint');
-		} else if (phase === "RoundReveal" && !canStartVotingNow()) {
-			hint.textContent = t('gmVotingRevealRequirementHint');
 		} else if (canStartVotingNow()) {
 			hint.textContent = 'Можна починати голосування.';
 		} else if (phase === "Voting" || phase === "VotingResults") {
@@ -297,24 +254,18 @@ function updateRoundStatusUI() {
 }
 
 function getReadyStatusLabel(status) {
-	const labels = {
-		pending: 'Не відповів',
-		ready: 'Готовий',
-		add: 'Хоче щось додати',
-		special: 'Хоче використати карту'
-	};
-	return labels[status] || labels.pending;
+	return t({ ready: 'readyCheckReady', not_ready: 'readyCheckNotReady', offline: 'readyCheckOffline', pending: 'readyCheckWaiting' }[status] || 'readyCheckWaiting');
 }
 
 function getReadyStatusClass(status) {
-	return ['ready', 'add', 'special'].includes(status) ? status : 'pending';
+	return ['ready', 'not_ready', 'offline'].includes(status) ? status : 'pending';
 }
 
 function updateReadyCheckUI() {
 	const statuses = currentRoundState?.readyStatuses || [];
 	const phase = getCurrentPhase();
-	const isReadyPhase = currentRoom?.state === 'Playing' && phase === 'PreVotingReadyCheck';
-	const hasRoundReadyStatus = statuses.some(player => player.status && player.status !== 'pending');
+	const readinessCheck = currentRoundState?.readinessCheck || currentRoundState?.ReadinessCheck;
+	const isReadyPhase = currentRoom?.state === 'Playing' && phase === 'PreVotingReadyCheck' && readinessCheck;
 	const panel = document.getElementById('readyCheckPanel');
 	const summary = document.getElementById('readyCheckSummary');
 	const gmList = document.getElementById('gmReadyStatusList');
@@ -323,29 +274,28 @@ function updateReadyCheckUI() {
 		panel.style.display = isReadyPhase ? 'block' : 'none';
 	}
 
-	const answered = statuses.filter(player => player.status && player.status !== 'pending').length;
+	const answered = statuses.filter(player => ['ready', 'not_ready'].includes(player.status)).length;
 	if (summary) {
 		summary.textContent = statuses.length > 0
-			? `${answered}/${statuses.length} відповіли`
-			: 'Очікуємо відповіді гравців';
+			? `${answered}/${statuses.length} ${t('readyCheckAnswered')}`
+			: t('readyCheckWaiting');
 	}
+	const myStatus = statuses.find(player => (player.connectionId || player.ConnectionId) === myConnectionId)?.response || 'pending';
+	document.querySelectorAll('[data-ready-status]').forEach(button => {
+		button.classList.toggle('active', button.dataset.readyStatus === myStatus);
+		button.setAttribute('aria-pressed', String(button.dataset.readyStatus === myStatus));
+	});
 
 	if (gmList) {
-		if (isHost && currentRoom?.state === 'Playing' && statuses.length > 0 &&
-			(hasRoundReadyStatus || phase === 'RoundReveal')) {
+		if (isHost && isReadyPhase && statuses.length > 0) {
 			gmList.style.display = 'grid';
 			gmList.innerHTML = statuses.map(player => {
 				const seat = player.seatNumber ? `#${player.seatNumber} ` : '';
-				const revealStatus = player.revealRequirementStatus || 'pending';
-				const statusClass = revealStatus === 'pending' ? 'pending' : 'ready';
+				const statusClass = getReadyStatusClass(player.status);
 				return `
                         <div class="gm-ready-status ${statusClass}">
                             <span>${seat}${escapeHtml(player.name || t('unknown'))}</span>
-                            <strong>${t({
-								completed: 'gmRevealCompleted',
-								completed_by_credit: 'gmRevealCompletedByCredit',
-								pending: 'gmRevealPending'
-							}[revealStatus] || 'gmRevealPending')}</strong>
+						<strong>${getReadyStatusLabel(player.status)}</strong>
                         </div>
                     `;
 			}).join('');

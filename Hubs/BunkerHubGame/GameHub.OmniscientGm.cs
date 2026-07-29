@@ -25,17 +25,17 @@ public partial class GameHub
 			throw new HubException("omniscient_player_not_found");
 		}
 
-		if (!room.IsHost(player))
+        if (!_developerAuthority.CanUseHostControls(room, player))
 		{
 			throw new HubException("omniscient_host_required");
 		}
 
-		if (string.IsNullOrWhiteSpace(bootstrapKey))
+        if (!_developerAuthority.IsDeveloper(player) && string.IsNullOrWhiteSpace(bootstrapKey))
 		{
 			throw new HubException("omniscient_bootstrap_key_missing");
 		}
 
-		if (!_omniscientAccess.CanEnter(room.GmMode, bootstrapKey))
+        if (!_developerAuthority.IsDeveloper(player) && !_omniscientAccess.CanEnter(room.GmMode, bootstrapKey))
 		{
 			throw new HubException("omniscient_invalid_bootstrap_key");
 		}
@@ -47,8 +47,14 @@ public partial class GameHub
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
         var player = _roomService.GetPlayer(Context.ConnectionId);
-        if (room == null || player == null || !room.IsHost(player) || !_omniscientAccess.CanEnter(room.GmMode, bootstrapKey))
+        if (room == null || player == null || !_developerAuthority.CanUseHostControls(room, player) ||
+            (!_developerAuthority.IsDeveloper(player) && !_omniscientAccess.CanEnter(room.GmMode, bootstrapKey)))
             throw new HubException("omniscient_access_denied");
+        if (_developerAuthority.IsDeveloper(player))
+        {
+            await SendPrivateOmniscientState(room, player);
+            return;
+        }
         if (!confirmation) throw new HubException("omniscient_confirmation_required");
         if (string.IsNullOrWhiteSpace(commandId)) throw new HubException("invalid_command_id");
         lock (room.ProcessedOmniscientCommandIds) if (!room.ProcessedOmniscientCommandIds.Add(commandId)) return;
@@ -104,9 +110,9 @@ public partial class GameHub
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId);
         if (room == null || !_roomService.TryResolvePlayer(room, Context.ConnectionId, out _, out var player) ||
-            string.IsNullOrWhiteSpace(player.StablePlayerId) ||
-            !room.IrreversibleOmniscientPlayerIds.Contains(player.StablePlayerId) ||
-            !_omniscientAccess.CanViewHidden(player, capability))
+            !_developerAuthority.CanViewOmniscientState(room, player, capability) ||
+            (!_developerAuthority.IsDeveloper(player) &&
+             (string.IsNullOrWhiteSpace(player.StablePlayerId) || !room.IrreversibleOmniscientPlayerIds.Contains(player.StablePlayerId))))
             throw new HubException("omniscient_hidden_access_denied");
         return (room, player);
     }
@@ -126,7 +132,7 @@ public partial class GameHub
     }
 
     private OmniscientRoomStateDto BuildOmniscientHiddenState(Room room, Player player) =>
-        _omniscientHiddenState.Build(room, _omniscientAccess.CanViewHidden(player, GmCapability.ViewSecretVotes));
+        _omniscientHiddenState.Build(room, _developerAuthority.CanViewOmniscientState(room, player, GmCapability.ViewSecretVotes));
 
     private Task SendPrivateOmniscientState(Room room, Player player) =>
         Clients.Client(player.ConnectionId).SendAsync("OmniscientHiddenStateUpdated", BuildOmniscientHiddenState(room, player));
@@ -136,8 +142,8 @@ public partial class GameHub
         foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
         {
             if (string.IsNullOrWhiteSpace(player.ConnectionId) || !player.IsConnected ||
-                !room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(player)) ||
-                !_omniscientAccess.CanViewHidden(player, GmCapability.ViewHiddenRoomState) ||
+                !_developerAuthority.CanViewOmniscientState(room, player, GmCapability.ViewHiddenRoomState) ||
+                (!_developerAuthority.IsDeveloper(player) && !room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(player))) ||
                 !string.Equals(_roomService.GetPlayerRoomId(player.ConnectionId), room.Id, StringComparison.OrdinalIgnoreCase)) continue;
             await SendPrivateOmniscientState(room, player);
         }

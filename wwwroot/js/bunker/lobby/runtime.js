@@ -1,6 +1,102 @@
 // Extracted from wwwroot/js/game.js.
 // Classic-script globals are intentional; do not convert to ES modules without a separate migration.
 
+let preparedScenarioPreview = null;
+let preparedScenarioRestorePending = false;
+let preparedScenarioRestoreError = null;
+let preparedScenarioRestoreRequest = 0;
+
+function preparedScenarioValue(source, camel, pascal) { return source?.[camel] ?? source?.[pascal] ?? ''; }
+
+function preparedScenarioRestoreMessage(error) {
+	const code = String(error?.message || error || '').toLowerCase();
+	if (code.includes('lobby_membership_required')) return t('preparedPreviewNotJoined');
+	if (code.includes('developer_required')) return t('preparedPreviewAccessDenied');
+	if (code.includes('room_not_found')) return t('preparedPreviewRoomMissing');
+	if (code.includes('prepared_scenario_stale')) return t('preparedPreviewStale');
+	return t('preparedPreviewTemporaryError');
+}
+
+async function restorePreparedGameScenarioPreview() {
+	if (!isDeveloper || preparedScenarioRestorePending || !currentRoom?.id) return;
+	const request = ++preparedScenarioRestoreRequest;
+	preparedScenarioRestorePending = true;
+	preparedScenarioRestoreError = null;
+	renderPreparedScenarioPreview();
+	try {
+		const preview = await connection.invoke('GetPreparedGameScenario');
+		if (request !== preparedScenarioRestoreRequest) return;
+		preparedScenarioPreview = preview || null;
+		window.preparedScenarioPreview = preparedScenarioPreview;
+	} catch (error) {
+		if (request !== preparedScenarioRestoreRequest) return;
+		preparedScenarioRestoreError = preparedScenarioRestoreMessage(error);
+	} finally {
+		if (request !== preparedScenarioRestoreRequest) return;
+		preparedScenarioRestorePending = false;
+		renderPreparedScenarioPreview();
+	}
+}
+
+function clearPreparedGameScenarioPreview() {
+	preparedScenarioRestoreRequest++;
+	preparedScenarioPreview = null;
+	preparedScenarioRestorePending = false;
+	preparedScenarioRestoreError = null;
+	window.preparedScenarioPreview = null;
+}
+
+function retryPreparedGameScenarioPreview() {
+	void restorePreparedGameScenarioPreview();
+}
+
+function renderPreparedScenarioPreview() {
+	const panel = document.getElementById('preparedScenarioPanel');
+	const cards = document.getElementById('preparedScenarioCards');
+	const summary = document.getElementById('preparedScenarioSummary');
+	if (!panel || !cards || !summary) return;
+	const preparationActive = Boolean(lobbyGet(lobbyState, 'isScenarioPreparationActive', 'IsScenarioPreparationActive'));
+	const visible = Boolean(isDeveloper && (preparedScenarioPreview || preparationActive || preparedScenarioRestoreError));
+	panel.hidden = !visible;
+	if (!visible) return;
+	if (!preparedScenarioPreview) {
+		summary.textContent = preparedScenarioRestoreError || t('preparedPreviewLoading');
+		cards.innerHTML = `<div class="prepared-scenario-restore"><p>${escapeHtml(summary.textContent)}</p><button type="button" class="btn-secondary" onclick="retryPreparedGameScenarioPreview()">${escapeHtml(t('preparedPreviewRetry'))}</button></div>`;
+		return;
+	}
+	const entries = [['apocalypse', preparedScenarioValue(preparedScenarioPreview, 'apocalypse', 'Apocalypse')], ['bunker', preparedScenarioValue(preparedScenarioPreview, 'bunker', 'Bunker')]];
+	const readyCount = entries.filter(([, item]) => Boolean(preparedScenarioValue(item, 'imageUrl', 'ImageUrl'))).length;
+	const scenarioStatus = preparedScenarioValue(preparedScenarioPreview, 'status', 'Status');
+	summary.textContent = t('preparedVisualSummary').replace('{ready}', readyCount).replace('{total}', entries.length) +
+		(String(scenarioStatus).toLowerCase() === 'stale' ? ` ${t('preparedPreviewStale')}` : '');
+	cards.innerHTML = entries.map(([kind, item]) => {
+		const imageUrl = preparedScenarioValue(item, 'imageUrl', 'ImageUrl');
+		const name = preparedScenarioValue(item, 'name', 'Name') || t('unknown');
+		const description = preparedScenarioValue(item, 'description', 'Description');
+		const status = imageUrl ? t('preparedImageReady') : t('preparedImageMissing');
+		const inputId = `prepared-${kind}-image-input`;
+		const upload = kind === 'apocalypse' ? 'uploadApocalypseImage' : 'uploadBunkerImage';
+		const prompt = kind === 'apocalypse' ? 'generateApocalypsePrompt' : 'generateBunkerPrompt';
+		return `<article class="prepared-scenario-card ${kind}-preview ${imageUrl ? 'has-image' : 'no-image'}">${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy">` : '<div class="prepared-scenario-fallback" aria-hidden="true"></div>'}<div class="prepared-scenario-copy"><span>${escapeHtml(t(kind))}</span><h4>${escapeHtml(name)}</h4><p>${escapeHtml(description)}</p><small>${escapeHtml(status)}</small></div><div class="prepared-scenario-card-actions"><input id="${inputId}" type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="${upload}(this)"><button type="button" class="btn-secondary" onclick="document.getElementById('${inputId}').click()">${escapeHtml(t('uploadImage'))}</button><button type="button" class="btn-secondary" onclick="${prompt}()">${escapeHtml(t('generatePrompt'))}</button></div></article>`;
+	}).join('');
+}
+
+async function prepareGameScenario() {
+	if (lobbyCommandPending) return;
+	lobbyCommandPending = true; renderLobbyState();
+	let prepared = false;
+	try { preparedScenarioPreview = await connection.invoke('PrepareGameScenario'); preparedScenarioRestoreError = null; window.preparedScenarioPreview = preparedScenarioPreview; renderPreparedScenarioPreview(); prepared = true; }
+	finally { lobbyCommandPending = false; renderLobbyState(); }
+	if (prepared) await previewLobbyStart();
+}
+
+async function cancelPreparedGameScenario() {
+	if (!confirm(t('cancelPreparationConfirm')) || lobbyCommandPending) return;
+	lobbyCommandPending = true; renderLobbyState();
+	try { await connection.invoke('CancelPreparedGameScenario', crypto.randomUUID()); clearPreparedGameScenarioPreview(); }
+	finally { lobbyCommandPending = false; renderLobbyState(); }
+}
+
 async function previewLobbyStart() {
 	if (lobbyCommandPending) return; lobbyCommandPending = true; renderLobbyState();
 	try { lobbyStartPreview = await connection.invoke('PreviewStartGameFromLobby'); renderLobbyPreviewSummary(); }
@@ -10,11 +106,21 @@ async function previewLobbyStart() {
 
 async function startGame() {
 	if (isStartingGame || lobbyCommandPending) return;
+	const preparedStatus = preparedScenarioValue(preparedScenarioPreview, 'status', 'Status');
+	if (isDeveloper && (!preparedScenarioPreview || String(preparedStatus).toLowerCase() === 'stale')) { await prepareGameScenario(); return; }
 	if (!lobbyStartPreview?.canStart) { await previewLobbyStart(); return; }
+	const missingPreparedImages = preparedScenarioPreview && ![preparedScenarioPreview.apocalypse || preparedScenarioPreview.Apocalypse, preparedScenarioPreview.bunker || preparedScenarioPreview.Bunker].every(item => preparedScenarioValue(item, 'imageUrl', 'ImageUrl'));
+	if (missingPreparedImages && !confirm(t('startWithFallbackConfirm'))) return;
 	if (!confirm(getCurrentLanguage() === 'en' ? 'Start the game?' : getCurrentLanguage() === 'ru' ? 'Начать игру?' : 'Почати гру?')) return;
+	const entryGeneration = typeof beginBunkerEntry === 'function' ? beginBunkerEntry('bunkerEntryRoomState') : 0;
 	isStartingGame = true; lobbyCommandPending = true; renderLobbyState();
 	try { await connection.invoke('StartGameFromLobby', lobbyStartPreview.previewToken, true, crypto.randomUUID()); }
-	catch (_) { isStartingGame = false; lobbyStartPreview = null; renderLobbyPreviewSummary(true); }
+	catch (_) {
+		isStartingGame = false;
+		lobbyStartPreview = null;
+		renderLobbyPreviewSummary(true);
+		if (entryGeneration && typeof failBunkerEntryCritical === 'function') failBunkerEntryCritical(entryGeneration);
+	}
 	finally { lobbyCommandPending = false; renderLobbyState(); }
 }
 
@@ -416,15 +522,20 @@ function isLobbyRunning() {
 	return lifecycle === 'Running' || roomState === 'Playing' || roomState === 'Started' || roomState === 'Voting';
 }
 
-function tryRenderRunningGameState() {
+function tryRenderRunningGameState(options = {}) {
 	if (!isLobbyRunning()) return false;
 
 	if (currentRoom && (currentRoom.state === 'Lobby' || currentRoom.State === 'Lobby')) {
 		currentRoom.state = 'Playing';
 	}
 
-	renderLobbyState();
-	renderCurrentGameUI();
+	const roomLobby = document.getElementById('roomLobby');
+	const game = document.getElementById('gameSection');
+	const mine = document.getElementById('myPlayerSection');
+	if (roomLobby) roomLobby.style.display = 'none';
+	if (game) game.style.display = 'block';
+	if (mine) mine.style.display = 'block';
+	renderCurrentGameUI(options);
 	return true;
 }
 
@@ -573,15 +684,18 @@ function renderLobbyState() {
 	const capacity = document.getElementById('lobbyMemberCapacity'); if (capacity) capacity.textContent = `${t('lobbyParticipants')}: ${gameplayCount}`;
 	const previewButton = document.getElementById('lobbyStartPreviewButton'); if (previewButton) { previewButton.style.display = canManageLobby && lifecycle === 'Lobby' ? '' : 'none'; previewButton.disabled = lobbyCommandPending; }
 	const canApplyStart = !!lobbyStartPreview?.canStart && !!lobbyGet(state, 'canStart', 'CanStart');
-	['startGameBtn', 'lobbyStartPrimaryButton'].forEach(id => { const button = document.getElementById(id); if (!button) return; button.style.display = canManageLobby && lifecycle === 'Lobby' ? 'inline-flex' : 'none'; button.disabled = lobbyCommandPending || !canApplyStart; button.style.pointerEvents = button.disabled ? 'none' : 'auto'; button.textContent = t('startGame'); });
+	const developerHost = canManageLobby && isDeveloper;
+	const preparationActive = Boolean(lobbyGet(state, 'isScenarioPreparationActive', 'IsScenarioPreparationActive'));
+	if (developerHost && preparationActive && !preparedScenarioPreview && !preparedScenarioRestorePending && !preparedScenarioRestoreError) void restorePreparedGameScenarioPreview();
+	if (!preparationActive && preparedScenarioPreview) clearPreparedGameScenarioPreview();
+	['startGameBtn', 'lobbyStartPrimaryButton'].forEach(id => { const button = document.getElementById(id); if (!button) return; button.style.display = canManageLobby && lifecycle === 'Lobby' ? 'inline-flex' : 'none'; button.disabled = lobbyCommandPending || (developerHost ? false : !canApplyStart); button.style.pointerEvents = button.disabled ? 'none' : 'auto'; button.textContent = developerHost && !preparedScenarioPreview ? t('prepareGame') : t('startGame'); });
 	const copy = document.getElementById('copyInviteLinkBtn'); if (copy && lifecycle === 'Lobby') copy.textContent = t('lobbyCopyLink');
-	const gm = document.getElementById('gmPanelBtn'); if (gm && lifecycle === 'Lobby') gm.textContent = t('lobbyGmPanel');
-	const leave = document.querySelector('#roomSection .room-actions .btn-danger'); if (leave && lifecycle === 'Lobby') leave.textContent = t('lobbyLeave');
-	document.getElementById('roomPlayersList').style.display = lifecycle === 'Lobby' ? 'none' : '';
-	const waiting = document.getElementById('waitingText'); if (waiting) waiting.style.display = 'none';
+	const leave = document.getElementById('leaveRoomButton'); if (leave && lifecycle === 'Lobby') leave.textContent = t('lobbyLeave');
+	const waiting = document.getElementById('waitingText'); if (waiting) { waiting.style.display = preparationActive && !developerHost ? '' : 'none'; if (preparationActive && !developerHost) waiting.textContent = t('scenarioPreparationWaiting'); }
 	const roomLobby = document.getElementById('roomLobby'); const game = document.getElementById('gameSection'); const mine = document.getElementById('myPlayerSection');
 	if (lifecycle === 'Lobby') { if (roomLobby) roomLobby.style.display = 'block'; if (game) game.style.display = 'none'; if (mine) mine.style.display = 'none'; }
 	else if (lifecycle === 'Running') { if (roomLobby) roomLobby.style.display = 'none'; if (game) game.style.display = 'block'; if (mine) mine.style.display = lobbyGet(me, 'isGameplayParticipant', 'IsGameplayParticipant') ? 'block' : 'none'; }
 	bindLobbySettingsControls(); renderLobbyGameSetup();
 	renderLobbyPreviewSummary();
+	renderPreparedScenarioPreview();
 }

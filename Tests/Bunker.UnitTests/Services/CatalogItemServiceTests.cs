@@ -28,11 +28,10 @@ public sealed class CatalogItemServiceTests
     }
 
     [Fact]
-    public void ReplacementPreservesRevealAccountingAndProfessionInventoryBoundary()
+    public void ReplacementPreservesRevealStateAndProfessionInventoryBoundary()
     {
         var service = new CatalogItemService(Data.Value);
         var player = GeneratePlayer();
-        player.FutureRevealCredits = 3;
         player.Revealed.Fact = true;
         player.Profession.ExperienceYears = 17;
         var inventoryIds = player.Inventory.Items.Select(item => item.DefinitionId).ToArray();
@@ -46,7 +45,6 @@ public sealed class CatalogItemServiceTests
 
         Assert.True(factResult.Success);
         Assert.True(professionResult.Success);
-        Assert.Equal(3, player.FutureRevealCredits);
         Assert.True(player.Revealed.Fact);
         Assert.Equal(17, player.Profession.ExperienceYears);
         Assert.Equal("profession", player.ProfessionItem.Source);
@@ -54,13 +52,11 @@ public sealed class CatalogItemServiceTests
     }
 
     [Fact]
-    public void ExchangeDeepCopiesValuesWithoutChangingRevealAccounting()
+    public void ExchangeDeepCopiesValuesWithoutChangingRevealState()
     {
         var service = new CatalogItemService(Data.Value);
         var source = GeneratePlayer();
         var target = GeneratePlayer();
-        source.FutureRevealCredits = 2;
-        target.FutureRevealCredits = 4;
         source.Revealed.Hobby = true;
         target.Revealed.Hobby = false;
         var sourceId = source.Hobby.Id;
@@ -77,7 +73,6 @@ public sealed class CatalogItemServiceTests
         Assert.Equal(sourceId, target.Hobby.Id);
         Assert.NotSame(targetHobby, source.Hobby);
         Assert.NotSame(sourceHobby, target.Hobby);
-        Assert.Equal((2, 4), (source.FutureRevealCredits, target.FutureRevealCredits));
         Assert.Equal((true, false), (source.Revealed.Hobby, target.Revealed.Hobby));
     }
 

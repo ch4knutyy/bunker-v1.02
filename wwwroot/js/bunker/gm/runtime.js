@@ -795,6 +795,7 @@ function renderRoomSnapshots() {
 function renderUnifiedGmAudit() {
 	const list = document.getElementById('gmThreatAuditList');
 	if (!list) return;
+	const render = () => {
 	const general = (Array.isArray(gmAuditData.entries) ? gmAuditData.entries : []).map(entry => ({
 		source: 'gm',
 		time: entry.occurredAtUtc || entry.OccurredAtUtc,
@@ -847,6 +848,12 @@ function renderUnifiedGmAudit() {
                 <div><span>${escapeHtml(entry.summary + undoState)}</span>${entry.target ? `<span>${escapeHtml(t('target'))}: ${escapeHtml(entry.target)}</span>` : ''}${entry.errorCode ? `<span>${escapeHtml(entry.errorCode)}</span>` : ''}</div>
             </details>`;
 	}).join('');
+	};
+	if (typeof window.preserveGmPanelScroll === 'function') {
+		window.preserveGmPanelScroll(render);
+	} else {
+		render();
+	}
 }
 
 function filterGMThreatOptions() {
@@ -1181,25 +1188,42 @@ function editCharacteristic(charName) {
 }
 
 function regenerateCharacteristic(charName) {
-	if (!selectedPlayerForGM) {
-		alert('Виберіть гравця');
-		return;
-	}
-	if (typeof openCatalogItemPicker === 'function') {
-		openCatalogItemPicker(charName, selectedPlayerForGM);
-	}
+	executeHostCharacteristicOverride('regenerate', charName);
 }
 
 function forceReveal(charName) {
-	if (!selectedPlayerForGM) {
-		alert('Виберіть гравця');
+	executeHostCharacteristicOverride('reveal', charName);
+}
+
+function executeHostCharacteristicOverride(operation, selectedCharacteristic) {
+	const characteristic = selectedCharacteristic || document.getElementById('gmCharacteristicOverrideSelect')?.value;
+	const player = gmPlayersData[selectedPlayerForGM];
+	if (!selectedPlayerForGM || !player || !characteristic || gmPlayerCommandPending) {
+		if (!selectedPlayerForGM) alert(t('gmSelectPlayerFirst'));
 		return;
 	}
+	const label = t(toCamelCase(characteristic)) || characteristic;
+	const playerName = player.name || player.Name || t('unknown');
+	const revealedKey = `${characteristic.charAt(0).toLowerCase()}${characteristic.slice(1)}`;
+	const remainsRevealed = player.revealed?.[revealedKey] ?? player.Revealed?.[characteristic];
+	const messages = {
+		reveal: t('gmForceRevealConfirm').replace('{characteristic}', label).replace('{player}', playerName),
+		hide: t('gmHideConfirm').replace('{characteristic}', label).replace('{player}', playerName),
+		regenerate: t('gmRegenerateConfirm').replace('{characteristic}', label).replace('{player}', playerName) +
+			(remainsRevealed ? `\n\n${t('gmRegenerateRevealedNotice')}` : '')
+	};
+	if (!messages[operation] || !confirm(messages[operation])) return;
 
-	if (confirm(`Примусово розкрити характеристику ${charName}?`)) {
-		connection.invoke("ForceRevealCharacteristic", selectedPlayerForGM, charName)
-			.catch(err => console.error(err));
-	}
+	gmPlayerCommandPending = true;
+	document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = true);
+	const commandId = gmPlayerCommandId();
+	const method = { reveal: 'ForceRevealCharacteristic', hide: 'HideRevealedCharacteristic', regenerate: 'RegeneratePlayerCharacteristic' }[operation];
+	connection.invoke(method, selectedPlayerForGM, characteristic, commandId).catch(error => {
+		gmPlayerCommandPending = false;
+		document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);
+		const result = document.getElementById('gmPlayerCommandResult');
+		if (result) result.textContent = error?.message || t('gmCharacteristicOverrideFailed');
+	});
 }
 
 function eliminateSelectedPlayer() {
@@ -1269,8 +1293,7 @@ function inspectSelectedConnection() {
 }
 
 function hideSelectedCharacteristic() {
-	const characteristic = document.getElementById('gmHideCharacteristicSelect')?.value;
-	if (characteristic) invokeGMPlayerCommand('HideRevealedCharacteristic', [selectedPlayerForGM, characteristic]);
+	executeHostCharacteristicOverride('hide');
 }
 
 async function transferHostToSelectedPlayer() {

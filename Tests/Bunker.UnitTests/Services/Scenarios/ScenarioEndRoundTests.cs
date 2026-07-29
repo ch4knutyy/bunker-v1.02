@@ -20,9 +20,6 @@ public sealed class ScenarioEndRoundTests
     public async Task UnexpectedScenarioExceptionIsRolledBackAndRoundStillAdvances()
     {
         var context = CreateHubContext();
-        var playerKey = RoomService.GetPlayerKey(context.Host);
-        context.Room.CurrentRoundReveals[playerKey] = "Profession";
-
         await context.Hub.EndRound();
 
         Assert.Equal(3, context.Room.CurrentRound);

@@ -111,17 +111,6 @@ body .player-cards-grid .vault-characteristic-card {
     --card-line: color-mix(in srgb, var(--card-accent) 18%, rgba(255, 255, 255, 0.14));
     --card-text: #eee9df;
     --card-muted: #c9c0b1;
-    --card-frame-texture: url('/images/ui/card-frame-military.png');
-    --card-stain-texture: url('/images/ui/card-stain-dust.png');
-    --card-fingerprint-texture: url('/images/ui/card-fingerprint-1.png');
-    /* v10 texture balance */
-    --surface-opacity: 0.16;
-    --fingerprint-opacity: 0;
-    --stain-position: 88% 12%;
-    --stain-size: 40% auto;
-    --fingerprint-position: 91% 12%;
-    --fingerprint-size: 18% auto;
-    --wear-rotation: -0.45deg;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -133,50 +122,10 @@ body .player-cards-grid .vault-characteristic-card {
     color: var(--card-text);
     border: 2px solid var(--card-border);
     border-radius: 7px;
-    background: radial-gradient(ellipse at 52% 12%, rgba(122, 95, 54, 0.15), transparent 34%), radial-gradient(ellipse at 15% 76%, rgba(94, 72, 44, 0.1), transparent 27%), radial-gradient(ellipse at 86% 62%, rgba(34, 30, 24, 0.38), transparent 32%), radial-gradient(circle at 18% 23%, rgba(255, 255, 255, 0.025) 0 1px, transparent 2px), radial-gradient(circle at 76% 70%, rgba(255, 255, 255, 0.018) 0 1px, transparent 2px), linear-gradient(148deg, rgba(255, 255, 255, 0.024), transparent 28%), linear-gradient(180deg, #151412 0%, #090908 52%, #060606 100%);
-    box-shadow: 0 19px 38px rgba(0, 0, 0, 0.46), 0 0 12px color-mix(in srgb, var(--card-accent) 8%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--card-accent) 20%, transparent), inset 0 0 0 3px rgba(0, 0, 0, 0.54), inset 0 -44px 66px rgba(0, 0, 0, 0.4);
+    background: radial-gradient(ellipse at 50% 0, color-mix(in srgb, var(--card-accent) 9%, transparent), transparent 48%), linear-gradient(180deg, #151511 0%, #0b0c09 100%);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.42), inset 0 0 0 1px color-mix(in srgb, var(--card-accent) 14%, transparent), inset 0 -20px 38px rgba(0, 0, 0, 0.28);
     transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
 }
-
-    /*
-   Real edge wear and a local stain. The centre is strongly faded,
-   keeping approximately 75% of the dark card clearly visible.
-*/
-    body .player-cards-grid .vault-characteristic-card::before {
-        content: "";
-        position: absolute;
-        inset: -4%;
-        z-index: 0;
-        pointer-events: none;
-        border-radius: inherit;
-        background: var(--card-frame-texture) center / 106% 106% no-repeat, var(--card-stain-texture) var(--stain-position) / var(--stain-size) no-repeat, linear-gradient(105deg, transparent 0 16%, rgba(255, 255, 255, 0.018) 16.1%, transparent 16.35%), linear-gradient(77deg, transparent 0 76%, rgba(255, 255, 255, 0.014) 76.1%, transparent 76.35%);
-        opacity: var(--surface-opacity);
-        filter: grayscale(0.42) sepia(0.14) saturate(0.56) contrast(1.08) brightness(0.72);
-        mix-blend-mode: screen;
-        -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.12) 0 34%, rgba(0, 0, 0, 0.38) 48%, rgba(0, 0, 0, 0.78) 68%, #000 100%);
-        mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.12) 0 34%, rgba(0, 0, 0, 0.38) 48%, rgba(0, 0, 0, 0.78) 68%, #000 100%);
-        transform: rotate(var(--wear-rotation)) scale(1.025);
-        transform-origin: center;
-    }
-
-    /*
-   A small optional fingerprint. It is disabled by default and shown
-   only on selected cards to avoid repetition.
-*/
-    body .player-cards-grid .vault-characteristic-card::after {
-        content: "";
-        position: absolute;
-        inset: -2%;
-        z-index: 0;
-        pointer-events: none;
-        border-radius: inherit;
-        background: var(--card-fingerprint-texture) var(--fingerprint-position) / var(--fingerprint-size) no-repeat;
-        opacity: var(--fingerprint-opacity);
-        filter: grayscale(0.34) sepia(0.12) saturate(0.58) contrast(1.05) brightness(0.8);
-        mix-blend-mode: screen;
-        transform: rotate(var(--wear-rotation)) scale(1.015);
-        transform-origin: center;
-    }
 
     body .player-cards-grid .vault-characteristic-card > * {
         position: relative;
@@ -189,112 +138,6 @@ body .player-cards-grid .vault-characteristic-card {
         border-color: color-mix(in srgb, var(--card-accent) 92%, rgba(255, 255, 255, 0.25));
         box-shadow: 0 0 22px color-mix(in srgb, var(--card-accent) 14%, transparent), 0 24px 42px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.02), inset 0 0 0 3px rgba(0, 0, 0, 0.46), inset 0 -46px 68px rgba(0, 0, 0, 0.34);
     }
-
-
-    /* ---------------------------------------------------------------
-   REAL TEXTURE MAPPING BY CATEGORY
-   --------------------------------------------------------------- */
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Personality"] {
-        --card-frame-texture: url('/images/ui/card-frame-forensic.png');
-        --card-stain-texture: url('/images/ui/card-stain-dust.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-1.png');
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Body"] {
-        --card-frame-texture: url('/images/ui/card-frame-anatomy.png');
-        --card-stain-texture: url('/images/ui/card-stain-corner.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-2.png');
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Profession"] {
-        --card-frame-texture: url('/images/ui/card-frame-industrial.png');
-        --card-stain-texture: url('/images/ui/card-stain-rust.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-3.png');
-        --stain-position: 5% 94%;
-        --stain-size: 38% auto;
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="PhysicalHealth"] {
-        --card-frame-texture: url('/images/ui/card-frame-anatomy.png');
-        --card-stain-texture: url('/images/ui/card-stain-scratch.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-4.png');
-        --stain-position: 94% 92%;
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="MentalHealth"] {
-        --card-frame-texture: url('/images/ui/card-frame-forensic.png');
-        --card-stain-texture: url('/images/ui/card-stain-cyan.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-5.png');
-        --stain-position: 4% 8%;
-        --stain-size: 36% auto;
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Hobby"] {
-        --card-frame-texture: url('/images/ui/card-frame-watch.png');
-        --card-stain-texture: url('/images/ui/card-stain-ring.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-2.png');
-        --stain-position: 96% 7%;
-        --stain-size: 34% auto;
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="CharacterTrait"] {
-        --card-frame-texture: url('/images/ui/card-frame-forensic.png');
-        --card-stain-texture: url('/images/ui/card-stain-smoke.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-3.png');
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Phobia"] {
-        --card-frame-texture: url('/images/ui/card-frame-forensic.png');
-        --card-stain-texture: url('/images/ui/card-stain-dust.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-4.png');
-        --stain-position: 4% 94%;
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Inventory"] {
-        --card-frame-texture: url('/images/ui/card-frame-gasmask.png');
-        --card-stain-texture: url('/images/ui/card-stain-rust.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-5.png');
-        --stain-position: 94% 6%;
-        --stain-size: 36% auto;
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Property"] {
-        --card-frame-texture: url('/images/ui/card-frame-industrial.png');
-        --card-stain-texture: url('/images/ui/card-stain-corner.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-1.png');
-    }
-
-    body .player-cards-grid .vault-characteristic-card[data-characteristic-type="Fact"] {
-        --card-frame-texture: url('/images/ui/card-frame-watch.png');
-        --card-stain-texture: url('/images/ui/card-stain-scratch.png');
-        --card-fingerprint-texture: url('/images/ui/card-fingerprint-2.png');
-        --stain-position: 97% 95%;
-        --stain-size: 36% auto;
-    }
-
-/*
-   Fingerprints appear only on a minority of cards.
-   Their size stays within 15–20% of the card width.
-*/
-body .player-cards-grid > .vault-characteristic-card:nth-child(3n + 1) {
-    --fingerprint-opacity: 0.12;
-    --fingerprint-position: 92% 10%;
-    --fingerprint-size: 18% auto;
-    --wear-rotation: -0.45deg;
-}
-
-body .player-cards-grid > .vault-characteristic-card:nth-child(5n + 2) {
-    --fingerprint-opacity: 0.09;
-    --fingerprint-position: 8% 91%;
-    --fingerprint-size: 16% auto;
-    --wear-rotation: 0.35deg;
-}
-
-body .player-cards-grid > .vault-characteristic-card:nth-child(4n + 2),
-body .player-cards-grid > .vault-characteristic-card:nth-child(4n) {
-    --wear-rotation: 0.25deg;
-}
 
 /* ---------------------------------------------------------------
    CATEGORY COLOURS
@@ -608,6 +451,13 @@ body .player-cards-grid .card-revealed {
     cursor: pointer;
     box-shadow: none;
     transition: color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+body .player-cards-grid .vault-card-hide {
+    color: rgba(233, 228, 219, .78);
+    border-top-color: rgba(255, 255, 255, .18);
+    border-bottom-color: rgba(255, 255, 255, .1);
+    background: linear-gradient(180deg, rgba(32, 35, 36, .58), rgba(0, 0, 0, .22));
 }
 
     body .player-cards-grid .vault-card-reveal:hover,

@@ -203,6 +203,11 @@ namespace Bunker.Hubs
 					developerPresence = _developerAuthority.Presence(room),
 					postGameTransition = BuildPostGameTransition(room)
 				});
+				if (_developerAuthority.IsDeveloper(player))
+				{
+					await SendPlayerHostControlData(room);
+					await SendPrivateOmniscientState(room, player);
+				}
 
 				// Повідомляємо інших у кімнаті
 				await Clients.OthersInGroup(room.Id).SendAsync("PlayerJoinedRoom", new
@@ -385,12 +390,17 @@ namespace Bunker.Hubs
 				apocalypse = GetPublicApocalypse(room),
 				gameSettings = BuildPublicGameSettings(room),
 				bunker = _bunkerIntel.Project(room, player,
-					player.GmRole is GmMode.TechnicalGm or GmMode.OmniscientGm ||
+					isDeveloper || player.GmRole is GmMode.TechnicalGm or GmMode.OmniscientGm ||
 					player.IsSpectatorGm && player.HasSeenOmniscientState),
 				voting = BuildVotingReconnectInfo(room, player),
 				players = BuildRoomPlayersPayload(room),
 				roundState = BuildRoundState(room)
 			});
+			if (isDeveloper)
+			{
+				await SendPlayerHostControlData(room);
+				await SendPrivateOmniscientState(room, player);
+			}
 			await SendPendingScenarioState(room, player, Context.ConnectionId);
 
 			await Clients.OthersInGroup(roomId).SendAsync("PlayerReconnected", new
@@ -798,6 +808,9 @@ namespace Bunker.Hubs
                     };
                 })
             });
+
+            // The selected content now belongs to the active game state; the lobby-only preview is closed.
+            room.PreparedScenario = null;
 
             // Оновлюємо список кімнат (кімната більше не в лобі)
             await Clients.All.SendAsync("RoomsListUpdated", _roomService.GetAllRooms());

@@ -117,9 +117,7 @@ function renderBunkerMaterialLayers() {
 		<div class="bunker-material-layer bunker-material-layer--secondary"></div>
 		<div class="bunker-condition-stack"></div>
 	</div>
-	<div class="bunker-chassis-frame" aria-hidden="true"></div>
-	<div class="apocalypse-effect-stack bunker-apocalypse-effect-stack" aria-hidden="true"></div>
-	<div class="bunker-readability-veil" aria-hidden="true"></div>`;
+	<div class="apocalypse-effect-stack bunker-apocalypse-effect-stack" aria-hidden="true"></div>`;
 }
 
 function applyBunkerApocalypseLayers(root = document.querySelector('.bunker-visual-root'), enabled = true) {

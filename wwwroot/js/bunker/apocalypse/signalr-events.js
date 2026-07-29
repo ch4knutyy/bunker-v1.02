@@ -51,7 +51,7 @@ window.BunkerSignalREvents.apocalypse = {
 				const imageUrl = data.imageUrl || data.ImageUrl || null;
 				currentApocalypse.imageUrl = imageUrl;
 				if ('ImageUrl' in currentApocalypse) currentApocalypse.ImageUrl = imageUrl;
-				renderApocalypse(currentApocalypse);
+				if (!updateApocalypseHeroImage(imageUrl)) renderApocalypse(currentApocalypse);
 				addEventMessage(`<span class="event-image">🖼️</span> Зображення апокаліпсису оновлено`);
 			}
 		});

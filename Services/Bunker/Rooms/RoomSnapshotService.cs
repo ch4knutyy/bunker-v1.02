@@ -194,7 +194,6 @@ public sealed class RoomSnapshotService
             PausedAtUtc = room.PausedAtUtc,
             PausedByPlayerId = NormalizePlayerReference(room, room.PausedByPlayerId),
             GameTimer = Clone(room.GameTimer) ?? new(),
-            CurrentRoundReveals = Clone(room.CurrentRoundReveals) ?? new(StringComparer.OrdinalIgnoreCase),
             RoundDiceRolls = Clone(room.RoundDiceRolls) ?? new(),
             AdditionalInventoryGrantedAfterRound3 = room.AdditionalInventoryGrantedAfterRound3,
             ThreatsTriggeredCount = room.ThreatsTriggeredCount,
@@ -268,7 +267,6 @@ public sealed class RoomSnapshotService
         room.PausedAtUtc = state.PausedAtUtc;
         room.PausedByPlayerId = state.PausedByPlayerId;
         room.GameTimer = state.GameTimer;
-        room.CurrentRoundReveals = state.CurrentRoundReveals;
         room.RoundDiceRolls = state.RoundDiceRolls;
         room.AdditionalInventoryGrantedAfterRound3 = state.AdditionalInventoryGrantedAfterRound3;
         room.ThreatsTriggeredCount = state.ThreatsTriggeredCount;
@@ -282,6 +280,11 @@ public sealed class RoomSnapshotService
             room.ThreatState = state.ThreatState;
         }
         room.VotingReadyResponses = state.VotingReadyResponses;
+        // Readiness prompts are temporary, connection-aware UI state. A restored snapshot
+        // must not revive an identifier that was not part of that snapshot.
+        room.ReadinessCheckId = null;
+        room.ReadinessCheckRound = null;
+        room.ReadinessCheckStartedAtUtc = null;
         room.CurrentVoting = state.CurrentVoting;
         room.Apocalypse = state.Apocalypse;
         room.ApocalypseRevealed = state.ApocalypseRevealed && state.Apocalypse != null;
@@ -321,8 +324,6 @@ public sealed class RoomSnapshotService
 
     private static void NormalizePlayerReferences(Room room, RoomSnapshotState state)
     {
-        state.CurrentRoundReveals = state.CurrentRoundReveals.ToDictionary(
-            pair => NormalizePlayerReference(room, pair.Key) ?? pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
         state.VotingReadyResponses = state.VotingReadyResponses.ToDictionary(
             pair => NormalizePlayerReference(room, pair.Key) ?? pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
         foreach (var roll in state.RoundDiceRolls.Values)

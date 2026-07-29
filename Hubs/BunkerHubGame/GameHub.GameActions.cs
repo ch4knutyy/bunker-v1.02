@@ -39,26 +39,6 @@ namespace Bunker.Hubs
                 return;
             }
 
-            if (room.CurrentPhase != GamePhase.RoundReveal)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Зараз не фаза розкриття характеристик");
-                return;
-            }
-
-            if (room.CurrentRound <= 0)
-            {
-                room.CurrentRound = 1;
-            }
-
-            room.CurrentRoundReveals ??= new();
-            var playerKey = RoomService.GetPlayerKey(player);
-            if (room.CurrentRoundReveals.ContainsKey(playerKey) &&
-                !player.RevealRequirementSatisfiedByCredit)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "У цьому раунді ви вже розкрили характеристику");
-                return;
-            }
-
             characteristicName = NormalizeCharacteristicName(characteristicName?.Trim() ?? "");
             if (string.Equals(characteristicName, "SpecialCard", StringComparison.Ordinal))
             {
@@ -85,7 +65,6 @@ namespace Bunker.Hubs
 
             if (alreadyRevealed)
             {
-                await Clients.Caller.SendAsync("ReceiveError", $"Характеристика '{characteristicName}' вже відкрита або не існує");
                 return;
             }
 
@@ -97,16 +76,31 @@ namespace Bunker.Hubs
                 return;
             }
 
-            // Позначаємо характеристику як відкриту
-            SetCharacteristicRevealed(player, characteristicName);
-            room.CurrentRoundReveals[playerKey] = characteristicName;
-            player.HasCompletedRevealThisRound = true;
-            player.RevealRequirementSatisfiedByCredit = false;
+            // The public reveal state and its ordering revision change atomically with hide.
+            long revealRevision;
+            var changed = false;
+            lock (room.SnapshotSyncRoot)
+            {
+                if (!IsCharacteristicRevealed(player, characteristicName))
+                {
+                    SetCharacteristicRevealed(player, characteristicName);
+                    revealRevision = ++room.PublicRevealRevision;
+                    changed = true;
+                }
+                else
+                {
+                    revealRevision = room.PublicRevealRevision;
+                }
+            }
+
+            if (!changed)
+            {
+                await SendPersonalPlayerSnapshot(Context.ConnectionId, player, "player_characteristic_revealed");
+                return;
+            }
 
             // Оновлюємо гравця в сервісі
             _roomService.UpdatePlayer(Context.ConnectionId, player);
-
-            var roundState = BuildRoundState(room);
 
             // Повідомляємо всіх в кімнаті про розкриту характеристику
             await Clients.Group(roomId).SendAsync("CharacteristicRevealed", new
@@ -115,18 +109,74 @@ namespace Bunker.Hubs
                 connectionId = Context.ConnectionId,
                 characteristicKey = characteristicName,
                 data = revealedData,
-                currentRound = room.CurrentRound,
-                roundState
+                revealRevision
             });
-
-            await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
             await BroadcastOmniscientStateToAuthorizedSpectators(room);
+        }
+
+        /// <summary>
+        /// Allows a player to return one of their own revealed characteristics to the hidden state.
+        /// The player identity is resolved exclusively from the active SignalR connection.
+        /// </summary>
+        public async Task<bool> HideOwnRevealedCharacteristic(string characteristicName)
+        {
+            var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
+            var player = _roomService.GetPlayer(Context.ConnectionId);
+
+            if (roomId == null || player == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "characteristic_hide_unavailable");
+                return false;
+            }
+
+            var room = _roomService.GetRoom(roomId);
+            if (room?.State != RoomState.Playing)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "characteristic_hide_unavailable");
+                return false;
+            }
+
+            characteristicName = NormalizeCharacteristicName(characteristicName?.Trim() ?? "");
+            if (!GmPlayerStateMutator.PublicCharacteristicKeys.Contains(characteristicName, StringComparer.Ordinal))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "characteristic_hide_unavailable");
+                return false;
+            }
+
+            var changed = false;
+            long revealRevision = 0;
+            lock (room.SnapshotSyncRoot)
+            {
+                if (IsCharacteristicRevealed(player, characteristicName))
+                {
+                    GmPlayerStateMutator.HideCharacteristic(player, characteristicName);
+                    _roomService.UpdatePlayer(Context.ConnectionId, player);
+                    revealRevision = ++room.PublicRevealRevision;
+                    changed = true;
+                }
+            }
+
+            if (!changed)
+            {
+                await SendPersonalPlayerSnapshot(Context.ConnectionId, player, "player_characteristic_hidden");
+                return true;
+            }
+
+            await SendPersonalPlayerSnapshot(Context.ConnectionId, player, "player_characteristic_hidden");
+            await Clients.Group(roomId).SendAsync("CharacteristicHidden", new
+            {
+                connectionId = Context.ConnectionId,
+                characteristicKey = characteristicName,
+                revealRevision
+            });
+            await BroadcastOmniscientStateToAuthorizedSpectators(room);
+            return true;
         }
 
         /// <summary>
         /// Відповідь гравця на перевірку готовності до голосування.
         /// </summary>
-        public async Task SubmitVotingReadyStatus(string status)
+        public async Task SubmitVotingReadyStatus(string status, string? readinessCheckId = null, string? commandId = null)
         {
             var roomId = _roomService.GetPlayerRoomId(Context.ConnectionId);
             var player = _roomService.GetPlayer(Context.ConnectionId);
@@ -145,17 +195,37 @@ namespace Bunker.Hubs
             }
             if (await RejectPausedPlayerAction(room)) return;
 
-            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.PreVotingReadyCheck)
+            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.PreVotingReadyCheck ||
+                string.IsNullOrWhiteSpace(room.ReadinessCheckId))
             {
                 await Clients.Caller.SendAsync("ReceiveError", "Зараз немає активної перевірки готовності");
+                return;
+            }
+
+            if (!string.Equals(room.ReadinessCheckId, readinessCheckId, StringComparison.Ordinal))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "stale_readiness_check");
+                return;
+            }
+
+            if (room.ReadinessCheckRound != room.CurrentRound ||
+                !RoomService.GetGameplayPlayersSnapshot(room).Any(entry =>
+                    string.Equals(RoomService.GetPlayerKey(entry.Value), RoomService.GetPlayerKey(player), StringComparison.Ordinal)))
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "readiness_player_ineligible");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(commandId) && !RememberPlayerCommand(room, commandId))
+            {
+                await Clients.Caller.SendAsync("RoundStateUpdated", BuildRoundState(room));
                 return;
             }
 
             status = (status ?? "").Trim().ToLowerInvariant() switch
             {
                 "ready" => "ready",
-                "add" => "add",
-                "special" => "special",
+                "not_ready" => "not_ready",
                 _ => "pending"
             };
 
@@ -172,6 +242,7 @@ namespace Bunker.Hubs
             {
                 playerName = player.Name,
                 status,
+                readinessCheckId = room.ReadinessCheckId,
                 roundState
             });
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
@@ -293,6 +364,7 @@ namespace Bunker.Hubs
                     {
                         player.Profession.Name,
                         player.Profession.ExperienceYears,
+						player.Profession.ProfessionalLevel,
                         player.Profession.Type,
                         player.Profession.Skills,
                         player.Profession.AllItems,
@@ -394,6 +466,7 @@ namespace Bunker.Hubs
             {
                 player.Profession.Name,
                 player.Profession.ExperienceYears,
+				player.Profession.ProfessionalLevel,
                 player.Profession.Type,
                 player.Profession.Skills,
                 player.Profession.AllItems,

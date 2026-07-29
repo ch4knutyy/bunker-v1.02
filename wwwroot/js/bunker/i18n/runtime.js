@@ -19,12 +19,40 @@ function applyStaticTranslations() {
 	setText('.create-room-panel .section-title', t('createRoom'));
 	setText('.rooms-list-panel .section-title', t('availableRooms'));
 	setText('#createRoomBtn', t('createRoom'));
-	setText('#gmPanelBtn', t('gmPanel'));
+	const gmPanelBtn = document.getElementById('gmPanelBtn');
+	if (gmPanelBtn) {
+		gmPanelBtn.setAttribute('aria-label', t('gmPanel'));
+		gmPanelBtn.title = t('gmPanel');
+	}
+	const developerToolsButton = document.getElementById('developerToolsButton');
+	if (developerToolsButton) {
+		developerToolsButton.setAttribute('aria-label', t('developerTools'));
+		developerToolsButton.title = t('developerTools');
+	}
+	const roomActionsMenuButton = document.getElementById('roomActionsMenuButton');
+	if (roomActionsMenuButton) {
+		roomActionsMenuButton.setAttribute('aria-label', t('roomActions'));
+		roomActionsMenuButton.title = t('roomActions');
+	}
+	if (window.BunkerRulesContent) window.BunkerRulesContent.refresh();
 	setText('#startVotingBtn', t('voting'));
 	setText('#startGameBtn', t('startGame'));
-	setText('#startReadyCheckBtn', t('allReady'));
+	setText('#startReadyCheckBtn', t('gmAskReadyAction'));
+	setText('#cancelReadyCheckBtn', t('gmCancelReadyCheckAction'));
+	setText('#readyCheckPanel [data-i18n="readyCheckPrompt"]', t('readyCheckPrompt'));
+	setText('#readyCheckSummary', t('readyCheckWaiting'));
+	setText('#readyCheckPanel [data-i18n="readyCheckHint"]', t('readyCheckHint'));
+	document.querySelectorAll('#readyCheckPanel [data-i18n]').forEach(element => {
+		const key = element.dataset.i18n;
+		if (key) element.textContent = t(key);
+	});
+	document.querySelectorAll('#gmCharacteristicOverrideSelect option').forEach(option => {
+		const key = option.value ? `${option.value.charAt(0).toLowerCase()}${option.value.slice(1)}` : '';
+		if (key) option.textContent = t(key);
+	});
 
-	const leaveBtn = document.querySelector('.room-actions .btn-danger');
+	setText('#copyInviteLinkBtn', t('lobbyCopyLink'));
+	const leaveBtn = document.getElementById('leaveRoomButton');
 	if (leaveBtn) leaveBtn.textContent = t('leaveRoom');
 
 	setPlaceholder('#playerNameCreate', t('playerNamePlaceholder'));
@@ -66,8 +94,6 @@ function applyStaticTranslations() {
 		if (specialCardHeaderLabels[index]) th.textContent = specialCardHeaderLabels[index];
 	});
 
-	if (typeof initVisualThemePreview === 'function') initVisualThemePreview();
-	else if (typeof initApocalypseEffectPreview === 'function') initApocalypseEffectPreview();
 }
 
 function rerenderLocalizedUI() {

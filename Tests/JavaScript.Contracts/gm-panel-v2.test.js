@@ -82,25 +82,23 @@ test('dangerous commands retain confirmations and V2 command helper blocks doubl
 
 test('drawer supports mobile layout keyboard tabs and Escape close', () => {
   assert.match(css, /@media \(max-width: 768px\)/);
-  assert.match(css, /width: 100vw/);
-  assert.match(css, /height: 100dvh/);
+  assert.match(css, /max-width: calc\(100vw - 1rem\)/);
+  assert.match(css, /height: calc\(100dvh - 5rem\)/);
   assert.match(client, /event\.key === "Escape"/);
   assert.match(client, /event\.key === "ArrowRight"/);
   assert.match(view, /aria-selected="true"/);
 });
 
-test('drawer and backdrop use one canonical open state without legacy panel geometry', () => {
+test('drawer uses one canonical non-modal open state without legacy panel geometry', () => {
   assert.equal((view.match(/id="gmPanel"/g) || []).length, 1);
-  assert.equal((view.match(/id="gmPanelBackdrop"/g) || []).length, 1);
-  assert.match(view, /class="gm-panel-v2-backdrop"/);
+  assert.equal((view.match(/id="gmPanelBackdrop"/g) || []).length, 0);
   assert.match(view, /class="gm-panel-v2-drawer"/);
+  assert.match(view, /role="complementary"/);
   assert.doesNotMatch(view, /class="gm-panel gm-panel-v2"/);
   assert.match(client, /panel\.classList\.toggle\("is-open", opening\)/);
-  assert.match(client, /backdrop\.classList\.toggle\("is-open", opening\)/);
   assert.match(client, /panel\.style\.removeProperty\("display"\)/);
-  assert.match(client, /document\.body\.classList\.toggle\("gm-panel-v2-open", opening\)/);
+  assert.doesNotMatch(client, /gmPanelBackdrop|gm-panel-v2-open/);
   assert.match(css, /\.gm-panel-v2-drawer\.is-open\s*\{[^}]*transform: translateX\(0\)/s);
-  assert.match(css, /\.gm-panel-v2-backdrop\.is-open\s*\{/);
 });
 
 test('drawer is top-level and shows loading, retry, and explicit error states', () => {
@@ -115,16 +113,11 @@ test('drawer is top-level and shows loading, retry, and explicit error states', 
   assert.match(client, /setPanelLoadState\("error",/);
 });
 
-test('backdrop is independent and drawer owns full viewport geometry', () => {
-  const backdropCss = css.slice(
-    css.indexOf('.gm-panel-v2-backdrop {'),
-    css.indexOf('.gm-panel-v2-backdrop.is-open'));
-  assert.match(backdropCss, /background: rgba\(0, 0, 0, 0\.58\)/);
-  assert.doesNotMatch(backdropCss, /\bopacity\s*:/);
-  assert.match(css, /\.gm-panel-v2-drawer\s*\{[\s\S]*?top: 0;[\s\S]*?right: 0;[\s\S]*?bottom: 0;/);
-  assert.match(css, /min-height: 100vh/);
+test('drawer preserves page scrolling and owns its own vertical scroll', () => {
+  assert.doesNotMatch(css, /body\.gm-panel-v2-open\s*\{\s*overflow: hidden/);
+  assert.match(css, /\.gm-panel-v2-drawer\s*\{[\s\S]*?top: 5rem;[\s\S]*?right: 0;[\s\S]*?bottom: 0;/);
   assert.match(css, /\.gm-panel-v2-content\s*\{[\s\S]*?min-height: 0;[\s\S]*?overflow-y: auto/);
-  assert.doesNotMatch(css, /body\.gm-panel-v2-open::before/);
+  assert.doesNotMatch(css, /gm-panel-v2-backdrop/);
 });
 
 test('returned DTO contract waits for room readiness and retry clears failures', () => {

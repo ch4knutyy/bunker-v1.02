@@ -82,7 +82,7 @@ window.BunkerSignalREvents.bunker = {
 				const imageUrl = data.imageUrl || data.ImageUrl || null;
 				currentBunker.imageUrl = imageUrl;
 				if ('ImageUrl' in currentBunker) currentBunker.ImageUrl = imageUrl;
-				renderBunker(currentBunker);
+				if (!updateBunkerHeroImage(imageUrl)) renderBunker(currentBunker);
 				addEventMessage(`<span class="event-image">🖼️</span> Зображення бункера оновлено`);
 			}
 		});
@@ -95,7 +95,7 @@ window.BunkerSignalREvents.bunker = {
 			if (currentBunker && (currentBunker.id || currentBunker.Id) === (data.bunkerId || data.BunkerId)) {
 				currentBunker.imageUrl = null;
 				if ('ImageUrl' in currentBunker) currentBunker.ImageUrl = null;
-				renderBunker(currentBunker);
+				if (!updateBunkerHeroImage(null)) renderBunker(currentBunker);
 				addEventMessage(`<span class="event-image">🗑️</span> Зображення бункера видалено`);
 			}
 		});

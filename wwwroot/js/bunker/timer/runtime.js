@@ -42,7 +42,11 @@ function getGameTimerRemaining() {
 }
 
 function renderGameTimer() {
-	if (!currentGameTimer) return;
+	const publicTimer = document.getElementById('publicGameTimer');
+	if (!currentGameTimer) {
+		if (publicTimer) publicTimer.hidden = true;
+		return;
+	}
 	const remaining = getGameTimerRemaining();
 	const value = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
 	const effectiveStatus = currentGameTimer.status.toLowerCase() === 'running' && remaining === 0 ? 'Expired' : currentGameTimer.status;
@@ -51,8 +55,6 @@ function renderGameTimer() {
 			effectiveStatus.toLowerCase() === 'stopped' ? 'gmTimerStopped' : effectiveStatus;
 	setText('#publicGameTimerValue', value);
 	setText('#publicGameTimerStatus', t(statusKey));
-	setText('#publicGameTimerLabel', currentGameTimer.label || t(`timerPurpose${currentGameTimer.purpose}`));
-	const publicTimer = document.getElementById('publicGameTimer');
 	if (publicTimer) {
 		publicTimer.classList.remove('timer-running', 'timer-paused', 'timer-expired', 'timer-stopped', 'timer-warning', 'timer-critical');
 		const timerState = ['running', 'paused', 'expired', 'stopped'].includes(effectiveStatus.toLowerCase())
@@ -62,6 +64,7 @@ function renderGameTimer() {
 		const urgency = timerState === 'running' && remaining <= 15 ? 'critical' :
 			timerState === 'running' && remaining <= 60 ? 'warning' : timerState === 'expired' ? 'expired' : 'normal';
 		if (urgency === 'warning' || urgency === 'critical') publicTimer.classList.add(`timer-${urgency}`);
+		publicTimer.hidden = !['running', 'paused'].includes(timerState);
 		if (publicTimer.dataset.visualTimerState !== urgency) {
 			publicTimer.dataset.visualTimerState = urgency;
 			if (urgency === 'warning') triggerApocalypseVisualReaction('timer-warning');

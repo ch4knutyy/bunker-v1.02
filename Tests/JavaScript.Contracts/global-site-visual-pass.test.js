@@ -31,21 +31,21 @@ test('navbar keeps its routes and gains a scoped active premium treatment', () =
   assert.match(sitePass, /\.profile-btn\s*\{[^}]*width:\s*42px[^}]*height:\s*42px/);
 });
 
-test('room command bar preserves every public action id and handler', () => {
+test('room page uses floating actions instead of a command banner', () => {
   for (const [id, handler] of [
-    ['currentRoomName', null], ['currentRoomId', null], ['currentRoomState', null],
     ['copyInviteLinkBtn', 'copyInviteLink()'], ['gmPanelBtn', 'toggleGMPanel()'],
-    ['startVotingBtn', 'startVoting()'], ['startGameBtn', 'startGame()']
+    ['developerToolsButton', 'toggleDeveloperTools()'], ['startVotingBtn', 'startVoting()'],
+    ['leaveRoomButton', 'leaveRoom()']
   ]) {
     assert.match(view, new RegExp(`id="${id}"`));
     if (handler) assert.match(view, new RegExp(`onclick="${handler.replace(/[()]/g, '\\$&')}"`));
   }
-  assert.match(view, /class="room-header site-command-bar"/);
-  assert.match(game, /roomPlayerCountElement[\s\S]*if \(roomPlayerCountElement\)/);
+  assert.match(view, /id="roomFloatingControls" class="room-floating-controls" hidden/);
+  assert.doesNotMatch(view, /currentRoomName|currentRoomId|currentRoomState|room-header site-command-bar/);
 });
 
 test('round HUD preserves values and applies explicit running paused expired state classes', () => {
-  for (const id of ['roundStatusPanel', 'roundStatusNumber', 'roundStatusPhase', 'roundStatusProgress', 'publicGameTimer', 'publicGameTimerValue', 'publicGameTimerStatus']) assert.match(view, new RegExp(`id="${id}"`));
+  for (const id of ['roundStatusPanel', 'roundStatusNumber', 'roundStatusPhase', 'publicGameTimer', 'publicGameTimerValue', 'publicGameTimerStatus']) assert.match(view, new RegExp(`id="${id}"`));
   assert.match(view, /site-round-hud/);
   assert.equal((view.match(/site-hud-module/g) || []).length, 3);
   assert.match(game, /panel\.style\.display = shouldShow \? 'grid' : 'none'/);

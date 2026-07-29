@@ -179,6 +179,7 @@ window.BunkerSignalREvents.lobby = {
 
 			showRoomSection();
 			renderCurrentGameUI();
+			void resyncCurrentRoomState?.();
 			addEventMessage(`Ви приєднались до кімнати <span class="event-room">${currentRoom.name}</span>`);
 		});
 	},
@@ -243,6 +244,7 @@ window.BunkerSignalREvents.lobby = {
 					...(roomPlayers[connectionId] || {}), ...p, connectionId,
 					revealed: normalizeRevealedState(p.revealed || p.Revealed || {}),
 					revealedData: normalizeRevealedValues(p.revealedValues || p.RevealedValues || {}).revealedData,
+					revealedTooltips: normalizeRevealedValues(p.revealedValues || p.RevealedValues || {}).revealedTooltips,
 					revealedSources: normalizeRevealedSources(p.revealedSources || p.RevealedSources || {}),
 					additionalConditionEffects: normalizeAdditionalPhysicalConditions(p.additionalConditionEffects || p.AdditionalConditionEffects || [])
 				};
@@ -296,7 +298,9 @@ window.BunkerSignalREvents.lobby = {
 		connection.on("LobbyKicked", function () {
 			lobbySettingsDraft = null; lobbySettingsDirty = false;
 			alert(t('lobbyKicked'));
-			window.location.reload();
+			resetClientGameStateForNewRoom();
+			showLobbySection();
+			connection.invoke("GetRooms").catch(error => console.error("GetRooms after LobbyKicked error:", error));
 		});
 	},
 
@@ -322,11 +326,12 @@ window.BunkerSignalREvents.lobby = {
 				closeGMPanel();
 				gmPlayersData = {};
 			}
-			if (isHost) {
+			if (isHost || isDeveloper) {
 				if (typeof refreshGmPanelV2State === 'function') refreshGmPanelV2State();
 				connection.invoke('GetAllPlayersData').catch(() => {});
 			}
 			renderCurrentGameUI();
+			void resyncCurrentRoomState?.();
 		});
 	},
 
@@ -383,24 +388,15 @@ window.BunkerSignalREvents.lobby = {
 	GameStarted() {
 		connection.off("GameStarted");
 		connection.on("GameStarted", function (data) {
-			console.log("=== GAME STARTED ===");
-			console.log("[GameStarted] Raw data:", data);
-			console.log("[GameStarted] data.roomState:", data.roomState);
-			console.log("[GameStarted] data.apocalypse:", data.apocalypse);
-			console.log("[GameStarted] data.bunker:", data.bunker);
-			console.log("[GameStarted] data.players:", data.players);
-
 			isStartingGame = false;
 			hideGuestWarningModal(false);
 			clearGameFinishedStateForLobby();
-			console.log("[GameStarted] Reset isStartingGame = false");
 
 			// Normalize room state (handle both camelCase and PascalCase)
 			const roomState = data.roomState || data.RoomState || "Playing";
 
 			if (currentRoom) {
 				currentRoom.state = roomState;
-				console.log("[GameStarted] Updated currentRoom.state:", currentRoom.state);
 			}
 			applyRoundState(data.roundState || data.RoundState);
 
@@ -408,16 +404,13 @@ window.BunkerSignalREvents.lobby = {
 			// Keep the complete canonical snapshot. The renderer localizes and normalizes it on every render.
 			const apocalypse = data.apocalypse || data.Apocalypse;
 			currentApocalypse = apocalypse || null;
-			console.log("[GameStarted] Normalized apocalypse:", currentApocalypse);
 
 			// Keep the complete canonical bunker snapshot; the renderer normalizes it per language.
 			const bunker = data.bunker || data.Bunker;
 			currentBunker = bunker || null;
-			console.log("[GameStarted] Normalized bunker:", currentBunker);
 
 			// Update players with seat numbers
 			const players = data.players || data.Players || [];
-			console.log("[GameStarted] Players to update:", players);
 
 			players.forEach(function (p) {
 				const connId = p.connectionId || p.ConnectionId;
@@ -430,34 +423,23 @@ window.BunkerSignalREvents.lobby = {
 					roomPlayers[connId].eliminatedByVote = !!(p.eliminatedByVote ?? p.EliminatedByVote);
 					roomPlayers[connId].canRevealAllAfterElimination = !!(p.canRevealAllAfterElimination ?? p.CanRevealAllAfterElimination);
 					roomPlayers[connId].hasRevealedAllAfterElimination = !!(p.hasRevealedAllAfterElimination ?? p.HasRevealedAllAfterElimination);
-					console.log(`[GameStarted] Updated player ${connId} seat: ${seatNum}`);
 				}
 			});
 
 			// Update UI visibility
-			console.log("[GameStarted] Updating UI visibility...");
 
 			const roomLobby = document.getElementById('roomLobby');
 			const gameSection = document.getElementById('gameSection');
 			const myPlayerSection = document.getElementById('myPlayerSection');
-			const currentRoomState = document.getElementById('currentRoomState');
 
 			if (roomLobby) {
 				roomLobby.style.display = 'none';
-				console.log("[GameStarted] roomLobby hidden");
 			}
 			if (gameSection) {
 				gameSection.style.display = 'block';
-				console.log("[GameStarted] gameSection shown");
 			}
 			if (myPlayerSection) {
 				myPlayerSection.style.display = 'block';
-				console.log("[GameStarted] myPlayerSection shown");
-			}
-			if (currentRoomState) {
-				currentRoomState.textContent = getRoomStateLabel();
-				currentRoomState.classList.add('state-playing');
-				console.log("[GameStarted] currentRoomState updated");
 			}
 
 			const startBtn = document.getElementById('startGameBtn');
@@ -465,13 +447,11 @@ window.BunkerSignalREvents.lobby = {
 				startBtn.style.display = 'none';
 				startBtn.disabled = true;
 				startBtn.style.pointerEvents = 'none';
-				console.log("[GameStarted] startBtn hidden");
 			}
 
 			updateRoundStatusUI();
 
 			// Show GM sections for host using the dedicated function
-			console.log("[GameStarted] Calling updateGMSections...");
 			updateGMSections();
 
 			// Update bunker capacity display
@@ -483,15 +463,10 @@ window.BunkerSignalREvents.lobby = {
 				}
 			}
 
-			// Render apocalypse and bunker
-			console.log("[GameStarted] Rendering apocalypse...");
-			renderApocalypse(currentApocalypse);
-
-			console.log("[GameStarted] Rendering bunker...");
-			renderBunker(currentBunker);
-
-			console.log("[GameStarted] Rendering current game UI...");
-			tryRenderRunningGameState();
+			if (typeof renderBunkerEntryCore === 'function')
+				renderBunkerEntryCore(options => tryRenderRunningGameState(options));
+			else
+				tryRenderRunningGameState();
 
 			// Add event messages
 			const currentRound = data.currentRound || data.CurrentRound || getCurrentRoundNumber() || 1;
@@ -505,7 +480,6 @@ window.BunkerSignalREvents.lobby = {
 				addEventMessage(`<span class="event-bunker">🏠 ${escapeHtml(t('bunker'))}:</span> ${escapeHtml(getLocalizedValue(currentBunker, 'name'))}`);
 			}
 
-			console.log("=== GAME STARTED END ===");
 		});
 	},
 
@@ -528,10 +502,6 @@ window.BunkerSignalREvents.lobby = {
 	RejoinSuccess() {
 		connection.off("RejoinSuccess");
 		connection.on("RejoinSuccess", function (data) {
-			console.log("=== REJOIN SUCCESS START ===");
-			console.log("[RejoinSuccess] raw data:", data);
-			console.log("[RejoinSuccess] data.players:", data.players);
-
 			currentRoom = data.room || data.Room;
 			syncPublicGameSettings(data);
 			myPlayerData = normalizePlayer(data.player || data.Player);
@@ -556,13 +526,10 @@ window.BunkerSignalREvents.lobby = {
 				currentGameCompletion);
 			if (rejoinCompletion) currentGameCompletion = rejoinCompletion;
 
-			console.log("[RejoinSuccess] currentRoom:", currentRoom);
-			console.log("[RejoinSuccess] myPlayerData:", myPlayerData);
-			console.log("[RejoinSuccess] myConnectionId:", myConnectionId);
-
 			saveSession(currentRoom.id, myPlayerData.name, hostToken);
 
 			roomPlayers = {};
+			publicCharacteristicRevisions.clear();
 			(data.players || data.Players || []).forEach(function (p, index) {
 				var revealedSources = normalizeRevealedSources(p.revealedSources || p.RevealedSources || {});
 				var revealedValues = normalizeRevealedValues(p.revealedValues || p.RevealedValues || {});
@@ -594,12 +561,7 @@ window.BunkerSignalREvents.lobby = {
 					seatNumber: p.seatNumber ?? p.SeatNumber ?? 0
 				};
 
-				console.log(`[RejoinSuccess] roomPlayers[${index}]`, roomPlayers[connId]);
 			});
-
-			console.log("[RejoinSuccess] roomPlayers final:", roomPlayers);
-
-			console.log("[RejoinSuccess] Object.keys(roomPlayers):", Object.keys(roomPlayers));
 
 			const isFinishedState = isFinishedGameState(
 				data.roundState || data.RoundState || data,
@@ -628,9 +590,6 @@ window.BunkerSignalREvents.lobby = {
 				document.getElementById('roomLobby').style.display = 'none';
 				document.getElementById('gameSection').style.display = 'block';
 				document.getElementById('myPlayerSection').style.display = 'block';
-
-				document.getElementById('currentRoomState').textContent =
-					getRoomStateLabel();
 
 				const startBtn = document.getElementById('startGameBtn');
 				if (startBtn) {
@@ -664,9 +623,10 @@ window.BunkerSignalREvents.lobby = {
 				document.getElementById('myPlayerSection').style.display = 'block';
 			}
 
-			renderCurrentGameUI();
-
-			console.log("=== REJOIN SUCCESS END ===");
+			if (isGameState && typeof renderBunkerEntryCore === 'function')
+				renderBunkerEntryCore(options => renderCurrentGameUI(options));
+			else
+				renderCurrentGameUI();
 
 			addEventMessage(`Сесію відновлено! Ви знову в кімнаті <span class="event-room">${currentRoom.name}</span>`);
 		});

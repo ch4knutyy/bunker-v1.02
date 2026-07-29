@@ -60,24 +60,6 @@ function updateRoomUI() {
 		});
 	}
 
-	const roomNameElement = document.getElementById('currentRoomName');
-	if (roomNameElement) {
-		roomNameElement.textContent = currentRoom.name || t('room');
-	}
-
-	const roomIdElement = document.getElementById('currentRoomId');
-	if (roomIdElement) {
-		roomIdElement.textContent = `ID: ${currentRoom.id || ''}`;
-	}
-
-	const roomStateElement = document.getElementById('currentRoomState');
-	if (roomStateElement) {
-		roomStateElement.textContent = getRoomStateLabel();
-		roomStateElement.classList.remove('state-lobby', 'state-playing', 'state-voting');
-		const roomState = String(currentRoom.state || '').toLowerCase();
-		roomStateElement.classList.add(roomState === 'lobby' ? 'state-lobby' : roomState === 'voting' ? 'state-voting' : 'state-playing');
-	}
-
 	const playerCount = Object.keys(roomPlayers).length;
 
 	const roomPlayerCountElement = document.getElementById('roomPlayerCount');
@@ -119,6 +101,10 @@ function updateRoomUI() {
 			gmPanelBtn.style.display = 'none';
 		}
 	}
+	const floatingControls = document.getElementById('roomFloatingControls');
+	if (floatingControls) floatingControls.hidden = false;
+	const copyInviteLinkButton = document.getElementById('copyInviteLinkBtn');
+	if (copyInviteLinkButton) copyInviteLinkButton.hidden = !isHost;
 
 	// Текст очікування
 	const waitingText = document.getElementById('waitingText');
@@ -186,34 +172,7 @@ function renderRoomsList(rooms) {
 }
 
 function renderRoomPlayers() {
-	const container = document.getElementById('roomPlayersList');
 	const players = Object.values(roomPlayers);
-
-	// Сортуємо за seatNumber якщо є (після старту гри)
-	players.sort(function (a, b) { return (a.seatNumber || 999) - (b.seatNumber || 999); });
-
-	container.innerHTML = players.map((p, i) => {
-		var seatLabel = p.seatNumber ? '#' + p.seatNumber : '#' + (i + 1);
-		const isEliminated = p.isEliminated || p.IsEliminated || false;
-		const isSpectatorGm = p.isSpectatorGm || p.IsSpectatorGm || false;
-
-		let cardClasses = ['room-player-card'];
-		if (p.connectionId === myConnectionId) cardClasses.push('my-player');
-		if (p.isHost) cardClasses.push('host-player');
-		if (isEliminated) cardClasses.push('room-player-eliminated');
-		if (isSpectatorGm) cardClasses.push('room-player-spectator-gm');
-
-		return `
-            <div class="${cardClasses.join(' ')}">
-                <span class="player-number">${seatLabel}</span>
-                <span class="player-name">${escapeHtml(p.name)}</span>
-                ${p.isHost ? `<span class="host-badge">${t('host')}</span>` : ''}
-                ${p.isDeveloper ? `<span class="player-role-developer" title="${escapeHtml(t('developerBadgeTitle'))}" aria-label="${escapeHtml(t('developerBadgeTitle'))}">DEVELOPER</span>` : ''}
-                ${p.connectionId === myConnectionId ? `<span class="you-badge">${t('you')}</span>` : ''}
-                ${isEliminated ? `<span class="eliminated-badge-small">${t('eliminated')}</span>` : ''}
-                ${isSpectatorGm ? `<span class="host-badge">${t('omniscientPublicBadge')}</span>` : ''}
-            </div>`;
-	}).join('');
 	const spectator = players.find(p => p.isSpectatorGm || p.IsSpectatorGm);
 	const banner = document.getElementById('omniscientGmBanner');
 	if (banner) { banner.style.display = spectator ? 'block' : 'none'; banner.textContent = spectator ? `${t('omniscientPublicBadge')}: ${spectator.name}. ${getCurrentLanguage() === 'en' ? 'Does not participate in gameplay or voting.' : getCurrentLanguage() === 'ru' ? 'Не участвует в игре и голосовании.' : 'Не бере участі у грі та голосуванні.'}` : ''; }

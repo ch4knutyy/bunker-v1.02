@@ -20,7 +20,7 @@ function method(source, name) {
 }
 
 test('three public scenarios share one full-width section, panel and shell contract', () => {
-  assert.match(view, /<section class="scenario-immersive-section"[^>]*aria-labelledby="scenarioSectionTitle"/);
+  assert.match(view, /<section class="scenario-immersive-section">/);
   assert.match(view, /class="game-info-panels scenario-immersive-grid"/);
   for (const panel of ['apocalypse-panel', 'bunker-panel', 'threat-panel']) {
     assert.match(view, new RegExp(`class="[^"]*${panel}[^"]*scenario-immersive-panel|class="[^"]*scenario-immersive-panel[^"]*${panel}`));

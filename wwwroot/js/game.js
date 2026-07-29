@@ -63,6 +63,8 @@ let lobbyApocalypseVisibleCount = 30;
 const lobbyApocalypseCollapsedCategoryIds = new Set();
 const lobbyLocalPresetStorageKey = 'bunker.lobbyGamePresets.v1';
 const pendingCharacteristicReveals = new Set();
+const pendingCharacteristicHides = new Set();
+const publicCharacteristicRevisions = new Map();
 const pendingSpecialCardUses = new Set();
 const specialCardSelectionState = new Map();
 let renderedSpecialCardKeys = [];
@@ -209,8 +211,6 @@ window.setInterval(renderGameTimer, 250);
 // normalizeThreatState moved to ~/js/bunker/threats/runtime.js
 
 // normalizeDiceRoll moved to ~/js/bunker/rounds/runtime.js
-
-// hasCurrentPlayerRevealedThisRound moved to ~/js/bunker/rounds/runtime.js
 
 // canRevealThisRound moved to ~/js/bunker/rounds/runtime.js
 
@@ -522,6 +522,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // Обробка перепідключення
 connection.onreconnecting(err => {
 	console.log("SignalR reconnecting...", err);
+	if (typeof isLobbyRunning === 'function' && isLobbyRunning() && typeof beginBunkerEntry === 'function')
+		beginBunkerEntry('bunkerEntryRoomState');
 	updateConnectionStatus("⟳ Перепідключення...", false);
 });
 
@@ -531,7 +533,8 @@ connection.onreconnected(connectionId => {
 	updateConnectionStatus("✓ Перепідключено");
 	window.refreshGmPanelV2State?.();
 	if (!tryRejoin()) {
-		connection.invoke("GetRooms");
+		if (currentRoom?.id) void resyncCurrentRoomState?.();
+		else connection.invoke("GetRooms");
 	}
 });
 

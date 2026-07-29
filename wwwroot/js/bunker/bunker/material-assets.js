@@ -99,9 +99,6 @@ function loadBunkerMaterialManifest() {
 		.then(state => {
 			state.loaded = true;
 			if (typeof validateBunkerMaterialIntegration === 'function') validateBunkerMaterialIntegration();
-			if (typeof currentBunker !== 'undefined' && currentBunker &&
-				typeof syncBunkerMaterialVisual === 'function') syncBunkerMaterialVisual(currentBunker);
-			if (typeof initVisualThemePreview === 'function') initVisualThemePreview();
 			return state;
 		});
 	return bunkerMaterialAssetState.loadPromise;
@@ -121,5 +118,3 @@ function getBunkerOverlayAsset(overlayId) {
 function getBunkerOverlayAssetsByUsage(usage) {
 	return bunkerMaterialAssetState.overlaysByUsage.get(normalizeBunkerMaterialToken(usage)) || Object.freeze([]);
 }
-
-loadBunkerMaterialManifest();

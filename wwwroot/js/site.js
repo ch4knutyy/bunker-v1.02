@@ -56,8 +56,7 @@ function safeRenderAll() {
             spyModeDescription: "Режим соціальної дедукції: один шпигун не знає локацію.",
             mafiaModeDescription: "Класична мафія з ролями. Буде додано пізніше.",
             rulesTitle: "Правила",
-            rulesIntro: "Тут будуть правила для режимів гри.",
-            bunkerRulesText: "Правила режиму Бункер будуть додані тут.",
+            rulesIntro: "Правила режимів гри.",
             spyRulesText: "Правила режиму Шпіон будуть додані пізніше.",
             mafiaRulesText: "Правила режиму Мафія будуть додані пізніше.",
             spyTitle: "Шпіон",
@@ -129,8 +128,7 @@ function safeRenderAll() {
             spyModeDescription: "Social deduction mode: one spy does not know the location.",
             mafiaModeDescription: "Classic mafia with roles. Coming later.",
             rulesTitle: "Rules",
-            rulesIntro: "Game mode rules will be added here.",
-            bunkerRulesText: "Bunker mode rules will be added here.",
+            rulesIntro: "Game mode rules.",
             spyRulesText: "Spy mode rules will be added later.",
             mafiaRulesText: "Mafia mode rules will be added later.",
             spyTitle: "Spy",
@@ -202,8 +200,7 @@ function safeRenderAll() {
             spyModeDescription: "Режим социальной дедукции: один шпион не знает локацию.",
             mafiaModeDescription: "Классическая мафия с ролями. Будет добавлена позже.",
             rulesTitle: "Правила",
-            rulesIntro: "Здесь будут правила для режимов игры.",
-            bunkerRulesText: "Правила режима Бункер будут добавлены здесь.",
+            rulesIntro: "Правила режимов игры.",
             spyRulesText: "Правила режима Шпион будут добавлены позже.",
             mafiaRulesText: "Правила режима Мафия будут добавлены позже.",
             spyTitle: "Шпион",
@@ -277,6 +274,7 @@ function safeRenderAll() {
             button.classList.toggle("active", button.dataset.lang === lang);
         });
         localizeProfileValues(lang);
+        window.BunkerRulesContent?.refresh?.();
     }
 
     function localizeProfileValues(lang) {

@@ -26,10 +26,6 @@ public static class RoundVotingAdminService
             return new(false, "threat_not_resolved", "Спершу завершіть інтерактивну загрозу");
         if (room.CurrentPhase is not (GamePhase.RoundReveal or GamePhase.ExtraInventory or GamePhase.PreVotingReadyCheck))
             return new(false, "invalid_phase", "Спершу завершіть поточний раунд");
-        if (room.CurrentPhase == GamePhase.RoundReveal &&
-            RoomService.GetGameplayPlayersSnapshot(room).Any(entry =>
-                !room.CurrentRoundReveals.ContainsKey(RoomService.GetPlayerKey(entry.Value))))
-            return new(false, "reveal_requirement_pending", "Спершу завершіть розкриття поточного раунду");
         if (room.CurrentVoting?.State is VotingState.Active or VotingState.Completed)
             return new(false, "voting_already_started", "Голосування вже розпочато");
 
@@ -69,20 +65,10 @@ public static class RoundVotingAdminService
         room.CurrentRound = round;
         room.State = RoomState.Playing;
         room.CurrentPhase = GamePhase.RoundReveal;
-        if (round > previousRound)
-        {
-            RevealCreditService.BeginRound(room);
-        }
-        else
-        {
-            room.CurrentRoundReveals.Clear();
-            foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value))
-            {
-                player.HasCompletedRevealThisRound = false;
-                player.RevealRequirementSatisfiedByCredit = false;
-            }
-        }
         room.VotingReadyResponses.Clear();
+        room.ReadinessCheckId = null;
+        room.ReadinessCheckRound = null;
+        room.ReadinessCheckStartedAtUtc = null;
         return true;
     }
 
