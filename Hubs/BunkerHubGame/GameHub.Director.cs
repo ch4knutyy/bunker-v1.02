@@ -16,7 +16,7 @@ public partial class GameHub
         var capability = DirectorCapability(action);
         var (room, actor) = RequireDirectorCaller(capability);
         var target = ResolveDirectorTarget(room, request.TargetPlayerId, action);
-        var blockers = new List<string>(); var categories = new List<string>(); var mutationCount = 0;
+        List<string> blockers = []; List<string> categories = []; var mutationCount = 0;
         if (target != null && target.IsSpectatorGm) blockers.Add("spectator_target_blocked");
         switch (action)
         {

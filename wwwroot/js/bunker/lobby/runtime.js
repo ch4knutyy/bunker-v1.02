@@ -169,11 +169,16 @@ function lobbyAmCurrentHost(state = lobbyState) {
 	return (lobbyGet(state, 'members', 'Members') || []).some(member => lobbyGet(member, 'playerId', 'PlayerId') === meId && lobbyGet(member, 'isCurrentHost', 'IsCurrentHost'));
 }
 
+function lobbyCanEditGameSettings(state = lobbyState) {
+	if (lobbyAmCurrentHost(state)) return true;
+	return (developerState?.capabilities || []).some(capability => String(capability) === 'ManageRoom');
+}
+
 function syncLobbySettingsState(state) {
-	const hostNow = lobbyAmCurrentHost(state); const ownerId = getMyStablePlayerId();
+	const canEditSettings = lobbyCanEditGameSettings(state); const ownerId = getMyStablePlayerId();
 	const revision = Number(lobbyGet(state, 'settingsRevision', 'SettingsRevision') || 1);
 	const canonical = lobbyGet(state, 'settings', 'Settings');
-	if (!hostNow) { lobbySettingsDraft = null; lobbySettingsDirty = false; lobbySettingsOwnerId = ''; lobbySettingsBaseRevision = revision; lobbyApocalypseCatalog = null; return; }
+	if (!canEditSettings) { lobbySettingsDraft = null; lobbySettingsDirty = false; lobbySettingsOwnerId = ''; lobbySettingsBaseRevision = revision; lobbyApocalypseCatalog = null; return; }
 	if (!lobbySettingsDraft || lobbySettingsOwnerId !== ownerId || lobbySettingsBaseRevision !== revision) {
 		lobbySettingsDraft = normalizeLobbySettings(canonical); lobbySettingsBaseRevision = revision; lobbySettingsDirty = false; lobbySettingsOwnerId = ownerId; lobbyApocalypseCatalog = null;
 		if (lobbySettingsActiveTab === 'apocalypse') ensureLobbyApocalypseCatalog();
@@ -200,7 +205,7 @@ function lobbyWarningText(code) { return t({ bunker_capacity_not_restrictive: 'l
 function lobbyAuditLabel(action) { return t({ lobby_settings_applied: 'lobbyAuditSettings', lobby_readiness_changed: 'lobbyAuditReady', lobby_readiness_reset: 'lobbyAuditReadyReset', lobby_role_changed: 'lobbyAuditRole', host_transfer: 'lobbyAuditHost', lobby_player_kicked: 'lobbyAuditKick', lobby_player_joined: 'lobbyAuditJoined', lobby_player_reconnected: 'lobbyAuditReconnected', lobby_player_left: 'lobbyAuditLeft', lobby_password_changed: 'lobbyAuditPassword', game_started_from_lobby: 'lobbyAuditStarted' }[action] || 'lobbyAuditGeneric'); }
 
 async function ensureLobbyApocalypseCatalog() {
-	if (lobbyApocalypseCatalog || lobbyApocalypseCatalogPending || !lobbyAmCurrentHost()) return;
+	if (lobbyApocalypseCatalog || lobbyApocalypseCatalogPending || !lobbyCanEditGameSettings()) return;
 	lobbyApocalypseCatalogPending = true;
 	try {
 		lobbyApocalypseCatalog = await connection.invoke('GetLobbyApocalypseCatalog', getCurrentLanguage());
@@ -371,14 +376,14 @@ function createLobbyApocalypseOption(item, settings, mode) {
 
 function renderLobbyGameSetup() {
 	const state = lobbyState; const setup = document.getElementById('lobbyGameSetup'); if (!state || !setup) return;
-	const host = lobbyAmCurrentHost(state); const canonical = normalizeLobbySettings(lobbyGet(state, 'settings', 'Settings'));
-	if (host && !lobbySettingsDraft) syncLobbySettingsState(state);
-	const displayed = host && lobbySettingsDraft ? lobbySettingsDraft : canonical;
+	const canEditSettings = lobbyCanEditGameSettings(state); const canonical = normalizeLobbySettings(lobbyGet(state, 'settings', 'Settings'));
+	if (canEditSettings && !lobbySettingsDraft) syncLobbySettingsState(state);
+	const displayed = canEditSettings && lobbySettingsDraft ? lobbySettingsDraft : canonical;
 	const revision = Number(lobbyGet(state, 'settingsRevision', 'SettingsRevision') || 1);
 	const revisionElement = document.getElementById('lobbySettingsRevision'); if (revisionElement) revisionElement.textContent = `${t('lobbyRevision')}: ${revision}`;
-	const dirty = document.getElementById('lobbySettingsDirty'); if (dirty) dirty.textContent = host && lobbySettingsDirty ? t('lobbyUnsaved') : '';
+	const dirty = document.getElementById('lobbySettingsDirty'); if (dirty) dirty.textContent = canEditSettings && lobbySettingsDirty ? t('lobbyUnsaved') : '';
 	const editor = document.getElementById('lobbySettingsHostEditor'); const readOnly = document.getElementById('lobbySettingsReadOnly');
-	if (editor) editor.hidden = !host; if (readOnly) readOnly.hidden = host;
+	if (editor) editor.hidden = !canEditSettings; if (readOnly) readOnly.hidden = canEditSettings;
 	const chipValues = [
 		`${lobbyPresetLabel(displayed.preset)}`,
 		`${displayed.minGameplayPlayers}–${displayed.maxGameplayPlayers} ${t('players').toLowerCase()}`,
@@ -393,7 +398,7 @@ function renderLobbyGameSetup() {
 	const warnings = lobbyGet(state, 'settingsWarnings', 'SettingsWarnings') || []; const warningsElement = document.getElementById('lobbySettingsWarnings');
 	if (warningsElement) warningsElement.innerHTML = warnings.map(warning => `<div class="lobby-settings-warning">${escapeHtml(lobbyWarningText(lobbyGet(warning, 'code', 'Code')))}</div>`).join('');
 
-	if (host) {
+	if (canEditSettings) {
 		const preset = document.getElementById('lobbyPresetSelect');
 		if (preset && preset.dataset.language !== getCurrentLanguage()) {
 			preset.innerHTML = ['Classic', 'Calm', 'Dangerous', 'Hardcore', 'Quick', 'Long', 'Custom'].map(value => `<option value="${value}">${escapeHtml(lobbyPresetLabel(value))}</option>`).join(''); preset.dataset.language = getCurrentLanguage();

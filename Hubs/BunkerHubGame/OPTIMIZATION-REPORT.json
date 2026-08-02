@@ -1,0 +1,183 @@
+{
+  "source": "GameHub.AccountIdentity.zip",
+  "profile": "conservative-safe",
+  "files_total": 25,
+  "files_changed": [
+    "GameHub.ApocalypseEffects.cs",
+    "GameHub.Director.cs",
+    "GameHub.GameActions.cs",
+    "GameHub.GameMaster.cs",
+    "GameHub.GmPanel.cs",
+    "GameHub.Helpers.cs",
+    "GameHub.Lobby.cs",
+    "GameHub.SpecialCards.cs",
+    "GameHub.Threats.cs"
+  ],
+  "changes": [
+    {
+      "file": "GameHub.ApocalypseEffects.cs",
+      "description": "Use a target-typed empty collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Director.cs",
+      "description": "Use target-typed empty collection expressions.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.GameActions.cs",
+      "description": "Use a target-typed empty dictionary expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.GameActions.cs",
+      "description": "Convert a local string array to a collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.GameActions.cs",
+      "description": "Convert a local string array to a collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.GameMaster.cs",
+      "description": "Use a target-typed string collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.GmPanel.cs",
+      "description": "Use a target-typed empty collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Helpers.cs",
+      "description": "Use an empty collection expression for the declared return type.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Helpers.cs",
+      "description": "Use a target-typed empty collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Lobby.cs",
+      "description": "Use a target-typed empty collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify empty list initialization.",
+      "count": 2
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify empty list initialization.",
+      "count": 2
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify empty list initialization.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify empty list initialization.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify empty list initialization.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 2
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 2
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 2
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Simplify single-item collection argument.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Convert GetSwappableCharacteristicKeys return initializer to a collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.SpecialCards.cs",
+      "description": "Convert GetOrdinaryCharacteristicKeys return initializer to a collection expression.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Threats.cs",
+      "description": "Avoid an extra ToList call by returning a concrete List.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Threats.cs",
+      "description": "Mark a stateless helper as static.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Threats.cs",
+      "description": "Remove a redundant conditional with identical branches.",
+      "count": 1
+    },
+    {
+      "file": "GameHub.Threats.cs",
+      "description": "Return the concrete collection actually consumed by the caller.",
+      "count": 1
+    }
+  ],
+  "notes": [
+    "No SignalR event names, public hub method names, DTO contracts, authorization checks, or gameplay outcomes were intentionally changed.",
+    "No full project build was run because the upload contains only partial GameHub sources and not the complete project dependency graph.",
+    "Changes are limited to collection expressions, one concrete return-type optimization, one static helper annotation, and one redundant conditional removal."
+  ]
+}

@@ -484,7 +484,7 @@ public partial class GameHub
 	}
 	private static List<string> ParticipationBlockers(Room room, Player? target, LobbyParticipationRole role)
 	{
-		var blockers = new List<string>();
+		List<string> blockers = [];
 		var settings = RoomGameSettingsService.Migrate(room.GameSettings);
 		if (!Enum.IsDefined(role)) blockers.Add("invalid_lobby_role");
 		if (room.State != RoomState.Lobby) blockers.Add("lobby_closed");

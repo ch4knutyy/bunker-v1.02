@@ -277,7 +277,7 @@ public partial class GameHub
 							field.Key,
 							"conditionLevel",
 							StringComparison.OrdinalIgnoreCase);
-						var options = new List<PropertyEditorConditionOptionDto>();
+						List<PropertyEditorConditionOptionDto> options = [];
 						if (isCondition &&
 							_gameData.PropertyConditionProfiles.TryGetValue(
 								definition.ConditionProfile,

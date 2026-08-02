@@ -45,6 +45,13 @@
         return translated && translated !== key ? translated : fallback;
     }
 
+    function canUseGmPanelV2() {
+        const capabilities = developerState?.capabilities || [];
+        return Boolean(isHost || capabilities.some(capability => String(capability) === "ManageRoom"));
+    }
+
+    window.canUseGmPanelV2 = canUseGmPanelV2;
+
     const statusTranslationKeys = Object.freeze({
         waiting: "gmValueWaiting",
         lobby: "gmValueLobby",
@@ -288,6 +295,7 @@
     };
 
     window.toggleGMPanel = function toggleGmPanelV2() {
+        if (!canUseGmPanelV2()) return;
         const panel = document.getElementById("gmPanel");
         if (!panel) return;
         const opening = !panel.classList.contains("is-open");
@@ -300,6 +308,7 @@
     };
 
     async function refreshGmPanelV2State() {
+        if (!canUseGmPanelV2()) return;
         if (typeof connection === "undefined" ||
             connection.state !== signalR.HubConnectionState.Connected) {
             setPanelLoadState("error", "connection_unavailable");
@@ -328,11 +337,13 @@
     }
 
     window.retryGmPanelV2 = function retryGmPanelV2() {
+        if (!canUseGmPanelV2()) return;
         setPanelLoadState("loading");
         refreshGmPanelV2State();
     };
 
     function scheduleGmPanelV2Refresh() {
+        if (!canUseGmPanelV2()) return;
         globalThis.clearTimeout(refreshTimer);
         refreshTimer = globalThis.setTimeout(refreshGmPanelV2State, 120);
         renderGmPanelV2();

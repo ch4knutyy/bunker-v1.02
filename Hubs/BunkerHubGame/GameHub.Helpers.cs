@@ -278,11 +278,11 @@ namespace Bunker.Hubs
             var settings = _roomGameSettings.GetEffective(room);
             if (!settings.BonusInventoryEnabled || completedRound != settings.BonusInventoryRound || room.AdditionalInventoryGrantedAfterRound3)
             {
-                return new();
+                return [];
             }
 
             room.AdditionalInventoryGrantedAfterRound3 = true;
-            var grants = new List<object>();
+            List<object> grants = [];
 
             foreach (var entry in RoomService.GetGameplayPlayersSnapshot(room))
             {
