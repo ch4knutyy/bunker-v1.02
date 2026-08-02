@@ -283,8 +283,8 @@ namespace Bunker.Hubs
                 return;
             }
 
-            var characteristicKeys = new[]
-            {
+            string[] characteristicKeys =
+            [
                 "Personality",
                 "Body",
                 "Profession",
@@ -296,7 +296,7 @@ namespace Bunker.Hubs
                 "Inventory",
                 "Property",
                 "Fact"
-            };
+            ];
 
             foreach (var characteristicKey in characteristicKeys)
             {
@@ -461,7 +461,7 @@ namespace Bunker.Hubs
 
         private Dictionary<string, object?> BuildRevealedSources(Player player)
         {
-            var sources = new Dictionary<string, object?>();
+            Dictionary<string, object?> sources = [];
             if (player.Revealed.Profession) sources["Profession"] = new
             {
                 player.Profession.Name,
@@ -502,8 +502,8 @@ namespace Bunker.Hubs
             if (string.IsNullOrWhiteSpace(tooltip)) return "";
 
             var cleaned = tooltip;
-            var phrases = new[]
-            {
+            string[] phrases =
+            [
                 "Тип: слабка",
                 "Тип: середня",
                 "Тип: сильна",
@@ -521,7 +521,7 @@ namespace Bunker.Hubs
                 "Дорослий контент",
                 "Сильна",
                 "Слабка"
-            };
+            ];
 
             foreach (var phrase in phrases)
             {

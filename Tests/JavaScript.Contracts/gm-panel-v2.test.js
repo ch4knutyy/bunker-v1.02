@@ -140,6 +140,15 @@ test('returned DTO contract waits for room readiness and retry clears failures',
   assert.match(client, /String\(content \?\? "—"\)/);
 });
 
+test('only canonical Host or Developer capabilities can request GM panel state', () => {
+  const refresh = client.slice(client.indexOf('async function refreshGmPanelV2State'), client.indexOf('window.retryGmPanelV2'));
+  assert.match(client, /function canUseGmPanelV2\(\)[\s\S]*isHost[\s\S]*ManageRoom/);
+  assert.match(refresh, /if \(!canUseGmPanelV2\(\)\) return;/);
+  assert.match(client, /function scheduleGmPanelV2Refresh\(\)\s*\{\s*if \(!canUseGmPanelV2\(\)\) return;/);
+  assert.match(client, /window\.canUseGmPanelV2 = canUseGmPanelV2/);
+  assert.match(fs.readFileSync('wwwroot\/js\/bunker\/ui\/runtime.js', 'utf8'), /window\.canUseGmPanelV2\(\)/);
+});
+
 test('operational GM tabs and primary action follow the server projection', () => {
   assert.match(client, /allowedTabs = \["game", "players", "events", "history", "tools", "diagnostics", "recovery", "overview"\]/);
   assert.equal((view.match(/data-gm-tab-button="(?:game|players|events|history|tools|diagnostics|recovery)"/g) || []).length, 7);

@@ -95,7 +95,10 @@ function updateRoomUI() {
 	// Показуємо кнопку GM панелі хосту ЗАВЖДИ (і в лобі, і під час гри)
 	const gmPanelBtn = document.getElementById('gmPanelBtn');
 	if (gmPanelBtn) {
-		if (isHost || isDeveloper || !!omniscientHiddenState) {
+		const canUseGmPanel = typeof window.canUseGmPanelV2 === 'function'
+			? window.canUseGmPanelV2()
+			: isHost || isDeveloper || !!omniscientHiddenState;
+		if (canUseGmPanel) {
 			gmPanelBtn.style.display = 'inline-block';
 		} else {
 			gmPanelBtn.style.display = 'none';

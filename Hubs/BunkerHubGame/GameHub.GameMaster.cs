@@ -1030,7 +1030,7 @@ namespace Bunker.Hubs
             if (roomId == null) return;
 
             // Валідуємо тип
-            var validTypes = new[] { "info", "warning", "danger", "success", "catastrophe" };
+            string[] validTypes = ["info", "warning", "danger", "success", "catastrophe"];
             if (!validTypes.Contains(eventType))
                 eventType = "info";
 

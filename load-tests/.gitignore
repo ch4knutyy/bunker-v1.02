@@ -1,0 +1,3 @@
+# k6 summaries and sample-level output are generated locally.
+results/*
+!results/.gitkeep

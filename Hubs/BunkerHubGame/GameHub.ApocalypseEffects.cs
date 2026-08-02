@@ -47,7 +47,7 @@ public partial class GameHub
                 return result;
             }
 
-            var personalRecipients = new List<(string ConnectionId, IReadOnlyList<ApocalypseEffectPersonalChange> Changes)>();
+            List<(string ConnectionId, IReadOnlyList<ApocalypseEffectPersonalChange> Changes)> personalRecipients = [];
             foreach (var entry in execution.PersonalChanges)
             {
             var connectionId = _roomService.GetCurrentConnectionId(room, entry.Key);

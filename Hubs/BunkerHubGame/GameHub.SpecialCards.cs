@@ -316,34 +316,34 @@ namespace Bunker.Hubs
 						activateForVoting: true);
 
 				case "forceRevealProfession":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Profession" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["Profession"], publicUse, commandId);
 				case "forceRevealPhysicalHealth":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "PhysicalHealth" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["PhysicalHealth"], publicUse, commandId);
 				case "forceRevealMentalHealth":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "MentalHealth" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["MentalHealth"], publicUse, commandId);
 				case "forceRevealHobby":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Hobby" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["Hobby"], publicUse, commandId);
 				case "forceRevealTrait":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "CharacterTrait" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["CharacterTrait"], publicUse, commandId);
 				case "forceRevealSecret":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Fact" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["Fact"], publicUse, commandId);
 				case "forceRevealAllInventory":
-					return await RevealCharacteristics(room, owner, card, target!, new[] { "Inventory" }, publicUse, commandId);
+					return await RevealCharacteristics(room, owner, card, target!, ["Inventory"], publicUse, commandId);
 				case "property_reveal":
 					return target == null ||
 						   !RoomService.IsGameplayParticipant(target) ||
 						   target.Property == null
 						? SpecialCardResolution.Fail("property_target_not_available")
-						: await RevealCharacteristics(room, owner, card, target, new[] { "Property" }, publicUse, commandId);
+						: await RevealCharacteristics(room, owner, card, target, ["Property"], publicUse, commandId);
 				case "forceRevealRandomCharacteristic":
 					return await RevealRandomCharacteristics(room, owner, card, target!, 1, publicUse, commandId);
 				case "forceRevealTwoRandomCharacteristics":
 					return await RevealRandomCharacteristics(room, owner, card, target!, 2, publicUse, commandId);
 
 				case "peekTargetSecret":
-					return PeekCharacteristics(target!, new[] { "Fact" }, publicUse);
+					return PeekCharacteristics(target!, ["Fact"], publicUse);
 				case "peekTargetInventory":
-					return PeekCharacteristics(target!, new[] { "Inventory" }, publicUse);
+					return PeekCharacteristics(target!, ["Inventory"], publicUse);
 				case "peekTargetRandomCharacteristic":
 					return PeekRandomCharacteristic(target!, publicUse);
 
@@ -512,8 +512,8 @@ namespace Bunker.Hubs
 				return SpecialCardResolution.Fail("Характеристики цього гравця захищені до кінця раунду");
 			}
 
-			var revealedLabels = new List<string>();
-			var revealedKeys = new List<string>();
+			List<string> revealedLabels = [];
+			List<string> revealedKeys = [];
 			foreach (var key in characteristicKeys)
 			{
 				if (IsCharacteristicRevealed(target, key))
@@ -571,7 +571,7 @@ namespace Bunker.Hubs
 
 			return hidden == null
 				? SpecialCardResolution.Fail("У гравця немає прихованих характеристик")
-				: PeekCharacteristics(target, new[] { hidden }, publicLog);
+				: PeekCharacteristics(target, [hidden], publicLog);
 		}
 
 		private SpecialCardResolution PeekCharacteristics(
@@ -603,8 +603,8 @@ namespace Bunker.Hubs
 				return SpecialCardResolution.Fail("Інвентар цього гравця захищений до кінця раунду");
 			}
 
-			target.Inventory.Items ??= new List<Item>();
-			owner.Inventory.Items ??= new List<Item>();
+			target.Inventory.Items ??= [];
+			owner.Inventory.Items ??= [];
 			var candidates = target.Inventory.Items
 				.Where(item => kind switch
 				{
@@ -700,8 +700,8 @@ namespace Bunker.Hubs
 
 		private SpecialCardResolution SwapRandomInventoryItems(Player owner, Player target, string? publicLog)
 		{
-			owner.Inventory.Items ??= new List<Item>();
-			target.Inventory.Items ??= new List<Item>();
+			owner.Inventory.Items ??= [];
+			target.Inventory.Items ??= [];
 			if (owner.Inventory.Items.Count == 0 || target.Inventory.Items.Count == 0)
 			{
 				return SpecialCardResolution.Fail("Для обміну обидва гравці повинні мати предмети");
@@ -960,9 +960,9 @@ namespace Bunker.Hubs
 				return SpecialCardResolution.Fail("Немає спільної прихованої характеристики у сусідів");
 
 			var key = keys[_random.Next(keys.Count)];
-			var upperResult = await RevealCharacteristics(room, owner, card, upper, new[] { key }, null, commandId);
+			var upperResult = await RevealCharacteristics(room, owner, card, upper, [key], null, commandId);
 			if (!upperResult.Success) return upperResult;
-			var lowerResult = await RevealCharacteristics(room, owner, card, lower, new[] { key }, null, commandId);
+			var lowerResult = await RevealCharacteristics(room, owner, card, lower, [key], null, commandId);
 			if (!lowerResult.Success) return lowerResult;
 
 			return SpecialCardResolution.Ok(
@@ -994,7 +994,7 @@ namespace Bunker.Hubs
 
 			var revealKey = revealCandidates[_random.Next(revealCandidates.Count)];
 			var hideKey = hideCandidates[_random.Next(hideCandidates.Count)];
-			var revealResult = await RevealCharacteristics(room, owner, card, revealTarget, new[] { revealKey }, null, commandId);
+			var revealResult = await RevealCharacteristics(room, owner, card, revealTarget, [revealKey], null, commandId);
 			if (!revealResult.Success) return revealResult;
 
 			SetCharacteristicHidden(hideTarget, hideKey);
@@ -1083,8 +1083,8 @@ namespace Bunker.Hubs
 				.ToList();
 		}
 
-		private static IReadOnlyList<string> GetSwappableCharacteristicKeys() => new[]
-		{
+		private static IReadOnlyList<string> GetSwappableCharacteristicKeys() =>
+		[
 			"Personality",
 			"Body",
 			"Profession",
@@ -1094,7 +1094,7 @@ namespace Bunker.Hubs
 			"CharacterTrait",
 			"Property",
 			"Fact"
-		};
+		];
 
 		private static IReadOnlyList<string> GetRerollableCharacteristicKeys() => GetSwappableCharacteristicKeys();
 
@@ -1218,8 +1218,8 @@ namespace Bunker.Hubs
 			}
 		}
 
-		private static IReadOnlyList<string> GetOrdinaryCharacteristicKeys() => new[]
-		{
+		private static IReadOnlyList<string> GetOrdinaryCharacteristicKeys() =>
+		[
 			"Profession",
 			"PhysicalHealth",
 			"MentalHealth",
@@ -1229,7 +1229,7 @@ namespace Bunker.Hubs
 			"Inventory",
 			"Property",
 			"Fact"
-		};
+		];
 
 		private static string GetCharacteristicLabel(string key) => key switch
 		{
@@ -1459,7 +1459,7 @@ namespace Bunker.Hubs
 
 		private static List<SpecialCard> GetPlayerSpecialCards(Player player)
 		{
-			player.SpecialCards ??= new List<SpecialCard>();
+			player.SpecialCards ??= [];
 
 			if (player.SpecialCards.Count == 0 &&
 				player.SpecialCard != null &&
