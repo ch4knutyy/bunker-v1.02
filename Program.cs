@@ -4,6 +4,7 @@ using Bunker.Hubs;
 using Bunker.Hubs.GameHunSpy;
 using Bunker.Models;
 using Bunker.Services;
+using Bunker.Services.Academy;
 using Bunker.Services.Bunker.GameSessions;
 using Bunker.Services.OwnerContent;
 using Bunker.Services.Profile;
@@ -21,6 +22,7 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IAcademicGroupService, AcademicGroupService>();
 
 builder.Services.Configure<OwnerAccessOptions>(
 	builder.Configuration.GetSection(OwnerAccessOptions.SectionName));

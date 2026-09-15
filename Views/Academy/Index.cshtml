@@ -1,0 +1,28 @@
+@model Bunker.Models.Academy.AcademicGroup
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<link rel="stylesheet" href="~/css/academy.css" asp-append-version="true" />
+
+<section class="mode-page academy-page">
+    <div class="mode-page-header">
+        <h1>@Model.Name</h1>
+        <p data-i18n="academyDescription">@Model.Description</p>
+    </div>
+    <dl class="academy-summary">
+        <div class="academy-info-card">
+            <dt data-i18n="academyCourse">Курс</dt><dd>@Model.Course</dd>
+        </div>
+        <div class="academy-info-card">
+            <dt data-i18n="academyInstitution">Навчальний заклад</dt><dd>@Model.Institution</dd>
+        </div>
+        <div class="academy-info-card">
+            <dt data-i18n="academyStudents">Студенти</dt><dd>@Model.StudentCount</dd>
+        </div>
+    </dl>
+    <nav class="academy-actions">
+        <a class="mode-action" asp-controller="Academy" asp-action="Students" data-i18n="academyStudents">Студенти</a>
+        <a class="mode-action" asp-controller="Academy" asp-action="Subjects" data-i18n="academySubjects">Предмети</a>
+    </nav>
+</section>

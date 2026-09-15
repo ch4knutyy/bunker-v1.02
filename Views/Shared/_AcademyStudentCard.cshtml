@@ -1,0 +1,7 @@
+@model Bunker.Models.Academy.Student
+
+<article class="mode-card">
+    <h2>@Model.FirstName @Model.LastName</h2>
+    <p data-i18n="academyStudent@(Model.Id)About">@Model.About</p>
+    <a class="mode-action" asp-controller="Academy" asp-action="StudentDetails" asp-route-id="@Model.Id" data-i18n="academyDetails">Детальніше</a>
+</article>

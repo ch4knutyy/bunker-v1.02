@@ -1,0 +1,26 @@
+@model Bunker.Models.Academy.Student
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName}";
+}
+
+<link rel="stylesheet" href="~/css/academy.css" asp-append-version="true" />
+
+<section class="mode-page academy-page">
+    <article class="academy-profile">
+        <header class="academy-profile-header">
+            <h1>@Model.FirstName @Model.LastName</h1>
+            <dl class="academy-profile-meta">
+                <div><dt><span data-i18n="academyAge">Вік</span>:</dt><dd>@Model.Age</dd></div>
+                <div><dt>Email:</dt><dd><a href="mailto:@Model.Email">@Model.Email</a></dd></div>
+            </dl>
+        </header>
+        <section class="academy-interests">
+            <h2 data-i18n="academyAbout">Інтереси</h2>
+            <p data-i18n="academyStudent@(Model.Id)About">@Model.About</p>
+        </section>
+    </article>
+    <nav class="academy-actions">
+        <a class="mode-action" asp-controller="Academy" asp-action="Students" data-i18n="academyBackStudents">До списку студентів</a>
+        <a class="mode-action" asp-controller="Academy" asp-action="Index" data-i18n="academyBack">До академічної групи</a>
+    </nav>
+</section>
