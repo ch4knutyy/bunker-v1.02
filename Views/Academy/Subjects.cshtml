@@ -3,16 +3,14 @@
     ViewData["Title"] = "Academy";
 }
 
-<section class="mode-page">
+<link rel="stylesheet" href="~/css/academy.css" asp-append-version="true" />
+
+<section class="mode-page academy-page">
     <div class="mode-page-header"><h1 data-i18n="academySubjects">Предмети</h1></div>
-    <div class="mode-grid">
+    <div class="academy-subject-grid">
         @foreach (var subject in Model)
         {
-            <article class="mode-card">
-                <h2>@subject.Name</h2>
-                <p data-i18n="academySubject@(subject.Id)Description">@subject.Description</p>
-                <a class="mode-action" asp-controller="Academy" asp-action="SubjectDetails" asp-route-id="@subject.Id" data-i18n="academyDetails">Детальніше</a>
-            </article>
+            <partial name="_AcademySubjectCard" model="subject" />
         }
     </div>
     <a class="mode-action" asp-controller="Academy" asp-action="Index" data-i18n="academyBack">До академічної групи</a>

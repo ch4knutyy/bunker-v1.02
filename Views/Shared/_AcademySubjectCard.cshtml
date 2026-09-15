@@ -1,0 +1,11 @@
+@model Bunker.Models.Academy.Subject
+
+<article class="mode-card academy-subject-card">
+    <h2>@Model.Name</h2>
+    <p data-i18n="academySubject@(Model.Id)Description">@Model.Description</p>
+    <dl class="academy-profile-meta">
+        <div><dt><span data-i18n="academyTeacher">Викладач</span>:</dt><dd>@Model.Teacher</dd></div>
+        <div><dt><span data-i18n="academyHours">Навчальні години</span>:</dt><dd>@Model.Hours</dd></div>
+    </dl>
+    <a class="mode-action" asp-controller="Academy" asp-action="SubjectDetails" asp-route-id="@Model.Id" data-i18n="academyDetails">Детальніше</a>
+</article>
