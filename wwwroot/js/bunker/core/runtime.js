@@ -145,7 +145,6 @@ function resetClientGameStateForNewRoom() {
 	currentGameCompletion = null;
 	returnFinishedGamePending = false;
 	myVote = null;
-	if (typeof gmRevealedChars !== "undefined") gmRevealedChars = {};
 	gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
 	gmThreatForcePreview = null;
 	gmThreatForceRequestedOutcome = '';

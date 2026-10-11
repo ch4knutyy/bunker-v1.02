@@ -28,12 +28,6 @@ namespace Bunker.Hubs
 				return;
 			}
 			
-			if (playerName.Length > 10)
-			{
-				await Clients.Caller.SendAsync("ReceiveError", "Ім'я гравця не може перевищувати 10 символів");
-				return;
-			}
-
 			try
 			{
 				// Створюємо кімнату
@@ -112,12 +106,6 @@ namespace Bunker.Hubs
 				return;
 			}
 			
-			if (playerName.Length > 10)
-			{
-				await Clients.Caller.SendAsync("ReceiveError", "Ім'я гравця не може перевищувати 10 символів");
-				return;
-			}
-
 			try
 			{
 				if (developerObserver && !_developerAuthority.IsDeveloper(Context.User))

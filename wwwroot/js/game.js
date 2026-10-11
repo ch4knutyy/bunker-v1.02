@@ -1000,9 +1000,6 @@ let eventsHistory = [];
 
 // renderGMAdditionalConditions moved to ~/js/bunker/gm/runtime.js
 
-// Об'єкт для зберігання розкритих характеристик у GM панелі
-var gmRevealedChars = {};
-
 // Форматування особистості
 // formatPersonality moved to ~/js/bunker/gm/runtime.js
 

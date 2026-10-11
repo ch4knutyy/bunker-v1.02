@@ -23,52 +23,21 @@ function revealCharInGMPanel(charName) {
 	let value = t('unknown');
 	let elementId = '';
 
-	switch (charName) {
-		case 'Personality':
-			value = formatPersonality(playerData.personality || playerData.Personality);
-			elementId = 'gmPersonality';
-			break;
-		case 'Body':
-			value = formatBody(playerData.body || playerData.Body);
-			elementId = 'gmBody';
-			break;
-		case 'Profession':
-			value = getCharValue(playerData, 'profession', 'Profession') || t('unknown');
-			elementId = 'gmProfession';
-			break;
-		case 'PhysicalHealth':
-			value = getCharValue(playerData, 'physicalHealth', 'PhysicalHealth') || t('unknown');
-			elementId = 'gmPhysicalHealth';
-			break;
-		case 'MentalHealth':
-			value = getCharValue(playerData, 'mentalHealth', 'MentalHealth') || t('unknown');
-			elementId = 'gmMentalHealth';
-			break;
-		case 'Hobby':
-			value = getCharValue(playerData, 'hobby', 'Hobby') || t('unknown');
-			elementId = 'gmHobby';
-			break;
-		case 'CharacterTrait':
-			value = getCharValue(playerData, 'characterTrait', 'CharacterTrait') || t('unknown');
-			elementId = 'gmCharacterTrait';
-			break;
-		case 'Phobia':
-			value = getCharValue(playerData, 'phobia', 'Phobia') || t('unknown');
-			elementId = 'gmPhobia';
-			break;
-		case 'Inventory':
-			value = getCharValue(playerData, 'inventory', 'Inventory') || t('unknown');
-			elementId = 'gmInventory';
-			break;
-		case 'Property':
-			value = getCharValue(playerData, 'property', 'Property') || t('propertyUnavailable');
-			elementId = 'gmProperty';
-			break;
-		case 'Fact':
-			const fact = playerData.fact ?? playerData.Fact;
-			value = fact ? (getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || fact.Name || t('unknown')) : t('unknown');
-			elementId = 'gmFact';
-			break;
+	const namedCharacteristics = ['Profession', 'PhysicalHealth', 'MentalHealth', 'Hobby', 'CharacterTrait', 'Phobia', 'Inventory', 'Property'];
+	if (namedCharacteristics.includes(charName)) {
+		const key = charName.charAt(0).toLowerCase() + charName.slice(1);
+		value = getCharValue(playerData, key, charName) || t(charName === 'Property' ? 'propertyUnavailable' : 'unknown');
+		elementId = `gm${charName}`;
+	} else if (charName === 'Personality') {
+		value = formatPersonality(playerData.personality || playerData.Personality);
+		elementId = 'gmPersonality';
+	} else if (charName === 'Body') {
+		value = formatBody(playerData.body || playerData.Body);
+		elementId = 'gmBody';
+	} else if (charName === 'Fact') {
+		const fact = playerData.fact ?? playerData.Fact;
+		value = fact ? (getLocalizedValue(fact, 'fact') || getLocalizedValue(fact, 'name') || fact.name || fact.Name || t('unknown')) : t('unknown');
+		elementId = 'gmFact';
 	}
 
 	const el = document.getElementById(elementId);
@@ -77,9 +46,6 @@ function revealCharInGMPanel(charName) {
 		el.classList.remove('gm-char-hidden');
 		el.classList.add('gm-char-revealed');
 	}
-
-	// Track what's been revealed
-	gmRevealedChars[charName] = true;
 }
 
 function showPeekModal(playerName, charKey, data, isAlreadyRevealed) {
@@ -1056,8 +1022,6 @@ function loadPlayerDataForGM() {
 	if (!connectionId) {
 		document.getElementById('gmPlayerInfo').style.display = 'none';
 		selectedPlayerForGM = null;
-		// Reset all revealed states
-		gmRevealedChars = {};
 		return;
 	}
 
@@ -1073,9 +1037,6 @@ function loadPlayerDataForGM() {
 		transferHostButton.disabled = !(playerData.canReceiveHost ?? playerData.CanReceiveHost);
 		transferHostButton.title = transferHostButton.disabled ? t('gmHostTransferIneligible') : '';
 	}
-
-	// Reset revealed characteristics for new player
-	gmRevealedChars = {};
 
 	document.getElementById('gmPlayerInfo').style.display = 'block';
 

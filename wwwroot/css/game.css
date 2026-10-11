@@ -1719,7 +1719,6 @@
 .compact-room-hud .site-player-status-row .player-number,
 .compact-room-hud .site-player-status-row .host-badge,
 .compact-room-hud .site-player-status-row .you-badge,
-.compact-room-hud .site-player-status-row .eliminated-badge-small,
 .compact-room-hud .site-player-status-row .player-role-developer {
 	font-size: .58rem;
 }
@@ -2094,32 +2093,6 @@ body.bunker-theme-active .bunker-game-page #bunkerStorySection .bunker-visual-ro
 
 .event-error {
     color: #e74c3c;
-}
-
-/* Room player card eliminated state (lobby view) */
-.room-player-eliminated {
-    opacity: 0.4;
-    filter: grayscale(60%);
-    position: relative;
-}
-
-    .room-player-eliminated .player-name {
-        text-decoration: line-through;
-    }
-
-.eliminated-badge-small {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.1rem 0.35rem;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-radius: 3px;
-    margin-left: 0.3rem;
 }
 
 .room-player-spectator-gm {
