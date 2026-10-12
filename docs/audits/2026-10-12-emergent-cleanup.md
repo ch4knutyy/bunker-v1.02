@@ -2,6 +2,8 @@
 
 This is a limited, evidence-backed cleanup, not a claim that all agent-derived code has been removed. Active, mixed-authorship implementations remain deliberately intact. Removing them wholesale would violate the preservation requirement.
 
+> Continuation note: sections through the original working-tree summary describe the initial audit snapshot. The continuation below supersedes its validation limits and uncommitted-state description. The original ten-commit audit was not repeated.
+
 ## Scope and evidence
 
 - Repository: `ch4knutyy/bunker-v1.02`; branch: `cleanup/remove-emergent`.
@@ -124,6 +126,99 @@ Three runtime JS files modified; one obsolete document deleted; one test and two
 ```
 
 Token usage
+- Tokens at task start: unavailable
+- Tokens at task end: unavailable
+- Tokens used by the task: unavailable
+- Context usage at task end: unavailable
+
+## Continuation: bounded cleanup and resumed validation
+
+At resumption, branch `cleanup/remove-emergent` was clean at `ef7f3509c29f62b9010ecfd9b787751de4dda761` (Dima, "Remove legacy GM reveal state handling"), whose parent is the audited `d5c753e0ad44f3f6fd4a0ce92837fa221db69121`. That commit was already present when this continuation began; this resumed session made no commits, pushes, branch changes or history edits. No existing cleanup was reverted.
+
+### Additional bounded changes already present in that commit
+
+| File | Change | Preserved contract / evidence |
+| --- | --- | --- |
+| `wwwroot/js/bunker/gm/runtime.js` | Replaced repeated named-characteristic switch branches with an explicit allowlist and derived camelCase key / GM element ID. | Existing helpers, casing tolerance, unknown-input behavior, Property fallback and explicit Personality/Body/Fact formatting retained. Prior session compared 256 before/after dispatch cases successfully; this is bounded parity evidence, not proof of independent clean-room authorship. |
+| `Hubs/BunkerHubGame/GameHub.Rooms.cs` | Removed two unreachable post-sanitization player-name length checks in CreateRoom and JoinRoom. | `SanitizePlayerName` still trims and truncates to ten characters before either site. This does **not** remove the name limit or change rejection into acceptance. |
+| `wwwroot/css/game.css` | Removed `.room-player-eliminated` and `.eliminated-badge-small` rules, including the latter compact-HUD selector. | No current runtime/markup consumers; current public-overview `.is-eliminated` / `.badge-eliminated` rendering and styles retained. |
+| `Tests/JavaScript.Contracts/gm-characteristic-dispatch.test.js` | Added one VM behavioral dispatch regression test. | Named fields in both casings, missing values, special formatters, unknown characteristic and missing player covered. |
+
+These extend the initial unused-map/template cleanup, rather than replacing the current GM or room system. Review of the complete parent-to-HEAD diff found no additional production edits beyond the listed removals/replacement. No new dependency, localization key, API, payload, event or persistence format was introduced.
+
+### Complete suite comparison
+
+| Check | Result |
+| --- | --- |
+| Complete .NET unit suite | Baseline and final: **459 total, 453 passed, 6 failed, 0 skipped**. Exact failure names identical. |
+| Complete JavaScript contract suite | Baseline: **420 total, 208 passed, 212 failed, 0 skipped**. Final: **421 total, 209 passed, 212 failed, 0 skipped**. Exact 212 failure names identical; added dispatch test accounts for the increase. |
+| Both focused GM JS files rerun during continuation | **2 passed, 0 failed**. |
+| Restore and final solution build from preceding session | Passed; final build **0 warnings, 0 errors**. No production source changed during this resumed validation. |
+
+All **six .NET and 212 JavaScript failure names** are recorded in the [validation failure inventory](2026-10-12-emergent-validation-failures.md), with exact saved log/TRX paths. The continuation parsed both baseline/final files and compared sorted unique names; it did not infer parity merely from counts. Pre-existing failures remain unresolved and were not repaired to make this cleanup appear green.
+
+### Active mixed-origin dependencies that remain
+
+| Area | Precise reason to preserve it | Safe next boundary |
+| --- | --- | --- |
+| Scenario images (`c59ee69d`) | Service/controller/model fields feed current image rendering, uploads/removal/prompts, Developer authority, revealed-threat target validation, secret lobby previews and image-update SignalR events. Removing the service or ImageUrl/prompts breaks these later consumers. | Separately specify and verify storage/cache, authority, target and broadcast contracts before any implementation replacement. Rendering checks alone do not validate upload/delete. |
+| GM characteristics (`8ed15548`, `0fb33649`) | Razor controls still call the current runtime. Personality/Body formatters, getCharValue and peek/hide paths support later Inventory/Property/Fact and localized representations. | Keep working formatters and controls; the small dispatch replacement does not make the entire GM system agent-free. |
+| Player normalization (`710bc285`, `21f74e9b`) | RoomCreated, RoomJoined and RejoinSuccess plus characteristic updates depend on case-tolerant normalization and later stable IDs, roles, health, property, special-card and hidden-state fields. | Define complete reconnect/full-state compatibility fixtures before replacing this active shared helper. |
+| Room startup (`21f74e9b`, `bc6b2a78`) | Rooms are created in Lobby; canonical StartGameFromLobby freezes settings, generates characters and persists session state. The old endpoint intentionally rejects with lobby_preview_required. The client two-player fallback is subsequently reconciled by lobby rendering. | Retain the Lobby predicate and current initialization order; changing thresholds or timing requires a behavior decision. |
+| Name rules (`0fb33649`) | Ten-character sanitization is still externally observable on both create and join. Only unreachable checks were removed. | A different name policy requires explicit approval. |
+| Eliminated-player UI (`06f45eb0`) | Later public overview, capacity/count logic and current badges use elimination state. | Only unreferenced legacy selectors were removed; removing current eliminated status would lose behavior. |
+
+The missing historical gitlink object and unverified backup bundle remain limitations from the original audit. Subsequent author metadata alone is not proof that code is independent. No claim of complete agent-origin removal is made.
+
+### History reconstruction readiness
+
+**Not ready for a validated history reconstruction that omits all agent implementations while preserving every feature.** Bounded cleanup is reviewable, but active mixed-origin systems remain, complete suites have existing failures, and browser coverage has limits recorded below. History reconstruction is a separate authorized project: first resolve whether retained implementations are acceptable or need scoped replacements, establish a dependable regression baseline, verify the bundle/nested objects, then construct and validate a candidate in a disposable clone with truthful authorship and an old-to-new commit map. No history operations were performed here.
+
+### Resumed HTTPS browser validation
+
+Temporary config: `.tmp/emergent-validation/playwright.config.cjs`. Both the test client and webServer use `https://localhost:5188`, with `ignoreHTTPSErrors: true`; BASE_URL and GAME_URL were set to that HTTPS origin and /Bunker. The prior HTTP antiforgery failure was resolved through test configuration, without weakening production antiforgery. Cached Playwright dependencies were reused.
+
+The server ran with `ConnectionStrings__DefaultConnection=Data Source=<repository>/.tmp/emergent-validation/browser-isolated.db`, `RoomRecovery__Enabled=false`, Development environment, and `reuseExistingServer=false`. Program reads this named connection string. The dedicated SQLite database and its WAL/SHM files remain in .tmp. Production `bunker.db` was never used by these test servers; its observed LastWriteTimeUtc remained 2026-08-20 19:28:29. No production upload/delete request was made. Playwright managed and stopped its own server; no unrelated server was restarted.
+
+| Run | Result | Meaning |
+| --- | --- | --- |
+| Unmodified selected Chromium specs (host-panel, lobby-state, player-name-input, player-overview-ui, mobile-reconnect, gm-round-voting, scenario-image-grid-regression) | **8 passed / 12 failed / 0 skipped** | All six mobile lobby/reconnect tests and two name-input tests pass. Eleven failures target missing startGameBtn; one targets missing profileName. The old start selector is already absent in the pre-cleanup Razor. |
+| Temporary selector-only supplemental copies | **0 passed / 11 failed** | Guest warning blocks ten tests; host panel reaches a stale viewport-height assertion. |
+| Temporary current-flow copies with guest warning acknowledged | **3 passed / 6 failed** | Lobby/spectator start and reconnect, four-player seat ordering and mobile overview pass. Further fixture assumptions fail; details retained in inventory. |
+| Overview copies using current eleven-characteristic contract, plus focused flow | **4 passed / 1 failed** | All four overview tests pass, including private-data exclusion, public reveal, selection, localization/reload, zero/one/twelve-player fixtures, canonical ordering and mobile layout. Focused flow still mishandles the restored GM panel. |
+| Focused flow before waiting for GM data | **0 passed / 1 failed** | Start/vote/reload/cancel assertions pass; GM dispatch fixture lacks data synchronization. |
+| Final focused current flow | **1 passed / 0 failed** | Current GM voting controls start voting, guest casts a vote, host refresh restores voting, cancellation propagates to guest. Loaded GM data supports immediate characteristic dispatch. Threat/apocalypse/bunker images load from existing local assets and all three error handlers switch to no-image fallback. |
+
+Full failure and pass names, including intermediate fixture failures, are in the [validation inventory](2026-10-12-emergent-validation-failures.md). No repository tests were edited to hide failures. The temporary fixtures acknowledge the guest warning through its Continue button, use the real start selector and readiness/preview sequence, respect persisted panel/accordion state, and use the current eleven-entry characteristic registry. Image assertions use an explicit revealed-threat client fixture and existing static assets; they do not assert a server reveal or upload transaction. GM dispatch uses the real loaded function and server-delivered player data; it does not certify the privileged PeekCharacteristic authorization path.
+
+Reproduction uses `node node_modules/@playwright/test/cli.js test --config <temporary-config> --project chromium` with the HTTPS environment values above. The final overview run used `playwright-verified.config.cjs`; the final focused run used `playwright-flow.config.cjs` (one worker). JSON results, logs and error contexts remain under `.tmp/emergent-validation`. These ignored files must be preserved separately if evidence is needed outside this checkout.
+
+No new production regression was identified in the exercised paths, and no additional production edit was made during this continuation. This does not certify all gameplay: unmodified browser tests remain red, their original image geometry tests did not complete, privileged image upload/delete and hidden-peek authorization were not browser-tested, no complete elimination/restore session was run, and Firefox/WebKit were not run. The passing mobile cases use Chromium with mobile viewport/device settings. A reliable maintained browser suite and resolution of the existing .NET/JS failures remain prerequisites for a strong reconstruction baseline.
+
+### Final manual-review state
+
+Only these documentation files changed during the resumed session:
+
+- `docs/audits/2026-10-12-emergent-cleanup.md`: continuation decisions, exact validation results, preserved dependencies and reconstruction readiness.
+- `docs/audits/2026-10-12-emergent-validation-failures.md`: new complete failure-name inventory and browser attempt accounting.
+
+The previous cleanup commit and all user-authored runtime functionality were preserved. Temporary validation configuration, fixtures, logs and isolated DB are ignored. No additional functioning code was deleted. No commits or pushes were made. Ready for manual review of the bounded cleanup and evidence, **not** a declaration that all agent-derived code is gone.
+
+Final `git diff --check`: passed. Final `git status --short`:
+
+```text
+ M docs/audits/2026-10-12-emergent-cleanup.md
+?? docs/audits/2026-10-12-emergent-validation-failures.md
+```
+
+Final `git diff --stat` (tracked changes only; new inventory is untracked):
+
+```text
+ docs/audits/2026-10-12-emergent-cleanup.md | 95 ++++++++++++++++++++++++++++++
+ 1 file changed, 95 insertions(+)
+```
+
+Token usage (resumed session)
 - Tokens at task start: unavailable
 - Tokens at task end: unavailable
 - Tokens used by the task: unavailable
