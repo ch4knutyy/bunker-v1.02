@@ -149,19 +149,30 @@ public partial class GameHub
 
     private async Task<bool> StartCanonicalScenarioThreat(Room room, int completedRound)
     {
-        lock (room.ThreatSyncRoot)
+        lock (room.SnapshotSyncRoot)
         {
             room.CurrentThreat = DrawThreatForRound(room, completedRound);
-            room.ThreatState = null;
             room.IsThreatRevealed = true;
             room.ThreatRevealedAtRound = completedRound;
             room.ThreatsTriggeredCount++;
             room.ThreatRoundsTriggered.Add(completedRound);
             if (!string.IsNullOrWhiteSpace(room.CurrentThreat?.Id))
+            {
                 room.TriggeredThreatIds.Add(room.CurrentThreat.Id);
-            EnsureRadiationThreatState(room);
+                room.ThreatAuditLog.Add(new ThreatAuditEntry
+                {
+                    SequenceId = ++room.NextThreatAuditSequenceId,
+                    TimestampUtc = DateTimeOffset.UtcNow,
+                    EventType = ThreatAuditEventType.Revealed,
+                    ThreatId = room.CurrentThreat.Id,
+                    ThreatName = room.CurrentThreat.Name,
+                    Round = completedRound
+                });
+                const int maxThreatRevealHistory = 200;
+                if (room.ThreatAuditLog.Count > maxThreatRevealHistory)
+                    room.ThreatAuditLog.RemoveRange(0, room.ThreatAuditLog.Count - maxThreatRevealHistory);
+            }
             room.CurrentPhase = GamePhase.Threat;
-            _threatAudit.Append(room, ThreatAuditEventType.Revealed, deduplicateTransition: true);
         }
         var threatState = BuildRoundState(room);
         await Clients.Group(room.Id).SendAsync("ThreatRevealed", new
@@ -171,8 +182,6 @@ public partial class GameHub
             roundState = threatState
         });
         await Clients.Group(room.Id).SendAsync("RoundStateUpdated", threatState);
-        if (!string.IsNullOrWhiteSpace(room.HostConnectionId))
-            await Clients.Client(room.HostConnectionId).SendAsync("GMThreatControlData", BuildGMThreatControlData(room));
         return true;
     }
 

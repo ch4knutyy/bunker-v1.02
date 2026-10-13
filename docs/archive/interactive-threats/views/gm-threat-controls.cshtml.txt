@@ -1,0 +1,73 @@
+<!-- Retired GM threat controls extracted from active Razor. -->
+
+		</section>
+
+		<div class="gm-section" id="gmThreatControlSection" data-gm-tab="events" style="display: none;">
+			<h4 class="gm-section-title" data-gm-i18n="gmActiveThreat">Активна загроза</h4>
+			<div class="gm-threat-status-card">
+				<div id="gmThreatCurrent" class="gm-threat-current" data-gm-i18n="gmThreatNone">Поточна загроза відсутня</div>
+				<button id="gmThreatPrimaryAction"
+						type="button"
+						class="btn-gm-action gm-action-primary"
+						data-gm-panel-action="open-threat-controls"
+						data-gm-i18n="gmThreatManage"
+						hidden>
+					Керувати загрозою
+				</button>
+			</div>
+			<section id="gmThreatOperations" class="gm-accordion" data-gm-accordion>
+				<button id="gmThreatOperationsToggle" type="button" class="gm-accordion-toggle" aria-expanded="false" aria-controls="gmThreatOperationsPanel">
+					<span data-gm-i18n="gmThreatOperations">Загроза</span>
+					<span class="gm-accordion-arrow" aria-hidden="true">⌄</span>
+				</button>
+				<div id="gmThreatOperationsPanel" class="gm-accordion-panel" role="region" aria-labelledby="gmThreatOperationsToggle" hidden>
+					<div id="gmSpecificThreatControls" style="display: none;">
+						<input id="gmThreatSearch" class="gm-select" type="search" data-gm-i18n-placeholder="gmThreatSearch" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
+						<select id="gmThreatSelect" class="gm-select"></select>
+						<button class="btn-gm-action" data-gm-i18n="gmThreatSelect" data-gm-click="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
+					</div>
+					<div class="gm-round-actions">
+						<button class="btn-gm-action" data-gm-i18n="gmThreatGenerateRare" data-gm-click="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
+						<button class="btn-gm-action" data-gm-i18n="gmThreatGenerateText" data-gm-click="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
+					</div>
+				</div>
+			</section>
+			<section id="gmThreatEmergencyBlock" class="gm-accordion gm-threat-danger-zone" data-gm-accordion hidden>
+				<button id="gmThreatEmergencyToggle" type="button" class="gm-accordion-toggle" aria-expanded="false" aria-controls="gmThreatEmergencyPanel">
+					<span data-gm-i18n="gmThreatEmergency">Аварійне керування</span>
+					<span class="gm-accordion-arrow" aria-hidden="true">⌄</span>
+				</button>
+				<div id="gmThreatEmergencyPanel" class="gm-accordion-panel" role="region" aria-labelledby="gmThreatEmergencyToggle" hidden>
+				<button id="gmThreatResync" class="btn-gm-action" data-gm-i18n="gmThreatResync" data-gm-click="gmResyncThreatRoom()">Оновити стан загрози</button>
+				<button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" data-gm-click="gmRestartThreat()">Перезапустити спробу</button>
+				<button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" data-gm-click="gmCancelThreat()">Скасувати загрозу</button>
+				<button id="gmThreatForceSuccess" class="btn-gm-action gm-force-success" data-gm-i18n="gmThreatForceSuccess" data-gm-click="requestGMThreatForcePreview('success')">Примусовий успіх</button>
+				<button id="gmThreatForceFailure" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatForceFailure" data-gm-click="requestGMThreatForcePreview('failure')">Примусовий провал</button>
+				</div>
+			</section>
+			<p id="gmThreatCommandResult" class="gm-round-hint"></p>
+
+<!-- Retired force-outcome dialog. -->
+
+</div>
+
+@* Підтвердження примусового завершення загрози для GM *@
+<div id="gmThreatForceModal"
+     class="modal gm-threat-force-modal"
+     style="display: none;"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="gmThreatForceTitle">
+
+    <div class="modal-content">
+        <h3 id="gmThreatForceTitle" data-gm-i18n="gmThreatForcePreviewTitle">Підтвердження примусового завершення</h3>
+        <div id="gmThreatForcePreviewContent"></div>
+        <p id="gmThreatForceError" class="gm-threat-force-error" aria-live="polite"></p>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" data-gm-i18n="cancel" onclick="closeGMThreatForceModal()">Скасувати</button>
+            <button type="button" id="gmThreatForceRefresh" class="btn-secondary" data-gm-i18n="gmThreatForceRefresh" onclick="refreshGMThreatForcePreview()" style="display: none;">Оновити preview</button>
+            <button type="button" id="gmThreatForceConfirm" class="btn-primary" data-gm-i18n="confirm" onclick="confirmGMThreatForce()">Підтвердити</button>
+        </div>
+    </div>
+</div>

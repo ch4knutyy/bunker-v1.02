@@ -99,14 +99,11 @@ internal static class GameResetService
 
 			room.ProcessedOmniscientCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedLobbyCommandIds = new(StringComparer.OrdinalIgnoreCase);
-			room.ProcessedGmThreatCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedGmPlayerCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedRoomIntegrityCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedSnapshotCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedRoomEditorCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedSpecialCardCommandIds = new(StringComparer.OrdinalIgnoreCase);
-			room.ThreatAuditLog = new();
-			room.NextThreatAuditSequenceId = 0;
 			room.GmAuditLog = new();
 			room.NextGmAuditSequenceId = 0;
 			room.SnapshotHistory = new();

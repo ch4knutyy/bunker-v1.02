@@ -6,12 +6,12 @@ public sealed class OmniscientGmRoleService(RoomService rooms)
 {
     public OmniscientGmPreviewDto Preview(Room room, Player player)
     {
-        var id = RoomService.GetPlayerKey(player); var voting = room.CurrentVoting; var threat = room.ThreatState;
+        var id = RoomService.GetPlayerKey(player); var voting = room.CurrentVoting;
         return new(id, player.Name, true,
             voting?.Votes.ContainsKey(id) == true || voting?.Votes.ContainsKey(player.ConnectionId) == true,
             room.VotingReadyResponses.ContainsKey(id) || room.VotingReadyResponses.ContainsKey(player.ConnectionId),
             room.CurrentTurnPlayerId == id || room.CurrentTurnPlayerId == player.ConnectionId,
-            threat?.ParticipantPlayerIds.Contains(id, StringComparer.OrdinalIgnoreCase) == true || threat?.VolunteerSelection.SelectedPlayerId == id || threat?.MiniGame.LeaderPlayerId == id,
+            false,
             true, !player.IsSpectatorGm);
     }
 

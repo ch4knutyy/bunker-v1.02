@@ -1,16 +1,10 @@
 namespace Bunker.Models;
 
+/// <summary>Compatibility history from operation-based threats. New narrative reveals use only <see cref="ThreatAuditEventType.Revealed"/>.</summary>
 public enum ThreatAuditEventType
 {
     Revealed,
-    AttemptStarted,
-    AttemptReset,
-    Aborted,
-    ForcedSuccess,
-    ForcedFailure,
-    CompletedSuccess,
-    CompletedFailure,
-    EffectsApplied
+    LegacyOperation
 }
 
 public sealed class ThreatAuditEntry
@@ -21,18 +15,7 @@ public sealed class ThreatAuditEntry
     public string ThreatId { get; init; } = "";
     public string ThreatName { get; init; } = "";
     public int Round { get; init; }
-    public string? AttemptId { get; init; }
     public string? ActorPlayerId { get; init; }
     public Dictionary<string, string> Metadata { get; init; } = new(StringComparer.OrdinalIgnoreCase);
     public string? CommandId { get; init; }
 }
-
-public sealed record ThreatAuditEntryDto(
-    long SequenceId,
-    DateTimeOffset TimestampUtc,
-    string EventType,
-    string ThreatId,
-    string ThreatName,
-    int Round,
-    string? ActorPlayerId,
-    IReadOnlyDictionary<string, string> Metadata);

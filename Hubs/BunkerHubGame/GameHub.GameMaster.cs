@@ -726,13 +726,6 @@ namespace Bunker.Hubs
                 return;
             }
 
-            var threatState = EnsureRadiationThreatState(room);
-            if (IsRadiationThreatActive(room, threatState) && !threatState.Resolution.EffectsApplied)
-            {
-                await Clients.Caller.SendAsync("ReceiveError", "Спершу завершіть інтерактивну загрозу");
-                return;
-            }
-
             if (room.ScenarioSituations is
                 { TriggerPhase: "after_voting", ActiveScenario:
                     { ResolutionMode: "existing_threat_flow", IsResolved: false } afterVotingThreat })

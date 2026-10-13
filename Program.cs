@@ -7,20 +7,32 @@ using Bunker.Services;
 using Bunker.Services.Bunker.GameSessions;
 using Bunker.Services.OwnerContent;
 using Bunker.Services.Profile;
-using Bunker.Services.Threats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.HttpOverrides;
+using Bunker.Services.PrivateAlpha;
+using System.Net;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var processStartedAtUtc = DateTime.UtcNow;
 var builder = WebApplication.CreateBuilder(args);
+
+// Keep local secrets outside Git in every environment, including Production.
+// Environment variables take final precedence for future VPS deployment.
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false)
+    .AddEnvironmentVariables();
+var privateAlphaConfiguration = builder.Configuration.GetSection(PrivateAlphaOptions.SectionName)
+    .Get<PrivateAlphaOptions>() ?? new PrivateAlphaOptions();
+privateAlphaConfiguration.ValidateForStartup();
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<PrivateAlphaOptions>(builder.Configuration.GetSection(PrivateAlphaOptions.SectionName));
 
 builder.Services.Configure<OwnerAccessOptions>(
 	builder.Configuration.GetSection(OwnerAccessOptions.SectionName));
@@ -69,8 +81,6 @@ builder.Services.AddHostedService<GameTimerExpiryService>();
 builder.Services.AddSingleton<SpyRoomService>();
 builder.Services.AddHostedService<SpyTimerExpiryService>();
 builder.Services.AddSingleton<ScenarioImageService>();
-builder.Services.AddSingleton<ThreatScalingService>();
-builder.Services.AddSingleton<ThreatAuditService>();
 builder.Services.AddSingleton<GmAuditService>();
 builder.Services.AddSingleton<GmPanelStateBuilder>();
 builder.Services.AddSingleton<CatalogItemService>();
@@ -120,8 +130,6 @@ builder.Services.AddSingleton<OmniscientRequestRateLimitService>();
 builder.Services.AddSingleton<DirectorControlService>();
 builder.Services.AddSingleton<LobbyStartService>();
 builder.Services.AddSingleton<RoomGameSettingsService>();
-builder.Services.AddSingleton<IThreatMiniGameService, RadiationLeakMiniGameService>();
-builder.Services.AddSingleton<ThreatMiniGameRegistry>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException(
@@ -150,6 +158,42 @@ builder.Services
 	})
 	.AddEntityFrameworkStores<BunkerDbContext>()
 	.AddDefaultTokenProviders();
+
+// This scheme is separate from the existing Bunker.Identity player accounts.
+builder.Services.AddAuthentication()
+    .AddCookie(PrivateAlphaOptions.AuthenticationScheme, options =>
+    {
+        options.Cookie.Name = "Bunker.PrivateAlpha";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+        options.LoginPath = "/alpha-access";
+    });
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("private-alpha-login", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        // Cloudflare's header is trusted only when the origin connection is local.
+        // Keep Kestrel bound to loopback when using Cloudflare Tunnel.
+        if (context.Connection.RemoteIpAddress is { } remote && IPAddress.IsLoopback(remote) &&
+            IPAddress.TryParse(context.Request.Headers["CF-Connecting-IP"].ToString(), out var cloudflareIp))
+            ip = cloudflareIp.ToString();
+
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 8,
+            Window = TimeSpan.FromMinutes(15),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        });
+    });
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -204,8 +248,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Run before static files, routing, MVC actions and both SignalR hubs.
+app.UseMiddleware<PrivateAlphaGateMiddleware>();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

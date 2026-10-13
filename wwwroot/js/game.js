@@ -18,11 +18,6 @@ let publicPlayerViewMode = 'all';
 let publicPlayerSortMode = 'seat';
 let gmPlayersData = {}; // Повні дані гравців для GM
 let selectedPlayerForGM = null;
-let gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
-let gmThreatCommandPending = false;
-let gmThreatForcePending = false;
-let gmThreatForcePreview = null;
-let gmThreatForceRequestedOutcome = '';
 let gmPlayerCommandPending = false;
 let bunkerCapacityPending = false;
 let gmRoundCommandPending = false;
@@ -284,7 +279,6 @@ window.setInterval(renderGameTimer, 250);
 
 // renderThreatLeaderControl moved to ~/js/bunker/threats/runtime.js
 
-// renderThreatMiniGamePanel moved to ~/js/bunker/threats/runtime.js
 
 // isCurrentPlayerId moved to ~/js/bunker/threats/runtime.js
 
@@ -294,13 +288,10 @@ window.setInterval(renderGameTimer, 250);
 
 // renderBunkerAssetControls moved to ~/js/bunker/threats/runtime.js
 
-// renderThreatVolunteerVoteControls moved to ~/js/bunker/threats/runtime.js
 
 // renderThreatRevealedItems moved to ~/js/bunker/threats/runtime.js
 
-// rollThreatSupportDice moved to ~/js/bunker/threats/runtime.js
 
-// submitThreatVolunteer moved to ~/js/bunker/threats/runtime.js
 
 // useProfessionForThreat moved to ~/js/bunker/threats/runtime.js
 
@@ -310,29 +301,18 @@ window.setInterval(renderGameTimer, 250);
 
 // contributeBunkerThreatAsset moved to ~/js/bunker/threats/runtime.js
 
-// withdrawThreatContribution moved to ~/js/bunker/threats/runtime.js
 
-// startThreatVolunteerVote moved to ~/js/bunker/threats/runtime.js
 
 // setThreatOperationLeader moved to ~/js/bunker/threats/runtime.js
 
-// voteThreatVolunteer moved to ~/js/bunker/threats/runtime.js
 
-// closeThreatVolunteerVote moved to ~/js/bunker/threats/runtime.js
 
 // resolveCurrentThreat moved to ~/js/bunker/threats/runtime.js
 
 // selectThreatPlan moved to ~/js/bunker/threats/runtime.js
 
-// startThreatMiniGame moved to ~/js/bunker/threats/runtime.js
 
-// submitThreatMiniGameAnswer moved to ~/js/bunker/threats/runtime.js
 
-// useThreatMiniGameHint moved to ~/js/bunker/threats/runtime.js
-
-// updateThreatOperationTimer moved to ~/js/bunker/threats/runtime.js
-
-window.setInterval(updateThreatOperationTimer, 1000);
 
 // getReadyStatusLabel moved to ~/js/bunker/rounds/runtime.js
 
@@ -970,29 +950,6 @@ let eventsHistory = [];
 // gmThreatCommandId moved to ~/js/bunker/gm/runtime.js
 
 // confirmGMThreatReplacement moved to ~/js/bunker/gm/runtime.js
-
-// invokeGMThreatCommand moved to ~/js/bunker/gm/runtime.js
-
-// gmGenerateRareThreat moved to ~/js/bunker/gm/runtime.js
-// gmGenerateTextThreat moved to ~/js/bunker/gm/runtime.js
-// gmSelectSpecificThreat moved to ~/js/bunker/gm/runtime.js
-// gmCancelThreat moved to ~/js/bunker/gm/runtime.js
-// gmRestartThreat moved to ~/js/bunker/gm/runtime.js
-// gmResyncThreatRoom moved to ~/js/bunker/gm/runtime.js
-
-// setGMThreatForcePending moved to ~/js/bunker/gm/runtime.js
-
-// requestGMThreatForcePreview moved to ~/js/bunker/gm/runtime.js
-
-// refreshGMThreatForcePreview moved to ~/js/bunker/gm/runtime.js
-
-// renderGMThreatForcePreview moved to ~/js/bunker/gm/runtime.js
-
-// confirmGMThreatForce moved to ~/js/bunker/gm/runtime.js
-
-// closeGMThreatForceModal moved to ~/js/bunker/gm/runtime.js
-
-// invokeGMThreatEmergency moved to ~/js/bunker/gm/runtime.js
 
 // updateGMPlayerSelect moved to ~/js/bunker/gm/runtime.js
 

@@ -166,9 +166,9 @@ function buildDirectorRequest() {
 function syncDirectorControls() {
 	directorPreview = null; const apply = document.getElementById('directorApplyButton'); if (apply) apply.disabled = true;
 	const labels = {
-		uk: { reveal: 'Розкрити характеристику', hide: 'Приховати характеристику', reveal_all: 'Розкрити все', hide_all: 'Приховати все', eliminate: 'Елімінувати', restore: 'Відновити', condition_severity: 'Змінити тяжкість стану', condition_remove: 'Видалити стан', pause: 'Пауза', resume: 'Продовжити', round_forward: 'Раунд уперед', reset_readiness: 'Скинути готовність', clear_votes: 'Очистити голоси', remove_vote: 'Видалити голос', voting_resync: 'Синхронізувати голосування', threat_force_success: 'Force success загрози', threat_force_failure: 'Force failure загрози', threat_cancel: 'Скасувати загрозу', threat_restart: 'Перезапустити загрозу', threat_resync: 'Синхронізувати загрозу' },
-		en: { reveal: 'Reveal characteristic', hide: 'Hide characteristic', reveal_all: 'Reveal all', hide_all: 'Hide all', eliminate: 'Eliminate', restore: 'Restore', condition_severity: 'Change condition severity', condition_remove: 'Remove condition', pause: 'Pause', resume: 'Resume', round_forward: 'Forward round', reset_readiness: 'Reset readiness', clear_votes: 'Clear votes', remove_vote: 'Remove vote', voting_resync: 'Voting resync', threat_force_success: 'Force threat success', threat_force_failure: 'Force threat failure', threat_cancel: 'Cancel threat', threat_restart: 'Restart threat', threat_resync: 'Threat resync' },
-		ru: { reveal: 'Раскрыть характеристику', hide: 'Скрыть характеристику', reveal_all: 'Раскрыть всё', hide_all: 'Скрыть всё', eliminate: 'Исключить', restore: 'Восстановить', condition_severity: 'Изменить тяжесть состояния', condition_remove: 'Удалить состояние', pause: 'Пауза', resume: 'Продолжить', round_forward: 'Раунд вперёд', reset_readiness: 'Сбросить готовность', clear_votes: 'Очистить голоса', remove_vote: 'Удалить голос', voting_resync: 'Синхронизировать голосование', threat_force_success: 'Force success угрозы', threat_force_failure: 'Force failure угрозы', threat_cancel: 'Отменить угрозу', threat_restart: 'Перезапустить угрозу', threat_resync: 'Синхронизировать угрозу' }
+		uk: { reveal: 'Розкрити характеристику', hide: 'Приховати характеристику', reveal_all: 'Розкрити все', hide_all: 'Приховати все', eliminate: 'Елімінувати', restore: 'Відновити', condition_severity: 'Змінити тяжкість стану', condition_remove: 'Видалити стан', pause: 'Пауза', resume: 'Продовжити', round_forward: 'Раунд уперед', reset_readiness: 'Скинути готовність', clear_votes: 'Очистити голоси', remove_vote: 'Видалити голос', voting_resync: 'Синхронізувати голосування' },
+		en: { reveal: 'Reveal characteristic', hide: 'Hide characteristic', reveal_all: 'Reveal all', hide_all: 'Hide all', eliminate: 'Eliminate', restore: 'Restore', condition_severity: 'Change condition severity', condition_remove: 'Remove condition', pause: 'Pause', resume: 'Resume', round_forward: 'Forward round', reset_readiness: 'Reset readiness', clear_votes: 'Clear votes', remove_vote: 'Remove vote', voting_resync: 'Voting resync' },
+		ru: { reveal: 'Раскрыть характеристику', hide: 'Скрыть характеристику', reveal_all: 'Раскрыть всё', hide_all: 'Скрыть всё', eliminate: 'Исключить', restore: 'Восстановить', condition_severity: 'Изменить тяжесть состояния', condition_remove: 'Удалить состояние', pause: 'Пауза', resume: 'Продолжить', round_forward: 'Раунд вперёд', reset_readiness: 'Сбросить готовность', clear_votes: 'Очистить голоса', remove_vote: 'Удалить голос', voting_resync: 'Синхронизировать голосование' }
 	}[getCurrentLanguage()] || {};
 	document.querySelectorAll('#directorAction option').forEach(option => { if (labels[option.value]) option.textContent = labels[option.value]; });
 	const action = document.getElementById('directorAction')?.value || '';
@@ -637,51 +637,6 @@ function renderGMPanelState() {
 	renderUnifiedGmAudit();
 }
 
-function renderGMThreatControl() {
-	const current = document.getElementById('gmThreatCurrent');
-	const select = document.getElementById('gmThreatSelect');
-	const specificControls = document.getElementById('gmSpecificThreatControls');
-	if (specificControls) specificControls.style.display = gmThreatControlData.canBrowseFutureThreatCatalog ? '' : 'none';
-	if (current) {
-		const threat = gmThreatControlData.currentThreat;
-		current.textContent = threat
-			? `${threat.name || threat.Name} — ${getThreatStatusLabel(threat.status || threat.Status || '—')}`
-			: t('gmThreatNone');
-	}
-	if (select) {
-		const previous = select.value;
-		select.innerHTML = gmThreatControlData.threats.map(threat => {
-			const id = threat.id || threat.Id;
-			const name = threat.name || threat.Name;
-			const type = threat.type || threat.Type || 'text';
-			const available = threat.available ?? threat.Available ?? true;
-			return `<option value="${escapeHtml(id)}" data-search="${escapeHtml(`${name} ${id} ${type}`.toLowerCase())}" ${available ? '' : 'disabled'}>${escapeHtml(name)} — ${escapeHtml(type)}</option>`;
-		}).join('');
-		if ([...select.options].some(option => option.value === previous)) select.value = previous;
-	}
-	const currentThreat = gmThreatControlData.currentThreat;
-	const canRecover = currentThreat?.canRecoverAttempt ?? currentThreat?.CanRecoverAttempt ?? false;
-	const canForce = currentThreat?.canForceOutcome ?? currentThreat?.CanForceOutcome ?? false;
-	const hasThreat = !!currentThreat;
-	const resync = document.getElementById('gmThreatResync');
-	const reset = document.getElementById('gmThreatReset');
-	const abort = document.getElementById('gmThreatAbort');
-	const forceSuccess = document.getElementById('gmThreatForceSuccess');
-	const forceFailure = document.getElementById('gmThreatForceFailure');
-	const emergency = document.getElementById('gmThreatEmergencyBlock');
-	if (resync) resync.style.display = hasThreat ? '' : 'none';
-	if (reset) reset.style.display = canRecover ? '' : 'none';
-	if (abort) abort.style.display = canRecover ? '' : 'none';
-	if (forceSuccess) forceSuccess.style.display = canForce ? '' : 'none';
-	if (forceFailure) forceFailure.style.display = canForce ? '' : 'none';
-	if (emergency) emergency.hidden = !hasThreat;
-	renderUnifiedGmAudit();
-}
-
-function renderGMThreatAudit() {
-	renderUnifiedGmAudit();
-}
-
 function renderRoomDiagnostics() {
 	const summary = document.getElementById('gmDiagnosticsSummary');
 	const issuesList = document.getElementById('gmDiagnosticsIssues');
@@ -773,41 +728,24 @@ function renderUnifiedGmAudit() {
 		canUndo: entry.canUndo ?? entry.CanUndo ?? false,
 		wasUndone: entry.wasUndone ?? entry.WasUndone ?? false
 	}));
-	const threat = (Array.isArray(gmThreatControlData.auditLog) ? gmThreatControlData.auditLog : []).map(entry => ({
-		source: 'threat',
-		time: entry.timestampUtc || entry.TimestampUtc,
-		action: `threat_${entry.eventType || entry.EventType || ''}`,
-		result: 'success',
-		target: entry.threatId || entry.ThreatId || '',
-		summary: `${entry.threatName || entry.ThreatName || entry.threatId || entry.ThreatId || ''} · ${t('gmThreatRound')} ${entry.round ?? entry.Round ?? 0}`,
-		threatType: entry.eventType || entry.EventType || ''
-	}));
 	const query = (document.getElementById('gmAuditSearch')?.value || '').trim().toLowerCase();
 	const resultFilter = document.getElementById('gmAuditResult')?.value || 'all';
-	const events = [...general, ...threat]
+	const events = general
 		.filter(entry => (resultFilter === 'all' || entry.result === resultFilter) &&
 			(!query || `${entry.action} ${entry.summary} ${entry.target}`.toLowerCase().includes(query)))
 		.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0)).slice(0, 50);
 	if (!events.length) {
-		list.innerHTML = `<p class="gm-threat-audit-empty">${escapeHtml(t('gmThreatHistoryEmpty'))}</p>`;
+		list.innerHTML = `<p class="gm-threat-audit-empty">${escapeHtml(t('gmNoIssues'))}</p>`;
 		return;
 	}
-	const eventKeys = {
-		revealed: 'gmThreatEventRevealed', attempt_started: 'gmThreatEventAttemptStarted',
-		attempt_reset: 'gmThreatEventAttemptReset', aborted: 'gmThreatEventAborted',
-		forced_success: 'gmThreatEventForcedSuccess', forced_failure: 'gmThreatEventForcedFailure',
-		completed_success: 'gmThreatEventCompletedSuccess', completed_failure: 'gmThreatEventCompletedFailure',
-		effects_applied: 'gmThreatEventEffectsApplied'
-	};
 	const locale = { uk: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }[getCurrentLanguage()] || 'uk-UA';
 	list.innerHTML = events.map(entry => {
-		const type = entry.threatType || '';
 		const rawTime = entry.time;
 		const parsedTime = rawTime ? new Date(rawTime) : null;
 		const time = parsedTime && !Number.isNaN(parsedTime.getTime())
 			? parsedTime.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 			: '';
-		const title = entry.source === 'threat' ? t(eventKeys[type] || type) : entry.action;
+		const title = entry.action;
 		const undoState = entry.wasUndone ? ' · undone' : entry.canUndo ? ' · undo available' : '';
 		return `<details class="gm-threat-audit-entry">
                 <summary><time>${escapeHtml(time)}</time><strong>${escapeHtml(title)}</strong><span class="gm-audit-result ${escapeHtml(entry.result)}">${escapeHtml(entry.result)}</span></summary>
@@ -820,185 +758,6 @@ function renderUnifiedGmAudit() {
 	} else {
 		render();
 	}
-}
-
-function filterGMThreatOptions() {
-	const query = (document.getElementById('gmThreatSearch')?.value || '').trim().toLowerCase();
-	document.querySelectorAll('#gmThreatSelect option').forEach(option => {
-		option.hidden = !!query && !option.dataset.search.includes(query);
-	});
-}
-
-function gmThreatCommandId() {
-	return globalThis.crypto?.randomUUID?.() || `gm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function confirmGMThreatReplacement(message) {
-	if (!gmThreatControlData.currentThreat) return true;
-	return confirm(message) && confirm('Підтвердіть ще раз: стара interaction state буде закрита без застосування її наслідків.');
-}
-
-function invokeGMThreatCommand(method, args, confirmationMessage) {
-	if (gmThreatCommandPending) return;
-	const confirmed = confirmationMessage ? confirmGMThreatReplacement(confirmationMessage) : true;
-	if (!confirmed) return;
-	gmThreatCommandPending = true;
-	document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = true);
-	let invocation;
-	switch (method) {
-		case 'GMGenerateRandomRareThreat':
-			invocation = connection.invoke('GMGenerateRandomRareThreat', args[0], confirmed);
-			break;
-		case 'GMGenerateTextThreat':
-			invocation = connection.invoke('GMGenerateTextThreat', args[0], confirmed);
-			break;
-		case 'GMSelectThreat':
-			invocation = connection.invoke('GMSelectThreat', args[0], args[1], confirmed);
-			break;
-		default:
-			gmThreatCommandPending = false;
-			return;
-	}
-	invocation
-		.catch(err => {
-			const result = document.getElementById('gmThreatCommandResult');
-			if (result) result.textContent = err?.message || 'Помилка GM-команди';
-		})
-		.finally(() => {
-			gmThreatCommandPending = false;
-			document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = false);
-		});
-}
-
-function gmGenerateRareThreat() {
-	invokeGMThreatCommand('GMGenerateRandomRareThreat', [gmThreatCommandId()], 'Замінити поточну загрозу випадковою рідкісною?');
-}
-
-function gmGenerateTextThreat() {
-	invokeGMThreatCommand('GMGenerateTextThreat', [gmThreatCommandId()], 'Замінити поточну загрозу випадковою текстовою?');
-}
-
-function gmSelectSpecificThreat() {
-	const id = document.getElementById('gmThreatSelect')?.value;
-	if (id) invokeGMThreatCommand('GMSelectThreat', [id, gmThreatCommandId()], 'Замінити поточну загрозу обраною?');
-}
-
-function gmCancelThreat() {
-	invokeGMThreatEmergency('GMCancelCurrentThreat', 'Загрозу буде завершено без застосування нових наслідків. Уже застосовані наслідки залишаться.');
-}
-
-function gmRestartThreat() {
-	invokeGMThreatEmergency('GMRestartCurrentThreat', 'Поточний прогрес спроби буде очищено. Уже застосовані наслідки не буде скасовано.');
-}
-
-function gmResyncThreatRoom() {
-	invokeGMThreatEmergency('GMResyncThreatRoom');
-}
-
-function setGMThreatForcePending(pending) {
-	gmThreatForcePending = pending;
-	document.querySelectorAll('#gmThreatEmergencyBlock button, #gmThreatForceModal button').forEach(button => {
-		button.disabled = pending;
-	});
-	if (!pending) {
-		const confirmButton = document.getElementById('gmThreatForceConfirm');
-		if (confirmButton) confirmButton.disabled = !gmThreatForcePreview;
-	}
-}
-
-function requestGMThreatForcePreview(outcome) {
-	if (gmThreatForcePending || !['success', 'failure'].includes(outcome)) return;
-	gmThreatForceRequestedOutcome = outcome;
-	gmThreatForcePreview = null;
-	const error = document.getElementById('gmThreatForceError');
-	if (error) error.textContent = '';
-	const refresh = document.getElementById('gmThreatForceRefresh');
-	if (refresh) refresh.style.display = 'none';
-	setGMThreatForcePending(true);
-	connection.invoke('GMPreviewForceThreat', outcome, getCurrentLanguage()).catch(err => {
-		if (error) error.textContent = err?.message || t('unavailableNow');
-		setGMThreatForcePending(false);
-	});
-}
-
-function refreshGMThreatForcePreview() {
-	if (gmThreatForceRequestedOutcome) requestGMThreatForcePreview(gmThreatForceRequestedOutcome);
-}
-
-function renderGMThreatForcePreview() {
-	const preview = gmThreatForcePreview;
-	const content = document.getElementById('gmThreatForcePreviewContent');
-	if (!content || !preview) return;
-	const value = key => preview[key] ?? preview[key[0].toUpperCase() + key.slice(1)];
-	const outcome = value('requestedOutcome');
-	const effects = !!value('effectsWillBeApplied');
-	content.innerHTML = `<div class="gm-threat-force-preview">
-            <strong>${escapeHtml(value('threatName') || value('threatId') || '')}</strong>
-            <dl>
-                <div><dt>${escapeHtml(t('gmThreatForceOutcome'))}</dt><dd>${escapeHtml(t(outcome === 'success' ? 'gmThreatForceSuccess' : 'gmThreatForceFailure'))}</dd></div>
-                <div><dt>${escapeHtml(t('gmThreatForceEffects'))}</dt><dd>${escapeHtml(t(effects ? 'gmThreatForceWillApply' : 'gmThreatForceWillNotApply'))}</dd></div>
-                <div><dt>${escapeHtml(t('gmThreatForceScope'))}</dt><dd>${escapeHtml(value('consequenceScope') || '')}</dd></div>
-                <div><dt>${escapeHtml(t('gmThreatForceAffected'))}</dt><dd>${escapeHtml(value('potentiallyAffectedPlayers') ?? 0)}</dd></div>
-            </dl>
-            <p>${escapeHtml(value('description') || '')}</p>
-            <p class="gm-threat-force-warning">${escapeHtml(value('irreversibleWarning') || '')}</p>
-        </div>`;
-	const error = document.getElementById('gmThreatForceError');
-	if (error) error.textContent = '';
-	const refresh = document.getElementById('gmThreatForceRefresh');
-	if (refresh) refresh.style.display = 'none';
-	setGMThreatForcePending(false);
-}
-
-function confirmGMThreatForce() {
-	if (gmThreatForcePending || !gmThreatForcePreview) return;
-	const fingerprint = gmThreatForcePreview.fingerprint || gmThreatForcePreview.Fingerprint;
-	if (!fingerprint) return;
-	setGMThreatForcePending(true);
-	connection.invoke('GMConfirmForceThreat', gmThreatForceRequestedOutcome, fingerprint, gmThreatCommandId(), getCurrentLanguage())
-		.catch(err => {
-			const error = document.getElementById('gmThreatForceError');
-			if (error) error.textContent = err?.message || t('unavailableNow');
-			setGMThreatForcePending(false);
-		});
-}
-
-function closeGMThreatForceModal() {
-	if (gmThreatForcePending) return;
-	const modal = document.getElementById('gmThreatForceModal');
-	if (modal) modal.style.display = 'none';
-	gmThreatForcePreview = null;
-}
-
-function invokeGMThreatEmergency(method, confirmationMessage) {
-	if (gmThreatCommandPending) return;
-	if (confirmationMessage && !confirm(confirmationMessage)) return;
-	gmThreatCommandPending = true;
-	document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = true);
-	const commandId = gmThreatCommandId();
-	let invocation;
-	switch (method) {
-		case 'GMCancelCurrentThreat':
-			invocation = connection.invoke('GMCancelCurrentThreat', commandId);
-			break;
-		case 'GMRestartCurrentThreat':
-			invocation = connection.invoke('GMRestartCurrentThreat', commandId);
-			break;
-		case 'GMResyncThreatRoom':
-			invocation = connection.invoke('GMResyncThreatRoom', commandId);
-			break;
-		default:
-			gmThreatCommandPending = false;
-			return;
-	}
-	invocation.catch(error => {
-		const result = document.getElementById('gmThreatCommandResult');
-		if (result) result.textContent = error?.message || t('unavailableNow');
-	}).finally(() => {
-		gmThreatCommandPending = false;
-		document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = false);
-		renderGMThreatControl();
-	});
 }
 
 function updateGMPlayerSelect() {

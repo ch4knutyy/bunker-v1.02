@@ -112,7 +112,7 @@
 					<a href="/#author"
 					   class="nav-link"
 					   data-i18n="navAuthor">
-						Автор
+						Про проєкт
 					</a>
 
 					<a href="https://github.com/ch4knutyy/bunker-v1.02"
@@ -169,34 +169,38 @@
 						}
 						else
 						{
-							<a class="account-nav-user"
-							   asp-controller="Profile"
-							   asp-action="Index"
-							   title="Профіль">
-								<span aria-hidden="true">👤</span>
-								<span>@signedInUser.DisplayName</span>
-							</a>
+							<details class="profile-menu">
+								<summary class="account-nav-user">
+									<span aria-hidden="true">👤</span>
+									<span>@signedInUser.DisplayName</span>
+									<span class="profile-menu-chevron" aria-hidden="true">⌄</span>
+								</summary>
+								<div class="profile-menu-panel">
+									<a class="profile-menu-link"
+									   asp-controller="Profile"
+									   asp-action="Index"
+									   data-i18n="profileMenu">
+										Профіль
+									</a>
 
-							@if (canUseOwnerContentEditor)
-							{
-								<a class="account-nav-link"
-								   asp-controller="OwnerContent"
-								   asp-action="Index">
-									Редактор контенту
-								</a>
-							}
+									@if (canUseOwnerContentEditor)
+									{
+										<a class="profile-menu-link"
+										   asp-controller="OwnerContent"
+										   asp-action="Index"
+										   data-i18n="contentEditor">
+											Редактор контенту
+										</a>
+									}
 
-							<form asp-controller="Account"
-								  asp-action="Logout"
-								  method="post"
-								  class="account-logout-form">
-
-								<button type="submit"
-										class="account-nav-link account-nav-button"
-										data-i18n="authLogout">
-									Вийти
-								</button>
-							</form>
+									<form asp-controller="Account"
+									  asp-action="Logout"
+									  method="post"
+									  class="account-logout-form">
+										<button type="submit" class="profile-menu-link profile-menu-logout" data-i18n="authLogout">Вийти</button>
+									</form>
+								</div>
+							</details>
 						}
 					</div>
 				</div>

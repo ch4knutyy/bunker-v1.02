@@ -5,7 +5,6 @@ using System.Text.Json;
 using Bunker.Hubs;
 using Bunker.Models;
 using Bunker.Services;
-using Bunker.Services.Threats;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
@@ -332,7 +331,7 @@ public sealed class PropertySpecialCardEffectsTests
             BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.NotNull(method);
         var task = Assert.IsAssignableFrom<Task>(
-            method!.Invoke(hub, [room, owner, card, target, "public", null]));
+            method!.Invoke(hub, [room, owner, card, target, "public", null, null]));
         await task;
         return task.GetType().GetProperty("Result")!.GetValue(task)!;
     }
@@ -385,10 +384,7 @@ public sealed class PropertySpecialCardEffectsTests
             roomService,
             gameData,
             new ScenarioImageService(environment, NullLogger<ScenarioImageService>.Instance),
-            new ThreatScalingService(),
-            new ThreatMiniGameRegistry([]),
             timer,
-            new ThreatAuditService(TimeProvider.System),
             NullLogger<GameHub>.Instance,
             new PlayerDisconnectCleanupCoordinator(
                 roomService,

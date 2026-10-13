@@ -1,6 +1,4 @@
 using System.Text.Json;
-using System.Reflection;
-using Bunker.Hubs;
 using Bunker.Models;
 using Bunker.Models.GameData;
 using Bunker.Models.Сharacteristics;
@@ -77,22 +75,6 @@ public class ProfessionItemGenerationTests
                 Assert.Equal(profession.Items.Count, itemsI18n.GetArrayLength());
             }
         }
-    }
-
-    [Xunit.Fact]
-    public void ServerThreatItemResolverAcceptsOwnedProfessionItemAndRejectsForgedToken()
-    {
-        var player = CreatePlayerWithProfessionItem();
-        var resolve = typeof(GameHub).GetMethod("ResolvePlayerThreatItem", BindingFlags.NonPublic | BindingFlags.Static);
-
-        Assert.NotNull(resolve);
-        var owned = resolve!.Invoke(null, new object[] { player, "profession", player.ProfessionItem.InstanceId });
-        var forgedProfession = resolve.Invoke(null, new object[] { player, "profession", "profession:forged" });
-        var forgedInventory = resolve.Invoke(null, new object[] { player, "inventory", player.ProfessionItem.InstanceId });
-
-        Assert.Same(player.ProfessionItem, owned);
-        Assert.Null(forgedProfession);
-        Assert.Null(forgedInventory);
     }
 
     private static GameDataService CreateGameData()

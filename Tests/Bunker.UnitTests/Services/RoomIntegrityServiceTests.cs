@@ -25,7 +25,7 @@ public sealed class RoomIntegrityServiceTests
     }
 
     [Fact]
-    public void Check_DetectsStaleReadyVoteAndThreatReferences()
+    public void Check_DetectsStaleReadyAndVoteReferences()
     {
         var (integrity, _, room, _) = CreateHealthyRoom();
         room.VotingReadyResponses["missing-ready"] = "ready";
@@ -34,18 +34,11 @@ public sealed class RoomIntegrityServiceTests
             State = VotingState.Active,
             Votes = new() { ["missing-voter"] = "missing-target" }
         };
-        room.ThreatState = new ThreatInteractionState
-        {
-            ParticipantPlayerIds = new() { "missing-participant" },
-            MiniGame = new() { LeaderPlayerId = "missing-leader" }
-        };
 
         var codes = integrity.Check(room).Issues.Select(issue => issue.Code).ToHashSet();
         Assert.Contains("ready_player_missing", codes);
         Assert.Contains("vote_voter_missing", codes);
         Assert.Contains("vote_target_missing", codes);
-        Assert.Contains("threat_participant_missing", codes);
-        Assert.Contains("operation_leader_invalid", codes);
     }
 
     [Fact]
@@ -56,10 +49,6 @@ public sealed class RoomIntegrityServiceTests
         room.Players.Remove(staleConnection);
         room.VotingReadyResponses["missing"] = "ready";
         room.CurrentVoting = new VotingSession { Votes = new() { ["missing"] = RoomService.GetPlayerKey(room.Players.Values.First()) } };
-        room.ThreatState = new ThreatInteractionState
-        {
-            ParticipantPlayerIds = new() { "missing" }, MiniGame = new() { LeaderPlayerId = "missing" }
-        };
 
         var preview = integrity.PreviewAutoFix(room);
         Assert.True(preview.HasChanges);
@@ -67,12 +56,10 @@ public sealed class RoomIntegrityServiceTests
         Assert.Contains("missing", room.VotingReadyResponses.Keys);
 
         var changed = integrity.ApplySafeFixes(room);
-        Assert.True(changed >= 4);
+        Assert.True(changed >= 2);
         Assert.Null(service.GetPlayerRoomId(staleConnection));
         Assert.Empty(room.VotingReadyResponses);
         Assert.Empty(room.CurrentVoting.Votes);
-        Assert.Empty(room.ThreatState.ParticipantPlayerIds);
-        Assert.Equal("", room.ThreatState.MiniGame.LeaderPlayerId);
         Assert.Equal(0, integrity.ApplySafeFixes(room));
         Assert.DoesNotContain(integrity.Check(room).Issues, issue => issue.CanAutoFix);
     }

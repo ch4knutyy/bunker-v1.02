@@ -17,7 +17,7 @@ public sealed class OmniscientHiddenStateService(TimeProvider timeProvider, Game
         var threat = BuildThreat(room);
         var voting = BuildVoting(room, includeSecretVotes);
         var version = _versions.AddOrUpdate(room.Id, 1, (_, current) => current + 1);
-        var fingerprintSource = $"{room.Id}|{room.CurrentRound}|{room.CurrentPhase}|{room.State}|{room.CurrentVoting?.Id}|{room.ThreatState?.ThreatStatus}|{string.Join(';', players.Select(p => $"{p.PlayerId}:{p.IsEliminated}:{p.Characteristics.Count}:{p.Inventory.Count}"))}";
+        var fingerprintSource = $"{room.Id}|{room.CurrentRound}|{room.CurrentPhase}|{room.State}|{room.CurrentVoting?.Id}|{room.IsThreatRevealed}|{string.Join(';', players.Select(p => $"{p.PlayerId}:{p.IsEliminated}:{p.Characteristics.Count}:{p.Inventory.Count}"))}";
         var fingerprint = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(fingerprintSource)))[..16].ToLowerInvariant();
         var timer = timers.GetDto(room);
         return new(version, now, fingerprint, room.Id, room.CurrentRound, room.CurrentPhase.ToString(), room.IsPaused, room.PauseReason,
@@ -79,15 +79,9 @@ public sealed class OmniscientHiddenStateService(TimeProvider timeProvider, Game
 
     private static OmniscientThreatStateDto? BuildThreat(Room room)
     {
-        if (room.CurrentThreat == null && room.ThreatState == null) return null;
-        var state = room.ThreatState; var mini = state?.MiniGame;
-        var terminal = state?.ThreatStatus is "resolved_safely" or "resolved_with_casualty" or "failed" or "completed" ? state.ThreatStatus : null;
-        var attempt = mini == null ? null : new OmniscientThreatAttemptDto(mini.Status, mini.StartedAtUtc, mini.CompletedAtUtc,
-            mini.CurrentIndex, mini.Questions.Count, mini.CorrectAnswers, mini.WrongAnswers, mini.Timeouts);
-        return new(room.CurrentThreat?.Id ?? state?.CurrentThreatId, room.CurrentThreat?.Category, room.CurrentThreat?.Name,
-            state?.ThreatStatus ?? (room.IsThreatRevealed ? "revealed" : "hidden"), state?.ParticipantPlayerIds.ToList() ?? [],
-            EmptyToNull(state?.MiniGame.LeaderPlayerId) ?? EmptyToNull(state?.VolunteerSelection.SelectedPlayerId),
-            EmptyToNull(state?.PlanChoice.SelectedPlanId), terminal, state?.Resolution.EffectsApplied == true, attempt);
+        if (room.CurrentThreat == null) return null;
+        return new(room.CurrentThreat.Id, room.CurrentThreat.Category, room.CurrentThreat.Name,
+            room.IsThreatRevealed ? "revealed" : "hidden", [], null, null, null, false, null);
     }
 
     private static string? ResolveStableId(Room room, string? value) => string.IsNullOrWhiteSpace(value) ? null :

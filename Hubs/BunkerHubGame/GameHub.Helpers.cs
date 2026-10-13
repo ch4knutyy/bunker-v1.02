@@ -1,7 +1,6 @@
 ﻿using Bunker.Models;
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
-using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 using System.Numerics;
 using System.Text.Json;
@@ -128,17 +127,6 @@ namespace Bunker.Hubs
                     (threat.RevealRound <= 0 && threat.Round <= 0))
                 .ToList();
 
-            if (settings.InteractiveThreatRate == InteractiveThreatRate.Off)
-            {
-                candidates = candidates.Where(threat =>
-                    !string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase) &&
-                    !string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase)).ToList();
-                if (candidates.Count == 0)
-                    candidates = _gameData.Threats.Where(threat =>
-                        !string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
             if (settings.AvoidRepeatedThreats)
             {
                 var unused = candidates.Where(threat => !room.TriggeredThreatIds.Contains(threat.Id)).ToList();
@@ -157,17 +145,7 @@ namespace Bunker.Hubs
                 Description = "Бункер зіткнувся з непередбаченою небезпекою.",
                 Round = round
             };
-            var selected = new ThreatPoolSelector().Select(
-                candidates,
-                threat => settings.InteractiveThreatRate != InteractiveThreatRate.Off &&
-                    (string.Equals(threat.Id, RadiationLeakThreatId, StringComparison.OrdinalIgnoreCase)
-                    ? _threatMiniGames.TryGet(RadiationLeakThreatId, out _)
-                    : string.Equals(threat.Id, AirFilterFailureThreatId, StringComparison.OrdinalIgnoreCase) &&
-                      IsPlanChoiceMechanics(threat.Mechanics)),
-                _random.Next,
-                safeFallback,
-                RoomGameSettingsService.InteractivePercent(settings.InteractiveThreatRate));
-            return CloneThreatData(selected);
+            return CloneThreatData(candidates.Count == 0 ? safeFallback : candidates[_random.Next(candidates.Count)]);
         }
 
         private long AdvancePublicRevealRevision(Room room)
@@ -183,7 +161,6 @@ namespace Bunker.Hubs
             var settings = _roomGameSettings.GetEffective(room);
             if (!settings.ThreatsEnabled || completedRound < settings.FirstThreatRound || room.ThreatRoundsTriggered.Contains(completedRound)) return false;
             if (settings.MaxThreatsPerGame.HasValue && room.ThreatsTriggeredCount >= settings.MaxThreatsPerGame.Value) return false;
-            if (room.ThreatState != null && room.ThreatState.ThreatStatus is not ("hidden" or "aborted" or "resolved_safely" or "resolved_with_casualty" or "failed" or "completed")) return false;
             return settings.ThreatFrequency switch
             {
                 ThreatFrequencyMode.OncePerGame => room.ThreatsTriggeredCount == 0,
@@ -203,10 +180,7 @@ namespace Bunker.Hubs
 
         private RoundVotingAdminService.VotingStartAvailability GetVotingStartAvailability(Room room)
         {
-            var threatState = EnsureRadiationThreatState(room);
-            var hasUnresolvedBlockingThreat = IsRadiationThreatActive(room, threatState) &&
-                !threatState.Resolution.EffectsApplied;
-            return RoundVotingAdminService.CanStartVoting(room, hasUnresolvedBlockingThreat);
+            return RoundVotingAdminService.CanStartVoting(room, false);
         }
 
         private static Bunker.Models.GameData.ThreatData CloneThreatData(Bunker.Models.GameData.ThreatData source)

@@ -100,25 +100,38 @@ async function cancelPreparedGameScenario() {
 async function previewLobbyStart() {
 	if (lobbyCommandPending) return; lobbyCommandPending = true; renderLobbyState();
 	try { lobbyStartPreview = await connection.invoke('PreviewStartGameFromLobby'); renderLobbyPreviewSummary(); }
-	catch (_) { lobbyStartPreview = null; renderLobbyPreviewSummary(true); }
+	catch (error) {
+		console.error('PreviewStartGameFromLobby failed:', error);
+		lobbyStartPreview = null;
+		renderLobbyPreviewSummary(true);
+		addEventMessage(`Помилка: ${localizeServerMessage(error?.message || error)}`);
+	}
 	finally { lobbyCommandPending = false; renderLobbyState(); }
 }
 
 async function startGame() {
 	if (isStartingGame || lobbyCommandPending) return;
 	const preparedStatus = preparedScenarioValue(preparedScenarioPreview, 'status', 'Status');
-	if (isDeveloper && (!preparedScenarioPreview || String(preparedStatus).toLowerCase() === 'stale')) { await prepareGameScenario(); return; }
-	if (!lobbyStartPreview?.canStart) { await previewLobbyStart(); return; }
+	if (isDeveloper && (!preparedScenarioPreview || String(preparedStatus).toLowerCase() === 'stale')) {
+		await prepareGameScenario();
+		if (!preparedScenarioPreview) return;
+	}
+	if (!lobbyStartPreview?.canStart) {
+		await previewLobbyStart();
+		if (!lobbyStartPreview?.canStart) return;
+	}
 	const missingPreparedImages = preparedScenarioPreview && ![preparedScenarioPreview.apocalypse || preparedScenarioPreview.Apocalypse, preparedScenarioPreview.bunker || preparedScenarioPreview.Bunker].every(item => preparedScenarioValue(item, 'imageUrl', 'ImageUrl'));
 	if (missingPreparedImages && !confirm(t('startWithFallbackConfirm'))) return;
 	if (!confirm(getCurrentLanguage() === 'en' ? 'Start the game?' : getCurrentLanguage() === 'ru' ? 'Начать игру?' : 'Почати гру?')) return;
 	const entryGeneration = typeof beginBunkerEntry === 'function' ? beginBunkerEntry('bunkerEntryRoomState') : 0;
 	isStartingGame = true; lobbyCommandPending = true; renderLobbyState();
 	try { await connection.invoke('StartGameFromLobby', lobbyStartPreview.previewToken, true, crypto.randomUUID()); }
-	catch (_) {
+	catch (error) {
+		console.error('StartGameFromLobby failed:', error);
 		isStartingGame = false;
 		lobbyStartPreview = null;
 		renderLobbyPreviewSummary(true);
+		addEventMessage(`Помилка: ${localizeServerMessage(error?.message || error)}`);
 		if (entryGeneration && typeof failBunkerEntryCritical === 'function') failBunkerEntryCritical(entryGeneration);
 	}
 	finally { lobbyCommandPending = false; renderLobbyState(); }
@@ -388,7 +401,7 @@ function renderLobbyGameSetup() {
 		`${lobbyPresetLabel(displayed.preset)}`,
 		`${displayed.minGameplayPlayers}–${displayed.maxGameplayPlayers} ${t('players').toLowerCase()}`,
 		`${t('lobbySummaryBunker')}: ${lobbyCapacityLabel(displayed)}`,
-		`${t('lobbySummaryThreats')}: ${displayed.threatsEnabled ? `${displayed.interactiveThreatRate} ${displayed.firstThreatRound}+` : t('lobbyOff')}`,
+		`${t('lobbySummaryThreats')}: ${displayed.threatsEnabled ? `${t('lobbyFromRound')} ${displayed.firstThreatRound}` : t('lobbyOff')}`,
 		`${t('lobbySummaryTimer')}: ${displayed.roundTimerEnabled ? `${Math.round(displayed.roundTimerDurationSeconds / 60)} min` : t('lobbyOff')}`,
 		`${t('lobbySummaryVoting')}: ${displayed.votingEnabled ? `${t('lobbyFromRound')} ${displayed.votingStartRound}` : t('lobbyOff')}`,
 		`${t('lobbySummaryCards')}: ${displayed.specialCardsEnabled ? displayed.specialCardsPerPlayer : 0}`
@@ -419,7 +432,7 @@ function renderLobbyGameSetup() {
 		const activation = canonical.apocalypseActivation;
 		const activationTiming = `${activation.policyMode} · ${activation.scheduleMode} · ${activation.trigger} · ${t('lobbyActivationFromRound')} ${activation.firstRound}${activation.intervalRounds == null ? '' : ` · ${t('lobbyActivationEvery')} ${activation.intervalRounds}`}`;
 		const activationSummary = activation.effectsEnabled ? activationTiming : `${t('lobbyActivationEffectsOffSummary')} · ${activationTiming}`;
-		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('apocalypse'), canonical.apocalypseEnabled ? `${canonical.apocalypseSelectionMode} · ${canonical.allowedApocalypseCategoryCount} categories · ${canonical.apocalypseCustomPoolCount} pool · ${canonical.interactiveApocalypseChancePercent}%` : t('lobbyOff')], [t('lobbyActivationTitle'), activationSummary], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${canonical.interactiveThreatRate}, ${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
+		const rows = [[t('lobbyPreset'), lobbyPresetLabel(canonical.preset)], [t('apocalypse'), canonical.apocalypseEnabled ? `${canonical.apocalypseSelectionMode} · ${canonical.allowedApocalypseCategoryCount} categories · ${canonical.apocalypseCustomPoolCount} pool · ${canonical.interactiveApocalypseChancePercent}%` : t('lobbyOff')], [t('lobbyActivationTitle'), activationSummary], [t('lobbyBunkerCapacityMode'), lobbyCapacityLabel(canonical)], [t('lobbySummaryThreats'), canonical.threatsEnabled ? `${t('lobbyFromRound')} ${canonical.firstThreatRound}` : t('lobbyOff')], [t('lobbySummaryTimer'), canonical.roundTimerEnabled ? `${canonical.roundTimerDurationSeconds / 60} min` : t('lobbyOff')], [t('lobbySummaryVoting'), canonical.votingEnabled ? `${t('lobbyFromRound')} ${canonical.votingStartRound}` : t('lobbyOff')], [t('lobbySpecialCardsCount'), canonical.specialCardsEnabled ? canonical.specialCardsPerPlayer : 0]];
 		readOnly.innerHTML = rows.map(([label, value]) => `<article><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	}
 	const events = lobbyGet(state, 'recentEvents', 'RecentEvents') || []; const audit = document.getElementById('lobbyAuditEvents');
@@ -459,7 +472,6 @@ function lobbySettingsHubPayload(settings) {
 			scheduleMode: enumValue(settings.apocalypseActivation.scheduleMode, ['Once', 'Recurring']),
 			trigger: enumValue(settings.apocalypseActivation.trigger, ['GameStart', 'AfterVoting', 'AfterRound'])
 		},
-		interactiveThreatRate: enumValue(settings.interactiveThreatRate, ['Off', 'Rare', 'Standard', 'Often', 'Always']),
 		threatFrequency: enumValue(settings.threatFrequency, ['OncePerGame', 'EveryOtherRound', 'EveryRound', 'RandomEligibleRounds']),
 		votingFrequency: enumValue(settings.votingFrequency, ['EveryRound', 'EveryTwoRounds']), characterGenerationMode: 0,
 		scenarioSchedule: {

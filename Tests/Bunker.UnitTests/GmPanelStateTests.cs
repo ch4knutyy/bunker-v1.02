@@ -72,7 +72,6 @@ public sealed class GmPanelStateTests
 		};
 		room.CurrentThreat = new ThreatData { Id = "threat", Name = "Storm" };
 		room.IsThreatRevealed = true;
-		room.ThreatState = new ThreatInteractionState { ThreatStatus = "active" };
 		room.Bunker = new BunkerInfo { Name = "Vault", Capacity = 6 };
 		room.ResolvedBunkerCapacity = 5;
 		player.Revealed.Profession = true;
@@ -89,7 +88,7 @@ public sealed class GmPanelStateTests
 		Assert.Equal("Active", state.VotingStatus);
 		Assert.Equal(1, state.VotesCast);
 		Assert.Equal(2, state.RequiredVotes);
-		Assert.Equal("active", state.ThreatStatus);
+		Assert.Equal("Revealed", state.ThreatStatus);
 		Assert.Equal("Storm", state.ThreatName);
 		Assert.Equal(5, state.BunkerCapacity);
 		var playerSummary = Assert.Single(

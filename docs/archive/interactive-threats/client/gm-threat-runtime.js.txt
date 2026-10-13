@@ -1,0 +1,222 @@
+// Retired GM threat controls extracted from the active client during the narrative-only refactor.
+
+function renderGMThreatControl() {
+	const current = document.getElementById('gmThreatCurrent');
+	const select = document.getElementById('gmThreatSelect');
+	const specificControls = document.getElementById('gmSpecificThreatControls');
+	if (specificControls) specificControls.style.display = gmThreatControlData.canBrowseFutureThreatCatalog ? '' : 'none';
+	if (current) {
+		const threat = gmThreatControlData.currentThreat;
+		current.textContent = threat
+			? `${threat.name || threat.Name} — ${getThreatStatusLabel(threat.status || threat.Status || '—')}`
+			: t('gmThreatNone');
+	}
+	if (select) {
+		const previous = select.value;
+		select.innerHTML = gmThreatControlData.threats.map(threat => {
+			const id = threat.id || threat.Id;
+			const name = threat.name || threat.Name;
+			const type = threat.type || threat.Type || 'text';
+			const available = threat.available ?? threat.Available ?? true;
+			return `<option value="${escapeHtml(id)}" data-search="${escapeHtml(`${name} ${id} ${type}`.toLowerCase())}" ${available ? '' : 'disabled'}>${escapeHtml(name)} — ${escapeHtml(type)}</option>`;
+		}).join('');
+		if ([...select.options].some(option => option.value === previous)) select.value = previous;
+	}
+	const currentThreat = gmThreatControlData.currentThreat;
+	const canRecover = currentThreat?.canRecoverAttempt ?? currentThreat?.CanRecoverAttempt ?? false;
+	const canForce = currentThreat?.canForceOutcome ?? currentThreat?.CanForceOutcome ?? false;
+	const hasThreat = !!currentThreat;
+	const resync = document.getElementById('gmThreatResync');
+	const reset = document.getElementById('gmThreatReset');
+	const abort = document.getElementById('gmThreatAbort');
+	const forceSuccess = document.getElementById('gmThreatForceSuccess');
+	const forceFailure = document.getElementById('gmThreatForceFailure');
+	const emergency = document.getElementById('gmThreatEmergencyBlock');
+	if (resync) resync.style.display = hasThreat ? '' : 'none';
+	if (reset) reset.style.display = canRecover ? '' : 'none';
+	if (abort) abort.style.display = canRecover ? '' : 'none';
+	if (forceSuccess) forceSuccess.style.display = canForce ? '' : 'none';
+	if (forceFailure) forceFailure.style.display = canForce ? '' : 'none';
+	if (emergency) emergency.hidden = !hasThreat;
+	renderUnifiedGmAudit();
+}
+
+function renderGMThreatAudit() {
+
+function filterGMThreatOptions() {
+	const query = (document.getElementById('gmThreatSearch')?.value || '').trim().toLowerCase();
+	document.querySelectorAll('#gmThreatSelect option').forEach(option => {
+		option.hidden = !!query && !option.dataset.search.includes(query);
+	});
+}
+
+function gmThreatCommandId() {
+	return globalThis.crypto?.randomUUID?.() || `gm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function confirmGMThreatReplacement(message) {
+	if (!gmThreatControlData.currentThreat) return true;
+	return confirm(message) && confirm('Підтвердіть ще раз: стара interaction state буде закрита без застосування її наслідків.');
+}
+
+function invokeGMThreatCommand(method, args, confirmationMessage) {
+	if (gmThreatCommandPending) return;
+	const confirmed = confirmationMessage ? confirmGMThreatReplacement(confirmationMessage) : true;
+	if (!confirmed) return;
+	gmThreatCommandPending = true;
+	document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = true);
+	let invocation;
+	switch (method) {
+		case 'GMGenerateRandomRareThreat':
+			invocation = connection.invoke('GMGenerateRandomRareThreat', args[0], confirmed);
+			break;
+		case 'GMGenerateTextThreat':
+			invocation = connection.invoke('GMGenerateTextThreat', args[0], confirmed);
+			break;
+		case 'GMSelectThreat':
+			invocation = connection.invoke('GMSelectThreat', args[0], args[1], confirmed);
+			break;
+		default:
+			gmThreatCommandPending = false;
+			return;
+	}
+	invocation
+		.catch(err => {
+			const result = document.getElementById('gmThreatCommandResult');
+			if (result) result.textContent = err?.message || 'Помилка GM-команди';
+		})
+		.finally(() => {
+			gmThreatCommandPending = false;
+			document.querySelectorAll('#gmThreatControlSection button').forEach(button => button.disabled = false);
+		});
+}
+
+function gmGenerateRareThreat() {
+	invokeGMThreatCommand('GMGenerateRandomRareThreat', [gmThreatCommandId()], 'Замінити поточну загрозу випадковою рідкісною?');
+}
+
+function gmGenerateTextThreat() {
+	invokeGMThreatCommand('GMGenerateTextThreat', [gmThreatCommandId()], 'Замінити поточну загрозу випадковою текстовою?');
+}
+
+function gmSelectSpecificThreat() {
+	const id = document.getElementById('gmThreatSelect')?.value;
+	if (id) invokeGMThreatCommand('GMSelectThreat', [id, gmThreatCommandId()], 'Замінити поточну загрозу обраною?');
+}
+
+function gmCancelThreat() {
+	invokeGMThreatEmergency('GMCancelCurrentThreat', 'Загрозу буде завершено без застосування нових наслідків. Уже застосовані наслідки залишаться.');
+}
+
+function gmRestartThreat() {
+	invokeGMThreatEmergency('GMRestartCurrentThreat', 'Поточний прогрес спроби буде очищено. Уже застосовані наслідки не буде скасовано.');
+}
+
+function gmResyncThreatRoom() {
+	invokeGMThreatEmergency('GMResyncThreatRoom');
+}
+
+function setGMThreatForcePending(pending) {
+	gmThreatForcePending = pending;
+	document.querySelectorAll('#gmThreatEmergencyBlock button, #gmThreatForceModal button').forEach(button => {
+		button.disabled = pending;
+	});
+	if (!pending) {
+		const confirmButton = document.getElementById('gmThreatForceConfirm');
+		if (confirmButton) confirmButton.disabled = !gmThreatForcePreview;
+	}
+}
+
+function requestGMThreatForcePreview(outcome) {
+	if (gmThreatForcePending || !['success', 'failure'].includes(outcome)) return;
+	gmThreatForceRequestedOutcome = outcome;
+	gmThreatForcePreview = null;
+	const error = document.getElementById('gmThreatForceError');
+	if (error) error.textContent = '';
+	const refresh = document.getElementById('gmThreatForceRefresh');
+	if (refresh) refresh.style.display = 'none';
+	setGMThreatForcePending(true);
+	connection.invoke('GMPreviewForceThreat', outcome, getCurrentLanguage()).catch(err => {
+		if (error) error.textContent = err?.message || t('unavailableNow');
+		setGMThreatForcePending(false);
+	});
+}
+
+function refreshGMThreatForcePreview() {
+	if (gmThreatForceRequestedOutcome) requestGMThreatForcePreview(gmThreatForceRequestedOutcome);
+}
+
+function renderGMThreatForcePreview() {
+	const preview = gmThreatForcePreview;
+	const content = document.getElementById('gmThreatForcePreviewContent');
+	if (!content || !preview) return;
+	const value = key => preview[key] ?? preview[key[0].toUpperCase() + key.slice(1)];
+	const outcome = value('requestedOutcome');
+	const effects = !!value('effectsWillBeApplied');
+	content.innerHTML = `<div class="gm-threat-force-preview">
+            <strong>${escapeHtml(value('threatName') || value('threatId') || '')}</strong>
+            <dl>
+                <div><dt>${escapeHtml(t('gmThreatForceOutcome'))}</dt><dd>${escapeHtml(t(outcome === 'success' ? 'gmThreatForceSuccess' : 'gmThreatForceFailure'))}</dd></div>
+                <div><dt>${escapeHtml(t('gmThreatForceEffects'))}</dt><dd>${escapeHtml(t(effects ? 'gmThreatForceWillApply' : 'gmThreatForceWillNotApply'))}</dd></div>
+                <div><dt>${escapeHtml(t('gmThreatForceScope'))}</dt><dd>${escapeHtml(value('consequenceScope') || '')}</dd></div>
+                <div><dt>${escapeHtml(t('gmThreatForceAffected'))}</dt><dd>${escapeHtml(value('potentiallyAffectedPlayers') ?? 0)}</dd></div>
+            </dl>
+            <p>${escapeHtml(value('description') || '')}</p>
+            <p class="gm-threat-force-warning">${escapeHtml(value('irreversibleWarning') || '')}</p>
+        </div>`;
+	const error = document.getElementById('gmThreatForceError');
+	if (error) error.textContent = '';
+	const refresh = document.getElementById('gmThreatForceRefresh');
+	if (refresh) refresh.style.display = 'none';
+	setGMThreatForcePending(false);
+}
+
+function confirmGMThreatForce() {
+	if (gmThreatForcePending || !gmThreatForcePreview) return;
+	const fingerprint = gmThreatForcePreview.fingerprint || gmThreatForcePreview.Fingerprint;
+	if (!fingerprint) return;
+	setGMThreatForcePending(true);
+	connection.invoke('GMConfirmForceThreat', gmThreatForceRequestedOutcome, fingerprint, gmThreatCommandId(), getCurrentLanguage())
+		.catch(err => {
+			const error = document.getElementById('gmThreatForceError');
+			if (error) error.textContent = err?.message || t('unavailableNow');
+			setGMThreatForcePending(false);
+		});
+}
+
+function closeGMThreatForceModal() {
+	if (gmThreatForcePending) return;
+	const modal = document.getElementById('gmThreatForceModal');
+	if (modal) modal.style.display = 'none';
+	gmThreatForcePreview = null;
+}
+
+function invokeGMThreatEmergency(method, confirmationMessage) {
+	if (gmThreatCommandPending) return;
+	if (confirmationMessage && !confirm(confirmationMessage)) return;
+	gmThreatCommandPending = true;
+	document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = true);
+	const commandId = gmThreatCommandId();
+	let invocation;
+	switch (method) {
+		case 'GMCancelCurrentThreat':
+			invocation = connection.invoke('GMCancelCurrentThreat', commandId);
+			break;
+		case 'GMRestartCurrentThreat':
+			invocation = connection.invoke('GMRestartCurrentThreat', commandId);
+			break;
+		case 'GMResyncThreatRoom':
+			invocation = connection.invoke('GMResyncThreatRoom', commandId);
+			break;
+		default:
+			gmThreatCommandPending = false;
+			return;
+	}
+	invocation.catch(error => {
+		const result = document.getElementById('gmThreatCommandResult');
+		if (result) result.textContent = error?.message || t('unavailableNow');
+	}).finally(() => {
+		gmThreatCommandPending = false;
+		document.querySelectorAll('#gmThreatEmergencyBlock button').forEach(button => button.disabled = false);
+		renderGMThreatControl();
+	});

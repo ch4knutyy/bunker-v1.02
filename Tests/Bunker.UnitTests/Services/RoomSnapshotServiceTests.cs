@@ -263,23 +263,33 @@ public sealed class RoomSnapshotServiceTests
     }
 
     [Fact]
-    public void Restore_DoesNotReapplyThreatEffectsOrDuplicateConditions()
+    public void Snapshot_ExcludesRetiredThreatInteractionState_AndRestoresNarrativeThreat()
     {
         var context = CreateContext();
         context.Room.CurrentThreat = context.GameData.Threats.First();
         context.Room.IsThreatRevealed = true;
-        context.Room.ThreatState = new ThreatInteractionState
-        {
-            CurrentThreatId = context.Room.CurrentThreat.Id,
-            ThreatStatus = "failed",
-            Resolution = new() { EffectsApplied = true, CompletedAtRound = 3 }
-        };
+        var legacyJson = """
+            {
+              "CurrentThreatId": "__threat_id__",
+              "ThreatStatus": "active",
+              "ParticipantPlayerIds": ["host-player"],
+              "MiniGame": { "Status": "active" }
+            }
+            """.Replace("__threat_id__", context.Room.CurrentThreat.Id, StringComparison.Ordinal);
+        var legacyState = JsonSerializer.Deserialize<ThreatInteractionState>(legacyJson);
+        Assert.NotNull(legacyState);
+        Assert.Contains("ParticipantPlayerIds", legacyState.LegacyInteractiveFields!.Keys);
+        Assert.Contains("MiniGame", legacyState.LegacyInteractiveFields.Keys);
+        context.Room.ThreatState = legacyState;
         context.Target.AdditionalConditionEffects.Add(new() { Id = "effect", ConditionId = "physical_152", SeverityCode = "hard" });
         var snapshot = context.Snapshots.CreateSnapshot(context.Room, "host-player", "terminal threat");
         context.Room.CurrentRound = 4;
 
         Assert.True(context.Snapshots.RestoreSnapshot(context.Room, snapshot.SnapshotId, "host-player", "restore-threat").Success);
-        Assert.True(context.Room.ThreatState!.Resolution.EffectsApplied);
+        Assert.Null(snapshot.State.ThreatState);
+        Assert.Null(context.Room.ThreatState);
+        Assert.Equal(context.GameData.Threats.First().Id, context.Room.CurrentThreat!.Id);
+        Assert.True(context.Room.IsThreatRevealed);
         Assert.Single(context.Room.Players[context.Target.ConnectionId].AdditionalConditionEffects);
     }
 

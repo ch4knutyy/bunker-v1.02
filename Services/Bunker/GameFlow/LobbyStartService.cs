@@ -95,12 +95,11 @@ public sealed class LobbyStartService
             members.Any(x => x.IsGameplayParticipant && x.IsConnected && !x.IsReady)) blockers.Add("connected_members_not_ready");
         blockers.AddRange(settings.ValidateStart(room));
         if (room.CurrentVoting?.State is VotingState.Active or VotingState.Completed) blockers.Add("active_voting");
-        if (room.CurrentThreat != null && room.ThreatState != null && room.ThreatState.ThreatStatus is not ("aborted" or "resolved_safely" or "resolved_with_casualty" or "failed" or "completed")) blockers.Add("active_threat");
         foreach (var player in RoomService.GetPlayersSnapshot(room).Select(x => x.Value).Where(x => x.IsSpectatorGm))
             if (!room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(player))) blockers.Add("invalid_omniscient_boundary");
         return blockers.Distinct().ToList();
     }
     private static string Fingerprint(Room room) => string.Join('|', room.Id, room.State, room.HostPlayerId,
-        room.SettingsRevision, room.SettingsFrozen, room.CurrentVoting?.Id, room.ThreatState?.ThreatStatus, string.Join(';', RoomService.GetPlayersSnapshot(room)
+        room.SettingsRevision, room.SettingsFrozen, room.CurrentVoting?.Id, room.IsThreatRevealed, string.Join(';', RoomService.GetPlayersSnapshot(room)
             .OrderBy(x => RoomService.GetPlayerKey(x.Value)).Select(x => $"{RoomService.GetPlayerKey(x.Value)}:{x.Value.IsConnected}:{x.Value.IsLobbyReady}:{x.Value.IsLobbySpectator}:{x.Value.GmRole}:{x.Value.IsSpectatorGm}")));
 }

@@ -47,7 +47,6 @@ public sealed class RoomGameSettingsService
             settings.ApocalypseActivation.FirstRound, settings.ApocalypseActivation.IntervalRounds,
             settings.ApocalypseActivation.MaxActivations,
             settings.BunkerScenarioEnabled, settings.ThreatsEnabled,
-            settings.InteractiveThreatRate.ToString(), InteractivePercent(settings.InteractiveThreatRate),
             settings.FirstThreatRound, settings.ThreatFrequency.ToString(), settings.MaxThreatsPerGame,
             settings.AvoidRepeatedThreats, settings.RoundTimerEnabled, settings.RoundTimerDurationSeconds,
             settings.AutoStartRoundTimer, settings.PauseTimerOnHostDisconnect, settings.VotingEnabled,
@@ -215,26 +214,14 @@ public sealed class RoomGameSettingsService
         return warnings;
     }
 
-    public static int InteractivePercent(InteractiveThreatRate rate) => rate switch
-    {
-        InteractiveThreatRate.Off => 0,
-        InteractiveThreatRate.Rare => 1,
-        InteractiveThreatRate.Standard => 10,
-        InteractiveThreatRate.Often => 25,
-        InteractiveThreatRate.Always => 100,
-        _ => 1
-    };
-
     public static RoomGameSettings Preset(GamePreset preset) => preset switch
     {
         GamePreset.Calm => With(new(), preset, settings =>
         {
-            settings.InteractiveThreatRate = InteractiveThreatRate.Off;
             settings.RoundTimerEnabled = false;
         }),
         GamePreset.Dangerous => With(new(), preset, settings =>
         {
-            settings.InteractiveThreatRate = InteractiveThreatRate.Standard;
             settings.FirstThreatRound = 2;
             settings.ThreatFrequency = ThreatFrequencyMode.EveryOtherRound;
             settings.MaxThreatsPerGame = 2;
@@ -245,7 +232,6 @@ public sealed class RoomGameSettingsService
         }),
         GamePreset.Hardcore => With(new(), preset, settings =>
         {
-            settings.InteractiveThreatRate = InteractiveThreatRate.Often;
             settings.FirstThreatRound = 2;
             settings.ThreatFrequency = ThreatFrequencyMode.EveryRound;
             settings.MaxThreatsPerGame = 3;
@@ -334,7 +320,7 @@ public sealed class RoomGameSettingsService
             (settings.RandomBunkerCapacityMin is < 1 || settings.RandomBunkerCapacityMax is null ||
              settings.RandomBunkerCapacityMax < settings.RandomBunkerCapacityMin ||
              settings.RandomBunkerCapacityMax > settings.MaxGameplayPlayers)) errors.Add("invalid_random_bunker_capacity");
-        if (!Enum.IsDefined(settings.InteractiveThreatRate) || settings.FirstThreatRound is < 2 or > 5 || !Enum.IsDefined(settings.ThreatFrequency)) errors.Add("invalid_threat_settings");
+        if (settings.FirstThreatRound is < 2 or > 5 || !Enum.IsDefined(settings.ThreatFrequency)) errors.Add("invalid_threat_settings");
         if (settings.MaxThreatsPerGame is < 1 or > 3) errors.Add("invalid_max_threats");
         if (!TimerDurations.Contains(settings.RoundTimerDurationSeconds)) errors.Add("invalid_timer_duration");
         if (settings.VotingStartRound is < 2 or > 5 || !Enum.IsDefined(settings.VotingFrequency)) errors.Add("invalid_voting_settings");

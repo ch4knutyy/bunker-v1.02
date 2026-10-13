@@ -35,12 +35,10 @@ public sealed class OmniscientHiddenStateServiceTests
         guest.SpecialCards.Add(new() { Id = "card-1", Name = "Secret card", Description = "Secret card effect", IsSecret = true });
         guest.AdditionalConditionEffects.Add(new() { ConditionId = "physical_152", Name = "Radiation sickness", SeverityLevel = "hard" });
         room.CurrentThreat = new() { Id = "radiation_leak", Name = "Current radiation leak", Category = "mini_game" };
-        room.ThreatState = new() { CurrentThreatId = "radiation_leak", ThreatStatus = "active", ParticipantPlayerIds = [guest.StablePlayerId] };
-        room.ThreatState.MiniGame.Status = "active"; room.ThreatState.MiniGame.Questions.Add(new() { QuestionId = "secret-question", SelectedOptionId = "answer-key" });
         var dto = service.Build(room, true); var json = JsonSerializer.Serialize(dto);
 
         Assert.Contains("Hidden profession", json); Assert.Contains("Hidden condition", json); Assert.Contains("Hidden item", json); Assert.Contains("Secret card", json); Assert.Contains("physical_152", json);
-        Assert.Contains("radiation_leak", json); Assert.DoesNotContain("secret-question", json); Assert.DoesNotContain("answer-key", json);
+        Assert.Contains("radiation_leak", json);
         Assert.DoesNotContain("Mechanics", json); Assert.DoesNotContain("ImagePath", json); Assert.DoesNotContain("RandomModifier", json);
         Assert.DoesNotContain("ConnectionId", json); Assert.DoesNotContain("HostToken", json);
     }

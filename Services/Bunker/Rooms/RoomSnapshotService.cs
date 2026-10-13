@@ -219,7 +219,9 @@ public sealed class RoomSnapshotService
         lock (room.ThreatSyncRoot)
         {
             state.CurrentThreat = Clone(room.CurrentThreat);
-            state.ThreatState = Clone(room.ThreatState);
+            // ThreatInteractionState is retained only to deserialize legacy snapshots.
+            // New snapshots never persist an interactive operation payload.
+            state.ThreatState = null;
         }
         if (state.CurrentThreat != null)
         {
@@ -277,7 +279,12 @@ public sealed class RoomSnapshotService
         lock (room.ThreatSyncRoot)
         {
             room.CurrentThreat = state.CurrentThreat;
-            room.ThreatState = state.ThreatState;
+            room.ThreatState = null;
+            if (room.CurrentThreat == null)
+            {
+                room.IsThreatRevealed = false;
+                room.ThreatRevealedAtRound = null;
+            }
         }
         room.VotingReadyResponses = state.VotingReadyResponses;
         // Readiness prompts are temporary, connection-aware UI state. A restored snapshot
@@ -345,23 +352,6 @@ public sealed class RoomSnapshotService
             }
         }
 
-        if (state.ThreatState is not { } threat) return;
-        threat.SecretSupportDrop.RecipientPlayerId = NormalizePlayerReference(room, threat.SecretSupportDrop.RecipientPlayerId) ?? threat.SecretSupportDrop.RecipientPlayerId;
-        threat.VolunteerSelection.SelectedPlayerId = NormalizePlayerReference(room, threat.VolunteerSelection.SelectedPlayerId) ?? threat.VolunteerSelection.SelectedPlayerId;
-        threat.ParticipantPlayerIds = threat.ParticipantPlayerIds.Select(id => NormalizePlayerReference(room, id) ?? id).ToList();
-        threat.ForcedParticipantPlayerId = NormalizePlayerReference(room, threat.ForcedParticipantPlayerId) ?? threat.ForcedParticipantPlayerId;
-        foreach (var contribution in threat.Contributions)
-        {
-            contribution.OwnerPlayerId = NormalizePlayerReference(room, contribution.OwnerPlayerId) ?? contribution.OwnerPlayerId;
-            contribution.PlayerId = NormalizePlayerReference(room, contribution.PlayerId) ?? contribution.PlayerId;
-        }
-        threat.ThreatVolunteerVote.Votes = threat.ThreatVolunteerVote.Votes.ToDictionary(
-            pair => NormalizePlayerReference(room, pair.Key) ?? pair.Key,
-            pair => NormalizePlayerReference(room, pair.Value) ?? pair.Value,
-            StringComparer.OrdinalIgnoreCase);
-        threat.ThreatVolunteerVote.SelectedPlayerId = NormalizePlayerReference(room, threat.ThreatVolunteerVote.SelectedPlayerId) ?? threat.ThreatVolunteerVote.SelectedPlayerId;
-        threat.OperationBonuses.ProtectedPlayerIds = threat.OperationBonuses.ProtectedPlayerIds.Select(id => NormalizePlayerReference(room, id) ?? id).ToList();
-        threat.MiniGame.LeaderPlayerId = NormalizePlayerReference(room, threat.MiniGame.LeaderPlayerId) ?? threat.MiniGame.LeaderPlayerId;
     }
 
     private static string NormalizeVoterReference(Room room, string voterId)

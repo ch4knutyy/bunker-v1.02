@@ -7,156 +7,77 @@
 <div class="landing-page">
     <section class="landing-hero" aria-labelledby="landingTitle">
         <div class="landing-hero__content">
-            <p class="landing-kicker">Онлайн соціальна гра про виживання</p>
-
+            <p class="landing-kicker" data-i18n="landingKicker">Місце в укритті не гарантоване</p>
             <h1 id="landingTitle">Vault Judgment</h1>
-
-            <p class="landing-lead">
-                Браузерна версія гри «Бункер», у якій учасники отримують випадкових персонажів,
-                розкривають характеристики, сперечаються, переживають загрози та голосують,
-                хто залишиться у сховищі після апокаліпсису.
+            <p class="landing-lead" data-i18n="landingHeroLead">
+                Соціальна гра про виживання: отримай персонажа, переконай інших і доведи, що саме ти маєш залишитися в бункері.
             </p>
 
-            <div class="landing-actions" aria-label="Основні дії">
-                <a class="landing-btn landing-btn--primary"
-                   asp-controller="Games"
-                   asp-action="Index">
-                    Почати гру
-                </a>
-
-                <a class="landing-btn" href="/rules">Правила</a>
-
-                <a class="landing-btn"
-                   href="https://github.com/ch4knutyy/bunker-v1.02"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    GitHub
-                </a>
-
-                <a class="landing-btn" href="#author">Про автора</a>
+            <div class="landing-actions">
+                <a class="landing-btn landing-btn--primary" asp-controller="Games" asp-action="Index" data-i18n="landingStartPlaying">Почати гру</a>
+                <a class="landing-btn" href="/rules" data-i18n="landingHowToPlay">Як грати</a>
             </div>
         </div>
     </section>
 
-    <section id="previousSession" class="previous-session" hidden>
+    <section id="previousSession" class="previous-session" hidden aria-labelledby="previousSessionTitle">
         <div>
-            <p class="section-eyebrow">Знайдена попередня сесія</p>
-            <h2>Повернутися до гри</h2>
-
+            <p class="section-eyebrow" data-i18n="landingPreviousSessionEyebrow">Активна сесія</p>
+            <h2 id="previousSessionTitle" data-i18n="landingPreviousSessionTitle">Поверніться до гри</h2>
             <dl class="session-details">
-                <div>
-                    <dt>Ім'я гравця</dt>
-                    <dd id="previousSessionName">-</dd>
-                </div>
-
-                <div>
-                    <dt>Кімната</dt>
-                    <dd id="previousSessionRoom">-</dd>
-                </div>
+                <div><dt data-i18n="landingPlayerName">Ім'я гравця</dt><dd id="previousSessionName">-</dd></div>
+                <div><dt data-i18n="landingRoom">Кімната</dt><dd id="previousSessionRoom">-</dd></div>
             </dl>
         </div>
-
         <div class="session-actions">
-            <a class="landing-btn landing-btn--primary"
-               asp-controller="Bunker"
-               asp-action="Index">
-                Повернутися
-            </a>
-
-            <button id="previousSessionForget"
-                    class="landing-btn landing-btn--muted"
-                    type="button">
-                Забути сесію
-            </button>
+            <a class="landing-btn landing-btn--primary" asp-controller="Bunker" asp-action="Index" data-i18n="landingResume">Повернутися</a>
+            <button id="previousSessionForget" class="landing-btn landing-btn--muted" type="button" data-i18n="landingForgetSession">Забути сесію</button>
         </div>
     </section>
 
-    <section class="landing-grid">
-        <article class="portfolio-panel">
-            <p class="section-eyebrow">Поточний стан проєкту</p>
-            <h2>Повний ігровий цикл у реальному часі</h2>
+    <section id="how-it-works" class="landing-section landing-section--steps" aria-labelledby="howItWorksTitle">
+        <div class="section-heading">
+            <p class="section-eyebrow" data-i18n="landingHowItWorksEyebrow">Як це працює</p>
+            <h2 id="howItWorksTitle" data-i18n="landingHowItWorksTitle">Три кроки до вироку</h2>
+        </div>
 
-            <p>
-                Vault Judgment підтримує створення кімнат, окреме лобі з ролями,
-                синхронізацію через SignalR, повторне підключення, генерацію персонажів,
-                раунди, розкриття характеристик, голосування, спеціальні карти,
-                загрози, події бункера та завершення партії.
-            </p>
-
-            <p>
-                Проєкт перебуває в активній розробці та використовується для приватного
-                тестування повних партій з друзями.
-            </p>
-        </article>
-
-        <article id="author" class="author-panel">
-            <p class="section-eyebrow">Автор</p>
-            <h2>Дмитро Лаптєв</h2>
-
-            <p>
-                Самостійний навчальний проєкт на ASP.NET Core, Razor, SignalR і JavaScript.
-                Основний акцент зроблено на серверній авторизації дій, стабільному стані кімнати,
-                відновленні сесій, ігровій логіці та інструментах ведучого.
-            </p>
-        </article>
+        <ol class="steps-grid">
+            <li class="step-card"><span class="step-card__number" aria-hidden="true">01</span><h3 data-i18n="landingStepOneTitle">Зберіть команду</h3><p data-i18n="landingStepOneText">Створіть кімнату або приєднайтеся до друзів — хост налаштовує майбутню партію.</p></li>
+            <li class="step-card"><span class="step-card__number" aria-hidden="true">02</span><h3 data-i18n="landingStepTwoTitle">Розкрийте себе</h3><p data-i18n="landingStepTwoText">Випадковий персонаж приховує професію, здоров'я, речі та інші характеристики, які відкриваються раундами.</p></li>
+            <li class="step-card"><span class="step-card__number" aria-hidden="true">03</span><h3 data-i18n="landingStepThreeTitle">Переконайте або вибувайте</h3><p data-i18n="landingStepThreeText">Обговорюйте, укладайте союзи та голосуйте: лише частина групи переживе апокаліпсис.</p></li>
+        </ol>
     </section>
 
-    <section class="landing-section">
+    <section class="landing-section" aria-labelledby="featuresTitle">
         <div class="section-heading">
-            <p class="section-eyebrow">Ігрові можливості</p>
-            <h2>Що вже реалізовано</h2>
+            <p class="section-eyebrow" data-i18n="landingFeaturesEyebrow">У кожній партії — нова історія</p>
+            <h2 id="featuresTitle" data-i18n="landingFeaturesTitle">Все, що потрібно для напруги за столом</h2>
         </div>
 
         <div class="features-grid">
-            <div class="feature-item">Онлайн-кімнати та окреме лобі</div>
-            <div class="feature-item">Ролі хоста, гравців і спостерігачів</div>
-            <div class="feature-item">Випадкова генерація персонажів</div>
-            <div class="feature-item">Розкриття характеристик по раундах</div>
-            <div class="feature-item">Голосування та вибування гравців</div>
-            <div class="feature-item">Спеціальні карти й ігрові ефекти</div>
-            <div class="feature-item">Каталоги бункерів та апокаліпсисів</div>
-            <div class="feature-item">Загрози, операції та наслідки провалу</div>
-            <div class="feature-item">Панель ведучого, таймер і ресурси</div>
-            <div class="feature-item">Reconnect і відновлення сесії</div>
-            <div class="feature-item">Snapshots, аудит і скасування дій</div>
-            <div class="feature-item">Фінальна післяігрова хроніка</div>
-            <div class="feature-item">Локалізація українською, англійською та російською</div>
+            <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">◈</span><h3 data-i18n="landingFeatureCharactersTitle">Випадкові персонажі</h3><p data-i18n="landingFeatureCharactersText">У кожного гравця — власний набір переваг, вад і приводів для суперечок.</p></article>
+            <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">◌</span><h3 data-i18n="landingFeatureRevealTitle">Прихована інформація</h3><p data-i18n="landingFeatureRevealText">Відкривайте характеристики поступово й обирайте, коли сказати правду.</p></article>
+            <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">▲</span><h3 data-i18n="landingFeatureVotingTitle">Голосування</h3><p data-i18n="landingFeatureVotingText">Кожен раунд завершується рішенням групи — хтось залишає бункер.</p></article>
+            <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">⌁</span><h3 data-i18n="landingFeatureWorldsTitle">Світ після катастрофи</h3><p data-i18n="landingFeatureWorldsText">Апокаліпсиси й бункери змінюють ставки та дають кожній історії власний контекст.</p></article>
+            <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">✦</span><h3 data-i18n="landingFeatureCardsTitle">Спеціальні карти</h3><p data-i18n="landingFeatureCardsText">Неочікувані ефекти можуть перевернути розмову в найважливіший момент.</p></article>
+            <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">⌛</span><h3 data-i18n="landingFeatureHostTitle">Ритм ведучого</h3><p data-i18n="landingFeatureHostText">Хост керує раундами та темпом гри, щоб не втрачати напругу.</p></article>
         </div>
     </section>
 
-    <section class="landing-section">
-        <div class="section-heading">
-            <p class="section-eyebrow">Архітектура</p>
-            <h2>Стабільність і контроль стану</h2>
+    <section id="author" class="landing-about" aria-labelledby="aboutTitle">
+        <div>
+            <p class="section-eyebrow" data-i18n="landingAboutEyebrow">Про проєкт</p>
+            <h2 id="aboutTitle" data-i18n="landingAboutTitle">Зберіть друзів. Зробіть свій вибір.</h2>
         </div>
-
-        <div class="features-grid">
-            <div class="feature-item">Серверна перевірка ролей і дозволів</div>
-            <div class="feature-item">Синхронізація стану через SignalR</div>
-            <div class="feature-item">Збереження ключових даних у SQLite</div>
-            <div class="feature-item">Безпечне відновлення після перепідключення</div>
-            <div class="feature-item">Журнал дій ведучого та системних подій</div>
-            <div class="feature-item">Цільові Playwright і xUnit перевірки</div>
-        </div>
+        <p data-i18n="landingAboutText">Vault Judgment — незалежна браузерна гра для живих розмов, несподіваних аргументів і вечорів, які хочеться повторити.</p>
+        <a class="landing-text-link" href="https://github.com/ch4knutyy/bunker-v1.02" target="_blank" rel="noopener noreferrer" data-i18n="landingGithub">Проєкт на GitHub</a>
     </section>
 
-    <section class="landing-section tech-section">
-        <div class="section-heading">
-            <p class="section-eyebrow">Технології</p>
-            <h2>Стек проєкту</h2>
-        </div>
-
-        <div class="tech-list" aria-label="Технології">
-            <span>ASP.NET Core</span>
-            <span>Razor / MVC</span>
-            <span>SignalR</span>
-            <span>JavaScript</span>
-            <span>Entity Framework Core</span>
-            <span>SQLite</span>
-            <span>JSON localization</span>
-            <span>Playwright</span>
-            <span>xUnit</span>
-        </div>
+    <section class="landing-final-cta" aria-labelledby="finalCtaTitle">
+        <p class="section-eyebrow" data-i18n="landingFinalEyebrow">Час вирішувати</p>
+        <h2 id="finalCtaTitle" data-i18n="landingFinalTitle">У бункері місць менше, ніж охочих вижити.</h2>
+        <p data-i18n="landingFinalText">Створіть кімнату, запросіть друзів і дізнайтеся, кому ви довірите останнє місце.</p>
+        <a class="landing-btn landing-btn--primary" asp-controller="Games" asp-action="Index" data-i18n="landingStartPlaying">Почати гру</a>
     </section>
 </div>
 

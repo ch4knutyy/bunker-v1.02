@@ -355,10 +355,6 @@ window.BunkerSignalREvents.lobby = {
 			roomPlayers = {};
 			currentApocalypse = null;
 			renderApocalypse(null);
-			gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
-			gmThreatForcePreview = null;
-			gmThreatCommandPending = false;
-			gmThreatForcePending = false;
 			gmPlayerCommandPending = false;
 			gmRoundCommandPending = false;
 			gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };
@@ -489,8 +485,6 @@ window.BunkerSignalREvents.lobby = {
 		// Успішне перепідключення
 		// Успішне перепідключення — очищуємо pending-флаги GM commands,
 		// оскільки серверний стан є авторитетним після reconnect
-		gmThreatCommandPending = false;
-		gmThreatForcePending = false;
 		gmPlayerCommandPending = false;
 		gmRoundCommandPending = false;
 		gmSnapshotCommandPending = false;

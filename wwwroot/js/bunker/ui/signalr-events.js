@@ -13,17 +13,6 @@ window.BunkerSignalREvents.ui = {
 
 			console.error("ReceiveError:", message);
 			addEventMessage("Помилка: " + localizeServerMessage(message));
-			const gmThreatResult = document.getElementById('gmThreatCommandResult');
-			if (gmThreatResult && gmThreatCommandPending) gmThreatResult.textContent = localizeServerMessage(message);
-			if (gmThreatCommandPending) {
-				gmLastCommandError = localizeServerMessage(message);
-				renderGMPanelState();
-			}
-			if (gmThreatForcePending) {
-				setGMThreatForcePending(false);
-				const forceError = document.getElementById('gmThreatForceError');
-				if (forceError) forceError.textContent = localizeServerMessage(message);
-			}
 			if (gmPlayerCommandPending) {
 				gmPlayerCommandPending = false;
 				document.querySelectorAll('.gm-player-command').forEach(button => button.disabled = false);

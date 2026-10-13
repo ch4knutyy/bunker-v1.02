@@ -1,7 +1,6 @@
 ﻿using Bunker.Models;
 using Bunker.Models.Сharacteristics;
 using Bunker.Services;
-using Bunker.Services.Threats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
@@ -20,10 +19,7 @@ namespace Bunker.Hubs
         private readonly PlayerDisconnectCleanupCoordinator _playerDisconnectCleanup;
         private readonly GameDataService _gameData;
         private readonly ScenarioImageService _imageService;
-        private readonly ThreatScalingService _threatScaling;
-        private readonly ThreatMiniGameRegistry _threatMiniGames;
         private readonly GameTimerService _gameTimerService;
-        private readonly ThreatAuditService _threatAudit;
         private readonly RoomIntegrityService _roomIntegrity;
         private readonly GmAuditService _gmAudit;
         private readonly RoomSnapshotService _roomSnapshots;
@@ -62,8 +58,7 @@ namespace Bunker.Hubs
 
 		public GameHub(CharacterGeneratorService generator, 
             RoomService roomService, GameDataService gameData, ScenarioImageService imageService,
-            ThreatScalingService threatScaling, ThreatMiniGameRegistry threatMiniGames, 
-            GameTimerService gameTimerService, ThreatAuditService threatAudit, ILogger<GameHub> logger, 
+            GameTimerService gameTimerService, ILogger<GameHub> logger,
             PlayerDisconnectCleanupCoordinator playerDisconnectCleanup, RoomIntegrityService? roomIntegrity = null, 
             GmAuditService? gmAudit = null, RoomSnapshotService? roomSnapshots = null, RoomLocalEditorService? roomLocalEditor = null, 
             GlobalContentCatalogService? globalContentCatalog = null, GlobalContentAccessPolicy? globalContentAccess = null, 
@@ -94,10 +89,7 @@ namespace Bunker.Hubs
             _playerDisconnectCleanup = playerDisconnectCleanup;
             _gameData = gameData;
             _imageService = imageService;
-            _threatScaling = threatScaling;
-            _threatMiniGames = threatMiniGames;
             _gameTimerService = gameTimerService;
-            _threatAudit = threatAudit;
             _roomIntegrity = roomIntegrity ?? new RoomIntegrityService(roomService, gameData, TimeProvider.System);
             _gmAudit = gmAudit ?? new GmAuditService(TimeProvider.System);
             _roomSnapshots = roomSnapshots ?? new RoomSnapshotService(_roomIntegrity, _gmAudit, TimeProvider.System);

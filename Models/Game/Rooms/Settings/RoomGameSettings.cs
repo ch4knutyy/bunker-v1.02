@@ -3,7 +3,6 @@ namespace Bunker.Models;
 public enum GamePreset { Classic, Calm, Dangerous, Hardcore, Quick, Long, Custom }
 public enum ReadyRequirementMode { AllPlayers, HostDecision }
 public enum BunkerCapacityMode { Automatic, Manual, RandomRange }
-public enum InteractiveThreatRate { Off, Rare, Standard, Often, Always }
 public enum ThreatFrequencyMode { OncePerGame, EveryOtherRound, EveryRound, RandomEligibleRounds }
 public enum VotingFrequencyMode { EveryRound, EveryTwoRounds }
 public enum CharacterGenerationMode { Classic }
@@ -60,7 +59,6 @@ public sealed class RoomGameSettings
     public bool BunkerScenarioEnabled { get; set; } = true;
 
     public bool ThreatsEnabled { get; set; } = true;
-    public InteractiveThreatRate InteractiveThreatRate { get; set; } = InteractiveThreatRate.Rare;
     public int FirstThreatRound { get; set; } = 3;
     public ThreatFrequencyMode ThreatFrequency { get; set; } = ThreatFrequencyMode.OncePerGame;
     public int? MaxThreatsPerGame { get; set; } = 1;
@@ -122,8 +120,6 @@ public sealed record LobbyGameSettingsDto(
     int? ApocalypseActivationMaxActivations,
     bool BunkerScenarioEnabled,
     bool ThreatsEnabled,
-    string InteractiveThreatRate,
-    int InteractiveThreatPercent,
     int FirstThreatRound,
     string ThreatFrequency,
     int? MaxThreatsPerGame,

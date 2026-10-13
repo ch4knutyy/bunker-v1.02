@@ -145,11 +145,6 @@ function resetClientGameStateForNewRoom() {
 	currentGameCompletion = null;
 	returnFinishedGamePending = false;
 	myVote = null;
-	gmThreatControlData = { threats: [], currentThreat: null, auditLog: [] };
-	gmThreatForcePreview = null;
-	gmThreatForceRequestedOutcome = '';
-	gmThreatCommandPending = false;
-	gmThreatForcePending = false;
 	gmPlayerCommandPending = false;
 	gmRoundCommandPending = false;
 	gmVotingAdminState = { active: false, nonVoters: [], eligibleVoters: [] };

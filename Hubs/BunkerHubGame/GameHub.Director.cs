@@ -1,6 +1,5 @@
 using Bunker.Models;
 using Bunker.Services;
-using Bunker.Services.Threats;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bunker.Hubs;
@@ -37,9 +36,6 @@ public partial class GameHub
             case "clear_votes": categories.Add("voting"); mutationCount = room.CurrentVoting?.Votes.Count ?? 0; break;
             case "remove_vote": categories.Add("voting"); mutationCount = 1; break;
             case "voting_resync": categories.Add("voting"); break;
-            case "threat_force_success": case "threat_force_failure": if (!GMThreatStateMutator.CanForceOutcome(room)) blockers.Add("threat_terminal_or_unavailable"); else mutationCount = 1; categories.Add("current_threat"); break;
-            case "threat_cancel": case "threat_restart": if (!GMThreatStateMutator.CanReset(room)) blockers.Add("threat_reset_unavailable"); else mutationCount = 1; categories.Add("current_threat"); break;
-            case "threat_resync": categories.Add("current_threat"); break;
             default: blockers.Add("unsupported_action"); break;
         }
         if (NeedsPlayerTarget(action) && target == null) blockers.Add("target_not_found");
@@ -79,19 +75,13 @@ public partial class GameHub
                 case "clear_votes": await ClearCurrentVotes(commandId); break;
                 case "remove_vote": await RemoveCurrentVote(request.TargetPlayerId!, commandId); break;
                 case "voting_resync": await ResyncVotingState(); break;
-                case "threat_force_success": await GMConfirmForceThreat("success", threatFingerprint!, commandId); break;
-                case "threat_force_failure": await GMConfirmForceThreat("failure", threatFingerprint!, commandId); break;
-                case "threat_cancel": await GMCancelCurrentThreat(commandId); break;
-                case "threat_restart": await GMRestartCurrentThreat(commandId); break;
-                case "threat_resync": await GMResyncThreatRoom(commandId); break;
             }
         }
         finally { _activeDirectorCapability = null; }
         await SendSafeRoomResync(room);
         await BroadcastOmniscientStateToAuthorizedSpectators(room);
-        var audit = action.StartsWith("threat_", StringComparison.Ordinal) ? null : _gmAudit.GetRecent(room, 1).FirstOrDefault();
-        var irreversible = action.StartsWith("threat_force_", StringComparison.Ordinal);
-        return _directorControls.Remember(commandId, new(action, true, false, audit?.RelatedSnapshotId, !irreversible && audit?.CanUndo == true, DirectorControlService.StateVersion(room)));
+        var audit = _gmAudit.GetRecent(room, 1).FirstOrDefault();
+        return _directorControls.Remember(commandId, new(action, true, false, audit?.RelatedSnapshotId, audit?.CanUndo == true, DirectorControlService.StateVersion(room)));
     }
 
     private async Task ApplyDirectorReveal(Room room, Player actor, Player target, IEnumerable<string> categories, string commandId, bool hide)
@@ -117,7 +107,7 @@ public partial class GameHub
         return (room, actor);
     }
     private bool IsAuthorizedDirector(Player player, GmCapability capability) => _omniscientAccess.CanViewHidden(player, capability);
-    private static GmCapability DirectorCapability(string action) => action.StartsWith("threat_", StringComparison.Ordinal) ? GmCapability.UseDirectorThreatControls :
+    private static GmCapability DirectorCapability(string action) =>
         action is "pause" or "resume" or "round_forward" or "reset_readiness" or "clear_votes" or "remove_vote" or "voting_resync" ? GmCapability.UseDirectorRoundControls : GmCapability.UseDirectorPlayerControls;
     private Player? ResolveDirectorTarget(Room room, string? stablePlayerId, string action)
     {

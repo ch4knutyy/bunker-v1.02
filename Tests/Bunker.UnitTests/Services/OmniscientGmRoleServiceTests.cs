@@ -27,8 +27,6 @@ public sealed class OmniscientGmRoleServiceTests
         var (rooms, room, host, guest) = Setup(); var hostId = RoomService.GetPlayerKey(host); var guestId = RoomService.GetPlayerKey(guest);
         room.CurrentTurnPlayerId = hostId; room.VotingReadyResponses[hostId] = "ready";
         room.CurrentVoting = new VotingSession(); room.CurrentVoting.EligibleVoters.UnionWith([hostId, guestId]); room.CurrentVoting.Votes[hostId] = guestId; room.CurrentVoting.Votes[guestId] = hostId;
-        room.ThreatState = new ThreatInteractionState { ParticipantPlayerIds = [hostId], ForcedParticipantPlayerId = hostId };
-        room.ThreatState.VolunteerSelection.SelectedPlayerId = hostId; room.ThreatState.MiniGame.LeaderPlayerId = hostId; room.ThreatState.Contributions.Add(new() { PlayerId = hostId, OwnerPlayerId = hostId });
         var service = new OmniscientGmRoleService(rooms); var before = JsonSerializer.Serialize(room.CurrentVoting);
         var preview = service.Preview(room, host); Assert.True(preview.WillRemoveVote); Assert.Equal(before, JsonSerializer.Serialize(room.CurrentVoting)); Assert.False(host.IsSpectatorGm);
 
@@ -37,7 +35,6 @@ public sealed class OmniscientGmRoleServiceTests
         Assert.Single(RoomService.GetGameplayPlayersSnapshot(room)); Assert.Same(guest, RoomService.GetGameplayPlayersSnapshot(room)[0].Value);
         Assert.Null(room.CurrentTurnPlayerId); Assert.DoesNotContain(hostId, room.VotingReadyResponses.Keys); Assert.DoesNotContain(hostId, room.CurrentVoting.EligibleVoters);
         Assert.DoesNotContain(hostId, room.CurrentVoting.Votes.Keys); Assert.DoesNotContain(hostId, room.CurrentVoting.Votes.Values);
-        Assert.Empty(room.ThreatState.ParticipantPlayerIds); Assert.Empty(room.ThreatState.VolunteerSelection.SelectedPlayerId); Assert.Empty(room.ThreatState.MiniGame.LeaderPlayerId); Assert.Empty(room.ThreatState.Contributions);
     }
 
     [Fact]

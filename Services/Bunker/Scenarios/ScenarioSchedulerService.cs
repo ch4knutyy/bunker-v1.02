@@ -53,8 +53,7 @@ public sealed class ScenarioSchedulerService
             return new(false, false, "game_finished", null);
         if (completedRound < state.NextDueAfterRound)
             return new(false, false, "not_due", null);
-        if (state.ActiveScenario is { IsResolved: false } || room.CurrentThreat != null &&
-            room.IsThreatRevealed && room.ThreatState?.Resolution.EffectsApplied != true)
+        if (state.ActiveScenario is { IsResolved: false })
         {
             state.History.Add(new("", "postponed", completedRound, "major_situation_active", _timeProvider.GetUtcNow()));
             return new(true, true, "major_situation_active", null);

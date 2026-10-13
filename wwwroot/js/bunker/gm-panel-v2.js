@@ -451,13 +451,6 @@
         document.querySelectorAll("[data-gm-tab-button]").forEach(button => {
             button.hidden = !canShowTab(button.dataset.gmTabButton);
         });
-        const emergency = document.getElementById("gmThreatEmergencyBlock");
-        if (emergency) {
-            emergency.hidden = !Boolean(value(
-                permissions(),
-                "canManageThreats",
-                "CanManageThreats"));
-        }
         const manualRound = document.getElementById("gmManualRoundHeading")?.closest("section");
         if (manualRound) manualRound.hidden = !technical;
         document.querySelectorAll(".gm-round-danger-zone, .gm-player-danger").forEach(section => {
@@ -590,13 +583,6 @@
         setDisabled("gmTimerResume", "canResumeTimer", "CanResumeTimer");
         setDisabled("gmTimerRestart", "canAdjustTimer", "CanAdjustTimer");
         setDisabled("gmTimerStop", "canAdjustTimer", "CanAdjustTimer");
-        const threatAction = document.getElementById("gmThreatPrimaryAction");
-        if (threatAction) {
-            threatAction.hidden = !Boolean(value(
-                actions,
-                "canManageActiveThreat",
-                "CanManageActiveThreat"));
-        }
     }
 
     function renderPlayerCards() {
@@ -900,9 +886,7 @@
         "applyDirectorAction", "applyRoomAutoFix", "applyRoomLocalEdit",
         "cancelVoting", "clearCurrentVotes", "closeGmPropertyEditor",
         "createManualRoomSnapshot", "editCharacteristic", "eliminateSelectedPlayer",
-        "endRound", "enterOmniscientGm", "executeHostCharacteristicOverride", "forceReveal", "gmCancelThreat",
-        "gmGenerateRareThreat", "gmGenerateTextThreat", "gmRestartThreat",
-        "gmResyncThreatRoom", "gmSelectSpecificThreat", "gmSkipScenarioChoice",
+        "endRound", "enterOmniscientGm", "executeHostCharacteristicOverride", "forceReveal", "gmSkipScenarioChoice",
         "hideSelectedCharacteristic", "inspectSelectedConnection",
         "invokeGameTimerCommand", "kickSelectedPlayer",
         "openGmPropertyEditor", "peekCharacteristic", "previewDirectorAction",
@@ -911,7 +895,7 @@
         "refreshRoomSnapshots", "regenerateApocalypse", "regenerateBunker",
         "regenerateCharacteristic", "regenerateGmPropertyPreview",
         "removeBunkerSupplies", "removeBunkerWater", "removeSelectedVote",
-        "requestGMThreatForcePreview", "resetRoundReadiness", "restartGameTimer",
+        "resetRoundReadiness", "restartGameTimer",
         "restoreSelectedPlayer", "resyncOmniscientHiddenState",
         "resyncSelectedPlayer", "resyncVotingAdmin", "rollRoundDice",
         "runRoomIntegrityCheck", "saveGmPropertyEdit", "sendGameEvent",
@@ -995,12 +979,6 @@
                     removeBunkerWater(months);
                     break;
             }
-            return;
-        }
-
-        if (event.target.closest('[data-gm-panel-action="open-threat-controls"]')) {
-            const threatAccordion = document.getElementById("gmThreatOperations");
-            if (threatAccordion) setAccordionOpen(threatAccordion, true);
             return;
         }
 

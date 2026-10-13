@@ -204,52 +204,6 @@
 			</div>
 		</section>
 
-		<div class="gm-section" id="gmThreatControlSection" data-gm-tab="events" style="display: none;">
-			<h4 class="gm-section-title" data-gm-i18n="gmActiveThreat">Активна загроза</h4>
-			<div class="gm-threat-status-card">
-				<div id="gmThreatCurrent" class="gm-threat-current" data-gm-i18n="gmThreatNone">Поточна загроза відсутня</div>
-				<button id="gmThreatPrimaryAction"
-						type="button"
-						class="btn-gm-action gm-action-primary"
-						data-gm-panel-action="open-threat-controls"
-						data-gm-i18n="gmThreatManage"
-						hidden>
-					Керувати загрозою
-				</button>
-			</div>
-			<section id="gmThreatOperations" class="gm-accordion" data-gm-accordion>
-				<button id="gmThreatOperationsToggle" type="button" class="gm-accordion-toggle" aria-expanded="false" aria-controls="gmThreatOperationsPanel">
-					<span data-gm-i18n="gmThreatOperations">Загроза</span>
-					<span class="gm-accordion-arrow" aria-hidden="true">⌄</span>
-				</button>
-				<div id="gmThreatOperationsPanel" class="gm-accordion-panel" role="region" aria-labelledby="gmThreatOperationsToggle" hidden>
-					<div id="gmSpecificThreatControls" style="display: none;">
-						<input id="gmThreatSearch" class="gm-select" type="search" data-gm-i18n-placeholder="gmThreatSearch" placeholder="Пошук загрози..." oninput="filterGMThreatOptions()" />
-						<select id="gmThreatSelect" class="gm-select"></select>
-						<button class="btn-gm-action" data-gm-i18n="gmThreatSelect" data-gm-click="gmSelectSpecificThreat()">Вибрати конкретну загрозу</button>
-					</div>
-					<div class="gm-round-actions">
-						<button class="btn-gm-action" data-gm-i18n="gmThreatGenerateRare" data-gm-click="gmGenerateRareThreat()">Згенерувати випадкову рідкісну</button>
-						<button class="btn-gm-action" data-gm-i18n="gmThreatGenerateText" data-gm-click="gmGenerateTextThreat()">Згенерувати звичайну текстову</button>
-					</div>
-				</div>
-			</section>
-			<section id="gmThreatEmergencyBlock" class="gm-accordion gm-threat-danger-zone" data-gm-accordion hidden>
-				<button id="gmThreatEmergencyToggle" type="button" class="gm-accordion-toggle" aria-expanded="false" aria-controls="gmThreatEmergencyPanel">
-					<span data-gm-i18n="gmThreatEmergency">Аварійне керування</span>
-					<span class="gm-accordion-arrow" aria-hidden="true">⌄</span>
-				</button>
-				<div id="gmThreatEmergencyPanel" class="gm-accordion-panel" role="region" aria-labelledby="gmThreatEmergencyToggle" hidden>
-				<button id="gmThreatResync" class="btn-gm-action" data-gm-i18n="gmThreatResync" data-gm-click="gmResyncThreatRoom()">Оновити стан загрози</button>
-				<button id="gmThreatReset" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatReset" data-gm-click="gmRestartThreat()">Перезапустити спробу</button>
-				<button id="gmThreatAbort" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatAbort" data-gm-click="gmCancelThreat()">Скасувати загрозу</button>
-				<button id="gmThreatForceSuccess" class="btn-gm-action gm-force-success" data-gm-i18n="gmThreatForceSuccess" data-gm-click="requestGMThreatForcePreview('success')">Примусовий успіх</button>
-				<button id="gmThreatForceFailure" class="btn-gm-action btn-danger" data-gm-i18n="gmThreatForceFailure" data-gm-click="requestGMThreatForcePreview('failure')">Примусовий провал</button>
-				</div>
-			</section>
-			<p id="gmThreatCommandResult" class="gm-round-hint"></p>
-		</div>
-
 		<div id="gmPlayerCardsV2" class="gm-player-cards-v2" data-gm-tab="players" style="display: none;"></div>
 
 		@* Вибір гравця для керування через GM-панель *@
@@ -752,11 +706,6 @@
 						<option value="clear_votes">Clear votes</option>
 						<option value="remove_vote">Remove vote</option>
 						<option value="voting_resync">Voting resync</option>
-						<option value="threat_force_success">Force threat success</option>
-						<option value="threat_force_failure">Force threat failure</option>
-						<option value="threat_cancel">Cancel threat</option>
-						<option value="threat_restart">Restart threat</option>
-						<option value="threat_resync">Threat resync</option>
 					</select>
 					<select id="directorCategory" class="input-field"><option>Profession</option><option>PhysicalHealth</option><option>MentalHealth</option><option>Hobby</option><option>CharacterTrait</option><option>Phobia</option><option>Inventory</option><option>Property</option><option>Fact</option><option>SpecialCard</option></select>
 					<input id="directorOption" class="input-field" maxlength="80" data-gm-i18n-placeholder="directorOption" placeholder="Option / severity / round" />

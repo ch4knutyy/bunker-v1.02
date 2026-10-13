@@ -22,12 +22,9 @@ function executableCallsMatching(pattern) {
   return hits;
 }
 
-test('gmThreatCommandPending is declared before registerSignalREvents() call', () => {
-  const decl = game.indexOf('let gmThreatCommandPending');
-  assert.notEqual(decl, -1, 'gmThreatCommandPending must be declared in game.js');
-  const call = game.indexOf('if (typeof registerSignalREvents');
-  assert.notEqual(call, -1, 'registerSignalREvents() call must exist');
-  assert.ok(decl < call, `gmThreatCommandPending declaration (${decl}) must come before registerSignalREvents() call (${call})`);
+test('stablePlayerId is initialized during startup', () => {
+  const decl = game.indexOf('const stablePlayerId = getOrCreatePlayerId()');
+  assert.notEqual(decl, -1, 'stablePlayerId must be initialized in game.js');
 });
 
 test('currentGameCompletion is declared before bootstrap block', () => {

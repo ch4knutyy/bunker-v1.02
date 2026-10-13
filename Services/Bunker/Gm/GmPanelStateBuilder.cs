@@ -49,7 +49,6 @@ public sealed class GmPanelStateBuilder
 		var completed = room.State == RoomState.Finished ||
 			room.CurrentPhase == GamePhase.Finished;
 		var voting = room.CurrentVoting;
-		var threat = room.ThreatState;
 		var timer = room.GameTimer;
 		var roomPlayers = (room.Players?.Values.AsEnumerable() ??
 				Enumerable.Empty<Player>())
@@ -91,9 +90,7 @@ public sealed class GmPanelStateBuilder
 				string.Equals(response, "ready", StringComparison.OrdinalIgnoreCase));
 		var readyRequiredCount = gameplayPlayers.Count(player => player.IsConnected);
 		var activeVoting = voting?.State == VotingState.Active;
-		var unresolvedThreat = threat is not null &&
-			threat.ThreatStatus is not ("hidden" or "aborted" or "resolved_safely" or
-				"resolved_with_casualty" or "failed" or "completed" or "success" or "failure");
+		var unresolvedThreat = false;
 		var canStartVoting = canManageGame &&
 			RoundVotingAdminService.CanStartVoting(room, unresolvedThreat).Allowed;
 		var canEndRound = canManageGame && !completed &&
@@ -141,7 +138,7 @@ public sealed class GmPanelStateBuilder
 			voting?.IsEarlyVoting ??
 				(canStartVoting &&
 				 room.CurrentRound < VotingSession.RecommendedStartRound),
-			threat?.ThreatStatus ?? (room.IsThreatRevealed ? "Revealed" : "Inactive"),
+			room.IsThreatRevealed ? "Revealed" : "Inactive",
 			room.CurrentThreat?.Name,
 			completed,
 			room.PostGamePhase.ToString(),

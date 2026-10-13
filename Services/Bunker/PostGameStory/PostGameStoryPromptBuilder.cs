@@ -112,13 +112,7 @@ public sealed class PostGameStoryPromptBuilder
         property = player.Property == null ? null : new { display = player.Property.GetDisplayText("uk"), player.Property.Category, player.Property.SizeClass, player.Property.GeneratedValues },
         specialCards = player.SpecialCards.Select(x => new { x.Name, x.Description, x.IsUsed, x.IsActive, x.UsedAtRound, x.EffectResult, x.PublicResult, x.PrivateResult }),
         eventCards = player.EventSpecialCards.Select(x => new { x.DefinitionId, status = x.Status.ToString(), result = x.Result.ToString(), x.UsedAtRound, x.ResolvedAtRound }),
-        threatParticipation = new
-        {
-            participatedInCurrentThreat = room.ThreatState?.ParticipantPlayerIds.Contains(RoomService.GetPlayerKey(player), StringComparer.OrdinalIgnoreCase) == true,
-            contributions = room.ThreatState?.Contributions
-                .Where(x => string.Equals(x.OwnerPlayerId, RoomService.GetPlayerKey(player), StringComparison.OrdinalIgnoreCase))
-                .Select(x => new { x.SourceType, x.DisplayName, x.Status, x.IsConsumed })
-        },
+        threatParticipation = new { },
         revealed = player.Revealed,
         finalStatus = player.IsEliminated ? "eliminated" : "survivor"
     };
@@ -126,23 +120,16 @@ public sealed class PostGameStoryPromptBuilder
     private static object HistoryContext(Room room)
     {
         var threatOutcomes = room.ThreatAuditLog
-            .Where(entry => entry.EventType is ThreatAuditEventType.Revealed or ThreatAuditEventType.CompletedSuccess or ThreatAuditEventType.CompletedFailure)
+            .Where(entry => entry.EventType == ThreatAuditEventType.Revealed)
             .GroupBy(entry => entry.ThreatId, StringComparer.OrdinalIgnoreCase)
             .Select(group =>
             {
                 var latest = group.OrderBy(entry => entry.SequenceId).Last();
-                var completed = group.OrderBy(entry => entry.SequenceId).LastOrDefault(entry =>
-                    entry.EventType is ThreatAuditEventType.CompletedSuccess or ThreatAuditEventType.CompletedFailure);
                 return new
                 {
                     name = string.IsNullOrWhiteSpace(latest.ThreatName) ? latest.ThreatId : latest.ThreatName,
                     round = latest.Round,
-                    outcome = completed?.EventType switch
-                    {
-                        ThreatAuditEventType.CompletedSuccess => "resolved_success",
-                        ThreatAuditEventType.CompletedFailure => "resolved_failure",
-                        _ => "unresolved"
-                    }
+                    outcome = "revealed"
                 };
             }).ToList();
         return new
@@ -152,10 +139,8 @@ public sealed class PostGameStoryPromptBuilder
             voting = room.CurrentVoting == null ? null : new { room.CurrentVoting.Round, state = room.CurrentVoting.State.ToString() },
             eliminated = RoomService.GetPlayersSnapshot(room).Select(x => x.Value).Where(x => x.IsEliminated).Select(x => new { x.Name, x.EliminatedAtRound, x.EliminatedByVote }),
             triggeredThreats = room.TriggeredThreatIds.OrderBy(x => x),
-            resolvedThreats = threatOutcomes.Where(x => x.outcome == "resolved_success"),
-            failedThreats = threatOutcomes.Where(x => x.outcome == "resolved_failure"),
-            unresolvedThreats = threatOutcomes.Where(x => x.outcome == "unresolved"),
-            currentThreat = room.CurrentThreat == null ? null : new { room.CurrentThreat.Name, status = room.ThreatState?.ThreatStatus, resolution = room.ThreatState?.Resolution },
+            revealedThreats = threatOutcomes,
+            currentThreat = room.CurrentThreat == null ? null : new { room.CurrentThreat.Name, status = "revealed" },
             scenarioSituations = room.ScenarioSituations?.History.Select(x => new { x.Type, x.ActualRound, x.Result }),
             appliedApocalypseEffects = room.ApocalypseEffectRuntime?.History.Select(x => new
             {

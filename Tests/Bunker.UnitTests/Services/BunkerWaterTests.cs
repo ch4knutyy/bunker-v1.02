@@ -4,7 +4,6 @@ using System.Text.Json;
 using Bunker.Hubs;
 using Bunker.Models;
 using Bunker.Services;
-using Bunker.Services.Threats;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
@@ -146,10 +145,7 @@ public sealed class BunkerWaterTests
             roomService,
             gameData,
             new ScenarioImageService(environment, NullLogger<ScenarioImageService>.Instance),
-            new ThreatScalingService(),
-            new ThreatMiniGameRegistry([]),
             timer,
-            new ThreatAuditService(TimeProvider.System),
             NullLogger<GameHub>.Instance,
             new PlayerDisconnectCleanupCoordinator(
                 roomService,

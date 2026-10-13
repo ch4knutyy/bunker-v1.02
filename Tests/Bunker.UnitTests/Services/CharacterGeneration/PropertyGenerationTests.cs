@@ -1,7 +1,5 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Bunker.Hubs;
 using Bunker.Models;
 using Bunker.Models.GameData;
 using Bunker.Services;
@@ -302,41 +300,6 @@ public sealed class PropertyGenerationTests
         Assert.True(cards["property_swap"].RequiresTarget);
         Assert.False(cards["property_reroll"].RequiresTarget);
         Assert.True(cards["property_reveal"].RequiresTarget);
-    }
-
-    [Fact]
-    public void PropertyThreatContributionUsesServerCapturedTagsAndIsNeverMarkedForConsumption()
-    {
-        var state = new ThreatInteractionState
-        {
-            Contributions =
-            [
-                new()
-                {
-                    ContributionId = "property-contribution",
-                    SourceType = "property",
-                    SourceId = "property-home",
-                    OwnerPlayerId = "owner",
-                    IsAccepted = true,
-                    Status = "accepted",
-                    TagsSnapshot = ["radiation_detection", "radiation_protection", "repair_tools"]
-                }
-            ]
-        };
-        var hub = RuntimeHelpers.GetUninitializedObject(typeof(GameHub));
-        var build = typeof(GameHub).GetMethod(
-            "BuildRadiationOperationBonuses",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
-        Assert.NotNull(build);
-        var bonuses = Assert.IsType<ThreatOperationBonusState>(build!.Invoke(hub, [state]));
-
-        Assert.Contains("property-contribution", bonuses.UsefulContributionIds);
-        Assert.Contains("detection", bonuses.AutoCompletedCategories);
-        Assert.Contains("owner", bonuses.ProtectedPlayerIds);
-        Assert.Equal(10, bonuses.TimeBonusSeconds);
-        Assert.Equal(1, bonuses.RepairRetryTokens);
-        Assert.False(state.Contributions[0].IsConsumed);
     }
 
     private static GameDataService CreateGameData()

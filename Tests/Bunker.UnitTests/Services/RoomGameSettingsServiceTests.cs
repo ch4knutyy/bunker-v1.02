@@ -16,8 +16,6 @@ public sealed class RoomGameSettingsServiceTests
         Assert.Equal(2, settings.MinGameplayPlayers);
         Assert.Equal(BunkerCapacityMode.Automatic, settings.BunkerCapacityMode);
         Assert.True(settings.ThreatsEnabled);
-        Assert.Equal(InteractiveThreatRate.Rare, settings.InteractiveThreatRate);
-        Assert.Equal(1, RoomGameSettingsService.InteractivePercent(settings.InteractiveThreatRate));
         Assert.Equal(3, settings.FirstThreatRound);
         Assert.Equal(1, settings.MaxThreatsPerGame);
         Assert.False(settings.RoundTimerEnabled);
@@ -161,16 +159,16 @@ public sealed class RoomGameSettingsServiceTests
     }
 
     [Theory]
-    [InlineData(GamePreset.Calm, 0, false, 3)]
-    [InlineData(GamePreset.Dangerous, 10, true, 2)]
-    [InlineData(GamePreset.Hardcore, 25, true, 2)]
-    [InlineData(GamePreset.Quick, 1, true, 2)]
-    [InlineData(GamePreset.Long, 1, true, 4)]
-    public void PresetsOnlyFillExplicitCanonicalValues(GamePreset preset, int interactivePercent, bool timer, int votingRound)
+    [InlineData(GamePreset.Calm, false, 3)]
+    [InlineData(GamePreset.Dangerous, true, 2)]
+    [InlineData(GamePreset.Hardcore, true, 2)]
+    [InlineData(GamePreset.Quick, true, 2)]
+    [InlineData(GamePreset.Long, true, 4)]
+    public void PresetsOnlyFillExplicitCanonicalValues(GamePreset preset, bool timer, int votingRound)
     {
         var settings = RoomGameSettingsService.Preset(preset);
         Assert.Equal(preset, settings.Preset);
-        Assert.Equal(interactivePercent, RoomGameSettingsService.InteractivePercent(settings.InteractiveThreatRate));
+        Assert.True(settings.ThreatsEnabled);
         Assert.Equal(timer, settings.RoundTimerEnabled);
         Assert.Equal(votingRound, settings.VotingStartRound);
     }
@@ -181,7 +179,7 @@ public sealed class RoomGameSettingsServiceTests
         var context = CreateContext(); context.Room.Password = "secret-value";
         context.Guest.Profession.Name = "hidden-profession";
         var json = JsonSerializer.Serialize(context.Service.ToDto(context.Room));
-        Assert.Contains("InteractiveThreatPercent", json);
+        Assert.Contains("FirstThreatRound", json);
         Assert.DoesNotContain("secret-value", json); Assert.DoesNotContain("hidden-profession", json);
         Assert.DoesNotContain("Password", json); Assert.DoesNotContain("DisplayName", json);
     }

@@ -269,20 +269,6 @@ namespace Bunker.Services
                 voting.VoteMultipliers.Remove(connectionId);
             }
 
-            var threat = room.ThreatState;
-            if (threat == null) return;
-            threat.ParticipantPlayerIds.RemoveAll(id => id == playerId || id == connectionId);
-            threat.Contributions.RemoveAll(item => item.PlayerId == playerId || item.PlayerId == connectionId || item.OwnerPlayerId == playerId || item.OwnerPlayerId == connectionId);
-            threat.ThreatVolunteerVote.Votes.Remove(playerId);
-            threat.ThreatVolunteerVote.Votes.Remove(connectionId);
-            foreach (var voter in threat.ThreatVolunteerVote.Votes.Where(vote => vote.Value == playerId || vote.Value == connectionId).Select(vote => vote.Key).ToList())
-                threat.ThreatVolunteerVote.Votes.Remove(voter);
-            if (threat.VolunteerSelection.SelectedPlayerId == playerId || threat.VolunteerSelection.SelectedPlayerId == connectionId)
-                threat.VolunteerSelection = new ThreatVolunteerSelectionState();
-            if (threat.ForcedParticipantPlayerId == playerId || threat.ForcedParticipantPlayerId == connectionId)
-                threat.ForcedParticipantPlayerId = "";
-            if (threat.MiniGame.LeaderPlayerId == playerId || threat.MiniGame.LeaderPlayerId == connectionId)
-                threat.MiniGame.LeaderPlayerId = "";
         }
 
         public static bool IsGameplayParticipant(Player? player) => player != null && !player.IsEliminated && !player.IsSpectatorGm &&

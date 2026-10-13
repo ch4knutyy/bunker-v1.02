@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <DefaultItemExcludes>
-      $(DefaultItemExcludes);Tests/Bunker.UnitTests/**;wwwroot\**\*~
+      $(DefaultItemExcludes);Tests/Bunker.UnitTests/**;tools/AlphaPasswordHash/**;wwwroot\**\*~
     </DefaultItemExcludes>
 
     <UserSecretsId>52d1ee71-b750-4e32-bcbf-089b6e3892bc</UserSecretsId>

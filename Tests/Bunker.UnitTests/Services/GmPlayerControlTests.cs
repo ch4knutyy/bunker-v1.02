@@ -16,12 +16,6 @@ public sealed class GmPlayerControlTests
             Votes = new() { [target.StablePlayerId] = "host-player", ["host-player"] = target.StablePlayerId },
             EligibleVoters = new() { target.StablePlayerId }
         };
-        room.ThreatState = new ThreatInteractionState
-        {
-            ParticipantPlayerIds = new() { target.StablePlayerId },
-            VolunteerSelection = new() { SelectedPlayerId = target.StablePlayerId },
-            MiniGame = new() { LeaderPlayerId = target.StablePlayerId }
-        };
 
         var result = service.LeaveRoom(target.ConnectionId);
 
@@ -31,8 +25,6 @@ public sealed class GmPlayerControlTests
         Assert.Null(room.CurrentTurnPlayerId);
         Assert.DoesNotContain(target.StablePlayerId, room.CurrentVoting.Votes.Keys);
         Assert.DoesNotContain(target.StablePlayerId, room.CurrentVoting.Votes.Values);
-        Assert.DoesNotContain(target.StablePlayerId, room.ThreatState.ParticipantPlayerIds);
-        Assert.Equal("", room.ThreatState.MiniGame.LeaderPlayerId);
     }
 
     [Fact]

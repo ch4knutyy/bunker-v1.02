@@ -51,18 +51,6 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
                 if (voting.Votes.Remove(voter)) fixedCount++;
         }
 
-        if (room.ThreatState is { } threat)
-        {
-            fixedCount += threat.ParticipantPlayerIds.RemoveAll(id => !validIds.Contains(id));
-            if (!string.IsNullOrWhiteSpace(threat.MiniGame.LeaderPlayerId) &&
-                (!validIds.Contains(threat.MiniGame.LeaderPlayerId) ||
-                 !threat.ParticipantPlayerIds.Contains(threat.MiniGame.LeaderPlayerId, StringComparer.OrdinalIgnoreCase)))
-            {
-                threat.MiniGame.LeaderPlayerId = "";
-                fixedCount++;
-            }
-        }
-
         foreach (var player in RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value))
             fixedCount += RemoveExactDuplicateConditions(player);
 
@@ -146,20 +134,6 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
             severity.ToString().ToLowerInvariant(), Message(code, language), null, null, fix));
         if (room.CurrentThreat != null && !gameData.Threats.Any(item => string.Equals(item.Id, room.CurrentThreat.Id, StringComparison.OrdinalIgnoreCase)))
             Add("current_threat_not_loaded", RoomIntegritySeverity.Error);
-        if (room.CurrentThreat == null && room.ThreatState != null) Add("threat_state_without_threat", RoomIntegritySeverity.Warning);
-        if (room.CurrentThreat != null && room.ThreatState != null &&
-            !string.Equals(room.CurrentThreat.Id, room.ThreatState.CurrentThreatId, StringComparison.OrdinalIgnoreCase)) Add("threat_state_mismatch", RoomIntegritySeverity.Error);
-        if (room.ThreatState is not { } threat) return;
-        var terminal = TerminalThreatStatuses.Contains(threat.ThreatStatus) || TerminalThreatStatuses.Contains(threat.MiniGame.Status);
-        if (threat.Resolution.EffectsApplied && !terminal) Add("effects_applied_non_terminal", RoomIntegritySeverity.Error);
-        if (terminal && !threat.Resolution.EffectsApplied && !string.Equals(threat.ThreatStatus, "aborted", StringComparison.OrdinalIgnoreCase))
-            Add("terminal_effects_not_applied", RoomIntegritySeverity.Warning);
-        foreach (var id in threat.ParticipantPlayerIds.Where(id => !validIds.Contains(id))) Add("threat_participant_missing", RoomIntegritySeverity.Warning, true);
-        if (!string.IsNullOrWhiteSpace(threat.MiniGame.LeaderPlayerId) &&
-            (!validIds.Contains(threat.MiniGame.LeaderPlayerId) || !threat.ParticipantPlayerIds.Contains(threat.MiniGame.LeaderPlayerId, StringComparer.OrdinalIgnoreCase)))
-            Add("operation_leader_invalid", RoomIntegritySeverity.Warning, true);
-        if (!string.IsNullOrWhiteSpace(threat.PlanChoice.SelectedPlanId) && room.CurrentThreat != null &&
-            !HasPlan(room.CurrentThreat.Mechanics, threat.PlanChoice.SelectedPlanId)) Add("selected_plan_invalid", RoomIntegritySeverity.Error);
     }
 
     private static void AddConditionIssues(Player player, List<RoomIntegrityIssueDto> issues, string language)
@@ -182,9 +156,6 @@ public sealed class RoomIntegrityService(RoomService roomService, GameDataServic
             ["ready_player_missing"] = room.VotingReadyResponses.Keys.Count(id => !validIds.Contains(id)),
             ["vote_reference_missing"] = room.CurrentVoting?.Votes.Count(vote =>
                 (!VotingSession.IsExtraVoteId(vote.Key) && !validIds.Contains(vote.Key)) || !validIds.Contains(vote.Value)) ?? 0,
-            ["threat_participant_missing"] = room.ThreatState?.ParticipantPlayerIds.Count(id => !validIds.Contains(id)) ?? 0,
-            ["operation_leader_invalid"] = room.ThreatState is { MiniGame.LeaderPlayerId.Length: > 0 } threat &&
-                (!validIds.Contains(threat.MiniGame.LeaderPlayerId) || !threat.ParticipantPlayerIds.Contains(threat.MiniGame.LeaderPlayerId, StringComparer.OrdinalIgnoreCase)) ? 1 : 0,
             ["duplicate_additional_condition"] = RoomService.GetPlayersSnapshot(room).Sum(entry => CountExactDuplicateConditions(entry.Value))
         };
         return counts;

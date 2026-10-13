@@ -389,27 +389,6 @@
     </div>
 </div>
 
-@* Підтвердження примусового завершення загрози для GM *@
-<div id="gmThreatForceModal"
-     class="modal gm-threat-force-modal"
-     style="display: none;"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="gmThreatForceTitle">
-
-    <div class="modal-content">
-        <h3 id="gmThreatForceTitle" data-gm-i18n="gmThreatForcePreviewTitle">Підтвердження примусового завершення</h3>
-        <div id="gmThreatForcePreviewContent"></div>
-        <p id="gmThreatForceError" class="gm-threat-force-error" aria-live="polite"></p>
-
-        <div class="modal-actions">
-            <button type="button" class="btn-secondary" data-gm-i18n="cancel" onclick="closeGMThreatForceModal()">Скасувати</button>
-            <button type="button" id="gmThreatForceRefresh" class="btn-secondary" data-gm-i18n="gmThreatForceRefresh" onclick="refreshGMThreatForcePreview()" style="display: none;">Оновити preview</button>
-            <button type="button" id="gmThreatForceConfirm" class="btn-primary" data-gm-i18n="confirm" onclick="confirmGMThreatForce()">Підтвердити</button>
-        </div>
-    </div>
-</div>
-
 @* Приєднання до вибраної кімнати *@
 <div id="joinModal"
      class="modal"
