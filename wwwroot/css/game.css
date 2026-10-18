@@ -2070,6 +2070,43 @@ body.bunker-theme-active .bunker-game-page #bunkerStorySection .bunker-visual-ro
     border-top: 1px solid rgba(255,255,255,.08);
 }
 
+.lobby-ai-config {
+    display: grid;
+    gap: .55rem;
+    margin-top: .65rem;
+    padding: .7rem;
+    border: 1px solid rgba(120, 168, 235, .28);
+    border-radius: 8px;
+    background: rgba(68, 109, 158, .08);
+}
+
+.lobby-ai-config > label {
+    display: grid;
+    grid-template-columns: minmax(72px, .42fr) minmax(0, 1fr);
+    align-items: center;
+    gap: .55rem;
+    color: var(--color-text-muted);
+    font-size: .78rem;
+}
+
+.lobby-ai-config .input-field { min-width: 0; }
+.lobby-ai-config-meta, .lobby-ai-config-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.lobby-ai-config-meta small { color: var(--color-text-muted); overflow-wrap: anywhere; }
+.lobby-ai-status { display: inline-flex; min-height: 24px; align-items: center; padding: .15rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 800; background: rgba(255,255,255,.08); }
+.lobby-ai-status.is-configured { color: #69dfa0; background: rgba(46,204,113,.11); }
+.lobby-ai-status.is-missing_api_key, .lobby-ai-status.is-model_unavailable { color: #d9b45b; background: rgba(217,180,91,.08); }
+.lobby-ai-status.is-rate_limited, .lobby-ai-status.is-error { color: #f08080; background: rgba(220,80,80,.1); }
+.lobby-ai-diagnostics { color: var(--color-text-muted); font-size: .76rem; }
+.lobby-ai-diagnostics summary { cursor: pointer; }
+.lobby-ai-diagnostics dl { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem .7rem; margin: .5rem 0 0; }
+.lobby-ai-diagnostics dl div { display: flex; justify-content: space-between; gap: .35rem; }
+.lobby-ai-diagnostics dt, .lobby-ai-diagnostics dd { margin: 0; }
+
+@media (max-width: 420px) {
+    .lobby-ai-config > label { grid-template-columns: 1fr; gap: .28rem; }
+    .lobby-ai-config-actions > button { flex: 1 1 130px; }
+}
+
 .lobby-role-control {
     justify-content: space-between;
     color: var(--color-text-muted);

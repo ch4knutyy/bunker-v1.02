@@ -27,7 +27,10 @@ function localizeServerMessage(message) {
 		"У гравця немає предметів": "noItems",
 		"У гравця немає спеціальних карт": "noSpecialCards",
 		"characteristic_hide_unavailable": "characteristicHideFailed",
-		"characteristic_already_hidden": "characteristicAlreadyHidden"
+		"characteristic_already_hidden": "characteristicAlreadyHidden",
+		"ai_model_unavailable": "lobbyAiStatusModelUnavailable",
+		"ai_not_configured": "lobbyAiStatusMissingKey",
+		"ai_rate_limited": "lobbyAiStatusRateLimited"
 	};
 	return keys[message] ? t(keys[message]) : message;
 }

@@ -73,7 +73,8 @@ public sealed class LobbyStartService
         var technical = player.GmRole == GmMode.TechnicalGm; var spectator = !gameplay;
         var role = omni ? "OmniscientGm" : technical ? "TechnicalGm" : gameplay && room.IsHost(player) ? "HostPlayer" : gameplay ? "Player" : "Spectator";
         return new(RoomService.GetPlayerKey(player), player.Name, role, room.IsHost(player), gameplay, spectator, technical, omni,
-            player.IsLobbyReady, player.IsConnected, player.AccountUserId.HasValue, isDeveloper, null, player.IsAi);
+            player.IsLobbyReady, player.IsConnected, player.AccountUserId.HasValue, isDeveloper, null, player.IsAi,
+            player.IsAi ? player.AiProvider : null, player.IsAi ? player.AiModel : null);
     }
 
     public static string Lifecycle(Room room) => room.State switch { RoomState.Lobby or RoomState.Waiting => "Lobby", RoomState.Finished => "Finished", _ => "Running" };

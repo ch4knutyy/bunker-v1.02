@@ -6,19 +6,25 @@ using Bunker.Models;
 namespace Bunker.Services;
 
 /// <summary>Routes a companion to its explicitly assigned provider; there is no cross-provider fallback.</summary>
-public sealed class AiProviderRouter(IGeminiAiProvider gemini, GroqAiProvider groq, OpenRouterAiProvider openRouter) : IAiProvider
+public sealed class AiProviderRouter(IGeminiAiProvider gemini, GroqAiProvider groq, OpenRouterAiProvider openRouter,
+    AiProviderManagementService management, TimeProvider time) : IAiProvider
 {
     public Task<AiProviderReply> GenerateReplyAsync(string prompt, CancellationToken cancellationToken) =>
         gemini.GenerateReplyAsync(prompt, cancellationToken);
 
-    public Task<AiProviderReply> GenerateReplyAsync(AiChatCompanion companion, string prompt, CancellationToken cancellationToken) =>
-        (companion.Provider ?? "Gemini").Trim().ToLowerInvariant() switch
+    public async Task<AiProviderReply> GenerateReplyAsync(AiChatCompanion companion, string prompt, CancellationToken cancellationToken)
+    {
+        var started = time.GetTimestamp();
+        var result = await ((companion.Provider ?? "Gemini").Trim().ToLowerInvariant() switch
         {
             "gemini" => gemini.GenerateReplyAsync(prompt, cancellationToken),
             "groq" => groq.GenerateReplyAsync(companion, prompt, cancellationToken),
             "openrouter" => openRouter.GenerateReplyAsync(companion, prompt, cancellationToken),
             _ => Task.FromResult(new AiProviderReply(null, "ai_provider_unknown"))
-        };
+        });
+        management.RecordResult(companion.PlayerStableId, result, time.GetElapsedTime(started));
+        return result;
+    }
 }
 
 public abstract class OpenAiCompatibleAiProvider(IHttpClientFactory clients, IConfiguration configuration)
@@ -38,9 +44,11 @@ public abstract class OpenAiCompatibleAiProvider(IHttpClientFactory clients, ICo
             Content = JsonContent.Create(new { model = companion.Model, messages = new[] { new { role = "user", content = prompt } } })
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue<int?>("AiChat:TimeoutSeconds") ?? 20, 5, 60)));
         try
         {
-            using var response = await clients.CreateClient(nameof(OpenAiCompatibleAiProvider)).SendAsync(request, cancellationToken);
+            using var response = await clients.CreateClient(nameof(OpenAiCompatibleAiProvider)).SendAsync(request, timeout.Token);
             if (!response.IsSuccessStatusCode)
                 return new(null, response.StatusCode switch
                 {
@@ -50,7 +58,7 @@ public abstract class OpenAiCompatibleAiProvider(IHttpClientFactory clients, ICo
                     _ when (int)response.StatusCode >= 500 => "ai_provider_unavailable",
                     _ => "ai_provider_failed"
                 });
-            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
+            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(timeout.Token));
             var text = document.RootElement.TryGetProperty("choices", out var choices) && choices.GetArrayLength() > 0 &&
                 choices[0].TryGetProperty("message", out var message) && message.TryGetProperty("content", out var content)
                 ? content.GetString() : null;

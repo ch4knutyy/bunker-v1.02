@@ -177,6 +177,8 @@ public sealed class AiConversationCoordinator
     private readonly ILogger<AiConversationCoordinator> logger;
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _active = new(StringComparer.Ordinal);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource> _roomCancellation = new(StringComparer.OrdinalIgnoreCase);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, DiscussionWave> _discussionWaves = new(StringComparer.OrdinalIgnoreCase);
+    private sealed record DiscussionWave(DateTimeOffset LastStartedAt, int Replies);
 
     public AiConversationCoordinator(RoomChatService chat, IAiProvider provider, AiChatContextBuilder contextBuilder,
         IHubContext<GameHub> hub, RoomService rooms, ILogger<AiConversationCoordinator> logger)
@@ -192,18 +194,43 @@ public sealed class AiConversationCoordinator
 
     public void QueueHumanMessage(Room room, RoomChatMessage message)
     {
-        if (room.Presentation.Status is AiPresentationStatus.Running or AiPresentationStatus.Paused)
-            return;
+        if (!IsDiscussionActive(room) || !IsDiscussionTrigger(room, message)) return;
         if (!chat.AiResponsesEnabled(room.Id) || chat.GetCompanions(room.Id).Count == 0) return;
+        if (!TryStartDiscussionWave(room.Id)) return;
         _ = ReplyWaveAsync(room.Id, message.Id);
     }
     public void CancelRoom(string roomId)
     {
         if (_roomCancellation.TryRemove(roomId, out var source)) { source.Cancel(); source.Dispose(); }
     }
+    private bool IsDiscussionActive(Room room) => room.State == RoomState.Playing &&
+        room.CurrentPhase == GamePhase.RoundReveal &&
+        room.Presentation.Status == AiPresentationStatus.Discussion &&
+        room.Presentation.RoundNumber == room.CurrentRound;
+    private static bool IsDiscussionTrigger(Room room, RoomChatMessage message)
+    {
+        var text = message.Text;
+        if (text.Contains("?", StringComparison.Ordinal)) return true;
+        if (new[] { "чому", "поясн", "бреш", "звинувач", "why", "explain", "lie", "accus", "почему", "объясн", "лж", "обвин" }
+            .Any(token => text.Contains(token, StringComparison.OrdinalIgnoreCase))) return true;
+        return RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value).Where(player => player.IsAi)
+            .Any(player => text.Contains(player.Name.Replace(" AI", "", StringComparison.OrdinalIgnoreCase), StringComparison.OrdinalIgnoreCase));
+    }
+    private bool TryStartDiscussionWave(string roomId)
+    {
+        var now = TimeProvider.System.GetUtcNow();
+        while (true)
+        {
+            var current = _discussionWaves.GetOrAdd(roomId, _ => new(DateTimeOffset.MinValue, 0));
+            var reset = now - current.LastStartedAt > TimeSpan.FromMinutes(2);
+            if (!reset && (now - current.LastStartedAt < TimeSpan.FromSeconds(8) || current.Replies >= 3)) return false;
+            var next = new DiscussionWave(now, reset ? 1 : current.Replies + 1);
+            if (_discussionWaves.TryUpdate(roomId, next, current)) return true;
+        }
+    }
     private async Task ReplyWaveAsync(string roomId, string triggerId)
     {
-        var room = rooms.GetRoom(roomId); if (room == null || !chat.AiResponsesEnabled(roomId)) return;
+        var room = rooms.GetRoom(roomId); if (room == null || !IsDiscussionActive(room) || !chat.AiResponsesEnabled(roomId)) return;
         var cancellation = _roomCancellation.GetOrAdd(roomId, _ => new CancellationTokenSource());
         var allCompanions = chat.GetCompanions(roomId).ToList();
         IReadOnlyList<AiChatCompanion> companions = allCompanions.Count == 0
@@ -215,7 +242,7 @@ public sealed class AiConversationCoordinator
             if (!await gate.WaitAsync(0, cancellation.Token)) continue;
             try
             {
-                var current = rooms.GetRoom(roomId); if (current == null || !chat.AiResponsesEnabled(roomId)) return;
+                var current = rooms.GetRoom(roomId); if (current == null || !IsDiscussionActive(current) || !chat.AiResponsesEnabled(roomId)) return;
                 if (!RoomService.GetPlayersSnapshot(current).Any(x => x.Value.IsAi && x.Value.StablePlayerId == companion.PlayerStableId)) continue;
                 await hub.Clients.Group(roomId).SendAsync("RoomChatAiStatus", new { playerStableId = companion.PlayerStableId, name = companion.Name, state = "typing" }, cancellation.Token);
                 var prompt = contextBuilder.Build(current, companion, chat.GetHistory(roomId));

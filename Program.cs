@@ -137,6 +137,7 @@ builder.Services.Configure<AiChatOptions>(builder.Configuration.GetSection(AiCha
 builder.Services.AddHttpClient<IGeminiAiProvider, GeminiAiProvider>(client => client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/"));
 builder.Services.AddSingleton<GroqAiProvider>();
 builder.Services.AddSingleton<OpenRouterAiProvider>();
+builder.Services.AddSingleton<AiProviderManagementService>();
 builder.Services.AddSingleton<IAiProvider, AiProviderRouter>();
 builder.Services.AddSingleton<RoomChatService>();
   builder.Services.AddSingleton<AiProviderRateLimitService>();

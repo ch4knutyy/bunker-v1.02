@@ -10,13 +10,18 @@ namespace Bunker.UnitTests.Services;
 public sealed class AiPresentationCoordinatorTests
 {
     [Fact]
-    public async Task Presentation_reveals_ai_profession_posts_reply_and_enters_discussion()
+    public async Task Human_completion_unblocks_two_ai_profession_presentations_without_starting_discussion()
     {
-        var room = new Room { Id = "presentation", State = RoomState.Playing };
-        var ai = new Player { Name = "Maria AI", StablePlayerId = "ai-maria", ConnectionId = RoomService.AiConnectionKey("ai-maria"), IsAi = true, SeatNumber = 2, Profession = new Profession { Name = "Engineer" } };
-        room.Players[ai.ConnectionId] = ai;
+        var room = new Room { Id = "presentation", State = RoomState.Playing, CurrentRound = 1, CurrentPhase = GamePhase.RoundReveal };
+        var human = new Player { Name = "Dmytro", StablePlayerId = "human", ConnectionId = "human", SeatNumber = 1 };
+        var firstAi = new Player { Name = "Oleksii", StablePlayerId = "ai-oleksii", ConnectionId = RoomService.AiConnectionKey("ai-oleksii"), IsAi = true, AiProvider = "Groq", SeatNumber = 2, Profession = new Profession { Name = "Engineer" } };
+        var secondAi = new Player { Name = "Maria", StablePlayerId = "ai-maria", ConnectionId = RoomService.AiConnectionKey("ai-maria"), IsAi = true, AiProvider = "OpenRouter", SeatNumber = 3, Profession = new Profession { Name = "Doctor" } };
+        room.Players[human.ConnectionId] = human;
+        room.Players[firstAi.ConnectionId] = firstAi;
+        room.Players[secondAi.ConnectionId] = secondAi;
         var chat = new RoomChatService(TimeProvider.System);
-        chat.AddCompanion(room.Id, new AiChatCompanion { Id = ai.StablePlayerId, Name = ai.Name, PlayerStableId = ai.StablePlayerId });
+        chat.AddCompanion(room.Id, new AiChatCompanion { Id = firstAi.StablePlayerId, Name = firstAi.Name, PlayerStableId = firstAi.StablePlayerId, Provider = "Groq", Model = "fake-groq" });
+        chat.AddCompanion(room.Id, new AiChatCompanion { Id = secondAi.StablePlayerId, Name = secondAi.Name, PlayerStableId = secondAi.StablePlayerId, Provider = "OpenRouter", Model = "fake-openrouter:free" });
         var hub = new RecordingHubContext();
         var sync = new CharacterRevealSynchronizationService(hub, new RoomService(NullLogger<RoomService>.Instance));
         var coordinator = new AiPresentationCoordinator(chat, new CharacterRevealService(), sync, new AiPresentationCharacteristicSelector(),
@@ -24,17 +29,20 @@ public sealed class AiPresentationCoordinatorTests
             NullLogger<AiPresentationCoordinator>.Instance);
 
         Assert.True(await coordinator.StartAsync(room, "Profession", CancellationToken.None));
-        Assert.True(ai.Revealed.Profession);
+        Assert.Equal("human", room.Presentation.CurrentSpeakerStablePlayerId);
+        Assert.DoesNotContain(chat.GetHistory(room.Id), message => message.SenderType == ChatSenderType.Ai);
+        Assert.True(await coordinator.CompleteHumanTurnAsync(room, "human", CancellationToken.None));
+        Assert.True(firstAi.Revealed.Profession && secondAi.Revealed.Profession);
+        Assert.Equal(AiPresentationStatus.ReadyForDiscussion, room.Presentation.Status);
+        Assert.Equal(2, chat.GetHistory(room.Id).Count(message => message.SenderType == ChatSenderType.Ai));
+        Assert.True(await coordinator.BeginDiscussionAsync(room, CancellationToken.None));
         Assert.Equal(AiPresentationStatus.Discussion, room.Presentation.Status);
-        Assert.Contains(chat.GetHistory(room.Id), message => message.SenderType == ChatSenderType.Ai && message.Text.Contains("repair"));
-        Assert.Contains(chat.GetHistory(room.Id), message => message.SystemEventType == "presentation_started");
-        Assert.Single(hub.Events, item => item.Event == "CharacteristicRevealed");
     }
 
     [Fact]
     public async Task First_presentation_forces_profession_and_uses_a_distinct_event_id()
     {
-        var room = new Room { Id = "first-presentation", State = RoomState.Playing };
+        var room = new Room { Id = "first-presentation", State = RoomState.Playing, CurrentPhase = GamePhase.RoundReveal };
         var human = new Player { Name = "Human", StablePlayerId = "human", ConnectionId = "human", SeatNumber = 1 };
         room.Players[human.ConnectionId] = human;
         var hub = new RecordingHubContext();
@@ -48,6 +56,7 @@ public sealed class AiPresentationCoordinatorTests
         Assert.True(await coordinator.EndAsync(room, CancellationToken.None));
         Assert.True(room.ProfessionPresentationCompleted);
         human.Revealed.Profession = true;
+        room.CurrentRound = 2;
         Assert.True(await coordinator.StartAsync(room, "Auto", CancellationToken.None));
         Assert.Equal("Hobby", room.Presentation.CharacteristicKey);
     }
@@ -55,7 +64,7 @@ public sealed class AiPresentationCoordinatorTests
     [Fact]
     public async Task Automatic_presentation_chooses_distinct_available_characteristics_for_ai_players()
     {
-        var room = new Room { Id = "auto-presentation", State = RoomState.Playing, ProfessionPresentationCompleted = true };
+        var room = new Room { Id = "auto-presentation", State = RoomState.Playing, CurrentPhase = GamePhase.RoundReveal, ProfessionPresentationCompleted = true };
         var first = CreateAi("ai-one", 1);
         var second = CreateAi("ai-two", 2);
         first.Revealed.Profession = true;

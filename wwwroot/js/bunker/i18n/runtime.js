@@ -78,8 +78,8 @@ function applyStaticTranslations() {
 
 	const playersInBunkerTitle = document.querySelector('#gameSection > .section-title');
 	if (playersInBunkerTitle) {
-		const count = document.getElementById('playerCount')?.textContent || '0/6';
-		playersInBunkerTitle.innerHTML = `${t('playersInBunker')} <span class="bunker-count" id="playerCount">${count}</span>`;
+		const count = document.getElementById('playerCount')?.textContent || `${t('participants')}: 0 · ${t('bunkerSeats')}: 6`;
+		playersInBunkerTitle.innerHTML = `<span class="bunker-count" id="playerCount">${count}</span>`;
 	}
 
 	const roomLobbyTitle = document.querySelector('#roomLobby .section-title');

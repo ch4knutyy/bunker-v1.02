@@ -35,6 +35,7 @@ namespace Bunker.Models
 		Inactive,
 		Running,
 		Paused,
+		ReadyForDiscussion,
 		Discussion
 	}
 
@@ -52,6 +53,9 @@ namespace Bunker.Models
 		public long GenerationToken { get; set; }
 		public string? LastGenerationError { get; set; }
 		public long PresentationId { get; set; }
+		public int RoundNumber { get; set; }
+		public HashSet<string> CompletedSpeakerStablePlayerIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+		public string CurrentSpeakerStatus { get; set; } = "Waiting";
 	}
 
 	/// <summary>

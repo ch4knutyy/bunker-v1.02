@@ -1,8 +1,9 @@
 using Bunker.Models;
+using Microsoft.Extensions.Options;
 
 namespace Bunker.Services;
 
-public sealed class AiParticipantService(RoomService rooms, RoomChatService chat, CharacterGeneratorService generator)
+public sealed class AiParticipantService(RoomService rooms, RoomChatService chat, CharacterGeneratorService generator, IOptions<AiChatOptions>? options = null)
 {
     private static readonly (string Name, string Motivation)[] Defaults =
     [
@@ -18,10 +19,11 @@ public sealed class AiParticipantService(RoomService rooms, RoomChatService chat
         for (var i = 0; i < Math.Clamp(count, 0, room.MaxPlayers); i++)
         {
             var preset = Defaults[(RoomService.GetPlayersSnapshot(room).Count(x => x.Value.IsAi) + i) % Defaults.Length];
-            var name = $"{preset.Name} AI";
+            var name = preset.Name;
             var player = generator.Generate(name);
             player.IsAi = true;
             player.AiProvider = "Gemini";
+            player.AiModel = options?.Value.GeminiModel?.Trim() ?? "";
             player.IsLobbyReady = true;
             player.StablePlayerId = "ai-" + Guid.NewGuid().ToString("N");
             player.GmRole = GmMode.PlayerHost;

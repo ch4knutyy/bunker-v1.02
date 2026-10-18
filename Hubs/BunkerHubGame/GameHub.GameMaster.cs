@@ -516,6 +516,8 @@ namespace Bunker.Hubs
 
             var completedRound = room.CurrentRound <= 0 ? 1 : room.CurrentRound;
             room.CurrentPhase = GamePhase.RoundEnded;
+            _aiPresentation?.CancelRoom(roomId);
+            _aiConversation?.CancelRoom(roomId);
 
             await Clients.Group(roomId).SendAsync("RoundEnded", new
             {

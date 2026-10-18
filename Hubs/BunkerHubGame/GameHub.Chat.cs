@@ -27,7 +27,12 @@ public partial class GameHub
             room.Presentation.CharacteristicKey,
             room.Presentation.UsesAutomaticCharacteristicSelection,
             room.Presentation.CurrentSpeakerStablePlayerId,
-            room.Presentation.LastGenerationError
+            room.Presentation.LastGenerationError,
+            room.Presentation.CurrentSpeakerStatus,
+            room.Presentation.CurrentIndex,
+            room.Presentation.RoundNumber,
+            participantCount = room.Presentation.ParticipantStablePlayerIds.Count,
+            completedCount = room.Presentation.CompletedSpeakerStablePlayerIds.Count
         });
     }
 
@@ -65,15 +70,12 @@ public partial class GameHub
     public async Task ConfigureAiProvider(string stablePlayerId, string provider, string model)
     {
         var room = RequireLobbyHost();
-        var normalizedProvider = provider?.Trim().ToLowerInvariant() switch
-        {
-            "gemini" => "Gemini",
-            "groq" => "Groq",
-            "openrouter" => "OpenRouter",
-            _ => throw new HubException("ai_provider_unknown")
-        };
+        var normalizedProvider = AiProviderManagementService.NormalizeProvider(provider);
+        if (string.IsNullOrWhiteSpace(normalizedProvider)) throw new HubException("ai_provider_unknown");
         var normalizedModel = model?.Trim() ?? "";
         if (normalizedModel.Length > 200) throw new HubException("ai_model_invalid");
+        if (_aiProviderManagement == null || !await _aiProviderManagement.IsAllowedModelAsync(normalizedProvider, normalizedModel, Context.ConnectionAborted))
+            throw new HubException("ai_model_unavailable");
         var player = RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)
             .FirstOrDefault(item => item.IsAi && string.Equals(RoomService.GetPlayerKey(item), stablePlayerId, StringComparison.OrdinalIgnoreCase))
             ?? throw new HubException("ai_player_not_found");
@@ -82,6 +84,42 @@ public partial class GameHub
         _roomService.UpdatePlayer(player.ConnectionId, player);
         _roomChat.UpdateCompanionProvider(room.Id, stablePlayerId, normalizedProvider, normalizedModel);
         await BroadcastAiParticipants(room);
+    }
+
+    public Task<AiProviderCatalogDto> GetAiProviderCatalog(string provider)
+    {
+        RequireLobbyHost();
+        return _aiProviderManagement?.GetCatalogAsync(provider, Context.ConnectionAborted)
+            ?? Task.FromResult(new AiProviderCatalogDto(AiProviderManagementService.NormalizeProvider(provider), false, "ai_provider_unavailable", []));
+    }
+
+    public Task<AiProviderDiagnosticDto> GetAiProviderDiagnostics(string stablePlayerId)
+    {
+        var room = RequireLobbyHost();
+        var player = RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)
+            .FirstOrDefault(item => item.IsAi && string.Equals(RoomService.GetPlayerKey(item), stablePlayerId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new HubException("ai_player_not_found");
+        return Task.FromResult(_aiProviderManagement?.GetDiagnostics(stablePlayerId, player.AiProvider, player.AiModel)
+            ?? new AiProviderDiagnosticDto("error", "ai_provider_unavailable", 0, 0, null, null, null, null));
+    }
+
+    public async Task<AiProviderDiagnosticDto> TestAiProviderConnection(string stablePlayerId)
+    {
+        var room = RequireLobbyHost();
+        var player = RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)
+            .FirstOrDefault(item => item.IsAi && string.Equals(RoomService.GetPlayerKey(item), stablePlayerId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new HubException("ai_player_not_found");
+        if (_aiProviderManagement == null || _aiProvider == null) throw new HubException("ai_provider_unavailable");
+        if (!await _aiProviderManagement.IsAllowedModelAsync(player.AiProvider, player.AiModel, Context.ConnectionAborted))
+            throw new HubException("ai_model_unavailable");
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted);
+        timeout.CancelAfter(TimeSpan.FromSeconds(15));
+        var reply = await _aiProvider.GenerateReplyAsync(new AiChatCompanion
+        {
+            Id = "connection-test", PlayerStableId = RoomService.GetPlayerKey(player), Name = player.Name,
+            Provider = player.AiProvider, Model = player.AiModel
+        }, "Reply with OK.", timeout.Token);
+        return _aiProviderManagement.GetDiagnostics(RoomService.GetPlayerKey(player), player.AiProvider, player.AiModel);
     }
 
     public async Task SetAiChatResponsesEnabled(bool enabled)
@@ -142,6 +180,20 @@ public partial class GameHub
         if (!IsCallerHost()) throw new HubException("host_required");
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
         return _aiPresentation != null && await _aiPresentation.RetryAsync(room, Context.ConnectionAborted);
+    }
+
+    public async Task<bool> CompleteAiPresentationHumanTurn()
+    {
+        if (!_roomService.TryGetCurrentPlayer(Context.ConnectionId, out var room, out var player)) throw new HubException("chat_room_required");
+        if (player.IsAi) throw new HubException("ai_presentation_required");
+        return _aiPresentation != null && await _aiPresentation.CompleteHumanTurnAsync(room, RoomService.GetPlayerKey(player), Context.ConnectionAborted);
+    }
+
+    public async Task<bool> BeginAiDiscussion()
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.BeginDiscussionAsync(room, Context.ConnectionAborted);
     }
 
     private async Task BroadcastAiParticipants(Room room)

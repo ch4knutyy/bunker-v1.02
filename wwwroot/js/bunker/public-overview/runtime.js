@@ -162,6 +162,7 @@ function getPublicRevealedSource(player, key) {
 
 function getPublicCharacteristicValue(player, key) {
 	const source = getPublicRevealedSource(player, key);
+	if (!source && !player?.revealedData?.[key]) return t('notRevealed');
 	if (key === 'profession' && source) return getProfessionDisplayName(source) || t('noData');
 	if (key === 'hobby' && source) return getLocalizedByFields(source, ['hobby', 'name'], source.name || source.Name || t('noData'));
 	if (key === 'property' && source) return getPropertyPresentation(source).title || t('propertyUnavailable');
@@ -363,7 +364,7 @@ function renderPublicPlayerOverview() {
 	const models = getCanonicalPublicPlayerModels();
 	const activePlayers = models.filter(({ player }) => !(player.isEliminated || player.IsEliminated));
 	const count = document.getElementById('playerCount');
-	if (count) count.textContent = `${activePlayers.length}/${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
+	if (count) count.textContent = `${t('participants')}: ${activePlayers.length} · ${t('bunkerSeats')}: ${currentBunkerCapacity || currentRoom?.maxPlayers || 12}`;
 	if (models.length === 0) {
 		selectedPublicPlayerSeat = null;
 		selector.innerHTML = '';

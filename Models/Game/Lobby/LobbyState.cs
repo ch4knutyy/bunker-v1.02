@@ -3,7 +3,8 @@ namespace Bunker.Models;
 public enum LobbyParticipationRole { Player, Spectator }
 public sealed record LobbyMemberDto(string PlayerId, string DisplayName, string Role, bool IsCurrentHost,
     bool IsGameplayParticipant, bool IsSpectator, bool IsTechnicalGm, bool IsOmniscientGm,
-    bool IsReady, bool IsConnected, bool IsAccountBound, bool IsDeveloper, string? BlockedReason, bool IsAi = false);
+    bool IsReady, bool IsConnected, bool IsAccountBound, bool IsDeveloper, string? BlockedReason, bool IsAi = false,
+    string? AiProvider = null, string? AiModel = null);
 public sealed record LobbyStateDto(string Lifecycle, int GameplayPlayerCount, int SpectatorCount,
     int TechnicalGmCount, int OmniscientGmCount, int ReadyCount, int TotalConnectedMembers,
     bool CanStart, IReadOnlyList<string> Blockers, long StateVersion, DateTimeOffset UpdatedAtUtc,
