@@ -87,6 +87,7 @@ namespace Bunker.Hubs
 			string actorId)
 		{
 			var state = completion.State;
+			_aiConversation?.CancelRoom(room.Id);
 			_gameTimerService.Stop(room);
 
 			// Спочатку повідомляємо клієнтів.

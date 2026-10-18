@@ -51,6 +51,7 @@ function showRoomSection() {
 
 function updateRoomUI() {
 	if (!currentRoom) return;
+	if (typeof updateRoomChatControls === 'function') updateRoomChatControls();
 
 	if (window.BUNKER_DEBUG === true) {
 		console.debug("[updateRoomUI]", {

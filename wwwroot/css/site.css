@@ -2732,3 +2732,14 @@ body {
 		white-space: nowrap !important;
 	}
 }
+/* Room-scoped conversation chat. */
+.room-chat-panel { margin-top: 18px; border-top: 1px solid var(--color-border, #46515f); padding-top: 14px; }
+.room-chat-heading { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.room-chat-heading h3 { margin: 0 auto 0 0; }
+.room-chat-messages { max-height: 280px; overflow-y: auto; display: grid; gap: 8px; padding: 8px 2px; }
+.room-chat-message { border-left: 3px solid #667; padding: 7px 10px; background: color-mix(in srgb, var(--color-surface, #1c2430) 90%, transparent); }
+.room-chat-message--ai { border-left-color: #8d6ad8; }
+.room-chat-message p { margin: 3px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.room-chat-form { display: flex; gap: 8px; }
+.room-chat-form input { min-width: 0; flex: 1; }
+@media (max-width: 600px) { .room-chat-form { flex-direction: column; } .room-chat-form button { width: 100%; } }

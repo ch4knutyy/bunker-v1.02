@@ -76,6 +76,10 @@ function registerSignalREvents() {
 	events.gameEvents.ScenarioResolved();
 	events.bunker.BunkerIntelRevealed();
 	events.gameEvents.EventEffectApplied();
+	events.chat.RoomChatMessageReceived();
+	events.chat.RoomChatHistory();
+	events.chat.RoomChatCompanionsUpdated();
+	events.chat.RoomChatSettingsUpdated();
 	events.inventory.AdditionalInventoryGranted();
 	events.threats.ThreatStateUpdated();
 	events.diagnostics.RoomDiagnosticsUpdated();

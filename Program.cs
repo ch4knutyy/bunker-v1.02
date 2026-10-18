@@ -130,6 +130,11 @@ builder.Services.AddSingleton<OmniscientRequestRateLimitService>();
 builder.Services.AddSingleton<DirectorControlService>();
 builder.Services.AddSingleton<LobbyStartService>();
 builder.Services.AddSingleton<RoomGameSettingsService>();
+builder.Services.Configure<AiChatOptions>(builder.Configuration.GetSection(AiChatOptions.SectionName));
+builder.Services.AddHttpClient<IAiProvider, GeminiAiProvider>(client => client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/"));
+builder.Services.AddSingleton<RoomChatService>();
+builder.Services.AddSingleton<AiChatContextBuilder>();
+builder.Services.AddSingleton<AiConversationCoordinator>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException(

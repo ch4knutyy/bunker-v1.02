@@ -55,6 +55,8 @@ namespace Bunker.Hubs
         private readonly Random _random = new();
 		private readonly IGameSessionHistoryService? _gameSessionHistoryService;
 		private readonly IRoomRecoveryCoordinator? _roomRecovery;
+        private readonly RoomChatService _roomChat;
+        private readonly AiConversationCoordinator? _aiConversation;
 
 		public GameHub(CharacterGeneratorService generator, 
             RoomService roomService, GameDataService gameData, ScenarioImageService imageService,
@@ -82,7 +84,9 @@ namespace Bunker.Hubs
             ApocalypseActivationScheduler? apocalypseEffects = null,
             PostGameStoryService? postGameStories = null,
             DeveloperAuthorityService? developerAuthority = null,
-            CatalogItemService? catalogItems = null)
+            CatalogItemService? catalogItems = null,
+            RoomChatService? roomChat = null,
+            AiConversationCoordinator? aiConversation = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -126,6 +130,8 @@ namespace Bunker.Hubs
             _lobbyStart = lobbyStart ?? new LobbyStartService(TimeProvider.System, _roomGameSettings, _gmAudit, _developerAuthority);
 			_gameSessionHistoryService = gameSessionHistoryService;
 			_roomRecovery = roomRecovery;
+			_roomChat = roomChat ?? new RoomChatService(TimeProvider.System);
+			_aiConversation = aiConversation;
 			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
             _catalogItems = catalogItems ?? new CatalogItemService(gameData);
 			_authorizationService = authorizationService;
