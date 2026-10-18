@@ -1,6 +1,6 @@
 # SQLite content migration — Phase 1 validation
 
-Validation date: 2026-10-13  
+Validation date: 2026-10-13
 Branch: `codex/content-sqlite-phase1`
 
 ## Scope and safety result
