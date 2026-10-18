@@ -50,6 +50,7 @@ public sealed class RoomChatService
             }
             state.LastHumanMessageAt[senderId] = now;
             message = Add(state, roomId, senderId, senderName, ChatSenderType.Human, normalized, clientMessageId, now);
+            RememberSocialStatement(state, message);
             return true;
         }
     }
@@ -102,6 +103,17 @@ public sealed class RoomChatService
         }
     }
 
+    public void EnsureCompanion(string roomId, AiChatCompanion companion)
+    {
+        var state = _rooms.GetOrAdd(roomId, _ => new());
+        lock (state.SyncRoot)
+        {
+            var existing = state.Companions.FirstOrDefault(x => x.PlayerStableId == companion.PlayerStableId);
+            if (existing == null) state.Companions.Add(companion);
+            else { existing.Provider = companion.Provider; existing.Model = companion.Model; }
+        }
+    }
+
     public bool RemoveCompanion(string roomId, string companionId)
     {
         if (!_rooms.TryGetValue(roomId, out var state)) return false;
@@ -112,6 +124,19 @@ public sealed class RoomChatService
     {
         if (!_rooms.TryGetValue(roomId, out var state)) return false;
         lock (state.SyncRoot) return state.Companions.RemoveAll(x => x.PlayerStableId == playerStableId) > 0;
+    }
+
+    public bool UpdateCompanionProvider(string roomId, string playerStableId, string provider, string model)
+    {
+        if (!_rooms.TryGetValue(roomId, out var state)) return false;
+        lock (state.SyncRoot)
+        {
+            var companion = state.Companions.FirstOrDefault(x => x.PlayerStableId == playerStableId);
+            if (companion == null) return false;
+            companion.Provider = provider;
+            companion.Model = model;
+            return true;
+        }
     }
 
     public bool AiResponsesEnabled(string roomId) => !_rooms.TryGetValue(roomId, out var state) || lockAndCopy(state, x => x.AiResponsesEnabled);
@@ -126,6 +151,17 @@ public sealed class RoomChatService
         if (!string.IsNullOrWhiteSpace(clientMessageId)) state.MessageIds.Add(clientMessageId);
         while (state.Messages.Count > MaxHistory) state.Messages.RemoveAt(0);
         return message;
+    }
+    private static void RememberSocialStatement(RoomChatState state, RoomChatMessage message)
+    {
+        var text = message.Text;
+        if (!new[] { "alliance", "ally", "promise", "trust", "betray", "союз", "обіц", "довір", "зрад", "союз", "обещ", "довер", "преда" }
+            .Any(token => text.Contains(token, StringComparison.OrdinalIgnoreCase))) return;
+        foreach (var companion in state.Companions)
+        {
+            companion.SocialMemory.Add(new(message.Timestamp, message.SenderId, message.SenderName, text));
+            if (companion.SocialMemory.Count > 30) companion.SocialMemory.RemoveAt(0);
+        }
     }
     private static string? NormalizeText(string? text)
     {

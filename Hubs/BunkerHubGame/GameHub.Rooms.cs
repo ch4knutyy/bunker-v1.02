@@ -642,6 +642,8 @@ namespace Bunker.Hubs
 					seatNumber = p.SeatNumber,
 					isConnected = p.IsConnected,
 					isAi = p.IsAi,
+					aiProvider = p.IsAi ? p.AiProvider : null,
+					aiModel = p.IsAi ? p.AiModel : null,
 					eliminationVoteImmunity = p.EliminationVoteImmunity
 				};
 			}).ToList();

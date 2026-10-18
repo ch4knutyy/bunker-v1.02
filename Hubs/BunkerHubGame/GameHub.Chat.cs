@@ -9,6 +9,17 @@ public partial class GameHub
     public async Task GetRoomChatHistory()
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value).Where(player => player.IsAi))
+        {
+            _roomChat.EnsureCompanion(room.Id, new AiChatCompanion
+            {
+                Id = RoomService.GetPlayerKey(player),
+                Name = player.Name,
+                PlayerStableId = RoomService.GetPlayerKey(player),
+                Provider = player.AiProvider,
+                Model = player.AiModel
+            });
+        }
         await Clients.Caller.SendAsync("RoomChatHistory", _roomChat.GetHistory(room.Id));
         await Clients.Caller.SendAsync("AiPresentationUpdated", new
         {
@@ -48,6 +59,28 @@ public partial class GameHub
     {
         var room = RequireLobbyHost();
         if (_aiParticipants.Remove(room, stablePlayerId)) _aiConversation?.CancelRoom(room.Id);
+        await BroadcastAiParticipants(room);
+    }
+
+    public async Task ConfigureAiProvider(string stablePlayerId, string provider, string model)
+    {
+        var room = RequireLobbyHost();
+        var normalizedProvider = provider?.Trim().ToLowerInvariant() switch
+        {
+            "gemini" => "Gemini",
+            "groq" => "Groq",
+            "openrouter" => "OpenRouter",
+            _ => throw new HubException("ai_provider_unknown")
+        };
+        var normalizedModel = model?.Trim() ?? "";
+        if (normalizedModel.Length > 200) throw new HubException("ai_model_invalid");
+        var player = RoomService.GetPlayersSnapshot(room).Select(entry => entry.Value)
+            .FirstOrDefault(item => item.IsAi && string.Equals(RoomService.GetPlayerKey(item), stablePlayerId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new HubException("ai_player_not_found");
+        player.AiProvider = normalizedProvider;
+        player.AiModel = normalizedModel;
+        _roomService.UpdatePlayer(player.ConnectionId, player);
+        _roomChat.UpdateCompanionProvider(room.Id, stablePlayerId, normalizedProvider, normalizedModel);
         await BroadcastAiParticipants(room);
     }
 
@@ -113,7 +146,7 @@ public partial class GameHub
 
     private async Task BroadcastAiParticipants(Room room)
     {
-        await Clients.Group(room.Id).SendAsync("RoomChatCompanionsUpdated", _roomChat.GetCompanions(room.Id).Select(x => new { x.Id, x.Name, x.PlayerStableId }));
+        await Clients.Group(room.Id).SendAsync("RoomChatCompanionsUpdated", _roomChat.GetCompanions(room.Id).Select(x => new { x.Id, x.Name, x.PlayerStableId, x.Provider, x.Model }));
         await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
         await BroadcastLobbyState(room);
     }

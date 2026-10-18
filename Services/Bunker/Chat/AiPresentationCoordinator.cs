@@ -183,7 +183,7 @@ public sealed class AiPresentationCoordinator(
         try
         {
             await hub.Clients.Group(room.Id).SendAsync("RoomChatAiStatus", new { playerStableId = speakerId, name = speaker.Name, state = "typing" }, source.Token);
-            var reply = await provider.GenerateReplyAsync(context.Build(room, companion, chat.GetHistory(room.Id)), source.Token);
+            var reply = await provider.GenerateReplyAsync(companion, context.Build(room, companion, chat.GetHistory(room.Id)), source.Token);
             if (room.Presentation.Status != AiPresentationStatus.Running || room.Presentation.GenerationToken != generationToken || room.Presentation.CurrentSpeakerStablePlayerId != speakerId) return;
             if (string.IsNullOrWhiteSpace(reply.Text)) { room.Presentation.LastGenerationError = reply.ErrorCode ?? "ai_empty_response"; await PublishStateAsync(room, cancellationToken); return; }
             var message = chat.AddAiMessage(room.Id, companion, reply.Text);

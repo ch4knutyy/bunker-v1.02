@@ -27,6 +27,8 @@ namespace Bunker.Models
         public bool IsLobbyReady { get; set; }
         // Server-controlled participant with no SignalR connection. Its ConnectionId is an internal room key only.
         public bool IsAi { get; set; }
+        public string AiProvider { get; set; } = "Gemini";
+        public string AiModel { get; set; } = "";
 
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();

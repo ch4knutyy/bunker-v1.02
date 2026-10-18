@@ -21,11 +21,12 @@ public sealed class AiParticipantService(RoomService rooms, RoomChatService chat
             var name = $"{preset.Name} AI";
             var player = generator.Generate(name);
             player.IsAi = true;
+            player.AiProvider = "Gemini";
             player.IsLobbyReady = true;
             player.StablePlayerId = "ai-" + Guid.NewGuid().ToString("N");
             player.GmRole = GmMode.PlayerHost;
             if (!rooms.TryAddAiPlayer(room, player)) break;
-            var companion = new AiChatCompanion { Id = player.StablePlayerId, Name = player.Name, Motivation = preset.Motivation, PlayerStableId = player.StablePlayerId };
+            var companion = new AiChatCompanion { Id = player.StablePlayerId, Name = player.Name, Motivation = preset.Motivation, PlayerStableId = player.StablePlayerId, Provider = player.AiProvider, Model = player.AiModel };
             if (!chat.AddCompanion(room.Id, companion)) { rooms.TryRemoveAiPlayer(room, player.StablePlayerId, out _); break; }
             added.Add(companion);
         }
