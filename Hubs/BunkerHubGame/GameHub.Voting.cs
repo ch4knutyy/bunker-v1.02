@@ -141,6 +141,8 @@ namespace Bunker.Hubs
                         extraVotes = p.ExtraVotes
                     })
             });
+            var votingStartedMessage = _roomChat.AddSystemMessage(roomId, "Voting has started.", $"voting-start:{voting.Id}");
+            await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", votingStartedMessage);
 
             await AppendGmAudit(
                 room,
@@ -313,6 +315,8 @@ namespace Bunker.Hubs
                 .ToDictionary(entry => entry.Key, entry => entry.Value);
 
             await Clients.Group(roomId).SendAsync("VotingEnded", voting.ToClientInfo(playersSnapshot, showVotes: false));
+            var votingEndedMessage = _roomChat.AddSystemMessage(roomId, "Voting has ended.", $"voting-end:{voting.Id}");
+            await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", votingEndedMessage);
 
             _logger.LogInformation($"Голосування завершено в кімнаті {room.Name}");
         }

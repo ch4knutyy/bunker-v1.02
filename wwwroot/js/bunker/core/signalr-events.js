@@ -81,6 +81,7 @@ function registerSignalREvents() {
 	events.chat.RoomChatCompanionsUpdated();
 	events.chat.RoomChatSettingsUpdated();
 	events.chat.RoomChatAiStatus();
+	events.chat.AiPresentationUpdated();
 	events.inventory.AdditionalInventoryGranted();
 	events.threats.ThreatStateUpdated();
 	events.diagnostics.RoomDiagnosticsUpdated();

@@ -60,6 +60,7 @@ namespace Bunker.Hubs
         private readonly CharacterRevealService _characterReveal;
         private readonly CharacterRevealSynchronizationService _characterRevealSync;
         private readonly AiParticipantService _aiParticipants;
+        private readonly AiPresentationCoordinator? _aiPresentation;
 
 		public GameHub(CharacterGeneratorService generator, 
             RoomService roomService, GameDataService gameData, ScenarioImageService imageService,
@@ -92,7 +93,8 @@ namespace Bunker.Hubs
             AiConversationCoordinator? aiConversation = null,
             AiParticipantService? aiParticipants = null,
             CharacterRevealService? characterReveal = null,
-            CharacterRevealSynchronizationService? characterRevealSync = null)
+            CharacterRevealSynchronizationService? characterRevealSync = null,
+            AiPresentationCoordinator? aiPresentation = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -141,6 +143,7 @@ namespace Bunker.Hubs
 			_aiParticipants = aiParticipants ?? new AiParticipantService(roomService, _roomChat, generator);
 			_characterReveal = characterReveal ?? new CharacterRevealService();
 			_characterRevealSync = characterRevealSync ?? throw new ArgumentNullException(nameof(characterRevealSync));
+			_aiPresentation = aiPresentation;
 			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
             _catalogItems = catalogItems ?? new CatalogItemService(gameData);
 			_authorizationService = authorizationService;

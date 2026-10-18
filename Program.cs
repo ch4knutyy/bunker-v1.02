@@ -139,6 +139,7 @@ builder.Services.AddSingleton<RoomChatService>();
 builder.Services.AddSingleton<AiParticipantService>();
 builder.Services.AddSingleton<AiChatContextBuilder>();
 builder.Services.AddSingleton<AiConversationCoordinator>();
+builder.Services.AddSingleton<AiPresentationCoordinator>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException(

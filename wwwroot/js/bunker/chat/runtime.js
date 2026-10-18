@@ -1,5 +1,6 @@
 // Room chat is a classic-script domain, like the rest of the Bunker client.
-const roomChatState = { ids: new Set(), aiEnabled: true, roomId: '', historyLoaded: false, open: false, unread: 0, trigger: null };
+const roomChatState = { ids: new Set(), aiEnabled: true, roomId: '', historyLoaded: false, open: false, unread: 0, trigger: null, presentation: null };
+function updateAiPresentation(data) { roomChatState.presentation = data || null; updateRoomChatControls(); }
 
 function updateRoomChatAiStatus(data) { const status = document.getElementById('roomChatAiStatus'); if (!status) return; const state = data?.state || data?.State; const name = data?.name || data?.Name || 'AI'; const error = data?.error || data?.Error; if (state === 'typing') { status.hidden = false; status.textContent = `${name} ${t('roomChatTyping')}`; return; } if (error) { status.hidden = false; status.textContent = t({ ai_not_configured: 'roomChatAiUnavailable', ai_auth_failed: 'roomChatAiUnavailable', ai_model_not_found: 'roomChatAiUnavailable', ai_rate_limited: 'roomChatAiBusy', ai_timeout: 'roomChatAiBusy', ai_provider_unavailable: 'roomChatAiBusy', ai_network_error: 'roomChatAiBusy' }[error] || 'roomChatAiUnavailable'); return; } status.hidden = true; }
 
@@ -46,6 +47,8 @@ function updateRoomChatControls() {
 	const connectionStatus = document.getElementById('roomChatConnection'); if (connectionStatus) connectionStatus.textContent = connection?.state === signalR.HubConnectionState.Connected ? t('roomChatConnected') : t('roomChatReconnecting');
 	if (add) add.hidden = !isHost;
 	if (toggle) { toggle.hidden = !isHost; toggle.textContent = roomChatState.aiEnabled ? t('roomChatAiOn') : t('roomChatAiOff'); }
+	const presentation = document.getElementById('aiPresentationControls'); if (presentation) presentation.hidden = !isHost;
+	const label = document.getElementById('aiPresentationState'); const current = roomChatState.presentation; if (label) label.textContent = current ? `${current.status ?? current.Status}${(current.currentSpeakerStablePlayerId ?? current.CurrentSpeakerStablePlayerId) ? ` · ${current.currentSpeakerStablePlayerId ?? current.CurrentSpeakerStablePlayerId}` : ''}` : '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -58,6 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 	document.getElementById('addAiChatCompanionsBtn')?.addEventListener('click', () => connection.invoke('AddDefaultAiCompanions').catch(console.warn));
 	document.getElementById('toggleAiChatBtn')?.addEventListener('click', () => connection.invoke('SetAiChatResponsesEnabled', !roomChatState.aiEnabled).catch(console.warn));
+	document.getElementById('startAiPresentationBtn')?.addEventListener('click', () => connection.invoke('StartAiPresentation', document.getElementById('aiPresentationCharacteristic')?.value).catch(console.warn));
+	document.getElementById('pauseAiPresentationBtn')?.addEventListener('click', () => connection.invoke('PauseAiPresentation').catch(console.warn));
+	document.getElementById('resumeAiPresentationBtn')?.addEventListener('click', () => connection.invoke('ResumeAiPresentation').catch(console.warn));
+	document.getElementById('nextAiPresentationBtn')?.addEventListener('click', () => connection.invoke('NextAiPresentationSpeaker', false).catch(console.warn));
+	document.getElementById('skipAiPresentationBtn')?.addEventListener('click', () => connection.invoke('NextAiPresentationSpeaker', true).catch(console.warn));
+	document.getElementById('endAiPresentationBtn')?.addEventListener('click', () => connection.invoke('EndAiPresentation').catch(console.warn));
+	document.getElementById('retryAiPresentationBtn')?.addEventListener('click', () => connection.invoke('RetryAiPresentationSpeaker').catch(console.warn));
 	document.addEventListener('keydown', event => {
 		if (!roomChatState.open) return;
 		if (event.key === 'Escape') { event.preventDefault(); closeRoomChat(); return; }

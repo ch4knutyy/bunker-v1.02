@@ -10,6 +10,13 @@ public partial class GameHub
     {
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
         await Clients.Caller.SendAsync("RoomChatHistory", _roomChat.GetHistory(room.Id));
+        await Clients.Caller.SendAsync("AiPresentationUpdated", new
+        {
+            room.Presentation.Status,
+            room.Presentation.CharacteristicKey,
+            room.Presentation.CurrentSpeakerStablePlayerId,
+            room.Presentation.LastGenerationError
+        });
     }
 
     public async Task SendRoomChatMessage(string text, string clientMessageId)
@@ -59,6 +66,48 @@ public partial class GameHub
         var companion = _roomChat.GetCompanions(room.Id).FirstOrDefault(x => x.Id == companionId);
         if (companion != null && _aiParticipants.Remove(room, companion.PlayerStableId)) _aiConversation?.CancelRoom(room.Id);
         await BroadcastAiParticipants(room);
+    }
+
+    public async Task<bool> StartAiPresentation(string characteristicKey)
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.StartAsync(room, characteristicKey, Context.ConnectionAborted);
+    }
+
+    public async Task<bool> PauseAiPresentation()
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.PauseAsync(room, Context.ConnectionAborted);
+    }
+
+    public async Task<bool> ResumeAiPresentation()
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.ResumeAsync(room, Context.ConnectionAborted);
+    }
+
+    public async Task<bool> NextAiPresentationSpeaker(bool skip = false)
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.NextAsync(room, skip, Context.ConnectionAborted);
+    }
+
+    public async Task<bool> EndAiPresentation()
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.EndAsync(room, Context.ConnectionAborted);
+    }
+
+    public async Task<bool> RetryAiPresentationSpeaker()
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiPresentation != null && await _aiPresentation.RetryAsync(room, Context.ConnectionAborted);
     }
 
     private async Task BroadcastAiParticipants(Room room)

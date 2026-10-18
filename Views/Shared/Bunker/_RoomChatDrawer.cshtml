@@ -3,6 +3,18 @@
         <div><span class="room-chat-kicker">Bunker comms</span><h2 id="roomChatTitle" data-i18n="roomChatTitle">Спільний чат</h2><span id="roomChatConnection" class="room-chat-connection" role="status"></span></div>
         <div class="room-chat-header-actions"><button id="addAiChatCompanionsBtn" class="btn-secondary" type="button" hidden data-i18n="roomChatAddAi">Додати AI</button><button id="toggleAiChatBtn" class="btn-secondary" type="button" hidden></button><button id="roomChatCloseButton" class="btn-close" type="button" aria-label="Close chat" data-i18n-aria-label="roomChatClose">×</button></div>
     </header>
+    <section id="aiPresentationControls" class="room-chat-presentation" hidden>
+        <span id="aiPresentationState" role="status"></span>
+        <label class="visually-hidden" for="aiPresentationCharacteristic" data-i18n="aiPresentationCharacteristic">Характеристика</label>
+        <select id="aiPresentationCharacteristic"><option value="Profession" data-i18n="profession">Професія</option><option value="Hobby" data-i18n="hobby">Хобі</option><option value="Fact" data-i18n="fact">Факт</option></select>
+        <button id="startAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationStart">Почати представлення</button>
+        <button id="pauseAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationPause">Пауза</button>
+        <button id="resumeAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationResume">Продовжити</button>
+        <button id="nextAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationNext">Наступний</button>
+        <button id="skipAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationSkip">Пропустити</button>
+        <button id="endAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationEnd">Завершити</button>
+        <button id="retryAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationRetry">Повторити AI</button>
+    </section>
     <div id="roomChatMessages" class="room-chat-messages" aria-live="polite" aria-relevant="additions text"></div>
     <p id="roomChatAiStatus" class="room-chat-ai-status" hidden aria-live="polite"></p>
     <form id="roomChatForm" class="room-chat-form">

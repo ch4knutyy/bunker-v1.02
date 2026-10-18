@@ -30,6 +30,26 @@ namespace Bunker.Models
 		Finished
 	}
 
+	public enum AiPresentationStatus
+	{
+		Inactive,
+		Running,
+		Paused,
+		Discussion
+	}
+
+	/// <summary>GM-directed discussion aid. It deliberately does not change the game round or phase.</summary>
+	public sealed class AiPresentationState
+	{
+		public AiPresentationStatus Status { get; set; }
+		public string? CharacteristicKey { get; set; }
+		public List<string> ParticipantStablePlayerIds { get; set; } = [];
+		public int CurrentIndex { get; set; }
+		public string? CurrentSpeakerStablePlayerId { get; set; }
+		public long GenerationToken { get; set; }
+		public string? LastGenerationError { get; set; }
+	}
+
 	/// <summary>
 	/// Ігрова кімната
 	/// </summary>
@@ -196,6 +216,7 @@ namespace Bunker.Models
 		[System.Text.Json.Serialization.JsonIgnore]
 		public object SnapshotSyncRoot { get; } = new();
 		public long PublicRevealRevision { get; set; }
+		public AiPresentationState Presentation { get; set; } = new();
 		public HashSet<string> ProcessedRoomEditorCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
