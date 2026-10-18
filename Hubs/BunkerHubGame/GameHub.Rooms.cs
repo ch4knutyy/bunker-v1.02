@@ -759,8 +759,17 @@ namespace Bunker.Hubs
 
             var roundState = BuildRoundState(room);
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
-            var roundAnnouncement = _roomChat.AddSystemMessage(roomId, $"Раунд {room.CurrentRound} розпочато.", $"round-start:{room.CurrentRound}");
-            await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", roundAnnouncement);
+            if (_roomChat.TryAddSystemMessage(roomId, "Game has started.", $"game-start:{room.GameRunId}",
+                "game_started", new Dictionary<string, string>
+                {
+                    ["round"] = room.CurrentRound.ToString(),
+                    ["playerCount"] = playersSnapshot.Count.ToString(),
+                    ["capacity"] = (room.ResolvedBunkerCapacity ?? room.Bunker?.Capacity ?? 0).ToString()
+                }, out var gameStartedAnnouncement))
+                await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", gameStartedAnnouncement);
+            if (_roomChat.TryAddSystemMessage(roomId, $"Раунд {room.CurrentRound} розпочато.", $"round-start:{room.GameRunId}:{room.CurrentRound}",
+                "round_started", new Dictionary<string, string> { ["round"] = room.CurrentRound.ToString() }, out var roundAnnouncement))
+                await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", roundAnnouncement);
             if (room.Bunker != null)
                 await BroadcastBunkerIntelProjection(room);
             if (room.Apocalypse != null)

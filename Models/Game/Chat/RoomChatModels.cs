@@ -15,7 +15,9 @@ public sealed record RoomChatMessage(
     string SenderName,
     DateTimeOffset Timestamp,
     ChatSenderType SenderType,
-    string Text);
+    string Text,
+    string? SystemEventType = null,
+    IReadOnlyDictionary<string, string>? SystemEventData = null);
 
 public sealed class AiChatCompanion
 {

@@ -12,6 +12,7 @@ public sealed class AiPresentationCoordinator(
     RoomChatService chat,
     CharacterRevealService reveal,
     CharacterRevealSynchronizationService synchronization,
+    AiPresentationCharacteristicSelector characteristicSelector,
     AiChatContextBuilder context,
     IAiProvider provider,
     IHubContext<GameHub> hub,
@@ -23,23 +24,31 @@ public sealed class AiPresentationCoordinator(
     {
         var participants = RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value)
             .OrderBy(player => player.SeatNumber).Select(RoomService.GetPlayerKey).ToList();
-        if (room.State != RoomState.Playing || participants.Count == 0 || !GmPlayerStateMutator.PublicCharacteristicKeys.Contains(characteristicKey, StringComparer.Ordinal))
+        if (room.State != RoomState.Playing || participants.Count == 0 ||
+            !string.Equals(characteristicKey, "Auto", StringComparison.OrdinalIgnoreCase) &&
+            !GmPlayerStateMutator.PublicCharacteristicKeys.Contains(characteristicKey, StringComparer.Ordinal))
             return false;
 
         lock (room.SnapshotSyncRoot)
         {
             if (room.Presentation.Status is AiPresentationStatus.Running or AiPresentationStatus.Paused) return false;
+            var automaticSelection = string.Equals(characteristicKey, "Auto", StringComparison.OrdinalIgnoreCase);
+            if (!room.ProfessionPresentationCompleted) characteristicKey = "Profession";
+            else if (automaticSelection)
+                characteristicKey = characteristicSelector.Select(room, participants);
             room.Presentation = new AiPresentationState
             {
                 Status = AiPresentationStatus.Running,
                 CharacteristicKey = characteristicKey,
+                UsesAutomaticCharacteristicSelection = automaticSelection && room.ProfessionPresentationCompleted,
                 ParticipantStablePlayerIds = participants,
                 CurrentIndex = 0,
                 CurrentSpeakerStablePlayerId = participants[0],
-                GenerationToken = room.Presentation.GenerationToken + 1
+                GenerationToken = room.Presentation.GenerationToken + 1,
+                PresentationId = ++room.NextPresentationId
             };
         }
-        await AddSystemAsync(room, $"Presentation started: {characteristicKey}.", $"presentation:start:{room.PublicRevealRevision}:{characteristicKey}", cancellationToken);
+        await AddSystemAsync(room, "Presentation started.", "presentation_started", new Dictionary<string, string> { ["characteristic"] = characteristicKey }, PresentationEventId(room, "start"), cancellationToken);
         await PublishStateAsync(room, cancellationToken);
         await PresentCurrentAsync(room, cancellationToken);
         return true;
@@ -88,10 +97,13 @@ public sealed class AiPresentationCoordinator(
             else room.Presentation.CurrentSpeakerStablePlayerId = room.Presentation.ParticipantStablePlayerIds[room.Presentation.CurrentIndex];
         }
         Cancel(room.Id);
-        if (skipped && skippedId != null) await AddSystemAsync(room, "Speaker skipped.", $"presentation:skip:{room.PublicRevealRevision}:{skippedId}", cancellationToken);
+        if (skipped && skippedId != null) await AddSystemAsync(room, "Speaker skipped.", "presentation_skipped", new Dictionary<string, string> { ["playerId"] = skippedId }, PresentationEventId(room, $"skip:{skippedId}"), cancellationToken);
         await PublishStateAsync(room, cancellationToken);
         if (room.Presentation.Status == AiPresentationStatus.Discussion)
-            await AddSystemAsync(room, "Presentations complete. Open discussion begins.", $"presentation:discussion:{room.PublicRevealRevision}", cancellationToken);
+        {
+            if (room.Presentation.CharacteristicKey == "Profession") room.ProfessionPresentationCompleted = true;
+            await AddSystemAsync(room, "Presentations complete. Open discussion begins.", "discussion_started", null, PresentationEventId(room, "discussion"), cancellationToken);
+        }
         else await PresentCurrentAsync(room, cancellationToken);
         return true;
     }
@@ -106,7 +118,8 @@ public sealed class AiPresentationCoordinator(
             room.Presentation.GenerationToken++;
         }
         Cancel(room.Id);
-        await AddSystemAsync(room, "Presentations complete. Open discussion begins.", $"presentation:discussion:{room.PublicRevealRevision}", cancellationToken);
+        if (room.Presentation.CharacteristicKey == "Profession") room.ProfessionPresentationCompleted = true;
+        await AddSystemAsync(room, "Presentations complete. Open discussion begins.", "discussion_started", null, PresentationEventId(room, "discussion"), cancellationToken);
         await PublishStateAsync(room, cancellationToken);
         return true;
     }
@@ -132,16 +145,34 @@ public sealed class AiPresentationCoordinator(
         if (state.Status != AiPresentationStatus.Running || string.IsNullOrWhiteSpace(speakerId)) return;
         var speaker = RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value).FirstOrDefault(p => RoomService.GetPlayerKey(p) == speakerId);
         if (speaker == null) { await NextAsync(room, true, cancellationToken); return; }
-        await AddSystemAsync(room, $"Now speaking: {speaker.Name}.", $"presentation:speaker:{room.PublicRevealRevision}:{speakerId}", cancellationToken);
+        await AddSystemAsync(room, "Now speaking.", "presentation_speaker", new Dictionary<string, string> { ["playerId"] = speakerId, ["name"] = speaker.Name }, PresentationEventId(room, $"speaker:{speakerId}"), cancellationToken);
         if (!speaker.IsAi) return; // Humans retain their normal reveal and speech controls.
 
-        var key = state.CharacteristicKey!;
+        var key = state.UsesAutomaticCharacteristicSelection
+            ? state.SelectedCharacteristicKeysByPlayer.GetValueOrDefault(speakerId) ?? characteristicSelector.SelectForPlayer(room, speaker, state.SelectedCharacteristicKeys)
+            : state.CharacteristicKey;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            await AddSystemAsync(room, "No characteristic is available.", "presentation_no_characteristic", new Dictionary<string, string> { ["playerId"] = speakerId, ["name"] = speaker.Name }, PresentationEventId(room, $"no-choice:{speakerId}"), cancellationToken);
+            await NextAsync(room, false, cancellationToken);
+            return;
+        }
+        if (state.UsesAutomaticCharacteristicSelection)
+        {
+            state.CharacteristicKey = key;
+            if (state.SelectedCharacteristicKeysByPlayer.TryAdd(speakerId, key))
+            {
+                state.SelectedCharacteristicKeys.Add(key);
+                await AddSystemAsync(room, "AI selected a characteristic.", "ai_characteristic_selected", new Dictionary<string, string> { ["playerId"] = speakerId, ["name"] = speaker.Name, ["characteristic"] = key }, PresentationEventId(room, $"choice:{speakerId}:{key}"), cancellationToken);
+                await PublishStateAsync(room, cancellationToken);
+            }
+        }
         var result = reveal.RevealAiPresentation(room, speaker, speakerId, key, presentationAuthorized: true);
         if (result.Success)
         {
             var data = PublicData(speaker, key);
             await synchronization.DispatchAsync(room, speaker, result, data, cancellationToken);
-            await AddSystemAsync(room, $"{speaker.Name} revealed {key}.", $"presentation:reveal:{result.RevealRevision}:{speakerId}:{key}", cancellationToken);
+            await AddSystemAsync(room, "Characteristic revealed.", "characteristic_revealed", new Dictionary<string, string> { ["playerId"] = speakerId, ["name"] = speaker.Name, ["characteristic"] = key, ["value"] = PublicValue(speaker, key) }, PresentationEventId(room, $"reveal:{speakerId}:{key}"), cancellationToken);
         }
         else if (result.ErrorCode != "already_revealed") return;
 
@@ -164,12 +195,33 @@ public sealed class AiPresentationCoordinator(
         finally { await hub.Clients.Group(room.Id).SendAsync("RoomChatAiStatus", new { playerStableId = speakerId, name = speaker.Name, state = "idle" }, CancellationToken.None); }
     }
 
-    private async Task AddSystemAsync(Room room, string text, string eventId, CancellationToken token)
+    private async Task AddSystemAsync(Room room, string text, string eventType, IReadOnlyDictionary<string, string>? eventData, string eventId, CancellationToken token)
     {
-        var message = chat.AddSystemMessage(room.Id, text, eventId);
-        await hub.Clients.Group(room.Id).SendAsync("RoomChatMessageReceived", message, token);
+        if (chat.TryAddSystemMessage(room.Id, text, eventId, eventType, eventData, out var message))
+            await hub.Clients.Group(room.Id).SendAsync("RoomChatMessageReceived", message, token);
     }
-    private Task PublishStateAsync(Room room, CancellationToken token) => hub.Clients.Group(room.Id).SendAsync("AiPresentationUpdated", new { room.Presentation.Status, room.Presentation.CharacteristicKey, room.Presentation.CurrentSpeakerStablePlayerId, room.Presentation.LastGenerationError }, token);
+    private Task PublishStateAsync(Room room, CancellationToken token) => hub.Clients.Group(room.Id).SendAsync("AiPresentationUpdated", new { room.Presentation.Status, room.Presentation.CharacteristicKey, room.Presentation.UsesAutomaticCharacteristicSelection, room.Presentation.CurrentSpeakerStablePlayerId, room.Presentation.LastGenerationError }, token);
     private void Cancel(string roomId) { if (_cancellations.TryRemove(roomId, out var source)) { source.Cancel(); source.Dispose(); } }
-    private static object PublicData(Player p, string key) => new { label = key, value = key switch { "Profession" => p.Profession?.Name, "Hobby" => p.Hobby?.Name, "CharacterTrait" => p.CharacterTrait?.Name, "Phobia" => p.Phobia?.Name, "Fact" => p.Fact?.Name, "PhysicalHealth" => p.PhysicalHealth?.Name, "MentalHealth" => p.MentalHealth?.Name, "Inventory" => string.Join(", ", p.Inventory?.Items?.Select(x => x.Name) ?? []), _ => key } };
+    private static string PresentationEventId(Room room, string eventName) => $"presentation:{room.GameRunId}:{room.Presentation.PresentationId}:{eventName}";
+    private static object PublicData(Player p, string key) => new
+    {
+        label = key,
+        value = PublicValue(p, key)
+    };
+
+    private static string PublicValue(Player p, string key) => key switch
+    {
+        "Personality" => $"{p.Personality?.Age}; {p.Personality?.Sex}; {p.Personality?.SexOrientation}",
+        "Body" => $"{p.Body?.Height}; {p.Body?.Weight}; {p.Body?.BodyType}",
+        "Profession" => p.Profession?.Name ?? "",
+        "Hobby" => p.Hobby?.Name ?? "",
+        "CharacterTrait" => p.CharacterTrait?.Name ?? "",
+        "Phobia" => p.Phobia?.Name ?? "",
+        "Fact" => p.Fact?.Name ?? "",
+        "PhysicalHealth" => p.PhysicalHealth?.Name ?? "",
+        "MentalHealth" => p.MentalHealth?.Name ?? "",
+        "Inventory" => string.Join(", ", p.Inventory?.Items?.Select(x => x.Name) ?? []),
+        "Property" => p.Property?.GetDisplayText("uk") ?? "",
+        _ => ""
+    };
 }

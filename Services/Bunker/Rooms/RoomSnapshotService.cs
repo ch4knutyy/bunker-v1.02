@@ -264,6 +264,9 @@ public sealed class RoomSnapshotService
         room.CurrentRound = state.CurrentRound;
         room.CurrentPhase = state.CurrentPhase;
         room.CurrentTurnPlayerId = state.CurrentTurnPlayerId;
+        // A presentation may have an in-flight provider request and is not part of the
+        // reversible game snapshot contract. Never revive its stale speaker or token.
+        room.Presentation = new();
         room.IsPaused = state.IsPaused;
         room.PauseReason = state.PauseReason;
         room.PausedAtUtc = state.PausedAtUtc;

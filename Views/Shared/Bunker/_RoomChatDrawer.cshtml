@@ -6,7 +6,10 @@
     <section id="aiPresentationControls" class="room-chat-presentation" hidden>
         <span id="aiPresentationState" role="status"></span>
         <label class="visually-hidden" for="aiPresentationCharacteristic" data-i18n="aiPresentationCharacteristic">Характеристика</label>
-        <select id="aiPresentationCharacteristic"><option value="Profession" data-i18n="profession">Професія</option><option value="Hobby" data-i18n="hobby">Хобі</option><option value="Fact" data-i18n="fact">Факт</option></select>
+        <select id="aiPresentationCharacteristic">
+            <option value="Auto" data-i18n="aiPresentationAuto">Автовибір AI</option>
+            <option value="Profession" data-i18n="profession">Професія</option><option value="Personality" data-i18n="personality">Особистість</option><option value="Body" data-i18n="body">Статура</option><option value="PhysicalHealth" data-i18n="physicalHealth">Фізичне здоров'я</option><option value="MentalHealth" data-i18n="mentalHealth">Психічне здоров'я</option><option value="Hobby" data-i18n="hobby">Хобі</option><option value="CharacterTrait" data-i18n="characterTrait">Риса характеру</option><option value="Phobia" data-i18n="phobia">Фобія</option><option value="Inventory" data-i18n="inventory">Інвентар</option><option value="Property" data-i18n="property">Майно</option><option value="Fact" data-i18n="fact">Факт</option>
+        </select>
         <button id="startAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationStart">Почати представлення</button>
         <button id="pauseAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationPause">Пауза</button>
         <button id="resumeAiPresentationBtn" class="btn-secondary" type="button" data-i18n="aiPresentationResume">Продовжити</button>

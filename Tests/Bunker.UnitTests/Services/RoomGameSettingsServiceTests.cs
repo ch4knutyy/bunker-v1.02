@@ -139,7 +139,7 @@ public sealed class RoomGameSettingsServiceTests
     }
 
     [Fact]
-    public void CommandIdAndStartFreezeAreIdempotentAndRandomCapacityResolvesOnce()
+    public void CommandIdAndStartFreezeAreIdempotentAndCapacityUsesCanonicalGameplayCount()
     {
         var context = CreateContext();
         var settings = RoomGameSettingsService.Clone(context.Room.GameSettings);
@@ -153,9 +153,23 @@ public sealed class RoomGameSettingsServiceTests
         var draws = 0;
         context.Service.FreezeForStart(context.Room, (min, max) => { draws++; return max - 1; });
         context.Service.FreezeForStart(context.Room, (min, max) => { draws++; return min; });
-        Assert.True(context.Room.SettingsFrozen); Assert.Equal(2, context.Room.ResolvedBunkerCapacity); Assert.Equal(1, draws);
+        Assert.True(context.Room.SettingsFrozen); Assert.Equal(1, context.Room.ResolvedBunkerCapacity); Assert.Equal(0, draws);
         settings.RandomBunkerCapacityMax = 1;
         Assert.Equal(2, context.Room.FrozenGameSettings!.RandomBunkerCapacityMax);
+    }
+
+    [Fact]
+    public void Start_capacity_counts_ai_but_excludes_spectator_and_technical_gm()
+    {
+        var context = CreateContext();
+        context.Room.Players["ai"] = new Player { IsAi = true, StablePlayerId = "ai", ConnectionId = "ai:ai" };
+        context.Room.Players["spectator"] = new Player { IsLobbySpectator = true, StablePlayerId = "spectator" };
+        context.Room.Players["gm"] = new Player { GmRole = GmMode.TechnicalGm, StablePlayerId = "gm" };
+
+        context.Service.FreezeForStart(context.Room, (_, _) => throw new InvalidOperationException("capacity must not be randomized"));
+
+        Assert.Equal(3, RoomService.GetGameplayPlayersSnapshot(context.Room).Count);
+        Assert.Equal(2, context.Room.ResolvedBunkerCapacity);
     }
 
     [Theory]

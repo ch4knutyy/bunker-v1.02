@@ -22,7 +22,31 @@ public interface IAiProvider
 
 public sealed record AiProviderReply(string? Text, string? ErrorCode = null);
 
-public sealed class GeminiAiProvider(HttpClient client, IOptions<AiChatOptions> options, ILogger<GeminiAiProvider> logger) : IAiProvider
+/// <summary>Shared, bounded Gemini gate. A 429 cools down all chat paths without blocking gameplay.</summary>
+public sealed class AiProviderRateLimitService(TimeProvider time)
+{
+    private readonly SemaphoreSlim _gate = new(1, 1);
+    private DateTimeOffset _cooldownUntil;
+
+    public bool IsCoolingDown => _cooldownUntil > time.GetUtcNow();
+    public async Task<IDisposable?> TryEnterAsync(CancellationToken cancellationToken)
+    {
+        if (IsCoolingDown) return null;
+        await _gate.WaitAsync(cancellationToken);
+        if (IsCoolingDown) { _gate.Release(); return null; }
+        return new Releaser(_gate);
+    }
+
+    public void RecordRateLimit(TimeSpan? retryAfter)
+    {
+        var delay = retryAfter is { } value && value > TimeSpan.Zero ? value : TimeSpan.FromSeconds(20);
+        _cooldownUntil = time.GetUtcNow().Add(TimeSpan.FromSeconds(Math.Clamp(delay.TotalSeconds, 5, 120)));
+    }
+
+    private sealed class Releaser(SemaphoreSlim gate) : IDisposable { public void Dispose() => gate.Release(); }
+}
+
+public sealed class GeminiAiProvider(HttpClient client, IOptions<AiChatOptions> options, AiProviderRateLimitService rateLimits, ILogger<GeminiAiProvider> logger) : IAiProvider
 {
     public async Task<AiProviderReply> GenerateReplyAsync(string prompt, CancellationToken cancellationToken)
     {
@@ -31,6 +55,12 @@ public sealed class GeminiAiProvider(HttpClient client, IOptions<AiChatOptions> 
         {
             logger.LogWarning("AI provider not configured: Gemini API key or model is missing");
             return new(null, "ai_not_configured");
+        }
+        using var lease = await rateLimits.TryEnterAsync(cancellationToken);
+        if (lease == null)
+        {
+            logger.LogInformation("Gemini request skipped during rate-limit cooldown");
+            return new(null, "ai_rate_limited");
         }
         logger.LogInformation("AI generation started with provider Gemini and model {Model}", settings.GeminiModel);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -42,6 +72,8 @@ public sealed class GeminiAiProvider(HttpClient client, IOptions<AiChatOptions> 
             if (!response.IsSuccessStatusCode)
             {
                 var category = response.StatusCode switch { System.Net.HttpStatusCode.BadRequest => "ai_bad_request", System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden => "ai_auth_failed", System.Net.HttpStatusCode.NotFound => "ai_model_not_found", System.Net.HttpStatusCode.TooManyRequests => "ai_rate_limited", _ when (int)response.StatusCode >= 500 => "ai_provider_unavailable", _ => "ai_provider_failed" };
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    rateLimits.RecordRateLimit(response.Headers.RetryAfter?.Delta);
                 logger.LogWarning("Gemini chat request failed with HTTP status {StatusCode} ({Category})", (int)response.StatusCode, category);
                 return new(null, category);
             }
@@ -148,6 +180,8 @@ public sealed class AiConversationCoordinator
 
     public void QueueHumanMessage(Room room, RoomChatMessage message)
     {
+        if (room.Presentation.Status is AiPresentationStatus.Running or AiPresentationStatus.Paused)
+            return;
         if (!chat.AiResponsesEnabled(room.Id) || chat.GetCompanions(room.Id).Count == 0) return;
         _ = ReplyWaveAsync(room.Id, message.Id);
     }
@@ -159,7 +193,10 @@ public sealed class AiConversationCoordinator
     {
         var room = rooms.GetRoom(roomId); if (room == null || !chat.AiResponsesEnabled(roomId)) return;
         var cancellation = _roomCancellation.GetOrAdd(roomId, _ => new CancellationTokenSource());
-        var companions = chat.GetCompanions(roomId).ToList();
+        var allCompanions = chat.GetCompanions(roomId).ToList();
+        IReadOnlyList<AiChatCompanion> companions = allCompanions.Count == 0
+            ? Array.Empty<AiChatCompanion>()
+            : [allCompanions[(StringComparer.Ordinal.GetHashCode(triggerId) & int.MaxValue) % allCompanions.Count]];
         foreach (var companion in companions)
         {
             var gate = _active.GetOrAdd(roomId + ":" + companion.Id, _ => new SemaphoreSlim(1, 1));

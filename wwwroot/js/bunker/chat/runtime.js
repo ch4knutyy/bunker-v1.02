@@ -20,13 +20,29 @@ function renderRoomChatMessage(message) {
 	const senderType = String(message.senderType ?? message.SenderType ?? 'Human').toLowerCase();
 	item.className = `room-chat-message room-chat-message--${senderType === 'ai' ? 'ai' : senderType === 'system' ? 'system' : 'human'}`;
 	if ((message.senderId || message.SenderId) === getMyStablePlayerId?.()) item.classList.add('room-chat-message--self');
-	const header = document.createElement('strong'); header.textContent = message.senderName || message.SenderName || 'Unknown';
+	const header = document.createElement('strong'); header.textContent = senderType === 'system' ? roomChatNarratorName() : (message.senderName || message.SenderName || 'Unknown');
 	if (senderType === 'ai') { const badge = document.createElement('span'); badge.className = 'room-chat-ai-badge'; badge.textContent = 'AI'; header.append(' ', badge); }
 	const time = document.createElement('time'); const timestamp = message.timestamp || message.Timestamp; time.textContent = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''; time.dateTime = timestamp || '';
-	const body = document.createElement('p'); body.textContent = message.text || message.Text || '';
+	const body = document.createElement('p'); body.textContent = roomChatSystemText(message) || message.text || message.Text || '';
 	item.append(header, time, body); list.append(item);
 	if (roomChatState.open && shouldStick) list.scrollTop = list.scrollHeight;
 	if (!roomChatState.open) { roomChatState.unread++; updateRoomChatUnread(); }
+}
+
+function roomChatNarratorName() { return ({ uk: 'Оповідач', en: 'Narrator', ru: 'Рассказчик' })[getCurrentLanguage()] || 'Narrator'; }
+function roomChatSystemText(message) {
+	const eventType = message.systemEventType || message.SystemEventType;
+	if (!eventType) return '';
+	const data = message.systemEventData || message.SystemEventData || {};
+	const characteristic = data.characteristic ? t(String(data.characteristic).charAt(0).toLowerCase() + String(data.characteristic).slice(1)) : '';
+	const name = data.name || data.playerId || '';
+	const revealedValue = data.value ? `: ${data.value}` : '';
+	const templates = {
+		uk: { game_started: `Партію розпочато. Учасників: ${data.playerCount}; місць у бункері: ${data.capacity}.`, round_started: `Розпочато раунд ${data.round}.`, presentation_started: `Починається представлення: ${characteristic}.`, presentation_speaker: `Черга: ${name}.`, ai_characteristic_selected: `${name} обирає: ${characteristic}.`, characteristic_revealed: `${name} розкриває: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} вже не має прихованих характеристик для представлення.`, presentation_skipped: 'Учасника пропущено.', discussion_started: 'Представлення завершено. Починається обговорення.', voting_started: `Почалося голосування${data.round ? ` у раунді ${data.round}` : ''}.`, voting_completed: 'Голосування завершено.' },
+		en: { game_started: `The game has started. Participants: ${data.playerCount}; bunker seats: ${data.capacity}.`, round_started: `Round ${data.round} has started.`, presentation_started: `Presentation begins: ${characteristic}.`, presentation_speaker: `Now speaking: ${name}.`, ai_characteristic_selected: `${name} chooses: ${characteristic}.`, characteristic_revealed: `${name} reveals: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} has no hidden characteristics left to present.`, presentation_skipped: 'The participant was skipped.', discussion_started: 'Presentations are complete. Discussion begins.', voting_started: `Voting has started${data.round ? ` in round ${data.round}` : ''}.`, voting_completed: 'Voting has ended.' },
+		ru: { game_started: `Партия началась. Участников: ${data.playerCount}; мест в бункере: ${data.capacity}.`, round_started: `Начался раунд ${data.round}.`, presentation_started: `Начинается представление: ${characteristic}.`, presentation_speaker: `Очередь: ${name}.`, ai_characteristic_selected: `${name} выбирает: ${characteristic}.`, characteristic_revealed: `${name} раскрывает: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} больше не имеет скрытых характеристик для представления.`, presentation_skipped: 'Участник пропущен.', discussion_started: 'Представления завершены. Начинается обсуждение.', voting_started: `Началось голосование${data.round ? ` в раунде ${data.round}` : ''}.`, voting_completed: 'Голосование завершено.' }
+	};
+	return templates[getCurrentLanguage()]?.[eventType] || '';
 }
 
 function replaceRoomChatHistory(messages) {
@@ -48,7 +64,28 @@ function updateRoomChatControls() {
 	if (add) add.hidden = !isHost;
 	if (toggle) { toggle.hidden = !isHost; toggle.textContent = roomChatState.aiEnabled ? t('roomChatAiOn') : t('roomChatAiOff'); }
 	const presentation = document.getElementById('aiPresentationControls'); if (presentation) presentation.hidden = !isHost;
-	const label = document.getElementById('aiPresentationState'); const current = roomChatState.presentation; if (label) label.textContent = current ? `${current.status ?? current.Status}${(current.currentSpeakerStablePlayerId ?? current.CurrentSpeakerStablePlayerId) ? ` · ${current.currentSpeakerStablePlayerId ?? current.CurrentSpeakerStablePlayerId}` : ''}` : '';
+	const current = roomChatState.presentation; const status = String(current?.status ?? current?.Status ?? 'Inactive');
+	const speakerId = current?.currentSpeakerStablePlayerId ?? current?.CurrentSpeakerStablePlayerId;
+	const speaker = roomChatPresentationSpeakerName(speakerId);
+	const label = document.getElementById('aiPresentationState'); if (label) label.textContent = roomChatPresentationStateText(status, speaker, current?.lastGenerationError ?? current?.LastGenerationError);
+	const buttons = { start: document.getElementById('startAiPresentationBtn'), pause: document.getElementById('pauseAiPresentationBtn'), resume: document.getElementById('resumeAiPresentationBtn'), next: document.getElementById('nextAiPresentationBtn'), skip: document.getElementById('skipAiPresentationBtn'), end: document.getElementById('endAiPresentationBtn'), retry: document.getElementById('retryAiPresentationBtn') };
+	const characteristic = document.getElementById('aiPresentationCharacteristic'); if (characteristic) characteristic.hidden = status === 'Running' || status === 'Paused';
+	if (isHost) { buttons.start.hidden = status === 'Running' || status === 'Paused'; buttons.pause.hidden = status !== 'Running'; buttons.resume.hidden = status !== 'Paused'; buttons.next.hidden = status !== 'Running'; buttons.skip.hidden = status !== 'Running'; buttons.end.hidden = status !== 'Running' && status !== 'Paused'; buttons.retry.hidden = status !== 'Running' || !(current?.lastGenerationError ?? current?.LastGenerationError); }
+}
+
+function roomChatPresentationSpeakerName(stableId) {
+	if (!stableId) return '';
+	const players = currentRoom?.players || currentRoom?.Players || [];
+	const list = Array.isArray(players) ? players : Object.values(players);
+	const player = list.find(item => (item?.stablePlayerId || item?.StablePlayerId || item?.id || item?.Id) === stableId);
+	return player?.name || player?.Name || stableId;
+}
+function roomChatPresentationStateText(status, speaker, error) {
+	const labels = { uk: { Inactive: 'Представлення не розпочато', Running: 'Представлення триває', Paused: 'Представлення призупинено', Discussion: 'Обговорення' }, en: { Inactive: 'Presentation has not started', Running: 'Presentation in progress', Paused: 'Presentation paused', Discussion: 'Discussion' }, ru: { Inactive: 'Представление не начато', Running: 'Представление продолжается', Paused: 'Представление приостановлено', Discussion: 'Обсуждение' } };
+	const text = labels[getCurrentLanguage()]?.[status] || status;
+	const isMyTurn = speaker && speaker === roomChatPresentationSpeakerName(getMyStablePlayerId?.());
+	const myTurn = ({ uk: 'Ваша черга', en: 'Your turn', ru: 'Ваша очередь' })[getCurrentLanguage()] || 'Your turn';
+	return `${text}${speaker ? ` · ${isMyTurn ? myTurn : speaker}` : ''}${error ? ` · ${t('roomChatAiUnavailable')}` : ''}`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

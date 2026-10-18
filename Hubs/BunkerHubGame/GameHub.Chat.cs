@@ -14,6 +14,7 @@ public partial class GameHub
         {
             room.Presentation.Status,
             room.Presentation.CharacteristicKey,
+            room.Presentation.UsesAutomaticCharacteristicSelection,
             room.Presentation.CurrentSpeakerStablePlayerId,
             room.Presentation.LastGenerationError
         });

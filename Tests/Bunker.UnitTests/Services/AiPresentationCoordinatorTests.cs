@@ -19,7 +19,7 @@ public sealed class AiPresentationCoordinatorTests
         chat.AddCompanion(room.Id, new AiChatCompanion { Id = ai.StablePlayerId, Name = ai.Name, PlayerStableId = ai.StablePlayerId });
         var hub = new RecordingHubContext();
         var sync = new CharacterRevealSynchronizationService(hub, new RoomService(NullLogger<RoomService>.Instance));
-        var coordinator = new AiPresentationCoordinator(chat, new CharacterRevealService(), sync,
+        var coordinator = new AiPresentationCoordinator(chat, new CharacterRevealService(), sync, new AiPresentationCharacteristicSelector(),
             new AiChatContextBuilder(new BunkerIntelService()), new FixedAiProvider("I can repair the bunker systems."), hub,
             NullLogger<AiPresentationCoordinator>.Instance);
 
@@ -27,7 +27,52 @@ public sealed class AiPresentationCoordinatorTests
         Assert.True(ai.Revealed.Profession);
         Assert.Equal(AiPresentationStatus.Discussion, room.Presentation.Status);
         Assert.Contains(chat.GetHistory(room.Id), message => message.SenderType == ChatSenderType.Ai && message.Text.Contains("repair"));
+        Assert.Contains(chat.GetHistory(room.Id), message => message.SystemEventType == "presentation_started");
         Assert.Single(hub.Events, item => item.Event == "CharacteristicRevealed");
+    }
+
+    [Fact]
+    public async Task First_presentation_forces_profession_and_uses_a_distinct_event_id()
+    {
+        var room = new Room { Id = "first-presentation", State = RoomState.Playing };
+        var human = new Player { Name = "Human", StablePlayerId = "human", ConnectionId = "human", SeatNumber = 1 };
+        room.Players[human.ConnectionId] = human;
+        var hub = new RecordingHubContext();
+        var coordinator = new AiPresentationCoordinator(new RoomChatService(TimeProvider.System), new CharacterRevealService(),
+            new CharacterRevealSynchronizationService(hub, new RoomService(NullLogger<RoomService>.Instance)), new AiPresentationCharacteristicSelector(),
+            new AiChatContextBuilder(new BunkerIntelService()), new FixedAiProvider("unused"), hub, NullLogger<AiPresentationCoordinator>.Instance);
+
+        Assert.True(await coordinator.StartAsync(room, "Hobby", CancellationToken.None));
+        Assert.Equal("Profession", room.Presentation.CharacteristicKey);
+        Assert.Equal(1, room.Presentation.PresentationId);
+        Assert.True(await coordinator.EndAsync(room, CancellationToken.None));
+        Assert.True(room.ProfessionPresentationCompleted);
+        human.Revealed.Profession = true;
+        Assert.True(await coordinator.StartAsync(room, "Auto", CancellationToken.None));
+        Assert.Equal("Hobby", room.Presentation.CharacteristicKey);
+    }
+
+    [Fact]
+    public async Task Automatic_presentation_chooses_distinct_available_characteristics_for_ai_players()
+    {
+        var room = new Room { Id = "auto-presentation", State = RoomState.Playing, ProfessionPresentationCompleted = true };
+        var first = CreateAi("ai-one", 1);
+        var second = CreateAi("ai-two", 2);
+        first.Revealed.Profession = true;
+        second.Revealed.Profession = true;
+        room.Players[first.ConnectionId] = first;
+        room.Players[second.ConnectionId] = second;
+        var chat = new RoomChatService(TimeProvider.System);
+        chat.AddCompanion(room.Id, new AiChatCompanion { Id = first.StablePlayerId, Name = first.Name, PlayerStableId = first.StablePlayerId });
+        chat.AddCompanion(room.Id, new AiChatCompanion { Id = second.StablePlayerId, Name = second.Name, PlayerStableId = second.StablePlayerId });
+        var hub = new RecordingHubContext();
+        var coordinator = new AiPresentationCoordinator(chat, new CharacterRevealService(), new CharacterRevealSynchronizationService(hub, new RoomService(NullLogger<RoomService>.Instance)), new AiPresentationCharacteristicSelector(), new AiChatContextBuilder(new BunkerIntelService()), new FixedAiProvider("I can help."), hub, NullLogger<AiPresentationCoordinator>.Instance);
+
+        Assert.True(await coordinator.StartAsync(room, "Auto", CancellationToken.None));
+        var selected = chat.GetHistory(room.Id).Where(message => message.SystemEventType == "ai_characteristic_selected").Select(message => message.SystemEventData!["characteristic"]).ToList();
+        Assert.Equal(2, selected.Count);
+        Assert.Equal(2, selected.Distinct(StringComparer.Ordinal).Count());
+        Assert.DoesNotContain("Profession", selected);
     }
 
     [Fact]
@@ -48,6 +93,15 @@ public sealed class AiPresentationCoordinatorTests
     {
         public Task<AiProviderReply> GenerateReplyAsync(string prompt, CancellationToken cancellationToken) => Task.FromResult(new AiProviderReply(text));
     }
+
+    private static Player CreateAi(string id, int seat) => new()
+    {
+        Name = id,
+        StablePlayerId = id,
+        ConnectionId = RoomService.AiConnectionKey(id),
+        IsAi = true,
+        SeatNumber = seat
+    };
 
     private sealed class RecordingHubContext : IHubContext<GameHub>
     {

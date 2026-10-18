@@ -43,11 +43,15 @@ namespace Bunker.Models
 	{
 		public AiPresentationStatus Status { get; set; }
 		public string? CharacteristicKey { get; set; }
+		public bool UsesAutomaticCharacteristicSelection { get; set; }
+		public HashSet<string> SelectedCharacteristicKeys { get; set; } = new(StringComparer.Ordinal);
+		public Dictionary<string, string> SelectedCharacteristicKeysByPlayer { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 		public List<string> ParticipantStablePlayerIds { get; set; } = [];
 		public int CurrentIndex { get; set; }
 		public string? CurrentSpeakerStablePlayerId { get; set; }
 		public long GenerationToken { get; set; }
 		public string? LastGenerationError { get; set; }
+		public long PresentationId { get; set; }
 	}
 
 	/// <summary>
@@ -217,6 +221,10 @@ namespace Bunker.Models
 		public object SnapshotSyncRoot { get; } = new();
 		public long PublicRevealRevision { get; set; }
 		public AiPresentationState Presentation { get; set; } = new();
+		/// <summary>Separates idempotent chat events between consecutive games in one room.</summary>
+		public string GameRunId { get; set; } = Guid.NewGuid().ToString("N");
+		public long NextPresentationId { get; set; }
+		public bool ProfessionPresentationCompleted { get; set; }
 		public HashSet<string> ProcessedRoomEditorCommandIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>

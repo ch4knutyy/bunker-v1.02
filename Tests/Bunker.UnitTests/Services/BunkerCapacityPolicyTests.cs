@@ -5,6 +5,25 @@ namespace Bunker.UnitTests.Services;
 public sealed class BunkerCapacityPolicyTests
 {
     [Theory]
+    [InlineData(2, 1)]
+    [InlineData(3, 2)]
+    [InlineData(4, 2)]
+    [InlineData(5, 2)]
+    [InlineData(6, 3)]
+    [InlineData(7, 3)]
+    [InlineData(8, 4)]
+    [InlineData(9, 4)]
+    [InlineData(10, 5)]
+    [InlineData(12, 6)]
+    public void Automatic_capacity_is_fixed_below_gameplay_participant_count(int players, int expectedCapacity)
+    {
+        var capacity = BunkerCapacityPolicy.ResolveForGameplayPlayerCount(players);
+
+        Assert.Equal(expectedCapacity, capacity);
+        Assert.InRange(capacity, 1, players - 1);
+    }
+
+    [Theory]
     [InlineData("1", 1)]
     [InlineData("4", 4)]
     [InlineData("99", 99)]

@@ -43,6 +43,9 @@ Object.assign(uiTranslations.ru, { roomChatTyping: 'печатает…', roomCh
 Object.assign(uiTranslations.uk, { aiPresentationCharacteristic: 'Характеристика', aiPresentationStart: 'Почати представлення', aiPresentationPause: 'Пауза', aiPresentationResume: 'Продовжити', aiPresentationNext: 'Наступний', aiPresentationSkip: 'Пропустити', aiPresentationEnd: 'Завершити', aiPresentationRetry: 'Повторити AI' });
 Object.assign(uiTranslations.en, { aiPresentationCharacteristic: 'Characteristic', aiPresentationStart: 'Start presentation', aiPresentationPause: 'Pause', aiPresentationResume: 'Resume', aiPresentationNext: 'Next', aiPresentationSkip: 'Skip', aiPresentationEnd: 'End', aiPresentationRetry: 'Retry AI' });
 Object.assign(uiTranslations.ru, { aiPresentationCharacteristic: 'Характеристика', aiPresentationStart: 'Начать представление', aiPresentationPause: 'Пауза', aiPresentationResume: 'Продолжить', aiPresentationNext: 'Следующий', aiPresentationSkip: 'Пропустить', aiPresentationEnd: 'Завершить', aiPresentationRetry: 'Повторить AI' });
+Object.assign(uiTranslations.uk, { aiPresentationAuto: 'Автовибір AI' });
+Object.assign(uiTranslations.en, { aiPresentationAuto: 'AI automatic choice' });
+Object.assign(uiTranslations.ru, { aiPresentationAuto: 'Автовыбор AI' });
 Object.assign(uiTranslations.ru, {
 	bunkerEntryTitle: "Подготовка бункера",
 	bunkerEntryRoomState: "Получение состояния комнаты…",

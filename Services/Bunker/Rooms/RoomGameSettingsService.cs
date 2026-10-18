@@ -126,10 +126,6 @@ public sealed class RoomGameSettingsService
         var errors = Validate(settings, count);
         if (count < settings.MinGameplayPlayers) errors.Add("minimum_gameplay_players");
         if (count > settings.MaxGameplayPlayers) errors.Add("maximum_gameplay_players");
-        if (settings.BunkerCapacityMode == BunkerCapacityMode.Manual && settings.ManualBunkerCapacity > count)
-            errors.Add("bunker_capacity_exceeds_players");
-        if (settings.BunkerCapacityMode == BunkerCapacityMode.RandomRange && settings.RandomBunkerCapacityMin > count)
-            errors.Add("bunker_capacity_exceeds_players");
         return errors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
@@ -144,14 +140,10 @@ public sealed class RoomGameSettingsService
         var settings = Clone(GetCanonical(room));
         room.FrozenGameSettings = settings;
         room.SettingsFrozen = true;
-        room.ResolvedBunkerCapacity = settings.BunkerCapacityMode switch
-        {
-            BunkerCapacityMode.Manual => settings.ManualBunkerCapacity,
-            BunkerCapacityMode.RandomRange => next(
-                settings.RandomBunkerCapacityMin!.Value,
-                Math.Min(settings.RandomBunkerCapacityMax!.Value, RoomService.GetGameplayPlayersSnapshot(room).Count) + 1),
-            _ => null
-        };
+        // Capacity is a game rule, not catalog or lobby configuration. Freeze it once,
+        // before any eliminations can change the participant count.
+        room.ResolvedBunkerCapacity = BunkerCapacityPolicy.ResolveForGameplayPlayerCount(
+            RoomService.GetGameplayPlayersSnapshot(room).Count);
     }
 
     public IReadOnlyList<LobbySettingsWarningDto> GetWarnings(Room room, RoomGameSettings? settings = null)

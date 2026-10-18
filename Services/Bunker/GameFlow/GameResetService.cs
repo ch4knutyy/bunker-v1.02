@@ -96,6 +96,10 @@ internal static class GameResetService
 			room.ResolvedBunkerCapacity = null;
 			room.SettingsFrozen = false;
 			room.FrozenGameSettings = null;
+			room.Presentation = new();
+			room.GameRunId = Guid.NewGuid().ToString("N");
+			room.NextPresentationId = 0;
+			room.ProfessionPresentationCompleted = false;
 
 			room.ProcessedOmniscientCommandIds = new(StringComparer.OrdinalIgnoreCase);
 			room.ProcessedLobbyCommandIds = new(StringComparer.OrdinalIgnoreCase);

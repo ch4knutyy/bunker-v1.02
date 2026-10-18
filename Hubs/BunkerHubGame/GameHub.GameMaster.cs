@@ -211,6 +211,11 @@ namespace Bunker.Hubs
                 await Clients.Caller.SendAsync("ReceiveError", "game_finished");
                 return;
             }
+            if (room.SettingsFrozen || room.State is RoomState.Playing or RoomState.Voting)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", "bunker_capacity_locked_after_start");
+                return;
+            }
 
             // Застосовуємо зміну
             bool success = ApplyCharacteristicChange(player, characteristicName, newValue);
@@ -571,6 +576,9 @@ namespace Bunker.Hubs
                 roundState = nextRoundState
             });
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", nextRoundState);
+            if (_roomChat.TryAddSystemMessage(roomId, $"Раунд {room.CurrentRound} розпочато.", $"round-start:{room.GameRunId}:{room.CurrentRound}",
+                "round_started", new Dictionary<string, string> { ["round"] = room.CurrentRound.ToString() }, out var roundAnnouncement))
+                await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", roundAnnouncement);
             await AppendGmAudit(room, GetGmActorId(room), "round_force_end", GmAuditResult.Success,
                 "The host forced the round transition without modifying player readiness.", commandId: commandId,
                 allowUndo: false);

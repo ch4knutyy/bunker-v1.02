@@ -62,15 +62,26 @@ public sealed class RoomChatService
     }
 
     public RoomChatMessage AddSystemMessage(string roomId, string text, string eventId)
+        => TryAddSystemMessage(roomId, text, eventId, null, null, out var message) ? message! : GetHistory(roomId).First(x => x.Id == eventId);
+
+    public bool TryAddSystemMessage(
+        string roomId,
+        string text,
+        string eventId,
+        string? systemEventType,
+        IReadOnlyDictionary<string, string>? systemEventData,
+        out RoomChatMessage? message)
     {
+        message = null;
         var state = _rooms.GetOrAdd(roomId, _ => new());
         lock (state.SyncRoot)
         {
-            if (state.MessageIds.Contains(eventId)) return state.Messages.First(x => x.Id == eventId);
-            var message = new RoomChatMessage(eventId, roomId, "system", "System", _time.GetUtcNow(), ChatSenderType.System, text);
+            if (state.MessageIds.Contains(eventId)) return false;
+            message = new RoomChatMessage(eventId, roomId, "system", "System", _time.GetUtcNow(), ChatSenderType.System, text,
+                systemEventType, systemEventData);
             state.Messages.Add(message); state.MessageIds.Add(eventId);
             while (state.Messages.Count > MaxHistory) state.Messages.RemoveAt(0);
-            return message;
+            return true;
         }
     }
 
