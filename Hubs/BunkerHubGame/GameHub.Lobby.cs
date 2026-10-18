@@ -59,6 +59,7 @@ public partial class GameHub
 		var target = ResolveStableLobbyTarget(room, targetPlayerId);
 		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
 		if (target == null) throw new HubException("target_not_found");
+		if (target.IsAi) throw new HubException("ai_remove_via_ai_controls");
 		if (!RememberLobbyCommand(room, commandId)) { await BroadcastLobbyState(room); return; }
 		target.IsLobbyReady = false;
 		await AppendGmAudit(room, GetGmActorId(room), "lobby_readiness_reset", GmAuditResult.Success,
@@ -73,6 +74,14 @@ public partial class GameHub
 		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
 		if (target == null) throw new HubException("target_not_found");
 		if (room.IsHost(target)) throw new HubException("cannot_kick_host");
+		if (target.IsAi)
+		{
+			if (!RememberLobbyCommand(room, commandId)) { await BroadcastLobbyState(room); return; }
+			_aiParticipants.Remove(room, RoomService.GetPlayerKey(target));
+			_aiConversation?.CancelRoom(room.Id);
+			await BroadcastAiParticipants(room);
+			return;
+		}
 		var caller = _roomService.GetPlayer(Context.ConnectionId);
 		if (_developerAuthority.IsDeveloper(target) && !_developerAuthority.IsDeveloper(caller))
 			throw new HubException("developer_protected");
@@ -489,6 +498,7 @@ public partial class GameHub
 		if (!Enum.IsDefined(role)) blockers.Add("invalid_lobby_role");
 		if (room.State != RoomState.Lobby) blockers.Add("lobby_closed");
 		if (target == null) blockers.Add("target_not_found");
+		else if (target.IsAi) blockers.Add("ai_participant_fixed_role");
 		else if (target.IsSpectatorGm || target.GmRole == GmMode.OmniscientGm) blockers.Add("omniscient_role_irreversible");
 		else if (role == LobbyParticipationRole.Player && room.IrreversibleOmniscientPlayerIds.Contains(RoomService.GetPlayerKey(target))) blockers.Add("omniscient_role_irreversible");
 		else if (role == LobbyParticipationRole.Spectator && !settings.SpectatorsAllowed) blockers.Add("spectators_disabled");

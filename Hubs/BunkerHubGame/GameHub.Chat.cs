@@ -25,18 +25,22 @@ public partial class GameHub
     {
         if (!IsCallerHost()) throw new HubException("host_required");
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
-        var existing = _roomChat.GetCompanions(room.Id).Select(companion => companion.Name).ToHashSet(StringComparer.Ordinal);
-        var defaults = new (string Name, string Motivation)[]
-        {
-            ("Марія", "Build alliances while protecting your chances of entering the bunker."),
-            ("Олексій", "Question weak claims and negotiate for survival.")
-        };
-        foreach (var (name, motivation) in defaults.Where(candidate => !existing.Contains(candidate.Name)))
-        {
-            var character = _generator.Generate(name);
-            _roomChat.AddCompanion(room.Id, new AiChatCompanion { Name = name, Motivation = motivation, Character = character });
-        }
-        await Clients.Group(room.Id).SendAsync("RoomChatCompanionsUpdated", _roomChat.GetCompanions(room.Id).Select(x => new { x.Id, x.Name }));
+        _aiParticipants.Add(room, 2);
+        await BroadcastAiParticipants(room);
+    }
+
+    public async Task AddAiPlayers(int count)
+    {
+        var room = RequireLobbyHost();
+        _aiParticipants.Add(room, count);
+        await BroadcastAiParticipants(room);
+    }
+
+    public async Task RemoveAiPlayer(string stablePlayerId)
+    {
+        var room = RequireLobbyHost();
+        if (_aiParticipants.Remove(room, stablePlayerId)) _aiConversation?.CancelRoom(room.Id);
+        await BroadcastAiParticipants(room);
     }
 
     public async Task SetAiChatResponsesEnabled(bool enabled)
@@ -52,7 +56,15 @@ public partial class GameHub
     {
         if (!IsCallerHost()) throw new HubException("host_required");
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
-        if (_roomChat.RemoveCompanion(room.Id, companionId)) _aiConversation?.CancelRoom(room.Id);
-        await Clients.Group(room.Id).SendAsync("RoomChatCompanionsUpdated", _roomChat.GetCompanions(room.Id).Select(x => new { x.Id, x.Name }));
+        var companion = _roomChat.GetCompanions(room.Id).FirstOrDefault(x => x.Id == companionId);
+        if (companion != null && _aiParticipants.Remove(room, companion.PlayerStableId)) _aiConversation?.CancelRoom(room.Id);
+        await BroadcastAiParticipants(room);
+    }
+
+    private async Task BroadcastAiParticipants(Room room)
+    {
+        await Clients.Group(room.Id).SendAsync("RoomChatCompanionsUpdated", _roomChat.GetCompanions(room.Id).Select(x => new { x.Id, x.Name, x.PlayerStableId }));
+        await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
+        await BroadcastLobbyState(room);
     }
 }

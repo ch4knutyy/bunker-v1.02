@@ -61,6 +61,19 @@ public sealed class RoomChatService
             return Add(state, roomId, companion.Id, companion.Name, ChatSenderType.Ai, NormalizeText(text) ?? "…", null, _time.GetUtcNow());
     }
 
+    public RoomChatMessage AddSystemMessage(string roomId, string text, string eventId)
+    {
+        var state = _rooms.GetOrAdd(roomId, _ => new());
+        lock (state.SyncRoot)
+        {
+            if (state.MessageIds.Contains(eventId)) return state.Messages.First(x => x.Id == eventId);
+            var message = new RoomChatMessage(eventId, roomId, "system", "System", _time.GetUtcNow(), ChatSenderType.System, text);
+            state.Messages.Add(message); state.MessageIds.Add(eventId);
+            while (state.Messages.Count > MaxHistory) state.Messages.RemoveAt(0);
+            return message;
+        }
+    }
+
     public IReadOnlyList<RoomChatMessage> GetHistory(string roomId) => _rooms.TryGetValue(roomId, out var state)
         ? lockAndCopy(state, x => x.Messages.ToList()) : [];
 
@@ -72,7 +85,7 @@ public sealed class RoomChatService
         var state = _rooms.GetOrAdd(roomId, _ => new());
         lock (state.SyncRoot)
         {
-            if (state.Companions.Any(x => x.Id == companion.Id) || state.Companions.Count >= 2) return false;
+            if (state.Companions.Any(x => x.Id == companion.Id || x.PlayerStableId == companion.PlayerStableId)) return false;
             state.Companions.Add(companion);
             return true;
         }
@@ -82,6 +95,12 @@ public sealed class RoomChatService
     {
         if (!_rooms.TryGetValue(roomId, out var state)) return false;
         lock (state.SyncRoot) return state.Companions.RemoveAll(companion => companion.Id == companionId) > 0;
+    }
+
+    public bool RemoveCompanionForPlayer(string roomId, string playerStableId)
+    {
+        if (!_rooms.TryGetValue(roomId, out var state)) return false;
+        lock (state.SyncRoot) return state.Companions.RemoveAll(x => x.PlayerStableId == playerStableId) > 0;
     }
 
     public bool AiResponsesEnabled(string roomId) => !_rooms.TryGetValue(roomId, out var state) || lockAndCopy(state, x => x.AiResponsesEnabled);

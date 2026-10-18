@@ -26,7 +26,7 @@ public sealed class RoomChatServiceTests
         var room = RoomWithPlayer("human", "Human", "Profession", "Visible doctor");
         var hidden = new Player { Name = "Hidden", StablePlayerId = "hidden", PhysicalHealth = new PhysicalHealth { Name = "Hidden diagnosis" } };
         room.Players["hidden-connection"] = hidden;
-        var companion = new AiChatCompanion { Name = "AI", Character = new Player { Profession = new Profession { Name = "AI private profession" }, SpecialCards = [new SpecialCard { Name = "AI secret card" }] } };
+        var companion = AddAi(room, "AI", "ai", "AI private profession");
 
         var knowledge = new AiChatContextBuilder(new BunkerIntelService()).BuildKnowledge(room, companion, []);
 
@@ -41,8 +41,8 @@ public sealed class RoomChatServiceTests
     public void Knowledge_keeps_only_observed_public_fact_after_it_is_hidden()
     {
         var room = RoomWithPlayer("human", "Human", "Profession", "Observed profession");
-        var first = new AiChatCompanion { Name = "First" };
-        var second = new AiChatCompanion { Name = "Second" };
+        var first = AddAi(room, "First", "ai-first", "Private first");
+        var second = AddAi(room, "Second", "ai-second", "Private second");
         var builder = new AiChatContextBuilder(new BunkerIntelService());
 
         builder.BuildKnowledge(room, first, []);
@@ -50,7 +50,7 @@ public sealed class RoomChatServiceTests
         var afterHide = builder.BuildKnowledge(room, first, []);
         var neverObserved = builder.BuildKnowledge(room, second, []);
 
-        Assert.Empty(afterHide.PublicPlayers.Single().RevealedCharacteristics);
+        Assert.Empty(afterHide.PublicPlayers.Single(player => player.Id == "human").RevealedCharacteristics);
         Assert.Contains(afterHide.ObservedPublicFacts.Values, value => value == "Observed profession");
         Assert.DoesNotContain(neverObserved.ObservedPublicFacts.Values, value => value == "Observed profession");
     }
@@ -62,9 +62,10 @@ public sealed class RoomChatServiceTests
         room.CurrentThreat = new Bunker.Models.GameData.ThreatData { Name = "Hidden future threat" };
         room.IsThreatRevealed = false;
         room.ActiveDeveloperPlayerId = "gm-only-value";
+        var companion = AddAi(room, "AI", "ai", "Private");
         var playerCount = room.Players.Count;
 
-        var knowledge = new AiChatContextBuilder(new BunkerIntelService()).BuildKnowledge(room, new AiChatCompanion { Name = "AI" }, []);
+        var knowledge = new AiChatContextBuilder(new BunkerIntelService()).BuildKnowledge(room, companion, []);
 
         Assert.DoesNotContain("Hidden future threat", System.Text.Json.JsonSerializer.Serialize(knowledge));
         Assert.DoesNotContain("gm-only-value", System.Text.Json.JsonSerializer.Serialize(knowledge));
@@ -77,5 +78,13 @@ public sealed class RoomChatServiceTests
         var player = new Player { Name = name, StablePlayerId = stableId, ConnectionId = stableId + "-connection" };
         player.Revealed.RevealedValues[characteristic] = new RevealedData { Value = value };
         return new Room { Players = new Dictionary<string, Player> { [player.ConnectionId] = player } };
+    }
+
+    private static AiChatCompanion AddAi(Room room, string name, string stableId, string profession)
+    {
+        var player = new Player { Name = name, StablePlayerId = stableId, ConnectionId = RoomService.AiConnectionKey(stableId), IsAi = true,
+            Profession = new Profession { Name = profession }, SpecialCards = [new SpecialCard { Name = "AI secret card" }] };
+        room.Players[player.ConnectionId] = player;
+        return new AiChatCompanion { Id = stableId, Name = name, PlayerStableId = stableId };
     }
 }

@@ -1843,6 +1843,13 @@ body.bunker-theme-active .bunker-game-page #bunkerStorySection .bunker-visual-ro
 .lobby-members-section {
     grid-area: members;
 }
+.lobby-ai-players { display: flex; align-items: center; justify-content: space-between; gap: .7rem; margin: 0 0 .9rem; padding: .7rem; border: 1px solid rgba(203,166,79,.34); border-radius: 9px; background: rgba(203,166,79,.06); }
+.lobby-ai-players > strong { color: var(--color-gold); font-size: .82rem; }
+.lobby-ai-stepper { display: inline-flex; align-items: center; gap: .35rem; min-width: 0; color: var(--color-text-muted); font-size: .78rem; }
+.lobby-ai-stepper button { width: 32px; min-height: 32px; padding: 0; font-size: 1.1rem; }
+.lobby-ai-stepper input { width: 3.25rem; min-width: 0; height: 32px; text-align: center; }
+.lobby-ai-players.is-full { opacity: .72; }
+@media (max-width: 600px) { .lobby-ai-players { align-items: stretch; flex-direction: column; } .lobby-ai-stepper { justify-content: space-between; } .lobby-ai-players > .btn-secondary { width: 100%; } }
 
 .lobby-start-card {
     grid-area: start;
@@ -9140,6 +9147,29 @@ order: 0 !important;
     }
 }
 /* ===== GM PANEL V2 ===== */
+.room-floating-chat { position: relative; }
+.room-chat-unread { position: absolute; top: -7px; right: -7px; display: grid; min-width: 18px; height: 18px; place-items: center; padding: 0 4px; color: #17120a; border-radius: 999px; background: #e5c96f; font-size: .68rem; font-weight: 800; }
+.room-chat-drawer { position: fixed; z-index: 4005; top: 5rem; right: 0; bottom: 0; display: flex; flex-direction: column; width: min(430px, 100vw); min-height: 0; padding: 0; overflow: hidden; color: #e9e3d8; border: 0; border-left: 1px solid rgba(203,166,79,.65); background: #0b0b0b; box-shadow: -18px 0 50px rgba(0,0,0,.55); transform: translateX(100%); visibility: hidden; pointer-events: none; }
+.room-chat-drawer.is-open { transform: translateX(0); visibility: visible; pointer-events: auto; }
+.room-chat-drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; padding: 1rem; border-bottom: 1px solid rgba(203,166,79,.45); background: #10100f; }
+.room-chat-drawer h2 { margin: 0; color: #e5c96f; font-size: 1.1rem; }
+.room-chat-kicker { color: #aaa499; font-size: .7rem; letter-spacing: .09em; text-transform: uppercase; }
+.room-chat-connection { display: block; margin-top: .2rem; color: #81d69d; font-size: .72rem; }
+.room-chat-header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }
+.room-chat-drawer .btn-close { min-width: 42px; min-height: 42px; color: #ddd; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; background: transparent; cursor: pointer; }
+.room-chat-messages { display: grid; flex: 1 1 auto; min-height: 0; align-content: start; gap: .55rem; padding: .85rem; overflow-y: auto; overscroll-behavior: contain; }
+.room-chat-message { padding: .65rem .75rem; border-left: 3px solid #667; border-radius: 0 8px 8px 0; background: rgba(255,255,255,.04); overflow-wrap: anywhere; }
+.room-chat-message--ai { border-left-color: #a980de; background: rgba(132,79,181,.12); }
+.room-chat-message--system { border-left-color: #e5c96f; color: #e8d79a; background: rgba(203,166,79,.09); font-size: .86rem; }
+.room-chat-message--self { border-left-color: #d5a467; background: rgba(213,164,103,.1); }
+.room-chat-message time { display: block; margin-top: .18rem; color: #99958c; font-size: .7rem; }
+.room-chat-ai-badge { display: inline-block; padding: .05rem .32rem; color: #d9c1f1; border: 1px solid rgba(169,128,222,.55); border-radius: 999px; font-size: .62rem; letter-spacing: .05em; }
+.room-chat-ai-status { margin: 0; padding: .45rem .85rem; color: #c8a8e0; border-top: 1px solid rgba(132,79,181,.22); background: rgba(132,79,181,.08); font-size: .82rem; }
+.room-chat-message p { margin: .3rem 0 0; white-space: pre-wrap; }
+.room-chat-form { display: flex; gap: .55rem; padding: .8rem; border-top: 1px solid rgba(203,166,79,.28); background: #10100f; }
+.room-chat-form input { min-width: 0; flex: 1; }
+.room-chat-drawer :focus-visible { outline: 2px solid #e5c96f; outline-offset: 2px; }
+@media (max-width: 768px) { .room-chat-drawer { top: 4.5rem; right: .5rem; bottom: .5rem; left: .5rem; width: auto; border: 1px solid rgba(203,166,79,.65); border-radius: 12px; transform: translateY(calc(100% + 1rem)); } .room-chat-drawer.is-open { transform: translateY(0); } .room-chat-form { flex-direction: column; } .room-chat-form button { width: 100%; } }
 .gm-panel-v2-drawer {
     position: fixed;
     top: 5rem;

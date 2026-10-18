@@ -30,6 +30,16 @@ Object.assign(uiTranslations.en, {
 	bunkerEntryVisualFallback: "Some visual assets could not be loaded. A simplified appearance is being used.",
 	bunkerEntryStateFailed: "Room state could not be received. Check the connection and try again."
 });
+
+Object.assign(uiTranslations.uk, { lobbyAiPlayers: 'AI-гравці', lobbyAiCount: 'Кількість', lobbyAddAi: 'Додати AI', lobbyAiBadge: 'AI' });
+Object.assign(uiTranslations.en, { lobbyAiPlayers: 'AI players', lobbyAiCount: 'Count', lobbyAddAi: 'Add AI', lobbyAiBadge: 'AI' });
+Object.assign(uiTranslations.ru, { lobbyAiPlayers: 'AI-игроки', lobbyAiCount: 'Количество', lobbyAddAi: 'Добавить AI', lobbyAiBadge: 'AI' });
+Object.assign(uiTranslations.uk, { roomChatTitle: 'Спільний чат', roomChatClose: 'Закрити чат', roomChatAddAi: 'Додати AI', roomChatInputLabel: 'Повідомлення чату', roomChatPlaceholder: 'Напишіть повідомлення…', roomChatSend: 'Надіслати', roomChatAiOn: 'AI: увімкнено', roomChatAiOff: 'AI: вимкнено' });
+Object.assign(uiTranslations.en, { roomChatTitle: 'Shared chat', roomChatClose: 'Close chat', roomChatAddAi: 'Add AI', roomChatInputLabel: 'Chat message', roomChatPlaceholder: 'Write a message…', roomChatSend: 'Send', roomChatAiOn: 'AI: on', roomChatAiOff: 'AI: off' });
+Object.assign(uiTranslations.ru, { roomChatTitle: 'Общий чат', roomChatClose: 'Закрыть чат', roomChatAddAi: 'Добавить AI', roomChatInputLabel: 'Сообщение чата', roomChatPlaceholder: 'Напишите сообщение…', roomChatSend: 'Отправить', roomChatAiOn: 'AI: включено', roomChatAiOff: 'AI: выключено' });
+Object.assign(uiTranslations.uk, { roomChatTyping: 'друкує…', roomChatAiUnavailable: 'AI наразі недоступний. Перевірте налаштування Gemini.', roomChatAiBusy: 'AI тимчасово недоступний. Спробуйте пізніше.', roomChatConnected: 'Підключено', roomChatReconnecting: 'Відновлення з’єднання…' });
+Object.assign(uiTranslations.en, { roomChatTyping: 'is typing…', roomChatAiUnavailable: 'AI is unavailable. Check Gemini configuration.', roomChatAiBusy: 'AI is temporarily unavailable. Try again later.', roomChatConnected: 'Connected', roomChatReconnecting: 'Reconnecting…' });
+Object.assign(uiTranslations.ru, { roomChatTyping: 'печатает…', roomChatAiUnavailable: 'AI сейчас недоступен. Проверьте настройки Gemini.', roomChatAiBusy: 'AI временно недоступен. Попробуйте позже.', roomChatConnected: 'Подключено', roomChatReconnecting: 'Восстановление соединения…' });
 Object.assign(uiTranslations.ru, {
 	bunkerEntryTitle: "Подготовка бункера",
 	bunkerEntryRoomState: "Получение состояния комнаты…",

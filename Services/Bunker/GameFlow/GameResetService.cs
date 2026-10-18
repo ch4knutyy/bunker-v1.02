@@ -127,7 +127,7 @@ internal static class GameResetService
 
 	private static void ResetPlayerForLobby(Player player)
 	{
-		player.IsLobbyReady = false;
+		player.IsLobbyReady = player.IsAi;
 		player.Profession = new Profession();
 		player.ProfessionItem = new Item();
 		player.Inventory = new Inventory();

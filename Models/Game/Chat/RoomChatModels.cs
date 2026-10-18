@@ -22,7 +22,7 @@ public sealed class AiChatCompanion
     public string Id { get; init; } = Guid.NewGuid().ToString("N");
     public string Name { get; init; } = "AI";
     public string Motivation { get; init; } = "Survive by persuading the group.";
-    public Player Character { get; init; } = new();
+    public string PlayerStableId { get; init; } = "";
     // Only facts exposed through the public projection are retained here.
     public Dictionary<string, string> ObservedPublicFacts { get; } = new(StringComparer.Ordinal);
 }

@@ -57,6 +57,9 @@ namespace Bunker.Hubs
 		private readonly IRoomRecoveryCoordinator? _roomRecovery;
         private readonly RoomChatService _roomChat;
         private readonly AiConversationCoordinator? _aiConversation;
+        private readonly CharacterRevealService _characterReveal;
+        private readonly CharacterRevealSynchronizationService _characterRevealSync;
+        private readonly AiParticipantService _aiParticipants;
 
 		public GameHub(CharacterGeneratorService generator, 
             RoomService roomService, GameDataService gameData, ScenarioImageService imageService,
@@ -86,7 +89,10 @@ namespace Bunker.Hubs
             DeveloperAuthorityService? developerAuthority = null,
             CatalogItemService? catalogItems = null,
             RoomChatService? roomChat = null,
-            AiConversationCoordinator? aiConversation = null)
+            AiConversationCoordinator? aiConversation = null,
+            AiParticipantService? aiParticipants = null,
+            CharacterRevealService? characterReveal = null,
+            CharacterRevealSynchronizationService? characterRevealSync = null)
         {
             _generator = generator;
             _roomService = roomService;
@@ -132,6 +138,9 @@ namespace Bunker.Hubs
 			_roomRecovery = roomRecovery;
 			_roomChat = roomChat ?? new RoomChatService(TimeProvider.System);
 			_aiConversation = aiConversation;
+			_aiParticipants = aiParticipants ?? new AiParticipantService(roomService, _roomChat, generator);
+			_characterReveal = characterReveal ?? new CharacterRevealService();
+			_characterRevealSync = characterRevealSync ?? throw new ArgumentNullException(nameof(characterRevealSync));
 			_gmPanelStateBuilder = gmPanelStateBuilder ?? new GmPanelStateBuilder(TimeProvider.System);
             _catalogItems = catalogItems ?? new CatalogItemService(gameData);
 			_authorizationService = authorizationService;

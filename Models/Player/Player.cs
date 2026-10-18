@@ -25,6 +25,8 @@ namespace Bunker.Models
         public GmMode GmRole { get; set; } = GmMode.PlayerHost;
         public bool IsLobbySpectator { get; set; }
         public bool IsLobbyReady { get; set; }
+        // Server-controlled participant with no SignalR connection. Its ConnectionId is an internal room key only.
+        public bool IsAi { get; set; }
 
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();

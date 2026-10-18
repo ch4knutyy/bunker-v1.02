@@ -151,6 +151,11 @@
 			<details class="lobby-audit"><summary data-lobby-i18n="lobbyAuditTitle">Останні події лобі</summary><div id="lobbyAuditEvents"></div></details>
 		</section>
 		<section class="lobby-members-section site-panel">
+			<section id="lobbyAiPlayers" class="lobby-ai-players" hidden>
+				<strong data-lobby-i18n="lobbyAiPlayers">AI-гравці</strong>
+				<div class="lobby-ai-stepper"><span data-lobby-i18n="lobbyAiCount">Кількість</span><button type="button" class="btn-secondary" onclick="adjustLobbyAiCount(-1)" aria-label="Decrease AI">−</button><input id="lobbyAiCount" type="number" min="1" max="12" value="1"><button type="button" class="btn-secondary" onclick="adjustLobbyAiCount(1)" aria-label="Increase AI">+</button></div>
+				<button id="lobbyAddAiButton" type="button" class="btn-secondary" onclick="addLobbyAiPlayers()" data-lobby-i18n="lobbyAddAi">Додати AI</button>
+			</section>
 			<header class="lobby-section-heading">
 				<div><span class="lobby-section-kicker">Room roster</span><h3 data-lobby-i18n="lobbyMembersTitle">Учасники</h3></div>
 				<span class="lobby-section-marker" aria-hidden="true">01</span>
