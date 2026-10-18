@@ -91,7 +91,9 @@ public sealed class AiPresentationCoordinator(
         string? skippedId;
         lock (room.SnapshotSyncRoot)
         {
-            if (room.Presentation.Status != AiPresentationStatus.Running) return false;
+            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.RoundReveal ||
+                room.Presentation.RoundNumber != room.CurrentRound ||
+                room.Presentation.Status != AiPresentationStatus.Running) return false;
             skippedId = room.Presentation.CurrentSpeakerStablePlayerId;
             if (string.IsNullOrWhiteSpace(skippedId)) return false;
             room.Presentation.CompletedSpeakerStablePlayerIds.Add(skippedId);
@@ -126,7 +128,9 @@ public sealed class AiPresentationCoordinator(
         var isCurrentHuman = false;
         lock (room.SnapshotSyncRoot)
         {
-            if (room.Presentation.Status != AiPresentationStatus.Running ||
+            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.RoundReveal ||
+                room.Presentation.RoundNumber != room.CurrentRound ||
+                room.Presentation.Status != AiPresentationStatus.Running ||
                 !string.Equals(room.Presentation.CurrentSpeakerStablePlayerId, stablePlayerId, StringComparison.OrdinalIgnoreCase) ||
                 room.Presentation.CompletedSpeakerStablePlayerIds.Contains(stablePlayerId)) return false;
             isCurrentHuman = RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value)
@@ -139,7 +143,9 @@ public sealed class AiPresentationCoordinator(
     {
         lock (room.SnapshotSyncRoot)
         {
-            if (room.Presentation.Status != AiPresentationStatus.ReadyForDiscussion) return false;
+            if (room.State != RoomState.Playing || room.CurrentPhase != GamePhase.RoundReveal ||
+                room.Presentation.RoundNumber != room.CurrentRound ||
+                room.Presentation.Status != AiPresentationStatus.ReadyForDiscussion) return false;
             room.Presentation.Status = AiPresentationStatus.Discussion;
             room.Presentation.CurrentSpeakerStatus = "Discussion";
             room.Presentation.GenerationToken++;
@@ -296,8 +302,8 @@ public sealed class AiPresentationCoordinator(
     }
     private Task PublishStateAsync(Room room, CancellationToken token) => hub.Clients.Group(room.Id).SendAsync("AiPresentationUpdated", new
     {
-        room.Presentation.Status,
-        room.Presentation.CharacteristicKey,
+		Status = room.Presentation.Status.ToString(),
+		room.Presentation.CharacteristicKey,
         room.Presentation.UsesAutomaticCharacteristicSelection,
         room.Presentation.CurrentSpeakerStablePlayerId,
         room.Presentation.LastGenerationError,

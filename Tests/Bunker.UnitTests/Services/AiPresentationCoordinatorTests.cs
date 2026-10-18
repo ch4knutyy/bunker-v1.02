@@ -85,6 +85,31 @@ public sealed class AiPresentationCoordinatorTests
     }
 
     [Fact]
+    public async Task Human_completion_cannot_advance_a_presentation_from_another_phase_or_round()
+    {
+        var room = new Room { Id = "stale-presentation", State = RoomState.Playing, CurrentRound = 2, CurrentPhase = GamePhase.Voting };
+        var human = new Player { Name = "Human", StablePlayerId = "human", ConnectionId = "human" };
+        room.Players[human.ConnectionId] = human;
+        room.Presentation = new AiPresentationState
+        {
+            Status = AiPresentationStatus.Running,
+            CurrentSpeakerStablePlayerId = human.StablePlayerId,
+            CurrentSpeakerStatus = "WaitingForHuman",
+            RoundNumber = 1,
+            ParticipantStablePlayerIds = [human.StablePlayerId]
+        };
+        var hub = new RecordingHubContext();
+        var coordinator = new AiPresentationCoordinator(new RoomChatService(TimeProvider.System), new CharacterRevealService(),
+            new CharacterRevealSynchronizationService(hub, new RoomService(NullLogger<RoomService>.Instance)), new AiPresentationCharacteristicSelector(),
+            new AiChatContextBuilder(new BunkerIntelService()), new FixedAiProvider("unused"), hub, NullLogger<AiPresentationCoordinator>.Instance);
+
+        Assert.False(await coordinator.CompleteHumanTurnAsync(room, human.StablePlayerId, CancellationToken.None));
+        Assert.Equal(AiPresentationStatus.Running, room.Presentation.Status);
+        Assert.Equal(0, room.Presentation.CurrentIndex);
+        Assert.Empty(room.Presentation.CompletedSpeakerStablePlayerIds);
+    }
+
+    [Fact]
     public void Reveal_service_allows_human_own_reveal_but_rejects_unapproved_ai_or_wrong_identity()
     {
         var room = new Room { State = RoomState.Playing };

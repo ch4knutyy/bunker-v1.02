@@ -1,12 +1,12 @@
 // Room chat is a classic-script domain, like the rest of the Bunker client.
-const roomChatState = { ids: new Set(), aiEnabled: true, roomId: '', historyLoaded: false, open: false, unread: 0, trigger: null, presentation: null };
-function updateAiPresentation(data) { roomChatState.presentation = data || null; updateRoomChatControls(); }
+const roomChatState = { ids: new Set(), aiEnabled: true, roomId: '', historyLoaded: false, open: false, unread: 0, trigger: null, presentation: null, presentationRoomId: '', presentationLoading: false, turnCompletionPending: false };
+function updateAiPresentation(data) { roomChatState.presentation = data || null; roomChatState.presentationLoading = false; updateRoomChatControls(); }
 
 function updateRoomChatAiStatus(data) { const status = document.getElementById('roomChatAiStatus'); if (!status) return; const state = data?.state || data?.State; const name = data?.name || data?.Name || 'AI'; const error = data?.error || data?.Error; if (state === 'typing') { status.hidden = false; status.textContent = `${name} ${t('roomChatTyping')}`; return; } if (error) { status.hidden = false; status.textContent = t({ ai_not_configured: 'roomChatAiUnavailable', ai_auth_failed: 'roomChatAiUnavailable', ai_model_not_found: 'roomChatAiUnavailable', ai_rate_limited: 'roomChatAiBusy', ai_timeout: 'roomChatAiBusy', ai_provider_unavailable: 'roomChatAiBusy', ai_network_error: 'roomChatAiBusy' }[error] || 'roomChatAiUnavailable'); return; } status.hidden = true; }
 
 function roomChatElements() { return { drawer: document.getElementById('roomChatDrawer'), trigger: document.getElementById('roomChatButton'), input: document.getElementById('roomChatInput'), list: document.getElementById('roomChatMessages'), badge: document.getElementById('roomChatUnread') }; }
 function updateRoomChatUnread() { const { badge } = roomChatElements(); if (!badge) return; badge.hidden = roomChatState.unread === 0; badge.textContent = roomChatState.unread > 9 ? '9+' : String(roomChatState.unread); }
-function openRoomChat() { const { drawer, trigger, input } = roomChatElements(); if (!drawer) return; roomChatState.trigger = document.activeElement; roomChatState.open = true; roomChatState.unread = 0; drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden', 'false'); trigger?.setAttribute('aria-expanded', 'true'); updateRoomChatUnread(); updateRoomChatControls(); requestAnimationFrame(() => input?.focus()); }
+function openRoomChat() { const { drawer, trigger, input } = roomChatElements(); if (!drawer) return; roomChatState.trigger = document.activeElement; roomChatState.open = true; roomChatState.unread = 0; drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden', 'false'); trigger?.setAttribute('aria-expanded', 'true'); updateRoomChatUnread(); updateRoomChatControls(); refreshAiPresentationState(true); requestAnimationFrame(() => input?.focus()); }
 function closeRoomChat() { const { drawer, trigger } = roomChatElements(); if (!drawer) return; roomChatState.open = false; drawer.classList.remove('is-open'); drawer.setAttribute('aria-hidden', 'true'); trigger?.setAttribute('aria-expanded', 'false'); (roomChatState.trigger || trigger)?.focus?.(); }
 function toggleRoomChat() { roomChatState.open ? closeRoomChat() : openRoomChat(); }
 
@@ -51,12 +51,34 @@ function replaceRoomChatHistory(messages) {
 	(messages || []).forEach(renderRoomChatMessage); roomChatState.historyLoaded = true;
 }
 
+function refreshAiPresentationState(force = false) {
+	const roomId = currentRoom?.id || currentRoom?.Id || '';
+	if (!roomId || connection?.state !== signalR.HubConnectionState.Connected || roomChatState.presentationLoading || (!force && roomChatState.presentationRoomId === roomId && roomChatState.presentation)) return;
+	roomChatState.presentationRoomId = roomId;
+	roomChatState.presentationLoading = true;
+	connection.invoke('GetAiPresentationState')
+		.then(updateAiPresentation)
+		.catch(error => { roomChatState.presentationLoading = false; console.warn('Presentation state refresh failed', error); });
+}
+
+function roomChatMyStablePlayerId() {
+	const currentId = typeof getMyStablePlayerId === 'function' ? getMyStablePlayerId() : '';
+	return String(currentId || window.myPlayerData?.stablePlayerId || window.myPlayerData?.StablePlayerId || window.stablePlayerId || '');
+}
+
 function updateRoomChatControls() {
 	const roomId = currentRoom?.id || currentRoom?.Id || '';
+	if (roomId !== roomChatState.roomId) {
+		roomChatState.roomId = roomId;
+		roomChatState.historyLoaded = false;
+		roomChatState.presentation = null;
+		roomChatState.presentationRoomId = '';
+	}
 	if (roomId && (roomId !== roomChatState.roomId || !roomChatState.historyLoaded) && connection?.state === signalR.HubConnectionState.Connected) {
-		roomChatState.roomId = roomId; roomChatState.historyLoaded = true;
+		roomChatState.historyLoaded = true;
 		connection.invoke('GetRoomChatHistory').catch(() => { roomChatState.historyLoaded = false; });
 	}
+	if (roomId && !roomChatState.presentation) refreshAiPresentationState();
 	const add = document.getElementById('addAiChatCompanionsBtn'); const toggle = document.getElementById('toggleAiChatBtn');
 	const { trigger } = roomChatElements(); if (trigger) trigger.hidden = !roomId;
 	if (trigger) { trigger.textContent = t('roomChatTitle'); trigger.setAttribute('aria-label', t('roomChatTitle')); trigger.title = t('roomChatTitle'); }
@@ -65,18 +87,20 @@ function updateRoomChatControls() {
 	if (add) add.hidden = !isHost;
 	if (toggle) { toggle.hidden = !isHost; toggle.textContent = roomChatState.aiEnabled ? t('roomChatAiOn') : t('roomChatAiOff'); }
 	const current = roomChatState.presentation; const status = String(current?.status ?? current?.Status ?? 'Inactive');
-	const speakerId = current?.currentSpeakerStablePlayerId ?? current?.CurrentSpeakerStablePlayerId;
-	const isMyHumanTurn = status === 'Running' && speakerId && speakerId === getMyStablePlayerId?.();
+	const speakerId = String(current?.currentSpeakerStablePlayerId ?? current?.CurrentSpeakerStablePlayerId ?? '');
+	const isMyHumanTurn = status === 'Running' && !!speakerId && speakerId === roomChatMyStablePlayerId();
 	const presentation = document.getElementById('aiPresentationControls'); if (presentation) presentation.hidden = !isHost && !isMyHumanTurn;
 	const speaker = roomChatPresentationSpeakerName(speakerId);
 	const progress = `${Math.min(Number(current?.currentIndex ?? current?.CurrentIndex ?? 0) + (status === 'Running' || status === 'Paused' ? 1 : 0), Number(current?.participantCount ?? current?.ParticipantCount ?? 0))}/${Number(current?.participantCount ?? current?.ParticipantCount ?? 0)}`;
-	const label = document.getElementById('aiPresentationState'); if (label) label.textContent = roomChatPresentationStateText(status, speaker, current?.lastGenerationError ?? current?.LastGenerationError, current?.currentSpeakerStatus ?? current?.CurrentSpeakerStatus, progress);
-	const buttons = { start: document.getElementById('startAiPresentationBtn'), pause: document.getElementById('pauseAiPresentationBtn'), resume: document.getElementById('resumeAiPresentationBtn'), next: document.getElementById('nextAiPresentationBtn'), skip: document.getElementById('skipAiPresentationBtn'), complete: document.getElementById('completeAiPresentationTurnBtn'), end: document.getElementById('endAiPresentationBtn'), retry: document.getElementById('retryAiPresentationBtn'), discussion: document.getElementById('beginAiDiscussionBtn') };
+	const label = document.getElementById('aiPresentationState'); if (label) label.textContent = roomChatPresentationStateText(status, speakerId, speaker, current?.lastGenerationError ?? current?.LastGenerationError, current?.currentSpeakerStatus ?? current?.CurrentSpeakerStatus, progress);
+	const turnAction = document.getElementById('aiPresentationTurnAction'); if (turnAction) turnAction.hidden = !isMyHumanTurn;
+	const turnSummary = document.getElementById('aiPresentationTurnSummary'); if (turnSummary) turnSummary.textContent = roomChatPresentationTurnText(progress);
+	const turnButton = document.getElementById('completeAiPresentationTurnStickyBtn'); if (turnButton) turnButton.disabled = roomChatState.turnCompletionPending;
+	const buttons = { start: document.getElementById('startAiPresentationBtn'), pause: document.getElementById('pauseAiPresentationBtn'), resume: document.getElementById('resumeAiPresentationBtn'), next: document.getElementById('nextAiPresentationBtn'), skip: document.getElementById('skipAiPresentationBtn'), end: document.getElementById('endAiPresentationBtn'), retry: document.getElementById('retryAiPresentationBtn'), discussion: document.getElementById('beginAiDiscussionBtn') };
 	const characteristic = document.getElementById('aiPresentationCharacteristic'); if (characteristic) characteristic.hidden = status === 'Running' || status === 'Paused';
 	const currentRound = Number(currentRoom?.currentRound ?? currentRoom?.CurrentRound ?? 0); const presentationRound = Number(current?.roundNumber ?? current?.RoundNumber ?? 0);
 	if (isHost) { buttons.start.hidden = !(status === 'Inactive' || (presentationRound > 0 && presentationRound !== currentRound)); buttons.pause.hidden = status !== 'Running'; buttons.resume.hidden = status !== 'Paused'; buttons.next.hidden = true; buttons.skip.hidden = status !== 'Running'; buttons.end.hidden = status !== 'Running' && status !== 'Paused'; buttons.retry.hidden = status !== 'Running' || !(current?.lastGenerationError ?? current?.LastGenerationError); buttons.discussion.hidden = status !== 'ReadyForDiscussion'; }
 	else { [buttons.start, buttons.pause, buttons.resume, buttons.next, buttons.skip, buttons.end, buttons.retry, buttons.discussion].forEach(button => { if (button) button.hidden = true; }); }
-	if (buttons.complete) buttons.complete.hidden = !isMyHumanTurn;
 }
 
 function roomChatPresentationSpeakerName(stableId) {
@@ -86,14 +110,36 @@ function roomChatPresentationSpeakerName(stableId) {
 	const player = list.find(item => (item?.stablePlayerId || item?.StablePlayerId || item?.id || item?.Id) === stableId);
 	return player?.name || player?.Name || stableId;
 }
-function roomChatPresentationStateText(status, speaker, error, speakerStatus, progress) {
+function roomChatPresentationStateText(status, speakerId, speaker, error, speakerStatus, progress) {
 	const labels = { uk: { Inactive: 'Представлення не розпочато', Running: 'Представлення триває', Paused: 'Представлення призупинено', ReadyForDiscussion: 'Представлення завершено — очікується GM', Discussion: 'Обговорення' }, en: { Inactive: 'Presentation has not started', Running: 'Presentation in progress', Paused: 'Presentation paused', ReadyForDiscussion: 'Presentations complete — waiting for GM', Discussion: 'Discussion' }, ru: { Inactive: 'Представление не начато', Running: 'Представление продолжается', Paused: 'Представление приостановлено', ReadyForDiscussion: 'Представления завершены — ожидается GM', Discussion: 'Обсуждение' } };
 	const text = labels[getCurrentLanguage()]?.[status] || status;
-	const isMyTurn = speaker && speakerId === getMyStablePlayerId?.();
+	const isMyTurn = speaker && speakerId === roomChatMyStablePlayerId();
 	const myTurn = ({ uk: 'Ваша черга', en: 'Your turn', ru: 'Ваша очередь' })[getCurrentLanguage()] || 'Your turn';
 	const speakerLabels = { uk: { WaitingForHuman: 'очікується виступ людини', Revealing: 'розкриває характеристику', Generating: 'генерує репліку', Finished: 'завершено', Failed: 'помилка', Paused: 'пауза' }, en: { WaitingForHuman: 'waiting for the human speaker', Revealing: 'revealing a characteristic', Generating: 'generating speech', Finished: 'finished', Failed: 'failed', Paused: 'paused' }, ru: { WaitingForHuman: 'ожидается выступление человека', Revealing: 'раскрывает характеристику', Generating: 'генерирует реплику', Finished: 'завершено', Failed: 'ошибка', Paused: 'пауза' } };
 	const localizedSpeakerStatus = speakerLabels[getCurrentLanguage()]?.[speakerStatus] || '';
 	return `${text}${progress && progress !== '0/0' ? ` · ${progress}` : ''}${speaker ? ` · ${isMyTurn ? myTurn : speaker}` : ''}${localizedSpeakerStatus ? ` · ${localizedSpeakerStatus}` : ''}${error ? ` · ${t('roomChatAiUnavailable')}` : ''}`;
+}
+
+function roomChatPresentationTurnText(progress) {
+	const templates = { uk: `Ваша черга · Виступ ${progress.replace('/', ' із ')}`, en: `Your turn · Speaker ${progress}`, ru: `Ваша очередь · Выступление ${progress.replace('/', ' из ')}` };
+	return templates[getCurrentLanguage()] || templates.en;
+}
+
+async function completeAiPresentationHumanTurn() {
+	if (roomChatState.turnCompletionPending || !connection) return;
+	roomChatState.turnCompletionPending = true;
+	updateRoomChatControls();
+	try {
+		const completed = await connection.invoke('CompleteAiPresentationHumanTurn');
+		if (!completed) updateRoomChatAiStatus({ error: 'presentation_turn_rejected' });
+	} catch (error) {
+		console.warn('Presentation turn completion failed', error);
+		updateRoomChatAiStatus({ error: 'presentation_turn_rejected' });
+	} finally {
+		roomChatState.turnCompletionPending = false;
+		refreshAiPresentationState(true);
+		updateRoomChatControls();
+	}
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -111,10 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('resumeAiPresentationBtn')?.addEventListener('click', () => connection.invoke('ResumeAiPresentation').catch(console.warn));
 	document.getElementById('nextAiPresentationBtn')?.addEventListener('click', () => connection.invoke('NextAiPresentationSpeaker', false).catch(console.warn));
 	document.getElementById('skipAiPresentationBtn')?.addEventListener('click', () => connection.invoke('NextAiPresentationSpeaker', true).catch(console.warn));
-	document.getElementById('completeAiPresentationTurnBtn')?.addEventListener('click', () => connection.invoke('CompleteAiPresentationHumanTurn').catch(console.warn));
+	document.getElementById('completeAiPresentationTurnStickyBtn')?.addEventListener('click', completeAiPresentationHumanTurn);
 	document.getElementById('endAiPresentationBtn')?.addEventListener('click', () => connection.invoke('EndAiPresentation').catch(console.warn));
 	document.getElementById('retryAiPresentationBtn')?.addEventListener('click', () => connection.invoke('RetryAiPresentationSpeaker').catch(console.warn));
 	document.getElementById('beginAiDiscussionBtn')?.addEventListener('click', () => connection.invoke('BeginAiDiscussion').catch(console.warn));
+	connection?.onreconnected?.(() => {
+		roomChatState.historyLoaded = false;
+		roomChatState.presentation = null;
+		roomChatState.presentationRoomId = '';
+		refreshAiPresentationState(true);
+		updateRoomChatControls();
+	});
 	document.addEventListener('keydown', event => {
 		if (!roomChatState.open) return;
 		if (event.key === 'Escape') { event.preventDefault(); closeRoomChat(); return; }

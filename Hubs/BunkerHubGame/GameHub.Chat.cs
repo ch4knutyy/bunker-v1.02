@@ -21,19 +21,15 @@ public partial class GameHub
             });
         }
         await Clients.Caller.SendAsync("RoomChatHistory", _roomChat.GetHistory(room.Id));
-        await Clients.Caller.SendAsync("AiPresentationUpdated", new
-        {
-            room.Presentation.Status,
-            room.Presentation.CharacteristicKey,
-            room.Presentation.UsesAutomaticCharacteristicSelection,
-            room.Presentation.CurrentSpeakerStablePlayerId,
-            room.Presentation.LastGenerationError,
-            room.Presentation.CurrentSpeakerStatus,
-            room.Presentation.CurrentIndex,
-            room.Presentation.RoundNumber,
-            participantCount = room.Presentation.ParticipantStablePlayerIds.Count,
-            completedCount = room.Presentation.CompletedSpeakerStablePlayerIds.Count
-        });
+        await Clients.Caller.SendAsync("AiPresentationUpdated", AiPresentationStatePayload(room));
+    }
+
+    // Reconnect-safe canonical snapshot for the presentation controls. This does not mutate
+    // the queue and deliberately exposes only public scheduling metadata.
+    public object GetAiPresentationState()
+    {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return AiPresentationStatePayload(room);
     }
 
     public async Task SendRoomChatMessage(string text, string clientMessageId)
@@ -202,4 +198,18 @@ public partial class GameHub
         await Clients.Group(room.Id).SendAsync("RoomPlayersUpdated", BuildRoomPlayersPayload(room));
         await BroadcastLobbyState(room);
     }
+
+    private static object AiPresentationStatePayload(Room room) => new
+    {
+		Status = room.Presentation.Status.ToString(),
+		room.Presentation.CharacteristicKey,
+        room.Presentation.UsesAutomaticCharacteristicSelection,
+        room.Presentation.CurrentSpeakerStablePlayerId,
+        room.Presentation.LastGenerationError,
+        room.Presentation.CurrentSpeakerStatus,
+        room.Presentation.CurrentIndex,
+        room.Presentation.RoundNumber,
+        participantCount = room.Presentation.ParticipantStablePlayerIds.Count,
+        completedCount = room.Presentation.CompletedSpeakerStablePlayerIds.Count
+    };
 }
