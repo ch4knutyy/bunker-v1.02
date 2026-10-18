@@ -22,6 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Keep local secrets outside Git in every environment, including Production.
 // Environment variables take final precedence for future VPS deployment.
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false)
+    .AddUserSecrets<Program>(optional: true)
     .AddEnvironmentVariables();
 var privateAlphaConfiguration = builder.Configuration.GetSection(PrivateAlphaOptions.SectionName)
     .Get<PrivateAlphaOptions>() ?? new PrivateAlphaOptions();
@@ -130,6 +131,14 @@ builder.Services.AddSingleton<OmniscientRequestRateLimitService>();
 builder.Services.AddSingleton<DirectorControlService>();
 builder.Services.AddSingleton<LobbyStartService>();
 builder.Services.AddSingleton<RoomGameSettingsService>();
+builder.Services.AddSingleton<CharacterRevealService>();
+builder.Services.AddSingleton<CharacterRevealSynchronizationService>();
+builder.Services.Configure<AiChatOptions>(builder.Configuration.GetSection(AiChatOptions.SectionName));
+builder.Services.AddHttpClient<IAiProvider, GeminiAiProvider>(client => client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/"));
+builder.Services.AddSingleton<RoomChatService>();
+builder.Services.AddSingleton<AiParticipantService>();
+builder.Services.AddSingleton<AiChatContextBuilder>();
+builder.Services.AddSingleton<AiConversationCoordinator>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException(

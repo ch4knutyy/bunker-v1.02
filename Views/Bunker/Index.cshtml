@@ -119,6 +119,13 @@
                     aria-label="Developer tools"
                     title="Developer tools"
                     hidden>DEV</button>
+            <button id="roomChatButton"
+                    type="button"
+                    class="room-floating-control room-floating-chat"
+                    aria-label="Chat"
+                    aria-expanded="false"
+                    aria-controls="roomChatDrawer"
+                    title="Chat">Чат<span id="roomChatUnread" class="room-chat-unread" hidden>0</span></button>
             <div class="room-actions-menu-shell">
                 <button id="roomActionsMenuButton"
                         type="button"
@@ -348,6 +355,7 @@
 @* Панель керування грою рендериться на верхньому рівні, щоб fixed drawer не залежав від game container. *@
 <partial name="~/Views/Shared/Bunker/_GmPanel.cshtml" />
 <partial name="~/Views/Shared/Bunker/_DeveloperTools.cshtml" />
+<partial name="~/Views/Shared/Bunker/_RoomChatDrawer.cshtml" />
 <partial name="~/Views/Shared/Bunker/_PostGameStoryDirector.cshtml" />
 
 <div id="scenarioPublicModal"
@@ -489,6 +497,7 @@
 <script src="~/js/bunker/voting/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/threats/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/events/runtime.js" asp-append-version="true"></script>
+	<script src="~/js/bunker/chat/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/lobby/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/postgame/runtime.js" asp-append-version="true"></script>
 <script src="~/js/bunker/public-overview/runtime.js" asp-append-version="true"></script>
@@ -502,6 +511,7 @@
 <script src="~/js/bunker/characters/signalr-events.js" asp-append-version="true"></script>
 <script src="~/js/bunker/diagnostics/signalr-events.js" asp-append-version="true"></script>
 <script src="~/js/bunker/events/signalr-events.js" asp-append-version="true"></script>
+	<script src="~/js/bunker/chat/signalr-events.js" asp-append-version="true"></script>
 <script src="~/js/bunker/gm/signalr-events.js" asp-append-version="true"></script>
 <script src="~/js/bunker/inventory/signalr-events.js" asp-append-version="true"></script>
 <script src="~/js/bunker/lobby/signalr-events.js" asp-append-version="true"></script>

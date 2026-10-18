@@ -66,13 +66,20 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
         using var cardsDocument = Load(cardsPath);
         using var eventsDocument = Load(eventsPath);
 
-        ValidateSchema(cardsDocument.RootElement, CardsFileName);
-        ValidateSchema(eventsDocument.RootElement, EventsFileName);
-
-        Cards = ReadCards(cardsDocument.RootElement, CardsFileName);
+        var snapshot = ReadSnapshot(cardsDocument.RootElement, eventsDocument.RootElement);
+        Cards = snapshot.Cards;
         _cardsById = Cards.ToImmutableDictionary(card => card.Id, StringComparer.OrdinalIgnoreCase);
-        Events = ReadEvents(eventsDocument.RootElement, EventsFileName, _cardsById);
+        Events = snapshot.Events;
         _eventsById = Events.ToImmutableDictionary(item => item.Id, StringComparer.OrdinalIgnoreCase);
+    }
+
+    internal static ScenarioContentSnapshot ReadSnapshot(JsonElement cardsRoot, JsonElement eventsRoot)
+    {
+        ValidateSchema(cardsRoot, CardsFileName);
+        ValidateSchema(eventsRoot, EventsFileName);
+        var cards = ReadCards(cardsRoot, CardsFileName);
+        var cardsById = cards.ToImmutableDictionary(card => card.Id, StringComparer.OrdinalIgnoreCase);
+        return new ScenarioContentSnapshot(cards, ReadEvents(eventsRoot, EventsFileName, cardsById));
     }
 
     public ScenarioDefinition? FindEvent(string id) =>
@@ -444,3 +451,7 @@ public sealed class ScenarioContentRegistry : IScenarioContentRegistry
         throw new InvalidOperationException(
             $"Scenario content validation failed: file={file}, path={path}, id={id}, reason={reason}");
 }
+
+internal sealed record ScenarioContentSnapshot(
+    ImmutableArray<EventSpecialCardDefinition> Cards,
+    ImmutableArray<ScenarioDefinition> Events);

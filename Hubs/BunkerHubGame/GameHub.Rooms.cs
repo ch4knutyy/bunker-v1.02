@@ -641,6 +641,7 @@ namespace Bunker.Hubs
 					hasRevealedAllAfterElimination = p.HasRevealedAllAfterElimination,
 					seatNumber = p.SeatNumber,
 					isConnected = p.IsConnected,
+					isAi = p.IsAi,
 					eliminationVoteImmunity = p.EliminationVoteImmunity
 				};
 			}).ToList();
@@ -758,6 +759,8 @@ namespace Bunker.Hubs
 
             var roundState = BuildRoundState(room);
             await Clients.Group(roomId).SendAsync("RoundStateUpdated", roundState);
+            var roundAnnouncement = _roomChat.AddSystemMessage(roomId, $"Раунд {room.CurrentRound} розпочато.", $"round-start:{room.CurrentRound}");
+            await Clients.Group(roomId).SendAsync("RoomChatMessageReceived", roundAnnouncement);
             if (room.Bunker != null)
                 await BroadcastBunkerIntelProjection(room);
             if (room.Apocalypse != null)

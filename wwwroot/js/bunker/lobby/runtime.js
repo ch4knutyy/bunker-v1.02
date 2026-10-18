@@ -145,6 +145,27 @@ async function toggleLobbyReady() {
 	finally { lobbyCommandPending = false; renderLobbyState(); }
 }
 
+async function addLobbyAiPlayers() {
+	if (lobbyCommandPending) return;
+	const count = Number(document.getElementById('lobbyAiCount')?.value || 1);
+	lobbyCommandPending = true; renderLobbyState();
+	try { await connection.invoke('AddAiPlayers', Math.max(1, Math.floor(count))); }
+	finally { lobbyCommandPending = false; renderLobbyState(); }
+}
+
+function adjustLobbyAiCount(delta) {
+	const input = document.getElementById('lobbyAiCount'); if (!input) return;
+	const max = Math.max(1, Number(lobbyGet(lobbyState, 'settings', 'Settings')?.maxGameplayPlayers || lobbyGet(lobbyState, 'gameplayPlayerCount', 'GameplayPlayerCount') || 12));
+	input.value = String(Math.min(max, Math.max(1, Number(input.value || 1) + delta)));
+}
+
+async function removeLobbyAiPlayer(playerId) {
+	if (lobbyCommandPending) return;
+	lobbyCommandPending = true; renderLobbyState();
+	try { await connection.invoke('RemoveAiPlayer', playerId); }
+	finally { lobbyCommandPending = false; renderLobbyState(); }
+}
+
 async function setLobbyParticipation(playerId, spectator) {
 	if (lobbyCommandPending) return; lobbyCommandPending = true; renderLobbyState();
 	try { const role = spectator ? 1 : 0; const preview = await connection.invoke('PreviewSetLobbyParticipation', playerId, role); if (!(preview.canApply ?? preview.CanApply) || !confirm(`${preview.targetName || preview.TargetName}: ${preview.requestedRole || preview.RequestedRole}?`)) return; await connection.invoke('SetLobbyParticipation', playerId, role, true, crypto.randomUUID()); }
@@ -666,20 +687,22 @@ function renderLobbyState() {
 		[t('lobbyReadySummary'), `${readyCount} ${countSeparator} ${readyRequiredCount}`, 'lobby-summary-ready-legacy']
 	].map(([label, value, className = '']) => `<article class="lobby-summary-card ${className}"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	const list = document.getElementById('lobbyMembers');
+	const aiPanel = document.getElementById('lobbyAiPlayers');
+	if (aiPanel) { aiPanel.hidden = !isHost || lifecycle !== 'Lobby'; const addAi = document.getElementById('lobbyAddAiButton'); const count = document.getElementById('lobbyAiCount'); const maxPlayers = Number(lobbyGet(lobbyGet(state, 'settings', 'Settings'), 'maxGameplayPlayers', 'MaxGameplayPlayers') || 12); const full = gameplayCount >= maxPlayers; if (addAi) { addAi.disabled = lobbyCommandPending || full; addAi.textContent = lobbyCommandPending ? '…' : t('lobbyAddAi'); } if (count) count.disabled = lobbyCommandPending || full; aiPanel.classList.toggle('is-full', full); }
 	if (list) list.innerHTML = members.map(member => {
 		const id = lobbyGet(member, 'playerId', 'PlayerId'); const role = lobbyGet(member, 'role', 'Role'); const host = lobbyGet(member, 'isCurrentHost', 'IsCurrentHost');
 		const developer = !!lobbyGet(member, 'isDeveloper', 'IsDeveloper');
 		const ready = lobbyGet(member, 'isReady', 'IsReady'); const connected = lobbyGet(member, 'isConnected', 'IsConnected'); const self = id === meId; const gameplay = lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant');
 		const gmRole = lobbyGet(member, 'isTechnicalGm', 'IsTechnicalGm') || lobbyGet(member, 'isOmniscientGm', 'IsOmniscientGm');
-		const displayName = String(lobbyGet(member, 'displayName', 'DisplayName') || '');
+		const ai = !!lobbyGet(member, 'isAi', 'IsAi'); const displayName = String(lobbyGet(member, 'displayName', 'DisplayName') || '');
 		const initials = displayName.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase() || '?';
 		return `<article class="lobby-member-card ${ready ? 'is-ready' : ''} ${connected ? '' : 'is-offline'} ${role === 'Spectator' ? 'is-spectator' : ''}" data-player-id="${escapeHtml(String(id))}">
                 <header class="lobby-member-header">
-					<div class="lobby-member-identity"><span class="lobby-member-avatar" aria-hidden="true">${escapeHtml(initials)}</span><div class="lobby-member-name"><strong>${escapeHtml(displayName)}</strong><div class="lobby-badges"><span class="lobby-role-badge">${escapeHtml(localizeLobbyRole(role))}</span>${host ? `<span class="lobby-host-badge">${t('lobbyHostBadge')}</span>` : ''}${developer ? `<span class="player-role-developer" title="${escapeHtml(t('developerBadgeTitle'))}" aria-label="${escapeHtml(t('developerBadgeTitle'))}">DEVELOPER</span>` : ''}</div></div></div>
+					<div class="lobby-member-identity"><span class="lobby-member-avatar" aria-hidden="true">${escapeHtml(initials)}</span><div class="lobby-member-name"><strong>${escapeHtml(displayName)}</strong><div class="lobby-badges"><span class="lobby-role-badge">${escapeHtml(localizeLobbyRole(role))}</span>${ai ? `<span class="lobby-role-badge">${escapeHtml(t('lobbyAiBadge'))}</span>` : ''}${host ? `<span class="lobby-host-badge">${t('lobbyHostBadge')}</span>` : ''}${developer ? `<span class="player-role-developer" title="${escapeHtml(t('developerBadgeTitle'))}" aria-label="${escapeHtml(t('developerBadgeTitle'))}">DEVELOPER</span>` : ''}</div></div></div>
                     <div class="lobby-member-state"><span class="lobby-connection-state"><span class="lobby-connection-indicator ${connected ? 'online' : 'offline'}" aria-hidden="true"></span>${connected ? t('lobbyConnected') : t('lobbyDisconnected')}</span><span class="${ready ? 'lobby-ready-status' : 'lobby-not-ready-status'}">${ready ? t('lobbyReady') : t('lobbyNotReady')}</span></div>
                 </header>
                 ${self && gameplay ? `<button id="lobbyReadyButton" type="button" class="btn-success lobby-self-ready lobby-command" data-lobby-focus="ready-${escapeHtml(String(id))}" onclick="toggleLobbyReady()" ${lobbyCommandPending || lifecycle !== 'Lobby' ? 'disabled' : ''}>${ready ? t('lobbyCancelReady') : t('lobbyIAmReady')}</button>` : ''}
-                ${isHost && lifecycle === 'Lobby' && !gmRole ? `<div class="lobby-host-controls"><div class="lobby-role-control"><span>${t('lobbyRoleLabel')}</span><span class="characteristic-with-tooltip"><button type="button" class="tooltip-trigger" aria-label="${escapeHtml(lobbyRoleHelp(role))}">?</button><span class="tooltip-content">${escapeHtml(lobbyRoleHelp(role))}</span></span></div><div class="lobby-segmented"><button class="lobby-command ${role === 'Player' || role === 'HostPlayer' ? 'active' : ''}" data-lobby-focus="player-${escapeHtml(String(id))}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', false)">${t('lobbyRolePlayer')}</button><button class="lobby-command ${role === 'Spectator' ? 'active' : ''}" data-lobby-focus="spectator-${escapeHtml(String(id))}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', true)">${t('lobbyRoleSpectator')}</button></div>${!host ? `<details class="lobby-player-menu"><summary aria-label="${escapeHtml(t('lobbyRoleLabel'))}">⋯</summary><div class="lobby-player-menu-panel"><button class="btn-secondary lobby-command" data-lobby-focus="reset-${escapeHtml(String(id))}" onclick="resetLobbyMemberReady('${escapeHtml(String(id))}')">${t('lobbyResetMemberReady')}</button><button class="btn-danger lobby-command" data-lobby-focus="kick-${escapeHtml(String(id))}" onclick="kickLobbyMember('${escapeHtml(String(id))}')">${t('lobbyKickMember')}</button><button class="btn-secondary lobby-transfer-host lobby-command" data-lobby-focus="host-${escapeHtml(String(id))}" onclick="transferLobbyHost('${escapeHtml(String(id))}')">${t('lobbyTransferHost')}</button></div></details>` : ''}</div>` : ''}
+				${isHost && lifecycle === 'Lobby' && ai ? `<div class="lobby-host-controls"><button class="btn-danger lobby-command" onclick="removeLobbyAiPlayer('${escapeHtml(String(id))}')">${t('remove')}</button></div>` : isHost && lifecycle === 'Lobby' && !gmRole ? `<div class="lobby-host-controls"><div class="lobby-role-control"><span>${t('lobbyRoleLabel')}</span></div><div class="lobby-segmented"><button class="lobby-command ${role === 'Player' || role === 'HostPlayer' ? 'active' : ''}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', false)">${t('lobbyRolePlayer')}</button><button class="lobby-command ${role === 'Spectator' ? 'active' : ''}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', true)">${t('lobbyRoleSpectator')}</button></div></div>` : ''}
             </article>`;
 	}).join('');
 	if (focusedKey) [...document.querySelectorAll('[data-lobby-focus]')].find(element => element.dataset.lobbyFocus === focusedKey)?.focus({ preventScroll: true });

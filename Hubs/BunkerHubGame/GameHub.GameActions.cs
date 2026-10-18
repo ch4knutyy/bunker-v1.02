@@ -46,28 +46,6 @@ namespace Bunker.Hubs
                 return;
             }
 
-            // Перевіряємо чи характеристика вже відкрита
-            bool alreadyRevealed = characteristicName switch
-            {
-                "Personality" => player.Revealed.Personality,
-                "Body" => player.Revealed.Body,
-                "Profession" => player.Revealed.Profession,
-                "PhysicalHealth" => player.Revealed.PhysicalHealth,
-                "MentalHealth" => player.Revealed.MentalHealth,
-                "Hobby" => player.Revealed.Hobby,
-                "CharacterTrait" => player.Revealed.CharacterTrait,
-                "Phobia" => player.Revealed.Phobia,
-                "Inventory" => player.Revealed.Inventory,
-                "Property" => player.Revealed.Property,
-				"Fact" => player.Revealed.Fact,
-				_ => true
-            };
-
-            if (alreadyRevealed)
-            {
-                return;
-            }
-
             object? revealedData = GetRevealedDataForCharacteristic(player, characteristicName);
 
             if (revealedData == null)
@@ -76,41 +54,14 @@ namespace Bunker.Hubs
                 return;
             }
 
-            // The public reveal state and its ordering revision change atomically with hide.
-            long revealRevision;
-            var changed = false;
-            lock (room.SnapshotSyncRoot)
+            var reveal = _characterReveal.RevealOwn(room, player, characteristicName);
+            if (!reveal.Success)
             {
-                if (!IsCharacteristicRevealed(player, characteristicName))
-                {
-                    SetCharacteristicRevealed(player, characteristicName);
-                    revealRevision = ++room.PublicRevealRevision;
-                    changed = true;
-                }
-                else
-                {
-                    revealRevision = room.PublicRevealRevision;
-                }
-            }
-
-            if (!changed)
-            {
-                await SendPersonalPlayerSnapshot(Context.ConnectionId, player, "player_characteristic_revealed");
                 return;
             }
 
             // Оновлюємо гравця в сервісі
-            _roomService.UpdatePlayer(Context.ConnectionId, player);
-
-            // Повідомляємо всіх в кімнаті про розкриту характеристику
-            await Clients.Group(roomId).SendAsync("CharacteristicRevealed", new
-            {
-                playerName = player.Name,
-                connectionId = Context.ConnectionId,
-                characteristicKey = characteristicName,
-                data = revealedData,
-                revealRevision
-            });
+            await _characterRevealSync!.DispatchAsync(room, player, reveal, revealedData, Context.ConnectionAborted);
             await BroadcastOmniscientStateToAuthorizedSpectators(room);
         }
 

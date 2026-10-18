@@ -209,6 +209,7 @@ namespace Bunker.Services
 
         public static bool CanReceiveHost(Player? player) =>
             player is not null &&
+            !player.IsAi &&
             player.IsConnected &&
             !player.IsEliminated &&
             !player.IsSpectatorGm &&
@@ -443,15 +444,59 @@ namespace Bunker.Services
             return roomId;
         }
 
+        public static string AiConnectionKey(string stablePlayerId) => "ai:" + stablePlayerId;
+
+        public bool TryAddAiPlayer(Room room, Player player)
+        {
+            if (room.State != RoomState.Lobby || !player.IsAi || player.IsLobbySpectator ||
+                GetGameplayPlayersSnapshot(room).Count >= room.MaxPlayers || string.IsNullOrWhiteSpace(player.StablePlayerId)) return false;
+            var key = AiConnectionKey(player.StablePlayerId);
+            lock (room.Players)
+            {
+                if (room.Players.ContainsKey(key) || room.Players.Values.Any(x => x.StablePlayerId == player.StablePlayerId)) return false;
+                player.ConnectionId = key;
+                player.IsConnected = true;
+                player.IsLobbyReady = true;
+                player.DisconnectedAt = null;
+                room.Players[key] = player;
+                return true;
+            }
+        }
+
+        public bool TryRemoveAiPlayer(Room room, string stablePlayerId, out Player? player)
+        {
+            player = null;
+            if (room.State != RoomState.Lobby) return false;
+            lock (room.Players)
+            {
+                var entry = room.Players.FirstOrDefault(x => x.Value.IsAi && x.Value.StablePlayerId == stablePlayerId);
+                if (entry.Value == null || room.IsHost(entry.Value)) return false;
+                room.Players.Remove(entry.Key);
+                player = entry.Value;
+                CleanupPlayerReferences(room, entry.Key, stablePlayerId);
+                return true;
+            }
+        }
+
         public bool TryRegisterRecoveredRoom(Room room)
         {
             if (room == null || string.IsNullOrWhiteSpace(room.Id)) return false;
             room.HostConnectionId = "";
-            foreach (var player in GetPlayersSnapshot(room).Select(entry => entry.Value))
+            foreach (var entry in GetPlayersSnapshot(room))
             {
-                player.ConnectionId = "";
-                player.IsConnected = false;
-                player.DisconnectedAt = null;
+                var player = entry.Value;
+                if (player.IsAi)
+                {
+                    player.ConnectionId = AiConnectionKey(player.StablePlayerId);
+                    player.IsConnected = true;
+                    player.IsLobbyReady = true;
+                    player.DisconnectedAt = null;
+                    if (!string.Equals(entry.Key, player.ConnectionId, StringComparison.Ordinal))
+                    {
+                        lock (room.Players) { room.Players.Remove(entry.Key); room.Players[player.ConnectionId] = player; }
+                    }
+                }
+                else { player.ConnectionId = ""; player.IsConnected = false; player.DisconnectedAt = null; }
             }
             return _rooms.TryAdd(room.Id, room);
         }
@@ -591,7 +636,7 @@ namespace Bunker.Services
         private bool TryAssignNewHost(Room room, string operation, out string? newHostConnectionId)
         {
             var playersSnapshot = GetPlayersSnapshot(room, operation, cleanupInvalid: true);
-            var newHost = playersSnapshot.FirstOrDefault();
+            var newHost = playersSnapshot.FirstOrDefault(entry => CanReceiveHost(entry.Value));
 
             if (newHost.Value == null)
             {
@@ -883,6 +928,7 @@ namespace Bunker.Services
 
 			var oldConnectionId = existingEntry.Key;
 			var player = existingEntry.Value;
+			if (player.IsAi) return (false, "ai_participant", null, null, false);
 
 			if (player.AccountUserId is Guid boundAccountUserId &&
 				boundAccountUserId != accountUserId)
