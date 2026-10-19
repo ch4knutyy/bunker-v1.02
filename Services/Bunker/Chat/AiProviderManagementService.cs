@@ -79,7 +79,7 @@ public sealed class AiProviderManagementService(IConfiguration configuration, IH
             : string.IsNullOrWhiteSpace(model) ? "model_unavailable"
             : state?.LastError switch { "ai_rate_limited" => "rate_limited", { } => "error", _ => "configured" };
         return new(status, state?.LastError, state?.SuccessfulRequests ?? 0, state?.FailedRequests ?? 0,
-            null, null, cooldown, state?.AverageResponseMilliseconds);
+            state?.InputTokens, state?.OutputTokens, cooldown, state?.AverageResponseMilliseconds);
     }
 
     public void RecordResult(string stablePlayerId, AiProviderReply reply, TimeSpan elapsed)
@@ -110,15 +110,25 @@ public sealed class AiProviderManagementService(IConfiguration configuration, IH
         _ when (int)status >= 500 => "ai_provider_unavailable",
         _ => "ai_provider_failed"
     };
-    private sealed record AiProviderDiagnosticState(int SuccessfulRequests, int FailedRequests, string? LastError, double AverageResponseMilliseconds)
+    private sealed record AiProviderDiagnosticState(int SuccessfulRequests, int FailedRequests, string? LastError,
+        long? InputTokens, long? OutputTokens, double AverageResponseMilliseconds)
     {
-        public static AiProviderDiagnosticState From(AiProviderReply reply, TimeSpan elapsed) => new(string.IsNullOrWhiteSpace(reply.ErrorCode) ? 1 : 0, string.IsNullOrWhiteSpace(reply.ErrorCode) ? 0 : 1, reply.ErrorCode, elapsed.TotalMilliseconds);
+        public static AiProviderDiagnosticState From(AiProviderReply reply, TimeSpan elapsed) => new(
+            string.IsNullOrWhiteSpace(reply.ErrorCode) ? 1 : 0,
+            string.IsNullOrWhiteSpace(reply.ErrorCode) ? 0 : 1,
+            reply.ErrorCode,
+            reply.Usage?.InputTokens,
+            reply.Usage?.OutputTokens,
+            elapsed.TotalMilliseconds);
         public AiProviderDiagnosticState Add(AiProviderReply reply, TimeSpan elapsed)
         {
             var success = SuccessfulRequests + (string.IsNullOrWhiteSpace(reply.ErrorCode) ? 1 : 0);
             var failure = FailedRequests + (string.IsNullOrWhiteSpace(reply.ErrorCode) ? 0 : 1);
             var count = success + failure;
-            return new(success, failure, reply.ErrorCode, ((AverageResponseMilliseconds * (count - 1)) + elapsed.TotalMilliseconds) / count);
+            return new(success, failure, reply.ErrorCode,
+                InputTokens + reply.Usage?.InputTokens,
+                OutputTokens + reply.Usage?.OutputTokens,
+                ((AverageResponseMilliseconds * (count - 1)) + elapsed.TotalMilliseconds) / count);
         }
     }
 }

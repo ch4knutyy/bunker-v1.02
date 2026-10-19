@@ -1,0 +1,783 @@
+{
+  "SchemaVersion": 1,
+  "GeneratedAtUtc": "2026-10-19T13:30:32.5736162+00:00",
+  "StoragePolicy": "numeric token and cost statistics only; prompts, player data, and credentials are not stored",
+  "Statistics": [
+    {
+      "RequestKind": "presentation",
+      "RequestCount": 2,
+      "ProviderReportedCount": 0,
+      "NonOpenAiProviderReportedCount": 0,
+      "ExactOpenAiInputCount": 0,
+      "ApproximateCount": 2,
+      "Input": {
+        "SampleCount": 2,
+        "Sum": 4381,
+        "Average": 2190.5,
+        "Median": 2157,
+        "P90": 2224
+      },
+      "Output": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Reasoning": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "CachedInput": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Total": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      }
+    },
+    {
+      "RequestKind": "discussion",
+      "RequestCount": 0,
+      "ProviderReportedCount": 0,
+      "NonOpenAiProviderReportedCount": 0,
+      "ExactOpenAiInputCount": 0,
+      "ApproximateCount": 0,
+      "Input": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Output": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Reasoning": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "CachedInput": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Total": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      }
+    },
+    {
+      "RequestKind": "other",
+      "RequestCount": 0,
+      "ProviderReportedCount": 0,
+      "NonOpenAiProviderReportedCount": 0,
+      "ExactOpenAiInputCount": 0,
+      "ApproximateCount": 0,
+      "Input": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Output": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Reasoning": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "CachedInput": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      },
+      "Total": {
+        "SampleCount": 0,
+        "Sum": 0,
+        "Average": null,
+        "Median": null,
+        "P90": null
+      }
+    }
+  ],
+  "Projections": [
+    {
+      "RequestKind": "presentation",
+      "AiCount": 5,
+      "ResponsesPerAi": 10,
+      "TotalRequests": 50,
+      "InputTokensPerRequest": 2190.5,
+      "HasInputTokenBasis": true,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0117025,
+          "MaximumUsd": 0.0301525
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.23405,
+          "MaximumUsd": 0.60305
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 1.17025,
+          "MaximumUsd": 3.01525
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0117025,
+          "MaximumUsd": 0.0301525
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.23405,
+          "MaximumUsd": 0.60305
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 1.17025,
+          "MaximumUsd": 3.01525
+        }
+      ]
+    },
+    {
+      "RequestKind": "presentation",
+      "AiCount": 5,
+      "ResponsesPerAi": 50,
+      "TotalRequests": 250,
+      "InputTokensPerRequest": 2190.5,
+      "HasInputTokenBasis": true,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0585125,
+          "MaximumUsd": 0.1507625
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 1.17025,
+          "MaximumUsd": 3.01525
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 5.85125,
+          "MaximumUsd": 15.07625
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0585125,
+          "MaximumUsd": 0.1507625
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 1.17025,
+          "MaximumUsd": 3.01525
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 5.85125,
+          "MaximumUsd": 15.07625
+        }
+      ]
+    },
+    {
+      "RequestKind": "presentation",
+      "AiCount": 5,
+      "ResponsesPerAi": 100,
+      "TotalRequests": 500,
+      "InputTokensPerRequest": 2190.5,
+      "HasInputTokenBasis": true,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.117025,
+          "MaximumUsd": 0.301525
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 2.3405,
+          "MaximumUsd": 6.0305
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 11.7025,
+          "MaximumUsd": 30.1525
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.117025,
+          "MaximumUsd": 0.301525
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 2.3405,
+          "MaximumUsd": 6.0305
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 11.7025,
+          "MaximumUsd": 30.1525
+        }
+      ]
+    },
+    {
+      "RequestKind": "presentation",
+      "AiCount": 5,
+      "ResponsesPerAi": 500,
+      "TotalRequests": 2500,
+      "InputTokensPerRequest": 2190.5,
+      "HasInputTokenBasis": true,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.585125,
+          "MaximumUsd": 1.507625
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 11.7025,
+          "MaximumUsd": 30.1525
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 58.5125,
+          "MaximumUsd": 150.7625
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.585125,
+          "MaximumUsd": 1.507625
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 11.7025,
+          "MaximumUsd": 30.1525
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 58.5125,
+          "MaximumUsd": 150.7625
+        }
+      ]
+    },
+    {
+      "RequestKind": "presentation",
+      "AiCount": 5,
+      "ResponsesPerAi": 1000,
+      "TotalRequests": 5000,
+      "InputTokensPerRequest": 2190.5,
+      "HasInputTokenBasis": true,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 1.17025,
+          "MaximumUsd": 3.01525
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 23.405,
+          "MaximumUsd": 60.305
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 117.025,
+          "MaximumUsd": 301.525
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 1.17025,
+          "MaximumUsd": 3.01525
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 23.405,
+          "MaximumUsd": 60.305
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 117.025,
+          "MaximumUsd": 301.525
+        }
+      ]
+    },
+    {
+      "RequestKind": "discussion",
+      "AiCount": 5,
+      "ResponsesPerAi": 10,
+      "TotalRequests": 50,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00075,
+          "MaximumUsd": 0.0192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.015,
+          "MaximumUsd": 0.384
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00075,
+          "MaximumUsd": 0.0192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.015,
+          "MaximumUsd": 0.384
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        }
+      ]
+    },
+    {
+      "RequestKind": "discussion",
+      "AiCount": 5,
+      "ResponsesPerAi": 50,
+      "TotalRequests": 250,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00375,
+          "MaximumUsd": 0.096
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.375,
+          "MaximumUsd": 9.6
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00375,
+          "MaximumUsd": 0.096
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.375,
+          "MaximumUsd": 9.6
+        }
+      ]
+    },
+    {
+      "RequestKind": "discussion",
+      "AiCount": 5,
+      "ResponsesPerAi": 100,
+      "TotalRequests": 500,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0075,
+          "MaximumUsd": 0.192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.15,
+          "MaximumUsd": 3.84
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0075,
+          "MaximumUsd": 0.192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.15,
+          "MaximumUsd": 3.84
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        }
+      ]
+    },
+    {
+      "RequestKind": "discussion",
+      "AiCount": 5,
+      "ResponsesPerAi": 500,
+      "TotalRequests": 2500,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0375,
+          "MaximumUsd": 0.96
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 3.75,
+          "MaximumUsd": 96
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0375,
+          "MaximumUsd": 0.96
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 3.75,
+          "MaximumUsd": 96.0
+        }
+      ]
+    },
+    {
+      "RequestKind": "discussion",
+      "AiCount": 5,
+      "ResponsesPerAi": 1000,
+      "TotalRequests": 5000,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 1.5,
+          "MaximumUsd": 38.4
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 7.5,
+          "MaximumUsd": 192
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 1.5,
+          "MaximumUsd": 38.4
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 7.5,
+          "MaximumUsd": 192.0
+        }
+      ]
+    },
+    {
+      "RequestKind": "other",
+      "AiCount": 5,
+      "ResponsesPerAi": 10,
+      "TotalRequests": 50,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00075,
+          "MaximumUsd": 0.0192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.015,
+          "MaximumUsd": 0.384
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00075,
+          "MaximumUsd": 0.0192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.015,
+          "MaximumUsd": 0.384
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        }
+      ]
+    },
+    {
+      "RequestKind": "other",
+      "AiCount": 5,
+      "ResponsesPerAi": 50,
+      "TotalRequests": 250,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00375,
+          "MaximumUsd": 0.096
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.375,
+          "MaximumUsd": 9.6
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.00375,
+          "MaximumUsd": 0.096
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.375,
+          "MaximumUsd": 9.6
+        }
+      ]
+    },
+    {
+      "RequestKind": "other",
+      "AiCount": 5,
+      "ResponsesPerAi": 100,
+      "TotalRequests": 500,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0075,
+          "MaximumUsd": 0.192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.15,
+          "MaximumUsd": 3.84
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0075,
+          "MaximumUsd": 0.192
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.15,
+          "MaximumUsd": 3.84
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        }
+      ]
+    },
+    {
+      "RequestKind": "other",
+      "AiCount": 5,
+      "ResponsesPerAi": 500,
+      "TotalRequests": 2500,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0375,
+          "MaximumUsd": 0.96
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 3.75,
+          "MaximumUsd": 96
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.0375,
+          "MaximumUsd": 0.96
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 0.75,
+          "MaximumUsd": 19.2
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 3.75,
+          "MaximumUsd": 96.0
+        }
+      ]
+    },
+    {
+      "RequestKind": "other",
+      "AiCount": 5,
+      "ResponsesPerAi": 1000,
+      "TotalRequests": 5000,
+      "InputTokensPerRequest": 0,
+      "HasInputTokenBasis": false,
+      "OutputTokensPerRequestMinimum": 30,
+      "OutputTokensPerRequestMaximum": 768,
+      "UsesAssumedOutputRange": true,
+      "Models": [
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 1.5,
+          "MaximumUsd": 38.4
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 7.5,
+          "MaximumUsd": 192
+        },
+        {
+          "Model": "GPT-6 Luna",
+          "MinimumUsd": 0.075,
+          "MaximumUsd": 1.92
+        },
+        {
+          "Model": "GPT-6.1 Sol",
+          "MinimumUsd": 1.5,
+          "MaximumUsd": 38.4
+        },
+        {
+          "Model": "GPT-6 Astra",
+          "MinimumUsd": 7.5,
+          "MaximumUsd": 192.0
+        }
+      ]
+    }
+  ]
+}

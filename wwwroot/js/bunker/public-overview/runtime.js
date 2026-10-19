@@ -178,7 +178,8 @@ function getPublicInfoValue(value, allowZero = false) {
 
 function getPublicCharacteristicInfo(player, key) {
 	const source = getPublicRevealedSource(player, key);
-	if (!source) return null;
+	const revealedTooltip = getLocalizedRevealedTooltip(player, key);
+	if (!source) return revealedTooltip ? { details: [], description: revealedTooltip } : null;
 	const details = [];
 	let professionBonus = '';
 	const add = (label, value, allowZero = false) => {
@@ -205,7 +206,7 @@ function getPublicCharacteristicInfo(player, key) {
 
 	const tooltip = cleanTooltipText(
 		source.tooltip ?? source.Tooltip ?? source.description ?? source.Description ??
-		source.gameEffect ?? source.GameEffect ?? source.bunkerEffect ?? source.BunkerEffect ?? '');
+		source.gameEffect ?? source.GameEffect ?? source.bunkerEffect ?? source.BunkerEffect ?? revealedTooltip ?? '');
 	const description = key === 'profession' && professionBonus && tooltip === professionBonus
 		? ''
 		: tooltip;

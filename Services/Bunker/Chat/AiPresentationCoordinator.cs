@@ -286,6 +286,7 @@ public sealed class AiPresentationCoordinator(
                 }
                 logger.LogWarning("AI presentation response rejected {RoomId} {PlayerId} {Provider} {Model} {Phase} {TurnId} {CorrelationId} {Error}", room.Id, speakerId, companion.Provider, companion.Model, room.CurrentPhase, room.Presentation.PresentationId, correlationId, reply.ErrorCode ?? quality.ErrorCode);
                 await PublishStateAsync(room, cancellationToken);
+                await NextAsync(room, true, cancellationToken);
                 return;
             }
             var message = chat.AddAiMessage(room.Id, companion, quality.Text!, room.CurrentRound);
@@ -303,6 +304,7 @@ public sealed class AiPresentationCoordinator(
                 room.Presentation.CurrentSpeakerStatus = "Failed";
             }
             await PublishStateAsync(room, cancellationToken);
+            await NextAsync(room, true, cancellationToken);
         }
         finally { await hub.Clients.Group(room.Id).SendAsync("RoomChatAiStatus", new { playerStableId = speakerId, name = speaker.Name, state = "idle" }, CancellationToken.None); }
     }
@@ -330,7 +332,39 @@ public sealed class AiPresentationCoordinator(
     private static object PublicData(Player p, string key) => new
     {
         label = key,
-        value = PublicValue(p, key)
+        value = PublicValue(p, key),
+        source = PublicSource(p, key)
+    };
+
+    // This is the same characteristic-scoped public projection used by ordinary reveal events.
+    // It is sent only after the characteristic has been marked revealed.
+    private static object? PublicSource(Player p, string key) => key switch
+    {
+        "Profession" => new
+        {
+            p.Profession?.Name,
+            p.Profession?.ExperienceYears,
+            p.Profession?.ProfessionalLevel,
+            p.Profession?.Type,
+            p.Profession?.Skills,
+            p.Profession?.AllItems,
+            p.Profession?.SelectedItem,
+            p.Profession?.SelectedItemIndex,
+            p.Profession?.Bonus,
+            p.Profession?.CapabilityTags,
+            p.Profession?.Tooltip,
+            p.Profession?.I18n,
+            ProfessionItem = p.ProfessionItem
+        },
+        "PhysicalHealth" => p.PhysicalHealth,
+        "MentalHealth" => p.MentalHealth,
+        "Hobby" => p.Hobby,
+        "CharacterTrait" => p.CharacterTrait,
+        "Phobia" => p.Phobia,
+        "Inventory" => p.Inventory,
+        "Property" => p.Property,
+        "Fact" => p.Fact,
+        _ => null
     };
 
     private static string PublicValue(Player p, string key) => key switch

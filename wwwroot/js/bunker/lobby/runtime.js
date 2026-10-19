@@ -862,7 +862,7 @@ function renderLobbyState() {
             </article>`;
 	}).join('');
 	if (focusedKey) [...document.querySelectorAll('[data-lobby-focus]')].find(element => element.dataset.lobbyFocus === focusedKey)?.focus({ preventScroll: true });
-	window.reinitTooltips?.();AiConversationCoordinator.IsDiscussionTrigger
+	window.reinitTooltips?.();
 	const blockers = lobbyGet(state, 'blockers', 'Blockers') || []; const blockersEl = document.getElementById('lobbyBlockers');
 	const waitingMembers = members.filter(member => lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant') && !lobbyGet(member, 'isReady', 'IsReady'));
 	const waitingNames = waitingMembers.map(member => String(lobbyGet(member, 'displayName', 'DisplayName') || '')).filter(Boolean);

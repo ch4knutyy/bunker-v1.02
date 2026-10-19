@@ -38,4 +38,6 @@ test('shared tooltip retains one listener set and supports escape plus pointer t
   assert.match(tooltip, /ensurePortal\(\)\.addEventListener\('pointerenter'/);
   assert.match(overview, /getPublicRevealedSource\(player, key\)[\s\S]*revealedSources/);
   assert.doesNotMatch(overview.slice(overview.indexOf('function getPublicRevealedSource'), overview.indexOf('function renderPublicCharacteristicCard')), /myPlayerData/);
+  assert.match(overview, /const revealedTooltip = getLocalizedRevealedTooltip\(player, key\);/);
+  assert.match(overview, /if \(!source\) return revealedTooltip \? \{ details: \[\], description: revealedTooltip \} : null;/);
 });

@@ -80,6 +80,7 @@ window.BunkerSignalREvents.characters = {
 		connection.off("CharacteristicRevealed");
 		connection.on("CharacteristicRevealed", function (info) {
 			console.log("Characteristic revealed:", info);
+			const revealedData = info.data || info.Data || {};
 			const characteristicKey = normalizeCharacteristicKey(info.characteristicKey || info.CharacteristicKey || '');
 			const charKey = normalizeCharacteristicKey(toCamelCase(characteristicKey));
 			const connectionId = info.connectionId || info.ConnectionId;
@@ -101,25 +102,25 @@ window.BunkerSignalREvents.characters = {
 					roomPlayers[connectionId].revealedSources = {};
 				}
 				roomPlayers[connectionId].revealed[charKey] = true;
-				roomPlayers[connectionId].revealedData[charKey] = info.data.value;
-				const source = info.data.source || info.data.Source || info.data.fact || info.data.Fact || null;
+				roomPlayers[connectionId].revealedData[charKey] = revealedData.value || revealedData.Value || '';
+				const source = revealedData.source || revealedData.Source || revealedData.fact || revealedData.Fact || null;
 				if (source) {
 					roomPlayers[connectionId].revealedSources[charKey] = source;
 				}
 				if (charKey === 'physicalHealth') {
 					roomPlayers[connectionId].additionalConditionEffects = normalizeAdditionalPhysicalConditions(
-						info.data.additionalConditionEffects || info.data.AdditionalConditionEffects || []
+						revealedData.additionalConditionEffects || revealedData.AdditionalConditionEffects || []
 					);
 				}
 				if (charKey === 'fact') {
-					roomPlayers[connectionId].fact = normalizeFactFromPlayer({ fact: source || info.data.fact || info.data.Fact, revealedData: { fact: info.data } });
+					roomPlayers[connectionId].fact = normalizeFactFromPlayer({ fact: source || revealedData.fact || revealedData.Fact, revealedData: { fact: revealedData } });
 				}
 				if (charKey === 'specialCard' && source) {
 					roomPlayers[connectionId].specialCard = normalizeSpecialCard(source);
 				}
-				if (info.data.tooltip && info.data.hasTooltip) {
+				if (revealedData.tooltip || revealedData.Tooltip) {
 					const kind = charKey === 'physicalHealth' ? 'physicalHealth' : charKey === 'mentalHealth' ? 'mentalHealth' : charKey;
-					roomPlayers[connectionId].revealedTooltips[charKey] = buildLocalizedTooltip(source, kind) || cleanTooltipText(info.data.tooltip);
+					roomPlayers[connectionId].revealedTooltips[charKey] = buildLocalizedTooltip(source, kind) || cleanTooltipText(revealedData.tooltip || revealedData.Tooltip);
 				}
 			}
 
@@ -132,11 +133,11 @@ window.BunkerSignalREvents.characters = {
 				myPlayerData.revealed[charKey] = true;
 
 				if (charKey === "fact") {
-					const source = info.data.source || info.data.Source || info.data.fact || info.data.Fact;
-					myPlayerData.fact = normalizeFactFromPlayer({ fact: source, revealedData: { fact: info.data } });
+					const source = revealedData.source || revealedData.Source || revealedData.fact || revealedData.Fact;
+					myPlayerData.fact = normalizeFactFromPlayer({ fact: source, revealedData: { fact: revealedData } });
 				}
 				if (charKey === "specialCard") {
-					const source = info.data.source || info.data.Source;
+					const source = revealedData.source || revealedData.Source;
 					if (source) {
 						const revealedCard = normalizeSpecialCard(source);
 						myPlayerData.specialCard = revealedCard;
