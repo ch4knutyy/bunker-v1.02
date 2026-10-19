@@ -263,20 +263,32 @@ public sealed class AiPresentationCoordinator(
             lock (room.SnapshotSyncRoot) room.Presentation.CurrentSpeakerStatus = "Generating";
             await PublishStateAsync(room, cancellationToken);
             await hub.Clients.Group(room.Id).SendAsync("RoomChatAiStatus", new { playerStableId = speakerId, name = speaker.Name, state = "typing" }, source.Token);
-            var reply = await provider.GenerateReplyAsync(companion, context.Build(room, companion, chat.GetHistory(room.Id)), source.Token);
-            if (room.Presentation.Status != AiPresentationStatus.Running || room.Presentation.GenerationToken != generationToken || room.Presentation.CurrentSpeakerStablePlayerId != speakerId) return;
-            if (string.IsNullOrWhiteSpace(reply.Text))
+			var prompt = context.BuildPresentation(
+	room,
+	companion,
+	chat.GetHistory(room.Id),
+	key,
+	PublicValue(speaker, key));
+
+			var reply = await provider.GenerateReplyAsync(
+				companion,
+				prompt,
+				source.Token
+			);
+			if (room.Presentation.Status != AiPresentationStatus.Running || room.Presentation.GenerationToken != generationToken || room.Presentation.CurrentSpeakerStablePlayerId != speakerId) return;
+            var quality = AiResponseQualityService.Validate(reply.Text, companion, chat.GetHistory(room.Id), speaker.Profession?.Name);
+            if (!quality.IsAccepted)
             {
                 lock (room.SnapshotSyncRoot)
                 {
-                    room.Presentation.LastGenerationError = reply.ErrorCode ?? "ai_empty_response";
+                    room.Presentation.LastGenerationError = reply.ErrorCode ?? quality.ErrorCode ?? "ai_empty_response";
                     room.Presentation.CurrentSpeakerStatus = "Failed";
                 }
-                logger.LogWarning("AI presentation failed {RoomId} {PlayerId} {Provider} {Model} {Phase} {TurnId} {CorrelationId} {Error}", room.Id, speakerId, companion.Provider, companion.Model, room.CurrentPhase, room.Presentation.PresentationId, correlationId, reply.ErrorCode);
+                logger.LogWarning("AI presentation response rejected {RoomId} {PlayerId} {Provider} {Model} {Phase} {TurnId} {CorrelationId} {Error}", room.Id, speakerId, companion.Provider, companion.Model, room.CurrentPhase, room.Presentation.PresentationId, correlationId, reply.ErrorCode ?? quality.ErrorCode);
                 await PublishStateAsync(room, cancellationToken);
                 return;
             }
-            var message = chat.AddAiMessage(room.Id, companion, reply.Text);
+            var message = chat.AddAiMessage(room.Id, companion, quality.Text!, room.CurrentRound);
             await hub.Clients.Group(room.Id).SendAsync("RoomChatMessageReceived", message, cancellationToken);
             lock (room.SnapshotSyncRoot) room.Presentation.CurrentSpeakerStatus = "Finished";
             await NextAsync(room, false, cancellationToken);

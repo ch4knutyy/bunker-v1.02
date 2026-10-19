@@ -11,13 +11,18 @@ public partial class GameHub
         var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
         foreach (var player in RoomService.GetGameplayPlayersSnapshot(room).Select(entry => entry.Value).Where(player => player.IsAi))
         {
+            var profile = AiBehaviorProfileFactory.Ensure(player);
             _roomChat.EnsureCompanion(room.Id, new AiChatCompanion
             {
                 Id = RoomService.GetPlayerKey(player),
                 Name = player.Name,
                 PlayerStableId = RoomService.GetPlayerKey(player),
                 Provider = player.AiProvider,
-                Model = player.AiModel
+                Model = player.AiModel,
+                Motivation = profile.Motivation,
+                BehavioralProfile = profile,
+                SocialMemory = player.AiSocialMemory,
+                Relationships = player.AiRelationships
             });
         }
         await Clients.Caller.SendAsync("RoomChatHistory", _roomChat.GetHistory(room.Id));
@@ -35,10 +40,9 @@ public partial class GameHub
     public async Task SendRoomChatMessage(string text, string clientMessageId)
     {
         if (!_roomService.TryGetCurrentPlayer(Context.ConnectionId, out var room, out var player)) throw new HubException("chat_room_required");
-        if (!_roomChat.TryAddHumanMessage(room.Id, RoomService.GetPlayerKey(player), player.Name, text, clientMessageId, out var message, out var error))
+        if (!_roomChat.TryAddHumanMessage(room.Id, RoomService.GetPlayerKey(player), player.Name, text, clientMessageId, room.CurrentRound, out var message, out var error))
             throw new HubException(error ?? "chat_message_rejected");
         await Clients.Group(room.Id).SendAsync("RoomChatMessageReceived", message!);
-        _aiConversation?.QueueHumanMessage(room, message!);
     }
 
     public async Task AddDefaultAiCompanions()
@@ -134,6 +138,20 @@ public partial class GameHub
         var companion = _roomChat.GetCompanions(room.Id).FirstOrDefault(x => x.Id == companionId);
         if (companion != null && _aiParticipants.Remove(room, companion.PlayerStableId)) _aiConversation?.CancelRoom(room.Id);
         await BroadcastAiParticipants(room);
+    }
+
+    // GM starts one sequential round of AI responses. Ordinary chat messages never trigger AI.
+    public bool StartAiDiscussionRound()
+    {
+        if (!IsCallerHost()) throw new HubException("host_required");
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiConversation?.StartManualDiscussionRound(room) ?? false;
+    }
+
+    public AiDiscussionRoundState GetAiDiscussionRoundState()
+    {
+        var room = _roomService.GetPlayerRoom(Context.ConnectionId) ?? throw new HubException("chat_room_required");
+        return _aiConversation?.GetDiscussionRoundState(room.Id) ?? new(false, null, 0, 0);
     }
 
     public async Task<bool> StartAiPresentation(string characteristicKey)

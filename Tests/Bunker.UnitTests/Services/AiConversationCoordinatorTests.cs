@@ -10,7 +10,7 @@ namespace Bunker.UnitTests.Services;
 public sealed class AiConversationCoordinatorTests
 {
     [Fact]
-    public async Task Conversation_is_silent_outside_discussion_and_bounded_inside_it()
+    public async Task Conversation_starts_only_when_the_host_starts_one_manual_round()
     {
         var rooms = new RoomService(NullLogger<RoomService>.Instance);
         var room = rooms.CreateRoom("phase-gate", "host", "Host");
@@ -23,13 +23,14 @@ public sealed class AiConversationCoordinatorTests
         var coordinator = new AiConversationCoordinator(chat, provider, new AiChatContextBuilder(new BunkerIntelService()), new NullHubContext(), rooms, NullLogger<AiConversationCoordinator>.Instance);
 
         Assert.True(chat.TryAddHumanMessage(room.Id, "host", "Host", "Are you ready?", "presentation-message", out var duringPresentation, out _));
-        coordinator.QueueHumanMessage(room, duringPresentation!);
         await Task.Delay(30);
         Assert.Equal(0, provider.Calls);
 
         room.Presentation.Status = AiPresentationStatus.Discussion; room.Presentation.RoundNumber = room.CurrentRound;
         Assert.True(chat.TryAddHumanMessage(room.Id, "other", "Other", "Maria, why should we trust you?", "discussion-message", out var duringDiscussion, out _));
-        coordinator.QueueHumanMessage(room, duringDiscussion!);
+        await Task.Delay(30);
+        Assert.Equal(0, provider.Calls);
+        Assert.True(coordinator.StartManualDiscussionRound(room));
         await WaitForAsync(() => provider.Calls == 1);
 
         Assert.Equal(1, provider.Calls);

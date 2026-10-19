@@ -73,6 +73,45 @@ public sealed class RoomChatServiceTests
         Assert.Null(room.CurrentVoting);
     }
 
+    [Fact]
+    public void Prompt_modes_share_bounded_structured_facts_without_hidden_competitor_data()
+    {
+        var room = RoomWithPlayer("human", "Human", "Profession", "Visible doctor");
+        room.Players["hidden-connection"] = new Player { Name = "Hidden", StablePlayerId = "hidden", PhysicalHealth = new PhysicalHealth { Name = "Hidden diagnosis" } };
+        var companion = AddAi(room, "AI", "ai", "Private engineer");
+        var builder = new AiChatContextBuilder(new BunkerIntelService());
+
+        var presentation = builder.BuildPresentation(room, companion, [], "Profession", "Private engineer");
+        var discussion = builder.BuildDiscussion(room, companion, []);
+
+        Assert.Contains("Presentation mode:", presentation);
+        Assert.Contains("exactRevealedValue", presentation);
+        Assert.Contains("Discussion mode:", discussion);
+        Assert.Contains("CanonicalSelf", discussion);
+        Assert.Contains("PublicPlayers", discussion);
+        Assert.DoesNotContain("Hidden diagnosis", discussion);
+    }
+
+    [Fact]
+    public void Clear_promise_creates_bounded_memory_and_gradual_relationship_change()
+    {
+        var chat = new RoomChatService(TimeProvider.System);
+        var maria = new AiChatCompanion { Id = "ai-maria", PlayerStableId = "ai-maria", Name = "Марія" };
+        var oleksii = new AiChatCompanion { Id = "ai-oleksii", PlayerStableId = "ai-oleksii", Name = "Олексій" };
+        chat.AddCompanion("room", maria);
+        chat.AddCompanion("room", oleksii);
+
+        Assert.True(chat.TryAddHumanMessage("room", "human", "Іван", "Маріє, обіцяю підтримати тебе в голосуванні.", "promise", 3, out _, out _));
+
+        var memory = Assert.Single(maria.SocialMemory);
+        var relationship = Assert.Single(maria.Relationships);
+        Assert.Equal(AiSocialMemoryType.Promise, memory.Type);
+        Assert.Equal("ai-maria", memory.TargetId);
+        Assert.Equal(3, memory.Round);
+        Assert.Equal("human", relationship.TargetId);
+        Assert.Equal(53, relationship.Trust);
+    }
+
     private static Room RoomWithPlayer(string stableId, string name, string characteristic, string value)
     {
         var player = new Player { Name = name, StablePlayerId = stableId, ConnectionId = stableId + "-connection" };

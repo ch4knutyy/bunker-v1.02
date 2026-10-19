@@ -142,6 +142,7 @@ builder.Services.AddSingleton<IAiProvider, AiProviderRouter>();
 builder.Services.AddSingleton<RoomChatService>();
   builder.Services.AddSingleton<AiProviderRateLimitService>();
 builder.Services.AddSingleton<AiParticipantService>();
+builder.Services.AddSingleton<AiWorldContextService>();
 builder.Services.AddSingleton<AiChatContextBuilder>();
   builder.Services.AddSingleton<AiSynergyEvaluator>();
   builder.Services.AddSingleton<AiPresentationCharacteristicSelector>();

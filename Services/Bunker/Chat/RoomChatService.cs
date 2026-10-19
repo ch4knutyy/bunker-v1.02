@@ -7,6 +7,7 @@ public sealed class RoomChatService
 {
     public const int MaxMessageLength = 800;
     private const int MaxHistory = 120;
+    private const int MaxSocialMemories = 40;
     private static readonly TimeSpan HumanRateWindow = TimeSpan.FromSeconds(3);
     private readonly TimeProvider _time;
     private readonly ConcurrentDictionary<string, RoomChatState> _rooms = new(StringComparer.OrdinalIgnoreCase);
@@ -29,6 +30,10 @@ public sealed class RoomChatService
 
     public bool TryAddHumanMessage(string roomId, string senderId, string senderName, string text, string clientMessageId,
         out RoomChatMessage? message, out string? error)
+        => TryAddHumanMessage(roomId, senderId, senderName, text, clientMessageId, 0, out message, out error);
+
+    public bool TryAddHumanMessage(string roomId, string senderId, string senderName, string text, string clientMessageId, int round,
+        out RoomChatMessage? message, out string? error)
     {
         message = null;
         error = null;
@@ -50,16 +55,20 @@ public sealed class RoomChatService
             }
             state.LastHumanMessageAt[senderId] = now;
             message = Add(state, roomId, senderId, senderName, ChatSenderType.Human, normalized, clientMessageId, now);
-            RememberSocialStatement(state, message);
+            RememberSocialStatement(state, message, round);
             return true;
         }
     }
 
-    public RoomChatMessage AddAiMessage(string roomId, AiChatCompanion companion, string text)
+    public RoomChatMessage AddAiMessage(string roomId, AiChatCompanion companion, string text, int round = 0)
     {
         var state = _rooms.GetOrAdd(roomId, _ => new());
         lock (state.SyncRoot)
-            return Add(state, roomId, companion.Id, companion.Name, ChatSenderType.Ai, NormalizeText(text) ?? "…", null, _time.GetUtcNow());
+        {
+            var message = Add(state, roomId, companion.Id, companion.Name, ChatSenderType.Ai, NormalizeText(text) ?? "…", null, _time.GetUtcNow());
+            RememberSocialStatement(state, message, round);
+            return message;
+        }
     }
 
     public RoomChatMessage AddSystemMessage(string roomId, string text, string eventId)
@@ -110,7 +119,14 @@ public sealed class RoomChatService
         {
             var existing = state.Companions.FirstOrDefault(x => x.PlayerStableId == companion.PlayerStableId);
             if (existing == null) state.Companions.Add(companion);
-            else { existing.Provider = companion.Provider; existing.Model = companion.Model; }
+            else
+            {
+                existing.Provider = companion.Provider;
+                existing.Model = companion.Model;
+                existing.BehavioralProfile = companion.BehavioralProfile;
+                existing.SocialMemory = companion.SocialMemory;
+                existing.Relationships = companion.Relationships;
+            }
         }
     }
 
@@ -152,17 +168,95 @@ public sealed class RoomChatService
         while (state.Messages.Count > MaxHistory) state.Messages.RemoveAt(0);
         return message;
     }
-    private static void RememberSocialStatement(RoomChatState state, RoomChatMessage message)
+    private static void RememberSocialStatement(RoomChatState state, RoomChatMessage message, int round)
     {
-        var text = message.Text;
-        if (!new[] { "alliance", "ally", "promise", "trust", "betray", "союз", "обіц", "довір", "зрад", "союз", "обещ", "довер", "преда" }
-            .Any(token => text.Contains(token, StringComparison.OrdinalIgnoreCase))) return;
+        var type = ClassifySocialStatement(message.Text);
+        if (type == null) return;
+        var mentioned = FindMentionedCompanion(state, message);
+        var summary = message.Text.Length <= 220 ? message.Text : message.Text[..220].TrimEnd() + "…";
         foreach (var companion in state.Companions)
         {
-            companion.SocialMemory.Add(new(message.Timestamp, message.SenderId, message.SenderName, text));
-            if (companion.SocialMemory.Count > 30) companion.SocialMemory.RemoveAt(0);
+            if (string.Equals(companion.PlayerStableId, message.SenderId, StringComparison.OrdinalIgnoreCase) && mentioned == null) continue;
+            var target = mentioned;
+            companion.SocialMemory.Add(new(message.Timestamp, message.SenderId, message.SenderName,
+                target?.PlayerStableId, target?.Name, type.Value, summary, round, 85, "chat"));
+            TrimMemories(companion.SocialMemory);
+
+            var isSpeaker = string.Equals(companion.PlayerStableId, message.SenderId, StringComparison.OrdinalIgnoreCase);
+            var isDirectTarget = target != null && string.Equals(companion.PlayerStableId, target.PlayerStableId, StringComparison.OrdinalIgnoreCase);
+            // Observers retain the public event, but only speaker/recipient relationships change when it is addressed.
+            if (target != null && !isSpeaker && !isDirectTarget) continue;
+            var relatedPlayerId = isSpeaker
+                ? target?.PlayerStableId
+                : message.SenderId;
+            var relatedPlayerName = isSpeaker
+                ? target?.Name
+                : message.SenderName;
+            if (!string.IsNullOrWhiteSpace(relatedPlayerId) && !string.Equals(relatedPlayerId, companion.PlayerStableId, StringComparison.OrdinalIgnoreCase))
+                ApplyRelationshipChange(companion.Relationships, relatedPlayerId, relatedPlayerName ?? "", type.Value);
         }
     }
+
+    private static AiChatCompanion? FindMentionedCompanion(RoomChatState state, RoomChatMessage message) => state.Companions
+        .Where(companion => !string.Equals(companion.PlayerStableId, message.SenderId, StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(companion => companion.Name.Length)
+        .FirstOrDefault(companion => MentionsName(message.Text, companion.Name));
+
+    // Covers direct mentions and common Ukrainian vocative endings without trying to parse ambiguous prose.
+    private static bool MentionsName(string text, string name) =>
+        text.Contains(name, StringComparison.OrdinalIgnoreCase) ||
+        name.Length >= 4 && text.Contains(name[..^1], StringComparison.OrdinalIgnoreCase);
+
+    private static AiSocialMemoryType? ClassifySocialStatement(string text)
+    {
+        if (ContainsAny(text, "зрад", "преда", "betray")) return AiSocialMemoryType.Betrayal;
+        if (ContainsAny(text, "погрож", "викину", "не пущу", "threat", "throw you out")) return AiSocialMemoryType.Threat;
+        if (ContainsAny(text, "обіцяю", "обещаю", "i promise", "обіця")) return AiSocialMemoryType.Promise;
+        if (ContainsAny(text, "пропоную союз", "давай союз", "предлагаю союз", "alliance proposal", "form an alliance")) return AiSocialMemoryType.AllianceProposal;
+        if (ContainsAny(text, "домовились", "погоджуюсь", "договорились", "согласен", "agreed", "i agree")) return AiSocialMemoryType.Agreement;
+        if (ContainsAny(text, "підтримую", "я за", "поддерживаю", "i support")) return AiSocialMemoryType.Support;
+        if (ContainsAny(text, "не згод", "я проти", "не соглас", "i oppose", "i disagree")) return AiSocialMemoryType.Opposition;
+        if (ContainsAny(text, "змінив думку", "передумав", "изменил мнение", "changed my mind")) return AiSocialMemoryType.OpinionChange;
+        return null;
+    }
+
+    private static void ApplyRelationshipChange(List<AiSocialRelationship> relationships, string targetId, string targetName, AiSocialMemoryType type)
+    {
+        var relationship = relationships.FirstOrDefault(item => string.Equals(item.TargetId, targetId, StringComparison.OrdinalIgnoreCase));
+        if (relationship == null)
+        {
+            relationship = new AiSocialRelationship { TargetId = targetId, TargetName = targetName };
+            relationships.Add(relationship);
+        }
+        else if (!string.IsNullOrWhiteSpace(targetName)) relationship.TargetName = targetName;
+
+        var (trust, tension, cooperation, rivalry) = type switch
+        {
+            AiSocialMemoryType.Support or AiSocialMemoryType.Agreement => (4, -2, 4, -1),
+            AiSocialMemoryType.Promise or AiSocialMemoryType.AllianceProposal => (3, -1, 5, -1),
+            AiSocialMemoryType.Betrayal => (-10, 8, -8, 8),
+            AiSocialMemoryType.Threat => (-7, 7, -5, 6),
+            AiSocialMemoryType.Opposition => (-4, 4, -3, 3),
+            AiSocialMemoryType.OpinionChange => (1, -1, 1, 0),
+            _ => (0, 0, 0, 0)
+        };
+        relationship.Trust = Math.Clamp(relationship.Trust + trust, 0, 100);
+        relationship.Tension = Math.Clamp(relationship.Tension + tension, 0, 100);
+        relationship.Cooperation = Math.Clamp(relationship.Cooperation + cooperation, 0, 100);
+        relationship.Rivalry = Math.Clamp(relationship.Rivalry + rivalry, 0, 100);
+    }
+
+    private static void TrimMemories(List<AiSocialMemoryEntry> memories)
+    {
+        while (memories.Count > MaxSocialMemories)
+        {
+            var expendable = memories.FindIndex(item => item.Type is not (AiSocialMemoryType.Promise or AiSocialMemoryType.Threat or AiSocialMemoryType.Betrayal));
+            memories.RemoveAt(expendable >= 0 ? expendable : 0);
+        }
+    }
+
+    private static bool ContainsAny(string value, params string[] terms) =>
+        terms.Any(term => value.Contains(term, StringComparison.OrdinalIgnoreCase));
     private static string? NormalizeText(string? text)
     {
         var value = text?.Trim();

@@ -41,24 +41,84 @@ public abstract class OpenAiCompatibleAiProvider(IHttpClientFactory clients, ICo
 
         using var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl + "chat/completions")
         {
-            Content = JsonContent.Create(new { model = companion.Model, messages = new[] { new { role = "user", content = prompt } } })
-        };
+
+			Content = JsonContent.Create(new
+			{
+				model = companion.Model,
+				messages = new[]
+	{
+		new { role = "user", content = prompt }
+	},
+				max_completion_tokens = 768
+			})
+
+		};
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue<int?>("AiChat:TimeoutSeconds") ?? 20, 5, 60)));
         try
         {
             using var response = await clients.CreateClient(nameof(OpenAiCompatibleAiProvider)).SendAsync(request, timeout.Token);
-            if (!response.IsSuccessStatusCode)
-                return new(null, response.StatusCode switch
-                {
-                    System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden => "ai_auth_failed",
-                    System.Net.HttpStatusCode.NotFound => "ai_model_not_found",
-                    System.Net.HttpStatusCode.TooManyRequests => "ai_rate_limited",
-                    _ when (int)response.StatusCode >= 500 => "ai_provider_unavailable",
-                    _ => "ai_provider_failed"
-                });
-            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(timeout.Token));
+
+			if (!response.IsSuccessStatusCode)
+			{
+				var responseBody = await response.Content
+					.ReadAsStringAsync(timeout.Token);
+
+				var details = "";
+
+				try
+				{
+					using var errorJson = JsonDocument.Parse(responseBody);
+
+					if (errorJson.RootElement.TryGetProperty(
+							"error", out var error) &&
+						error.ValueKind == JsonValueKind.Object &&
+						error.TryGetProperty(
+							"message", out var errorMessageNode) &&
+						errorMessageNode.ValueKind == JsonValueKind.String)
+					{
+						details = errorMessageNode.GetString() ?? "";
+					}
+
+				}
+				catch (JsonException)
+				{
+					details = "No structured error message";
+				}
+
+				var shortDetails =
+					details[..Math.Min(details.Length, 400)];
+
+				Console.Error.WriteLine(
+					$"[AI API ERROR] {ProviderId} " +
+					$"model={companion.Model} " +
+					$"HTTP={(int)response.StatusCode} " +
+					$"message={shortDetails}");
+
+				return new(null, response.StatusCode switch
+				{
+					System.Net.HttpStatusCode.RequestEntityTooLarge
+						=> "ai_request_too_large",
+
+					System.Net.HttpStatusCode.Unauthorized
+						or System.Net.HttpStatusCode.Forbidden
+							=> "ai_auth_failed",
+
+					System.Net.HttpStatusCode.NotFound
+						=> "ai_model_not_found",
+
+					System.Net.HttpStatusCode.TooManyRequests
+						=> "ai_rate_limited",
+
+					_ when (int)response.StatusCode >= 500
+						=> "ai_provider_unavailable",
+
+					_ => "ai_provider_failed"
+				});
+			}
+
+			using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(timeout.Token));
             var text = document.RootElement.TryGetProperty("choices", out var choices) && choices.GetArrayLength() > 0 &&
                 choices[0].TryGetProperty("message", out var message) && message.TryGetProperty("content", out var content)
                 ? content.GetString() : null;

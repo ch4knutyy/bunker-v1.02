@@ -10,6 +10,67 @@ const lobbyAiCatalogPending = new Set();
 const lobbyAiDiagnostics = new Map();
 const lobbyAiDiagnosticsPending = new Set();
 const lobbyAiConfigPending = new Set();
+// Browser-local preferences for NEW AI players. Canonical room assignments remain server-owned.
+const lobbyAiDefaultsStorageKey = 'bunker:ai-model-defaults:v1';
+let lobbyAiNewPlayersToConfigure = null;
+
+function lobbyAiPreferenceName(member) {
+	return String(lobbyAiField(member, 'displayName', 'DisplayName') || '')
+		.replace(/(?:\s+AI)+$/i, '').trim().toLocaleLowerCase();
+}
+
+function readLobbyAiDefaults() {
+	try {
+		const saved = JSON.parse(localStorage.getItem(lobbyAiDefaultsStorageKey) || '{}');
+		return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+	} catch { return {}; }
+}
+
+function rememberLobbyAiDefault(playerId, provider, model) {
+	const members = lobbyAiField(lobbyState, 'members', 'Members') || [];
+	const member = members.find(item => String(lobbyAiField(item, 'playerId', 'PlayerId')) === String(playerId));
+	if (!member || !lobbyAiField(member, 'isAi', 'IsAi')) return;
+	const name = lobbyAiPreferenceName(member);
+	if (!name || !provider || !model) return;
+	try {
+		const defaults = readLobbyAiDefaults();
+		defaults[name] = { provider, model };
+		localStorage.setItem(lobbyAiDefaultsStorageKey, JSON.stringify(defaults));
+	} catch (error) { console.warn('Could not save AI model preference', error); }
+}
+
+function applyLobbyAiDefaultsToNewPlayers(members, lifecycle) {
+	const pending = lobbyAiNewPlayersToConfigure;
+	if (!pending) return;
+	const roomId = currentRoom?.id || currentRoom?.Id || '';
+	if (roomId !== pending.roomId || lifecycle !== 'Lobby') {
+		lobbyAiNewPlayersToConfigure = null;
+		return;
+	}
+	if (!lobbyCanEditGameSettings()) return;
+	const defaults = readLobbyAiDefaults();
+	for (const member of members) {
+		if (!lobbyAiField(member, 'isAi', 'IsAi')) continue;
+		const playerId = String(lobbyAiField(member, 'playerId', 'PlayerId'));
+		if (!playerId || pending.knownIds.has(playerId)) continue;
+		// Mark before invoking SignalR, so rerenders never send the same assignment twice.
+		pending.knownIds.add(playerId);
+		const preferred = defaults[lobbyAiPreferenceName(member)];
+		if (!preferred || !['Gemini', 'Groq', 'OpenRouter'].includes(preferred.provider) ||
+			!preferred.model || typeof preferred.model !== 'string') continue;
+		const initialProvider = lobbyAiField(member, 'aiProvider', 'AiProvider') || 'Gemini';
+		const initialModel = lobbyAiField(member, 'aiModel', 'AiModel') || '';
+		if (initialProvider === preferred.provider && initialModel === preferred.model) continue;
+		queueMicrotask(() => {
+			if ((currentRoom?.id || currentRoom?.Id) !== roomId || lobbyAiConfigPending.has(playerId)) return;
+			const currentMembers = lobbyAiField(lobbyState, 'members', 'Members') || [];
+			const currentMember = currentMembers.find(item => String(lobbyAiField(item, 'playerId', 'PlayerId')) === playerId);
+			if (!currentMember || (lobbyAiField(currentMember, 'aiProvider', 'AiProvider') || 'Gemini') !== initialProvider ||
+				(lobbyAiField(currentMember, 'aiModel', 'AiModel') || '') !== initialModel) return;
+			void configureLobbyAiProvider(playerId, preferred.provider, preferred.model);
+		});
+	}
+}
 
 function lobbyAiField(source, camel, pascal) { return source?.[camel] ?? source?.[pascal] ?? ''; }
 function lobbyAiStatusLabel(status) { return t({ configured: 'lobbyAiStatusConfigured', missing_api_key: 'lobbyAiStatusMissingKey', model_unavailable: 'lobbyAiStatusModelUnavailable', rate_limited: 'lobbyAiStatusRateLimited', error: 'lobbyAiStatusError', checking: 'lobbyAiStatusChecking' }[status] || 'lobbyAiStatusError'); }
@@ -35,6 +96,7 @@ async function configureLobbyAiProvider(playerId, provider, model) {
 	lobbyAiConfigPending.add(playerId); renderLobbyState();
 	try {
 		await connection.invoke('ConfigureAiProvider', playerId, provider, model);
+		rememberLobbyAiDefault(playerId, provider, model);
 		lobbyAiDiagnostics.delete(playerId);
 	} catch (error) {
 		lobbyAiDiagnostics.set(playerId, { status: 'error', lastError: String(error?.message || error) });
@@ -234,8 +296,15 @@ async function toggleLobbyReady() {
 async function addLobbyAiPlayers() {
 	if (lobbyCommandPending) return;
 	const count = Number(document.getElementById('lobbyAiCount')?.value || 1);
+	const members = lobbyAiField(lobbyState, 'members', 'Members') || [];
+	lobbyAiNewPlayersToConfigure = {
+		roomId: currentRoom?.id || currentRoom?.Id || '',
+		knownIds: new Set(members.filter(member => lobbyAiField(member, 'isAi', 'IsAi'))
+			.map(member => String(lobbyAiField(member, 'playerId', 'PlayerId'))))
+	};
 	lobbyCommandPending = true; renderLobbyState();
 	try { await connection.invoke('AddAiPlayers', Math.max(1, Math.floor(count))); }
+	catch (error) { lobbyAiNewPlayersToConfigure = null; throw error; }
 	finally { lobbyCommandPending = false; renderLobbyState(); }
 }
 
@@ -385,10 +454,10 @@ function renderLobbyApocalypseActivation(settings, apocalypses) {
 	const custom = activation.policyMode === 'Custom';
 	const controls = document.getElementById('lobbyActivationCustomControls'); if (controls) controls.hidden = !custom;
 	const setOptions = (id, values, selected, label) => { const select = document.getElementById(id); if (!select) return; select.replaceChildren(...values.map(value => new Option(label(value), value))); select.value = selected == null ? '' : String(selected); select.disabled = lobbySettingsPending || inactive || !activation.effectsEnabled || !custom; };
-	const modes = (lobbyGet(contract, 'supportedModes', 'SupportedModes') || ['once','recurring']).map(value => value === 'once' ? 'Once' : 'Recurring');
-	const triggers = (lobbyGet(contract, 'supportedTriggers', 'SupportedTriggers') || ['game_start','after_voting','after_round']).map(value => value === 'game_start' ? 'GameStart' : value === 'after_round' ? 'AfterRound' : 'AfterVoting');
-	const firstRounds = lobbyGet(contract, 'allowedFirstRounds', 'AllowedFirstRounds') || [1,2,3,4,5];
-	const intervals = lobbyGet(contract, 'allowedIntervalRounds', 'AllowedIntervalRounds') || [1,2,3,4,5];
+	const modes = (lobbyGet(contract, 'supportedModes', 'SupportedModes') || ['once', 'recurring']).map(value => value === 'once' ? 'Once' : 'Recurring');
+	const triggers = (lobbyGet(contract, 'supportedTriggers', 'SupportedTriggers') || ['game_start', 'after_voting', 'after_round']).map(value => value === 'game_start' ? 'GameStart' : value === 'after_round' ? 'AfterRound' : 'AfterVoting');
+	const firstRounds = lobbyGet(contract, 'allowedFirstRounds', 'AllowedFirstRounds') || [1, 2, 3, 4, 5];
+	const intervals = lobbyGet(contract, 'allowedIntervalRounds', 'AllowedIntervalRounds') || [1, 2, 3, 4, 5];
 	setOptions('lobbyActivationScheduleMode', modes, activation.scheduleMode, value => t(value === 'Once' ? 'lobbyActivationOnce' : 'lobbyActivationRecurring'));
 	setOptions('lobbyActivationTrigger', triggers, activation.trigger, value => t(value === 'GameStart' ? 'lobbyActivationGameStart' : value === 'AfterRound' ? 'lobbyActivationAfterRound' : 'lobbyActivationAfterVoting'));
 	setOptions('lobbyActivationFirstRound', firstRounds, activation.firstRound, value => String(value));
@@ -512,7 +581,7 @@ function renderLobbyGameSetup() {
 		`${t('lobbySummaryTimer')}: ${displayed.roundTimerEnabled ? `${Math.round(displayed.roundTimerDurationSeconds / 60)} min` : t('lobbyOff')}`,
 		`${t('lobbySummaryVoting')}: ${displayed.votingEnabled ? `${t('lobbyFromRound')} ${displayed.votingStartRound}` : t('lobbyOff')}`,
 		`${t('lobbySummaryCards')}: ${displayed.specialCardsEnabled ? displayed.specialCardsPerPlayer : 0}`
-		,`${t('apocalypse')}: ${displayed.apocalypseEnabled ? `${displayed.apocalypseSelectionMode} · ${displayed.interactiveApocalypseChancePercent}%` : t('lobbyOff')}`
+		, `${t('apocalypse')}: ${displayed.apocalypseEnabled ? `${displayed.apocalypseSelectionMode} · ${displayed.interactiveApocalypseChancePercent}%` : t('lobbyOff')}`
 	];
 	const chips = document.getElementById('lobbySettingsChips'); if (chips) chips.innerHTML = chipValues.map(value => `<span class="lobby-settings-chip">${escapeHtml(String(value))}</span>`).join('');
 	const warnings = lobbyGet(state, 'settingsWarnings', 'SettingsWarnings') || []; const warningsElement = document.getElementById('lobbySettingsWarnings');
@@ -596,7 +665,7 @@ async function applyLobbySettings() {
 	if (!lobbySettingsDraft || !lobbySettingsDirty || lobbySettingsPending) return;
 	lobbySettingsPending = true; renderLobbyGameSetup();
 	try {
-		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision:lobbySettingsBaseRevision, commandId:crypto.randomUUID(), settings:lobbySettingsHubPayload(lobbySettingsDraft) });
+		const result = await connection.invoke('ApplyLobbyGameSettings', { expectedRevision: lobbySettingsBaseRevision, commandId: crypto.randomUUID(), settings: lobbySettingsHubPayload(lobbySettingsDraft) });
 		if (!(result?.success ?? result?.Success)) {
 			const code = result?.errorCode ?? result?.ErrorCode; setLobbySettingsFeedback(code === 'settings_revision_conflict' ? 'lobbySettingsConflict' : 'lobbySettingsInvalid', true);
 			lobbySettingsDraft = normalizeLobbySettings(result?.settings ?? result?.Settings); lobbySettingsBaseRevision = Number(result?.settingsRevision ?? result?.SettingsRevision ?? lobbySettingsBaseRevision); lobbySettingsDirty = false;
@@ -611,13 +680,13 @@ function writeLobbyLocalPresets(value) { localStorage.setItem(lobbyLocalPresetSt
 
 function renderLobbyLocalPresetOptions() { const select = document.getElementById('lobbyLocalPresetSelect'); if (!select) return; const value = select.value; const presets = readLobbyLocalPresets(); select.innerHTML = Object.keys(presets).sort().map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join(''); if (presets[value]) select.value = value; }
 
-function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0, 40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version:1, settings:normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
+function saveLobbyLocalPreset() { const input = document.getElementById('lobbyLocalPresetName'); const name = String(input?.value || '').trim().slice(0, 40); if (!name || !lobbySettingsDraft) return setLobbySettingsFeedback('lobbySettingsInvalid', true); const presets = readLobbyLocalPresets(); presets[name] = { version: 1, settings: normalizeLobbySettings(lobbySettingsDraft) }; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetSaved'); }
 
 function loadLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; const entry = readLobbyLocalPresets()[name]; if (!entry || entry.version !== 1) return setLobbySettingsFeedback('lobbyPresetImportError', true); lobbySettingsDraft = normalizeLobbySettings(entry.settings); lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetLoaded'); renderLobbyGameSetup(); }
 
 function deleteLobbyLocalPreset() { const name = document.getElementById('lobbyLocalPresetSelect')?.value; if (!name) return; const presets = readLobbyLocalPresets(); delete presets[name]; writeLobbyLocalPresets(presets); renderLobbyLocalPresetOptions(); setLobbySettingsFeedback('lobbyPresetDeleted'); }
 
-function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema:'bunker-room-game-settings', version:1, name, settings:normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi, '-')}.json`; link.click(); URL.revokeObjectURL(url); }
+function exportLobbyPreset() { if (!lobbySettingsDraft) return; const name = String(document.getElementById('lobbyLocalPresetName')?.value || 'bunker-preset').trim() || 'bunker-preset'; const data = { schema: 'bunker-room-game-settings', version: 1, name, settings: normalizeLobbySettings(lobbySettingsDraft) }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `${name.replace(/[^a-z0-9_-]+/gi, '-')}.json`; link.click(); URL.revokeObjectURL(url); }
 
 async function importLobbyPresetFile(file) { try { const data = JSON.parse(await file.text()); if (data?.schema !== 'bunker-room-game-settings' || data?.version !== 1 || ![1, 2, 3, 4].includes(Number(data?.settings?.version))) throw new Error('version'); lobbySettingsDraft = normalizeLobbySettings(data.settings); lobbySettingsDraft.version = 4; lobbySettingsDraft.preset = 'Custom'; lobbySettingsDirty = true; setLobbySettingsFeedback('lobbyPresetImportOk'); renderLobbyGameSetup(); } catch (_) { setLobbySettingsFeedback('lobbyPresetImportError', true); } }
 
@@ -764,6 +833,7 @@ function renderLobbyState() {
 	const readyCount = lobbyGet(state, 'readyCount', 'ReadyCount') || 0; const readyRequiredCount = lobbyGet(state, 'readyRequiredCount', 'ReadyRequiredCount') || 0; const gameplayCount = lobbyGet(state, 'gameplayPlayerCount', 'GameplayPlayerCount') || 0;
 	const meId = getMyStablePlayerId(); const me = members.find(member => lobbyGet(member, 'playerId', 'PlayerId') === meId);
 	isHost = Boolean(lobbyGet(me, 'isCurrentHost', 'IsCurrentHost'));
+	applyLobbyAiDefaultsToNewPlayers(members, lifecycle);
 	const canManageLobby = isHost || isDeveloper;
 	const focusedKey = document.activeElement?.dataset?.lobbyFocus || null;
 	const summary = document.getElementById('lobbySummary');
@@ -792,7 +862,7 @@ function renderLobbyState() {
             </article>`;
 	}).join('');
 	if (focusedKey) [...document.querySelectorAll('[data-lobby-focus]')].find(element => element.dataset.lobbyFocus === focusedKey)?.focus({ preventScroll: true });
-	window.reinitTooltips?.();
+	window.reinitTooltips?.();AiConversationCoordinator.IsDiscussionTrigger
 	const blockers = lobbyGet(state, 'blockers', 'Blockers') || []; const blockersEl = document.getElementById('lobbyBlockers');
 	const waitingMembers = members.filter(member => lobbyGet(member, 'isGameplayParticipant', 'IsGameplayParticipant') && !lobbyGet(member, 'isReady', 'IsReady'));
 	const waitingNames = waitingMembers.map(member => String(lobbyGet(member, 'displayName', 'DisplayName') || '')).filter(Boolean);

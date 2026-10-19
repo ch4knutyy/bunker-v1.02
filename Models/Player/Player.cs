@@ -29,6 +29,10 @@ namespace Bunker.Models
         public bool IsAi { get; set; }
         public string AiProvider { get; set; } = "Gemini";
         public string AiModel { get; set; } = "";
+        // Persisted with the player so an AI keeps the same behavior after recovery.
+        public AiBehaviorProfile? AiBehaviorProfile { get; set; }
+        public List<AiSocialMemoryEntry> AiSocialMemory { get; set; } = new();
+        public List<AiSocialRelationship> AiRelationships { get; set; } = new();
 
         public Profession Profession { get; set; } = new();
         public Item ProfessionItem { get; set; } = new();
