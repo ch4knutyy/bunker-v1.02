@@ -37,6 +37,26 @@ public sealed class GroqAiProviderRetryTests
         Assert.Equal(8, result.Usage?.OutputTokens);
     }
 
+    [Fact]
+    public async Task Reasoning_only_and_length_limited_responses_are_reported_as_unusable()
+    {
+        var handler = new SequencedHandler(
+            JsonResponse("""{"choices":[{"message":{"content":null,"reasoning":"internal work"}}],"usage":{"prompt_tokens":12,"completion_tokens":320,"completion_tokens_details":{"reasoning_tokens":320}}}"""),
+            JsonResponse("""{"choices":[{"message":{"content":"An unfinished strategic point"},"finish_reason":"length"}],"usage":{"prompt_tokens":12,"completion_tokens":320,"total_tokens":332}}"""));
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["AiChat:GroqApiKey"] = "test-key" }).Build();
+        var provider = new GroqAiProvider(new TestHttpClientFactory(handler), configuration, NullLogger<OpenAiCompatibleAiProvider>.Instance);
+        var companion = new AiChatCompanion { Provider = "Groq", Model = "openai/gpt-oss-120b" };
+
+        var reasoningOnly = await provider.GenerateReplyAsync(companion, "Discussion mode: test", CancellationToken.None);
+        var truncated = await provider.GenerateReplyAsync(companion, "Discussion mode: test", CancellationToken.None);
+
+        Assert.Equal("ai_reasoning_exhausted", reasoningOnly.ErrorCode);
+        Assert.Equal(320, reasoningOnly.Usage?.ReasoningTokens);
+        Assert.Equal("ai_response_truncated", truncated.ErrorCode);
+        Assert.Null(truncated.Text);
+        Assert.Equal(2, handler.RequestBodies.Count);
+    }
+
     private static HttpResponseMessage JsonResponse(string json) => new(HttpStatusCode.OK)
     {
         Content = new StringContent(json, Encoding.UTF8, "application/json")

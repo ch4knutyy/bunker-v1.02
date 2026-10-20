@@ -17,6 +17,7 @@ function applyDeveloperAccessState(value) {
 		recentAudit: projection.recentAudit || projection.RecentAudit || []
 	} : null;
 	renderDeveloperAuthorityUi();
+	if (typeof renderLobbyState === 'function') renderLobbyState();
 	if (typeof renderLobbyGameSetup === 'function') renderLobbyGameSetup();
 	renderPostGameCommandState();
 }

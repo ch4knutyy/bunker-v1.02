@@ -90,6 +90,7 @@ public sealed class RoomChatServiceTests
         Assert.Contains("CanonicalSelf", discussion);
         Assert.Contains("PublicPlayers", discussion);
         Assert.DoesNotContain("Hidden diagnosis", discussion);
+        Assert.DoesNotContain("AI secret card", discussion);
     }
 
     [Fact]

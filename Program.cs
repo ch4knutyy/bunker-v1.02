@@ -244,6 +244,11 @@ builder.Services.AddScoped<IProfileGameHistoryService, ProfileGameHistoryService
 
 var app = builder.Build();
 
+var aiTokenCostOptions = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<AiTokenCostOptions>>().Value;
+var groqConfigured = app.Services.GetRequiredService<AiProviderManagementService>().HasApiKey("Groq");
+app.Logger.LogInformation("AI startup configuration: AiTokenCostDryRun={DryRun}; Environment={Environment}; GroqConfigured={GroqConfigured}",
+	aiTokenCostOptions.DryRun, app.Environment.EnvironmentName, groqConfigured);
+
 // Fail fast before the server starts accepting requests.
 _ = app.Services.GetRequiredService<IScenarioContentRegistry>();
 

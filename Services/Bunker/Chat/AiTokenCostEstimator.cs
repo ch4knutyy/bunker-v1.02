@@ -19,7 +19,7 @@ public sealed class AiCostModelPrice
 
 public sealed class AiTokenCostOptions
 {
-    public bool DryRun { get; set; }
+    public bool DryRun { get; set; } = false;
     public bool ExactOpenAiInputTokensEnabled { get; set; }
     public bool ExactOpenAiInputTokensAuthorized { get; set; }
     public string ExactOpenAiInputTokensModel { get; set; } = "gpt-6-astra";

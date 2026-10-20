@@ -47,7 +47,7 @@ function applyLobbyAiDefaultsToNewPlayers(members, lifecycle) {
 		lobbyAiNewPlayersToConfigure = null;
 		return;
 	}
-	if (!lobbyCanEditGameSettings()) return;
+	if (!isDeveloper) return;
 	const defaults = readLobbyAiDefaults();
 	for (const member of members) {
 		if (!lobbyAiField(member, 'isAi', 'IsAi')) continue;
@@ -76,7 +76,7 @@ function lobbyAiField(source, camel, pascal) { return source?.[camel] ?? source?
 function lobbyAiStatusLabel(status) { return t({ configured: 'lobbyAiStatusConfigured', missing_api_key: 'lobbyAiStatusMissingKey', model_unavailable: 'lobbyAiStatusModelUnavailable', rate_limited: 'lobbyAiStatusRateLimited', error: 'lobbyAiStatusError', checking: 'lobbyAiStatusChecking' }[status] || 'lobbyAiStatusError'); }
 
 async function ensureLobbyAiCatalog(provider) {
-	if (lobbyAiCatalogs.has(provider) || lobbyAiCatalogPending.has(provider) || !lobbyCanEditGameSettings()) return;
+	if (lobbyAiCatalogs.has(provider) || lobbyAiCatalogPending.has(provider) || !isDeveloper) return;
 	lobbyAiCatalogPending.add(provider);
 	try { lobbyAiCatalogs.set(provider, await connection.invoke('GetAiProviderCatalog', provider)); }
 	catch (error) { lobbyAiCatalogs.set(provider, { provider, catalogAvailable: false, errorCode: String(error?.message || error), models: [] }); }
@@ -84,7 +84,7 @@ async function ensureLobbyAiCatalog(provider) {
 }
 
 async function ensureLobbyAiDiagnostics(playerId) {
-	if (lobbyAiDiagnostics.has(playerId) || lobbyAiDiagnosticsPending.has(playerId) || !lobbyCanEditGameSettings()) return;
+	if (lobbyAiDiagnostics.has(playerId) || lobbyAiDiagnosticsPending.has(playerId) || !isDeveloper) return;
 	lobbyAiDiagnosticsPending.add(playerId);
 	try { lobbyAiDiagnostics.set(playerId, await connection.invoke('GetAiProviderDiagnostics', playerId)); }
 	catch { lobbyAiDiagnostics.set(playerId, { status: 'error', lastError: 'ai_provider_unavailable' }); }
@@ -92,7 +92,7 @@ async function ensureLobbyAiDiagnostics(playerId) {
 }
 
 async function configureLobbyAiProvider(playerId, provider, model) {
-	if (lobbyAiConfigPending.has(playerId)) return;
+	if (!isDeveloper || lobbyAiConfigPending.has(playerId)) return;
 	lobbyAiConfigPending.add(playerId); renderLobbyState();
 	try {
 		await connection.invoke('ConfigureAiProvider', playerId, provider, model);
@@ -105,6 +105,7 @@ async function configureLobbyAiProvider(playerId, provider, model) {
 }
 
 async function changeLobbyAiProvider(playerId, provider) {
+	if (!isDeveloper) return;
 	await ensureLobbyAiCatalog(provider);
 	const catalog = lobbyAiCatalogs.get(provider);
 	const models = lobbyAiField(catalog, 'models', 'Models') || [];
@@ -114,11 +115,13 @@ async function changeLobbyAiProvider(playerId, provider) {
 }
 
 function changeLobbyAiModel(playerId, provider, input) {
+	if (!isDeveloper) return;
 	const model = String(input?.value || '').trim();
 	if (model) void configureLobbyAiProvider(playerId, provider, model);
 }
 
 async function testLobbyAiProvider(playerId) {
+	if (!isDeveloper) return;
 	if (!confirm(t('lobbyAiTestWarning'))) return;
 	lobbyAiConfigPending.add(playerId); renderLobbyState();
 	try { lobbyAiDiagnostics.set(playerId, await connection.invoke('TestAiProviderConnection', playerId)); }
@@ -294,7 +297,7 @@ async function toggleLobbyReady() {
 }
 
 async function addLobbyAiPlayers() {
-	if (lobbyCommandPending) return;
+	if (!isDeveloper || lobbyCommandPending) return;
 	const count = Number(document.getElementById('lobbyAiCount')?.value || 1);
 	const members = lobbyAiField(lobbyState, 'members', 'Members') || [];
 	lobbyAiNewPlayersToConfigure = {
@@ -315,7 +318,7 @@ function adjustLobbyAiCount(delta) {
 }
 
 async function removeLobbyAiPlayer(playerId) {
-	if (lobbyCommandPending) return;
+	if (!isDeveloper || lobbyCommandPending) return;
 	lobbyCommandPending = true; renderLobbyState();
 	try { await connection.invoke('RemoveAiPlayer', playerId); }
 	finally { lobbyCommandPending = false; renderLobbyState(); }
@@ -844,7 +847,7 @@ function renderLobbyState() {
 	].map(([label, value, className = '']) => `<article class="lobby-summary-card ${className}"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></article>`).join('');
 	const list = document.getElementById('lobbyMembers');
 	const aiPanel = document.getElementById('lobbyAiPlayers');
-	if (aiPanel) { aiPanel.hidden = !isHost || lifecycle !== 'Lobby'; const addAi = document.getElementById('lobbyAddAiButton'); const count = document.getElementById('lobbyAiCount'); const maxPlayers = Number(lobbyGet(lobbyGet(state, 'settings', 'Settings'), 'maxGameplayPlayers', 'MaxGameplayPlayers') || 12); const full = gameplayCount >= maxPlayers; if (addAi) { addAi.disabled = lobbyCommandPending || full; addAi.textContent = lobbyCommandPending ? '…' : t('lobbyAddAi'); } if (count) count.disabled = lobbyCommandPending || full; aiPanel.classList.toggle('is-full', full); }
+	if (aiPanel) { aiPanel.hidden = !isDeveloper || lifecycle !== 'Lobby'; const addAi = document.getElementById('lobbyAddAiButton'); const count = document.getElementById('lobbyAiCount'); const maxPlayers = Number(lobbyGet(lobbyGet(state, 'settings', 'Settings'), 'maxGameplayPlayers', 'MaxGameplayPlayers') || 12); const full = gameplayCount >= maxPlayers; if (addAi) { addAi.disabled = lobbyCommandPending || full; addAi.textContent = lobbyCommandPending ? '…' : t('lobbyAddAi'); } if (count) count.disabled = lobbyCommandPending || full; aiPanel.classList.toggle('is-full', full); }
 	if (list) list.innerHTML = members.map(member => {
 		const id = lobbyGet(member, 'playerId', 'PlayerId'); const role = lobbyGet(member, 'role', 'Role'); const host = lobbyGet(member, 'isCurrentHost', 'IsCurrentHost');
 		const developer = !!lobbyGet(member, 'isDeveloper', 'IsDeveloper');
@@ -858,7 +861,7 @@ function renderLobbyState() {
                     <div class="lobby-member-state"><span class="lobby-connection-state"><span class="lobby-connection-indicator ${connected ? 'online' : 'offline'}" aria-hidden="true"></span>${connected ? t('lobbyConnected') : t('lobbyDisconnected')}</span><span class="${ready ? 'lobby-ready-status' : 'lobby-not-ready-status'}">${ready ? t('lobbyReady') : t('lobbyNotReady')}</span></div>
                 </header>
                 ${self && gameplay ? `<button id="lobbyReadyButton" type="button" class="btn-success lobby-self-ready lobby-command" data-lobby-focus="ready-${escapeHtml(String(id))}" onclick="toggleLobbyReady()" ${lobbyCommandPending || lifecycle !== 'Lobby' ? 'disabled' : ''}>${ready ? t('lobbyCancelReady') : t('lobbyIAmReady')}</button>` : ''}
-				${canManageLobby && lifecycle === 'Lobby' && ai ? renderLobbyAiControls(member, String(id)) : isHost && lifecycle === 'Lobby' && !gmRole ? `<div class="lobby-host-controls"><div class="lobby-role-control"><span>${t('lobbyRoleLabel')}</span></div><div class="lobby-segmented"><button class="lobby-command ${role === 'Player' || role === 'HostPlayer' ? 'active' : ''}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', false)">${t('lobbyRolePlayer')}</button><button class="lobby-command ${role === 'Spectator' ? 'active' : ''}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', true)">${t('lobbyRoleSpectator')}</button></div></div>` : ''}
+				${isDeveloper && lifecycle === 'Lobby' && ai ? renderLobbyAiControls(member, String(id)) : isHost && lifecycle === 'Lobby' && !gmRole ? `<div class="lobby-host-controls"><div class="lobby-role-control"><span>${t('lobbyRoleLabel')}</span></div><div class="lobby-segmented"><button class="lobby-command ${role === 'Player' || role === 'HostPlayer' ? 'active' : ''}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', false)">${t('lobbyRolePlayer')}</button><button class="lobby-command ${role === 'Spectator' ? 'active' : ''}" onclick="setLobbyParticipation('${escapeHtml(String(id))}', true)">${t('lobbyRoleSpectator')}</button></div></div>` : ''}
             </article>`;
 	}).join('');
 	if (focusedKey) [...document.querySelectorAll('[data-lobby-focus]')].find(element => element.dataset.lobbyFocus === focusedKey)?.focus({ preventScroll: true });

@@ -1,8 +1,50 @@
 // Room chat is a classic-script domain, like the rest of the Bunker client.
-const roomChatState = { ids: new Set(), aiEnabled: true, roomId: '', historyLoaded: false, open: false, unread: 0, trigger: null, presentation: null, presentationRoomId: '', presentationLoading: false, turnCompletionPending: false, discussionRoundRunning: false, discussionRoundSpeaker: "", discussionRoundDone: 0, discussionRoundTotal: 0 };
+const roomChatState = { ids: new Set(), aiEnabled: true, roomId: '', historyLoaded: false, open: false, unread: 0, trigger: null, presentation: null, presentationRoomId: '', presentationLoading: false, turnCompletionPending: false, discussionRoundRunning: false, discussionRoundSpeaker: "", discussionRoundDone: 0, discussionRoundTotal: 0, aiStatusErrorTimer: 0 };
 function updateAiPresentation(data) { roomChatState.presentation = data || null; roomChatState.presentationLoading = false; updateRoomChatControls(); }
 
-function updateRoomChatAiStatus(data) { const status = document.getElementById('roomChatAiStatus'); if (!status) return; const state = data?.state || data?.State; const name = data?.name || data?.Name || 'AI'; const error = data?.error || data?.Error; if (state === 'typing') { status.hidden = false; status.textContent = `${name} ${t('roomChatTyping')}`; return; } if (error) { status.hidden = false; status.textContent = t({ ai_not_configured: 'roomChatAiUnavailable', ai_auth_failed: 'roomChatAiUnavailable', ai_model_not_found: 'roomChatAiUnavailable', ai_rate_limited: 'roomChatAiBusy', ai_timeout: 'roomChatAiBusy', ai_provider_unavailable: 'roomChatAiBusy', ai_network_error: 'roomChatAiBusy' }[error] || 'roomChatAiUnavailable'); return; } status.hidden = true; }
+function roomChatPacing() {
+	const configured = window.BunkerChatPacing || {};
+	const delay = Number(document.getElementById('roomChatDrawer')?.dataset?.narratorAnimationDelayMs);
+	return {
+		narratorDelayMs: Math.max(0, Math.min(1000, Number(configured.narratorDelayMs ?? delay) || 0)),
+		fastMode: Boolean(configured.fastMode),
+		reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+	};
+}
+
+function clearRoomChatAiStatus() {
+	const status = document.getElementById('roomChatAiStatus'); if (!status) return;
+	if (roomChatState.aiStatusErrorTimer) window.clearTimeout(roomChatState.aiStatusErrorTimer);
+	roomChatState.aiStatusErrorTimer = 0;
+	status.hidden = true; status.className = 'room-chat-ai-status'; status.replaceChildren();
+}
+
+function setRoomChatTypingStatus(name, playerStableId) {
+	const status = document.getElementById('roomChatAiStatus'); if (!status) return;
+	if (roomChatState.aiStatusErrorTimer) window.clearTimeout(roomChatState.aiStatusErrorTimer);
+	roomChatState.aiStatusErrorTimer = 0;
+	status.hidden = false; status.className = 'room-chat-ai-status is-typing'; status.dataset.playerStableId = String(playerStableId || '');
+	const label = document.createElement('span'); label.textContent = `${name} ${t('roomChatTyping')}`;
+	const dots = document.createElement('span'); dots.className = 'room-chat-typing-dots'; dots.setAttribute('aria-hidden', 'true'); dots.textContent = '…';
+	status.replaceChildren(label, dots);
+}
+
+function showRoomChatAiError(error) {
+	const status = document.getElementById('roomChatAiStatus'); if (!status) return;
+	if (roomChatState.aiStatusErrorTimer) window.clearTimeout(roomChatState.aiStatusErrorTimer);
+	const messageKey = { ai_not_configured: 'roomChatAiUnavailable', ai_auth_failed: 'roomChatAiUnavailable', ai_model_not_found: 'roomChatAiUnavailable', ai_rate_limited: 'roomChatAiBusy', ai_timeout: 'roomChatAiBusy', ai_provider_unavailable: 'roomChatAiBusy', ai_network_error: 'roomChatAiBusy' }[error] || 'roomChatAiUnavailable';
+	status.hidden = false; status.className = 'room-chat-ai-status is-error'; status.dataset.playerStableId = '';
+	status.textContent = `${t(messageKey)} · ${error}`;
+	roomChatState.aiStatusErrorTimer = window.setTimeout(clearRoomChatAiStatus, 8000);
+}
+
+function updateRoomChatAiStatus(data) {
+	const status = document.getElementById('roomChatAiStatus'); if (!status) return;
+	const state = data?.state || data?.State; const name = data?.name || data?.Name || 'AI'; const error = data?.error || data?.Error;
+	if (state === 'typing') { setRoomChatTypingStatus(name, data?.playerStableId || data?.PlayerStableId); return; }
+	if (error) { showRoomChatAiError(String(error)); return; }
+	if (!status.classList.contains('is-error')) clearRoomChatAiStatus();
+}
 
 function updateAiDiscussionRound(data) {
     roomChatState.discussionRoundRunning = Boolean(data?.isRunning ?? data?.IsRunning);
@@ -20,7 +62,7 @@ function refreshAiDiscussionRound() {
 }
 
 async function startAiDiscussionRound() {
-    if (roomChatState.discussionRoundRunning || !connection) return;
+    if (!isDeveloper || roomChatState.discussionRoundRunning || !connection) return;
     roomChatState.discussionRoundRunning = true; // Disable immediately to reject double clicks.
     updateRoomChatControls();
     try {
@@ -51,7 +93,7 @@ function openRoomChat() { const { drawer, trigger, input } = roomChatElements();
 function closeRoomChat() { const { drawer, trigger } = roomChatElements(); if (!drawer) return; roomChatState.open = false; drawer.classList.remove('is-open'); drawer.setAttribute('aria-hidden', 'true'); trigger?.setAttribute('aria-expanded', 'false'); (roomChatState.trigger || trigger)?.focus?.(); }
 function toggleRoomChat() { roomChatState.open ? closeRoomChat() : openRoomChat(); }
 
-function renderRoomChatMessage(message) {
+function renderRoomChatMessage(message, options = {}) {
 	const id = message?.id || message?.Id;
 	if (!id || roomChatState.ids.has(id)) return;
 	roomChatState.ids.add(id);
@@ -60,6 +102,11 @@ function renderRoomChatMessage(message) {
 	const item = document.createElement('article');
 	const senderType = String(message.senderType ?? message.SenderType ?? 'Human').toLowerCase();
 	item.className = `room-chat-message room-chat-message--${senderType === 'ai' ? 'ai' : senderType === 'system' ? 'system' : 'human'}`;
+	const pacing = roomChatPacing();
+	if (!options.fromHistory && roomChatState.historyLoaded && !pacing.fastMode && !pacing.reducedMotion && senderType !== 'human') {
+		item.classList.add('room-chat-message--arriving');
+		if (senderType === 'system') item.style.setProperty('--room-chat-arrival-delay', `${pacing.narratorDelayMs}ms`);
+	}
 	if ((message.senderId || message.SenderId) === getMyStablePlayerId?.()) item.classList.add('room-chat-message--self');
 	const senderName = message.senderName || message.SenderName || 'Unknown';
 	const header = document.createElement('strong'); header.textContent = senderType === 'system' ? roomChatNarratorName() : (senderType === 'ai' ? String(senderName).replace(/\s+AI$/i, '') : senderName);
@@ -67,6 +114,7 @@ function renderRoomChatMessage(message) {
 	const time = document.createElement('time'); const timestamp = message.timestamp || message.Timestamp; time.textContent = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''; time.dateTime = timestamp || '';
 	const body = document.createElement('p'); body.textContent = roomChatSystemText(message) || message.text || message.Text || '';
 	item.append(header, time, body); list.append(item);
+	if (senderType === 'ai') clearRoomChatAiStatus();
 	if (roomChatState.open && shouldStick) list.scrollTop = list.scrollHeight;
 	if (!roomChatState.open) { roomChatState.unread++; updateRoomChatUnread(); }
 }
@@ -80,16 +128,16 @@ function roomChatSystemText(message) {
 	const name = data.name || data.playerId || '';
 	const revealedValue = data.value ? `: ${data.value}` : '';
 	const templates = {
-		uk: { game_started: `Партію розпочато. Учасників: ${data.playerCount}; місць у бункері: ${data.capacity}.`, round_started: `Розпочато раунд ${data.round}.`, presentation_started: `Починається представлення: ${characteristic}.`, presentation_speaker: `Черга: ${name}.`, ai_characteristic_selected: `${name} обирає: ${characteristic}.`, characteristic_revealed: `${name} розкриває: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} вже не має прихованих характеристик для представлення.`, presentation_skipped: 'Учасника пропущено.', discussion_started: 'Представлення завершено. Починається обговорення.', voting_started: `Почалося голосування${data.round ? ` у раунді ${data.round}` : ''}.`, voting_completed: 'Голосування завершено.' },
-		en: { game_started: `The game has started. Participants: ${data.playerCount}; bunker seats: ${data.capacity}.`, round_started: `Round ${data.round} has started.`, presentation_started: `Presentation begins: ${characteristic}.`, presentation_speaker: `Now speaking: ${name}.`, ai_characteristic_selected: `${name} chooses: ${characteristic}.`, characteristic_revealed: `${name} reveals: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} has no hidden characteristics left to present.`, presentation_skipped: 'The participant was skipped.', discussion_started: 'Presentations are complete. Discussion begins.', voting_started: `Voting has started${data.round ? ` in round ${data.round}` : ''}.`, voting_completed: 'Voting has ended.' },
-		ru: { game_started: `Партия началась. Участников: ${data.playerCount}; мест в бункере: ${data.capacity}.`, round_started: `Начался раунд ${data.round}.`, presentation_started: `Начинается представление: ${characteristic}.`, presentation_speaker: `Очередь: ${name}.`, ai_characteristic_selected: `${name} выбирает: ${characteristic}.`, characteristic_revealed: `${name} раскрывает: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} больше не имеет скрытых характеристик для представления.`, presentation_skipped: 'Участник пропущен.', discussion_started: 'Представления завершены. Начинается обсуждение.', voting_started: `Началось голосование${data.round ? ` в раунде ${data.round}` : ''}.`, voting_completed: 'Голосование завершено.' }
+		uk: { game_started: `Партію розпочато. Учасників: ${data.playerCount}; місць у бункері: ${data.capacity}.`, round_started: `Розпочато раунд ${data.round}.`, presentation_started: `Починається представлення: ${characteristic}.`, presentation_speaker: `Черга: ${name}.`, ai_characteristic_selected: `${name} обирає: ${characteristic}.`, characteristic_revealed: `${name} розкриває: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} вже не має прихованих характеристик для представлення.`, presentation_skipped: 'Учасника пропущено.', presentations_complete: 'Представлення завершено. GM може почати обговорення.', discussion_started: 'Представлення завершено. Починається обговорення.', voting_started: `Почалося голосування${data.round ? ` у раунді ${data.round}` : ''}.`, voting_completed: 'Голосування завершено.' },
+		en: { game_started: `The game has started. Participants: ${data.playerCount}; bunker seats: ${data.capacity}.`, round_started: `Round ${data.round} has started.`, presentation_started: `Presentation begins: ${characteristic}.`, presentation_speaker: `Now speaking: ${name}.`, ai_characteristic_selected: `${name} chooses: ${characteristic}.`, characteristic_revealed: `${name} reveals: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} has no hidden characteristics left to present.`, presentation_skipped: 'The participant was skipped.', presentations_complete: 'Presentations are complete. The GM may start discussion.', discussion_started: 'Presentations are complete. Discussion begins.', voting_started: `Voting has started${data.round ? ` in round ${data.round}` : ''}.`, voting_completed: 'Voting has ended.' },
+		ru: { game_started: `Партия началась. Участников: ${data.playerCount}; мест в бункере: ${data.capacity}.`, round_started: `Начался раунд ${data.round}.`, presentation_started: `Начинается представление: ${characteristic}.`, presentation_speaker: `Очередь: ${name}.`, ai_characteristic_selected: `${name} выбирает: ${characteristic}.`, characteristic_revealed: `${name} раскрывает: ${characteristic}${revealedValue}.`, presentation_no_characteristic: `${name} больше не имеет скрытых характеристик для представления.`, presentation_skipped: 'Участник пропущен.', presentations_complete: 'Представления завершены. GM может начать обсуждение.', discussion_started: 'Представления завершены. Начинается обсуждение.', voting_started: `Началось голосование${data.round ? ` в раунде ${data.round}` : ''}.`, voting_completed: 'Голосование завершено.' }
 	};
 	return templates[getCurrentLanguage()]?.[eventType] || '';
 }
 
 function replaceRoomChatHistory(messages) {
-	roomChatState.ids.clear(); const { list } = roomChatElements(); if (list) list.replaceChildren();
-	(messages || []).forEach(renderRoomChatMessage); roomChatState.historyLoaded = true;
+	clearRoomChatAiStatus(); roomChatState.ids.clear(); const { list } = roomChatElements(); if (list) list.replaceChildren();
+	(messages || []).forEach(message => renderRoomChatMessage(message, { fromHistory: true })); roomChatState.historyLoaded = true;
 }
 
 function refreshAiPresentationState(force = false) {
@@ -127,12 +175,12 @@ function updateRoomChatControls() {
 	if (trigger) { trigger.textContent = t('roomChatTitle'); trigger.setAttribute('aria-label', t('roomChatTitle')); trigger.title = t('roomChatTitle'); }
 	const close = document.getElementById('roomChatCloseButton'); if (close) close.setAttribute('aria-label', t('roomChatClose'));
 	const connectionStatus = document.getElementById('roomChatConnection'); if (connectionStatus) connectionStatus.textContent = connection?.state === signalR.HubConnectionState.Connected ? t('roomChatConnected') : t('roomChatReconnecting');
-	if (add) add.hidden = !isHost;
-	if (toggle) { toggle.hidden = !isHost; toggle.textContent = roomChatState.aiEnabled ? t('roomChatAiOn') : t('roomChatAiOff'); }
+	if (add) add.hidden = !isDeveloper;
+	if (toggle) { toggle.hidden = !isDeveloper; toggle.textContent = roomChatState.aiEnabled ? t('roomChatAiOn') : t('roomChatAiOff'); }
 	const current = roomChatState.presentation; const status = String(current?.status ?? current?.Status ?? 'Inactive');
 	const speakerId = String(current?.currentSpeakerStablePlayerId ?? current?.CurrentSpeakerStablePlayerId ?? '');
 	const isMyHumanTurn = status === 'Running' && !!speakerId && speakerId === roomChatMyStablePlayerId();
-	const presentation = document.getElementById('aiPresentationControls'); if (presentation) presentation.hidden = !isHost && !isMyHumanTurn;
+	const presentation = document.getElementById('aiPresentationControls'); if (presentation) presentation.hidden = !isDeveloper && !isMyHumanTurn;
 	const speaker = roomChatPresentationSpeakerName(speakerId);
 	const progress = `${Math.min(Number(current?.currentIndex ?? current?.CurrentIndex ?? 0) + (status === 'Running' || status === 'Paused' ? 1 : 0), Number(current?.participantCount ?? current?.ParticipantCount ?? 0))}/${Number(current?.participantCount ?? current?.ParticipantCount ?? 0)}`;
 	const label = document.getElementById('aiPresentationState'); if (label) label.textContent = roomChatPresentationStateText(status, speakerId, speaker, current?.lastGenerationError ?? current?.LastGenerationError, current?.currentSpeakerStatus ?? current?.CurrentSpeakerStatus, progress);
@@ -142,7 +190,7 @@ function updateRoomChatControls() {
 	const buttons = { start: document.getElementById('startAiPresentationBtn'), pause: document.getElementById('pauseAiPresentationBtn'), resume: document.getElementById('resumeAiPresentationBtn'), next: document.getElementById('nextAiPresentationBtn'), skip: document.getElementById('skipAiPresentationBtn'), end: document.getElementById('endAiPresentationBtn'), retry: document.getElementById('retryAiPresentationBtn'), discussion: document.getElementById('beginAiDiscussionBtn') };
     const discussionRoundButton = document.getElementById('startAiDiscussionRoundBtn');
     if (discussionRoundButton) {
-        discussionRoundButton.hidden = !isHost || status !== 'Discussion';
+        discussionRoundButton.hidden = !isDeveloper || status !== 'Discussion';
         discussionRoundButton.disabled = !roomChatState.aiEnabled || roomChatState.discussionRoundRunning ||
             connection?.state !== signalR.HubConnectionState.Connected;
         const labels = {
@@ -154,13 +202,13 @@ function updateRoomChatControls() {
     }
     const roundProgress = document.getElementById('aiDiscussionRoundProgress');
     if (roundProgress) {
-        roundProgress.hidden = !isHost || !roomChatState.discussionRoundRunning;
+        roundProgress.hidden = !isDeveloper || !roomChatState.discussionRoundRunning;
         if (!roundProgress.hidden) roundProgress.textContent =
             `${roomChatState.discussionRoundSpeaker || 'AI'} · ${roomChatState.discussionRoundDone + 1}/${roomChatState.discussionRoundTotal}`;
     }
-	const characteristic = document.getElementById('aiPresentationCharacteristic'); if (characteristic) characteristic.hidden = status === 'Running' || status === 'Paused';
+	const characteristic = document.getElementById('aiPresentationCharacteristic'); if (characteristic) characteristic.hidden = !isDeveloper || status === 'Running' || status === 'Paused';
 	const currentRound = Number(currentRoom?.currentRound ?? currentRoom?.CurrentRound ?? 0); const presentationRound = Number(current?.roundNumber ?? current?.RoundNumber ?? 0);
-	if (isHost) { buttons.start.hidden = !(status === 'Inactive' || (presentationRound > 0 && presentationRound !== currentRound)); buttons.pause.hidden = status !== 'Running'; buttons.resume.hidden = status !== 'Paused'; buttons.next.hidden = true; buttons.skip.hidden = status !== 'Running'; buttons.end.hidden = status !== 'Running' && status !== 'Paused'; buttons.retry.hidden = status !== 'Running' || !(current?.lastGenerationError ?? current?.LastGenerationError); buttons.discussion.hidden = status !== 'ReadyForDiscussion'; }
+	if (isDeveloper) { buttons.start.hidden = !(status === 'Inactive' || (presentationRound > 0 && presentationRound !== currentRound)); buttons.pause.hidden = status !== 'Running'; buttons.resume.hidden = status !== 'Paused'; buttons.next.hidden = true; buttons.skip.hidden = status !== 'Running'; buttons.end.hidden = status !== 'Running' && status !== 'Paused'; buttons.retry.hidden = status !== 'Running' || !(current?.lastGenerationError ?? current?.LastGenerationError); buttons.discussion.hidden = status !== 'ReadyForDiscussion'; }
 	else { [buttons.start, buttons.pause, buttons.resume, buttons.next, buttons.skip, buttons.end, buttons.retry, buttons.discussion].forEach(button => { if (button) button.hidden = true; }); }
 }
 
@@ -178,7 +226,7 @@ function roomChatPresentationStateText(status, speakerId, speaker, error, speake
 	const myTurn = ({ uk: 'Ваша черга', en: 'Your turn', ru: 'Ваша очередь' })[getCurrentLanguage()] || 'Your turn';
 	const speakerLabels = { uk: { WaitingForHuman: 'очікується виступ людини', Revealing: 'розкриває характеристику', Generating: 'генерує репліку', Finished: 'завершено', Failed: 'помилка', Paused: 'пауза' }, en: { WaitingForHuman: 'waiting for the human speaker', Revealing: 'revealing a characteristic', Generating: 'generating speech', Finished: 'finished', Failed: 'failed', Paused: 'paused' }, ru: { WaitingForHuman: 'ожидается выступление человека', Revealing: 'раскрывает характеристику', Generating: 'генерирует реплику', Finished: 'завершено', Failed: 'ошибка', Paused: 'пауза' } };
 	const localizedSpeakerStatus = speakerLabels[getCurrentLanguage()]?.[speakerStatus] || '';
-	return `${text}${progress && progress !== '0/0' ? ` · ${progress}` : ''}${speaker ? ` · ${isMyTurn ? myTurn : speaker}` : ''}${localizedSpeakerStatus ? ` · ${localizedSpeakerStatus}` : ''}${error ? ` · ${t('roomChatAiUnavailable')}` : ''}`;
+	return `${text}${progress && progress !== '0/0' ? ` · ${progress}` : ''}${speaker ? ` · ${isMyTurn ? myTurn : speaker}` : ''}${localizedSpeakerStatus ? ` · ${localizedSpeakerStatus}` : ''}${error ? ` · ${t('roomChatAiUnavailable')} · ${error}` : ''}`;
 }
 
 function roomChatPresentationTurnText(progress) {
@@ -211,17 +259,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		event.preventDefault(); const input = document.getElementById('roomChatInput'); const text = input?.value?.trim(); if (!text || !connection) return;
 		try { await connection.invoke('SendRoomChatMessage', text, crypto.randomUUID()); input.value = ''; } catch (error) { console.warn('Chat send failed', error); }
 	});
-	document.getElementById('addAiChatCompanionsBtn')?.addEventListener('click', () => connection.invoke('AddDefaultAiCompanions').catch(console.warn));
-	document.getElementById('toggleAiChatBtn')?.addEventListener('click', () => connection.invoke('SetAiChatResponsesEnabled', !roomChatState.aiEnabled).catch(console.warn));
-	document.getElementById('startAiPresentationBtn')?.addEventListener('click', () => connection.invoke('StartAiPresentation', document.getElementById('aiPresentationCharacteristic')?.value).catch(console.warn));
-	document.getElementById('pauseAiPresentationBtn')?.addEventListener('click', () => connection.invoke('PauseAiPresentation').catch(console.warn));
-	document.getElementById('resumeAiPresentationBtn')?.addEventListener('click', () => connection.invoke('ResumeAiPresentation').catch(console.warn));
-	document.getElementById('nextAiPresentationBtn')?.addEventListener('click', () => connection.invoke('NextAiPresentationSpeaker', false).catch(console.warn));
-	document.getElementById('skipAiPresentationBtn')?.addEventListener('click', () => connection.invoke('NextAiPresentationSpeaker', true).catch(console.warn));
+	document.getElementById('addAiChatCompanionsBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('AddDefaultAiCompanions').catch(console.warn); });
+	document.getElementById('toggleAiChatBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('SetAiChatResponsesEnabled', !roomChatState.aiEnabled).catch(console.warn); });
+	document.getElementById('startAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('StartAiPresentation', document.getElementById('aiPresentationCharacteristic')?.value).catch(console.warn); });
+	document.getElementById('pauseAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('PauseAiPresentation').catch(console.warn); });
+	document.getElementById('resumeAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('ResumeAiPresentation').catch(console.warn); });
+	document.getElementById('nextAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('NextAiPresentationSpeaker', false).catch(console.warn); });
+	document.getElementById('skipAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('NextAiPresentationSpeaker', true).catch(console.warn); });
 	document.getElementById('completeAiPresentationTurnStickyBtn')?.addEventListener('click', completeAiPresentationHumanTurn);
-	document.getElementById('endAiPresentationBtn')?.addEventListener('click', () => connection.invoke('EndAiPresentation').catch(console.warn));
-	document.getElementById('retryAiPresentationBtn')?.addEventListener('click', () => connection.invoke('RetryAiPresentationSpeaker').catch(console.warn));
-	document.getElementById('beginAiDiscussionBtn')?.addEventListener('click', () => connection.invoke('BeginAiDiscussion').catch(console.warn));
+	document.getElementById('endAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('EndAiPresentation').catch(console.warn); });
+	document.getElementById('retryAiPresentationBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('RetryAiPresentationSpeaker').catch(console.warn); });
+	document.getElementById('beginAiDiscussionBtn')?.addEventListener('click', () => { if (isDeveloper) connection.invoke('BeginAiDiscussion').catch(console.warn); });
 	document.getElementById('startAiDiscussionRoundBtn')?.addEventListener('click', startAiDiscussionRound);
 	connection?.onreconnected?.(() => {
 		roomChatState.historyLoaded = false;

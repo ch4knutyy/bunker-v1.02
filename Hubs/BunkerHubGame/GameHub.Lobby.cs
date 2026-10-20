@@ -70,19 +70,20 @@ public partial class GameHub
 	public async Task KickLobbyPlayer(string targetPlayerId, string commandId)
 	{
 		var room = RequireLobbyHost();
+		var caller = _roomService.GetPlayer(Context.ConnectionId);
 		var target = ResolveStableLobbyTarget(room, targetPlayerId);
 		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
 		if (target == null) throw new HubException("target_not_found");
 		if (room.IsHost(target)) throw new HubException("cannot_kick_host");
 		if (target.IsAi)
 		{
+			if (!_developerAuthority.IsDeveloper(caller)) throw new HubException("developer_required");
 			if (!RememberLobbyCommand(room, commandId)) { await BroadcastLobbyState(room); return; }
 			_aiParticipants.Remove(room, RoomService.GetPlayerKey(target));
 			_aiConversation?.CancelRoom(room.Id);
 			await BroadcastAiParticipants(room);
 			return;
 		}
-		var caller = _roomService.GetPlayer(Context.ConnectionId);
 		if (_developerAuthority.IsDeveloper(target) && !_developerAuthority.IsDeveloper(caller))
 			throw new HubException("developer_protected");
 		if (!RememberLobbyCommand(room, commandId)) { await BroadcastLobbyState(room); return; }
@@ -486,6 +487,18 @@ public partial class GameHub
 	{
 		var room = RequireLobbyMember(); var player = _roomService.GetPlayer(Context.ConnectionId);
 		if (player == null || !HasActiveRoomCapability(room, player, RoomActorCapability.ManageRoom)) throw new HubException("lobby_host_required"); return room;
+	}
+	private Room RequireDeveloperRoom()
+	{
+		if (!_roomService.TryGetCurrentPlayer(Context.ConnectionId, out var room, out var player)) throw new HubException("chat_room_required");
+		if (!_developerAuthority.IsDeveloper(player)) throw new HubException("developer_required");
+		return room;
+	}
+	private Room RequireDeveloperLobby()
+	{
+		var room = RequireDeveloperRoom();
+		if (room.State != RoomState.Lobby) throw new HubException("lobby_closed");
+		return room;
 	}
 	private Player? ResolveStableLobbyTarget(Room room, string id)
 	{

@@ -112,11 +112,20 @@ public abstract class OpenAiCompatibleAiProvider(IHttpClientFactory clients, ICo
                 }
 
                 using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(timeout.Token));
-                var text = document.RootElement.TryGetProperty("choices", out var choices) && choices.ValueKind == JsonValueKind.Array && choices.GetArrayLength() > 0 &&
-                    choices[0].TryGetProperty("message", out var message) && message.TryGetProperty("content", out var content)
+                var hasChoice = document.RootElement.TryGetProperty("choices", out var choices) &&
+                    choices.ValueKind == JsonValueKind.Array && choices.GetArrayLength() > 0;
+                var choice = hasChoice ? choices[0] : default;
+                var text = hasChoice && choice.TryGetProperty("message", out var message) && message.TryGetProperty("content", out var content)
                     ? content.GetString() : null;
+                var hasReasoningWithoutText = hasChoice && choice.TryGetProperty("message", out var responseMessage) &&
+                    (HasText(responseMessage, "reasoning") || HasText(responseMessage, "reasoning_content"));
+                var wasTruncated = hasChoice && choice.TryGetProperty("finish_reason", out var finishReason) &&
+                    finishReason.ValueKind == JsonValueKind.String &&
+                    string.Equals(finishReason.GetString(), "length", StringComparison.OrdinalIgnoreCase);
                 var usage = AiTokenUsageParser.FromOpenAiCompatible(document.RootElement);
-                var result = string.IsNullOrWhiteSpace(text) ? new AiProviderReply(null, "ai_empty_response", usage) : new AiProviderReply(text, Usage: usage);
+                var result = string.IsNullOrWhiteSpace(text)
+                    ? new AiProviderReply(null, hasReasoningWithoutText ? "ai_reasoning_exhausted" : "ai_empty_response", usage)
+                    : wasTruncated ? new AiProviderReply(null, "ai_response_truncated", usage) : new AiProviderReply(text, Usage: usage);
                 logger.LogInformation("AI request completed: {Provider} {Model} {Kind} estimatedInputTokens={EstimatedInputTokens} actualInputTokens={InputTokens} actualOutputTokens={OutputTokens} reasoningTokens={ReasoningTokens} cachedInputTokens={CachedInputTokens} httpStatus=200 durationMs={DurationMs} retries={Retries} errorCode={ErrorCode}",
                     ProviderId, companion.Model, kind, AiTokenCostEstimator.EstimatePromptTokens(requestPrompt), usage?.InputTokens, usage?.OutputTokens,
                     usage?.ReasoningTokens, usage?.CachedInputTokens, total.Elapsed.TotalMilliseconds, attempt, result.ErrorCode);
@@ -158,6 +167,10 @@ public abstract class OpenAiCompatibleAiProvider(IHttpClientFactory clients, ICo
         _ when (int)status >= 500 => "ai_provider_unavailable",
         _ => "ai_provider_failed"
     };
+
+    private static bool HasText(JsonElement parent, string property) =>
+        parent.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String &&
+        !string.IsNullOrWhiteSpace(value.GetString());
 }
 
 internal static class AiPromptCompactor

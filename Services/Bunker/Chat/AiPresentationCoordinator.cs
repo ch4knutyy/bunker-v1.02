@@ -1,6 +1,7 @@
 using Bunker.Hubs;
 using Bunker.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 namespace Bunker.Services;
 
@@ -16,9 +17,17 @@ public sealed class AiPresentationCoordinator(
     AiChatContextBuilder context,
     IAiProvider provider,
     IHubContext<GameHub> hub,
-    ILogger<AiPresentationCoordinator> logger)
+    ILogger<AiPresentationCoordinator> logger,
+    IOptions<AiChatOptions>? options = null,
+    TimeProvider? time = null)
 {
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource> _cancellations = new(StringComparer.OrdinalIgnoreCase);
+    private readonly AiChatOptions pacing = options?.Value ?? new AiChatOptions
+    {
+        MinimumAiTypingMilliseconds = 0,
+        BetweenAiSpeakersMilliseconds = 0
+    };
+    private readonly TimeProvider clock = time ?? TimeProvider.System;
 
     public async Task<bool> StartAsync(Room room, string characteristicKey, CancellationToken cancellationToken)
     {
@@ -260,8 +269,13 @@ public sealed class AiPresentationCoordinator(
         var source = _cancellations.AddOrUpdate(room.Id, _ => CancellationTokenSource.CreateLinkedTokenSource(cancellationToken), (_, old) => { old.Cancel(); old.Dispose(); return CancellationTokenSource.CreateLinkedTokenSource(cancellationToken); });
         try
         {
-            lock (room.SnapshotSyncRoot) room.Presentation.CurrentSpeakerStatus = "Generating";
+            lock (room.SnapshotSyncRoot)
+            {
+                room.Presentation.LastGenerationError = null;
+                room.Presentation.CurrentSpeakerStatus = "Generating";
+            }
             await PublishStateAsync(room, cancellationToken);
+            var typingStarted = clock.GetTimestamp();
             await hub.Clients.Group(room.Id).SendAsync("RoomChatAiStatus", new { playerStableId = speakerId, name = speaker.Name, state = "typing" }, source.Token);
 			var prompt = context.BuildPresentation(
 	room,
@@ -279,19 +293,28 @@ public sealed class AiPresentationCoordinator(
             var quality = AiResponseQualityService.Validate(reply.Text, companion, chat.GetHistory(room.Id), speaker.Profession?.Name);
             if (!quality.IsAccepted)
             {
+                var errorCode = reply.ErrorCode ?? quality.ErrorCode ?? "ai_empty_response";
                 lock (room.SnapshotSyncRoot)
                 {
-                    room.Presentation.LastGenerationError = reply.ErrorCode ?? quality.ErrorCode ?? "ai_empty_response";
+                    room.Presentation.LastGenerationError = errorCode;
                     room.Presentation.CurrentSpeakerStatus = "Failed";
                 }
-                logger.LogWarning("AI presentation response rejected {RoomId} {PlayerId} {Provider} {Model} {Phase} {TurnId} {CorrelationId} {Error}", room.Id, speakerId, companion.Provider, companion.Model, room.CurrentPhase, room.Presentation.PresentationId, correlationId, reply.ErrorCode ?? quality.ErrorCode);
+                logger.LogWarning("AI presentation response rejected {RoomId} {PlayerId} {Provider} {Model} {Phase} {TurnId} {CorrelationId} {Error}", room.Id, speakerId, companion.Provider, companion.Model, room.CurrentPhase, room.Presentation.PresentationId, correlationId, errorCode);
                 await PublishStateAsync(room, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(room.HostConnectionId))
+                    await hub.Clients.Client(room.HostConnectionId).SendAsync("RoomChatAiStatus",
+                        new { playerStableId = speakerId, name = speaker.Name, state = "idle", error = errorCode }, cancellationToken);
                 await NextAsync(room, true, cancellationToken);
                 return;
             }
+            await WaitForPacingAsync(room, speakerId, generationToken, typingStarted, pacing.MinimumAiTypingMilliseconds, source.Token);
+            if (!IsCurrentSpeaker(room, speakerId, generationToken)) return;
             var message = chat.AddAiMessage(room.Id, companion, quality.Text!, room.CurrentRound);
             await hub.Clients.Group(room.Id).SendAsync("RoomChatMessageReceived", message, cancellationToken);
             lock (room.SnapshotSyncRoot) room.Presentation.CurrentSpeakerStatus = "Finished";
+            await PublishStateAsync(room, cancellationToken);
+            await WaitForPacingAsync(room, speakerId, generationToken, clock.GetTimestamp(), pacing.BetweenAiSpeakersMilliseconds, source.Token);
+            if (!IsCurrentSpeaker(room, speakerId, generationToken)) return;
             await NextAsync(room, false, cancellationToken);
         }
         catch (OperationCanceledException) { }
@@ -327,6 +350,19 @@ public sealed class AiPresentationCoordinator(
         participantCount = room.Presentation.ParticipantStablePlayerIds.Count,
         completedCount = room.Presentation.CompletedSpeakerStablePlayerIds.Count
     }, token);
+    private async Task WaitForPacingAsync(Room room, string speakerId, long generationToken, long startedAt,
+        int configuredDelayMilliseconds, CancellationToken token)
+    {
+        var delay = Math.Clamp(configuredDelayMilliseconds, 0, 4000);
+        var remaining = delay - clock.GetElapsedTime(startedAt).TotalMilliseconds;
+        if (remaining > 0) await Task.Delay(TimeSpan.FromMilliseconds(remaining), token);
+        token.ThrowIfCancellationRequested();
+        if (!IsCurrentSpeaker(room, speakerId, generationToken)) throw new OperationCanceledException(token);
+    }
+    private static bool IsCurrentSpeaker(Room room, string speakerId, long generationToken) =>
+        room.Presentation.Status == AiPresentationStatus.Running &&
+        room.Presentation.GenerationToken == generationToken &&
+        room.Presentation.CurrentSpeakerStablePlayerId == speakerId;
     private void Cancel(string roomId) { if (_cancellations.TryRemove(roomId, out var source)) { source.Cancel(); source.Dispose(); } }
     private static string PresentationEventId(Room room, string eventName) => $"presentation:{room.GameRunId}:{room.Presentation.PresentationId}:{eventName}";
     private static object PublicData(Player p, string key) => new

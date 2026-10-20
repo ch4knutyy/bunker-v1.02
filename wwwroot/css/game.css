@@ -9209,6 +9209,14 @@ order: 0 !important;
 .room-chat-message time { display: block; margin-top: .18rem; color: #99958c; font-size: .7rem; }
 .room-chat-ai-badge { display: inline-block; padding: .05rem .32rem; color: #d9c1f1; border: 1px solid rgba(169,128,222,.55); border-radius: 999px; font-size: .62rem; letter-spacing: .05em; }
 .room-chat-ai-status { margin: 0; padding: .45rem .85rem; color: #c8a8e0; border-top: 1px solid rgba(132,79,181,.22); background: rgba(132,79,181,.08); font-size: .82rem; }
+.room-chat-ai-status.is-error { color: #e7bd9b; background: rgba(173,96,56,.12); }
+.room-chat-typing-dots { display: inline-block; width: 1.4em; margin-left: .15rem; overflow: hidden; vertical-align: bottom; animation: room-chat-typing-dots 1.1s steps(4, end) infinite; }
+.room-chat-message--arriving { animation: room-chat-message-arrival .22s ease-out var(--room-chat-arrival-delay, 0ms) both; }
+@keyframes room-chat-message-arrival { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes room-chat-typing-dots { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: reduce) {
+    .room-chat-typing-dots, .room-chat-message--arriving { animation: none; }
+}
 .room-chat-message p { margin: .3rem 0 0; white-space: pre-wrap; }
 .room-chat-form { display: flex; gap: .55rem; padding: .8rem; border-top: 1px solid rgba(203,166,79,.28); background: #10100f; }
 .room-chat-form input { min-width: 0; flex: 1; }
