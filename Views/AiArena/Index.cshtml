@@ -11,16 +11,28 @@
     <section class="ai-arena-configuration" aria-label="Налаштування AI арени">
         <label>Провайдер <select id="arenaProvider"><option value="Deterministic">Deterministic</option><option value="Local">Local MamayLM</option><option value="Gemini">Gemini</option><option value="Groq">Groq</option><option value="OpenRouter">OpenRouter</option></select></label>
         <label>Режим <select id="arenaGenerationMode"><option value="Direct">Direct</option><option value="Strategic">Strategic</option></select></label>
+		<label>Швидкість <select id="arenaSpeedPreset"><option value="Fast">Fast</option><option value="Balanced" selected>Balanced</option><option value="Deep">Deep</option></select></label>
+		<label>AI-гравці <input id="arenaAgentCount" type="number" min="3" max="12" value="6" inputmode="numeric" /></label>
         <span>Модель <b id="arenaModel">—</b></span><span>Local <b id="arenaProviderStatus">не перевірено</b></span>
         <button id="arenaCheckProvider" type="button">Перевірити з’єднання</button><a id="arenaExport" class="arena-export" hidden>Експортувати dataset (.zip)</a>
     </section>
+	<section id="arenaDatasetSection" class="ai-arena-configuration">
+		<span id="arenaDatasetStats"></span>
+		<a id="arenaRawExport" hidden></a><a id="arenaSftExport" hidden></a><a id="arenaCuratedExport" hidden></a>
+		<span id="arenaEditorStats"></span>
+	</section>
+	<section class="ai-arena-configuration arena-characteristic-selection" aria-label="Категорії картки персонажа">
+		<div><strong>Характеристики для нової сесії</strong><small>Special Card вимкнено для нових Arena.</small></div>
+		<div class="arena-characteristic-actions"><button id="arenaCharacteristicsAll" type="button">Увімкнути всі</button><button id="arenaCharacteristicsNone" type="button">Вимкнути всі</button><button id="arenaCharacteristicsDefault" type="button">Стандартний набір</button></div>
+		<div id="arenaCharacteristicOptions" class="arena-characteristic-options"></div>
+	</section>
 
     <section id="arenaSummary" class="ai-arena-summary" aria-label="Стан арени"></section>
     <section id="arenaScenario" class="ai-arena-panel arena-scenario-panel" aria-label="Сценарій виживання"></section>
 
     <div class="ai-arena-dashboard">
         <aside class="ai-arena-panel arena-players-panel">
-            <div class="panel-heading"><div><span>Учасники</span><h2>Шість AI</h2></div><span id="arenaPlayerCount" class="panel-count"></span></div>
+			<div class="panel-heading"><div><span>Учасники</span><h2 id="arenaPlayersTitle">AI-гравці</h2></div><span id="arenaPlayerCount" class="panel-count"></span></div>
             <div id="arenaAgents" class="arena-agent-list"></div>
             <details class="arena-sessions"><summary>Збережені сесії</summary><div id="arenaSessions"></div></details>
         </aside>
@@ -46,5 +58,7 @@
 </aside>
 <div id="arenaTooltip" class="arena-tooltip" role="tooltip" hidden></div>
 
+<script src="~/js/bunker/i18n/translations.js" asp-append-version="true"></script>
+<script src="~/js/bunker/i18n/localization.js" asp-append-version="true"></script>
 <script src="~/js/signalr-lite.js" asp-append-version="true"></script>
 <script src="~/js/ai-arena.js" asp-append-version="true"></script>

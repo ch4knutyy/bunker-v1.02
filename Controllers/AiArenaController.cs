@@ -43,4 +43,79 @@ public sealed class AiArenaController(AiTrainingArenaService arenas) : Controlle
         try { return File(arenas.Export(id), "application/zip", $"ai-training-arena-{id}.zip"); }
         catch (FileNotFoundException) { return NotFound(); }
     }
+
+    [HttpGet("dataset-stats/{id}")]
+    public IActionResult DatasetStatistics(string id)
+    {
+        try { return Ok(arenas.DatasetStatistics(id)); }
+        catch (FileNotFoundException) { return NotFound(); }
+    }
+
+    [HttpGet("editor-stats/{id}")]
+    public IActionResult EditorStatistics(string id)
+    {
+        try { return Ok(arenas.EditorStatistics(id)); }
+        catch (FileNotFoundException) { return NotFound(); }
+    }
+
+    [HttpGet("export-curated")]
+    public IActionResult ExportCurated(string? sessionId, DateTimeOffset? fromUtc, DateTimeOffset? toUtc,
+        string? status, string? quality, string? split, int seed = 17)
+    {
+        try
+        {
+            if (split != null && split is not ("train" or "validation" or "test"))
+                return BadRequest(new { error = "arena_invalid_split" });
+            var data = arenas.ExportCurated(new AiTrainingExportFilter(sessionId, fromUtc, toUtc, status, quality, split, seed));
+            return File(data, "application/zip", "ai-arena-curated.zip");
+        }
+        catch (FileNotFoundException) { return NotFound(); }
+        catch (InvalidOperationException exception) when (exception.Message == "arena_export_too_large_filter_sessions")
+        { return StatusCode(413, new { error = exception.Message }); }
+    }
+
+    [HttpPost("preferences")]
+    [ValidateAntiForgeryToken]
+    public IActionResult AddPreference([FromBody] AiTrainingPreferenceInput input)
+    {
+        if (input == null) return BadRequest(new { error = "arena_preference_invalid" });
+        try { return Ok(arenas.AddPreference(input)); }
+        catch (FileNotFoundException) { return NotFound(); }
+        catch (InvalidOperationException exception) { return BadRequest(new { error = exception.Message }); }
+    }
+
+    [HttpPost("evaluate-offline")]
+    [ValidateAntiForgeryToken]
+    public IActionResult EvaluateOffline([FromBody] List<AiTrainingOfflinePrediction> predictions, int seed = 17)
+    {
+        if (predictions == null) return BadRequest(new { error = "arena_evaluation_invalid_prediction" });
+        try { return Ok(arenas.EvaluateOffline(predictions, seed)); }
+        catch (InvalidOperationException exception) { return BadRequest(new { error = exception.Message }); }
+    }
+
+    [HttpGet("export-raw")]
+    public IActionResult ExportRaw(string? sessionId, DateTimeOffset? fromUtc, DateTimeOffset? toUtc, string? status, string? quality,
+        string? split, int seed = 17, string? reviewSignal = null) =>
+        ExportDataset(false, sessionId, fromUtc, toUtc, status, quality, split, seed, reviewSignal);
+
+    [HttpGet("export-sft")]
+    public IActionResult ExportSft(string? sessionId, DateTimeOffset? fromUtc, DateTimeOffset? toUtc, string? status, string? quality,
+        string? split, int seed = 17, string? reviewSignal = null) =>
+        ExportDataset(true, sessionId, fromUtc, toUtc, status, quality, split, seed, reviewSignal);
+
+    private IActionResult ExportDataset(bool sft, string? sessionId, DateTimeOffset? fromUtc, DateTimeOffset? toUtc, string? status,
+        string? quality, string? split, int seed, string? reviewSignal)
+    {
+        try
+        {
+            if (split != null && split is not ("train" or "validation" or "test"))
+                return BadRequest(new { error = "arena_invalid_split" });
+            var data = arenas.ExportDataset(sft, new AiTrainingExportFilter(sessionId, fromUtc, toUtc, status, quality,
+                split, seed, reviewSignal));
+            return File(data, "application/zip", sft ? "ai-arena-sft.zip" : "ai-arena-raw.zip");
+        }
+        catch (FileNotFoundException) { return NotFound(); }
+        catch (InvalidOperationException exception) when (exception.Message == "arena_export_too_large_filter_sessions")
+        { return StatusCode(413, new { error = exception.Message }); }
+    }
 }

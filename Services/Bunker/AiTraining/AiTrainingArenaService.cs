@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Bunker.Hubs;
 using Bunker.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -49,6 +50,7 @@ public enum AiTrainingAction { Speak, RevealCharacteristic, ProposeAlliance, Pro
 
 public sealed class AiTrainingArena
 {
+	public int SnapshotSchemaVersion { get; set; } = 1;
 	public string Id { get; init; } = Guid.NewGuid().ToString("N");
 	public DateTimeOffset StartedAtUtc { get; init; }
 	public DateTimeOffset? EndedAtUtc { get; set; }
@@ -68,14 +70,17 @@ public sealed class AiTrainingArena
 	public bool UseLiveProvider { get; set; }
 	public int ModelRequestCount { get; set; }
 	public int ConsecutiveProviderFailures { get; set; }
+	public string? CurrentAgentId { get; set; }
+	public string? CurrentDecisionId { get; set; }
+	public bool IsGenerating { get; set; }
 	public Apocalypse? Apocalypse { get; set; }
 	public BunkerInfo? Bunker { get; set; }
 	public List<AiTrainingArenaThreat> ThreatHistory { get; set; } = [];
 	public List<int> ThreatRoundsEvaluated { get; set; } = [];
 	public List<AiTrainingAgent> Agents { get; set; } = [];
 	public List<AiTrainingMessage> Messages { get; set; } = [];
-	public List<AiTrainingEvent> Events { get; set; } = [];
-	public List<AiTrainingDecision> Decisions { get; set; } = [];
+	[JsonIgnore] public List<AiTrainingEvent> Events { get; set; } = [];
+	[JsonIgnore] public List<AiTrainingDecision> Decisions { get; set; } = [];
 	public AiTrainingVoteProposal? Proposal { get; set; }
 	public Dictionary<string, string> OpenVotes { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
@@ -85,7 +90,6 @@ public sealed class AiTrainingAgent
 	public string Id { get; init; } = "";
 	public string Name { get; init; } = "";
 	public int Seat { get; init; }
-	public string Persona { get; init; } = "Обережний, прагматичний учасник.";
 	public bool IsEliminated { get; set; }
 	public Dictionary<string, string> OwnCharacteristics { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 	public Dictionary<string, string> RevealedCharacteristics { get; set; } = new(StringComparer.OrdinalIgnoreCase);
@@ -101,7 +105,7 @@ public sealed class AiTrainingAgent
 }
 
 public sealed record AiTrainingMessage(string Id, int Step, string AgentId, string AgentName, string Text, DateTimeOffset AtUtc);
-public sealed record AiTrainingEvent(string Id, int Step, string Type, string? AgentId, object Data, DateTimeOffset AtUtc);
+public sealed record AiTrainingEvent(string Id, int Step, string Type, string? AgentId, object Data, DateTimeOffset AtUtc, string? DecisionId = null);
 public sealed record AiTrainingStatement(string Classification, string Text, string AgentId, int Step);
 public sealed class AiTrainingArenaThreat
 {
@@ -130,8 +134,10 @@ public sealed record AiTrainingDecision(string Id, int Step, string AgentId, obj
 public sealed record AiTrainingVoteProposal(string Id, string ProposerId, HashSet<string> AcceptedBy, HashSet<string> RejectedBy, DateTimeOffset AtUtc, bool IsOpen = false);
 public sealed record AiTrainingArenaRequest(string? Provider, string? GenerationMode, int? AgentCount = null,
 	string? SpeedPreset = null, List<string>? EnabledCharacteristics = null);
+public sealed record AiTrainingStudentResult(bool Valid, string? Error, string? Action, string? TargetPlayerId,
+	string? Message, string Provider, string Model);
 
-public sealed class AiTrainingDatasetStore
+public sealed partial class AiTrainingDatasetStore
 {
 	private readonly string _root;
 	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
@@ -142,13 +148,14 @@ public sealed class AiTrainingDatasetStore
 		_root = Path.GetFullPath(Path.Combine(environment.ContentRootPath, options.Value.DatasetDirectory));
 	}
 
-	public string SessionPath(string id) => Path.Combine(_root, "sessions", id);
+	public string SessionPath(string id) => !string.IsNullOrWhiteSpace(id) && id.All(character => char.IsLetterOrDigit(character) || character is '-' or '_')
+		? Path.Combine(_root, "sessions", id) : throw new FileNotFoundException("arena_not_found");
 	public void Create(AiTrainingArena arena, AiTrainingArenaOptions options)
 	{
 		Directory.CreateDirectory(SessionPath(arena.Id));
 		WriteJson(arena.Id, "metadata.json", new
 		{
-			schemaVersion = 2,
+			schemaVersion = 4,
 			sessionId = arena.Id,
 			startedAtUtc = arena.StartedAtUtc,
 			ruleVersion = "ai-training-arena-v2",
@@ -156,6 +163,10 @@ public sealed class AiTrainingDatasetStore
 			provider = arena.Provider,
 			model = arena.Model,
 			generationMode = arena.GenerationMode,
+			speedPreset = arena.SpeedPreset,
+			survivorTarget = arena.SurvivorTarget,
+			requiredRevealsPerAgent = arena.RequiredRevealsPerAgent,
+			enabledCharacteristics = arena.EnabledCharacteristics.OrderBy(item => item),
 			useLiveProvider = arena.UseLiveProvider,
 			voteApprovalPercent = options.VoteApprovalPercent,
 			scenario = new
@@ -172,14 +183,17 @@ public sealed class AiTrainingDatasetStore
 	public void AppendDecision(AiTrainingArena arena, AiTrainingDecision value) => Append(arena.Id, "decisions.jsonl", value);
 	public void Save(AiTrainingArena arena)
 	{
+		arena.SnapshotSchemaVersion = 2; // Events and decisions live in their durable journals.
 		WriteJson(arena.Id, "snapshot.json", arena);
+		if (arena.Status == AiTrainingArenaStatus.Running) _liveSessions[arena.Id] = true;
+		else _liveSessions.TryRemove(arena.Id, out _);
 		if (arena.Status is AiTrainingArenaStatus.Finished or AiTrainingArenaStatus.Cancelled or AiTrainingArenaStatus.Faulted)
 			WriteJson(arena.Id, "results.json", new
 			{
 				sessionId = arena.Id,
 				status = arena.Status,
 				completedAtUtc = arena.EndedAtUtc,
-				winners = arena.Agents.Where(agent => !agent.IsEliminated).Select(agent => agent.Id),
+				winners = arena.Status == AiTrainingArenaStatus.Finished && arena.LastIntervention == null ? arena.Agents.Where(agent => !agent.IsEliminated).Select(agent => agent.Id).ToArray() : null,
 				eliminated = arena.Agents.Where(agent => agent.IsEliminated).Select(agent => agent.Id),
 				steps = arena.Step,
 				votes = arena.VoteCount,
@@ -187,13 +201,27 @@ public sealed class AiTrainingDatasetStore
 				bunkerId = arena.Bunker?.Id,
 				threats = arena.ThreatHistory,
 				intervention = arena.LastIntervention,
-				correctlyCompleted = arena.Status == AiTrainingArenaStatus.Finished
+				correctlyCompleted = arena.Status == AiTrainingArenaStatus.Finished && arena.LastIntervention == null
 			});
 	}
 	public AiTrainingArena? Load(string id)
 	{
 		var path = Path.Combine(SessionPath(id), "snapshot.json");
-		return File.Exists(path) ? JsonSerializer.Deserialize<AiTrainingArena>(File.ReadAllText(path), Json) : null;
+		if (!File.Exists(path)) return null;
+		var arena = JsonSerializer.Deserialize<AiTrainingArena>(File.ReadAllText(path), Json);
+		if (arena == null) return null;
+		var eventsPath = Path.Combine(SessionPath(id), "events.jsonl");
+		if (File.Exists(eventsPath)) arena.Events = ReadLines<AiTrainingEvent>(eventsPath).DistinctBy(item => item.Id).ToList();
+		var decisionsPath = Path.Combine(SessionPath(id), "decisions.jsonl");
+		if (File.Exists(decisionsPath)) arena.Decisions = ReadLines<AiTrainingDecision>(decisionsPath).DistinctBy(item => item.Id).ToList();
+		var snapshotSequence = arena.Step;
+		var lastSequence = Math.Max(arena.Step, LastRawSequence(id));
+		if (lastSequence > arena.Step) { arena.Cursor += lastSequence - arena.Step; arena.Step = lastSequence; }
+		arena.IsGenerating = false;
+		if (!_liveSessions.ContainsKey(id) && (arena.Status == AiTrainingArenaStatus.Running || lastSequence > snapshotSequence))
+		{ arena.Status = AiTrainingArenaStatus.Paused; arena.LastIntervention = "interrupted_restart"; }
+		arena.CurrentDecisionId = null;
+		return arena;
 	}
 	public IReadOnlyList<object> List()
 	{
@@ -217,7 +245,24 @@ public sealed class AiTrainingDatasetStore
 	private void Append<T>(string id, string name, T value)
 	{
 		Directory.CreateDirectory(SessionPath(id));
-		File.AppendAllText(Path.Combine(SessionPath(id), name), JsonSerializer.Serialize(value, JsonLine) + Environment.NewLine, Encoding.UTF8);
+		lock (WriteGate(id))
+		{
+			using var file = new FileStream(Path.Combine(SessionPath(id), name), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.WriteThrough);
+			if (file.Length > 0)
+			{
+				file.Position = file.Length - 1;
+				if (file.ReadByte() != '\n')
+				{
+					var position = file.Length - 1;
+					while (position >= 0) { file.Position = position; if (file.ReadByte() == '\n') break; position--; }
+					file.SetLength(position + 1);
+				}
+			}
+			file.Position = file.Length;
+			var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, JsonLine) + "\n");
+			file.Write(bytes);
+			file.Flush(true);
+		}
 	}
 	private void WriteJson<T>(string id, string name, T value)
 	{
@@ -231,21 +276,7 @@ public sealed class AiTrainingDatasetStore
 public sealed class AiTrainingArenaService
 {
 	private static readonly string[] Names = ["Марія", "Олексій", "Ірина", "Данило", "Софія", "Максим", "Олена", "Тарас", "Вікторія", "Андрій", "Наталія", "Роман"];
-	private static readonly string[] Personas = [
-		"Емпатична й обережна: перевіряє ризики перед довірою.",
-		"Прагматичний: мислить ресурсами, надійністю та доказами.",
-		"Соціальна психологиня: будує союзи й помічає суперечності у словах.",
-		"Прямолінійний: цінує дію, чесність і чітке голосування.",
-		"Обережна дослідниця: ставить уточнювальні питання й не поспішає з висновками.",
-		"Іронічний стратег: шукає важелі впливу, але не розкриває зайвого.",
-		"Спостережлива: запам’ятовує обіцянки й перевіряє факти.",
-		"Рішучий перемовник: швидко формує коаліції, але не довіряє без доказів.",
-		"Врівноважена: зважує користь команди та особистий ризик.",
-		"Скептичний аналітик: ставить точні запитання й шукає нестикування.",
-		"Дипломатична: знижує конфлікти та домовляється про взаємні вигоди.",
-		"Незалежний: обережно блефує і змінює курс лише за новими фактами."
-	];
-	private static readonly string[] CharacteristicCategories = ["personality", "body", "profession", "physicalHealth", "mentalHealth", "hobby", "characterTrait", "phobia", "inventory", "property", "fact", "specialCard"];
+	private static readonly string[] CharacteristicCategories = ["personality", "body", "profession", "physicalHealth", "mentalHealth", "hobby", "characterTrait", "phobia", "inventory", "property", "fact"];
 	private static readonly AiTrainingStructuredOutput StrategicPlanSchema = new("bunker_private_plan", new
 	{
 		type = "object",
@@ -271,19 +302,22 @@ public sealed class AiTrainingArenaService
 	});
 	private readonly ConcurrentDictionary<string, AiTrainingArena> _arenas = new(StringComparer.OrdinalIgnoreCase);
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new(StringComparer.OrdinalIgnoreCase);
+	private readonly ConcurrentDictionary<string, CancellationTokenSource> _generations = new(StringComparer.OrdinalIgnoreCase);
 	private readonly CharacterGeneratorService _characters;
 	private readonly GameDataService _gameData;
 	private readonly IAiProvider _provider;
 	private readonly ILocalMamayLmProvider _localProvider;
 	private readonly AiTrainingDatasetStore _dataset;
+	private readonly AiTrainingLlmEditorService? _editor;
 	private readonly AiTrainingArenaOptions _options;
 	private readonly IHubContext<AiTrainingArenaHub> _hub;
 	private readonly TimeProvider _clock;
 	private readonly ILogger<AiTrainingArenaService> _logger;
 
 	public AiTrainingArenaService(CharacterGeneratorService characters, GameDataService gameData, IAiProvider provider, ILocalMamayLmProvider localProvider, AiTrainingDatasetStore dataset,
-		IOptions<AiTrainingArenaOptions> options, IHubContext<AiTrainingArenaHub> hub, TimeProvider clock, ILogger<AiTrainingArenaService> logger)
-	{ _characters = characters; _gameData = gameData; _provider = provider; _localProvider = localProvider; _dataset = dataset; _options = options.Value; _hub = hub; _clock = clock; _logger = logger; }
+		IOptions<AiTrainingArenaOptions> options, IHubContext<AiTrainingArenaHub> hub, TimeProvider clock, ILogger<AiTrainingArenaService> logger,
+		AiTrainingLlmEditorService? editor = null)
+	{ _characters = characters; _gameData = gameData; _provider = provider; _localProvider = localProvider; _dataset = dataset; _editor = editor; _options = options.Value; _hub = hub; _clock = clock; _logger = logger; }
 
 	public Task<AiTrainingArena> CreateAsync(CancellationToken token) => CreateAsync(null, token);
 
@@ -320,7 +354,6 @@ public sealed class AiTrainingArenaService
 				Id = $"ai-{index + 1}",
 				Name = Names[index],
 				Seat = index + 1,
-				Persona = Personas[index],
 				OwnCharacteristics = BuildCharacteristics(player).Where(item => enabledCharacteristics.Contains(item.Key))
 					.ToDictionary(item => item.Key, item => item.Value, StringComparer.OrdinalIgnoreCase)
 			});
@@ -332,6 +365,40 @@ public sealed class AiTrainingArenaService
 	public AiTrainingArena Get(string id) => _arenas.TryGetValue(id, out var arena) ? arena : _arenas.GetOrAdd(id, key => _dataset.Load(key) ?? throw new KeyNotFoundException("arena_not_found"));
 	public IReadOnlyList<object> List() => _dataset.List();
 	public byte[] Export(string id) => _dataset.ExportZip(id);
+	public byte[] ExportDataset(bool sft, AiTrainingExportFilter filter) => _dataset.ExportDataset(sft, filter);
+	public byte[] ExportCurated(AiTrainingExportFilter filter) => _dataset.ExportDataset(true, filter with { Curated = true });
+	public object DatasetStatistics(string id) => _dataset.Statistics(id);
+	public object EditorStatistics(string id) => new { enabled = _editor?.Enabled == true, stats = _dataset.EditorStatistics(id) };
+	public AiTrainingPreferenceRecord AddPreference(AiTrainingPreferenceInput input) => _dataset.AddPreference(input);
+	public object EvaluateOffline(IReadOnlyList<AiTrainingOfflinePrediction> predictions, int seed = 17) =>
+		_dataset.EvaluateOffline(predictions, seed);
+	public async Task<AiTrainingStudentResult> PreviewStudentAsync(string id, string agentId, string provider, string model,
+		CancellationToken token)
+	{
+		var arena = Get(id);
+		var actor = arena.Agents.FirstOrDefault(item => item.Id == agentId && !item.IsEliminated)
+			?? throw new InvalidOperationException("arena_agent_not_available");
+		var selectedProvider = NormalizeProvider(provider);
+		if (selectedProvider == "Deterministic" || string.IsNullOrWhiteSpace(model))
+			throw new InvalidOperationException("arena_student_model_not_configured");
+		var step = arena.Step;
+		var visible = JsonSerializer.SerializeToElement(VisibleState(arena, actor));
+		var input = AiTrainingDatasetStore.BuildInferenceInput(actor.Name,
+			arena.Proposal?.IsOpen == true ? "Voting" : arena.Proposal != null ? "VoteProposal" : "Discussion",
+			visible.GetProperty("world"), actor.OwnCharacteristics, actor.RevealedCharacteristics.Keys.ToArray(),
+			arena.Agents.Where(item => !item.IsEliminated && item.Id != actor.Id)
+				.Select(item => new { item.Id, item.Name, revealed = item.RevealedCharacteristics }),
+			visible.GetProperty("claims"), visible.GetProperty("vote"), AllowedActions(arena, actor));
+		var systemPrompt = "You are a human Bunker player with the supplied card. Use only visible facts; claims are unverified. Reply in natural Ukrainian. Return one JSON action with action, targetPlayerId, message, strategy, confidence, claims and bluffs.";
+		var userPrompt = JsonSerializer.Serialize(input);
+		var reply = await GenerateAsync(arena, actor, systemPrompt, userPrompt, _options.MaxResponseTokens,
+			DecisionSchema, .5, token, selectedProvider, model);
+		if (arena.Step != step) return new(false, "arena_state_changed", null, null, null, selectedProvider, model);
+		if (reply.ErrorCode != null) return new(false, reply.ErrorCode, null, null, null, selectedProvider, model);
+		if (!TryParseDecision(arena, actor, reply, null, out var decision, out var error))
+			return new(false, reply.ErrorCode ?? error, null, null, null, selectedProvider, model);
+		return new(true, null, decision.Action.ToString(), decision.TargetPlayerId, decision.Message, selectedProvider, model);
+	}
 	public object View(string id, string? selectedAgentId) { var arena = Get(id); return BuildView(arena, selectedAgentId); }
 	public object Configuration() => new
 	{
@@ -359,9 +426,9 @@ public sealed class AiTrainingArenaService
 		var arena = Get(id); await MutateAsync(arena, _ => { if (arena.Status is AiTrainingArenaStatus.Created or AiTrainingArenaStatus.Paused) { arena.Status = AiTrainingArenaStatus.Running; AddEvent(arena, "arena_started", null, new { }); _ = RunAsync(arena.Id); } }, token); return BuildView(arena, null);
 	}
 	public async Task<object> PauseAsync(string id, CancellationToken token) { var arena = Get(id); await MutateAsync(arena, _ => { if (arena.Status == AiTrainingArenaStatus.Running) { arena.Status = AiTrainingArenaStatus.Paused; AddEvent(arena, "arena_paused", null, new { }); } }, token); return BuildView(arena, null); }
-	public async Task<object> ResumeAsync(string id, CancellationToken token) { var arena = Get(id); await MutateAsync(arena, _ => { if (arena.Status == AiTrainingArenaStatus.Paused) { arena.Status = AiTrainingArenaStatus.Running; arena.ConsecutiveProviderFailures = 0; AddEvent(arena, "arena_resumed", null, new { }); _ = RunAsync(arena.Id); } }, token); return BuildView(arena, null); }
-	public async Task<object> CancelAsync(string id, CancellationToken token) { var arena = Get(id); await MutateAsync(arena, _ => Finish(arena, AiTrainingArenaStatus.Cancelled, "developer_cancelled"), token); return BuildView(arena, null); }
-	public async Task<object> StepAsync(string id, CancellationToken token) { var arena = Get(id); await MutateAsync(arena, _ => ExecuteStepAsync(arena, token).GetAwaiter().GetResult(), token); return BuildView(arena, null); }
+	public async Task<object> ResumeAsync(string id, CancellationToken token) { var arena = Get(id); if (arena.LastIntervention == "interrupted_restart") throw new InvalidOperationException("arena_state_requires_review"); await MutateAsync(arena, _ => { if (arena.Status == AiTrainingArenaStatus.Paused) { arena.Status = AiTrainingArenaStatus.Running; arena.ConsecutiveProviderFailures = 0; AddEvent(arena, "arena_resumed", null, new { }); _ = RunAsync(arena.Id); } }, token); return BuildView(arena, null); }
+	public async Task<object> CancelAsync(string id, CancellationToken token) { var arena = Get(id); if (_generations.TryGetValue(id, out var generation)) { try { generation.Cancel(); } catch (ObjectDisposedException) { } } await MutateAsync(arena, _ => { if (arena.Status is not (AiTrainingArenaStatus.Finished or AiTrainingArenaStatus.Cancelled or AiTrainingArenaStatus.Faulted)) Finish(arena, AiTrainingArenaStatus.Cancelled, "developer_cancelled"); }, token); return BuildView(arena, null); }
+	public async Task<object> StepAsync(string id, CancellationToken token) { var arena = Get(id); if (arena.LastIntervention == "interrupted_restart") throw new InvalidOperationException("arena_state_requires_review"); await MutateAsync(arena, _ => ExecuteStepAsync(arena, token).GetAwaiter().GetResult(), token); if (arena.Step > 0 && arena.Step % Math.Max(1, arena.AgentCount) == 0) _editor?.TryEnqueue(arena.Id, arena.Step / Math.Max(1, arena.AgentCount)); return BuildView(arena, null); }
 
 	private async Task RunAsync(string id)
 	{
@@ -374,13 +441,24 @@ public sealed class AiTrainingArenaService
 				await Task.Delay(Math.Clamp(_options.AutoStepDelayMilliseconds, 150, 10_000));
 			}
 		}
-		catch (Exception exception) { _logger.LogError(exception, "AI training arena {ArenaId} stopped unexpectedly", id); var arena = Get(id); Finish(arena, AiTrainingArenaStatus.Faulted, "simulator_fault"); _dataset.Save(arena); await PublishAsync(arena, CancellationToken.None); }
+		catch (Exception exception)
+		{
+			_logger.LogError(exception, "AI training arena {ArenaId} stopped unexpectedly", id);
+			try { var arena = Get(id); Finish(arena, AiTrainingArenaStatus.Faulted, "simulator_fault"); _dataset.Save(arena); await PublishAsync(arena, CancellationToken.None); }
+			catch (Exception storageException) { _logger.LogError(storageException, "AI training arena {ArenaId} failure state was not durably saved", id); }
+		}
 	}
 
 	private async Task MutateAsync(AiTrainingArena arena, Action<object?> action, CancellationToken token)
 	{
 		var gate = _locks.GetOrAdd(arena.Id, _ => new SemaphoreSlim(1, 1)); await gate.WaitAsync(token);
-		try { action(null); _dataset.Save(arena); await PublishAsync(arena, token); } finally { gate.Release(); }
+		try
+		{
+			try { action(null); _dataset.Save(arena); }
+			catch (Exception exception) { _logger.LogError(exception, "AI training arena {ArenaId} mutation was not durably saved", arena.Id); throw; }
+			await PublishAsync(arena, token);
+		}
+		finally { gate.Release(); }
 	}
 
 	private async Task ExecuteStepAsync(AiTrainingArena arena, CancellationToken token)
@@ -390,14 +468,33 @@ public sealed class AiTrainingArenaService
 		if (arena.Step >= Math.Max(10, _options.MaxSteps) || arena.Messages.Count >= Math.Max(10, _options.MaxMessages)) { Finish(arena, AiTrainingArenaStatus.Finished, "simulator_limit_reached"); return; }
 		var active = arena.Agents.Where(agent => !agent.IsEliminated).OrderBy(agent => agent.Seat).ToList();
 		if (active.Count <= EffectiveSurvivorTarget(arena)) { Finish(arena, AiTrainingArenaStatus.Finished, null); return; }
-		var actor = active[arena.Cursor % active.Count]; arena.Cursor++; arena.Step++;
+		var actor = active[arena.Cursor % active.Count]; arena.Cursor++; arena.Step++; arena.CurrentAgentId = actor.Id; arena.IsGenerating = true;
 		ActivateThreatsForCurrentRound(arena);
+		arena.CurrentDecisionId = $"{arena.Id}-{arena.Step:D6}";
 		var contextStopwatch = Stopwatch.StartNew();
-		var visible = VisibleState(arena, actor);
-		var result = await DecideAsync(arena, actor, visible, contextStopwatch.ElapsedMilliseconds, token);
+		var visible = JsonSerializer.SerializeToElement(VisibleState(arena, actor));
+		var allowedActions = AllowedActions(arena, actor).ToArray();
+		var decisionId = _dataset.BeginDecision(arena, actor, visible, allowedActions, _clock.GetUtcNow());
+		Decision result;
+		using var generation = CancellationTokenSource.CreateLinkedTokenSource(token);
+		_generations[arena.Id] = generation;
+		try
+		{
+			try { await PublishAsync(arena, generation.Token); }
+			catch (Exception exception) when (!generation.IsCancellationRequested) { _logger.LogWarning(exception, "AI training state broadcast failed for {ArenaId}", arena.Id); }
+			result = await DecideAsync(arena, actor, visible, contextStopwatch.ElapsedMilliseconds, decisionId, generation.Token);
+		}
+		catch (OperationCanceledException) when (generation.IsCancellationRequested)
+		{
+			_dataset.CompleteDecision(arena.Id, decisionId, arena.Step, new AiTrainingRawFinal("Interrupted", null, null, null, null, null,
+				false, null, "generation_interrupted", null, false, false, 0, _clock.GetUtcNow()));
+			arena.CurrentDecisionId = null;
+			return;
+		}
+		finally { arena.IsGenerating = false; _generations.TryRemove(arena.Id, out _); }
 		var accepted = ApplyDecision(arena, actor, result, out var validation);
 		var fallbackWait = !string.IsNullOrWhiteSpace(result.ProviderError) || !accepted;
-		var decision = new AiTrainingDecision(Guid.NewGuid().ToString("N"), arena.Step, actor.Id, visible, AllowedActions(arena, actor), result.Action, result.TargetPlayerId, result.Message, result.Strategy, result.Confidence, accepted, validation, arena.Provider, arena.Model, result.InputTokens, result.OutputTokens, _clock.GetUtcNow(),
+		var decision = new AiTrainingDecision(decisionId, arena.Step, actor.Id, visible, allowedActions, result.Action, result.TargetPlayerId, result.Message, result.Strategy, result.Confidence, accepted, validation, arena.Provider, arena.Model, result.InputTokens, result.OutputTokens, _clock.GetUtcNow(),
 			arena.GenerationMode, result.PrivateStrategicPlan, result.PublicClaims, result.ExplicitBluffs, result.ProviderError, result.ProviderErrorDetail, result.RequestAttempts, result.RequestDurationMilliseconds,
 			result.PromptBuildMilliseconds, result.GenerationMilliseconds, stepStopwatch.ElapsedMilliseconds, result.PromptCharacters, result.EstimatedPromptTokens,
 			result.PlanGenerationMilliseconds, fallbackWait, result.StrategicPlanRefreshed);
@@ -418,9 +515,15 @@ public sealed class AiTrainingArenaService
 		}
 		else arena.ConsecutiveProviderFailures = 0;
 		if (!accepted) { AddEvent(arena, "decision_rejected", actor.Id, new { validation }); ApplyDecision(arena, actor, new Decision(AiTrainingAction.Wait, null, null, "safe fallback", null), out _); }
+		_dataset.CompleteDecision(arena.Id, decisionId, arena.Step, new AiTrainingRawFinal(
+			!accepted ? "Rejected" : fallbackWait ? "Fallback" : "Accepted", result.ProviderError == null ? result.Action.ToString() : null,
+			result.ProviderError == null ? result.Action.ToString() : null, accepted ? result.Action.ToString() : AiTrainingAction.Wait.ToString(),
+			result.TargetPlayerId, accepted ? result.Message : null, accepted, validation, result.ProviderError, result.ProviderErrorDetail,
+			fallbackWait, arena.UseLiveProvider && string.IsNullOrWhiteSpace(result.ProviderError), result.RequestAttempts, _clock.GetUtcNow()));
+		arena.CurrentDecisionId = null;
 	}
 
-	private async Task<Decision> DecideAsync(AiTrainingArena arena, AiTrainingAgent actor, object visible, long visibleStateMilliseconds, CancellationToken token)
+	private async Task<Decision> DecideAsync(AiTrainingArena arena, AiTrainingAgent actor, object visible, long visibleStateMilliseconds, string decisionId, CancellationToken token)
 	{
 		var fallback = DeterministicDecision(arena, actor);
 		if (!arena.UseLiveProvider) return fallback with { PromptBuildMilliseconds = visibleStateMilliseconds };
@@ -458,7 +561,7 @@ public sealed class AiTrainingArenaService
 			var planPrompt = $$"""Приватний план: поверни JSON лише з полем strategy (1–2 короткі речення): що розкрити, кому довіряти/не довіряти, коли голосувати. CTX={{context}}""";
 			promptBuildMilliseconds += contextStopwatch.ElapsedMilliseconds;
 			promptCharacters += systemPrompt.Length + planPrompt.Length;
-			var planReply = await GenerateWithRetryAsync(arena, actor, systemPrompt, planPrompt, _options.StrategicPlanResponseTokens, StrategicPlanSchema, .45, token);
+			var planReply = await GenerateWithRetryAsync(arena, actor, decisionId, "PrivatePlan", systemPrompt, planPrompt, _options.StrategicPlanResponseTokens, StrategicPlanSchema, .45, token);
 			generationMilliseconds += planReply.DurationMilliseconds ?? 0;
 			planGenerationMilliseconds += planReply.DurationMilliseconds ?? 0;
 			if (!TryReadStrategicPlan(planReply, out privatePlan, out var planError))
@@ -474,7 +577,7 @@ public sealed class AiTrainingArenaService
 		var prompt = $$"""Хід. Тільки JSON: {"action":"Speak|RevealCharacteristic|ProposeAlliance|ProposeVote|AcceptVoteProposal|RejectVoteProposal|CastVote|Wait","targetPlayerId":"ai-id|characteristic|null","message":"українська репліка|null","strategy":"коротко","confidence":0.0,"claims":[],"bluffs":[]}. FACT лише з CTX; CLAIM неперевірений; BLUFF — лише твоя навмисна неправда. Дії: {{string.Join(',', AllowedActions(arena, actor))}}. CTX={{context}}{{(privatePlan == null ? string.Empty : $" PLAN={privatePlan}")}}""";
 		promptBuildMilliseconds += contextStopwatch.ElapsedMilliseconds;
 		promptCharacters += systemPrompt.Length + prompt.Length;
-		var reply = await GenerateWithRetryAsync(arena, actor, systemPrompt, prompt, _options.MaxResponseTokens, DecisionSchema, .5, token);
+		var reply = await GenerateWithRetryAsync(arena, actor, decisionId, "Action", systemPrompt, prompt, _options.MaxResponseTokens, DecisionSchema, .5, token);
 		generationMilliseconds += reply.DurationMilliseconds ?? 0;
 		if (string.IsNullOrWhiteSpace(reply.Text)) return WithMetrics(ProviderFailure(reply.ErrorCode ?? "ai_provider_failed", privatePlan, reply.ErrorDetail, reply.Attempts, reply.DurationMilliseconds));
 		if (TryParseDecision(arena, actor, reply, privatePlan, out var decision, out var parseError)) return WithMetrics(decision);
@@ -483,7 +586,7 @@ public sealed class AiTrainingArenaService
 		var correctionPrompt = $"""JSON only. Fields: action,targetPlayerId,message,strategy,confidence,claims,bluffs. Allowed action: {string.Join(',', AllowedActions(arena, actor))}. Fix without new facts: {TrimForPrompt(reply.Text, 700)}""";
 		promptBuildMilliseconds += contextStopwatch.ElapsedMilliseconds;
 		promptCharacters += correctionPrompt.Length + 120;
-		var corrected = await GenerateWithRetryAsync(arena, actor, "Поверни лише валідний JSON ходу без нових фактів.", correctionPrompt, _options.JsonCorrectionResponseTokens, DecisionSchema, .45, token);
+		var corrected = await GenerateWithRetryAsync(arena, actor, decisionId, "Correction", "Поверни лише валідний JSON ходу без нових фактів.", correctionPrompt, _options.JsonCorrectionResponseTokens, DecisionSchema, .45, token);
 		generationMilliseconds += corrected.DurationMilliseconds ?? 0;
 		if (string.IsNullOrWhiteSpace(corrected.Text)) return WithMetrics(ProviderFailure(corrected.ErrorCode ?? "ai_provider_failed", privatePlan, corrected.ErrorDetail, corrected.Attempts, corrected.DurationMilliseconds));
 		if (TryParseDecision(arena, actor, corrected, privatePlan, out decision, out parseError)) return WithMetrics(decision);
@@ -491,9 +594,9 @@ public sealed class AiTrainingArenaService
 	}
 
 	private static string BuildSystemPrompt(AiTrainingAgent actor) =>
-		$"Ти {actor.Name}, гравець «Бункер». Характер: {actor.Persona}. Мета: вижити. SELF — твої справжні дані; FACT — лише розкриті дані інших; CLAIM — неперевірена заява; BLUFF — тільки твій приватно позначений блеф. Не вигадуй фактів, не розкривай приховане інших, план чи службові позначки. Говори, відкривай лише свій ключ і голосуй лише за доступної дії. Пиши природною українською, 1–3 речення.";
+		$"Ти {actor.Name}, людина-гравець «Бункер» із випадковою карткою. Мета: залишитися серед тих, кого пустять у бункер. SELF — твої справжні дані; FACT — лише офіційно розкриті дані інших; CLAIM — неперевірена заява; BLUFF — лише твоя навмисна неправда. Не вигадуй фактів і не натякай на приховані власні дані без свідомого блефу; не розкривай приховане інших, план чи службові позначки. Оцінюй користь у контексті апокаліпсису, бункера, ресурсів і загроз. Говори, відкривай лише свій ключ і голосуй лише за доступної дії. Не повторюй представлення; реагуй конкретно на публічні факти. Пиши природною українською, 1–3 речення.";
 
-	private async Task<AiProviderReply> GenerateWithRetryAsync(AiTrainingArena arena, AiTrainingAgent actor, string systemPrompt, string userPrompt,
+	private async Task<AiProviderReply> GenerateWithRetryAsync(AiTrainingArena arena, AiTrainingAgent actor, string decisionId, string phase, string systemPrompt, string userPrompt,
 		int maxResponseTokens, AiTrainingStructuredOutput structuredOutput, double temperature, CancellationToken token)
 	{
 		AiProviderReply reply = new(null, "ai_provider_failed");
@@ -507,13 +610,21 @@ public sealed class AiTrainingArenaService
 				return new(null, "ai_live_request_limit", Attempts: attempts);
 			attempts++;
 			arena.ModelRequestCount++;
-			try { reply = await GenerateAsync(arena, actor, systemPrompt, userPrompt, maxResponseTokens, structuredOutput, temperature, token); }
+			var sentPrompt = string.Equals(arena.Provider, "Local", StringComparison.OrdinalIgnoreCase)
+				? TrimForPrompt(userPrompt, _options.MaxPromptCharacters) : userPrompt;
+			try { reply = await GenerateAsync(arena, actor, systemPrompt, sentPrompt, maxResponseTokens, structuredOutput, temperature, token); }
 			catch (Exception exception) when (exception is not OperationCanceledException || !token.IsCancellationRequested)
 			{
 				_logger.LogWarning(exception, "AI training generation failed for {ArenaId}, agent {AgentId}, attempt {Attempt}", arena.Id, actor.Id, attempts);
 				reply = new(null, "ai_provider_unavailable", ErrorDetail: "local_generation_exception");
 			}
 			totalDurationMilliseconds += reply.DurationMilliseconds ?? 0;
+			_dataset.RecordAttempt(arena.Id, decisionId, arena.Step, new AiTrainingRawAttempt(phase, attempts, systemPrompt,
+				sentPrompt, reply.Text, reply.ErrorCode, reply.ErrorDetail, reply.Usage?.InputTokens, reply.Usage?.OutputTokens,
+				reply.Usage?.ReasoningTokens, reply.Usage?.CachedInputTokens, reply.Usage?.TotalTokens,
+				reply.DurationMilliseconds, arena.Provider == "Local" ? structuredOutput.Name : null,
+				arena.Provider == "Local" ? JsonSerializer.SerializeToElement(structuredOutput.Schema) : null,
+				arena.Provider == "Local", maxResponseTokens, temperature, _clock.GetUtcNow()));
 			if (reply.ErrorCode == "ai_context_overflow" && !contextReduced && attempts < limit)
 			{
 				contextReduced = true;
@@ -559,12 +670,15 @@ public sealed class AiTrainingArenaService
 	}
 
 	private Task<AiProviderReply> GenerateAsync(AiTrainingArena arena, AiTrainingAgent actor, string systemPrompt, string userPrompt,
-		int maxResponseTokens, AiTrainingStructuredOutput structuredOutput, double temperature, CancellationToken token)
+		int maxResponseTokens, AiTrainingStructuredOutput structuredOutput, double temperature, CancellationToken token,
+		string? providerOverride = null, string? modelOverride = null)
 	{
-		if (string.Equals(arena.Provider, "Local", StringComparison.OrdinalIgnoreCase))
-			return _localProvider.GenerateAsync(new AiTrainingModelRequest(arena.Model, systemPrompt, TrimForPrompt(userPrompt, _options.MaxPromptCharacters), maxResponseTokens,
+		var provider = providerOverride ?? arena.Provider;
+		var model = modelOverride ?? arena.Model;
+		if (string.Equals(provider, "Local", StringComparison.OrdinalIgnoreCase))
+			return _localProvider.GenerateAsync(new AiTrainingModelRequest(model, systemPrompt, TrimForPrompt(userPrompt, _options.MaxPromptCharacters), maxResponseTokens,
 				_options.UseJsonResponseFormat, structuredOutput, temperature), token);
-		var companion = new AiChatCompanion { Id = actor.Id, PlayerStableId = actor.Id, Name = actor.Name, Provider = arena.Provider, Model = arena.Model };
+		var companion = new AiChatCompanion { Id = actor.Id, PlayerStableId = actor.Id, Name = actor.Name, Provider = provider, Model = model };
 		return _provider.GenerateReplyAsync(companion, systemPrompt + "\n\n" + userPrompt, token);
 	}
 
@@ -664,7 +778,7 @@ public sealed class AiTrainingArenaService
 		var hidden = actor.OwnCharacteristics.Keys.FirstOrDefault(key => !actor.RevealedCharacteristics.ContainsKey(key));
 		if (RevealsReady(arena) && arena.Proposal == null && arena.OpenVotes.Count == 0) return new(AiTrainingAction.ProposeVote, null, null, "Open a vote when public disclosures are sufficient", .7);
 		if (arena.Proposal != null && !arena.Proposal.AcceptedBy.Contains(actor.Id) && !arena.Proposal.RejectedBy.Contains(actor.Id)) return new(AiTrainingAction.AcceptVoteProposal, null, null, "Support a timely decision", .6);
-		if (arena.Proposal?.IsOpen == true && !arena.OpenVotes.ContainsKey(actor.Id)) return new(AiTrainingAction.CastVote, PickTarget(arena, actor).Id, null, "Vote against a competing survivor", .55);
+		if (arena.Proposal?.IsOpen == true) return new(AiTrainingAction.CastVote, PickTarget(arena, actor).Id, null, "Vote against a competing survivor", .55);
 		if (!string.IsNullOrWhiteSpace(hidden) && actor.RevealedCharacteristics.Count < EffectiveRequiredReveals(arena)) return new(AiTrainingAction.RevealCharacteristic, hidden, null, "Meet the disclosure threshold", .9);
 		return new(AiTrainingAction.Speak, null, $"Я оцінюю відкриті факти та шукаю надійних союзників.", "Build a public coalition", .5);
 	}
@@ -698,9 +812,10 @@ public sealed class AiTrainingArenaService
 				if (arena.Proposal == null) { error = "vote_proposal_missing"; return false; }
 				arena.Proposal.RejectedBy.Add(actor.Id); AddEvent(arena, "vote_proposal_rejected", actor.Id, new { proposalId = arena.Proposal.Id }); break;
 			case AiTrainingAction.CastVote:
-				if (arena.Proposal?.IsOpen != true || string.IsNullOrWhiteSpace(decision.TargetPlayerId) || !arena.Agents.Any(agent => agent.Id == decision.TargetPlayerId && !agent.IsEliminated) || decision.TargetPlayerId == actor.Id) { error = "invalid_vote"; return false; }
-				if (!arena.OpenVotes.TryAdd(actor.Id, decision.TargetPlayerId)) { error = "duplicate_vote"; return false; }
-				AddEvent(arena, "vote_cast", actor.Id, new { targetPlayerId = decision.TargetPlayerId });
+				if (arena.Proposal?.IsOpen != true || string.IsNullOrWhiteSpace(decision.TargetPlayerId) || !arena.Agents.Any(agent => agent.Id == decision.TargetPlayerId && !agent.IsEliminated)) { error = "invalid_vote"; return false; }
+				var previousTarget = arena.OpenVotes.GetValueOrDefault(actor.Id);
+				arena.OpenVotes[actor.Id] = decision.TargetPlayerId;
+				AddEvent(arena, previousTarget == null ? "vote_cast" : "vote_changed", actor.Id, new { targetPlayerId = decision.TargetPlayerId, previousTargetPlayerId = previousTarget });
 				if (arena.OpenVotes.Count == ActiveCount(arena)) ResolveVote(arena); break;
 			case AiTrainingAction.Wait: AddEvent(arena, "agent_waited", actor.Id, new { }); break;
 		}
@@ -791,14 +906,14 @@ public sealed class AiTrainingArenaService
 			actions.Add(AiTrainingAction.AcceptVoteProposal.ToString());
 			actions.Add(AiTrainingAction.RejectVoteProposal.ToString());
 		}
-		if (arena.Proposal?.IsOpen == true && !arena.OpenVotes.ContainsKey(actor.Id)) actions.Add(AiTrainingAction.CastVote.ToString());
+		if (arena.Proposal?.IsOpen == true) actions.Add(AiTrainingAction.CastVote.ToString());
 		return actions;
 	}
 
 	private static bool CanApplyAction(AiTrainingArena arena, AiTrainingAgent actor, AiTrainingAction action, string? target) => action switch
 	{
 		AiTrainingAction.RevealCharacteristic => !string.IsNullOrWhiteSpace(target) && actor.OwnCharacteristics.ContainsKey(target) && !actor.RevealedCharacteristics.ContainsKey(target),
-		AiTrainingAction.CastVote => arena.Proposal?.IsOpen == true && !arena.OpenVotes.ContainsKey(actor.Id) && !string.IsNullOrWhiteSpace(target) && target != actor.Id && arena.Agents.Any(agent => agent.Id == target && !agent.IsEliminated),
+		AiTrainingAction.CastVote => arena.Proposal?.IsOpen == true && !string.IsNullOrWhiteSpace(target) && arena.Agents.Any(agent => agent.Id == target && !agent.IsEliminated),
 		_ => AllowedActions(arena, actor).Contains(action.ToString())
 	};
 	private static Dictionary<string, string> BuildCharacteristics(Player player) => new(StringComparer.OrdinalIgnoreCase)
@@ -866,7 +981,9 @@ public sealed class AiTrainingArenaService
 	{
 		var strategic = string.Equals(arena.GenerationMode, "Strategic", StringComparison.OrdinalIgnoreCase);
 		var budget = Math.Clamp(strategic ? _options.StrategicContextTokenBudget : _options.DirectContextTokenBudget, 700, 3000);
-		var scale = budget >= 1600 ? 1.15 : budget <= 1200 ? .82 : 1d;
+		var speed = NormalizeSpeedPreset(arena.SpeedPreset);
+		var scale = (budget >= 1600 ? 1.15 : budget <= 1200 ? .82 : 1d) * (speed == "Fast" ? .72 : speed == "Deep" ? 1.18 : 1d);
+		var history = speed == "Fast" ? 1 : speed == "Deep" ? 4 : 2;
 		return new(
 			OwnCharacteristicCharacters: (int)(180 * scale),
 			OtherCharacteristicCharacters: (int)(80 * scale),
@@ -875,10 +992,10 @@ public sealed class AiTrainingArenaService
 			StatementCharacters: (int)(120 * scale),
 			MemoryCharacters: (int)(120 * scale),
 			MessageCharacters: (int)(120 * scale),
-			PublicClaims: strategic ? 3 : 4,
-			OwnBluffs: strategic ? 2 : 3,
-			MemoryItems: strategic ? 2 : 3,
-			Messages: strategic ? 2 : 3);
+			PublicClaims: strategic ? history + 1 : history + 2,
+			OwnBluffs: Math.Max(1, history),
+			MemoryItems: history,
+			Messages: history + 1);
 	}
 
 	private static object BuildVisibleScenario(AiTrainingArena arena, PromptContextLimits limits) => new
@@ -945,10 +1062,27 @@ public sealed class AiTrainingArenaService
 			lastDecision.StepDurationMilliseconds,
 			lastDecision.PromptCharacters,
 			lastDecision.EstimatedPromptTokens,
+			lastDecision.PlanGenerationMilliseconds,
+			lastDecision.FallbackWait,
+			lastDecision.StrategicPlanRefreshed,
 			lastDecision.AtUtc
 		};
 		var diagnostics = arena.Decisions.TakeLast(30)
-			.Select(item => new { item.Step, item.AgentId, item.Accepted, item.ProviderError, item.ProviderErrorDetail, item.ValidationError, item.RequestAttempts, item.RequestDurationMilliseconds, item.PromptBuildMilliseconds, item.GenerationMilliseconds, item.StepDurationMilliseconds, item.PromptCharacters, item.EstimatedPromptTokens, item.InputTokens, item.OutputTokens, item.AtUtc });
+			.Select(item => new { item.Step, item.AgentId, item.Accepted, item.ProviderError, item.ProviderErrorDetail, item.ValidationError, item.RequestAttempts, item.RequestDurationMilliseconds, item.PromptBuildMilliseconds, item.GenerationMilliseconds, item.PlanGenerationMilliseconds, item.StepDurationMilliseconds, item.PromptCharacters, item.EstimatedPromptTokens, item.InputTokens, item.OutputTokens, item.FallbackWait, item.StrategicPlanRefreshed, item.AtUtc });
+		var performance = new
+		{
+			averageStepMilliseconds = arena.Decisions.Where(item => item.StepDurationMilliseconds.HasValue).Select(item => item.StepDurationMilliseconds!.Value).DefaultIfEmpty().Average(),
+			averagePlanMilliseconds = arena.Decisions.Where(item => item.PlanGenerationMilliseconds.HasValue).Select(item => item.PlanGenerationMilliseconds!.Value).DefaultIfEmpty().Average(),
+			averagePublicGenerationMilliseconds = arena.Decisions.Where(item => item.GenerationMilliseconds.HasValue).Select(item => Math.Max(0, item.GenerationMilliseconds!.Value - (item.PlanGenerationMilliseconds ?? 0))).DefaultIfEmpty().Average(),
+			promptTokens = arena.Decisions.Sum(item => item.InputTokens ?? item.EstimatedPromptTokens ?? 0),
+			completionTokens = arena.Decisions.Sum(item => item.OutputTokens ?? 0),
+			modelRequests = arena.ModelRequestCount,
+			retries = arena.Decisions.Sum(item => Math.Max(0, item.RequestAttempts - 1)),
+			jsonErrors = arena.Decisions.Count(item => item.ProviderError == "ai_malformed_response" || item.ProviderErrorDetail?.Contains("json", StringComparison.OrdinalIgnoreCase) == true),
+			successfulActions = arena.Decisions.Count(item => item.Accepted && !item.FallbackWait),
+			fallbackWaits = arena.Decisions.Count(item => item.FallbackWait),
+			strategyRefreshes = arena.Decisions.Count(item => item.StrategicPlanRefreshed)
+		};
 		return new
 		{
 			arena.Id,
@@ -960,6 +1094,14 @@ public sealed class AiTrainingArenaService
 			arena.Provider,
 			arena.Model,
 			arena.GenerationMode,
+			arena.SpeedPreset,
+			arena.AgentCount,
+			arena.SurvivorTarget,
+			arena.RequiredRevealsPerAgent,
+			arena.CurrentAgentId,
+			currentAgentName = arena.Agents.FirstOrDefault(item => item.Id == arena.CurrentAgentId)?.Name,
+			arena.IsGenerating,
+			enabledCharacteristics = arena.EnabledCharacteristics.Count == 0 ? CharacteristicCategories : arena.EnabledCharacteristics.OrderBy(item => item),
 			scenario = BuildDeveloperScenario(arena),
 			agents = arena.Agents.Select(item => new { item.Id, item.Name, item.Seat, item.IsEliminated, revealed = item.RevealedCharacteristics, revealedCount = item.RevealedCharacteristics.Count, item.LastDecision, item.LastError }),
 			messages = arena.Messages.TakeLast(100),
@@ -968,6 +1110,7 @@ public sealed class AiTrainingArenaService
 			proposal = arena.Proposal,
 			openVotes = arena.OpenVotes.Count,
 			diagnostics,
+			performance,
 			datasetExportUrl = $"/ai-arena/export/{arena.Id}"
 		};
 	}
@@ -995,7 +1138,7 @@ public sealed class AiTrainingArenaService
 		: CloneScenario(_gameData.Bunkers[Random.Shared.Next(_gameData.Bunkers.Count)]);
 	private static T CloneScenario<T>(T source) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(source))
 		?? throw new InvalidOperationException("scenario_clone_failed");
-	private void AddEvent(AiTrainingArena arena, string type, string? agentId, object data) { var item = new AiTrainingEvent(Guid.NewGuid().ToString("N"), arena.Step, type, agentId, data, _clock.GetUtcNow()); arena.Events.Add(item); _dataset.AppendEvent(arena, item); }
+	private void AddEvent(AiTrainingArena arena, string type, string? agentId, object data) { var item = new AiTrainingEvent($"{arena.Id}-{arena.Events.Count + 1:D6}", arena.Step, type, agentId, data, _clock.GetUtcNow(), arena.CurrentDecisionId); arena.Events.Add(item); _dataset.AppendEvent(arena, item); }
 	private void Finish(AiTrainingArena arena, AiTrainingArenaStatus status, string? intervention) { arena.Status = status; arena.EndedAtUtc = _clock.GetUtcNow(); arena.LastIntervention = intervention; if (intervention != null) AddEvent(arena, "simulator_intervention", null, new { intervention }); else AddEvent(arena, "arena_finished", null, new { winners = arena.Agents.Where(agent => !agent.IsEliminated).Select(agent => agent.Id) }); }
 	private Task PublishAsync(AiTrainingArena arena, CancellationToken token) => _hub.Clients.Group(arena.Id).SendAsync("AiArenaStateUpdated", BuildView(arena, null), token);
 	private ArenaConfiguration ResolveConfiguration(AiTrainingArenaRequest? request)

@@ -141,10 +141,12 @@ builder.Services.AddSingleton<CharacterRevealService>();
 builder.Services.AddSingleton<CharacterRevealSynchronizationService>();
 builder.Services.Configure<AiChatOptions>(builder.Configuration.GetSection(AiChatOptions.SectionName));
 builder.Services.Configure<AiTrainingArenaOptions>(builder.Configuration.GetSection(AiTrainingArenaOptions.SectionName));
+builder.Services.Configure<AiTrainingLlmEditorOptions>(builder.Configuration.GetSection(AiTrainingLlmEditorOptions.SectionName));
 builder.Services.Configure<AiTokenCostOptions>(builder.Configuration.GetSection("AiTokenCost"));
 builder.Services.AddHttpClient<IGeminiAiProvider, GeminiAiProvider>(client => client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/"));
 builder.Services.AddHttpClient(nameof(OpenAiInputTokenCounter));
 builder.Services.AddHttpClient(nameof(LocalMamayLmProvider));
+builder.Services.AddHttpClient(nameof(AiTrainingLlmEditorService));
 builder.Services.AddSingleton<GroqAiProvider>();
 builder.Services.AddSingleton<OpenRouterAiProvider>();
 builder.Services.AddSingleton<ILocalMamayLmProvider, LocalMamayLmProvider>();
@@ -162,6 +164,8 @@ builder.Services.AddSingleton<AiChatContextBuilder>();
 builder.Services.AddSingleton<AiConversationCoordinator>();
 builder.Services.AddSingleton<AiPresentationCoordinator>();
 builder.Services.AddSingleton<AiTrainingDatasetStore>();
+builder.Services.AddSingleton<AiTrainingLlmEditorService>();
+builder.Services.AddHostedService<AiTrainingLlmEditorService>(provider => provider.GetRequiredService<AiTrainingLlmEditorService>());
 builder.Services.AddSingleton<AiTrainingArenaService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

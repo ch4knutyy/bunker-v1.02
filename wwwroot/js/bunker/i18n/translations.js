@@ -785,3 +785,30 @@ Object.assign(uiTranslations.ru, {
 	aiArenaConfigurationUnavailable: 'Конфигурация AI арены недоступна', connectionAvailableForLocal: 'Проверка доступна только для Local MamayLM',
 	notConfigured: 'не настроено', notChecked: 'не проверено'
 });
+Object.assign(uiTranslations.uk, {
+	arenaDatasetSection: 'Датасет Arena', arenaDatasetSelect: 'Датасет: оберіть сесію',
+	arenaRawExport: 'Raw JSONL (.zip)', arenaSftExport: 'SFT JSONL (.zip)', arenaCuratedExport: 'Curated JSONL (.zip)',
+	arenaEditorSelect: 'Редактор: оберіть сесію', arenaEditor: 'Редактор', arenaEditorOn: 'увімкнено', arenaEditorOff: 'вимкнено',
+	arenaEditorPending: 'очікує', arenaEditorCompleted: 'готово', arenaEditorSkipped: 'пропущено',
+	arenaEditorRejected: 'відхилено', arenaEditorFailed: 'збоїв', arenaEditorImprovements: 'покращень', arenaEditorTokens: 'токени input/output',
+	arenaDatasetSessions: 'Сесій', arenaDatasetDecisions: 'рішень', arenaDatasetEligible: 'SFT придатні',
+	arenaDatasetExcluded: 'виключено', arenaDatasetStopped: 'зупинено', arenaDatasetErrors: 'помилки', arenaDatasetKiB: 'КіБ'
+});
+Object.assign(uiTranslations.en, {
+	arenaDatasetSection: 'Arena dataset', arenaDatasetSelect: 'Dataset: select a session',
+	arenaRawExport: 'Raw JSONL (.zip)', arenaSftExport: 'SFT JSONL (.zip)', arenaCuratedExport: 'Curated JSONL (.zip)',
+	arenaEditorSelect: 'Editor: select a session', arenaEditor: 'Editor', arenaEditorOn: 'enabled', arenaEditorOff: 'disabled',
+	arenaEditorPending: 'pending', arenaEditorCompleted: 'completed', arenaEditorSkipped: 'skipped',
+	arenaEditorRejected: 'rejected', arenaEditorFailed: 'failed', arenaEditorImprovements: 'improvements', arenaEditorTokens: 'input/output tokens',
+	arenaDatasetSessions: 'Sessions', arenaDatasetDecisions: 'decisions', arenaDatasetEligible: 'SFT eligible',
+	arenaDatasetExcluded: 'excluded', arenaDatasetStopped: 'stopped', arenaDatasetErrors: 'errors', arenaDatasetKiB: 'KiB'
+});
+Object.assign(uiTranslations.ru, {
+	arenaDatasetSection: 'Датасет Arena', arenaDatasetSelect: 'Датасет: выберите сессию',
+	arenaRawExport: 'Raw JSONL (.zip)', arenaSftExport: 'SFT JSONL (.zip)', arenaCuratedExport: 'Curated JSONL (.zip)',
+	arenaEditorSelect: 'Редактор: выберите сессию', arenaEditor: 'Редактор', arenaEditorOn: 'включён', arenaEditorOff: 'выключен',
+	arenaEditorPending: 'ожидает', arenaEditorCompleted: 'готово', arenaEditorSkipped: 'пропущено',
+	arenaEditorRejected: 'отклонено', arenaEditorFailed: 'сбоев', arenaEditorImprovements: 'улучшений', arenaEditorTokens: 'токены input/output',
+	arenaDatasetSessions: 'Сессий', arenaDatasetDecisions: 'решений', arenaDatasetEligible: 'SFT пригодны',
+	arenaDatasetExcluded: 'исключено', arenaDatasetStopped: 'остановлено', arenaDatasetErrors: 'ошибки', arenaDatasetKiB: 'КиБ'
+});

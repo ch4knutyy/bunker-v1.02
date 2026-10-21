@@ -1,5 +1,5 @@
 (() => {
-    const state = { arena: null, selected: null, connection: null, configuration: null, drawer: null, detailId: null };
+    const state = { arena: null, selected: null, connection: null, configuration: null, characteristics: null, drawer: null, detailId: null };
     const detailItems = new Map();
     const supportsHover = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === true;
     const byId = id => document.getElementById(id);
@@ -42,19 +42,33 @@
         state.configuration = configuration;
         byId('arenaProvider').value = configuration.provider || 'Deterministic';
         byId('arenaGenerationMode').value = configuration.generationMode || 'Direct';
+		byId('arenaSpeedPreset').value = configuration.speedPreset || 'Balanced';
+		byId('arenaAgentCount').value = configuration.agentCount || 6;
+		if (!state.characteristics) state.characteristics = new Set(configuration.defaultEnabledCharacteristics || configuration.characteristicCategories || []);
+		renderCharacteristicOptions(configuration.characteristicCategories || []);
         byId('arenaModel').textContent = configuration.model || 'не задано';
         const local = configuration.localStatus || {};
         byId('arenaProviderStatus').textContent = local.errorCode ? `${local.status || 'unavailable'}: ${local.errorCode}` : (local.status || (configuration.useLiveProvider ? 'configured' : 'disabled'));
     }
+
+	function renderCharacteristicOptions(categories) {
+		const target = byId('arenaCharacteristicOptions');
+		if (!target) return;
+		target.innerHTML = categories.map(key => `<label><input type="checkbox" value="${safe(key)}" ${state.characteristics?.has(key) ? 'checked' : ''} /> ${safe(labels[key] || key)}</label>`).join('');
+		target.querySelectorAll('input').forEach(input => input.addEventListener('change', () => {
+			if (input.checked) state.characteristics.add(input.value); else state.characteristics.delete(input.value);
+		}));
+	}
 
     function renderSummary(view) {
         const active = view.agents.filter(agent => !agent.isEliminated).length;
         const eliminated = view.agents.length - active;
         byId('arenaSummary').innerHTML = [
             ['Статус', view.status], ['Раунд', view.currentRound], ['Крок', view.step], ['Активні', active], ['Виключені', eliminated],
-            ['Голосування', view.voteCount], ['Провайдер', view.provider], ['Модель', view.model || '—'], ['Режим', view.generationMode]
+			['Голосування', view.voteCount], ['Провайдер', view.provider], ['Модель', view.model || '—'], ['Режим', view.generationMode], ['Швидкість', view.speedPreset || 'Balanced'], ['Поточний AI', view.currentAgentName || '—'], ['Генерація', view.isGenerating ? 'триває' : 'очікування']
         ].map(([label, value]) => `<div><span>${safe(label)}</span><strong>${safe(value)}</strong></div>`).join('');
         byId('arenaPlayerCount').textContent = `${active} активних`;
+		byId('arenaPlayersTitle').textContent = `${view.agents.length} AI-гравців`;
         status(view.lastIntervention ? `${view.status} · ${view.lastIntervention}` : `${view.status} · крок ${view.step} · активних AI: ${active}`);
     }
 
@@ -229,12 +243,14 @@
 
     function renderDiagnostics(view) {
         const diagnostics = view.diagnostics || [];
-        byId('arenaDiagnostics').innerHTML = diagnostics.length ? diagnostics.slice().reverse().map(item => {
+        const aggregate = view.performance || {};
+        const aggregateLine = `<p class="diagnostic-summary">середній хід ${aggregate.averageStepMilliseconds ?? '—'} мс · план ${aggregate.averagePlanMilliseconds ?? '—'} мс · публічна генерація ${aggregate.averagePublicGenerationMilliseconds ?? '—'} мс<br>LLM ${aggregate.modelRequests ?? 0} · input ${aggregate.promptTokens ?? 0} · output ${aggregate.completionTokens ?? 0} · retry ${aggregate.retries ?? 0} · JSON ${aggregate.jsonErrors ?? 0} · успішно ${aggregate.successfulActions ?? 0} · fallback Wait ${aggregate.fallbackWaits ?? 0} · оновлення плану ${aggregate.strategyRefreshes ?? 0}</p>`;
+        byId('arenaDiagnostics').innerHTML = aggregateLine + (diagnostics.length ? diagnostics.slice().reverse().map(item => {
             const outcome = item.providerError || item.validationError || (item.accepted ? 'прийнято' : 'відхилено');
             const timing = `побудова промпту ${item.promptBuildMilliseconds ?? '—'} мс · генерація ${item.generationMilliseconds ?? item.requestDurationMilliseconds ?? '—'} мс · хід ${item.stepDurationMilliseconds ?? '—'} мс`;
             const prompt = `промпт ${item.promptCharacters ?? '—'} симв. / ≈${item.estimatedPromptTokens ?? '—'} токенів`;
             return `<article class="diagnostic-entry"><strong>Крок ${safe(item.step)} · ${safe(item.agentId)}</strong><p>${safe(outcome)}</p>${item.providerErrorDetail ? `<small>${safe(item.providerErrorDetail)}</small>` : ''}<footer>${timing}<br>${prompt} · ${item.requestAttempts || 1} спроб · ${item.inputTokens ?? '—'}/${item.outputTokens ?? '—'} токенів</footer></article>`;
-        }).join('') : '<p class="empty-state">Кроків генерації ще немає.</p>';
+        }).join('') : '<p class="empty-state">Кроків генерації ще немає.</p>');
     }
 
     function renderDebug(agent) {
@@ -252,13 +268,44 @@
         characteristicItems(view.selectedAgent).forEach(registerDetail);
         renderSummary(view); renderScenario(view.scenario); renderPlayers(view); renderChat(view.messages || []); renderTimeline(view); renderDiagnostics(view); renderDebug(view.selectedAgent); renderDrawer(view.selectedAgent); bindDetailCards(byId('arenaScenario'));
         const exportLink = byId('arenaExport'); exportLink.href = view.datasetExportUrl; exportLink.hidden = false;
+		for (const [id, type] of [['arenaRawExport', 'raw'], ['arenaSftExport', 'sft'], ['arenaCuratedExport', 'curated']]) {
+			const link = byId(id); link.href = `/ai-arena/export-${type}?sessionId=${encodeURIComponent(view.id)}`; link.hidden = false;
+		}
+		if (!view.isGenerating) refreshDatasetStats(view.id);
         controls(!['Finished', 'Cancelled', 'Faulted'].includes(view.status));
     }
+	function renderDatasetLabels() {
+		byId('arenaDatasetSection').setAttribute('aria-label', t('arenaDatasetSection'));
+		byId('arenaDatasetStats').textContent = t('arenaDatasetSelect');
+		byId('arenaRawExport').textContent = t('arenaRawExport');
+		byId('arenaSftExport').textContent = t('arenaSftExport');
+		byId('arenaCuratedExport').textContent = t('arenaCuratedExport');
+		byId('arenaEditorStats').textContent = t('arenaEditorSelect');
+	}
+	async function refreshDatasetStats(id) {
+		try {
+			const response = await fetch(`/ai-arena/dataset-stats/${encodeURIComponent(id)}`);
+			if (!response.ok) return;
+			const data = await response.json();
+			if (state.arena?.id === id) byId('arenaDatasetStats').textContent = `${t('arenaDatasetSessions')} ${data.sessions} · ${t('arenaDatasetDecisions')} ${data.decisions} · ${t('arenaDatasetEligible')} ${data.eligible} · ${t('arenaDatasetExcluded')} ${data.excluded} · ${t('arenaDatasetStopped')} ${data.stopped} · ${t('arenaDatasetErrors')} ${data.errors} · ≈${Math.ceil((data.approximateStoreBytes || 0) / 1024)} ${t('arenaDatasetKiB')}`;
+		} catch { /* Diagnostics must not interrupt the arena controls. */ }
+		refreshEditorStats(id);
+	}
+	async function refreshEditorStats(id) {
+		try {
+			const response = await fetch(`/ai-arena/editor-stats/${encodeURIComponent(id)}`);
+			if (!response.ok) return;
+			const data = await response.json();
+			if (state.arena?.id === id) byId('arenaEditorStats').textContent = `${t('arenaEditor')}: ${data.enabled ? t('arenaEditorOn') : t('arenaEditorOff')} · ${t('arenaEditorPending')} ${data.stats.pending} · ${t('arenaEditorCompleted')} ${data.stats.completed} · ${t('arenaEditorSkipped')} ${data.stats.skipped} · ${t('arenaEditorRejected')} ${data.stats.rejected} · ${t('arenaEditorFailed')} ${data.stats.failed} · ${t('arenaEditorImprovements')} ${data.stats.improvements} · ${t('arenaEditorTokens')} ${data.stats.inputTokens}/${data.stats.outputTokens}`;
+		} catch { /* Editor diagnostics must not interrupt the arena. */ }
+	}
 
     async function watch(id, selected = state.selected) { state.selected = selected; render(await state.connection.invoke('WatchArena', id, selected)); }
     async function invoke(name) { if (state.arena) render(await state.connection.invoke(name, state.arena.id)); }
 
     async function setup() {
+		renderDatasetLabels();
+		setInterval(() => { if (state.arena?.id) refreshEditorStats(state.arena.id); }, 10000);
         state.connection = new signalR.HubConnectionBuilder().withUrl('/aiArenaHub').withAutomaticReconnect().build();
         state.connection.on('AiArenaStateUpdated', view => { if (state.arena?.id === view.id) watch(view.id, state.selected); });
         state.connection.onreconnected(() => state.arena && watch(state.arena.id, state.selected));
@@ -269,7 +316,14 @@
         const initialArenaId = byId('aiArena')?.dataset.initialArenaId;
         if (initialArenaId) { try { await watch(initialArenaId); } catch (error) { status(`Не вдалося відкрити AI арену: ${error.message || error}`); } }
         renderConfiguration(await state.connection.invoke('GetArenaConfiguration'));
-        byId('arenaCreate').addEventListener('click', async () => render(await state.connection.invoke('CreateArena', { provider: byId('arenaProvider').value, generationMode: byId('arenaGenerationMode').value })));
+		byId('arenaCreate').addEventListener('click', async () => {
+			const enabledCharacteristics = [...(state.characteristics || [])];
+			if (!enabledCharacteristics.length) { status('Оберіть хоча б одну характеристику.'); return; }
+			render(await state.connection.invoke('CreateArena', { provider: byId('arenaProvider').value, generationMode: byId('arenaGenerationMode').value, speedPreset: byId('arenaSpeedPreset').value, agentCount: Number(byId('arenaAgentCount').value), enabledCharacteristics }));
+		});
+		byId('arenaCharacteristicsAll').addEventListener('click', () => { state.characteristics = new Set(state.configuration?.characteristicCategories || []); renderCharacteristicOptions(state.configuration?.characteristicCategories || []); });
+		byId('arenaCharacteristicsNone').addEventListener('click', () => { state.characteristics = new Set(); renderCharacteristicOptions(state.configuration?.characteristicCategories || []); });
+		byId('arenaCharacteristicsDefault').addEventListener('click', () => { state.characteristics = new Set(state.configuration?.defaultEnabledCharacteristics || []); renderCharacteristicOptions(state.configuration?.characteristicCategories || []); });
         byId('arenaCheckProvider').addEventListener('click', async () => { const result = await state.connection.invoke('CheckArenaProvider'); renderConfiguration(result.configuration); if (result.status?.errorCode) status(`Провайдер недоступний: ${result.status.errorCode}`); });
         [['arenaStart', 'StartArena'], ['arenaPause', 'PauseArena'], ['arenaResume', 'ResumeArena'], ['arenaStep', 'StepArena'], ['arenaCancel', 'CancelArena']].forEach(([id, method]) => byId(id).addEventListener('click', () => invoke(method)));
         byId('arenaDrawerClose').addEventListener('click', closeDrawer);
