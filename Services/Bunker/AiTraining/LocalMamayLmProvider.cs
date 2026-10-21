@@ -14,7 +14,9 @@ public interface ILocalMamayLmProvider
     AiTrainingProviderStatus LastStatus { get; }
 }
 
-public sealed record AiTrainingModelRequest(string Model, string SystemPrompt, string UserPrompt, int MaxResponseTokens, bool UseJsonResponseFormat = false);
+public sealed record AiTrainingStructuredOutput(string Name, object Schema);
+public sealed record AiTrainingModelRequest(string Model, string SystemPrompt, string UserPrompt, int MaxResponseTokens,
+    bool UseJsonResponseFormat = false, AiTrainingStructuredOutput? StructuredOutput = null, double Temperature = 0.65);
 public sealed record AiTrainingProviderStatus(string Provider, string Status, string? Model, string? ErrorCode = null);
 
 public sealed class LocalMamayLmProvider(IHttpClientFactory clients, IOptions<AiTrainingArenaOptions> options,
@@ -50,31 +52,18 @@ public sealed class LocalMamayLmProvider(IHttpClientFactory clients, IOptions<Ai
                 new { role = "system", content = request.SystemPrompt },
                 new { role = "user", content = request.UserPrompt }
             };
-            object payload = request.UseJsonResponseFormat
-                ? new { model = request.Model, messages, temperature = 0.65, max_tokens = Math.Clamp(request.MaxResponseTokens, 64, 512), response_format = new { type = "json_object" } }
-                : new { model = request.Model, messages, temperature = 0.65, max_tokens = Math.Clamp(request.MaxResponseTokens, 64, 512) };
-            using var response = await clients.CreateClient(nameof(LocalMamayLmProvider)).PostAsJsonAsync(endpoint + "chat/completions", payload, timeout.Token);
-            if (!response.IsSuccessStatusCode)
+            using var response = await PostCompletionAsync(endpoint, request, messages, timeout.Token);
+            var result = await ReadCompletionAsync(response, stopwatch, timeout.Token);
+            if (result.ErrorCode == "ai_structured_output_unsupported" && request.StructuredOutput != null)
             {
-                var detail = ExtractSanitizedErrorDetail(await response.Content.ReadAsStringAsync(timeout.Token));
-                var error = ClassifyFailure(response.StatusCode, detail);
-                SetStatus("unavailable", error);
-                logger.LogWarning("Local MamayLM request failed: status={StatusCode} error={ErrorCode} reason={Reason} durationMs={DurationMs}",
-                    (int)response.StatusCode, error, detail ?? "unspecified", stopwatch.ElapsedMilliseconds);
-                return new(null, error, ErrorDetail: detail, DurationMilliseconds: stopwatch.ElapsedMilliseconds);
+                logger.LogInformation("Local MamayLM does not support JSON Schema structured output; falling back to JSON object mode");
+                var fallback = request with { StructuredOutput = null, UseJsonResponseFormat = true };
+                using var fallbackResponse = await PostCompletionAsync(endpoint, fallback, messages, timeout.Token);
+                result = await ReadCompletionAsync(fallbackResponse, stopwatch, timeout.Token);
             }
 
-            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(timeout.Token));
-            var text = document.RootElement.TryGetProperty("choices", out var choices) && choices.ValueKind == JsonValueKind.Array &&
-                choices.GetArrayLength() > 0 && choices[0].TryGetProperty("message", out var message) &&
-                message.TryGetProperty("content", out var content) ? content.GetString() : null;
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                SetStatus("unavailable", "ai_empty_response");
-                return new(null, "ai_empty_response", AiTokenUsageParser.FromOpenAiCompatible(document.RootElement), DurationMilliseconds: stopwatch.ElapsedMilliseconds);
-            }
-            SetStatus("available", null);
-            return new(text, Usage: AiTokenUsageParser.FromOpenAiCompatible(document.RootElement), DurationMilliseconds: stopwatch.ElapsedMilliseconds);
+            SetStatus(string.IsNullOrWhiteSpace(result.ErrorCode) ? "available" : "unavailable", result.ErrorCode);
+            return result;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -99,6 +88,58 @@ public sealed class LocalMamayLmProvider(IHttpClientFactory clients, IOptions<Ai
         {
             _requestGate.Release();
         }
+    }
+
+    private Task<HttpResponseMessage> PostCompletionAsync(string endpoint, AiTrainingModelRequest request, object[] messages, CancellationToken cancellationToken)
+    {
+        var maxTokens = Math.Clamp(request.MaxResponseTokens, 64, 512);
+        var temperature = Math.Clamp(request.Temperature, 0, 2);
+        object payload = request.StructuredOutput != null
+            ? new
+            {
+                model = request.Model,
+                messages,
+                temperature,
+                max_tokens = maxTokens,
+                response_format = new
+                {
+                    type = "json_schema",
+                    json_schema = new { name = request.StructuredOutput.Name, strict = true, schema = request.StructuredOutput.Schema }
+                }
+            }
+            : request.UseJsonResponseFormat
+                ? new { model = request.Model, messages, temperature, max_tokens = maxTokens, response_format = new { type = "json_object" } }
+                : new { model = request.Model, messages, temperature, max_tokens = maxTokens };
+        return clients.CreateClient(nameof(LocalMamayLmProvider)).PostAsJsonAsync(endpoint + "chat/completions", payload, cancellationToken);
+    }
+
+    private async Task<AiProviderReply> ReadCompletionAsync(HttpResponseMessage response, Stopwatch stopwatch, CancellationToken cancellationToken)
+    {
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var detail = ExtractSanitizedErrorDetail(body);
+            var error = IsStructuredOutputUnsupported(response.StatusCode, detail)
+                ? "ai_structured_output_unsupported"
+                : ClassifyFailure(response.StatusCode, detail);
+            logger.LogWarning("Local MamayLM request failed: status={StatusCode} error={ErrorCode} reason={Reason} durationMs={DurationMs}",
+                (int)response.StatusCode, error, detail ?? "unspecified", stopwatch.ElapsedMilliseconds);
+            return new(null, error, ErrorDetail: detail, DurationMilliseconds: stopwatch.ElapsedMilliseconds);
+        }
+
+        using var document = JsonDocument.Parse(body);
+        var hasChoice = document.RootElement.TryGetProperty("choices", out var choices) && choices.ValueKind == JsonValueKind.Array && choices.GetArrayLength() > 0;
+        var choice = hasChoice ? choices[0] : default;
+        var text = hasChoice && choice.TryGetProperty("message", out var message) && message.TryGetProperty("content", out var content)
+            ? content.GetString() : null;
+        var wasTruncated = hasChoice && choice.TryGetProperty("finish_reason", out var finishReason) && finishReason.ValueKind == JsonValueKind.String &&
+            string.Equals(finishReason.GetString(), "length", StringComparison.OrdinalIgnoreCase);
+        var usage = AiTokenUsageParser.FromOpenAiCompatible(document.RootElement);
+        if (wasTruncated)
+            return new(null, "ai_response_truncated", usage, "finish_reason:length", DurationMilliseconds: stopwatch.ElapsedMilliseconds);
+        return string.IsNullOrWhiteSpace(text)
+            ? new(null, "ai_empty_response", usage, DurationMilliseconds: stopwatch.ElapsedMilliseconds)
+            : new(text, Usage: usage, DurationMilliseconds: stopwatch.ElapsedMilliseconds);
     }
 
     public async Task<AiTrainingProviderStatus> ProbeAsync(CancellationToken cancellationToken)
@@ -159,6 +200,14 @@ public sealed class LocalMamayLmProvider(IHttpClientFactory clients, IOptions<Ai
         if (reason.Contains("context") || reason.Contains("token limit") || reason.Contains("too many tokens") || reason.Contains("maximum context")) return "ai_context_overflow";
         if (reason.Contains("model") && (reason.Contains("not found") || reason.Contains("not loaded") || reason.Contains("unavailable"))) return "ai_model_not_found";
         return "ai_invalid_request";
+    }
+
+    private static bool IsStructuredOutputUnsupported(HttpStatusCode status, string? detail)
+    {
+        if (status != HttpStatusCode.BadRequest || string.IsNullOrWhiteSpace(detail)) return false;
+        var reason = detail.ToLowerInvariant();
+        return (reason.Contains("response_format") || reason.Contains("json_schema") || reason.Contains("structured output")) &&
+            (reason.Contains("unsupported") || reason.Contains("not supported") || reason.Contains("invalid"));
     }
 
     private static string? ExtractSanitizedErrorDetail(string body)

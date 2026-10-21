@@ -1,5 +1,7 @@
 (() => {
-    const state = { arena: null, selected: null, connection: null, configuration: null };
+    const state = { arena: null, selected: null, connection: null, configuration: null, drawer: null, detailId: null };
+    const detailItems = new Map();
+    const supportsHover = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === true;
     const byId = id => document.getElementById(id);
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
     const status = text => { const target = byId('arenaStatus'); if (target) target.textContent = text; };
@@ -10,6 +12,30 @@
         inventory: 'Інвентар', property: 'Майно', fact: 'Факт', specialCard: 'Спеціальна карта'
     };
     const technicalTypes = new Set(['provider_error', 'agent_waited', 'decision_rejected', 'arena_paused_provider_error']);
+    const votingTypes = new Set(['vote_proposed', 'vote_proposal_accepted', 'vote_proposal_rejected', 'vote_opened', 'vote_cast', 'player_eliminated']);
+
+    const short = (value, length = 88) => {
+        const text = String(value ?? '').replace(/\s+/g, ' ').trim();
+        return text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text || '—';
+    };
+    const textList = (values, empty = 'Немає даних.') => values?.length
+        ? `<ul>${values.map(value => `<li>${safe(value)}</li>`).join('')}</ul>`
+        : `<p class="empty-state">${safe(empty)}</p>`;
+    const detailValue = value => Array.isArray(value)
+        ? textList(value)
+        : `<p>${safe(value || '—')}</p>`;
+
+    function registerDetail(item) {
+        detailItems.set(item.id, item);
+        return item;
+    }
+
+    function detailCard(item) {
+        registerDetail(item);
+        return `<button type="button" class="arena-detail-card ${safe(item.status || '')}" data-detail-id="${safe(item.id)}" aria-label="Відкрити деталі: ${safe(item.title)}">
+            <span class="detail-category">${safe(item.category)}</span><strong>${safe(item.title)}</strong><small>${safe(item.summary)}</small><em>${safe(item.statusLabel || '')}</em>
+        </button>`;
+    }
 
     function renderConfiguration(configuration) {
         if (!configuration) return;
@@ -32,8 +58,8 @@
         status(view.lastIntervention ? `${view.status} · ${view.lastIntervention}` : `${view.status} · крок ${view.step} · активних AI: ${active}`);
     }
 
-    function scenarioList(values, empty) {
-        return values?.length ? `<ul>${values.map(value => `<li>${safe(value)}</li>`).join('')}</ul>` : `<p class="empty-state">${safe(empty)}</p>`;
+    function scenarioCard(id, category, title, description, fields, statusLabel = 'Публічно відомо') {
+        return detailCard({ id, category, title, summary: short(description), status: 'public', statusLabel, tooltip: description, details: fields });
     }
 
     function renderScenario(scenario) {
@@ -44,14 +70,20 @@
         }
         const apocalypse = scenario.apocalypse;
         const bunker = scenario.bunker;
-        const currentThreats = scenario.currentThreats || [];
-        const previousThreats = scenario.previousThreats || [];
-        target.innerHTML = `<div class="panel-heading"><div><span>Світ гри</span><h2>Апокаліпсис, бункер і загрози</h2></div></div>
-            <div class="arena-scenario-grid">
-                <article><h3>Апокаліпсис</h3>${apocalypse ? `<strong>${safe(apocalypse.name)}</strong><p>${safe(apocalypse.description)}</p><dl><dt>Небезпека</dt><dd>${safe(apocalypse.severity)}</dd><dt>Шанс виживання</dt><dd>${safe(apocalypse.survivalChance)}%</dd><dt>Тривалість</dt><dd>${safe(apocalypse.duration)}</dd></dl><h4>Умови виживання</h4>${scenarioList(apocalypse.requirements, 'Не вказано.')}` : '<p class="empty-state">Немає даних.</p>'}</article>
-                <article><h3>Бункер</h3>${bunker ? `<strong>${safe(bunker.name)}</strong><p>${safe(bunker.description)}</p><dl><dt>Місткість</dt><dd>${safe(bunker.capacity)}</dd><dt>Локація</dt><dd>${safe(bunker.location)}</dd><dt>Запаси</dt><dd>${safe(bunker.suppliesMonths)} міс. / вода ${safe(bunker.waterMonths)} міс.</dd><dt>Стан</dt><dd>${safe(bunker.condition)}</dd></dl><h4>Приміщення</h4>${scenarioList(bunker.facilities, 'Не вказано.')}<h4>Ресурси</h4>${scenarioList(bunker.resources, 'Не вказано.')}<h4>Проблеми</h4>${scenarioList(bunker.problems, 'Не вказано.')}` : '<p class="empty-state">Немає даних.</p>'}</article>
-                <article><h3>Поточні загрози</h3>${currentThreats.length ? currentThreats.map(threat => `<div class="arena-threat"><strong>${safe(threat.name)}</strong><span>${safe(threat.severity)}</span><p>${safe(threat.description)}</p><h4>Вимоги</h4>${scenarioList(threat.requirements, 'Не вказано.')}<h4>Ризики</h4>${scenarioList(threat.risks, 'Не вказано.')}<h4>Наслідки</h4>${scenarioList(threat.consequences, 'Не вказано.')}</div>`).join('') : '<p class="empty-state">Ще не активовано за канонічним розкладом.</p>'}${previousThreats.length ? `<details><summary>Попередні загрози (${safe(previousThreats.length)})</summary>${previousThreats.map(threat => `<p><strong>${safe(threat.name)}</strong> · ${safe(threat.description)}</p>`).join('')}</details>` : ''}</article>
-            </div>`;
+        const threats = [...(scenario.currentThreats || []), ...(scenario.previousThreats || [])];
+        const cards = [];
+        if (apocalypse) cards.push(scenarioCard('scenario:apocalypse', 'Апокаліпсис', apocalypse.name, apocalypse.description, [
+            ['Опис', apocalypse.description], ['Небезпека', apocalypse.severity], ['Шанс виживання', `${apocalypse.survivalChance}%`], ['Тривалість', apocalypse.duration],
+            ['Зовнішні загрози', apocalypse.threats || []], ['Умови виживання', apocalypse.requirements || []], ['Теги', apocalypse.tags || []]
+        ]));
+        if (bunker) cards.push(scenarioCard('scenario:bunker', 'Бункер', bunker.name, bunker.description, [
+            ['Опис', bunker.description], ['Місткість', bunker.capacity], ['Локація', bunker.location], ['Запаси', `${bunker.suppliesMonths} міс.`], ['Вода', `${bunker.waterMonths} міс.`], ['Стан', bunker.condition],
+            ['Приміщення', bunker.facilities || []], ['Ресурси', bunker.resources || []], ['Проблеми', bunker.problems || []], ['Теги', bunker.bunkerTags || []]
+        ]));
+        threats.forEach(threat => cards.push(scenarioCard(`threat:${threat.id}:${threat.activatedAtRound ?? 'current'}`, threat.isActive ? 'Активна загроза' : 'Попередня загроза', threat.name, threat.description, [
+            ['Опис', threat.description], ['Серйозність', threat.severity], ['Категорія', threat.category], ['Вимоги', threat.requirements || []], ['Ризики', threat.risks || []], ['Наслідки', threat.consequences || []], ['Активовано', threat.activatedAtRound ? `раунд ${threat.activatedAtRound}` : '—']
+        ], threat.isActive ? 'Активна' : 'Минувша')));
+        target.innerHTML = `<div class="panel-heading"><div><span>Світ гри</span><h2>Сценарій виживання</h2></div><small>Натисніть картку для деталей</small></div><div class="arena-scenario-cards">${cards.join('')}</div>`;
     }
 
     function renderPlayers(view) {
@@ -59,10 +91,14 @@
             const action = agent.lastDecision || 'очікує ходу';
             return `<button class="arena-agent-card ${agent.isEliminated ? 'eliminated' : ''} ${state.selected === agent.id ? 'selected' : ''}" data-id="${safe(agent.id)}">
                 <span class="agent-seat">AI ${safe(agent.seat)}</span><strong>${safe(agent.name)}</strong><span>${agent.isEliminated ? 'Виключено' : 'У грі'}</span>
-                <small>Відкрито: ${safe(agent.revealedCount ?? Object.keys(agent.revealed || {}).length)} · ${safe(action)}</small>${agent.lastError ? `<em>${safe(agent.lastError)}</em>` : ''}
+                <small>${safe(agent.revealedCount ?? Object.keys(agent.revealed || {}).length)} відкрито · ${safe(action)}</small>${agent.lastError ? `<em>${safe(agent.lastError)}</em>` : ''}
             </button>`;
         }).join('');
-        document.querySelectorAll('.arena-agent-card').forEach(button => button.addEventListener('click', () => watch(view.id, button.dataset.id)));
+        document.querySelectorAll('.arena-agent-card').forEach(button => button.addEventListener('click', async () => {
+            state.selected = button.dataset.id;
+            await watch(view.id, state.selected);
+            openInspector();
+        }));
     }
 
     function renderChat(messages) {
@@ -81,37 +117,124 @@
         return `${types[event.type] || event.type} · ${name}`;
     }
 
+    function eventRows(events, agents, empty) {
+        return events.length ? events.slice().reverse().map(event => `<article><span>крок ${safe(event.step)}</span><strong>${safe(eventText(event, agents))}</strong></article>`).join('') : `<p class="empty-state">${safe(empty)}</p>`;
+    }
+
     function renderTimeline(view) {
-        const publicEvents = view.events.filter(event => !technicalTypes.has(event.type));
+        const voting = view.events.filter(event => votingTypes.has(event.type));
         const technical = view.events.filter(event => technicalTypes.has(event.type));
-        byId('arenaEvents').innerHTML = publicEvents.slice().reverse().map(event => `<article><span>крок ${safe(event.step)}</span><strong>${safe(eventText(event, view.agents))}</strong></article>`).join('') || '<p class="empty-state">Подій гри ще немає.</p>';
-        const technicalRoot = byId('arenaTechnicalTimeline');
-        technicalRoot.querySelector('div').innerHTML = technical.slice().reverse().map(event => `<article><span>крок ${safe(event.step)}</span><strong>${safe(eventText(event, view.agents))}</strong></article>`).join('') || '<p class="empty-state">Технічних подій немає.</p>';
+        const publicEvents = view.events.filter(event => !technicalTypes.has(event.type) && !votingTypes.has(event.type));
+        byId('arenaEvents').innerHTML = eventRows(publicEvents, view.agents, 'Подій гри ще немає.');
+        byId('arenaVotingEvents').innerHTML = eventRows(voting, view.agents, 'Голосувань ще не було.');
+        byId('arenaTechnicalEvents').innerHTML = eventRows(technical, view.agents, 'Технічних подій немає.');
+    }
+
+    function characteristicItems(agent) {
+        const revealed = agent?.revealedCharacteristics || {};
+        return Object.entries(agent?.ownCharacteristics || {}).map(([key, value]) => ({
+            id: `characteristic:${agent.id}:${key}`,
+            category: labels[key] || key,
+            title: short(value, 58),
+            summary: Object.prototype.hasOwnProperty.call(revealed, key) ? 'Розкрито публічно' : 'Приховано від інших AI',
+            status: Object.prototype.hasOwnProperty.call(revealed, key) ? 'revealed' : 'hidden',
+            statusLabel: Object.prototype.hasOwnProperty.call(revealed, key) ? 'Розкрито' : 'Приховано',
+            tooltip: value,
+            details: [['Повне значення', value], ['Статус розкриття', Object.prototype.hasOwnProperty.call(revealed, key) ? 'Публічно розкрито.' : 'Відомо лише власнику та Developer Spectator.']]
+        }));
     }
 
     function characteristicCards(agent) {
-        const revealed = agent.revealedCharacteristics || {};
-        return Object.entries(agent.ownCharacteristics || {}).map(([key, value]) => `<article class="characteristic-card ${Object.prototype.hasOwnProperty.call(revealed, key) ? 'revealed' : 'hidden'}"><span>${safe(labels[key] || key)}</span><strong>${safe(value)}</strong><small>${Object.prototype.hasOwnProperty.call(revealed, key) ? 'Розкрито публічно' : 'Приховано від AI'}</small></article>`).join('');
+        return characteristicItems(agent).map(detailCard).join('');
     }
 
     function statements(items, empty) {
-        return items?.length ? `<ul>${items.map(item => `<li>${safe(item.text)}</li>`).join('')}</ul>` : `<p class="empty-state">${safe(empty)}</p>`;
+        return items?.length ? `<ul>${items.map(item => `<li>${safe(item.text ?? item)}</li>`).join('')}</ul>` : `<p class="empty-state">${safe(empty)}</p>`;
     }
 
-    function renderInspector(agent) {
-        const target = byId('arenaPerspective');
-        if (!agent) { target.textContent = 'Оберіть AI.'; return; }
-        target.innerHTML = `<div class="inspector-identity"><h3>${safe(agent.name)}</h3><p>${safe(agent.objective)}</p></div>
-            <h4>Справжні характеристики</h4><div class="characteristics-grid">${characteristicCards(agent)}</div>
-            <h4>Публічно відомі FACT</h4>${statements(Object.entries(agent.publicKnowledge || {}).map(([key, text]) => ({ text: `${key}: ${text}` })), 'Поки що немає.')}
-            <h4>Особиста пам’ять</h4>${statements((agent.memory || []).map(text => ({ text })), 'Пам’ять ще порожня.')}
-            <h4>Власні публічні CLAIM</h4>${statements(agent.publicClaims, 'Заяв ще немає.')}
+    function renderInspectorContent(agent) {
+        if (!agent) return '<p class="empty-state">Оберіть AI.</p>';
+        return `<div class="inspector-identity"><h3>${safe(agent.name)}</h3><p>${safe(agent.objective)}</p></div>
+            <h4>Характеристики</h4><p class="drawer-hint">Наведіть курсор або натисніть картку для повного значення.</p><div class="characteristics-grid">${characteristicCards(agent)}</div>
+            <details><summary>Публічно відомі FACT</summary>${statements(Object.entries(agent.publicKnowledge || {}).map(([key, text]) => `${key}: ${text}`), 'Поки що немає.')}</details>
+            <details><summary>Особиста пам’ять</summary>${statements(agent.memory || [], 'Пам’ять ще порожня.')}</details>
+            <details><summary>Власні публічні CLAIM</summary>${statements(agent.publicClaims, 'Заяв ще немає.')}</details>
             <details class="private-inspector"><summary>Приватно: навмисні BLUFF</summary>${statements(agent.explicitBluffs, 'Блефів не зафіксовано.')}</details>`;
+    }
+
+    function renderDrawer(agent) {
+        const drawer = byId('arenaDetailDrawer');
+        const backdrop = byId('arenaDetailBackdrop');
+        if (!state.drawer) {
+            drawer.hidden = true; drawer.setAttribute('aria-hidden', 'true'); backdrop.hidden = true;
+            return;
+        }
+        drawer.hidden = false; drawer.setAttribute('aria-hidden', 'false'); backdrop.hidden = false;
+        const title = byId('arenaDrawerTitle');
+        const meta = byId('arenaDrawerMeta');
+        const content = byId('arenaDrawerContent');
+        if (state.drawer === 'detail' && detailItems.has(state.detailId)) {
+            const item = detailItems.get(state.detailId);
+            title.textContent = item.title;
+            meta.textContent = item.category;
+            content.innerHTML = `<button id="arenaDrawerBack" type="button" class="drawer-back">← До інспектора</button><p class="detail-status ${safe(item.status || '')}">${safe(item.statusLabel || '')}</p>${item.details.map(([label, value]) => `<section class="drawer-detail"><h3>${safe(label)}</h3>${detailValue(value)}</section>`).join('')}`;
+            byId('arenaDrawerBack').addEventListener('click', openInspector);
+        } else {
+            state.drawer = 'inspector'; state.detailId = null;
+            title.textContent = agent?.name || 'Інспектор персонажа';
+            meta.textContent = 'Developer Spectator';
+            content.innerHTML = renderInspectorContent(agent);
+        }
+        bindDetailCards(content);
+    }
+
+    function openInspector() {
+        state.drawer = 'inspector'; state.detailId = null;
+        renderDrawer(state.arena?.selectedAgent);
+    }
+
+    function closeDrawer() {
+        state.drawer = null; state.detailId = null;
+        renderDrawer(null);
+    }
+
+    function showTooltip(card) {
+        if (!supportsHover) return;
+        const item = detailItems.get(card.dataset.detailId);
+        if (!item) return;
+        const tooltip = byId('arenaTooltip');
+        tooltip.textContent = short(item.tooltip || item.summary, 420);
+        tooltip.hidden = false;
+        const rect = card.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const left = Math.min(Math.max(12, rect.left), Math.max(12, window.innerWidth - tooltipRect.width - 12));
+        const below = rect.bottom + 10;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${below + tooltipRect.height <= window.innerHeight - 12 ? below : Math.max(12, rect.top - tooltipRect.height - 10)}px`;
+    }
+
+    function hideTooltip() { const tooltip = byId('arenaTooltip'); if (tooltip) tooltip.hidden = true; }
+
+    function bindDetailCards(root = document) {
+        root.querySelectorAll('.arena-detail-card').forEach(card => {
+            if (supportsHover) {
+                card.addEventListener('mouseenter', () => showTooltip(card));
+                card.addEventListener('mouseleave', hideTooltip);
+                card.addEventListener('focus', () => showTooltip(card));
+                card.addEventListener('blur', hideTooltip);
+            }
+            card.addEventListener('click', () => { hideTooltip(); state.drawer = 'detail'; state.detailId = card.dataset.detailId; renderDrawer(state.arena?.selectedAgent); });
+        });
     }
 
     function renderDiagnostics(view) {
         const diagnostics = view.diagnostics || [];
-        byId('arenaDiagnostics').innerHTML = diagnostics.length ? diagnostics.slice().reverse().map(item => `<article class="diagnostic-entry"><strong>Крок ${safe(item.step)} · ${safe(item.agentId)}</strong><p>${safe(item.providerError || item.validationError || 'rejected')}</p>${item.providerErrorDetail ? `<small>${safe(item.providerErrorDetail)}</small>` : ''}<footer>${item.requestAttempts || 1} спроб · ${item.requestDurationMilliseconds ?? '—'} мс · ${item.inputTokens ?? '—'}/${item.outputTokens ?? '—'} токенів</footer></article>`).join('') : '<p class="empty-state">Помилок генерації ще немає.</p>';
+        byId('arenaDiagnostics').innerHTML = diagnostics.length ? diagnostics.slice().reverse().map(item => {
+            const outcome = item.providerError || item.validationError || (item.accepted ? 'прийнято' : 'відхилено');
+            const timing = `побудова промпту ${item.promptBuildMilliseconds ?? '—'} мс · генерація ${item.generationMilliseconds ?? item.requestDurationMilliseconds ?? '—'} мс · хід ${item.stepDurationMilliseconds ?? '—'} мс`;
+            const prompt = `промпт ${item.promptCharacters ?? '—'} симв. / ≈${item.estimatedPromptTokens ?? '—'} токенів`;
+            return `<article class="diagnostic-entry"><strong>Крок ${safe(item.step)} · ${safe(item.agentId)}</strong><p>${safe(outcome)}</p>${item.providerErrorDetail ? `<small>${safe(item.providerErrorDetail)}</small>` : ''}<footer>${timing}<br>${prompt} · ${item.requestAttempts || 1} спроб · ${item.inputTokens ?? '—'}/${item.outputTokens ?? '—'} токенів</footer></article>`;
+        }).join('') : '<p class="empty-state">Кроків генерації ще немає.</p>';
     }
 
     function renderDebug(agent) {
@@ -124,8 +247,10 @@
     function render(view) {
         if (!view) return;
         state.arena = view;
-        if (!state.selected && view.selectedAgent) state.selected = view.selectedAgent.id;
-        renderSummary(view); renderScenario(view.scenario); renderPlayers(view); renderChat(view.messages || []); renderTimeline(view); renderInspector(view.selectedAgent); renderDiagnostics(view); renderDebug(view.selectedAgent);
+        if (!view.agents.some(agent => agent.id === state.selected)) state.selected = view.selectedAgent?.id || null;
+        detailItems.clear();
+        characteristicItems(view.selectedAgent).forEach(registerDetail);
+        renderSummary(view); renderScenario(view.scenario); renderPlayers(view); renderChat(view.messages || []); renderTimeline(view); renderDiagnostics(view); renderDebug(view.selectedAgent); renderDrawer(view.selectedAgent); bindDetailCards(byId('arenaScenario'));
         const exportLink = byId('arenaExport'); exportLink.href = view.datasetExportUrl; exportLink.hidden = false;
         controls(!['Finished', 'Cancelled', 'Faulted'].includes(view.status));
     }
@@ -147,6 +272,9 @@
         byId('arenaCreate').addEventListener('click', async () => render(await state.connection.invoke('CreateArena', { provider: byId('arenaProvider').value, generationMode: byId('arenaGenerationMode').value })));
         byId('arenaCheckProvider').addEventListener('click', async () => { const result = await state.connection.invoke('CheckArenaProvider'); renderConfiguration(result.configuration); if (result.status?.errorCode) status(`Провайдер недоступний: ${result.status.errorCode}`); });
         [['arenaStart', 'StartArena'], ['arenaPause', 'PauseArena'], ['arenaResume', 'ResumeArena'], ['arenaStep', 'StepArena'], ['arenaCancel', 'CancelArena']].forEach(([id, method]) => byId(id).addEventListener('click', () => invoke(method)));
+        byId('arenaDrawerClose').addEventListener('click', closeDrawer);
+        byId('arenaDetailBackdrop').addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDrawer(); });
         status('Готово. Створіть або відкрийте арену.');
     }
     setup().catch(error => status(`Помилка підключення: ${error.message || error}`));

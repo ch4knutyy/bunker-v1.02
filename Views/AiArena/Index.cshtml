@@ -16,7 +16,6 @@
     </section>
 
     <section id="arenaSummary" class="ai-arena-summary" aria-label="Стан арени"></section>
-
     <section id="arenaScenario" class="ai-arena-panel arena-scenario-panel" aria-label="Сценарій виживання"></section>
 
     <div class="ai-arena-dashboard">
@@ -28,15 +27,24 @@
 
         <main class="ai-arena-main">
             <section class="ai-arena-panel arena-chat-panel"><div class="panel-heading"><div><span>Жива дискусія</span><h2>Публічний чат</h2></div></div><div id="arenaChat" class="ai-arena-chat" aria-live="polite"></div></section>
-            <section class="ai-arena-panel arena-timeline-panel"><div class="panel-heading"><div><span>Хронологія</span><h2>Події гри</h2></div></div><div id="arenaEvents" class="ai-arena-events"></div><details id="arenaTechnicalTimeline" class="technical-timeline"><summary>Технічні події</summary><div></div></details></section>
+            <section class="ai-arena-panel arena-events-panel"><div class="panel-heading"><div><span>Події</span><h2>Історія гри</h2></div></div><div id="arenaEvents" class="ai-arena-events"></div></section>
         </main>
 
         <aside class="ai-arena-side">
-            <section class="ai-arena-panel arena-inspector"><div class="panel-heading"><div><span>Developer Spectator</span><h2>Інспектор персонажа</h2></div></div><div id="arenaPerspective">Оберіть AI.</div></section>
+            <section class="ai-arena-panel arena-voting-panel"><div class="panel-heading"><div><span>Голосування</span><h2>Рішення та вибуття</h2></div></div><div id="arenaVotingEvents" class="ai-arena-events"></div></section>
             <section class="ai-arena-panel arena-diagnostics"><div class="panel-heading"><div><span>Developer diagnostics</span><h2>Генерація та помилки</h2></div></div><div id="arenaDiagnostics">Помилок генерації ще немає.</div></section>
+            <section class="ai-arena-panel arena-technical-panel"><div class="panel-heading"><div><span>Технічні події</span><h2>Стан симулятора</h2></div></div><div id="arenaTechnicalEvents" class="ai-arena-events"></div></section>
             <details class="ai-arena-panel arena-debug"><summary>Приватний developer-debug</summary><div id="arenaDebug">Оберіть AI, щоб побачити останнє рішення.</div></details>
         </aside>
     </div>
 </section>
+
+<div id="arenaDetailBackdrop" class="arena-detail-backdrop" hidden></div>
+<aside id="arenaDetailDrawer" class="arena-detail-drawer" role="dialog" aria-modal="true" aria-label="Деталі developer spectator" aria-hidden="true" hidden>
+    <header><div><span id="arenaDrawerMeta" class="ai-arena-kicker"></span><h2 id="arenaDrawerTitle">Деталі</h2></div><button id="arenaDrawerClose" type="button" aria-label="Закрити деталі">×</button></header>
+    <div id="arenaDrawerContent" class="arena-drawer-content"></div>
+</aside>
+<div id="arenaTooltip" class="arena-tooltip" role="tooltip" hidden></div>
+
 <script src="~/js/signalr-lite.js" asp-append-version="true"></script>
 <script src="~/js/ai-arena.js" asp-append-version="true"></script>

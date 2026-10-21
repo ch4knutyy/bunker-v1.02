@@ -22,9 +22,19 @@ public sealed class AiTrainingArenaServiceTests : IDisposable
         var gameData = new GameDataService(environment, NullLogger<GameDataService>.Instance);
         var generator = new CharacterGeneratorService(gameData, NullLogger<CharacterGeneratorService>.Instance);
         var store = new AiTrainingDatasetStore(environment, options);
-        var service = new AiTrainingArenaService(generator, new FakeProvider(), new FakeLocalProvider(), store, options, new NullHubContext(), TimeProvider.System, NullLogger<AiTrainingArenaService>.Instance);
+		var service = new AiTrainingArenaService(
+	generator,
+	gameData,
+	new FakeProvider(),
+	new FakeLocalProvider(),
+	store,
+	options,
+	new NullHubContext(),
+	TimeProvider.System,
+	NullLogger<AiTrainingArenaService>.Instance
+);
 
-        var arena = await service.CreateAsync(CancellationToken.None);
+		var arena = await service.CreateAsync(CancellationToken.None);
         Assert.Equal(6, arena.Agents.Count);
         arena.Agents[0].OwnCharacteristics["testSecret"] = "only-first-agent";
         var secondPerspective = JsonSerializer.Serialize(service.View(arena.Id, arena.Agents[1].Id));
