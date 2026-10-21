@@ -1,6 +1,6 @@
-@{ ViewData["Title"] = "AI Training Arena"; }
+@{ ViewData["Title"] = "AI Training Arena"; var initialArenaId = ViewData["InitialArenaId"] as string; }
 <link rel="stylesheet" href="~/css/ai-arena.css" asp-append-version="true" />
-<section id="aiArena" class="ai-arena-shell">
+<section id="aiArena" class="ai-arena-shell" data-initial-arena-id="@initialArenaId">
     <header class="ai-arena-header"><div><span>Developer only</span><h1>AI Training Arena</h1><p>Ізольована self-play симуляція з шістьма AI та dataset-журналом.</p></div><div class="ai-arena-actions"><button id="arenaCreate" type="button">Створити арену</button><button id="arenaStart" type="button" disabled>Запустити</button><button id="arenaPause" type="button" disabled>Пауза</button><button id="arenaResume" type="button" disabled>Продовжити</button><button id="arenaStep" type="button" disabled>Один крок</button><button id="arenaCancel" type="button" disabled>Завершити</button></div></header>
     <p id="arenaStatus" class="ai-arena-status">Підключення…</p>
     <section class="ai-arena-configuration" aria-label="Налаштування AI арени">

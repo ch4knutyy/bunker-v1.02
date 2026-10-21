@@ -493,6 +493,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			createRoom();
 		});
 	}
+	initializeAiArenaRoomCreation?.();
 
 	// Ініціалізація tooltip для мобільних
 	initMobileTooltips();

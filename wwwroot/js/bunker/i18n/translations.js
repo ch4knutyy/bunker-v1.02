@@ -13,6 +13,21 @@ const uiTranslations = {
 };	
 
 Object.assign(uiTranslations.uk, {
+	roomType: "Тип кімнати",
+	regularRoom: "Звичайна кімната",
+	aiTrainingArena: "AI Training Arena",
+	aiProvider: "AI-провайдер",
+	generationMode: "Режим генерації",
+	aiCount: "Кількість AI",
+	model: "Модель",
+	checkConnection: "Перевірити з’єднання",
+	createAiArena: "Створити AI арену",
+	creatingAiArena: "Створення AI арени…",
+	aiArenaCreateFailed: "Не вдалося створити AI арену",
+	aiArenaConfigurationUnavailable: "Конфігурація AI арени недоступна",
+	connectionAvailableForLocal: "Перевірка доступна лише для Local MamayLM",
+	notConfigured: "не налаштовано",
+	notChecked: "не перевірено",
 	bunkerEntryTitle: "Підготовка бункера",
 	bunkerEntryRoomState: "Отримання стану кімнати…",
 	bunkerEntryInterface: "Підготовка інтерфейсу…",
@@ -22,6 +37,21 @@ Object.assign(uiTranslations.uk, {
 	bunkerEntryStateFailed: "Не вдалося отримати стан кімнати. Перевірте з’єднання та повторіть спробу."
 });
 Object.assign(uiTranslations.en, {
+	roomType: "Room type",
+	regularRoom: "Regular room",
+	aiTrainingArena: "AI Training Arena",
+	aiProvider: "AI provider",
+	generationMode: "Generation mode",
+	aiCount: "AI count",
+	model: "Model",
+	checkConnection: "Check connection",
+	createAiArena: "Create AI arena",
+	creatingAiArena: "Creating AI arena…",
+	aiArenaCreateFailed: "Could not create AI arena",
+	aiArenaConfigurationUnavailable: "AI arena configuration is unavailable",
+	connectionAvailableForLocal: "Checking is available only for Local MamayLM",
+	notConfigured: "not configured",
+	notChecked: "not checked",
 	bunkerEntryTitle: "Preparing the bunker",
 	bunkerEntryRoomState: "Receiving room state…",
 	bunkerEntryInterface: "Preparing the interface…",
@@ -747,4 +777,11 @@ Object.assign(uiTranslations.ru, {
 	cancelPreparation: 'Отменить подготовку', cancelPreparationConfirm: 'Отменить подготовку сценария?',
 	startWithFallbackConfirm: 'Не все изображения сценария готовы. Апокалипсис или бункер использует тематический fallback. Начать игру без всех изображений?', scenarioPreparationWaiting: 'Ведущий подготавливает сценарий игры',
 	preparedPreviewLoading: 'Загрузка подготовленного сценария…', preparedPreviewRetry: 'Повторить', preparedPreviewNotJoined: 'Участие в комнате ещё не подтверждено.', preparedPreviewAccessDenied: 'Нет доступа к preview сценария.', preparedPreviewRoomMissing: 'Комната не найдена.', preparedPreviewStale: 'Подготовленный сценарий устарел.', preparedPreviewTemporaryError: 'Временно не удалось загрузить preview сценария.'
+});
+Object.assign(uiTranslations.ru, {
+	roomType: 'Тип комнаты', regularRoom: 'Обычная комната', aiTrainingArena: 'AI Training Arena', aiProvider: 'AI-провайдер',
+	generationMode: 'Режим генерации', aiCount: 'Количество AI', model: 'Модель', checkConnection: 'Проверить подключение',
+	createAiArena: 'Создать AI арену', creatingAiArena: 'Создание AI арены…', aiArenaCreateFailed: 'Не удалось создать AI арену',
+	aiArenaConfigurationUnavailable: 'Конфигурация AI арены недоступна', connectionAvailableForLocal: 'Проверка доступна только для Local MamayLM',
+	notConfigured: 'не настроено', notChecked: 'не проверено'
 });

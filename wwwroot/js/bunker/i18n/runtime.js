@@ -19,6 +19,10 @@ function applyStaticTranslations() {
 	setText('.create-room-panel .section-title', t('createRoom'));
 	setText('.rooms-list-panel .section-title', t('availableRooms'));
 	setText('#createRoomBtn', t('createRoom'));
+	document.querySelectorAll('.room-type-selection [data-i18n], .ai-arena-create-options [data-i18n]').forEach(element => {
+		const key = element.dataset.i18n;
+		if (key) element.textContent = t(key);
+	});
 	const gmPanelBtn = document.getElementById('gmPanelBtn');
 	if (gmPanelBtn) {
 		gmPanelBtn.setAttribute('aria-label', t('gmPanel'));

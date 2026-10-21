@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Грати";
+    var canCreateAiArena = ViewData["CanCreateAiArena"] is true;
 }
 
 <link rel="stylesheet" href="~/css/game.css" asp-append-version="true" />
@@ -33,47 +34,59 @@
                 <h2 class="section-title site-section-heading">Створити кімнату</h2>
 
                 <div class="create-room-form">
-                    <label class="visually-hidden" for="playerNameCreate">Ім'я гравця</label>
-                    <input id="playerNameCreate"
-                           name="playerNameCreate"
-                           type="text"
-                           class="input-field"
-                           placeholder="Ваше ім'я..."
-                           maxlength="10"
-                           autocomplete="nickname"
-                           oninput="sanitizeNameInput(this)"
-                           data-testid="player-name-input" />
+                    @Html.AntiForgeryToken()
+                    <fieldset class="room-type-selection">
+                        <legend data-i18n="roomType">Тип кімнати</legend>
+                        <label><input type="radio" name="roomCreationType" value="regular" checked /> <span data-i18n="regularRoom">Звичайна кімната</span></label>
+                        @if (canCreateAiArena)
+                        {
+                            <label><input type="radio" name="roomCreationType" value="arena" /> <span data-i18n="aiTrainingArena">AI Training Arena</span></label>
+                        }
+                    </fieldset>
 
-                    <label class="visually-hidden" for="roomName">Назва кімнати</label>
-                    <input id="roomName"
-                           name="roomName"
-                           type="text"
-                           class="input-field"
-                           placeholder="Назва кімнати..."
-                           autocomplete="off"
-                           data-testid="room-name-input" />
-
-                    <div class="form-row create-room-fields-row">
-                        <label class="visually-hidden" for="maxPlayers">Максимальна кількість гравців</label>
-                        <input id="maxPlayers"
-                               name="maxPlayers"
-                               type="number"
-                               class="input-field small"
-                               placeholder="Макс. гравців"
-                               value="12"
-                               min="2"
-                               max="12"
-                               autocomplete="off"
-                               data-testid="room-max-players-input" />
-
-                        <label class="visually-hidden" for="roomPassword">Пароль кімнати</label>
-                        <input id="roomPassword"
-                               name="roomPassword"
-                               type="password"
+                    <div id="regularRoomFields">
+                        <label class="visually-hidden" for="playerNameCreate">Ім'я гравця</label>
+                        <input id="playerNameCreate"
+                               name="playerNameCreate"
+                               type="text"
                                class="input-field"
-                               placeholder="Пароль (необов'язково)"
-                               autocomplete="new-password"
-                               data-testid="room-password-input" />
+                               placeholder="Ваше ім'я..."
+                               maxlength="10"
+                               autocomplete="nickname"
+                               oninput="sanitizeNameInput(this)"
+                               data-testid="player-name-input" />
+
+                        <label class="visually-hidden" for="roomName">Назва кімнати</label>
+                        <input id="roomName"
+                               name="roomName"
+                               type="text"
+                               class="input-field"
+                               placeholder="Назва кімнати..."
+                               autocomplete="off"
+                               data-testid="room-name-input" />
+
+                        <div class="form-row create-room-fields-row">
+                            <label class="visually-hidden" for="maxPlayers">Максимальна кількість гравців</label>
+                            <input id="maxPlayers"
+                                   name="maxPlayers"
+                                   type="number"
+                                   class="input-field small"
+                                   placeholder="Макс. гравців"
+                                   value="12"
+                                   min="2"
+                                   max="12"
+                                   autocomplete="off"
+                                   data-testid="room-max-players-input" />
+
+                            <label class="visually-hidden" for="roomPassword">Пароль кімнати</label>
+                            <input id="roomPassword"
+                                   name="roomPassword"
+                                   type="password"
+                                   class="input-field"
+                                   placeholder="Пароль (необов'язково)"
+                                   autocomplete="new-password"
+                                   data-testid="room-password-input" />
+                        </div>
                     </div>
 
                     <button type="button"
@@ -82,6 +95,18 @@
                             data-testid="create-room-btn">
                         Створити кімнату
                     </button>
+
+                    @if (canCreateAiArena)
+                    {
+                        <section id="aiArenaCreateOptions" class="ai-arena-create-options" hidden>
+                            <label><span data-i18n="aiProvider">AI-провайдер</span><select id="aiArenaCreateProvider" class="input-field"><option value="Local">Local MamayLM</option><option value="Gemini">Gemini</option><option value="Groq">Groq</option><option value="OpenRouter">OpenRouter</option><option value="Deterministic">Deterministic</option></select></label>
+                            <label><span data-i18n="generationMode">Режим генерації</span><select id="aiArenaCreateMode" class="input-field"><option value="Direct">Direct</option><option value="Strategic">Strategic</option></select></label>
+                            <p><span data-i18n="aiCount">Кількість AI</span>: <strong>6</strong> · <span data-i18n="model">Модель</span>: <strong id="aiArenaCreateModel">—</strong></p>
+                            <p id="aiArenaCreateConnection" class="connection-status" role="status" aria-live="polite"></p>
+                            <button id="checkAiArenaProviderBtn" type="button" class="btn-secondary" data-i18n="checkConnection">Перевірити з’єднання</button>
+                            <button id="createAiArenaBtn" type="button" class="btn-primary" data-i18n="createAiArena">Створити AI арену</button>
+                        </section>
+                    }
 
                     <p id="connectionStatus"
                        class="connection-status"

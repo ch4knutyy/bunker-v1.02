@@ -33,6 +33,11 @@
         state.connection.onreconnected(() => state.arena && watch(state.arena.id, state.selected));
         await state.connection.start(); setStatus('Готово. Створіть окрему арену з 6 AI.');
         const sessions = await state.connection.invoke('ListArenas'); byId('arenaSessions').innerHTML = sessions.map(session => `<button class="arena-session" data-id="${safe(session.id)}">${safe(session.id.slice(0, 8))} · ${safe(session.status)}</button>`).join(''); document.querySelectorAll('.arena-session').forEach(button => button.addEventListener('click', () => watch(button.dataset.id)));
+        const initialArenaId = byId('aiArena')?.dataset.initialArenaId;
+        if (initialArenaId) {
+            try { await watch(initialArenaId); }
+            catch (error) { setStatus(`Не вдалося відкрити AI арену: ${error.message || error}`); }
+        }
         renderConfiguration(await state.connection.invoke('GetArenaConfiguration'));
         byId('arenaCreate').addEventListener('click', async () => render(await state.connection.invoke('CreateArena', {
             provider: byId('arenaProvider').value,

@@ -383,6 +383,80 @@ function createRoom() {
 		});
 }
 
+function initializeAiArenaRoomCreation() {
+	const options = document.getElementById('aiArenaCreateOptions');
+	if (!options) return;
+	const regularFields = document.getElementById('regularRoomFields');
+	const regularButton = document.getElementById('createRoomBtn');
+	const createButton = document.getElementById('createAiArenaBtn');
+	const provider = document.getElementById('aiArenaCreateProvider');
+	const mode = document.getElementById('aiArenaCreateMode');
+	const model = document.getElementById('aiArenaCreateModel');
+	const connectionStatus = document.getElementById('aiArenaCreateConnection');
+	const checkButton = document.getElementById('checkAiArenaProviderBtn');
+	let configurationLoaded = false;
+
+	const showStatus = (message, isError = false) => {
+		if (!connectionStatus) return;
+		connectionStatus.textContent = message;
+		connectionStatus.style.color = isError ? 'var(--color-red)' : 'var(--color-text-muted)';
+	};
+	const selectedType = () => document.querySelector('input[name="roomCreationType"]:checked')?.value || 'regular';
+	const syncType = () => {
+		const arenaSelected = selectedType() === 'arena';
+		options.hidden = !arenaSelected;
+		if (regularFields) regularFields.hidden = arenaSelected;
+		if (regularButton) regularButton.hidden = arenaSelected;
+		if (arenaSelected && !configurationLoaded) {
+			configurationLoaded = true;
+			loadConfiguration().catch(() => showStatus(t('aiArenaConfigurationUnavailable'), true));
+		}
+	};
+	const loadConfiguration = async () => {
+		const response = await fetch('/ai-arena/configuration', { credentials: 'same-origin' });
+		if (!response.ok) throw new Error('developer_required');
+		const configuration = await response.json();
+		if (provider && configuration.provider) provider.value = configuration.provider;
+		if (mode && configuration.generationMode) mode.value = configuration.generationMode;
+		if (model) model.textContent = configuration.model || t('notConfigured');
+		const local = configuration.localStatus || {};
+		showStatus(local.errorCode ? `${local.status}: ${local.errorCode}` : (local.status || t('notChecked')), !!local.errorCode);
+	};
+	const verifyLocalProvider = async () => {
+		if (provider?.value !== 'Local') { showStatus(t('connectionAvailableForLocal')); return; }
+		const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+		const response = await fetch('/ai-arena/check-provider', {
+			method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+			body: new URLSearchParams({ __RequestVerificationToken: token || '' })
+		});
+		const result = await response.json().catch(() => ({}));
+		if (!response.ok) throw new Error(result.error || 'ai_provider_check_failed');
+		const status = result.status || {};
+		showStatus(status.errorCode ? `${status.status}: ${status.errorCode}` : (status.status || t('notChecked')), !!status.errorCode);
+	};
+	const createArena = async () => {
+		const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+		if (createButton) { createButton.disabled = true; createButton.textContent = t('creatingAiArena'); }
+		try {
+			const response = await fetch('/ai-arena/create', {
+				method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+				body: new URLSearchParams({ provider: provider?.value || 'Deterministic', generationMode: mode?.value || 'Direct', __RequestVerificationToken: token || '' })
+			});
+			const result = await response.json().catch(() => ({}));
+			if (!response.ok || !result.redirectUrl) throw new Error(result.error || 'ai_arena_create_failed');
+			window.location.assign(result.redirectUrl);
+		} catch (error) {
+			showStatus(`${t('aiArenaCreateFailed')}: ${error.message || error}`, true);
+			if (createButton) { createButton.disabled = false; createButton.textContent = t('createAiArena'); }
+		}
+	};
+
+	document.querySelectorAll('input[name="roomCreationType"]').forEach(input => input.addEventListener('change', syncType));
+	checkButton?.addEventListener('click', () => verifyLocalProvider().catch(error => showStatus(error.message || error, true)));
+	createButton?.addEventListener('click', createArena);
+	syncType();
+}
+
 function getInviteLink(roomId) {
 	if (!roomId) return '';
 	return `${window.location.origin}/room/${encodeURIComponent(roomId)}`;
