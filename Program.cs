@@ -50,9 +50,15 @@ builder.Services.AddAuthorization(options =>
 		policy.RequireAuthenticatedUser();
 		policy.AddRequirements(new OwnerOnlyRequirement());
 	});
+	options.AddPolicy("DeveloperOnly", policy =>
+	{
+		policy.RequireAuthenticatedUser();
+		policy.AddRequirements(new DeveloperOnlyRequirement());
+	});
 });
 
 builder.Services.AddSingleton<IAuthorizationHandler, OwnerOnlyAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, DeveloperOnlyAuthorizationHandler>();
 builder.Services.AddSingleton<IContentDocumentRegistry, ContentDocumentRegistry>();
 builder.Services.AddSingleton<IContentDocumentValidator, GenericContentDocumentValidator>();
 builder.Services.AddSingleton<ContentFileLockManager>();
@@ -134,11 +140,14 @@ builder.Services.AddSingleton<RoomGameSettingsService>();
 builder.Services.AddSingleton<CharacterRevealService>();
 builder.Services.AddSingleton<CharacterRevealSynchronizationService>();
 builder.Services.Configure<AiChatOptions>(builder.Configuration.GetSection(AiChatOptions.SectionName));
+builder.Services.Configure<AiTrainingArenaOptions>(builder.Configuration.GetSection(AiTrainingArenaOptions.SectionName));
 builder.Services.Configure<AiTokenCostOptions>(builder.Configuration.GetSection("AiTokenCost"));
 builder.Services.AddHttpClient<IGeminiAiProvider, GeminiAiProvider>(client => client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/"));
 builder.Services.AddHttpClient(nameof(OpenAiInputTokenCounter));
+builder.Services.AddHttpClient(nameof(LocalMamayLmProvider));
 builder.Services.AddSingleton<GroqAiProvider>();
 builder.Services.AddSingleton<OpenRouterAiProvider>();
+builder.Services.AddSingleton<ILocalMamayLmProvider, LocalMamayLmProvider>();
 builder.Services.AddSingleton<AiProviderManagementService>();
 builder.Services.AddSingleton<AiTokenCostEstimator>();
 builder.Services.AddSingleton<OpenAiInputTokenCounter>();
@@ -152,6 +161,8 @@ builder.Services.AddSingleton<AiChatContextBuilder>();
   builder.Services.AddSingleton<AiPresentationCharacteristicSelector>();
 builder.Services.AddSingleton<AiConversationCoordinator>();
 builder.Services.AddSingleton<AiPresentationCoordinator>();
+builder.Services.AddSingleton<AiTrainingDatasetStore>();
+builder.Services.AddSingleton<AiTrainingArenaService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException(
@@ -289,5 +300,6 @@ app.MapControllerRoute(
 
 app.MapHub<GameHub>("/gameHub");
 app.MapHub<SpyHub>("/spyHub");
+app.MapHub<AiTrainingArenaHub>("/aiArenaHub").RequireAuthorization("DeveloperOnly");
 
 app.Run();

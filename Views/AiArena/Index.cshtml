@@ -1,0 +1,15 @@
+@{ ViewData["Title"] = "AI Training Arena"; }
+<link rel="stylesheet" href="~/css/ai-arena.css" asp-append-version="true" />
+<section id="aiArena" class="ai-arena-shell">
+    <header class="ai-arena-header"><div><span>Developer only</span><h1>AI Training Arena</h1><p>Ізольована self-play симуляція з шістьма AI та dataset-журналом.</p></div><div class="ai-arena-actions"><button id="arenaCreate" type="button">Створити арену</button><button id="arenaStart" type="button" disabled>Запустити</button><button id="arenaPause" type="button" disabled>Пауза</button><button id="arenaResume" type="button" disabled>Продовжити</button><button id="arenaStep" type="button" disabled>Один крок</button><button id="arenaCancel" type="button" disabled>Завершити</button></div></header>
+    <p id="arenaStatus" class="ai-arena-status">Підключення…</p>
+    <section class="ai-arena-configuration" aria-label="Налаштування AI арени">
+        <label>Провайдер <select id="arenaProvider"><option value="Deterministic">Deterministic</option><option value="Local">Local</option><option value="Gemini">Gemini</option><option value="Groq">Groq</option><option value="OpenRouter">OpenRouter</option></select></label>
+        <label>Режим <select id="arenaGenerationMode"><option value="Direct">Direct</option><option value="Strategic">Strategic</option></select></label>
+        <span>Модель: <b id="arenaModel">—</b></span><span>Стан: <b id="arenaProviderStatus">не перевірено</b></span>
+        <button id="arenaCheckProvider" type="button">Перевірити з’єднання</button>
+    </section>
+    <div class="ai-arena-grid"><aside><h2>AI-гравці</h2><div id="arenaAgents"></div><h2>Сесії</h2><div id="arenaSessions"></div></aside><main><h2>Живий чат</h2><div id="arenaChat" class="ai-arena-chat"></div><h2>Події та голосування</h2><div id="arenaEvents" class="ai-arena-events"></div></main><aside><h2>AI Perspective</h2><div id="arenaPerspective">Оберіть AI.</div><h2>Developer Debug</h2><div id="arenaDebug">Структуровані рішення й помилки доступні лише тут.</div><a id="arenaExport" hidden>Експортувати dataset (.zip)</a></aside></div>
+</section>
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script src="~/js/ai-arena.js" asp-append-version="true"></script>
