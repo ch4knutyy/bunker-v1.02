@@ -120,32 +120,19 @@ namespace Bunker.Hubs
         private Bunker.Models.GameData.ThreatData? DrawThreatForRound(Room room, int round)
         {
             var settings = _roomGameSettings.GetEffective(room);
-            var candidates = _gameData.Threats
-                .Where(threat =>
-                    threat.RevealRound == round ||
-                    threat.Round == round ||
-                    (threat.RevealRound <= 0 && threat.Round <= 0))
-                .ToList();
-
-            if (settings.AvoidRepeatedThreats)
-            {
-                var unused = candidates.Where(threat => !room.TriggeredThreatIds.Contains(threat.Id)).ToList();
-                if (unused.Count > 0) candidates = unused;
-            }
-
-            if (candidates.Count == 0)
-            {
-                candidates = _gameData.Threats.ToList();
-            }
-
-            var safeFallback = candidates.FirstOrDefault() ?? _gameData.Threats.FirstOrDefault() ?? new Bunker.Models.GameData.ThreatData
+            var selected = _gameData.SelectThreatForRound(
+                round,
+                room.TriggeredThreatIds,
+                settings.AvoidRepeatedThreats,
+                _random.Next);
+            var safeFallback = selected ?? new Bunker.Models.GameData.ThreatData
             {
                 Id = "fallback_threat",
                 Name = "Невідома загроза",
                 Description = "Бункер зіткнувся з непередбаченою небезпекою.",
                 Round = round
             };
-            return CloneThreatData(candidates.Count == 0 ? safeFallback : candidates[_random.Next(candidates.Count)]);
+            return CloneThreatData(safeFallback);
         }
 
         private long AdvancePublicRevealRevision(Room room)

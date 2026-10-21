@@ -30,7 +30,8 @@ public interface IAiProvider
 
 public interface IGeminiAiProvider : IAiProvider;
 
-public sealed record AiProviderReply(string? Text, string? ErrorCode = null, AiTokenUsage? Usage = null);
+public sealed record AiProviderReply(string? Text, string? ErrorCode = null, AiTokenUsage? Usage = null,
+    string? ErrorDetail = null, int Attempts = 1, long? DurationMilliseconds = null);
 
 /// <summary>Shared, bounded Gemini gate. A 429 cools down all chat paths without blocking gameplay.</summary>
 public sealed class AiProviderRateLimitService(TimeProvider time)

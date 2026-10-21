@@ -1213,6 +1213,36 @@ namespace Bunker.Services
             Array.AsReadOnly(_apocalypses.Where(item => item.Gameplay?.Interactive == true).ToArray());
         public IReadOnlyList<BunkerInfo> Bunkers => _bunkers ?? new();
         public IReadOnlyList<ThreatData> Threats => _threats ?? new();
+        /// <summary>
+        /// Selects a canonical threat using the same round and repeat rules as the room threat flow.
+        /// The caller owns cloning the returned catalog record before it becomes mutable session state.
+        /// </summary>
+        public ThreatData? SelectThreatForRound(
+            int round,
+            IReadOnlySet<string>? triggeredThreatIds,
+            bool avoidRepeatedThreats,
+            Func<int, int> next)
+        {
+            if (next == null) throw new ArgumentNullException(nameof(next));
+
+            var candidates = Threats
+                .Where(threat =>
+                    threat.RevealRound == round ||
+                    threat.Round == round ||
+                    (threat.RevealRound <= 0 && threat.Round <= 0))
+                .ToList();
+
+            if (avoidRepeatedThreats && triggeredThreatIds is { Count: > 0 })
+            {
+                var unused = candidates
+                    .Where(threat => !triggeredThreatIds.Contains(threat.Id))
+                    .ToList();
+                if (unused.Count > 0) candidates = unused;
+            }
+
+            if (candidates.Count == 0) candidates = Threats.ToList();
+            return candidates.Count == 0 ? null : candidates[next(candidates.Count)];
+        }
         public IReadOnlyList<SpecialCardData> SpecialCards => _specialCards ?? new();
         public IReadOnlyList<PropertyDefinition> Properties => _properties ?? new();
         public IReadOnlyDictionary<string, PropertyConditionProfile> PropertyConditionProfiles =>
